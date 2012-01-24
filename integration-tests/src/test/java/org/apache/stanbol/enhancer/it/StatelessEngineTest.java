@@ -15,91 +15,14 @@
  * the License.
  */
 package org.apache.stanbol.enhancer.it;
+/**
+ * Tests of the old "/engines" path is still supported
+ */
+public class StatelessEngineTest extends DefaultChainTest {
 
-import org.apache.stanbol.commons.testing.http.RequestDocumentor;
-import org.junit.Test;
-
-/** Test the stateless text enhancement engines */
-public class StatelessEngineTest extends EnhancerTestBase {
     
-    private final RequestDocumentor documentor = new RequestDocumentor(getClass().getName());
-    /**
-     * Contains values grouped by three elements: Accept header, 
-     * Expected content-type, Expected regexp
-     */
-    public final static String [] ACCEPT_FORMAT_TEST_DATA  = new String[] {
-        "application/json",
-        "application/json", //now JSON LD uses application/json
-        "\"creator\": \"org.apache.stanbol.enhancer.engines.langid.LangIdEnhancementEngine\",",
-        
-        "application/rdf+xml",
-        "application/rdf+xml",
-        "xmlns:rdf=.http://www.w3.org/1999/02/22-rdf-syntax-ns",
-    
-        "application/rdf+json", 
-        "application/rdf+json", 
-        "\\{.*value.*ontology.*TextAnnotation.*type.*uri.*}",
-    
-        "text/turtle", 
-        "text/turtle", 
-        "a.*ontology/TextAnnotation.*ontology/Enhancement.*;",
-    
-        "text/rdf+nt", 
-        "text/rdf+nt", 
-        "<urn:enhancement.*www.w3.org/1999/02/22-rdf-syntax-ns#type.*ontology/TextAnnotation>",
-    };
-    
-    @Test
-    public void testSimpleEnhancement() throws Exception {
-        executor.execute(
-            builder.buildPostRequest("/engines")
-            .withHeader("Accept","text/rdf+nt")
-            .withContent("The Stanbol enhancer can detect famous cities such as Paris and people such as Bob Marley.")
-        )
-        .assertStatus(200)
-        .assertContentRegexp(
-                "http://purl.org/dc/terms/creator.*MetaxaEngine",
-                "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
-                "http://purl.org/dc/terms/language.*en",
-                "http://fise.iks-project.eu/ontology/entity-label.*Paris",
-                "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
-                "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley"
-                )
-        .generateDocumentation(
-                documentor,
-                "title", 
-                "Stateless text analysis",
-                "description", 
-                "A POST request to ${request.path} (TODO should be replaced by actual path) returns triples representing enhancements "
-                + " of the POSTed text. Output format is defined by the Accept header."
-        );
+    public StatelessEngineTest(){
+        super(ENGINES_ENDPOINT);
     }
     
-    @Test
-    public void testOutputFormats() throws Exception {
-        for (int i = 0; i < ACCEPT_FORMAT_TEST_DATA.length; i += 3) {
-            executor.execute(
-                    builder.buildPostRequest("/engines")
-                    .withHeader("Accept", ACCEPT_FORMAT_TEST_DATA[i])
-                    .withContent("Nothing")
-            )
-            .assertStatus(200)
-            .assertContentType(ACCEPT_FORMAT_TEST_DATA[i+1])
-            .assertContentRegexp(ACCEPT_FORMAT_TEST_DATA[i+2])
-            .generateDocumentation(documentor,
-                    "title", "Output format: " + ACCEPT_FORMAT_TEST_DATA[i],
-                    "description", "Demonstrate " + ACCEPT_FORMAT_TEST_DATA[i] + " output"
-                    );
-        }
-    }
-    
-    @Test
-    public void testInvalidFormat() throws Exception {
-        executor.execute(
-            builder.buildPostRequest("/engines")
-            .withHeader("Accept", "INVALID_FORMAT")
-            .withContent("Nothing")
-        )
-        .assertStatus(500);
-    }
 }

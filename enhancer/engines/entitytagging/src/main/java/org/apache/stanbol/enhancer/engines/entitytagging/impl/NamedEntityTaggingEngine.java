@@ -51,6 +51,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -70,6 +71,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -82,9 +84,14 @@ import org.slf4j.LoggerFactory;
  * @author ogrisel, rwesten
  */
 @Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
-specVersion = "1.1", metatype = true, immediate = true)
+specVersion = "1.1", metatype = true, immediate = true, inherit = true)
 @Service
-public class NamedEntityTaggingEngine implements EnhancementEngine, ServiceProperties {
+@org.apache.felix.scr.annotations.Properties(value={
+    @Property(name=EnhancementEngine.PROPERTY_NAME)
+})
+public class NamedEntityTaggingEngine 
+        extends AbstractEnhancementEngine<RuntimeException,RuntimeException> 
+        implements EnhancementEngine, ServiceProperties {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -120,6 +127,8 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
     @Property(boolValue = true)
     public static final String DEREFERENCE_ENTITIES = "org.apache.stanbol.enhancer.engines.entitytagging.dereference";
 
+    @Property(intValue=0)
+    public static final String SERVICE_RANKING = Constants.SERVICE_RANKING;
     
     /**
      * Service of the Entityhub that manages all the active referenced Site. This Service is used to lookup the
@@ -235,6 +244,7 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
     @SuppressWarnings("unchecked")
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException {
+        super.activate(context);
         Dictionary<String,Object> config = context.getProperties();
         Object referencedSiteID = config.get(REFERENCED_SITE_ID);
         if (referencedSiteID == null) {
@@ -276,6 +286,7 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        super.deactivate(context);
         referencedSiteID = null;
         personType = null;
         orgType = null;

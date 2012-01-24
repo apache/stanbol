@@ -14,12 +14,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.stanbol.enhancer.it;
+package org.apache.stanbol.it;
 
+import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
 import org.junit.Test;
 
 /** Test access to the OSGi console */
-public class OsgiConsoleTest extends EnhancerTestBase {
+public class OsgiConsoleTest extends StanbolTestBase {
     
     @Test
     public void testDefaultConsolePaths() throws Exception {
@@ -32,7 +33,10 @@ public class OsgiConsoleTest extends EnhancerTestBase {
                 "logs",
                 "memoryusage",
                 "services",
-                "shell"
+                "shell",
+                "stanbol_datafileprovider",
+                "osgi-installer",
+                "slinglog"
         };
         
         for(String subpath : subpaths) {

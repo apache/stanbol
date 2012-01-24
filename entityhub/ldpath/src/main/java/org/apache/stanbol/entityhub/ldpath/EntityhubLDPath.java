@@ -34,7 +34,6 @@ import at.newmedialab.ldpath.api.backend.RDFBackend;
 import at.newmedialab.ldpath.api.transformers.NodeTransformer;
 import at.newmedialab.ldpath.model.fields.FieldMapping;
 import at.newmedialab.ldpath.model.programs.Program;
-import at.newmedialab.ldpath.parser.Configuration;
 import at.newmedialab.ldpath.parser.DefaultConfiguration;
 
 /**

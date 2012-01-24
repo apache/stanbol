@@ -44,10 +44,15 @@
   <modules>
     <module>parent</module>
     <module>generic/servicesapi</module>
+    <module>generic/enginemanager</module>
+    <module>generic/chainmanager</module>
     <module>jobmanager</module>
     <module>jersey</module>
     <module>benchmark</module>
     <module>engines</module>
+    <module>chain/allactive</module>
+    <module>chain/graph</module>
+    <module>chain/weighted</module>
     <module>bundlelist</module>
   </modules>
 </project>

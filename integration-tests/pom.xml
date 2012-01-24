@@ -49,7 +49,7 @@
     <test.server.url></test.server.url>
 
     <!-- Options for the VM that executes our runnable jar -->
-    <jar.executor.vm.options>-Xmx512m -Dorg.apache.stanbol.offline.mode=true</jar.executor.vm.options>
+    <jar.executor.vm.options>-Xmx512m -Dorg.apache.stanbol.offline.mode=true -Dorg.apache.sling.commons.log.level=DEBUG</jar.executor.vm.options>
 
     <!-- Set this to true to keep the runnable jar running - useful to debug tests -->
     <keepJarRunning>false</keepJarRunning>
@@ -164,7 +164,7 @@
           </systemPropertyVariables>
           <excludes>
             <!-- TODO: remove before commit -->
-            <exclude>**/enhancer/it/*.java</exclude>
+            <!-- <exclude>**/enhancer/it/*.java</exclude> -->
             <exclude>**/ontologymanager/web/it/*.java</exclude>
           </excludes>
         </configuration>

@@ -19,7 +19,6 @@ package org.apache.stanbol.entityhub.jersey.resource;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.OPTIONS;
 import static javax.ws.rs.HttpMethod.POST;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
@@ -29,9 +28,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
-import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES;
-import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES;
-import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getAcceptableMediaType;
+import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.getAcceptableMediaType;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.getLDPathParseExceptionMessage;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.prepairQueryLDPathProgram;
@@ -45,7 +42,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
@@ -60,19 +56,19 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
-import org.apache.stanbol.entityhub.ldpath.backend.SiteBackend;
 import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
 import org.apache.stanbol.entityhub.ldpath.query.LDPathSelect;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
@@ -81,7 +77,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.codehaus.jettison.json.JSONArray;
 import org.slf4j.Logger;
@@ -172,7 +167,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     @Produces({MediaType.APPLICATION_JSON,MediaType.TEXT_HTML})
     public Response getReferencedSites(@Context UriInfo uriInfo,
                                         @Context HttpHeaders headers) {
-        MediaType acceptable = JerseyUtils.getAcceptableMediaType(headers,
+        MediaType acceptable = getAcceptableMediaType(headers,
            Arrays.asList(MediaType.APPLICATION_JSON,MediaType.TEXT_HTML) ,
            MediaType.APPLICATION_JSON_TYPE);
         if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptable)){
@@ -218,7 +213,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
 
         Collection<String> supported = new HashSet<String>(JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+        final MediaType acceptedMediaType = getAcceptableMediaType(
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
         if (id == null || id.isEmpty()) {
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
@@ -284,7 +279,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         log.debug("findEntity() Request");
         Collection<String> supported = new HashSet<String>(JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+        final MediaType acceptedMediaType = getAcceptableMediaType(
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
         if(name == null || name.isEmpty()){
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
@@ -340,7 +335,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                                   @Context HttpHeaders headers) {
         Collection<String> supported = new HashSet<String>(JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+        final MediaType acceptedMediaType = getAcceptableMediaType(
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
         if(query == null){
             //if query is null nd the mediaType is HTML we need to print the

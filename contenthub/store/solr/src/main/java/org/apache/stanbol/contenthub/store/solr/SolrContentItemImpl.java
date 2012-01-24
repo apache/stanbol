@@ -47,6 +47,9 @@ public class SolrContentItemImpl extends ContentItemImpl implements SolrContentI
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(SolrContentItem.class);
 
+    /**
+     * TODO: sync access to {@link #constraints} using}
+     */
     private final Map<String,List<Object>> constraints;
     private String title;
 
@@ -93,6 +96,7 @@ public class SolrContentItemImpl extends ContentItemImpl implements SolrContentI
     }
 
     public Map<String,List<Object>> getConstraints() {
+        // TODO: sync access to constraints via #readLock and #writeLocck
         return constraints;
     }
 

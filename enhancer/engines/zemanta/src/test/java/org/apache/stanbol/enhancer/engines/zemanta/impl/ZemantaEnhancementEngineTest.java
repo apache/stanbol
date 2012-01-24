@@ -47,6 +47,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -90,6 +91,7 @@ public class ZemantaEnhancementEngineTest {
     public static void setUpServices() throws IOException, ConfigurationException {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put(API_KEY_PROPERTY, ZEMANTA_TEST_APPLICATION_KEY);
+        properties.put(EnhancementEngine.PROPERTY_NAME, "zemanta");
         MockComponentContext context = new MockComponentContext(properties);
         zemantaEngine.activate(context);
     }

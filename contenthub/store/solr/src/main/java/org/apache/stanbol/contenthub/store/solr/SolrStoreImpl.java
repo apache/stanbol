@@ -67,6 +67,7 @@ import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -207,7 +208,7 @@ public class SolrStoreImpl implements SolrStore {
     public String enhanceAndPut(SolrContentItem sci) {
         try {
             jobManager.enhanceContent(sci);
-        } catch (EngineException e) {
+        } catch (EnhancementException e) {
             logger.error("Cannot enhance content with id: {}", sci.getUri().getUnicodeString(), e);
         }
 

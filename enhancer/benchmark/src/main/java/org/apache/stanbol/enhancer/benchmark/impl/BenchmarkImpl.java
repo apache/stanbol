@@ -25,6 +25,7 @@ import org.apache.stanbol.enhancer.benchmark.BenchmarkResult;
 import org.apache.stanbol.enhancer.benchmark.TripleMatcherGroup;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
 
@@ -60,7 +61,7 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
     }
 
     @Override
-    public List<BenchmarkResult> execute(EnhancementJobManager jobManager) throws EngineException {
+    public List<BenchmarkResult> execute(EnhancementJobManager jobManager) throws EnhancementException {
         if(isEmpty()) {
             return null;
         }
@@ -77,7 +78,7 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
     }
     
     /** @inheritDoc */
-    public Graph getGraph(EnhancementJobManager jobManager) throws EngineException {
+    public Graph getGraph(EnhancementJobManager jobManager) throws EnhancementException {
         if(graph == null) {
             final ContentItem ci = new InMemoryContentItem(inputText.getBytes(), "text/plain");
             jobManager.enhanceContent(ci);

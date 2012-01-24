@@ -19,8 +19,8 @@ package org.apache.stanbol.entityhub.jersey.writers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.stanbol.entityhub.ldpath.query.LDPathSelect;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;

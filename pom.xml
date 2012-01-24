@@ -57,7 +57,12 @@
 
     <module>enhancer/parent</module>
     <module>enhancer/generic/servicesapi</module>
+    <module>enhancer/generic/chainmanager</module>
+    <module>enhancer/generic/enginemanager</module>
     <module>enhancer/jobmanager</module>
+    <module>enhancer/chain/allactive</module>
+    <module>enhancer/chain/graph</module>
+    <module>enhancer/chain/weighted</module>
     <module>enhancer/jersey</module>
     <module>enhancer/benchmark</module>
     <module>enhancer/bundlelist</module>

@@ -112,6 +112,7 @@
             <exclude>src/main/resources/resources/config/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-entityhub.config</exclude>
             <exclude>src/main/resources/resources/config/org.apache.stanbol.examples.ExampleBootstrapConfig.cfg</exclude>
             <exclude>src/main/resources/resources/config/org.apache.stanbol.enhancer.engines.opennlp.impl.NamedEntityExtractionEnhancementEngine-default.config</exclude>
+            <exclude>src/main/resources/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-language.config</exclude>
           </excludes>
         </configuration>
       </plugin>

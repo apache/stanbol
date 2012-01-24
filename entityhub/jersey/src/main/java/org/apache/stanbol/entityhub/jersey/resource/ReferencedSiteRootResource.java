@@ -30,10 +30,10 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.getAcceptableMediaType;
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES;
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.REPRESENTATION_SUPPORTED_MEDIA_TYPES;
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.createFieldQueryForFindRequest;
-import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getAcceptableMediaType;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.getLDPathParseExceptionMessage;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.prepairQueryLDPathProgram;
@@ -63,15 +63,16 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.jersey.parsers.FieldQueryReader;
@@ -188,7 +189,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @Produces({APPLICATION_JSON,RDF_XML,N3,TURTLE,X_TURTLE,RDF_JSON,N_TRIPLE})
     public Response getInfo(@Context HttpHeaders headers,
                             @Context UriInfo uriInfo) {
-        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, REPRESENTATION_SUPPORTED_MEDIA_TYPES,MediaType.APPLICATION_JSON_TYPE);
+        MediaType acceptedMediaType = getAcceptableMediaType(headers, REPRESENTATION_SUPPORTED_MEDIA_TYPES,MediaType.APPLICATION_JSON_TYPE);
         ResponseBuilder rb =  Response.ok(site2Representation(uriInfo.getAbsolutePath().toString()));
         rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
         addCORSOrigin(servletContext, rb, headers);
@@ -199,7 +200,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     public Response getLicenseInfo(@Context HttpHeaders headers,
                                    @Context UriInfo uriInfo,
                                    @PathParam(value = "name") String name) {
-        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
+        MediaType acceptedMediaType = getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
         if(name == null || name.isEmpty()){
             //return all
         } else if(name.startsWith(LICENSE_NAME)){
@@ -257,7 +258,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         log.info("  > mediaType: " + headers.getMediaType());
         Collection<String> supported = new HashSet<String>(JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
+        final MediaType acceptedMediaType = getAcceptableMediaType(headers,
             supported, MediaType.APPLICATION_JSON_TYPE);
         if (id == null || id.isEmpty()) {
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
@@ -330,7 +331,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         log.debug("site/{}/find Request",site.getId());
         Collection<String> supported = new HashSet<String>(JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+        final MediaType acceptedMediaType = getAcceptableMediaType(
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
         if(name == null || name.isEmpty()){
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){

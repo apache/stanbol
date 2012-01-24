@@ -34,6 +34,7 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -43,6 +44,7 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
@@ -67,6 +69,8 @@ import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
 import org.apache.stanbol.rules.refactor.api.RefactoringException;
+import org.osgi.framework.Constants;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -92,28 +96,38 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true, metatype = true, inherit = true)
 @Service(EnhancementEngine.class)
-public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProperties {
+@Properties(value={
+    @Property(name=EnhancementEngine.PROPERTY_NAME,value="refactor"),
+    @Property(name=RefactorEnhancementEngine.SCOPE,value="refactor-engine"),
+    @Property(name=RefactorEnhancementEngine.RECIPE_URI,value = ""),
+    @Property(name=RefactorEnhancementEngine.SCOPE_CORE_ONTOLOGY,
+        value = {
+                 "http://ontologydesignpatterns.org/ont/iks/kres/dbpedia_demo.owl", 
+                 ""}, 
+        cardinality = 1000),
+    @Property(name=RefactorEnhancementEngine.APPEND_OTHER_ENHANCEMENT_GRAPHS,boolValue = true),
+    @Property(name=RefactorEnhancementEngine.USAGE_OF_ENTITY_HUB,boolValue = true),
+    @Property(name=Constants.SERVICE_RANKING,intValue=0)
+})
+public class RefactorEnhancementEngine 
+        extends AbstractEnhancementEngine<RuntimeException,RuntimeException> 
+        implements EnhancementEngine, ServiceProperties {
 
     /*
      * TODO This are the scope and recipe IDs to be used by this implementation In future implementation this
      * will be configurable
      */
 
-    @Property(value = "refactor-engine")
     public static final String SCOPE = "engine.refactor.scope";
 
-    @Property(value = "")
     public static final String RECIPE_URI = "engine.refactor.recipe";
 
-    @Property(value = {"http://ontologydesignpatterns.org/ont/iks/kres/dbpedia_demo.owl", ""}, cardinality = 1000, description = "To fix a set of resolvable ontology URIs for the scope's ontologies.")
     public static final String SCOPE_CORE_ONTOLOGY = "engine.refactor.scope.core.ontology";
 
-    @Property(boolValue = true, description = "If true: the previously generated RDF is deleted and substituted with the new one. If false: the new one is appended to the old RDF. Possible value: true or false.")
     public static final String APPEND_OTHER_ENHANCEMENT_GRAPHS = "engine.refactor.append.graphs";
 
-    @Property(boolValue = true, description = "If true: entities are fetched via the EntityHub. If false: entities are fetched on-line. Possible value: true or false.")
     public static final String USAGE_OF_ENTITY_HUB = "engine.refactor.entityhub";
 
     @Reference
@@ -487,8 +501,8 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
      * 
      * @param context
      */
-    protected void activate(ComponentContext context) {
-
+    protected void activate(ComponentContext context) throws ConfigurationException {
+        super.activate(context);
         /*
          * Read property to indicate if the the new eanchment metada must be append to the existing mGraph
          */
@@ -681,7 +695,7 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
     }
 
     protected void deactivate(ComponentContext context) {
-
+        super.deactivate(context);
         /*
          * Deactivating the dulcifier. The procedure require: 1) get all the rules from the recipe 2) remove
          * the recipe. 3) remove the single rule. 4) tear down the scope ontologySpace and the scope itself.

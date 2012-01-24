@@ -35,9 +35,6 @@
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
-  <properties>
-    <ldpath.version>0.9.3-SNAPSHOT</ldpath.version>
-  </properties>
 
   <build>
     <!-- make it an OSGi bundle -->
@@ -52,48 +49,11 @@
               org.apache.stanbol.entityhub.ldpath;version=${project.version},
               org.apache.stanbol.entityhub.ldpath.backend;version=${project.version},
               org.apache.stanbol.entityhub.ldpath.query;version=${project.version},
-              org.apache.stanbol.entityhub.ldpath.transformer;version=${project.version},
-              at.newmedialab.ldpath;version=${ldpath.version},
-              at.newmedialab.ldpath.api;version=${ldpath.version},
-              at.newmedialab.ldpath.api.backend;version=${ldpath.version},
-              at.newmedialab.ldpath.api.functions;version=${ldpath.version},
-              at.newmedialab.ldpath.api.selectors;version=${ldpath.version},
-              at.newmedialab.ldpath.api.transformers;version=${ldpath.version},
-              at.newmedialab.ldpath.model;version=${ldpath.version},
-              at.newmedialab.ldpath.model.backend;version=${ldpath.version},
-              at.newmedialab.ldpath.model.fields;version=${ldpath.version},
-              at.newmedialab.ldpath.model.functions;version=${ldpath.version},
-              at.newmedialab.ldpath.model.programs;version=${ldpath.version},
-              at.newmedialab.ldpath.model.selectors;version=${ldpath.version},
-              at.newmedialab.ldpath.model.transformers;version=${ldpath.version},
-              at.newmedialab.ldpath.util;version=${ldpath.version},
-              at.newmedialab.ldpath.exception;version=${ldpath.version}
+              org.apache.stanbol.entityhub.ldpath.transformer;version=${project.version}
             </Export-Package>
             <Private-Package>
               org.apache.stanbol.entityhub.ldpath.impl;version=${project.version}
             </Private-Package>
-            <!-- 
-              excludes 
-                * ANT for htmlcleaner
-                * some sun.** private APIs referenced by guava
-              -->
-            <Import-Package>
-              !sun.misc,
-              !org.apache.tools.ant.*,
-              !org.apache.tools.bzip2,
-              !org.apache.tools.mail,
-              !org.apache.tools.tar,
-              !org.apache.tools.zip,
-              *
-            </Import-Package>
-            <!--
-              Embeds ldPath, guava and htmlcleaner
-              JDOM is an own Bundle
-             -->
-            <Embed-Dependency>
-              ldpath-api, ldpath-core,
-              guava, htmlcleaner,
-            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>
@@ -104,33 +64,18 @@
     </plugins>
   </build>
 
-  <repositories>
-    <repository>
-      <id>kiwi-project_SNAPSHOTS</id> <!-- Hosts LDPath SNAPSHOT bundles for now -->
-      <name>Kiwi Project SNAPSHOTS Repository</name>
-      <url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/snapshots/</url>
-    </repository>
-    <repository>
-      <id>kiwi-project</id> <!-- Hosts LDPath releases bundles for now -->
-      <name>Kiwi Project Repository</name>
-      <url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/releases/</url>
-    </repository>
-  </repositories>
-
   <dependencies>
     <!-- LD Path -->
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
       <artifactId>ldpath-api</artifactId>
-      <version>${ldpath.version}</version>
     </dependency>
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core</artifactId>
-      <version>${ldpath.version}</version>
+      <artifactId>ldpath-core-bundle</artifactId>
     </dependency>
     <!-- additional LD Path dependencies -->
-	<dependency>
+<!-- 	<dependency>
 	  <groupId>com.google.guava</groupId>
 	  <artifactId>guava</artifactId>
       <version>10.0.1</version>
@@ -143,7 +88,7 @@
     <dependency>
       <groupId>org.jdom</groupId>
       <artifactId>com.springsource.org.jdom</artifactId> 
-    </dependency>
+    </dependency> -->
     <!-- dependencies on other Entityhub modules -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>

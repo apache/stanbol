@@ -32,6 +32,7 @@ import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -39,8 +40,10 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.tika.language.LanguageIdentifier;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +55,14 @@ import org.slf4j.LoggerFactory;
  * @author Joerg Steffen, DFKI
  * @version $Id$
  */
-@Component(immediate = true, metatype = true)
+@Component(immediate = true, metatype = true, inherit=true)
 @Service
-public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProperties {
+@Properties(value={
+    @Property(name=EnhancementEngine.PROPERTY_NAME,value="langid")
+})
+public class LangIdEnhancementEngine 
+        extends AbstractEnhancementEngine<IOException,RuntimeException>
+        implements EnhancementEngine, ServiceProperties {
 
     /**
      * a configurable value of the text segment length to check
@@ -95,7 +103,8 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
      * @param ce
      *            the {@link ComponentContext}
      */
-    protected void activate(ComponentContext ce) throws IOException {
+    protected void activate(ComponentContext ce) throws ConfigurationException, IOException {
+        super.activate(ce);
         if (ce != null) {
             @SuppressWarnings("unchecked")
             Dictionary<String, String> properties = ce.getProperties();

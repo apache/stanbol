@@ -14,30 +14,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.stanbol.enhancer.it;
+package org.apache.stanbol.it;
 
 import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
 import org.junit.Test;
 
-/** Test the enhancer homepage and demonstrate the test classes.
- *  Does not inherit from EnhancerTestBase as we don't care
- *  at this stage if engines are ready or not.
- */
-public class HomepageTest extends StanbolTestBase {
+/** Verify that the example config of STANBOL-110 is present */ 
+public class DefaultConfigTest extends StanbolTestBase {
     
     @Test
-    public void testHomepageExamples() throws Exception {
+    public void testDefaultConfig() throws Exception {
+        // AFAIK there's no way to get the config in machine
+        // format from the webconsole, so we just grep the 
+        // text config output
+        final String path = "/system/console/config/configuration-status-20110304-1743+0100.txt";
         executor.execute(
-                builder.buildGetRequest("/")
-                .withHeader("Accept", "text/html")
+                builder.buildGetRequest(path)
+                .withCredentials("admin", "admin")
         )
         .assertStatus(200)
-        .assertContentType("text/html")
-        .assertContentContains(
-            "/static/home/style/stanbol.css", 
-            "The RESTful Semantic Engine")
         .assertContentRegexp(
-            "stylesheet.*stanbol.css",
-            "<title.*[Ss]tanbol");
+                "PID.*org.apache.stanbol.examples.ExampleBootstrapConfig",
+                "anotherValue.*This is AnotherValue.",
+                "message.*This test config should be loaded at startup",
+                "org.apache.stanbol.examples.ExampleBootstrapConfig.*launchpad:resources/config/org.apache.stanbol.examples.ExampleBootstrapConfig.cfg"
+        );
     }
 }
+

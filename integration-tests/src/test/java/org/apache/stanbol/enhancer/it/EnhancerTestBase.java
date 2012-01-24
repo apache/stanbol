@@ -30,15 +30,97 @@ import org.junit.Before;
  */
 public class EnhancerTestBase extends StanbolTestBase {
     
+
+    
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     // TODO configurable via system properties??
     public static final int ENGINES_TIMEOUT_SECONDS = 60;
     public static final int WAIT_BETWEEN_TRIES_MSEC = 1000;
     
-    static boolean enginesReady;
-    static boolean timedOut;
+    boolean enginesReady;
+    boolean timedOut;
+
+    protected final String endpoint;
+    /*  List of expected engines could be made configurable via system
+     *  properties, but we don't expect it to change often. 
+     */
+    protected final String[] assertEngines; 
     
+    /**
+     * The "/enhancer" endpoint"
+     */
+    public static final String ENHANCER_ENDPOINT = "/enhancer";
+    /**
+     * The default endpoint
+     * @see #ENHANCER_ENDPOINT
+     */
+    public static final String DEFAULT_ENDPOINT = ENHANCER_ENDPOINT;
+    /**
+     * The "/engines" endpoint the only endpoint supported to enhance 
+     * content items before STANBOL-431. This endpoint is still supported
+     */
+    public static final String ENGINES_ENDPOINT = "/engines";
+    /**
+     * The root for the endpoints of specific enhancement chains
+     * @see #getChainEndpoint(String)
+     */
+    private static final String CHAINS_ROOT = "/enhancer/chain/";
+    
+    private static final String[] DEFAULT_ASSERT_ENGINES = 
+            new String[]{
+                "metaxa","MetaxaEngine",
+                "langid","LangIdEnhancementEngine",
+                "ner","NamedEntityExtractionEnhancementEngine",
+                "entityhubLinking","NamedEntityTaggingEngine",
+                "dbpediaLinking","NamedEntityTaggingEngine"                    
+            };
+    /**
+     * Getter for the Endpoint for a specific enhancement chain
+     * @param chainName the name of the chain
+     * @return the endpoint
+     * @throws IllegalArgumentException if the parsed chain is <code>null</code>
+     * or invalid
+     */
+    public static final String getChainEndpoint(String chainName){
+        if(chainName == null || chainName.isEmpty()){
+            throw new IllegalArgumentException("The parsed Chain name MUST NOT BE NULL nor empty!");
+        }
+        if(chainName.charAt(0) == '/'){
+            if(chainName.length()<2){
+                throw new IllegalArgumentException("The parsed Chain name '/' is invalid!");
+            }
+            return CHAINS_ROOT+chainName.substring(1);
+        } else {
+            return CHAINS_ROOT+chainName;
+        }
+    }
+    
+    public EnhancerTestBase(){
+        this(null, (String[])null);
+    }
+    public EnhancerTestBase(String endpoint){
+        this(endpoint,(String[])null);
+    }
+    public EnhancerTestBase(String endpoint,String...assertEngines){
+        super();
+        if(endpoint == null){
+            endpoint = DEFAULT_ENDPOINT;
+        }
+        if(endpoint.charAt(0) != '/')
+            this.endpoint = "/"+endpoint;
+        else{
+            this.endpoint = endpoint;
+        }
+        if(assertEngines == null){
+            this.assertEngines = DEFAULT_ASSERT_ENGINES;
+        } else {
+            this.assertEngines = assertEngines;
+        }
+    }
+    public String getEndpoint(){
+        return endpoint;
+    }
     @Before
     public void checkEnginesReady() throws Exception {
     
@@ -58,21 +140,13 @@ public class EnhancerTestBase extends StanbolTestBase {
             
             @Override
             public boolean isTrue() throws Exception {
-                /*  List of expected engines could be made configurable via system
-                 *  properties, but we don't expect it to change often. 
-                 */
                 executor.execute(
-                        builder.buildGetRequest("/engines")
-                        .withHeader("Accept", "text/html")
+                    builder.buildGetRequest(endpoint)
+                    .withHeader("Accept", "text/html")
                 )
                 .assertStatus(200)
                 .assertContentType("text/html")
-                .assertContentRegexp(
-                    "org.apache.stanbol.*MetaxaEngine",
-                    "org.apache.stanbol.*LangIdEnhancementEngine",
-                    "org.apache.stanbol.*NamedEntityExtractionEnhancementEngine",
-                    "org.apache.stanbol.*NamedEntityTaggingEngine"
-                );
+                .assertContentRegexp(assertEngines);
                 
                 /*  List of expected referencedSites could also be made 
                  *  configurable via system properties, but we don't expect it 
@@ -87,13 +161,14 @@ public class EnhancerTestBase extends StanbolTestBase {
                 .assertContentRegexp(
                     "http:\\\\/\\\\/.*\\\\/entityhub\\\\/site\\\\/dbpedia\\\\/"
                 );
-                log.info("Enhancement engines checked, all present");
+                log.info("Enhancement engines checked for '{}', all present", endpoint);
                 return true;
             }
             
             @Override
             public String getDescription() {
-                return "Checking that all enhancement engines are ready";
+                return String.format("Checking that all enhancement engines for " +
+                		"endpoint '%s' are ready",endpoint);
             }
         };
         

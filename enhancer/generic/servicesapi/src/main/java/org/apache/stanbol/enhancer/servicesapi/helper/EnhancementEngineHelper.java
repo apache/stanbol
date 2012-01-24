@@ -16,9 +16,12 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.helper;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.clerezza.rdf.core.Literal;
@@ -32,6 +35,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.slf4j.Logger;
@@ -320,7 +324,7 @@ public class EnhancementEngineHelper {
      * @param property the property
      * @return the value
      */
-    public static UriRef getReference(MGraph graph, NonLiteral resource, UriRef property){
+    public static UriRef getReference(TripleCollection graph, NonLiteral resource, UriRef property){
         Iterator<Triple> results = graph.filter(resource, property, null);
         if(results.hasNext()){
             while(results.hasNext()){
@@ -346,7 +350,7 @@ public class EnhancementEngineHelper {
      * @param property the property
      * @return The iterator over all the values (
      */
-    public static Iterator<UriRef> getReferences(MGraph graph, NonLiteral resource, UriRef property){
+    public static Iterator<UriRef> getReferences(TripleCollection graph, NonLiteral resource, UriRef property){
         final Iterator<Triple> results = graph.filter(resource, property, null);
         return new Iterator<UriRef>() {
             //TODO: dose not check if the object of the triple is of type UriRef
@@ -358,5 +362,42 @@ public class EnhancementEngineHelper {
             public void remove() { results.remove(); }
         };
     }
+    
+    /**
+     * Comparator that allows to sort a list/array of {@link EnhancementEngine}s
+     * based on there {@link ServiceProperties#ENHANCEMENT_ENGINE_ORDERING}.
+     */
+    public static final Comparator<EnhancementEngine> EXECUTION_ORDER_COMPARATOR = new Comparator<EnhancementEngine>() {
 
+        @Override
+        public int compare(EnhancementEngine engine1, EnhancementEngine engine2) {
+            Integer order1 = getEngineOrder(engine1);
+            Integer order2 = getEngineOrder(engine2);
+            //start with the highest number finish with the lowest ...
+            return order1 == order2?0:order1<order2?1:-1;
+        }
+
+    };
+    /**
+     * Gets the {@link ServiceProperties#ENHANCEMENT_ENGINE_ORDERING} value
+     * for the parsed EnhancementEngine. If the Engine does not implement the
+     * {@link ServiceProperties} interface or does not provide the
+     * {@link ServiceProperties#ENHANCEMENT_ENGINE_ORDERING} the 
+     * {@link ServiceProperties#ORDERING_DEFAULT} is returned <p>
+     * This method is guaranteed to NOT return <code>null</code>.
+     * @param engine the engine
+     * @return the ordering
+     */
+    public static Integer getEngineOrder(EnhancementEngine engine){
+        log.debug("getOrder "+engine);
+        if (engine instanceof ServiceProperties){
+            log.debug(" ... implements ServiceProperties");
+            Object value = ((ServiceProperties)engine).getServiceProperties().get(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING);
+            log.debug("   > value = "+value +" "+value.getClass());
+            if (value !=null && value instanceof Integer){
+                return (Integer)value;
+            }
+        }
+        return ServiceProperties.ORDERING_DEFAULT;
+    }
 }

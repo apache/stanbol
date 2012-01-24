@@ -16,17 +16,23 @@
 */
 package org.apache.stanbol.enhancer.jobmanager.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.EXECUTION_ORDER_COMPARATOR;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,11 +46,12 @@ import org.slf4j.LoggerFactory;
  * @scr.reference name="EnhancementEngine"
  *                interface="org.apache.stanbol.enhancer.servicesapi.EnhancementEngine"
  *                cardinality="0..n" policy="dynamic"
- *
+ * @scr.property name="service.ranking" 
+ *               value="-1000"
+ *               type="Integer"
  */
 public class WeightedJobManager implements EnhancementJobManager {
     private static final Logger log = LoggerFactory.getLogger(WeightedJobManager.class);
-
     // handle thread safety efficiently when traversals (e.g. when calling
     // #enhanceContent) are expected to be much more frequent than mutable
     // operations (binding or unbinding engines).
@@ -55,8 +62,7 @@ public class WeightedJobManager implements EnhancementJobManager {
     //     operation is performed
     private List<EnhancementEngine> sortedEngineList = new ArrayList<EnhancementEngine>();
 
-    private static final ExecutionOrderComparator executionOrderComparator = new ExecutionOrderComparator();
-
+    @Override
     public void enhanceContent(ContentItem ci) throws EngineException {
         log.debug("enhanceContent({}), {} engines available", ci, sortedEngineList.size());
         Iterator<EnhancementEngine> engines;
@@ -86,7 +92,11 @@ public class WeightedJobManager implements EnhancementJobManager {
     }
     
     @Override
-	public void enhanceContent(ContentItem ci, String chain) throws EngineException {
+	public void enhanceContent(ContentItem ci, Chain chain) throws EngineException {
+        if(chain != null){
+            log.error("This EnhancementJobManager implementation does not yet" +
+            		"support Enhancement Chains");
+        }
 		//This implementation don't take "chain" in account.
     	enhanceContent(ci);
 	}
@@ -95,7 +105,7 @@ public class WeightedJobManager implements EnhancementJobManager {
         synchronized (sortedEngineList) {
             List<EnhancementEngine> newList = new ArrayList<EnhancementEngine>(sortedEngineList);
             newList.add(e);
-            Collections.sort(newList,executionOrderComparator);
+            Collections.sort(newList,EXECUTION_ORDER_COMPARATOR);
             sortedEngineList = newList;
         }
         log.info("EnhancementEngine {} added to our list: {}", e, sortedEngineList);
@@ -112,30 +122,6 @@ public class WeightedJobManager implements EnhancementJobManager {
 
     public List<EnhancementEngine> getActiveEngines() {
         return Collections.unmodifiableList(sortedEngineList);
-    }
-
-    private static class ExecutionOrderComparator implements Comparator<EnhancementEngine> {
-
-        @Override
-        public int compare(EnhancementEngine engine1, EnhancementEngine engine2) {
-            Integer order1 = getOrder(engine1);
-            Integer order2 = getOrder(engine2);
-            //start with the highest number finish with the lowest ...
-            return order1 == order2?0:order1<order2?1:-1;
-        }
-
-        public Integer getOrder(EnhancementEngine engine){
-            log.debug("getOrder "+engine);
-            if (engine instanceof ServiceProperties){
-                log.debug(" ... implements ServiceProperties");
-                Object value = ((ServiceProperties)engine).getServiceProperties().get(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING);
-                log.debug("   > value = "+value +" "+value.getClass());
-                if (value !=null && value instanceof Integer){
-                    return (Integer)value;
-                }
-            }
-            return ServiceProperties.ORDERING_DEFAULT;
-        }
     }
     
 }

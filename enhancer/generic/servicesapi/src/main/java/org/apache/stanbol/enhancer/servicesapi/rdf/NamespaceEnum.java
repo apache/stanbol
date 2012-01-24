@@ -29,7 +29,11 @@ public enum NamespaceEnum {
     geonames("http://www.geonames.org/ontology#"),
     georss("http://www.georss.org/georss/"),
     geo("http://www.w3.org/2003/01/geo/wgs84_pos#"),
-    nie("http://www.semanticdesktop.org/ontologies/2007/01/19/nie#");
+    nie("http://www.semanticdesktop.org/ontologies/2007/01/19/nie#"),
+    /**
+     * Namespace for the Stanbol Enhancer Execution Plan ontology
+     */
+    ep("http://stanbol.apache.org/ontology/enhancer/executionplan#");
 
     String ns;
     String prefix;

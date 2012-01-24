@@ -24,6 +24,10 @@ package org.apache.stanbol.enhancer.servicesapi;
 public interface EnhancementEngine {
 
     /**
+     * The property used to provide the name of an enhancement engine.
+     */
+    String PROPERTY_NAME = "stanbol.enhancer.engine.name";
+    /**
      * Return value for {@link #canEnhance}, meaning this engine cannot enhance
      * supplied {@link ContentItem}
      */
@@ -41,7 +45,7 @@ public interface EnhancementEngine {
      * supplied {@link ContentItem}, and suggests queuing a request for
      * enhancement instead of enhancing it synchronously.
      */
-    int ENHANCE_ASYNC = 1;
+    int ENHANCE_ASYNC = 2;
 
     /**
      * Indicate if this engine can enhance supplied ContentItem, and if it
@@ -65,5 +69,11 @@ public interface EnhancementEngine {
      *             expected
      */
     void computeEnhancements(ContentItem ci) throws EngineException;
+    /**
+     * Getter for the name of this EnhancementEngine instance as configured
+     * by {@link #PROPERTY_NAME}
+     * @return the name
+     */
+    String getName();
 
 }

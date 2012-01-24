@@ -20,25 +20,59 @@
 
 
 <div class="panel" id="webview">
-<#if it.activeEngines?size == 0>
-  <p><em>There is no active engines. Administrators can install,
-   configure and enable new engines by using the
-   <a href="/system/console">OSGi console</a>.</em></p>
+<#if !it.executionNodes??>
+  <p><em>There seams to be a problem with the Enhancement Chain <b>${it.chain.name}</b>. 
+   To fix this an Administrator needs to install, configure and enable enhancement 
+   chains and -engines by using the <a href="/system/console">OSGi console</a>.</em></p>
+<#elseif it.executionNodes?size == 0>
+  <p><em>There is no active engines for Enhancement Chain <b>${it.chain.name}</b>. 
+   Administrators can install, configure and enable enhancement chains and 
+   -engines by using the <a href="/system/console">OSGi console</a>.</em></p>
 <#else>
+  <#assign executionNodes = it.executionNodes>
   <div class="enginelisting">
-  <div class="collapsed">
-  <p class="collapseheader">There are currently
-   <strong>${it.activeEngines?size}</strong> active engines.</p>
-  <div class="collapsable">
-  <ul>
-    <#list it.activeEngines as engine>
-    <li>${engine.class.name}</li>
-    </#list>
-  </ul>
-  <p class="note">You can enable, disable and deploy new engines using the
-    <a href="/system/console/components">OSGi console</a>.</p>
-  </div>
-  </div>
+  <#if it.chainAvailable>
+    <div class="collapsed">
+  <#else>
+    <div>
+  </#if>
+  <p class="collapseheader">There are currently 
+    <#if it.activeNodes?size < it.executionNodes?size>
+      <strong>${it.activeNodes?size}/</strong><#else>all </#if><strong>${it.executionNodes?size}</strong>
+    engines available for enhancement chain 
+    <#if it.chainAvailable>
+      <span style="color:#006600">
+    <#else>
+      <span style="color:#660000">
+    </#if>
+    <strong>${it.chain.name}</strong></span></p>
+    <div class="collapsable">
+    <ul>
+      <#list executionNodes as node>
+        <li>
+        <#if node.engineActive>
+          <span style="color:#006600">
+        <#elseif node.optional>
+          <span style="color:#666666">
+        <#else>
+          <span style="color:#660000">
+        </#if>
+          <b>${node.engineName}</b> 
+          <small>(
+          <#if node.optional> optional <#else> required </#if>, 
+          <#if node.engineActive>
+            ${node.engine.class.simpleName})</small></li>
+          <#else>
+            currently not available)</small>
+          </span>
+          </li>
+        </#if>
+      </#list>
+    </ul>
+    <p class="note">You can enable, disable and deploy new engines using the
+      <a href="/system/console/components">OSGi console</a>.</p>
+    </div>
+    </div>
   </div>
   
 <script>
@@ -71,13 +105,14 @@ function registerFormHandler() {
        ajax: true,
        format:  $("#enginesInput select[name=format]").val()
      };
+     var base = window.location.href.replace(/\/$/, "");
      
      $("#enginesOuputWaiter").show();
      
      // submit the form query using Ajax
      $.ajax({
        type: "POST",
-       url: "${it.publicBaseUri}engines",
+       url: base,
        data: data,
        dataType: "html",
        cache: false,

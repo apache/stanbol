@@ -24,12 +24,22 @@ public class BenchmarkTest extends EnhancerTestBase {
 
     final String BENCHMARK =
         "= INPUT = \n"
-        + "Bob Marley was born in Kingston, Jamaica. \n"
+        + "Bob Marley was born in Kingston, Jamaica. Marley's music was heavily "
+        + "influenced by the social issues of his homeland.\n"
         + "= EXPECT = \n"
         + "Description: Jamaica must be found \n"
-        + "http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Jamaica"
+        + "http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Jamaica\n"
+        + "\n"
+        + "Description: Bob Marley must be found as a musical artist\n"
+        + "http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist\n"
+        + "http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Bob_Marley\n"
+        + "\n"
+        + "= COMPLAIN =\n"
+        + "Description: Miles Davis must not be found\n"
+        + "http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist\n"
+        + "http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Miles_Davis\n"
         ;
-    
+        
     @Test
     public void testBenchmark() throws Exception {
         executor.execute(

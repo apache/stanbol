@@ -205,6 +205,17 @@ public class RequestExecutor {
      * to have match partial lines.
      */
     public RequestExecutor assertContentRegexp(String... regexp) {
+        return assertContentRegexp(true,regexp);
+    }
+    /**
+     * For each supplied regexp, fail unless <ul>
+     * <li><code>expected</code>: content contains at least one line that matches.
+     * <li><code>!expected</code>: content contains any line that mathces.
+     * <ul>
+     * Regexps are automatically prefixed/suffixed with .* so as
+     * to have match partial lines.
+     */
+    public RequestExecutor assertContentRegexp(boolean expected, String... regexp) {
         assertNotNull(this.toString(), response);
         nextPattern:
         for (String expr : regexp) {
@@ -212,11 +223,16 @@ public class RequestExecutor {
             final LineIterator it = new LineIterator(new StringReader(content));
             while (it.hasNext()) {
                 final String line = it.nextLine();
-                if (p.matcher(line).matches()) {
+                if (expected & p.matcher(line).matches()) {
                     continue nextPattern;
                 }
+                if(!expected & p.matcher(line).matches()) {
+                    fail(this + ": match found for regexp '" + expr + "', content=\n" + content);
+                }
             }
-            fail(this + ": no match for regexp '" + expr + "', content=\n" + content);
+            if(expected){
+                fail(this + ": no match for regexp '" + expr + "', content=\n" + content);
+            }
         }
         return this;
     }

@@ -43,6 +43,11 @@
       <artifactId>org.apache.felix.metatype</artifactId>
       <version>1.0.4</version>
     </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.eventadmin</artifactId>
+      <version>1.2.14</version>
+    </bundle>
   </startLevel>
 
   <!-- HTTP service and Http related Utilities -->

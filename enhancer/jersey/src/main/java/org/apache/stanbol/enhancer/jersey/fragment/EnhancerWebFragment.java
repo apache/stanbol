@@ -33,6 +33,8 @@ import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.enhancer.jersey.resource.EnginesRootResource;
+import org.apache.stanbol.enhancer.jersey.resource.EnhancerRootResource;
+import org.apache.stanbol.enhancer.jersey.resource.EnhancementChainResource;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -80,6 +82,8 @@ public class EnhancerWebFragment implements WebFragment {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         // resources
         classes.add(EnginesRootResource.class);
+        classes.add(EnhancerRootResource.class);
+        classes.add(EnhancementChainResource.class);
         return classes;
     }
 

@@ -468,6 +468,21 @@
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.enhancer.chainmanager</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.enhancer.enginemanager</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.enhancer.eventjobmanager</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.enhancer.weightedjobmanager</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
@@ -1340,6 +1355,19 @@
       <version>2.7.1</version>
       <type>jar</type>
     </dependency>
+    
+    <!-- LD Path -->
+    <dependency>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-api</artifactId>
+      <version>0.9.4-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-core-bundle</artifactId>
+      <version>0.9.4-SNAPSHOT</version>
+    </dependency>
+    
 
     <!-- Apache Tika core -->
     <dependency>
@@ -1747,6 +1775,18 @@
       <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name> 
       <url>http://repository.springsource.com/maven/bundles/external</url>
     </repository>     
+    
+    <repository>
+      <id>kiwi-project_SNAPSHOTS</id> <!-- Hosts LDPath SNAPSHOT bundles for now -->
+      <name>Kiwi Project SNAPSHOTS Repository</name>
+      <url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/snapshots/</url>
+    </repository>
+    
+    <repository>
+      <id>kiwi-project</id> <!-- Hosts LDPath releases bundles for now -->
+      <name>Kiwi Project Repository</name>
+      <url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/releases/</url>
+    </repository>
     
   </repositories>
 

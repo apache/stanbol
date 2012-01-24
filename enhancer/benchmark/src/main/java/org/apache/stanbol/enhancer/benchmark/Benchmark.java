@@ -19,7 +19,7 @@ package org.apache.stanbol.enhancer.benchmark;
 import java.util.List;
 
 import org.apache.clerezza.rdf.core.Graph;
-import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 
 /** A Benchmark is a named List of {@link TripleMatcherGroup} */
@@ -32,8 +32,8 @@ public interface Benchmark extends List<TripleMatcherGroup >{
     
     /** Execute the benchmark and return results 
      *  @return null */
-    List<BenchmarkResult> execute(EnhancementJobManager jobManager) throws EngineException;
+    List<BenchmarkResult> execute(EnhancementJobManager jobManager) throws EnhancementException;
     
     /** Return the enhanced Graph of our input text */
-    Graph getGraph(EnhancementJobManager jobManager) throws EngineException;
+    Graph getGraph(EnhancementJobManager jobManager) throws EnhancementException;
 }

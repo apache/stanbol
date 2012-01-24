@@ -43,5 +43,6 @@
 
   <modules>
     <module>weightedjobmanager</module>
+    <module>event</module>
   </modules>
 </project>
