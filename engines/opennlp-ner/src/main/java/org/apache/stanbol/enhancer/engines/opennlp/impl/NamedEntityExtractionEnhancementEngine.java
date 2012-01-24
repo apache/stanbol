@@ -34,6 +34,8 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -45,6 +47,7 @@ import org.osgi.service.component.ComponentContext;
 @Component(
     metatype = true, 
     immediate = true,
+    inherit = true,
     configurationFactory = true, 
     policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
     specVersion = "1.1", 
@@ -52,10 +55,14 @@ import org.osgi.service.component.ComponentContext;
     description = "%stanbol.NamedEntityExtractionEnhancementEngine.description")
 @Service
 @org.apache.felix.scr.annotations.Properties(value={
+    @Property(name=EnhancementEngine.PROPERTY_NAME,value="ner"),
     @Property(name=NamedEntityExtractionEnhancementEngine.PROCESSED_LANGUAGES,value=""),
-    @Property(name=NamedEntityExtractionEnhancementEngine.DEFAULT_LANGUAGE,value="")}
-)
-public class NamedEntityExtractionEnhancementEngine implements EnhancementEngine, ServiceProperties {
+    @Property(name=NamedEntityExtractionEnhancementEngine.DEFAULT_LANGUAGE,value=""),
+    @Property(name=Constants.SERVICE_RANKING,intValue=0)
+})
+public class NamedEntityExtractionEnhancementEngine 
+        extends AbstractEnhancementEngine<IOException,RuntimeException> 
+        implements EnhancementEngine, ServiceProperties {
 
     private EnhancementEngine engineCore;
     
@@ -89,6 +96,7 @@ public class NamedEntityExtractionEnhancementEngine implements EnhancementEngine
     private OpenNLP openNLP;
     
     protected void activate(ComponentContext ctx) throws IOException, ConfigurationException {
+        super.activate(ctx);
         // Need to register the default data before loading the models
         Object value = ctx.getProperties().get(DEFAULT_LANGUAGE);
         final String defaultLanguage;
@@ -130,6 +138,7 @@ public class NamedEntityExtractionEnhancementEngine implements EnhancementEngine
     }
 
     protected void deactivate(ComponentContext ctx) {
+        super.deactivate(ctx);
         if(dfpServiceRegistration != null) {
             dfpServiceRegistration.unregister();
             dfpServiceRegistration = null;

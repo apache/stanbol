@@ -81,6 +81,7 @@ import org.apache.stanbol.enhancer.topic.UTCTimeStamper;
 import org.apache.stanbol.enhancer.topic.training.Example;
 import org.apache.stanbol.enhancer.topic.training.TrainingSet;
 import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -113,7 +114,8 @@ import org.slf4j.LoggerFactory;
                      @Property(name = TopicClassificationEngine.FALSE_NEGATIVES_FIELD, value = "false_negatives"),
                      @Property(name = TopicClassificationEngine.FALSE_POSITIVES_FIELD, value = "false_positives"),
                      @Property(name = TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, value = "positive_support"),
-                     @Property(name = TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, value = "negative_support")})
+                     @Property(name = TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, value = "negative_support"),
+                     @Property(name = Constants.SERVICE_RANKING, intValue=0)})
 public class TopicClassificationEngine extends ConfiguredSolrCoreTracker implements EnhancementEngine,
         ServiceProperties, TopicClassifier {
 
@@ -121,7 +123,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     public static final String METADATA_ENTRY = "metadata";
 
-    public static final String ENGINE_ID = "org.apache.stanbol.enhancer.engine.id";
+    public static final String ENGINE_ID = EnhancementEngine.PROPERTY_NAME;
 
     public static final String SOLR_CORE = "org.apache.stanbol.enhancer.engine.topic.solrCore";
 
@@ -338,7 +340,11 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     public String getSchemeId() {
         return engineId;
     }
-
+    @Override
+    public String getName() {
+        return engineId;
+    }
+    
     @Override
     public List<String> getAcceptedLanguages() {
         return acceptedLanguages;

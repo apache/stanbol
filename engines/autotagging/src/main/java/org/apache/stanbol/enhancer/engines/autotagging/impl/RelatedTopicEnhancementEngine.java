@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.autotagging.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.EnhancementEngine.PROPERTY_NAME;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
 import java.io.IOException;
@@ -31,6 +32,8 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.autotagging.Autotagger;
@@ -40,6 +43,7 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,12 +56,17 @@ import org.slf4j.LoggerFactory;
  *
  * @author ogrisel
  */
-//@Component(immediate = false, metatype = true)
-//@Service
-public class RelatedTopicEnhancementEngine implements EnhancementEngine {
+@Component(immediate = false, metatype = true,inherit=true)
+@Properties(value={
+    @Property(name=PROPERTY_NAME,value=RelatedTopicEnhancementEngine.DEFAULT_NAME)
+})
+@Service
+public class RelatedTopicEnhancementEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements EnhancementEngine {
 
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
 
+    public static final String DEFAULT_NAME = "autotaggingRelatedTopic";
+    
     private static final Logger log = LoggerFactory.getLogger(RelatedTopicEnhancementEngine.class);
 
     // TODO: make me configurable through an OSGi property
@@ -69,7 +78,7 @@ public class RelatedTopicEnhancementEngine implements EnhancementEngine {
     public void setType(String type) {
         this.type = type;
     }
-
+    
     public void computeEnhancements(ContentItem ci) throws EngineException {
         Autotagger autotagger = autotaggerProvider.getAutotagger();
         if (autotagger == null) {

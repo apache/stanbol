@@ -53,6 +53,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -63,6 +64,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
@@ -87,9 +89,14 @@ import org.slf4j.LoggerFactory;
  * @author michaelmarth
  * @author Rupert Westenthaler
  */
-@Component(immediate = true, metatype = true)
+@Component(immediate = true, metatype = true, inherit = true)
 @Service
-public class ZemantaEnhancementEngine implements EnhancementEngine, ServiceProperties {
+@Properties(value={
+    @Property(name=EnhancementEngine.PROPERTY_NAME,value="zemanta")
+})
+public class ZemantaEnhancementEngine 
+        extends AbstractEnhancementEngine<IOException,RuntimeException>
+        implements EnhancementEngine, ServiceProperties {
 
     @Property
     public static final String API_KEY_PROPERTY = "org.apache.stanbol.enhancer.engines.zemanta.key";
@@ -122,6 +129,7 @@ public class ZemantaEnhancementEngine implements EnhancementEngine, ServicePrope
 
     @Activate
     protected void activate(ComponentContext ce) throws IOException,ConfigurationException {
+        super.activate(ce);
         bundleContext = ce.getBundleContext();
         key = (String)ce.getProperties().get(API_KEY_PROPERTY);
         checkConfig();
@@ -131,6 +139,7 @@ public class ZemantaEnhancementEngine implements EnhancementEngine, ServicePrope
 
     @Deactivate
     protected void deactivate(ComponentContext ce) {
+        super.deactivate(ce);
         literalFactory = null;
         key = null;
         bundleContext = null;

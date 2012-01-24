@@ -43,6 +43,7 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
@@ -54,6 +55,7 @@ import org.ontoware.rdf2go.model.node.Node;
 import org.ontoware.rdf2go.model.node.PlainLiteral;
 import org.ontoware.rdf2go.model.node.URI;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.semanticdesktop.aperture.extractor.ExtractorException;
 import org.slf4j.Logger;
@@ -66,11 +68,14 @@ import org.slf4j.LoggerFactory;
  * @author Joerg Steffen, DFKI
  * @version $Id$
  */
-@Component(immediate = true, metatype = true,
-    label="Apache Stanbol Text and Metadata Extraction Engine",
-    description="Extract plain text and embedded metadata form various document types and formats")
+@Component(immediate = true, metatype = true, inherit = true)
 @Service
-public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
+@org.apache.felix.scr.annotations.Properties(value={
+    @Property(name=EnhancementEngine.PROPERTY_NAME, value="metaxa")
+})
+public class MetaxaEngine 
+        extends AbstractEnhancementEngine<IOException, RuntimeException>
+        implements EnhancementEngine, ServiceProperties {
 
     private static final Logger log = LoggerFactory.getLogger(MetaxaEngine.class);
 
@@ -83,16 +88,13 @@ public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
     /**
      * name of a file defining the available docuemnt extractors for Metaxa. By defualt, the builtin file 'extractionregistry.xml' is used.
      */
-    @Property(label="ExtractorRegistry",
-        description="The path of a resource on the bundle classpath that specifies which extractors to use.",
-        value="extractionregistry.xml")
+    @Property(value=MetaxaEngine.DEFAULT_EXTRACTION_REGISTRY)
     public static final String GLOBAL_EXTRACTOR_REGISTRY = "org.apache.stanbol.enhancer.engines.metaxa.extractionregistry";
 
     /**
      * name of a file that defines the set of extractors for HTML documents. By default, the builtin file 'htmlextractors.xml' is used."
      */
-    @Property(label="HtmlExtractors",value="htmlextractors.xml",
-        description="The path of a resource on the bundle classpath that specifies which extractors are used for HTML pages.")
+    @Property(value=MetaxaEngine.DEFAULT_HTML_EXTRACTOR_REGISTRY)
     public static final String HTML_EXTRACTOR_REGISTRY = "org.apache.stanbol.enhancer.engines.metaxa.htmlextractors";
 
     private MetaxaCore extractor;
@@ -108,7 +110,8 @@ public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
      * @param ce the {@link ComponentContext}
      * @throws IOException if initializing fails
      */
-    protected void activate(ComponentContext ce) throws IOException {
+    protected void activate(ComponentContext ce) throws ConfigurationException, IOException {
+        super.activate(ce);
         String extractionRegistry = DEFAULT_EXTRACTION_REGISTRY;
         String htmlExtractors = DEFAULT_HTML_EXTRACTOR_REGISTRY;
         if (ce != null) {
@@ -138,7 +141,8 @@ public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
      *
      * @param ce the {@link ComponentContext}
      */
-    protected void deactivate(@SuppressWarnings("unused") ComponentContext ce) {
+    protected void deactivate(ComponentContext ce) {
+        super.deactivate(ce);
         this.extractor = null;
     }
 

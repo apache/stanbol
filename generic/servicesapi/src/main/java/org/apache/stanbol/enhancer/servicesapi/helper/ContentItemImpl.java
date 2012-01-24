@@ -23,9 +23,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.LockableMGraph;
+import org.apache.clerezza.rdf.core.access.LockableMGraphWrapper;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
@@ -71,8 +75,11 @@ public abstract class ContentItemImpl implements ContentItem {
 	 */
 	private final UriRef mainBlobUri;
 
-    private final MGraph metadata; 
-	
+    private final LockableMGraph metadata; 
+
+    protected final Lock readLock;
+    protected final Lock writeLock;
+    
 	protected ContentItemImpl(UriRef uri, Blob main, MGraph metadata) {
 	    if(uri == null){
 	        throw new IllegalArgumentException("The URI for the ContentItem MUST NOT be NULL!");
@@ -86,10 +93,22 @@ public abstract class ContentItemImpl implements ContentItem {
         this.uri = uri;
         this.mainBlobUri = new UriRef(uri.getUnicodeString()+MAIN_BLOB_SUFFIX);
         this.parts.put(mainBlobUri, main);
-	    this.metadata = metadata;
+        if(metadata instanceof LockableMGraph){
+            this.metadata = (LockableMGraph)metadata;
+        } else {
+            this.metadata = new LockableMGraphWrapper(metadata);
+        }
+        //init the read and write lock
+        this.readLock = this.metadata.getLock().readLock();
+        this.writeLock = this.metadata.getLock().writeLock();
 		//Better parse the Blob in the Constructor than calling a public
 		//method on a may be not fully initialised instance
 		//parts.put(new UriRef(uri.getUnicodeString()+"_main"), getBlob());
+	}
+	
+	@Override
+	public final ReadWriteLock getLock() {
+	    return metadata.getLock();
 	}
 	
 	/**
@@ -98,11 +117,16 @@ public abstract class ContentItemImpl implements ContentItem {
 	 */
 	@Override
 	public final Blob getBlob() {
-	    return (Blob) parts.get(mainBlobUri);
+	    readLock.lock();
+	    try {
+	        return (Blob) parts.get(mainBlobUri);
+	    }finally {
+	        readLock.unlock();
+	    }
 	}
 	@Override
 	public final InputStream getStream() {
-	    return getBlob().getStream();
+        return getBlob().getStream();
 	}
     @Override
     public final String getMimeType() {
@@ -121,48 +145,62 @@ public abstract class ContentItemImpl implements ContentItem {
 
 	@Override
 	public UriRef getPartUri(int index) throws NoSuchPartException {
-		int count = 0;
-		for(Map.Entry<UriRef, Object> entry : parts.entrySet()) {
-			if (count == index) {
-				return entry.getKey();
-			}
-			count++;
-		}
-		throw new NoSuchPartException(index);
+        readLock.lock();
+        try {
+    		int count = 0;
+    		for(Map.Entry<UriRef, Object> entry : parts.entrySet()) {
+    			if (count == index) {
+    				return entry.getKey();
+    			}
+    			count++;
+    		}
+        } finally {
+            readLock.unlock();
+        }
+  		throw new NoSuchPartException(index);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getPart(int index, Class<T> clazz) throws NoSuchPartException {
-		Object result = null;
-		int count = 0;
-		for(Map.Entry<UriRef, Object> entry : parts.entrySet()) {
-			if (count == index) {
-				result = entry.getValue();
-				if (!result.getClass().isAssignableFrom(clazz)) {
-					throw new NoSuchPartException("The body part 0 is of type "+result.getClass().getName()+" which cannot be converted to "+clazz.getName());
-				}
-				return (T) result;
-			}
-			count++;
-		}
-		throw new NoSuchPartException(index);
+        readLock.lock();
+        try {
+    		Object result = null;
+    		int count = 0;
+    		for(Map.Entry<UriRef, Object> entry : parts.entrySet()) {
+    			if (count == index) {
+    				result = entry.getValue();
+    				if (!result.getClass().isAssignableFrom(clazz)) {
+    					throw new NoSuchPartException("The body part 0 is of type "+result.getClass().getName()+" which cannot be converted to "+clazz.getName());
+    				}
+    				return (T) result;
+    			}
+    			count++;
+    		}
+        } finally {
+            readLock.unlock();
+        }
+   		throw new NoSuchPartException(index);
 	}
 	
 	@Override
 	public Object addPart(UriRef uriRef, Object object) {
-	    if(uriRef == null || object == null){
-	        throw new IllegalArgumentException("The parsed content part ID and " +
-	        		"object MUST NOT be NULL!");
-	    }
-	    if(uriRef.equals(mainBlobUri)){ //avoid that this method is used to
-	        //reset the main content part
-	        throw new IllegalArgumentException("The parsed content part ID MUST " +
-	        		"NOT be equals to the ID used by the main Content Part " +
-	        		"( ContentItem.getUri()+\"_main\")");
-	    }
-		return parts.put(uriRef, object);
-		
+        writeLock.lock();
+        try {
+    	    if(uriRef == null || object == null){
+    	        throw new IllegalArgumentException("The parsed content part ID and " +
+    	        		"object MUST NOT be NULL!");
+    	    }
+    	    if(uriRef.equals(mainBlobUri)){ //avoid that this method is used to
+    	        //reset the main content part
+    	        throw new IllegalArgumentException("The parsed content part ID MUST " +
+    	        		"NOT be equals to the ID used by the main Content Part " +
+    	        		"( ContentItem.getUri()+\"_main\")");
+    	    }
+    		return parts.put(uriRef, object);
+        } finally {
+		    writeLock.unlock();
+		}
 	}
 
     @Override
@@ -171,7 +209,7 @@ public abstract class ContentItemImpl implements ContentItem {
 	}
 
 	@Override
-	public MGraph getMetadata() {
+	public LockableMGraph getMetadata() {
 	    return metadata;
 	}
 	@Override

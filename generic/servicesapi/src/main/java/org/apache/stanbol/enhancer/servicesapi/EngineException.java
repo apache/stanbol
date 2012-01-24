@@ -26,7 +26,7 @@ package org.apache.stanbol.enhancer.servicesapi;
  *
  * @author ogrisel
  */
-public class EngineException extends Exception {
+public class EngineException extends EnhancementException {
 
     private static final long serialVersionUID = 1L;
 

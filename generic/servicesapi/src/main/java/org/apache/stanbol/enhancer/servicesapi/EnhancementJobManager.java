@@ -20,8 +20,9 @@ import java.util.List;
 
 /**
  * Accept requests for enhancing ContentItems, and processes them either
- * synchronously or asynchronously (as decided by the enhancement engines or by
- * configuration).
+ * synchronously or asynchronously (as decided by the enhancement engines,
+ * the job manager implementation, the execution plan provided by the 
+ * {@link Chain} or by some additional configurations).
  * <p>
  * The progress of the enhancement process should be made accessible in the
  * ContentItem's metadata.
@@ -29,6 +30,8 @@ import java.util.List;
 public interface EnhancementJobManager {
 
     /**
+     * Enhances the parsed contentItem by using the default enhancement
+     * Chain.
      * Create relevant asynchronous requests or enhance content immediately. The
      * result is not persisted right now. The caller is responsible for calling the
      * {@link Store#put(ContentItem)} afterwards in case persistence is
@@ -36,23 +39,30 @@ public interface EnhancementJobManager {
      * <p>
      * TODO: define the expected semantics if asynchronous enhancements were to
      * get implemented.
-     *
-     * @throws EngineException if the enhancement process failed
+     * @throws EnhancementException if the enhancement process failed
      */
-    void enhanceContent(ContentItem ci) throws EngineException;
+    void enhanceContent(ContentItem ci) throws EnhancementException;
     
     /**
-     * 
+     * Processes the parsed {@link ContentItem} by using the 
+     * {@link Chain#getExecutionPlan() execution plan} provided by the
+     * {@link Chain}.
      * @param ci : ContentItem to be enhanced
-     * @param chain : enhancement chain Name
-     * @throws EngineException : if the enhancement process failed
+     * @param chain : The enhancement Chain used to process the content item
+     * @throws EnhancementException : if an Engine required by the Chain fails to
+     * process the ContentItem
+     * @throws ChainException : if the enhancement process failed
      */
-    void enhanceContent(ContentItem ci, String chain) throws EngineException;
+    void enhanceContent(ContentItem ci, Chain chain) throws EnhancementException;
 
     /**
      * Return the unmodifiable list of active registered engine instance that
      * can be used by the manager.
+     * @deprecated use the {@link EnhancementEngineManager} to get information
+     * about currently active Engines and the {@link ChainManager} to get active
+     * chains. This method will now return active engines of the default chain.
      */
+    @Deprecated
     List<EnhancementEngine> getActiveEngines();
 
 }

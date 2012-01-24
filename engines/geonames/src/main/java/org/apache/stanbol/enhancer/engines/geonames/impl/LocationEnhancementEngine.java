@@ -50,6 +50,7 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -58,9 +59,11 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -68,10 +71,21 @@ import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, metatype = true)
 @Service
-//@Property(name="service.ranking",intValue=5)
-public class LocationEnhancementEngine implements EnhancementEngine, ServiceProperties {
+@Properties(value={
+    @Property(name=EnhancementEngine.PROPERTY_NAME,value=LocationEnhancementEngine.DEFAULT_ENGINE_NAME),
+    @Property(name=Constants.SERVICE_RANKING,intValue=LocationEnhancementEngine.DEFAULT_SERVICE_RANKING)
+})
+public class LocationEnhancementEngine 
+        extends AbstractEnhancementEngine<IOException,RuntimeException> 
+        implements EnhancementEngine, ServiceProperties {
 
-
+    public static final String DEFAULT_ENGINE_NAME = "geonames";
+    /**
+     * Default value for the {@link Constants#SERVICE_RANKING} used by this engine.
+     * This is a negative value to allow easy replacement by this engine depending
+     * to a remote service with one that does not have this requirement
+     */
+    public static final int DEFAULT_SERVICE_RANKING = -100;
     /**
      * The default value for the Execution of this Engine. Currently set to
      * {@link ServiceProperties#ORDERING_EXTRACTION_ENHANCEMENT}
@@ -237,6 +251,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
 
     @SuppressWarnings("unchecked")
     protected void activate(ComponentContext ce) throws IOException, ConfigurationException {
+        super.activate(ce);
         Dictionary<String, Object> properties = ce.getProperties();
         log.debug("activating ...");
         //NOTE: The type of the values is ensured by the default values in the
@@ -284,6 +299,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
     }
 
     protected void deactivate(ComponentContext ce) {
+        super.deactivate(ce);
         setMinScore(null);
         setMaxLocationEnhancements(null);
         setMinHierarchyScore(null);
