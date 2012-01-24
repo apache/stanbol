@@ -30,7 +30,7 @@
 	<artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>Apache Stanbol Solr Managed Bundle</name>
+	<name>Apache Stanbol Commons Solr Managed</name>
 	<description>This bundle provides support for manageing
   Solr Servers (CoreContainer and SolrCores) within the Stanbol JVM.
   Managed CoreContainer and SolrCores are registered as OSGI services

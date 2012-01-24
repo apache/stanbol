@@ -31,7 +31,7 @@
   <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Solr Bundle</name>
+  <name>Apache Stanbol Commons Solr Core</name>
   <description>This bundle provides an OSGI bundle for Solr. This also includes
   an utility that registers CoreContainer and SolrCores as OSGI services.
   </description>

@@ -31,7 +31,7 @@
   <artifactId>org.apache.stanbol.commons.solr.web</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Solr Bundle</name>
+  <name>Apache Stanbol Commons Solr Web</name>
   <description>This Bundle provide an integration of the Solr RESTful API to 
   the Stanbol JerseyEndpoint.
   </description>
