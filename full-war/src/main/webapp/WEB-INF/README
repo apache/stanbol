@@ -22,4 +22,4 @@ resources/config/org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEnt
 resources/config/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-entityhub.config
 resources/config/org.apache.stanbol.commons.solr.web.impl.SolrDispatchFilterComponent-default.config
 resources/config/org.apache.stanbol.enhancer.engines.opennlp.impl.NamedEntityExtractionEnhancementEngine-default.config
-
+resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-language.config
