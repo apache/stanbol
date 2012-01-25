@@ -5,3 +5,4 @@ Feel free to modify and commit this file to test your commit rights.
 - fchrist is able to play
 - sfermigier is able to play
 - cihan is able to play
+- anil starts to play
