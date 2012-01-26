@@ -83,17 +83,23 @@
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.contenthub.core</artifactId>
+      <artifactId>org.apache.stanbol.contenthub.store.solr</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.contenthub.store.solr</artifactId>
+      <artifactId>org.apache.stanbol.contenthub.search.solr</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.contenthub.search.featured</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </dependency>
 
     <!-- Search Helper -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.contenthub.helper.cnn</artifactId>
+      <artifactId>org.apache.stanbol.contenthub.crawler.cnn</artifactId>
     </dependency>
 
     <!-- needed for the ContentItem resource -->
@@ -113,6 +119,14 @@
       <artifactId>jena</artifactId>
     </dependency>
 
+    <!-- dependencies on other Stanbol modules -->
+    <!-- TODO : added to get DefaultQueryFactory at SearchResource, find 
+      a solution not to get this dependency -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+    </dependency>
+
     <!-- Jersey -->
     <dependency>
       <groupId>com.sun.jersey</groupId>
@@ -126,9 +140,6 @@
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
     </dependency>
-    <!-- <dependency> <groupId>com.sun.jersey</groupId> <artifactId>jersey-json</artifactId> 
-      </dependency> <dependency> <groupId>com.sun.jersey</groupId> <artifactId>jersey-client</artifactId> 
-      </dependency> -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>

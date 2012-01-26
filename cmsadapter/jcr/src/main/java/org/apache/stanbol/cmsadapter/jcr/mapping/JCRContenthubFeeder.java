@@ -46,6 +46,7 @@ import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContentItemFilter;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeederException;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
+import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrStore;
 import org.osgi.service.cm.ConfigurationException;
@@ -196,7 +197,11 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
 
     @Override
     public void deleteContentItemByID(String contentItemID) {
-        solrStore.deleteById(contentItemID);
+        try {
+			solrStore.deleteById(contentItemID);
+		} catch (StoreException e) {
+			log.error(e.getMessage(), e);
+		}
     }
 
     @Override
@@ -204,7 +209,11 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
         Node n;
         try {
             n = getNodeByPath(contentItemPath);
-            solrStore.deleteById(n.getIdentifier());
+            try {
+				solrStore.deleteById(n.getIdentifier());
+			} catch (StoreException e) {
+				log.error(e.getMessage(), e);
+			}
         } catch (RepositoryException e) {
             log.warn("Failed to obtain the item specified by the path: {}", contentItemPath, e);
         }
@@ -216,7 +225,11 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
         try {
             nodes = getNodesUnderPath(rootPath);
             for (Node n : nodes) {
-                solrStore.deleteById(n.getIdentifier());
+                try {
+					solrStore.deleteById(n.getIdentifier());
+				} catch (StoreException e) {
+					log.error(e.getMessage(), e);
+				}
             }
         } catch (RepositoryException e) {
             log.warn("Failed to obtain the item specified by the path: {}", rootPath, e);
@@ -247,9 +260,13 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
             log.debug("There is no constraint for the node having id: {}", id);
         }
 
-        SolrContentItem sci = solrStore.create(id, contentContext.getNodeName(), contentContext.getContent(),
+        SolrContentItem sci = solrStore.create(contentContext.getContent(), contentContext.getNodeName(), id, 
             contentContext.getContentType(), constraints);
-        solrStore.enhanceAndPut(sci);
+        try {
+			solrStore.enhanceAndPut(sci);
+		} catch (StoreException e) {
+			log.error(e.getMessage(), e);
+		}
         log.info("Document submitted to Contenthub.");
         log.info("Id: {}", sci.getUri().getUnicodeString());
         log.info("Mime type: {}", sci.getMimeType());

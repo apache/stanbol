@@ -47,7 +47,9 @@
 					<#list 0..x-1 as i>
 						<#assign uri = it.templateData.uris[i]>
 						<#assign title = it.templateData.titles[i]/>
-						<li><a href="${it.publicBaseUri}contenthub/content/${uri}">${title}</a></li>
+						<li><a href="${it.publicBaseUri}contenthub/store/content/${uri}">
+							<#if title??>${title}<#else>${uri}</#if>
+						</a></li>
 					</#list>  
 					</ul>
 				<#else>
@@ -59,7 +61,7 @@
 	
 	<script language="javascript">
 	
-	function registersSparqlHandler() {
+	function init() {
 	   $("#submitIn", this).click(function(e) {
 	     // disable regular form click
 	     e.preventDefault();
@@ -84,7 +86,7 @@
 	     });
 	   });
 	 }
-	 $(document).ready(registersSparqlHandler);
+	 $(document).ready(init);
 	
 	</script>
 </@common.page>

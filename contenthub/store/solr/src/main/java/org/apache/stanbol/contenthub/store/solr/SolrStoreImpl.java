@@ -22,6 +22,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,22 +56,25 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.stanbol.commons.solr.IndexReference;
-import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
-import org.apache.stanbol.contenthub.core.utils.ContentItemIDOrganizer;
-import org.apache.stanbol.contenthub.core.utils.sparql.QueryGenerator;
+import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.enhancements.vocabulary.EnhancementGraphVocabulary;
+import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
+import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramManager;
+import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrStore;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
+import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
+import org.apache.stanbol.contenthub.store.solr.util.ContentItemIDOrganizer;
+import org.apache.stanbol.contenthub.store.solr.util.QueryGenerator;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -81,11 +85,11 @@ import org.slf4j.LoggerFactory;
  * @author anil.sinaci
  * 
  */
-@Component(immediate = false)
+@Component(immediate = true)
 @Service
 public class SolrStoreImpl implements SolrStore {
 
-    private static final Logger logger = LoggerFactory.getLogger(SolrStoreImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SolrStoreImpl.class);
 
     @Reference
     private ManagedSolrServer managedSolrServer;
@@ -96,42 +100,31 @@ public class SolrStoreImpl implements SolrStore {
     @Reference
     private EnhancementJobManager jobManager;
 
-    private RegisteredSolrServerTracker serverTracker = null;
+    @Reference
+    private LDProgramManager ldProgramManager;
     
-    public static final String SOLR_SERVER_NAME = "contenthub";
-
+    private BundleContext bundleContext;
+    
     @Activate
-    public void activate(ComponentContext context) throws IllegalArgumentException, IOException, InvalidSyntaxException {
-        if (!managedSolrServer.isManagedIndex(SOLR_SERVER_NAME)) {
-            managedSolrServer.createSolrIndex(SOLR_SERVER_NAME, SOLR_SERVER_NAME, null);
+    protected void activate(ComponentContext context) throws IllegalArgumentException,
+                                                     IOException,
+                                                     InvalidSyntaxException,
+                                                     StoreException {
+        if (managedSolrServer == null) {
+            throw new IllegalStateException("ManagedSolrServer cannot be referenced within SolrServerImpl.");
         }
-        serverTracker = new RegisteredSolrServerTracker(context.getBundleContext(), 
-            new IndexReference(managedSolrServer.getServerName(), SOLR_SERVER_NAME));
-        serverTracker.open();
+        this.bundleContext = context.getBundleContext();
+        SolrCoreManager.getInstance(bundleContext, managedSolrServer).createDefaultSolrServer();
     }
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        if(serverTracker != null){
-            serverTracker.close();
-            serverTracker = null;
-        }
         managedSolrServer = null;
-    }
-    
-    protected SolrServer getServer(){
-        SolrServer server = serverTracker != null ? serverTracker.getService() : null;
-        if(server == null){
-            throw new IllegalStateException("The SolrServer for the Contenthub " +
-                    "is currently not available!");
-        } else {
-            return server;
-        }
     }
 
     @Override
     public SolrContentItem create(String id, byte[] content, String contentType) {
-        return create(id, "", content, contentType, null);
+        return create(content, id, "", contentType, null);
     }
 
     @Override
@@ -141,16 +134,16 @@ public class SolrStoreImpl implements SolrStore {
         try {
             enhancementGraph = tcManager.getMGraph(graphUri);
         } catch (NoSuchEntityException e) {
-            logger.debug("Creating the enhancement graph!");
+            log.debug("Creating the enhancement graph!");
             enhancementGraph = tcManager.createMGraph(graphUri);
         }
         return enhancementGraph;
     }
 
     @Override
-    public SolrContentItem create(String id,
+    public SolrContentItem create(byte[] content,
+                                  String id,
                                   String title,
-                                  byte[] content,
                                   String contentType,
                                   Map<String,List<Object>> constraints) {
         UriRef uri;
@@ -159,7 +152,7 @@ public class SolrStoreImpl implements SolrStore {
         } else {
             uri = new UriRef(ContentItemIDOrganizer.attachBaseURI(id));
         }
-        logger.debug("Created ContentItem with id:{} and uri:{}", id, uri);
+        log.debug("Created ContentItem with id:{} and uri:{}", id, uri);
         final MGraph g = new SimpleMGraph();
         return new SolrContentItemImpl(uri.getUnicodeString(), title, content, contentType, g, constraints);
     }
@@ -204,17 +197,25 @@ public class SolrStoreImpl implements SolrStore {
         return dynamicFieldName;
     }
 
-    @Override
-    public String enhanceAndPut(SolrContentItem sci) {
+    private void enhance(SolrContentItem sci) throws StoreException {
         try {
             jobManager.enhanceContent(sci);
         } catch (EnhancementException e) {
-            logger.error("Cannot enhance content with id: {}", sci.getUri().getUnicodeString(), e);
+            String msg = String.format("Cannot enhance content with id: {}", sci.getUri().getUnicodeString());
+            log.error(msg, e);
+            throw new StoreException(msg, e);
         }
-
         updateEnhancementGraph(sci);
+    }
 
-        return put(sci);
+    private void removeEnhancements(String id) {
+        MGraph enhancementGraph = getEnhancementGraph();
+        Iterator<Triple> it = enhancementGraph.filter(new UriRef(id), null, null);
+        List<Triple> willBeRemoved = new ArrayList<Triple>();
+        while (it.hasNext()) {
+            willBeRemoved.add(it.next());
+        }
+        enhancementGraph.removeAll(willBeRemoved);
     }
 
     private void updateEnhancementGraph(SolrContentItem sci) {
@@ -229,43 +230,89 @@ public class SolrStoreImpl implements SolrStore {
                 triple = it.next();
                 enhancementGraph.add(triple);
             } catch (Exception e) {
-                logger.warn("Cannot add triple {} to the TCManager.enhancementgraph", triple, e);
+                log.warn("Cannot add triple {} to the TCManager.enhancementgraph", triple, e);
                 continue;
             }
         }
     }
 
-    private void removeEnhancements(String id) {
-        MGraph enhancementGraph = getEnhancementGraph();
-        Iterator<Triple> it = enhancementGraph.filter(new UriRef(id), null, null);
-        List<Triple> willBeRemoved = new ArrayList<Triple>();
-        while (it.hasNext()) {
-            willBeRemoved.add(it.next());
-        }
-        enhancementGraph.removeAll(willBeRemoved);
+    @Override
+    public String enhanceAndPut(SolrContentItem sci) throws StoreException {
+        enhance(sci);
+        return put(sci);
     }
 
     @Override
-    public String put(ContentItem ci) {
+    public String enhanceAndPut(SolrContentItem sci, String ldProgramName) throws StoreException {
+        enhance(sci);
+        return put(sci, ldProgramName);
+    }
+
+    @Override
+    public String put(ContentItem ci) throws StoreException {
+        SolrInputDocument doc = new SolrInputDocument();
+        addDefaultFields(ci, doc);
+        if (ci instanceof SolrContentItem) {
+            SolrContentItem sci = (SolrContentItem) ci;
+            addSolrSpecificFields(sci, doc);
+        }
+        SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer();
+        try {
+            solrServer.add(doc);
+            solrServer.commit();
+            log.debug("Documents are committed to Solr Server successfully.");
+        } catch (SolrServerException e) {
+            log.error("Solr Server Exception", e);
+        } catch (IOException e) {
+            log.error("IOException", e);
+        }
+        return ci.getUri().getUnicodeString();
+    }
+
+    @Override
+    public String put(SolrContentItem sci, String ldProgramName) throws StoreException {
+        if(ldProgramName == null || ldProgramName.isEmpty() || ldProgramName.equals(SolrCoreManager.CONTENTHUB_SOLR_SERVER_NAME)) {
+            return put(sci);
+        }
+        SolrInputDocument doc = new SolrInputDocument();
+        addDefaultFields(sci, doc);
+        addSolrSpecificFields(sci, doc, ldProgramName);
+        SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(
+            ldProgramName);
+        try {
+            solrServer.add(doc);
+            solrServer.commit();
+            log.debug("Documents are committed to Solr Server successfully.");
+        } catch (SolrServerException e) {
+            log.error("Solr Server Exception", e);
+            throw new StoreException(e.getMessage(), e);
+        } catch (IOException e) {
+            log.error("IOException", e);
+            throw new StoreException(e.getMessage(), e);
+        }
+        return sci.getUri().getUnicodeString();
+    }
+
+    private void addDefaultFields(ContentItem ci, SolrInputDocument doc) throws StoreException {
         if (ci.getUri().getUnicodeString() == null || ci.getUri().getUnicodeString().isEmpty()) {
-            logger.debug("ID of the content item cannot be null while inserting to the SolrStore.");
+            log.debug("ID of the content item cannot be null while inserting to the SolrStore.");
             throw new IllegalArgumentException(
                     "ID of the content item cannot be null while inserting to the SolrStore.");
         }
 
-        SolrServer solrServer = getServer();
         String content = null;
         try {
-            content = IOUtils.toString(ci.getStream(), "UTF-8");
+            content = IOUtils.toString(ci.getStream(), Constants.DEFAULT_ENCODING);
         } catch (IOException ex) {
-            logger.error("Cannot read the content.", ex);
+            String msg = "Cannot read the stream of the ContentItem.";
+            log.error(msg, ex);
+            throw new StoreException(msg, ex);
         }
 
         Calendar cal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String creationDate = sdf.format(cal.getTime()).replace(" ", "T") + "Z";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        String creationDate = sdf.format(cal.getTime());
 
-        SolrInputDocument doc = new SolrInputDocument();
         doc.addField(SolrFieldName.ID.toString(), ci.getUri().getUnicodeString());
         doc.addField(SolrFieldName.CONTENT.toString(), content);
         doc.addField(SolrFieldName.MIMETYPE.toString(), ci.getMimeType());
@@ -280,42 +327,40 @@ public class SolrStoreImpl implements SolrStore {
             enhancementCount++;
         }
         doc.addField(SolrFieldName.ENHANCEMENTCOUNT.toString(), enhancementCount);
-
-        if (ci instanceof SolrContentItem) {
-            SolrContentItem sci = (SolrContentItem) ci;
-
-            // add the constraints
-            if (sci.getConstraints() != null) {
-                for (Entry<String,List<Object>> constraint : sci.getConstraints().entrySet()) {
-                    Object[] values = constraint.getValue().toArray();
-                    if (values == null || values.length == 0) continue;
-                    String fieldName = constraint.getKey();
-                    if (!SolrFieldName.isNameReserved(fieldName)) {
-                        fieldName = addSolrDynamicFieldProperties(constraint.getKey(), values);
-                    }
-                    doc.addField(fieldName, values);
-                }
-            }
-
-            if (sci.getMetadata() != null) {
-                addSemanticFields(sci, doc);
-                addFacetFields(sci, doc);
-            } else {
-                logger.debug("There are no enhancements for the content item {}", sci.getUri().getUnicodeString());
-            }
-        }
-
+    }
+    
+    private void addSolrSpecificFields(SolrContentItem sci, SolrInputDocument doc, String ldProgramName) {
+        doc.addField(SolrFieldName.TITLE.toString(), sci.getTitle());
         try {
-            solrServer.add(doc);
-            solrServer.commit();
-            logger.debug("Documents are committed to Solr Server successfully.");
-        } catch (SolrServerException e) {
-            logger.error("Solr Server Exception", e);
-        } catch (IOException e) {
-            logger.error("IOException", e);
+            Map<String,Collection<?>> results = ldProgramManager.executeProgram(ldProgramName, sci.getMetadata());
+            for(Entry<String,Collection<?>> entry : results.entrySet()) {
+                doc.addField(entry.getKey(), entry.getValue());
+            }
+        } catch (LDPathException e) {
+            log.error("Cannot execute the ldPathProgram on SolrContentItem's metadata", e);
+        }
+    }
+
+    private void addSolrSpecificFields(SolrContentItem sci, SolrInputDocument doc) {
+        doc.addField(SolrFieldName.TITLE.toString(), sci.getTitle());
+        if (sci.getConstraints() != null) {
+            for (Entry<String,List<Object>> constraint : sci.getConstraints().entrySet()) {
+                Object[] values = constraint.getValue().toArray();
+                if (values == null || values.length == 0) continue;
+                String fieldName = constraint.getKey();
+                if (!SolrFieldName.isNameReserved(fieldName)) {
+                    fieldName = addSolrDynamicFieldProperties(constraint.getKey(), values);
+                }
+                doc.addField(fieldName, values);
+            }
         }
 
-        return ci.getUri().getUnicodeString();
+        if (sci.getMetadata() != null) {
+            addSemanticFields(sci, doc);
+            addFacetFields(sci, doc);
+        } else {
+            log.debug("There are no enhancements for the content item {}", sci.getUri().getUnicodeString());
+        }
     }
 
     private void addSemanticFields(SolrContentItem sci, SolrInputDocument doc) {
@@ -335,8 +380,8 @@ public class SolrStoreImpl implements SolrStore {
         try {
             query = (SelectQuery) QueryParser.getInstance().parse(QueryGenerator.getFieldQuery(fieldName));
         } catch (ParseException e) {
-            logger.debug("Should never reach here!");
-            logger.error("Cannot parse the query generated by QueryGenerator: {}",
+            log.debug("Should never reach here!");
+            log.error("Cannot parse the query generated by QueryGenerator: {}",
                 QueryGenerator.getFieldQuery(fieldName), e);
             return;
         }
@@ -355,14 +400,21 @@ public class SolrStoreImpl implements SolrStore {
             value = value.replaceAll("_", " ");
             values.add(value);
         }
-        if (!values.isEmpty()) doc.addField(fieldName.toString(), values.toArray());
+        if (!values.isEmpty()) {
+            doc.setField(fieldName.toString(), values.toArray());
+        }
+    }
+
+    @Override
+    public ContentItem get(String id) throws StoreException {
+        return get(id, SolrCoreManager.CONTENTHUB_SOLR_SERVER_NAME);
     }
 
     // TODO: we can use cache for "Recently uploaded Content Items"..
     @Override
-    public SolrContentItem get(String id) {
+    public SolrContentItem get(String id, String ldProgramName) throws StoreException {
         id = ContentItemIDOrganizer.attachBaseURI(id);
-        SolrServer solrServer = getServer();
+        SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer();
         String content = null;
         String mimeType = null;
         String title = null;
@@ -395,10 +447,12 @@ public class SolrStoreImpl implements SolrStore {
                     }
                 }
             } else {
-                logger.warn("No matching item in Solr for the given id {}.", id);
+                log.warn("No matching item in Solr for the given id {}.", id);
+                return null;
             }
         } catch (SolrServerException ex) {
-            logger.error("", ex);
+            log.error("", ex);
+            throw new StoreException(ex.getMessage(), ex);
         }
 
         String enhancementQuery = QueryGenerator.getEnhancementsOfContent(id);
@@ -406,7 +460,9 @@ public class SolrStoreImpl implements SolrStore {
         try {
             selectQuery = (SelectQuery) QueryParser.getInstance().parse(enhancementQuery);
         } catch (ParseException e) {
-            logger.error("", e);
+            String msg = "Cannot parse the SPARQL while trying to retrieve the enhancements of the ContentItem";
+            log.error(msg, e);
+            throw new StoreException(msg, e);
         }
 
         ResultSet resultSet = tcManager.executeSparqlQuery(selectQuery, this.getEnhancementGraph());
@@ -422,33 +478,40 @@ public class SolrStoreImpl implements SolrStore {
         }
 
         byte[] contentByte = null;
-        if(content != null){
-        	contentByte = content.getBytes();
+        if (content != null) {
+            contentByte = content.getBytes();
         }
         return new SolrContentItemImpl(id, title, contentByte, mimeType, metadata, constraints);
     }
 
     @Override
-    public void deleteById(String id) {
+    public void deleteById(String id, String ldProgramName) throws StoreException {
         if (id == null || id.isEmpty()) return;
-        SolrServer solrServer = getServer();
+        SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(
+            ldProgramName);
         id = ContentItemIDOrganizer.attachBaseURI(id);
         removeEnhancements(id);
         try {
             solrServer.deleteById(id);
             solrServer.commit();
         } catch (SolrServerException e) {
-            logger.error("Solr Server Exception", e);
+            log.error("Solr Server Exception", e);
+            throw new StoreException(e.getMessage(), e);
         } catch (IOException e) {
-            logger.error("IOException", e);
-        } catch (Exception e) {
-            logger.error("Exception", e);
+            log.error("IOException", e);
+            throw new StoreException(e.getMessage(), e);
         }
     }
 
     @Override
-    public void deleteById(List<String> idList) {
-        SolrServer solrServer = getServer();
+    public void deleteById(String id) throws StoreException {
+        deleteById(id, SolrCoreManager.CONTENTHUB_SOLR_SERVER_NAME);
+    }
+
+    @Override
+    public void deleteById(List<String> idList, String ldProgramName) throws StoreException {
+        SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(
+            ldProgramName);
         for (int i = 0; i < idList.size(); i++) {
             String id = ContentItemIDOrganizer.attachBaseURI(idList.get(i));
             idList.remove(i);
@@ -458,9 +521,17 @@ public class SolrStoreImpl implements SolrStore {
             solrServer.deleteById(idList);
             solrServer.commit();
         } catch (SolrServerException e) {
-            logger.error("Solr Server Exception", e);
+            log.error("Solr Server Exception", e);
+            throw new StoreException(e.getMessage(), e);
         } catch (IOException e) {
-            logger.error("IOException", e);
+            log.error("IOException", e);
+            throw new StoreException(e.getMessage(), e);
         }
     }
+
+    @Override
+    public void deleteById(List<String> idList) throws StoreException {
+        deleteById(idList, SolrCoreManager.CONTENTHUB_SOLR_SERVER_NAME);
+    }
+
 }

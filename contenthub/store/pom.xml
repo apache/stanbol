@@ -16,34 +16,39 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.contenthub.store.reactor</artifactId>
-  <version>0.9.0-incubating-SNAPSHOT</version>
-  <packaging>pom</packaging>
+	<parent>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.contenthub.parent</artifactId>
+		<version>0.9.0-incubating-SNAPSHOT</version>
+		<relativePath>../parent</relativePath>
+	</parent>
 
-  <name>Apache Stanbol Contenthub Store Reactor</name>
-  <description>
+	<artifactId>org.apache.stanbol.contenthub.store.reactor</artifactId>
+	<packaging>pom</packaging>
+
+	<name>Apache Stanbol Contenthub Store Reactor</name>
+	<description>
     Pseudo project to build the Contenthub Store
-  </description>
+    </description>
 
-  <inceptionYear>2011</inceptionYear>
+	<inceptionYear>2011</inceptionYear>
 
-  <scm>
-    <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/store
+	<scm>
+		<connection>
+				  scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/store
     </connection>
-    <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/store
+		<developerConnection>
+				  scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/store
     </developerConnection>
-  </scm>
+	</scm>
 
-  <modules>
-    <module>solr</module>
-    <module>clerezza</module>
-    <module>inmemory</module>
-  </modules>
+	<modules>
+		<module>solr</module>
+		<module>clerezza</module>
+		<module>inmemory</module>
+	</modules>
 </project>
