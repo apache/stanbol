@@ -34,8 +34,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.contenthub.helper.cnn.CNNImporter;
-import org.apache.stanbol.contenthub.web.search.model.TopicNews;
+import org.apache.stanbol.contenthub.crawler.cnn.CNNImporter;
+import org.apache.stanbol.contenthub.web.model.TopicNews;
 
 import com.sun.jersey.api.view.Viewable;
 

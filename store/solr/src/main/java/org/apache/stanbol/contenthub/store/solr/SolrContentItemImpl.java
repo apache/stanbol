@@ -17,9 +17,8 @@
 
 package org.apache.stanbol.contenthub.store.solr;
 
-import static org.apache.stanbol.contenthub.core.utils.ContentItemIDOrganizer.CONTENT_ITEM_URI_PREFIX;
+import static org.apache.stanbol.contenthub.store.solr.util.ContentItemIDOrganizer.CONTENT_ITEM_URI_PREFIX;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +26,8 @@ import java.util.Map;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.stanbol.contenthub.core.utils.ContentItemIDOrganizer;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
-import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
+import org.apache.stanbol.contenthub.store.solr.util.ContentItemIDOrganizer;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemImpl;
 import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryBlob;
@@ -53,11 +51,6 @@ public class SolrContentItemImpl extends ContentItemImpl implements SolrContentI
     private final Map<String,List<Object>> constraints;
     private String title;
 
-// Do not allow ContentItmes without Content!
-//    public SolrContentItemImpl(String id) {
-//        this(id, null, null, null, null);
-//    }
-
     public SolrContentItemImpl(byte[] content, String mimetype) {
         this(null, content, mimetype, null, null);
     }
@@ -80,18 +73,17 @@ public class SolrContentItemImpl extends ContentItemImpl implements SolrContentI
                                String mimeType,
                                MGraph metadata,
                                Map<String,List<Object>> constraints) {
-    	super(id == null ? ContentItemHelper.makeDefaultUri(CONTENT_ITEM_URI_PREFIX, content) :
-    		new UriRef(ContentItemIDOrganizer.attachBaseURI(id)),
-    		new InMemoryBlob(content, mimeType),
-    		metadata == null ? new SimpleMGraph() : metadata);
+        super(id == null ? ContentItemHelper.makeDefaultUri(CONTENT_ITEM_URI_PREFIX, content) : new UriRef(
+                ContentItemIDOrganizer.attachBaseURI(id)), new InMemoryBlob(content, mimeType),
+                metadata == null ? new SimpleMGraph() : metadata);
 
         if (metadata == null) {
             metadata = new SimpleMGraph();
         }
-        if(constraints == null) {
+        if (constraints == null) {
             constraints = new HashMap<String,List<Object>>();
         }
-        this.title = determineTitle(title, getUri().getUnicodeString(), constraints);
+        this.title = title;
         this.constraints = constraints;
     }
 
@@ -105,30 +97,5 @@ public class SolrContentItemImpl extends ContentItemImpl implements SolrContentI
             return title;
         }
         return getUri().getUnicodeString();
-    }
-
-    private String determineTitle(String title, String id, Map<String,List<Object>> constraints) {
-        if (title != null && !title.trim().equals("")) {
-            title = title.trim();
-            List<Object> titleList = new ArrayList<Object>();
-            titleList.add(title);
-            constraints.put(SolrFieldName.TITLE.toString(), titleList);
-
-        } else {
-            List<Object> titleList = constraints.get(SolrFieldName.TITLE.toString());
-            if (titleList != null) {
-                String titleCons = titleList.toString();
-                titleCons = titleCons.substring(1,titleCons.length()-1);
-                titleList.clear();
-                titleList.add(titleCons);
-                title = titleList.get(0).toString();
-            } else {
-                title = id;
-                titleList = new ArrayList<Object>();
-                titleList.add(title);
-                constraints.put(SolrFieldName.TITLE.toString(), titleList);
-            }
-        }
-        return title;
     }
 }

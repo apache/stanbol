@@ -35,8 +35,12 @@ import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.contenthub.servicesapi.store.Store;
 import org.apache.stanbol.contenthub.web.resources.CNNImporterResource;
-import org.apache.stanbol.contenthub.web.resources.ContenthubStoreResource;
-import org.apache.stanbol.contenthub.web.resources.SearchResource;
+import org.apache.stanbol.contenthub.web.resources.FeaturedSearchResource;
+import org.apache.stanbol.contenthub.web.resources.LDProgramManagerResource;
+import org.apache.stanbol.contenthub.web.resources.RootResource;
+import org.apache.stanbol.contenthub.web.resources.StoreResource;
+import org.apache.stanbol.contenthub.web.writers.SearchResultWriter;
+import org.apache.stanbol.contenthub.web.writers.LDProgramCollectionWriter;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -84,9 +88,15 @@ public class ContenthubWebFragment implements WebFragment {
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(ContenthubStoreResource.class);
+        classes.add(RootResource.class);
+        classes.add(StoreResource.class);
         classes.add(CNNImporterResource.class);
-        classes.add(SearchResource.class);
+        classes.add(FeaturedSearchResource.class);
+        classes.add(LDProgramManagerResource.class);
+
+        classes.add(LDProgramCollectionWriter.class);
+        classes.add(SearchResultWriter.class);
+        
         return classes;
     }
 
@@ -108,7 +118,7 @@ public class ContenthubWebFragment implements WebFragment {
     @Override
     public List<LinkResource> getLinkResources() {
         List<LinkResource> resources = new ArrayList<LinkResource>();
-        resources.add(new LinkResource("stylesheet", "style/search.css", this, 0));
+        resources.add(new LinkResource("stylesheet", "style/contenthub.css", this, 0));
         resources.add(new LinkResource("stylesheet", "style/jquery-ui-1.8.11.custom.css", this, 1));
         return resources;
     }
@@ -127,8 +137,8 @@ public class ContenthubWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("contenthub", "/contenthub", "/imports/contenthubDescription.ftl", 20));
-        //links.add(new NavigationLink("contenthub/search", "search", "/imports/searchDescription.ftl", 70));
+        links.add(new NavigationLink("contenthub/store", "/contenthub", "/imports/contenthubDescription.ftl",
+                20));
         return links;
     }
 
