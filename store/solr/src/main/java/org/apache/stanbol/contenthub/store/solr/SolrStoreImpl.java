@@ -414,7 +414,7 @@ public class SolrStoreImpl implements SolrStore {
     @Override
     public SolrContentItem get(String id, String ldProgramName) throws StoreException {
         id = ContentItemIDOrganizer.attachBaseURI(id);
-        SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer();
+        SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(ldProgramName);
         String content = null;
         String mimeType = null;
         String title = null;
