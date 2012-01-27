@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
@@ -50,5 +51,7 @@ public interface OWLExportable {
      * @return the ontology that represents this object.
      */
     <O> O export(Class<O> returnType, boolean merge);
+
+    IRI getDocumentIRI();
 
 }

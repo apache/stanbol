@@ -16,11 +16,18 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 
 import java.io.InputStream;
 
@@ -43,6 +50,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.rdf.core.Graph;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -70,18 +78,14 @@ import org.slf4j.LoggerFactory;
 @Path("/ontonet/session/{id}")
 public class SessionByIdResource extends BaseStanbolResource {
 
-    // /*
-    // * Placeholder for the ONManager to be fetched from the servlet context.
-    // */
-    // protected ONManager onm;
+    private Logger log = LoggerFactory.getLogger(getClass());
 
-    protected ServletContext servletContext;
-
+    /*
+     * Placeholder for the session manager to be fetched from the servlet context.
+     */
     protected SessionManager sesMgr;
 
     protected Session session;
-
-    private Logger log = LoggerFactory.getLogger(getClass());
 
     public SessionByIdResource(@PathParam(value = "id") String sessionId,
                                @Context ServletContext servletContext) {
@@ -92,24 +96,25 @@ public class SessionByIdResource extends BaseStanbolResource {
         session = sesMgr.getSession(sessionId);
     }
 
-    /**
-     * Gets the OWL ontology form of the session.
-     * 
-     * @param sessionId
-     *            the session identifier.
-     * @param uriInfo
-     * @param headers
-     * @return the ontology if the session exists, otherwise {@link Status#NOT_FOUND}.
-     */
     @GET
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
-    public Response asOntology(@PathParam("id") String sessionId,
-                               @DefaultValue("false") @QueryParam("merge") boolean merge,
-                               @Context UriInfo uriInfo,
-                               @Context HttpHeaders headers) {
+    @Produces(value = {APPLICATION_JSON})
+    public Response asOntologyGraph(@PathParam("scopeid") String scopeid,
+                                    @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                    @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
-        return Response.ok(session.asOWLOntology(merge)).build();
+        // Export to Clerezza Graph, which can be rendered as JSON-LD.
+        else return Response.ok(session.export(Graph.class, merge)).build();
+    }
+
+    @GET
+    @Produces(value = {RDF_XML, OWL_XML, TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON})
+    public Response asOntologyOWL(@PathParam("scopeid") String scopeid,
+                                  @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                  @Context HttpHeaders headers) {
+        if (session == null) return Response.status(NOT_FOUND).build();
+        // Export to OWLOntology due to the more human-readable rendering.
+        if (merge) return Response.ok(session.export(Graph.class, merge)).build();
+        else return Response.ok(session.export(OWLOntology.class, merge)).build();
     }
 
     /**
@@ -181,7 +186,8 @@ public class SessionByIdResource extends BaseStanbolResource {
                                        @Context UriInfo uriInfo,
                                        @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
-        OWLOntology o = session.getOntology(IRI.create(ontologyId), merge);
+        Graph o = session.getOntology(IRI.create(ontologyId), Graph.class, merge);
+        // OWLOntology o = session.getOntology(IRI.create(ontologyId), merge);
         if (o == null) return Response.status(NOT_FOUND).build();
         return Response.ok(o).build();
     }
@@ -269,7 +275,7 @@ public class SessionByIdResource extends BaseStanbolResource {
                                      @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI iri = IRI.create(ontologyId);
-        OWLOntology o = session.getOntology(iri);
+        OWLOntology o = session.getOntology(iri, OWLOntology.class);
         if (o == null) return Response.notModified().build();
         try {
             session.removeOntology(iri);

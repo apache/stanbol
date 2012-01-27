@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.session;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,7 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
@@ -34,20 +36,12 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.AbstractOntologyCollectorImpl;
-import org.apache.stanbol.owl.util.URIUtils;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologySetProvider;
-import org.semanticweb.owlapi.model.RemoveImport;
-import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -77,6 +71,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
      */
     public SessionImpl(String sessionID, IRI namespace, OntologyProvider<?> ontologyProvider) {
         super(sessionID, namespace, ontologyProvider);
+        backwardPathLength = 0;
         // setNamespace(namespace);
         attachedScopes = new HashMap<String,OntologyScope>();
         listeners = new HashSet<SessionListener>();
@@ -85,111 +80,6 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     public void addSessionListener(SessionListener listener) {
         listeners.add(listener);
-    }
-
-    // TODO reinstate this
-    // @Override
-    // public OWLOntology asOWLOntology(boolean merge) {
-    // OWLOntology o = super.asOWLOntology(merge);
-    // if (o != null && !merge) {
-    // OWLOntologyManager ontologyManager = o.getOWLOntologyManager();
-    // OWLDataFactory df = ontologyManager.getOWLDataFactory();
-    // List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
-    // // Add import declarations for attached scopes.
-    // for (String scopeID : getAttachedScopes()) {
-    // IRI physIRI = IRI.create(namespace + scopeID);
-    // changes.add(new AddImport(o, df.getOWLImportsDeclaration(physIRI)));
-    // }
-    // ontologyManager.applyChanges(changes);
-    // }
-    // return o;
-    // }
-
-    /**
-     * FIXME not merging yet FIXME not including imported ontologies unless they are merged *before* storage.
-     * 
-     * @see OWLExportable#asOWLOntology(boolean)
-     */
-    @Override
-    public OWLOntology asOWLOntology(boolean merge) {
-
-        long before = System.currentTimeMillis();
-
-        // Create a new ontology
-        OWLOntology root;
-        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-        IRI iri = IRI.create(namespace + _id);
-        try {
-            root = ontologyManager.createOntology(iri);
-        } catch (OWLOntologyAlreadyExistsException e) {
-            // It should be impossible, but just in case.
-            ontologyManager.removeOntology(ontologyManager.getOntology(iri));
-            try {
-                root = ontologyManager.createOntology(iri);
-            } catch (OWLOntologyAlreadyExistsException e1) {
-                root = ontologyManager.getOntology(iri);
-            } catch (OWLOntologyCreationException e1) {
-                log.error("Failed to assemble root ontology for session " + _id, e);
-                root = null;
-            }
-        } catch (OWLOntologyCreationException e) {
-            log.error("Failed to assemble root ontology for session " + _id, e);
-            root = null;
-        }
-
-        // Add the import declarations for directly managed ontologies.
-        if (root != null) {
-
-            if (merge) {
-                final Set<OWLOntology> set = new HashSet<OWLOntology>();
-                log.debug("Merging {} with its imports.", root);
-                set.add(root);
-
-                for (IRI ontologyIri : managedOntologies) {
-                    log.debug("Merging {} with {}.", ontologyIri, root);
-                    set.add(getOntology(ontologyIri, true));
-                }
-
-                OWLOntologySetProvider provider = new OWLOntologySetProvider() {
-                    @Override
-                    public Set<OWLOntology> getOntologies() {
-                        return set;
-                    }
-                };
-                OWLOntologyMerger merger = new OWLOntologyMerger(provider);
-                try {
-                    root = merger.createMergedOntology(OWLManager.createOWLOntologyManager(), iri);
-                } catch (OWLOntologyCreationException e) {
-                    log.error("Failed to merge imports for ontology " + iri, e);
-                    root = null;
-                }
-
-            } else {
-                // Add the import declarations for directly managed ontologies.
-                List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
-                OWLDataFactory df = ontologyManager.getOWLDataFactory();
-                String base = IRI.create(namespace + getID()) + "/";
-                // The key set of managedOntologies contains the ontology IRIs, not their storage keys.
-                for (IRI ontologyIri : managedOntologies) {
-                    IRI physIRI = IRI.create(base + ontologyIri);
-                    changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
-                }
-
-                // Add import declarations for attached scopes.
-                for (String scopeID : getAttachedScopes()) {
-                    IRI physIRI = IRI.create(namespace + scopeID);
-                    changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
-                }
-
-                // Commit
-                ontologyManager.applyChanges(changes);
-            }
-        }
-        log.debug("OWL export of session {} completed in {} ms.", getID(), System.currentTimeMillis()
-                                                                           - before);
-
-        return root;
-
     }
 
     @Override
@@ -220,6 +110,37 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
         attachedScopes.remove(scopeId);
     }
 
+    @Override
+    protected MGraph exportToMGraph(boolean merge) {
+        MGraph mg = super.exportToMGraph(merge);
+        // Add import declarations for attached scopes.
+        for (String scopeID : attachedScopes.keySet()) {
+            UriRef iri = new UriRef(namespace + _id);
+            UriRef physIRI = new UriRef(attachedScopes.get(scopeID).getDocumentIRI().toString());
+            mg.add(new TripleImpl(iri, OWL.imports, physIRI));
+        }
+        return mg;
+    }
+
+    /**
+     * TODO support merging for attached scopes as well?
+     */
+    @Override
+    protected OWLOntology exportToOWLOntology(boolean merge) {
+        OWLOntology o = super.exportToOWLOntology(merge);
+        List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
+        OWLOntologyManager ontologyManager = o.getOWLOntologyManager();
+        OWLDataFactory df = ontologyManager.getOWLDataFactory();
+        // Add import declarations for attached scopes.
+        for (String scopeID : attachedScopes.keySet()) {
+            IRI physIRI = attachedScopes.get(scopeID).getDocumentIRI();
+            changes.add(new AddImport(o, df.getOWLImportsDeclaration(physIRI)));
+        }
+        // Commit
+        ontologyManager.applyChanges(changes);
+        return o;
+    }
+
     protected void fireClosed() {
         SessionEvent e = null;
         try {
@@ -235,45 +156,6 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     public Set<String> getAttachedScopes() {
         return attachedScopes.keySet();
-    }
-
-    @Override
-    public OWLOntology getOntology(IRI ontologyIri) {
-        return getOntology(ontologyIri, false);
-    }
-
-    @Override
-    public OWLOntology getOntology(IRI ontologyIri, boolean merge) {
-
-        long before = System.currentTimeMillis();
-
-        // Remove the check below. It might be an unmanaged dependency (TODO remove from collector and
-        // reintroduce check?).
-        // if (!hasOntology(ontologyIri)) return null;
-        OWLOntology o;
-        o = (OWLOntology) ontologyProvider.getStoredOntology(ontologyIri, OWLOntology.class, true);
-        // Rewrite import statements
-        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-        OWLDataFactory df = o.getOWLOntologyManager().getOWLDataFactory();
-        /*
-         * TODO manage import rewrites better once the container ID is fully configurable (i.e. instead of
-         * going upOne() add "session" or "ontology" if needed).
-         */
-        for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
-            changes.add(new RemoveImport(o, oldImp));
-            String s = oldImp.getIRI().toString();
-            s = s.substring(s.indexOf("::") + 2, s.length());
-            boolean managed = managedOntologies.contains(oldImp.getIRI());
-            IRI target = IRI.create((managed ? getNamespace() + getID() + "/" : URIUtils
-                    .upOne(getNamespace()) + "/")
-                                    + s);
-            changes.add(new AddImport(o, df.getOWLImportsDeclaration(target)));
-        }
-        o.getOWLOntologyManager().applyChanges(changes);
-
-        log.debug("OWL export of session " + getID() + " ontology {} completed in {} ms.", ontologyIri,
-            System.currentTimeMillis() - before);
-        return o;
     }
 
     @Override

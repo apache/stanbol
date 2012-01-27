@@ -16,18 +16,27 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
+import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.Lockable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
@@ -44,12 +53,14 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologySetProvider;
+import org.semanticweb.owlapi.model.RemoveImport;
 import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +75,12 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         OntologyInputSourceHandler, OWLExportable {
 
     protected String _id = null;
+
+    /**
+     * How many levels back to go in the namespace+id concatenation in order to write resolvable import
+     * statements.
+     */
+    protected int backwardPathLength = 0;
 
     private Set<OntologyCollectorListener> listeners = new HashSet<OntologyCollectorListener>();
 
@@ -149,36 +166,114 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         return key;
     }
 
+    @Override
+    public OWLOntology asOWLOntology(boolean merge) {
+        return export(OWLOntology.class, merge);
+    }
+
+    @Override
+    public void clearListeners() {
+        listeners.clear();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <O> O export(Class<O> returnType, boolean merge) {
-        if (OWLOntology.class.isAssignableFrom(returnType)) return (O) exportToOWLOntology(merge);
+        if (OWLOntology.class.isAssignableFrom(returnType)) {
+            return (O) exportToOWLOntology(merge);
+        }
         if (TripleCollection.class.isAssignableFrom(returnType)) {
-            if (merge) throw new UnsupportedOperationException(
-                    "Merge not implemented yet for Clerezza triple collections.");
-            // No need to store, give it a name, or anything.
-            TripleCollection root = new SimpleMGraph();
-            UriRef iri = new UriRef(namespace + _id);
-            // Add the import declarations for directly managed ontologies.
-            if (root != null) {
-                String base = URIUtils.upOne(IRI.create(namespace + getID())) + "/";
+            TripleCollection root = exportToMGraph(merge);
+            // A Clerezza graph has to be cast properly.
+            if (returnType == Graph.class) root = ((MGraph) root).getGraph();
+            else if (returnType == MGraph.class) {}
+            return (O) root;
+        }
+        throw new UnsupportedOperationException("Cannot export ontology collector " + getID() + " to a "
+                                                + returnType);
+    }
+
+    /**
+     * This method has no conversion calls, to it can be invoked by subclasses that wish to modify it
+     * afterwards.
+     * 
+     * @param merge
+     * @return
+     */
+    protected MGraph exportToMGraph(boolean merge) {
+        // if (merge) throw new UnsupportedOperationException(
+        // "Merge not implemented yet for Clerezza triple collections.");
+
+        long before = System.currentTimeMillis();
+
+        // No need to store, give it a name, or anything.
+        MGraph root = new SimpleMGraph();
+        UriRef iri = new UriRef(namespace + _id);
+        // Add the import declarations for directly managed ontologies.
+        if (root != null) {
+            // Set the ontology ID
+            root.add(new TripleImpl(iri, RDF.type, OWL.Ontology));
+
+            if (merge) {
+                log.warn("Merging of Clerezza triple collections is only implemented one level down. Import statements will be preserved for further levels.");
+                Iterator<Triple> it;
+                Set<Resource> importTargets = new HashSet<Resource>();
+                for (IRI ontologyIri : managedOntologies) {
+                    Graph g = getOntology(ontologyIri, Graph.class, false);
+                    root.addAll(g);
+
+                    it = g.filter(null, OWL.imports, null);
+                    while (it.hasNext())
+                        importTargets.add(it.next().getObject());
+
+                    it = g.filter(null, RDF.type, OWL.Ontology);
+                    while (it.hasNext()) {
+                        NonLiteral ontology = it.next().getSubject();
+                        log.debug("Removing all triples related to {} from {}", ontology, iri);
+                        Iterator<Triple> it2 = g.filter(ontology, null, null);
+                        while (it2.hasNext())
+                            root.remove(it2.next());
+                    }
+
+                    /*
+                     * Reinstate import statements, though. If imported ontologies were not merged earlier, we
+                     * are not doing it now anyway.
+                     */
+                    for (Resource target : importTargets)
+                        root.add(new TripleImpl(iri, OWL.imports, target));
+                }
+
+            } else {
+
+                String base = getNamespace() + getID();
+                for (int i = 0; i < backwardPathLength; i++)
+                    base = URIUtils.upOne(URI.create(base)).toString();
+                base += "/";
+
                 // The key set of managedOntologies contains the ontology IRIs, not their storage keys.
                 for (IRI ontologyIri : managedOntologies) {
                     UriRef physIRI = new UriRef(base + ontologyIri);
                     root.add(new TripleImpl(iri, OWL.imports, physIRI));
                 }
             }
-            return (O) root;
+
+            log.debug("Clerezza export of {} completed in {} ms.", getID(), System.currentTimeMillis()
+                                                                            - before);
         }
-        throw new UnsupportedOperationException("Cannot export to " + returnType);
+
+        return root;
     }
 
-    @Override
-    public OWLOntology asOWLOntology(boolean merge) {
-        return export(OWLOntology.class, merge);
-    }
-
-    private OWLOntology exportToOWLOntology(boolean merge) {
+    /**
+     * This method has no conversion calls, to it can be invoked by subclasses that wish to modify it
+     * afterwards.
+     * 
+     * FIXME not merging yet FIXME not including imported ontologies unless they are merged *before* storage.
+     * 
+     * @param merge
+     * @return
+     */
+    protected OWLOntology exportToOWLOntology(boolean merge) {
 
         long before = System.currentTimeMillis();
 
@@ -236,7 +331,10 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
                 List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
                 OWLDataFactory df = ontologyManager.getOWLDataFactory();
 
-                String base = URIUtils.upOne(IRI.create(namespace + getID())) + "/";
+                String base = getNamespace() + getID();
+                for (int i = 0; i < backwardPathLength; i++)
+                    base = URIUtils.upOne(URI.create(base)).toString();
+                base += "/";
 
                 // The key set of managedOntologies contains the ontology IRIs, not their storage keys.
                 for (IRI ontologyIri : managedOntologies) {
@@ -251,11 +349,6 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         log.debug("OWL export of {} completed in {} ms.", getID(), System.currentTimeMillis() - before);
 
         return root;
-    }
-
-    @Override
-    public void clearListeners() {
-        listeners.clear();
     }
 
     /**
@@ -295,6 +388,11 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
+    public IRI getDocumentIRI() {
+        return IRI.create(getNamespace() + getID());
+    }
+
+    @Override
     public String getID() {
         return _id;
     }
@@ -302,6 +400,16 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     @Override
     public Collection<OntologyCollectorListener> getListeners() {
         return listeners;
+    }
+
+    @Override
+    public <O> Set<O> getManagedOntologies(Class<O> returnType, boolean withClosure) {
+        if (withClosure) log.warn("Closure support not implemented yet. Will merge instead.");
+        Set<O> ontologies = new HashSet<O>();
+        for (IRI id : managedOntologies)
+            // FIXME temporary fix is to merge instead of including closure
+            ontologies.add(getOntology(id, returnType, withClosure));
+        return Collections.unmodifiableSet(ontologies);
     }
 
     @Override
@@ -316,14 +424,122 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
      */
     @Override
     public Set<OWLOntology> getOntologies(boolean withClosure) {
-        // if (withClosure) throw new UnsupportedOperationException(
-        // "Closure support not implemented efficiently yet. Please call getOntologies(false) and compute the closure union for the OWLOntology objects in the set.");
-        Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
-        for (IRI id : managedOntologies) {
-            // FIXME temporary fix is to merge instead of including closure
-            ontologies.add(getOntology(id, withClosure));
+        return getManagedOntologies(OWLOntology.class, withClosure);
+    }
+
+    @Override
+    public OWLOntology getOntology(IRI ontologyIri) {
+        return getOntology(ontologyIri, false);
+    }
+
+    @Override
+    public OWLOntology getOntology(IRI ontologyIri, boolean merge) {
+        return getOntology(ontologyIri, OWLOntology.class, merge);
+    }
+
+    @Override
+    public <O> O getOntology(IRI ontologyIri, Class<O> returnType) {
+        return getOntology(ontologyIri, returnType, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge) {
+        if (OWLOntology.class.isAssignableFrom(returnType)) {
+            return (O) getOntologyAsOWLOntology(ontologyIri, merge);
         }
-        return Collections.unmodifiableSet(ontologies);
+        if (TripleCollection.class.isAssignableFrom(returnType)) {
+            TripleCollection root = getOntologyAsMGraph(ontologyIri, merge);
+            // A Clerezza graph has to be cast properly.
+            if (returnType == Graph.class) root = ((MGraph) root).getGraph();
+            else if (returnType == MGraph.class) {}
+            // We don't know of other TripleCollection subclasses: just try to cast the MGraph.
+            return (O) root;
+        }
+        throw new UnsupportedOperationException("Cannot export ontology collector " + getID() + " to a "
+                                                + returnType);
+    }
+
+    protected MGraph getOntologyAsMGraph(IRI ontologyIri, boolean merge) {
+        if (merge) throw new UnsupportedOperationException(
+                "Merge not implemented yet for Clerezza triple collections.");
+        /*
+         * TODO manage import rewrites better once the container ID is fully configurable (i.e. instead of
+         * going upOne() add "session" or "ontology" if needed). But only do this if we keep considering
+         * imported ontologies as *not* managed.
+         */
+        // if (!merge) {
+        MGraph o = new SimpleMGraph(ontologyProvider.getStoredOntology(ontologyIri, MGraph.class, merge));
+
+        // Now rewrite import statements
+
+        // Scan import statements for each owl:Ontology instance (hopefully one).
+        IRI ns = getNamespace();
+        String tid = getID();
+        // Bit of a hack : since ontology spaces are named like {scopeid}/{core|custom}, in that particular
+        // case we go back to {scopeid}, whereas for sessions we maintain their original id.
+        if (backwardPathLength > 0) tid = tid.split("/")[0];
+
+        Iterator<Triple> it;
+        List<Triple> newImports = new LinkedList<Triple>();
+        synchronized (o) {
+            it = o.filter(null, OWL.imports, null);
+            // We use this list to avoid concurrent modification exceptions.
+            List<Triple> replaceUs = new LinkedList<Triple>();
+            while (it.hasNext())
+                replaceUs.add(it.next());
+
+            for (Triple t : replaceUs) {
+                String s = ((UriRef) (t.getObject())).getUnicodeString();
+                boolean managed = managedOntologies.contains(IRI.create(s));
+                UriRef target = new UriRef((managed ? ns + "/" + tid + "/" : URIUtils.upOne(ns) + "/") + s);
+                o.remove(t);
+                newImports.add(new TripleImpl(t.getSubject(), OWL.imports, target));
+            }
+        }
+
+        for (Triple t : newImports)
+            o.add(t);
+        // }
+        // TODO else if (merge)
+
+        return o;
+    }
+
+    protected OWLOntology getOntologyAsOWLOntology(IRI ontologyIri, boolean merge) {
+        if (merge) throw new UnsupportedOperationException("Merge not implemented yet for OWLOntology.");
+        // Remove the check below. It might be an unmanaged dependency (TODO remove from collector and
+        // reintroduce check?).
+        // if (!hasOntology(ontologyIri)) return null;
+        OWLOntology o;
+        o = (OWLOntology) ontologyProvider.getStoredOntology(ontologyIri, OWLOntology.class, merge);
+        // Rewrite import statements
+        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+        OWLDataFactory df = o.getOWLOntologyManager().getOWLDataFactory();
+        /*
+         * TODO manage import rewrites better once the container ID is fully configurable (i.e. instead of
+         * going upOne() add "session" or "ontology" if needed). But only do this if we keep considering
+         * imported ontologies as *not* managed.
+         */
+        // if (!merge) {
+        for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
+            changes.add(new RemoveImport(o, oldImp));
+            String s = oldImp.getIRI().toString();
+            // s = s.substring(s.indexOf("::") + 2, s.length());
+            boolean managed = managedOntologies.contains(oldImp.getIRI());
+            // For space, always go up at least one
+            IRI ns = getNamespace();
+
+            String tid = getID();
+            if (backwardPathLength > 0) tid = tid.split("/")[0];
+
+            IRI target = IRI.create((managed ? ns + "/" + tid + "/" : URIUtils.upOne(ns) + "/") + s);
+            changes.add(new AddImport(o, df.getOWLImportsDeclaration(target)));
+        }
+        o.getOWLOntologyManager().applyChanges(changes);
+        // }
+        // TODO else if (merge)
+        return o;
     }
 
     @Override

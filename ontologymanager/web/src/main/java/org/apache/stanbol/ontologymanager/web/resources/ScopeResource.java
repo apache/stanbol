@@ -16,12 +16,20 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -31,7 +39,6 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -47,8 +54,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.rdf.core.Graph;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -59,7 +66,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
@@ -70,6 +76,12 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The REST resource of an OntoNet {@link OntologyScope} whose identifier is known.
+ * 
+ * @author alexdma
+ * 
+ */
 @Path("/ontonet/ontology/{scopeid}")
 public class ScopeResource extends BaseStanbolResource {
 
@@ -109,6 +121,27 @@ public class ScopeResource extends BaseStanbolResource {
         // }
     }
 
+    @GET
+    @Produces(value = {APPLICATION_JSON})
+    public Response asOntologyGraph(@PathParam("scopeid") String scopeid,
+                                    @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                    @Context HttpHeaders headers) {
+        if (scope == null) return Response.status(NOT_FOUND).build();
+        // Export to Clerezza Graph, which can be rendered as JSON-LD.
+        else return Response.ok(scope.export(Graph.class, merge)).build();
+    }
+
+    @GET
+    @Produces(value = {RDF_XML, OWL_XML, TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON})
+    public Response asOntologyOWL(@PathParam("scopeid") String scopeid,
+                                  @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                  @Context HttpHeaders headers) {
+        if (scope == null) return Response.status(NOT_FOUND).build();
+        // Export to OWLOntology due to the more human-readable rendering.
+        if (merge) return Response.ok(scope.export(Graph.class, merge)).build();
+        else return Response.ok(scope.export(OWLOntology.class, merge)).build();
+    }
+
     @DELETE
     public void deregisterScope(@PathParam("scopeid") String scopeid,
                                 @Context UriInfo uriInfo,
@@ -120,19 +153,8 @@ public class ScopeResource extends BaseStanbolResource {
         scope = null;
     }
 
-    @GET
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
-    public Response getTopOntology(@PathParam("scopeid") String scopeid,
-                                   @Context UriInfo uriInfo,
-                                   @Context HttpHeaders headers,
-                                   @Context ServletContext servletContext) {
-        if (scope == null) return Response.status(NOT_FOUND).build();
-        else return Response.ok(scope.asOWLOntology(false)).build();
-    }
-
     /**
-     * Tells the session that it should manage the ontology obtained by parsing the supplied content.<br>
+     * Tells the scope that it should manage the ontology obtained by parsing the supplied content.<br>
      * <br>
      * Note that the PUT method cannot be used, as it is not possible to predict what ID the ontology will
      * have until it is parsed.
@@ -144,8 +166,7 @@ public class ScopeResource extends BaseStanbolResource {
      *         other reason, {@link Status#INTERNAL_SERVER_ERROR} if some other error occurs.
      */
     @POST
-    @Consumes(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.N_TRIPLE, KRFormat.TURTLE,
-                       KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    @Consumes(value = {RDF_XML, OWL_XML, N_TRIPLE, TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON})
     @Produces(MediaType.TEXT_PLAIN)
     public Response manageOntology(InputStream content, @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
@@ -188,46 +209,6 @@ public class ScopeResource extends BaseStanbolResource {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
         return Response.status(OK).type(MediaType.TEXT_PLAIN).build();
-    }
-
-    // @POST
-    // @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response loadCustomOntology(@PathParam("scopeid") String scopeid,
-                                       @FormParam("location") String physIri,
-                                       @FormParam("registry") boolean asRegistry,
-                                       @Context UriInfo uriInfo,
-                                       @Context HttpHeaders headers,
-                                       @Context ServletContext servletContext) {
-
-        ScopeRegistry reg = onm.getScopeRegistry();
-
-        // IRI scopeiri = null;
-        IRI ontoiri = null;
-        try {
-            // scopeiri = IRI.create(uriInfo.getAbsolutePath());
-            ontoiri = IRI.create(physIri);
-        } catch (Exception ex) {
-            // Malformed IRI, throw bad request.
-            throw new WebApplicationException(ex, BAD_REQUEST);
-        }
-        if (reg.containsScope(scopeid)) {
-            OntologyScope scope = reg.getScope(scopeid);
-            try {
-                OntologyInputSource<?,?> src = new RootOntologyIRISource(ontoiri);
-                OntologySpace space = scope.getCustomSpace();
-                if (space == null) {
-                    space = onm.getOntologySpaceFactory().createCustomOntologySpace(scopeid, src);
-
-                    scope.setCustomSpace(space);
-                    // space.setUp();
-                } else space.addOntology(src);
-            } catch (OWLOntologyCreationException e) {
-                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-            } catch (UnmodifiableOntologyCollectorException e) {
-                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-            }
-        } else throw new WebApplicationException(NOT_FOUND);
-        return Response.ok().build();
     }
 
     /**

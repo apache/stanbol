@@ -25,11 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
@@ -131,13 +126,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     public void addListener(OntologyCollectorListener listener) {
         listeners.add(listener);
     }
-    
-    @SuppressWarnings("unchecked")
-    @Override
-    public <O> O export(Class<O> returnType, boolean merge) {
-        if (OWLOntology.class.isAssignableFrom(returnType)) return (O) asOWLOntology(merge);
-        throw new UnsupportedOperationException("Cannot export to " + returnType);
-    }
 
     @Override
     public synchronized String addOntology(OntologyInputSource<?,?> ontologySource) throws UnmodifiableOntologyCollectorException {
@@ -157,8 +145,8 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
             } else throw new UnsupportedOperationException(
                     "This ontology space implementation can only handle " + OWLOntology.class
                             + " input sources.");
-        } 
-        if (o!=null) return o.getOntologyID().toString();
+        }
+        if (o != null) return o.getOntologyID().toString();
         else return null; // No ontology to add
     }
 
@@ -220,6 +208,13 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         listeners.clear();
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O> O export(Class<O> returnType, boolean merge) {
+        if (OWLOntology.class.isAssignableFrom(returnType)) return (O) asOWLOntology(merge);
+        throw new UnsupportedOperationException("Cannot export to " + returnType);
+    }
+
     /**
      * Notifies all ontology space listeners that an ontology has been added to this space.
      * 
@@ -243,6 +238,11 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     }
 
     @Override
+    public IRI getDocumentIRI() {
+        return IRI.create(getNamespace() + getID());
+    }
+
+    @Override
     public String getID() {
         return _id;
     }
@@ -263,6 +263,14 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
                 managedOntologies.values());
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O> Set<O> getManagedOntologies(Class<O> returnType, boolean withClosure) {
+        if (!OWLOntology.class.isAssignableFrom(returnType)) throw new UnsupportedOperationException(
+                "This implementation can only get objects of type " + OWLOntology.class);
+        return (Set<O>) getOntologies(withClosure);
+    }
+
     @Override
     public OWLOntology getOntology(IRI ontologyIri) {
         log.debug("Requesting ontology {} from space {}", ontologyIri, getNamespace() + getID());
@@ -281,6 +289,18 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         if (merge) throw new UnsupportedOperationException(
                 "Merge not implemented yet in OWLAPI version. Just a matter of time...");
         return getOntology(ontologyIri);
+    }
+
+    @Override
+    public <O> O getOntology(IRI ontologyIri, Class<O> returnType) {
+        return getOntology(ontologyIri, returnType, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge) {
+        if (OWLOntology.class.isAssignableFrom(returnType)) return (O) getOntology(ontologyIri, merge);
+        throw new UnsupportedOperationException("Cannot export to " + returnType);
     }
 
     @Override

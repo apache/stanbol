@@ -19,15 +19,26 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.ontologies.OWL;
+import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
@@ -99,11 +110,11 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
         this.coreSpace.addListener(this);
         // let's just lock it. Once the core space is done it's done.
         this.coreSpace.setUp();
-        // if (customRoot != null) {
+
         try {
             setCustomSpace(factory.createCustomOntologySpace(id/* , coreOntologies */));
         } catch (UnmodifiableOntologyCollectorException e) {
-            // Can't happen unless the factory or space implementations are
+            // Cannot happen unless the factory or space implementations are
             // really naughty.
             log.warn(
                 "Ontology scope "
@@ -112,7 +123,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
                 e);
         }
         this.customSpace.addListener(this);
-        // }
+
         sessionSpaces = new HashMap<String,SessionOntologySpace>();
     }
 
@@ -133,21 +144,117 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
 
         }
     }
-    
+
+    @Override
+    public OWLOntology asOWLOntology(boolean merge) {
+        return export(OWLOntology.class, merge);
+    }
+
+    @Override
+    public void clearOntologyScopeListeners() {
+        listeners.clear();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <O> O export(Class<O> returnType, boolean merge) {
-        if (OWLOntology.class.isAssignableFrom(returnType)) return (O) asOWLOntology(merge);
-        throw new UnsupportedOperationException("Cannot export to " + returnType);
+        if (OWLOntology.class.isAssignableFrom(returnType)) {
+            return (O) exportToOWLOntology(merge);
+        }
+        if (TripleCollection.class.isAssignableFrom(returnType)) {
+            TripleCollection root = exportToMGraph(merge);
+            // A Clerezza graph has to be cast properly.
+            if (returnType == Graph.class) root = ((MGraph) root).getGraph();
+            else if (returnType == MGraph.class) {}
+            return (O) root;
+        }
+        throw new UnsupportedOperationException("Cannot export scope " + getID() + " to a " + returnType);
     }
 
     /**
-     * FIXME not merging yet
+     * Get a Clerezza {@link MGraph} representation of the scope.
      * 
-     * @see OWLExportable#asOWLOntology(boolean)
+     * @param merge
+     *            if true the core and custom spaces will be recursively merged with the scope graph,
+     *            otherwise owl:imports statements will be added.
+     * @return the RDF representation of the scope as a modifiable graph.
      */
-    @Override
-    public OWLOntology asOWLOntology(boolean merge) {
+    protected MGraph exportToMGraph(boolean merge) {
+
+        // No need to store, give it a name, or anything.
+        MGraph root = new SimpleMGraph();
+        UriRef iri = new UriRef(getNamespace() + getID());
+
+        if (root != null) {
+            // Set the ontology ID
+            root.add(new TripleImpl(iri, RDF.type, OWL.Ontology));
+
+            if (merge) {
+
+                Graph custom, core;
+
+                // Get the subjects of "bad" triples (those with subjects of type owl:Ontology).
+                Iterator<Triple> it;
+                Set<NonLiteral> ontologies = new HashSet<NonLiteral>();
+                Set<Resource> importTargets = new HashSet<Resource>();
+                custom = this.getCustomSpace().export(Graph.class, merge);
+                // root.addAll(space);
+                it = custom.filter(null, RDF.type, OWL.Ontology);
+                while (it.hasNext())
+                    ontologies.add(it.next().getSubject());
+                it = custom.filter(null, OWL.imports, null);
+                while (it.hasNext())
+                    importTargets.add(it.next().getObject());
+                core = this.getCoreSpace().export(Graph.class, merge);
+                // root.addAll(space);
+                it = core.filter(null, RDF.type, OWL.Ontology);
+                while (it.hasNext())
+                    ontologies.add(it.next().getSubject());
+                it = core.filter(null, OWL.imports, null);
+                while (it.hasNext())
+                    importTargets.add(it.next().getObject());
+
+                // Make sure the scope itself is not in the "bad" subjects.
+                ontologies.remove(iri);
+
+                for (NonLiteral nl : ontologies)
+                    log.debug("{} -related triples will not be added to {}", nl, iri);
+
+                // Merge the two spaces, skipping the "bad" triples.
+                log.debug("Merging custom space of {}.", getID());
+                for (Triple t : custom)
+                    if (!ontologies.contains(t.getSubject())) root.add(t);
+                log.debug("Merging core space of {}.", getID());
+                for (Triple t : core)
+                    if (!ontologies.contains(t.getSubject())) root.add(t);
+
+                /*
+                 * Reinstate import statements, though. If imported ontologies were not merged earlier, we are
+                 * not doing it now anyway.
+                 */
+                for (Resource target : importTargets)
+                    root.add(new TripleImpl(iri, OWL.imports, target));
+
+            } else {
+                UriRef physIRI = new UriRef(this.getCustomSpace().getDocumentIRI().toString());
+                root.add(new TripleImpl(iri, OWL.imports, physIRI));
+                physIRI = new UriRef(this.getCoreSpace().getDocumentIRI().toString());
+                root.add(new TripleImpl(iri, OWL.imports, physIRI));
+            }
+        }
+        return root;
+
+    }
+
+    /**
+     * Get an OWL API {@link OWLOntology} representation of the scope.
+     * 
+     * @param merge
+     *            if true the core and custom spaces will be recursively merged with the scope ontology,
+     *            otherwise owl:imports statements will be added.
+     * @return the OWL representation of the scope.
+     */
+    protected OWLOntology exportToOWLOntology(boolean merge) {
         // if (merge) throw new UnsupportedOperationException(
         // "Ontology merging only implemented for managed ontologies, not for collectors. "
         // + "Please set merge parameter to false.");
@@ -161,10 +268,10 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
                 final Set<OWLOntology> set = new HashSet<OWLOntology>();
 
                 log.debug("Merging custom space of {}.", getID());
-                set.add(this.getCustomSpace().asOWLOntology(merge));
+                set.add(this.getCustomSpace().export(OWLOntology.class, merge));
 
                 log.debug("Merging core space of {}.", getID());
-                set.add(this.getCoreSpace().asOWLOntology(merge));
+                set.add(this.getCoreSpace().export(OWLOntology.class, merge));
 
                 OWLOntologySetProvider provider = new OWLOntologySetProvider() {
                     @Override
@@ -205,11 +312,6 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
         return ont;
     }
 
-    @Override
-    public void clearOntologyScopeListeners() {
-        listeners.clear();
-    }
-
     protected void fireOntologyAdded(IRI ontologyIri) {
         for (ScopeOntologyListener listener : listeners)
             listener.onOntologyAdded(this.getID(), ontologyIri);
@@ -228,6 +330,11 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     @Override
     public OntologySpace getCustomSpace() {
         return customSpace;
+    }
+
+    @Override
+    public IRI getDocumentIRI() {
+        return IRI.create(getNamespace() + getID());
     }
 
     @Override
