@@ -430,8 +430,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         }
         SolrServer solrServer = getActiveSolrServer();
         SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY);
-        // use a filter query to avoid string escaping issues with special solr chars
-        query.addFilterQuery("{!field f=" + broaderField + "}" + broadTopicId);
+        query.addFilterQuery(broaderField + ":" + ClientUtils.escapeQueryChars(broadTopicId));
         query.addField(topicUriField);
         query.addSortField(topicUriField, SolrQuery.ORDER.asc);
         try {
