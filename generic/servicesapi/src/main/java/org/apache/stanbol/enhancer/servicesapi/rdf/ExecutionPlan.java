@@ -12,6 +12,20 @@ public final class ExecutionPlan {
 
     private ExecutionPlan(){/* No instances of Utility classes*/ }
     /**
+     * The Class ep:ExecutionPlan
+     */
+    public static final UriRef EXECUTION_PLAN = new UriRef(NamespaceEnum.ep+"ExecutionPlan");
+    /**
+     * The property ep:chain linking an {@link #EXECUTION_PLAN} to the name
+     * of the chain this plan is defined for
+     */
+    public static final UriRef CHAIN = new UriRef(NamespaceEnum.ep+"chain");
+    /**
+     * the property ep:hasExecutionNode linking an {@link #EXECUTION_PLAN} with
+     * all its {@link #EXECUTION_NODE}s
+     */
+    public static final UriRef HAS_EXECUTION_NODE = new UriRef(NamespaceEnum.ep+"hasExecutionNode");
+    /**
      * The Class ep:ExecutionMode
      */
     public static final UriRef EXECUTION_NODE = new UriRef(NamespaceEnum.ep+"ExecutionNode");
@@ -30,5 +44,5 @@ public final class ExecutionPlan {
      * an {@link #EXECUTION_NODE} is optional. The default is <code>false</code>.
      */
     public static final UriRef OPTIONAL = new UriRef(NamespaceEnum.ep+"optional");
-    
+ 
 }

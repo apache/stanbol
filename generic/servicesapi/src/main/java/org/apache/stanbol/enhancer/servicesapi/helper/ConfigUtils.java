@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.slf4j.Logger;
@@ -136,6 +137,19 @@ public final class ConfigUtils {
             parseLine(config, confIterator.next());
         }
         return config;
+    }
+    /**
+     * Returns the "key, parameter" entry parsed form the parsed configuration 
+     * line.<p>
+     * This method is useful if the caller need to preserve the oder of multi
+     * line configurations and therefore can not use the parseConfig methods.
+     * @param line a configuration line
+     * @return the key, parameter entry
+     */
+    public static Entry<String,Map<String,List<String>>> parseConfigEntry(String line){
+        String[] elements = line.split(";");
+        return Collections.singletonMap(elements[0].trim(), getParameters(elements,1))
+            .entrySet().iterator().next();
     }
     
     /**

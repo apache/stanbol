@@ -22,9 +22,12 @@ import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHe
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getString;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.getExecutable;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.writeExecutionNode;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.CHAIN;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.DEPENDS_ON;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.ENGINE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.EXECUTION_NODE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.EXECUTION_PLAN;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.HAS_EXECUTION_NODE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.OPTIONAL;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 
@@ -67,20 +70,25 @@ public final class ExecutionPlanHelper {
      * Writes all triples for an ep:ExecutionNode to the parsed {@link MGraph}.
      * An {@link BNode} is use for representing the execution node resource.
      * @param graph the graph to write the triples. MUST NOT be empty
+     * @param epNode the NonLiteral representing the ep:ExecutionPlan
      * @param engineName the name of the engine. MUST NOT be <code>null</code> nor empty
      * @param optional if the execution of this node is optional or required
      * @param dependsOn other nodes that MUST BE executed before this one. Parse 
      * <code>null</code> or an empty set if none.
      * @return the resource representing the added ep:ExecutionNode.
      */
-    public static NonLiteral writeExecutionNode(MGraph graph,String engineName, boolean optional, Set<NonLiteral> dependsOn){
+    public static NonLiteral writeExecutionNode(MGraph graph,NonLiteral epNode, String engineName, boolean optional, Set<NonLiteral> dependsOn){
         if(graph == null){
             throw new IllegalArgumentException("The parsed MGraph MUST NOT be NULL!");
         }
         if(engineName == null || engineName.isEmpty()){
             throw new IllegalArgumentException("The parsed Engine name MUST NOT be NULL nor empty!");
         }
+        if(epNode == null){
+            throw new IllegalArgumentException("The ep:ExecutionPlan instance MUST NOT be NULL!");
+        }
         NonLiteral node = new BNode();
+        graph.add(new TripleImpl(epNode, HAS_EXECUTION_NODE, node));
         graph.add(new TripleImpl(node, RDF_TYPE, EXECUTION_NODE));
         graph.add(new TripleImpl(node,ENGINE,new PlainLiteralImpl(engineName)));
         if(dependsOn != null){
@@ -91,6 +99,24 @@ public final class ExecutionPlanHelper {
             }
         }
         graph.add(new TripleImpl(node, OPTIONAL, lf.createTypedLiteral(optional)));
+        return node;
+    }
+    /**
+     * Creates an ExecutionPlan for the parsed chainName in the parsed Graph
+     * @param graph the graph
+     * @param chainName the chain name
+     * @return the node representing the ex:ExecutionPlan
+     */
+    public static NonLiteral createExecutionPlan(MGraph graph,String chainName){
+        if(graph == null){
+            throw new IllegalArgumentException("The parsed MGraph MUST NOT be NULL!");
+        }
+        if(chainName == null || chainName.isEmpty()){
+            throw new IllegalArgumentException("The parsed Chain name MUST NOT be NULL nor empty!");
+        }
+        NonLiteral node = new BNode();
+        graph.add(new TripleImpl(node, RDF_TYPE, EXECUTION_PLAN));
+        graph.add(new TripleImpl(node, CHAIN,new PlainLiteralImpl(chainName)));
         return node;
     }
     
@@ -129,21 +155,26 @@ public final class ExecutionPlanHelper {
      * A second parameter with the set of optional engines can be used to define
      * what {@link ExecutionPlan#EXECUTION_NODE} in the execution plan should be 
      * marked as {@link ExecutionPlan#OPTIONAL}.
+     * @param chainName the name of the Chain to build the execution plan for
      * @param availableEngines the list of engines
      * @param the names of optional engines.
      * @return the execution plan
      */
-    public static Graph calculateExecutionPlan(List<EnhancementEngine> availableEngines, Set<String> optional, Set<String> missing) {
+    public static Graph calculateExecutionPlan(String chainName, List<EnhancementEngine> availableEngines, Set<String> optional, Set<String> missing) {
+        if(chainName == null || chainName.isEmpty()){
+            throw new IllegalArgumentException("The parsed ChainName MUST NOT be empty!");
+        }
         Collections.sort(availableEngines,EXECUTION_ORDER_COMPARATOR);
         //now we have all required and possible also optional engines
         //  -> build the execution plan
         MGraph ep = new SimpleMGraph();
+        NonLiteral epNode = createExecutionPlan(ep, chainName);
         Integer prevOrder = null;
         Set<NonLiteral> prev = null;
         Set<NonLiteral> current = new HashSet<NonLiteral>();
         for(String name : missing){
             boolean optionalMissing = optional.contains(name);
-            NonLiteral node = writeExecutionNode(ep, name, optionalMissing, null);
+            NonLiteral node = writeExecutionNode(ep, epNode, name, optionalMissing, null);
             if(!optionalMissing){
                 current.add(node);
             } // else add missing optional engines without any dependsOn restrictions
@@ -155,7 +186,7 @@ public final class ExecutionPlanHelper {
                 prev = current;
                 prevOrder = order;
             }
-            current.add(writeExecutionNode(ep, name, optional.contains(name), prev));
+            current.add(writeExecutionNode(ep, epNode, name, optional.contains(name), prev));
         }
         return ep.getGraph();
     }

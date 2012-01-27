@@ -22,6 +22,7 @@ import static org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils.getStat
 import static org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils.getValue;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils.guessRdfFormat;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils.parseConfig;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.createExecutionPlan;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.validateExecutionPlan;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.writeExecutionNode;
 
@@ -443,6 +444,7 @@ public class GraphChain extends AbstractChain implements Chain {
             }
             engines = Collections.unmodifiableSet(new HashSet<String>(config.keySet()));
             MGraph graph = new SimpleMGraph();
+            NonLiteral epNode = createExecutionPlan(graph, getName());
             //caches the String name -> {NonLiteral node, List<Stirng> dependsOn} mappings
             Map<String,Object[]> name2nodes = new HashMap<String,Object[]>();
             //1. write the nodes (without dependencies)
@@ -450,7 +452,7 @@ public class GraphChain extends AbstractChain implements Chain {
                 name2nodes.put(
                     node.getKey(),
                     new Object[]{
-                        writeExecutionNode(graph,
+                        writeExecutionNode(graph, epNode, 
                             node.getKey(), 
                             getState(node.getValue(), "optional"),
                             null),
