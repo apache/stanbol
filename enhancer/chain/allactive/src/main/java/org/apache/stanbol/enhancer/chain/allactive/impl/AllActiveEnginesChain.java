@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Graph;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -37,7 +35,6 @@ import org.apache.stanbol.enhancer.servicesapi.helper.EnginesTracker;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
@@ -169,7 +166,8 @@ public class AllActiveEnginesChain implements ServiceTrackerCustomizer, Chain {
             }
         }
         Set<String> emptySet = Collections.emptySet();
-        executionPlan = calculateExecutionPlan(activeEngines, 
+        executionPlan = calculateExecutionPlan(
+            getName(),activeEngines, 
             emptySet,//this Chain does not support optional engines
             emptySet); //only active meaning that no engines are missing
         engineNames = Collections.unmodifiableSet(activeEngineNames);

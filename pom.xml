@@ -63,6 +63,7 @@
     <module>enhancer/chain/allactive</module>
     <module>enhancer/chain/graph</module>
     <module>enhancer/chain/weighted</module>
+    <module>enhancer/chain/list</module>
     <module>enhancer/jersey</module>
     <module>enhancer/benchmark</module>
     <module>enhancer/bundlelist</module>

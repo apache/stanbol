@@ -64,7 +64,13 @@
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.enhancer.chain.weighted</artifactId>
             <version>0.9.0-incubating-SNAPSHOT</version>
-        </bundle>    </startLevel>
+        </bundle>
+        <bundle>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.enhancer.chain.list</artifactId>
+            <version>0.9.0-incubating-SNAPSHOT</version>
+        </bundle>
+    </startLevel>
 	<!-- Web Fragment -->
 	<startLevel level="21">
 		<bundle>

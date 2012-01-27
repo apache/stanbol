@@ -16,6 +16,7 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.helper;
 
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.createExecutionPlan;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.writeExecutionNode;
 
 import java.util.Collections;
@@ -38,7 +39,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
  * The intension is that it is instantiated by the component (e.g. the implementation
  * of a RESTful service) for an {@link EnhancementEngine} and directly parsed
  * to the {@link EnhancementJobManager}.
- * S
+ * 
  * @author Rupert Westenthaler 
  *
  */
@@ -53,10 +54,11 @@ public class SingleEngineChain implements Chain {
             throw new IllegalArgumentException("The parsed EnhancementEngine MUST NOT be NULL!");
         }
         this.engine = engine;
+        this.name = engine.getName()+"Chain";
         MGraph graph = new SimpleMGraph();
-        writeExecutionNode(graph, engine.getName(), false, null);
+        writeExecutionNode(graph, createExecutionPlan(graph, name),
+            engine.getName(), false, null);
         executionPlan = graph.getGraph();
-        name = engine.getName()+"Chain";
     }
     
     @Override

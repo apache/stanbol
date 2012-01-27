@@ -193,7 +193,7 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
 //            throw new ChainException("This Chain is missing the following " +
 //            		"required Engines "+missingEngines);
 //        }
-        return calculateExecutionPlan(availableEngines,optionalEngines, missingEngines);
+        return calculateExecutionPlan(getName(),availableEngines,optionalEngines, missingEngines);
     }
 
     @Override
