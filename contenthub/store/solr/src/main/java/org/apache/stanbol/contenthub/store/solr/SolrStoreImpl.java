@@ -58,7 +58,6 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
-import org.apache.stanbol.contenthub.servicesapi.enhancements.vocabulary.EnhancementGraphVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramManager;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
@@ -102,9 +101,9 @@ public class SolrStoreImpl implements SolrStore {
 
     @Reference
     private LDProgramManager ldProgramManager;
-    
+
     private BundleContext bundleContext;
-    
+
     @Activate
     protected void activate(ComponentContext context) throws IllegalArgumentException,
                                                      IOException,
@@ -129,7 +128,7 @@ public class SolrStoreImpl implements SolrStore {
 
     @Override
     public MGraph getEnhancementGraph() {
-        final UriRef graphUri = new UriRef(EnhancementGraphVocabulary.ENHANCEMENTS_GRAPH_URI);
+        final UriRef graphUri = new UriRef(Constants.ENHANCEMENTS_GRAPH_URI);
         MGraph enhancementGraph = null;
         try {
             enhancementGraph = tcManager.getMGraph(graphUri);
@@ -271,7 +270,8 @@ public class SolrStoreImpl implements SolrStore {
 
     @Override
     public String put(SolrContentItem sci, String ldProgramName) throws StoreException {
-        if(ldProgramName == null || ldProgramName.isEmpty() || ldProgramName.equals(SolrCoreManager.CONTENTHUB_SOLR_SERVER_NAME)) {
+        if (ldProgramName == null || ldProgramName.isEmpty()
+            || ldProgramName.equals(SolrCoreManager.CONTENTHUB_SOLR_SERVER_NAME)) {
             return put(sci);
         }
         SolrInputDocument doc = new SolrInputDocument();
@@ -328,12 +328,13 @@ public class SolrStoreImpl implements SolrStore {
         }
         doc.addField(SolrFieldName.ENHANCEMENTCOUNT.toString(), enhancementCount);
     }
-    
+
     private void addSolrSpecificFields(SolrContentItem sci, SolrInputDocument doc, String ldProgramName) {
         doc.addField(SolrFieldName.TITLE.toString(), sci.getTitle());
         try {
-            Map<String,Collection<?>> results = ldProgramManager.executeProgram(ldProgramName, sci.getMetadata());
-            for(Entry<String,Collection<?>> entry : results.entrySet()) {
+            Map<String,Collection<?>> results = ldProgramManager.executeProgram(ldProgramName,
+                sci.getMetadata());
+            for (Entry<String,Collection<?>> entry : results.entrySet()) {
                 doc.addField(entry.getKey(), entry.getValue());
             }
         } catch (LDPathException e) {
@@ -414,7 +415,8 @@ public class SolrStoreImpl implements SolrStore {
     @Override
     public SolrContentItem get(String id, String ldProgramName) throws StoreException {
         id = ContentItemIDOrganizer.attachBaseURI(id);
-        SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(ldProgramName);
+        SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(
+            ldProgramName);
         String content = null;
         String mimeType = null;
         String title = null;

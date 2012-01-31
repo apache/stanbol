@@ -53,6 +53,7 @@ import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
+import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearchManager;
 import org.apache.stanbol.contenthub.web.util.JSONUtils;
 import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -62,6 +63,8 @@ import org.slf4j.LoggerFactory;
 import com.sun.jersey.api.view.Viewable;
 
 /**
+ * This class is the web resource which provides RESTful and HTTP interfaces for {@link FeaturedSearch}
+ * services.
  * 
  * @author anil.sinaci
  * @author suat
@@ -81,6 +84,44 @@ public class FeaturedSearchResource extends BaseStanbolResource {
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
     }
 
+    /**
+     * HTTP POST method to make a featured search over Contenthub. This method directly calls the
+     * corresponding {{@link #get(String, String, String, String, String, int, int, String, HttpHeaders)}
+     * method of this class.
+     * 
+     * @param queryTerm
+     *            A keyword a statement or a set of keywords which can be regarded as the query term.
+     * @param solrQuery
+     *            Solr query string. This is the string format which is accepted by a Solr server. For
+     *            example, {@code q="john doe"&fl=score} is a valid value for this parameter. If this
+     *            parameter exists, search is performed based on this solrQuery and any queryTerms are
+     *            neglected.
+     * @param ldProgram
+     *            The name of the LDPath program (actually name of the Solr core/index) to be searched over.
+     * @param jsonCons
+     *            Constrainst in JSON format. These constraints are tranformed to corresponding Solr queries
+     *            to enable faceted search. Each constraint is a facet field and values of the constraints
+     *            maps to the values of the facet fields in Solr queries.
+     * @param graphURI
+     *            URI of the ontology in which related keywords will be searched by
+     *            {@link RelatedKeywordSearchManager#getRelatedKeywordsFromOntology(String, String)}
+     * @param offset
+     *            The offset of the document from which the resultant documents will start as the search
+     *            result. {@link offset} and {@link limit} parameters can be used to make a pagination
+     *            mechanism for search results.
+     * @param limit
+     *            Maximum number of resultant documents to be returned as the search result. {@link offset}
+     *            and {@link limit} parameters can be used to make a pagination mechanism for search results.
+     * @param headers
+     *            HTTP headers
+     * @return
+     * @throws IllegalArgumentException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws SolrServerException
+     * @throws SearchException
+     * @throws IOException
+     */
     @POST
     @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -100,6 +141,44 @@ public class FeaturedSearchResource extends BaseStanbolResource {
         return get(queryTerm, solrQuery, ldProgram, jsonCons, graphURI, offset, limit, null, headers);
     }
 
+    /**
+     * HTTP GET method to make a featured search over Contenthub.
+     * 
+     * @param queryTerm
+     *            A keyword a statement or a set of keywords which can be regarded as the query term.
+     * @param solrQuery
+     *            Solr query string. This is the string format which is accepted by a Solr server. For
+     *            example, {@code q="john doe"&fl=score} is a valid value for this parameter. If this
+     *            parameter exists, search is performed based on this solrQuery and any queryTerms are
+     *            neglected.
+     * @param ldProgram
+     *            The name of the LDPath program (actually name of the Solr core/index) to be searched over.
+     * @param jsonCons
+     *            Constrainst in JSON format. These constraints are tranformed to corresponding Solr queries
+     *            to enable faceted search. Each constraint is a facet field and values of the constraints
+     *            maps to the values of the facet fields in Solr queries.
+     * @param graphURI
+     *            URI of the ontology in which related keywords will be searched by
+     *            {@link RelatedKeywordSearchManager#getRelatedKeywordsFromOntology(String, String)}
+     * @param offset
+     *            The offset of the document from which the resultant documents will start as the search
+     *            result. {@link offset} and {@link limit} parameters can be used to make a pagination
+     *            mechanism for search results.
+     * @param limit
+     *            Maximum number of resultant documents to be returned as the search result. {@link offset}
+     *            and {@link limit} parameters can be used to make a pagination mechanism for search results.
+     * @param fromStore
+     *            Special parameter for HTML view only.
+     * @param headers
+     *            HTTP headers
+     * @return HTML view or JSON representation of the search results or HTTP BAD REQUEST(400)
+     * @throws IllegalArgumentException
+     * @throws SearchException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws SolrServerException
+     * @throws IOException
+     */
     @GET
     @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
     public final Response get(@QueryParam("queryTerm") String queryTerm,
@@ -127,7 +206,7 @@ public class FeaturedSearchResource extends BaseStanbolResource {
         this.pageSize = limit;
 
         if (acceptedHeader.isCompatible(MediaType.TEXT_HTML_TYPE)) {
-            if(fromStore != null) {
+            if (fromStore != null) {
                 return Response.ok(new Viewable("index", this), MediaType.TEXT_HTML).build();
             }
             if (queryTerm == null && solrQuery == null) {
@@ -175,7 +254,7 @@ public class FeaturedSearchResource extends BaseStanbolResource {
         } else if (queryTerm != null) {
             Map<String,List<Object>> constraintsMap = JSONUtils.convertToMap(jsonCons);
             this.chosenFacets = JSONUtils.convertToString(constraintsMap);
-            List<String> allAvailableFacetNames = featuredSearch.getFacetNames(ldProgramName);
+            List<String> allAvailableFacetNames = featuredSearch.getFieldNames(ldProgramName);
             if (this.chosenFacets != null) {
                 SolrQuery sq = SolrQueryUtil.prepareFacetedSolrQuery(queryTerm, allAvailableFacetNames,
                     constraintsMap);
@@ -213,9 +292,9 @@ public class FeaturedSearchResource extends BaseStanbolResource {
     // Data holders for HTML view
     private List<String> ontologies = null;
     private String queryTerm = null;
-//    private String solrQuery = null;
-//    private String ldProgram = null;
-//    private String graphURI = null;
+    // private String solrQuery = null;
+    // private String ldProgram = null;
+    // private String graphURI = null;
     private SearchResult searchResults = null;
     private String chosenFacets = null;
     private int offset = 0;
@@ -226,7 +305,7 @@ public class FeaturedSearchResource extends BaseStanbolResource {
     /*
      * Helper methods for HTML view
      */
-    
+
     public Object getMoreRecentItems() {
         if (offset >= pageSize) {
             return new Object();
@@ -242,11 +321,11 @@ public class FeaturedSearchResource extends BaseStanbolResource {
             return new Object();
         }
     }
-    
+
     public int getOffset() {
         return this.offset;
     }
-    
+
     public int getPageSize() {
         return this.pageSize;
     }
@@ -254,7 +333,7 @@ public class FeaturedSearchResource extends BaseStanbolResource {
     public Object getSearchResults() {
         return this.searchResults;
     }
-    
+
     public Object getResultantDocuments() {
         if (searchResults.getResultantDocuments().size() > pageSize) {
             return searchResults.getResultantDocuments().subList(0, pageSize);

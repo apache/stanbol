@@ -16,9 +16,11 @@
  */
 package org.apache.stanbol.contenthub.servicesapi.search;
 
-import org.apache.stanbol.contenthub.servicesapi.AbstractContenthubException;
+import org.apache.stanbol.contenthub.servicesapi.exception.AbstractContenthubException;
 
 /**
+ * Exception to be thrown in search related operations of Contenthub.
+ * 
  * @author anil.sinaci
  * 
  */
@@ -39,7 +41,7 @@ public class SearchException extends AbstractContenthubException {
     public SearchException(Throwable cause) {
         super(cause);
     }
-    
+
     /**
      * @param msg
      * @param cause

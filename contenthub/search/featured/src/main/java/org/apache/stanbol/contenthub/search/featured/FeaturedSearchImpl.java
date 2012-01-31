@@ -181,12 +181,12 @@ public class FeaturedSearchImpl implements FeaturedSearch {
     }
 
     @Override
-    public List<String> getFacetNames() throws SearchException {
-        return getFacetNames(null);
+    public List<String> getFieldNames() throws SearchException {
+        return getFieldNames(null);
     }
 
     @Override
-    public List<String> getFacetNames(String ldProgramName) throws SearchException {
+    public List<String> getFieldNames(String ldProgramName) throws SearchException {
         SolrServer solrServer = null;
         try {
             solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(

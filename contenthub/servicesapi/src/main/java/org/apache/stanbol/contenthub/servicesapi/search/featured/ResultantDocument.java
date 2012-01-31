@@ -16,15 +16,47 @@
  */
 package org.apache.stanbol.contenthub.servicesapi.search.featured;
 
+/**
+ * This interface contains "getter" methods for a search result that can be passed in a {@link SearchResult}
+ * object. A resultant document corresponds to a content item stored in Contenthub.
+ * 
+ * @author suat
+ * 
+ */
 public interface ResultantDocument {
-    
+    /**
+     * Returns the URI of the content item corresponding to this search result.
+     * 
+     * @return URI of the search result
+     */
     String getLocalId();
 
+    /**
+     * Returns the dereferencable URI of the content item corresponding to this search result. This URI of the
+     * HTML interface of the content item.
+     * 
+     * @return Dereferencable URI of the search result
+     */
     String getDereferencableURI();
 
+    /**
+     * Returns the mime type of the content item corresponding to this search result
+     * 
+     * @return Mime type of the search result
+     */
     String getMimetype();
 
+    /**
+     * Returns the count of the enhancements of the content item corresponding to this search result
+     * 
+     * @return Enhancement count of the search result
+     */
     long getEnhancementCount();
 
+    /**
+     * Returns the title of the content item corresponding to the this search result
+     * 
+     * @return Title of the search result
+     */
     String getTitle();
 }

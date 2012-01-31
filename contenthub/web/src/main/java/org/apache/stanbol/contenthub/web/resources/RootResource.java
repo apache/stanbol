@@ -25,6 +25,12 @@ import javax.ws.rs.core.Response;
 
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
+/**
+ * Base resource which automatically redirects to "contenthub/store"
+ * 
+ * @author anil.sinaci
+ *
+ */
 @Path("/contenthub")
 public class RootResource extends BaseStanbolResource {
 

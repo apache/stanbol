@@ -17,7 +17,7 @@
 
 package org.apache.stanbol.contenthub.search.related.ontologyresource;
 
-import org.apache.stanbol.contenthub.servicesapi.search.vocabulary.SearchVocabulary;
+import org.apache.stanbol.contenthub.servicesapi.Constants;
 
 import com.hp.hpl.jena.query.Query;
 
@@ -31,7 +31,7 @@ public final class QueryFactory {
     private static final String OWL = "PREFIX owl: <http://www.w3.org/2002/07/owl#>";
     private static final String RDF = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
     private static final String PF = "PREFIX pf: <http://jena.hpl.hp.com/ARQ/property#>";
-    private static final String SEARCH = "PREFIX ss: <" + SearchVocabulary.getUri() + ">";
+    private static final String SEARCH = "PREFIX ss: <" + Constants.SEARCH_URI + ">";
     private static final String CMS = "PREFIX cms: <http://www.apache.org/stanbol/cms#>";
 
     public static final Query getClassQuery(String keyword) {

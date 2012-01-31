@@ -16,25 +16,40 @@
  */
 package org.apache.stanbol.contenthub.servicesapi.search.related;
 
+/**
+ * This interface defines the structure of a keyword which is related to the query term of a search operation.
+ * 
+ * @author suat
+ * 
+ */
 public interface RelatedKeyword {
 
+    /**
+     * @return Lexical value of the related keyword.
+     */
     String getKeyword();
-    
+
+    /**
+     * @return Score of the related keyword
+     */
     double getScore();
-    
+
+    /**
+     * @return Source of the related keyword
+     */
     String getSource();
-    
-    /*
-     * To enumerate the source for a related keyword 
+
+    /**
+     * To enumerate the source for a related keyword
      */
     public enum Source {
-        
+
         UNKNOWN("Unknown"),
-        
+
         WORDNET("Wordnet"),
-        
+
         ONTOLOGY("Ontology");
-        
+
         private final String name;
 
         private Source(String n) {
@@ -44,7 +59,7 @@ public interface RelatedKeyword {
         @Override
         public final String toString() {
             return this.name;
-        }        
+        }
     }
-    
+
 }

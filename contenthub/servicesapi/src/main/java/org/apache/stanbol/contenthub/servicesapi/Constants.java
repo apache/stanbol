@@ -16,19 +16,31 @@
  */
 package org.apache.stanbol.contenthub.servicesapi;
 
-import org.apache.stanbol.contenthub.servicesapi.enhancements.vocabulary.EnhancementGraphVocabulary;
-
 /**
+ * Class keeping the constants that are used in various places of Contenthub.
+ * 
  * @author anil.sinaci
- *
+ * 
  */
 public class Constants {
-    
+
+    /**
+     * Default encoding
+     */
     public static final String DEFAULT_ENCODING = "UTF-8";
-    
+
+    /**
+     * The URI of the global enhancement graph. All enhancements are stored in this graph.
+     */
+    public static final String ENHANCEMENTS_GRAPH_URI = "org.apache.stanbol.enhancer.standalone.store.enhancements";
+
+    /**
+     * The URI of ???
+     */
     public static final String ENHANCER_ENTITIY_CACHE_GRAPH_URI = "enhancerEntityCache";
+
     public static final String[] RESERVED_GRAPH_URIs = {ENHANCER_ENTITIY_CACHE_GRAPH_URI,
-                                                        EnhancementGraphVocabulary.ENHANCEMENTS_GRAPH_URI};
+                                                        ENHANCEMENTS_GRAPH_URI};
 
     public static boolean isGraphReserved(String graphURI) {
         for (String uri : RESERVED_GRAPH_URIs) {
@@ -36,4 +48,6 @@ public class Constants {
         }
         return false;
     }
+
+    public static final String SEARCH_URI = "http://stanbol.apache.org/contenthub/search/";
 }

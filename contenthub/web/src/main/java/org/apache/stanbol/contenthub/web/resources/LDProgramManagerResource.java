@@ -47,6 +47,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * This class the the web resource to handle the RESTful requests and HTML view of the LDProgram management
+ * facilities within Contenthub.
+ * 
  * @author anil.pacaci
  * @author anil.sinaci
  * 
@@ -73,7 +76,7 @@ public class LDProgramManagerResource extends BaseStanbolResource {
         enableCORS(servletContext, res, headers);
         return res.build();
     }
-    
+
     @OPTIONS
     @Path("/program")
     public Response handleCorsPreflightProgram(@Context HttpHeaders headers) {
@@ -81,7 +84,7 @@ public class LDProgramManagerResource extends BaseStanbolResource {
         enableCORS(servletContext, res, headers);
         return res.build();
     }
-    
+
     @OPTIONS
     @Path("/exists")
     public Response handleCorsPreflightExists(@Context HttpHeaders headers) {
@@ -89,7 +92,16 @@ public class LDProgramManagerResource extends BaseStanbolResource {
         enableCORS(servletContext, res, headers);
         return res.build();
     }
-    
+
+    /**
+     * HTTP GET method which returns all LDPath programs residing in Contenthub. LDPath programs are uniquely
+     * identified by their names. Returning JSON string presents each LDPath program in string format aligned
+     * with its name.
+     * 
+     * @param headers
+     *            HTTP headers
+     * @return JSON string of {@code name:program} pairs.
+     */
     @GET
     @Produces(APPLICATION_JSON)
     public Response retrieveAllPrograms(@Context HttpHeaders headers) {
@@ -99,6 +111,18 @@ public class LDProgramManagerResource extends BaseStanbolResource {
         return rb.build();
     }
 
+    /**
+     * HTTP POST method which saves an LDPath program into the persistent store of Contenthub.
+     * 
+     * @param programName
+     *            Unique name to identify the LDPath program
+     * @param program
+     *            The LDPath program.
+     * @param headers
+     *            HTTP Headers
+     * @return HTTP OK(200) or BAD REQUEST(400)
+     * @throws LDPathException
+     */
     @POST
     @Path("/program")
     @Consumes(APPLICATION_FORM_URLENCODED)
@@ -117,7 +141,16 @@ public class LDProgramManagerResource extends BaseStanbolResource {
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
-    
+
+    /**
+     * HTTP GET method to retrieve an LDPath program, given its name.
+     * 
+     * @param programName
+     *            The name of the LDPath program to be retrieved.
+     * @param headers
+     *            HTTP headers
+     * @return LDPath program in {@link String} format or HTTP NOT FOUND(404)
+     */
     @GET
     @Path("/program")
     public Response getProgramByName(@QueryParam("name") String programName, @Context HttpHeaders headers) {
@@ -130,7 +163,16 @@ public class LDProgramManagerResource extends BaseStanbolResource {
             return rb.build();
         }
     }
-    
+
+    /**
+     * HTTP DELETE method to delete an LDPath program.
+     * 
+     * @param programName
+     *            The name of the LDPath program.
+     * @param headers
+     *            HTTP headers
+     * @return HTTP OK(200)
+     */
     @DELETE
     @Path("/program")
     @Consumes(APPLICATION_FORM_URLENCODED)
@@ -141,6 +183,15 @@ public class LDProgramManagerResource extends BaseStanbolResource {
         return rb.build();
     }
 
+    /**
+     * HTTP GET method to check whether an LDPath program exists in Contenthub or not.
+     * 
+     * @param programName
+     *            The name of the LDPath program.
+     * @param headers
+     *            HTTP headers
+     * @return HTTP OK(200) or HTTP NOT FOUND(404)
+     */
     @GET
     @Path("/exists")
     public Response isManagedProgram(@QueryParam("name") String programName, @Context HttpHeaders headers) {
@@ -154,5 +205,5 @@ public class LDProgramManagerResource extends BaseStanbolResource {
             return rb.build();
         }
     }
-    
+
 }

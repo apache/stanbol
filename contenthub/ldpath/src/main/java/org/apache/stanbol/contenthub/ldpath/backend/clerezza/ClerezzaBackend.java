@@ -48,6 +48,9 @@ import org.slf4j.LoggerFactory;
 import at.newmedialab.ldpath.api.backend.RDFBackend;
 
 /**
+ * Clerezza based implementation of {@link RDFBackend} interface. This implementation uses the
+ * {@link Resource} objects of Clerezza as processing unit RDFBackend.
+ * 
  * @author anil.sinaci
  * 
  */
@@ -241,81 +244,81 @@ public class ClerezzaBackend implements RDFBackend<Resource> {
         }
     }
 
-	@Override
-	public Boolean booleanValue(Resource resource) {
-		if (resource instanceof TypedLiteral) {
+    @Override
+    public Boolean booleanValue(Resource resource) {
+        if (resource instanceof TypedLiteral) {
             return LiteralFactory.getInstance().createObject(Boolean.class, (TypedLiteral) resource);
         } else {
             throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
         }
-	}
+    }
 
-	@Override
-	public Date dateTimeValue(Resource resource) {
-		if (resource instanceof TypedLiteral) {
+    @Override
+    public Date dateTimeValue(Resource resource) {
+        if (resource instanceof TypedLiteral) {
             return LiteralFactory.getInstance().createObject(Date.class, (TypedLiteral) resource);
         } else {
             throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
         }
-	}
+    }
 
-	@Override
-	public Date dateValue(Resource resource) {
-		if (resource instanceof TypedLiteral) {
+    @Override
+    public Date dateValue(Resource resource) {
+        if (resource instanceof TypedLiteral) {
             return LiteralFactory.getInstance().createObject(Date.class, (TypedLiteral) resource);
         } else {
             throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
         }
-	}
+    }
 
-	@Override
-	public Date timeValue(Resource resource) {
-		if (resource instanceof TypedLiteral) {
+    @Override
+    public Date timeValue(Resource resource) {
+        if (resource instanceof TypedLiteral) {
             return LiteralFactory.getInstance().createObject(Date.class, (TypedLiteral) resource);
         } else {
             throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
         }
-	}
+    }
 
-	@Override
-	public Float floatValue(Resource resource) {
-		if (resource instanceof TypedLiteral) {
+    @Override
+    public Float floatValue(Resource resource) {
+        if (resource instanceof TypedLiteral) {
             return LiteralFactory.getInstance().createObject(Float.class, (TypedLiteral) resource);
         } else {
             throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
         }
-	}
+    }
 
-	@Override
-	public Integer intValue(Resource resource) {
-		if (resource instanceof TypedLiteral) {
+    @Override
+    public Integer intValue(Resource resource) {
+        if (resource instanceof TypedLiteral) {
             return LiteralFactory.getInstance().createObject(Integer.class, (TypedLiteral) resource);
         } else {
             throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
         }
-	}
+    }
 
-	@Override
-	public BigInteger integerValue(Resource resource) {
-		if (resource instanceof TypedLiteral) {
+    @Override
+    public BigInteger integerValue(Resource resource) {
+        if (resource instanceof TypedLiteral) {
             return LiteralFactory.getInstance().createObject(BigInteger.class, (TypedLiteral) resource);
         } else {
             throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
         }
-	}
+    }
 
-	@Override
-	public BigDecimal decimalValue(Resource resource) {
-		if (resource instanceof TypedLiteral) {
-			try {
-				return LiteralFactory.getInstance().createObject(BigDecimal.class, (TypedLiteral) resource);
-			}
-			catch(NoConvertorException e) {
-				throw new NumberFormatException("Resource " + resource.toString() + " can not converted, no convertor for the BigDecimal");
-			}
-            
+    @Override
+    public BigDecimal decimalValue(Resource resource) {
+        if (resource instanceof TypedLiteral) {
+            try {
+                return LiteralFactory.getInstance().createObject(BigDecimal.class, (TypedLiteral) resource);
+            } catch (NoConvertorException e) {
+                throw new NumberFormatException("Resource " + resource.toString()
+                                                + " can not converted, no convertor for the BigDecimal");
+            }
+
         } else {
             throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
         }
-	}
+    }
 }

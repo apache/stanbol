@@ -16,11 +16,13 @@
  */
 package org.apache.stanbol.contenthub.servicesapi.ldpath;
 
-import org.apache.stanbol.contenthub.servicesapi.AbstractContenthubException;
+import org.apache.stanbol.contenthub.servicesapi.exception.AbstractContenthubException;
 
 /**
+ * Exception to be thrown in LDPath related operations of Contenthub.
+ * 
  * @author anil.sinaci
- *
+ * 
  */
 public class LDPathException extends AbstractContenthubException {
 
@@ -32,7 +34,7 @@ public class LDPathException extends AbstractContenthubException {
     public LDPathException(String msg) {
         super(msg);
     }
-    
+
     /**
      * @param cause
      */
@@ -47,5 +49,5 @@ public class LDPathException extends AbstractContenthubException {
     public LDPathException(String msg, Throwable cause) {
         super(msg, cause);
     }
-    
+
 }

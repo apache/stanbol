@@ -43,13 +43,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.newmedialab.ldpath.LDPath;
+import at.newmedialab.ldpath.api.backend.RDFBackend;
 import at.newmedialab.ldpath.exception.LDPathParseException;
 
+/**
+ * This class provides a main function for executing an LDProgram on {@link ClerezzaBackend} ,which is
+ * Clerezza based implementation of {@link RDFBackend}, populated with RDF data.
+ * 
+ * @author suat
+ * 
+ */
 public class ClerezzaQuery {
     private static final Logger logger = LoggerFactory.getLogger(ClerezzaQuery.class);
 
     private static Parser clerezzaRDFParser;
 
+    /**
+     * This executable method provides execution of an LDPath program over an RDF data and prints out the
+     * obtained results. Passed RDF data should be in <b>RDF/XML</b> format.<br>
+     * 
+     * Usage of this main method is as follows: <br>
+     * ClerezzaQuery -context <pre>&lt;uri></pre> -filePath <pre>&lt;filePath></pre> -path <pre>&lt;path></pre> | -program <pre>&lt;file></pre></br></br> 
+     * 
+     * <b><code>context</code>:</b> URI of the context node to start from<br>
+     * <b><code>rdfData</code>:</b> File system path of the file holding RDF data<br>
+     * <b><code>path</code>:</b> LD Path to evaluate on the file starting from the <code>context</code><br>
+     * <b><code>program</code>:</b> LD Path program to evaluate on the file starting from the
+     * <code>context</code><br>
+     * 
+     * @param args
+     *            Collection of <code>context</code>, <code>rdfData</code>, <code>path</code> and <code>program</code> parameters
+     * 
+     */
     public static void main(String[] args) {
         Options options = buildOptions();
 
@@ -58,11 +83,11 @@ public class ClerezzaQuery {
             CommandLine cmd = parser.parse(options, args);
 
             ClerezzaBackend clerezzaBackend = null;
-            if (cmd.hasOption("filePath")) {
+            if (cmd.hasOption("rdfData")) {
                 clerezzaRDFParser = new Parser();
                 clerezzaRDFParser.bindParsingProvider(new JenaParserProvider());
                 MGraph mGraph = new SimpleMGraph(clerezzaRDFParser.parse(
-                    new FileInputStream(cmd.getOptionValue("filePath")), SupportedFormat.RDF_XML));
+                    new FileInputStream(cmd.getOptionValue("rdfData")), SupportedFormat.RDF_XML));
                 clerezzaBackend = new ClerezzaBackend(mGraph);
             }
 
@@ -106,14 +131,14 @@ public class ClerezzaQuery {
         } catch (ParseException e) {
             logger.error("invalid arguments");
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("LDQuery", options, true);
+            formatter.printHelp("ClerezzaQuery", options, true);
         } catch (LDPathParseException e) {
             logger.error("path or program could not be parsed");
             e.printStackTrace();
         } catch (FileNotFoundException e) {
             logger.error("file or program could not be found");
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("LDQuery", options, true);
+            formatter.printHelp("ClerezzaQuery", options, true);
         }
 
     }
@@ -124,32 +149,27 @@ public class ClerezzaQuery {
         OptionGroup query = new OptionGroup();
         OptionBuilder.withArgName("path");
         OptionBuilder.hasArg();
-        OptionBuilder
-                .withDescription("LD Path to evaluate on the file starting from the context");
+        OptionBuilder.withDescription("LD Path to evaluate on the file starting from the context");
         Option path = OptionBuilder.create("path");
         OptionBuilder.withArgName("file");
         OptionBuilder.hasArg();
-        OptionBuilder
-                .withDescription("LD Path program to evaluate on the file starting from the context");
-        Option program = OptionBuilder
-                .create("program");
+        OptionBuilder.withDescription("LD Path program to evaluate on the file starting from the context");
+        Option program = OptionBuilder.create("program");
         query.addOption(path);
         query.addOption(program);
         query.setRequired(true);
         result.addOptionGroup(query);
 
-        OptionBuilder.withArgName("filePath");
+        OptionBuilder.withArgName("rdfData");
         OptionBuilder.hasArg();
-        OptionBuilder
-                .withDescription("File system path of the file holding RDF data");
-        Option filePath = OptionBuilder.create("filePath");
+        OptionBuilder.withDescription("File system path of the file holding RDF data");
+        Option filePath = OptionBuilder.create("rdfData");
         filePath.setRequired(true);
         result.addOption(filePath);
 
         OptionBuilder.withArgName("uri");
         OptionBuilder.hasArg();
-        OptionBuilder
-                .withDescription("URI of the context node to start from");
+        OptionBuilder.withDescription("URI of the context node to start from");
         Option context = OptionBuilder.create("context");
         context.setRequired(true);
         result.addOption(context);

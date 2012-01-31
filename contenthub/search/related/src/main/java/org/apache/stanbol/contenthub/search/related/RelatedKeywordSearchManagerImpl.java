@@ -95,7 +95,7 @@ public class RelatedKeywordSearchManagerImpl implements RelatedKeywordSearchMana
     }
 
     @Override
-    public SearchResult getRelatedKeywordsFromReferencedCites(String keyword) throws SearchException {
+    public SearchResult getRelatedKeywordsFromReferencedSites(String keyword) throws SearchException {
         return getRelatedKeywordsFrom(keyword, ReferencedSiteSearch.class);
     }
 }

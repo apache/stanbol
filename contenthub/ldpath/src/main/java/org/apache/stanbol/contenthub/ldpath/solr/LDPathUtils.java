@@ -65,6 +65,8 @@ import at.newmedialab.ldpath.parser.ParseException;
 import at.newmedialab.ldpath.parser.RdfPathParser;
 
 /**
+ * Class containing utility methods for LDPath functionalities.
+ * 
  * @author anil.sinaci
  * 
  */
@@ -125,6 +127,12 @@ public class LDPathUtils {
 
     private Bundle bundle;
 
+    /**
+     * Constructor taking a {@link Bundle} parameter. This bundle is used when obtaining Solr schema template.
+     * 
+     * @param bundle
+     *            From which the template Solr schema is obtained.
+     */
     public LDPathUtils(Bundle bundle) {
         this.bundle = bundle;
     }
@@ -147,6 +155,14 @@ public class LDPathUtils {
         }
     }
 
+    /**
+     * Creates a {@link Reader} instance from the given program string.
+     * 
+     * @param program
+     * @return a {@link InputStreamReader}.
+     * @throws LDPathException
+     *             if {@link Constants#DEFAULT_ENCODING} is not supported
+     */
     public static Reader constructReader(String program) throws LDPathException {
         try {
             return new InputStreamReader(new ByteArrayInputStream(
@@ -180,6 +196,21 @@ public class LDPathUtils {
         return program;
     }
 
+    /**
+     * This method creates an {@link ArchiveInputStream} containing Solr schema configurations based on the
+     * provided <code>ldPathProgram</code>. All folders and files except <b>"schema-template.xml"</b> is took
+     * from a default Solr configuration template which is located in the resources of the bundle specified in
+     * the constructor of this class i.e {@link LDPathUtils}. Instead of the "schema-template" file, a
+     * <b>"schema.xml"</b> is created.
+     * 
+     * @param coreName
+     *            Name of the Solr core that is used instead of template
+     * @param ldPathProgram
+     *            Program for which the Solr core will be created
+     * @return {@link ArchiveInputStream} containing the Solr configurations for the provided
+     *         <code>ldPathProgram</code>
+     * @throws LDPathException
+     */
     public ArchiveInputStream createSchemaArchive(String coreName, String ldPathProgram) throws LDPathException {
         ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
         ArchiveStreamFactory asf = new ArchiveStreamFactory();
@@ -199,8 +230,7 @@ public class LDPathUtils {
             byte[] schemaFile = null;
             while ((ze = zis.getNextZipEntry()) != null) {
                 if (SOLR_TEMPLATE_SCHEMA.equals(ze.getName())) {
-                    schemaFile = createSchemaXML(coreName, getLDPathProgram(ldPathProgram),
-                        IOUtils.toByteArray(zis));
+                    schemaFile = createSchemaXML(getLDPathProgram(ldPathProgram), IOUtils.toByteArray(zis));
                     TarArchiveEntry te = new TarArchiveEntry(coreName + SOLR_SCHEMA);
                     te.setSize(schemaFile.length);
                     tarOutputStream.putArchiveEntry(te);
@@ -259,7 +289,25 @@ public class LDPathUtils {
         return is;
     }
 
-    private byte[] createSchemaXML(String coreName, Program<Resource> program, byte[] template) throws LDPathException {
+    /**
+     * Creates <b>"schema.xml"</b> file for the Solr configurations to be created for the provided LDPath
+     * program. Creates <b>Solr fields</b> for each field obtained by calling {@link Program#getFields()} of
+     * provided <code>program</code>. By default, <i>name</i>, <i>type</i>, <i>stored</i>, <i>indexed</i> and
+     * <i>multiValued</i> attributes of fields are set. Furthermore, any attribute obtained from the fields of
+     * the program is also set if it is included in {@link LDPathUtils#SOLR_FIELD_OPTIONS}. Another
+     * configuration about the fields obtained from the program is {@link LDPathUtils#SOLR_COPY_FIELD_OPTION}.
+     * If there is a specified configuration about this field, <b>destination</b> of <b>copyField</b> element
+     * is set accordingly. Otherwise, the destination is set as <b>text_all</b>
+     * 
+     * @param program
+     *            LDPath program of which fields will be obtained
+     * @param template
+     *            Solr schema template to be populated with the fields based on the provided
+     *            <code>program</code>
+     * @return created template in an array of bytes.
+     * @throws LDPathException
+     */
+    private byte[] createSchemaXML(Program<Resource> program, byte[] template) throws LDPathException {
 
         Builder xmlParser = new Builder();
         ByteArrayInputStream is = new ByteArrayInputStream(template);

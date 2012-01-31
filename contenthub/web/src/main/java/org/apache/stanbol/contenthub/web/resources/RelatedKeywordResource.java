@@ -42,6 +42,7 @@ import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearchManager;
 import org.apache.stanbol.contenthub.web.util.RestUtil;
+import org.apache.stanbol.contenthub.web.writers.SearchResultWriter;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -54,6 +55,13 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is the web resourceclass which implements the search functionality of Contenthub to look for related
+ * keywords, given a keyword.
+ * 
+ * @author anil.sinaci
+ * 
+ */
 @Path("/contenthub/search/related")
 public class RelatedKeywordResource extends BaseStanbolResource {
 
@@ -73,6 +81,22 @@ public class RelatedKeywordResource extends BaseStanbolResource {
             context);
     }
 
+    /**
+     * HTTP GET method to retrieve related keywords from all resources defined within Contenthub.
+     * 
+     * @param keyword
+     *            The keyword whose related keywords will be retrieved.
+     * @param ontologyURI
+     *            URI of the ontology to be used during the step in which related keywords are searched in
+     *            ontology resources. If this parameter is {@code null}, then no related keywords are returned
+     *            from ontology resources.
+     * @param headers
+     *            HTTP headers
+     * @return JSON string which is constructed by {@link SearchResultWriter}. {@link SearchResult} returned
+     *         by {@link RelatedKeywordSearchManager#getRelatedKeywordsFromAllSources(String, String)} only contains related keywords (no resultant documents
+     *         or facet fields are returned within the {@link SearchResult}).
+     * @throws SearchException
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public final Response findAllRelatedKeywords(@QueryParam("keyword") String keyword,
@@ -97,6 +121,19 @@ public class RelatedKeywordResource extends BaseStanbolResource {
         return prepareResponse(searchResult, headers);
     }
 
+    /**
+     * HTTP GET method to retrieve related keywords from Wordnet. If a Wordnet database is not installed into
+     * Contenthub, this method cannot find any related keywords.
+     * 
+     * @param keyword
+     *            The keyword whose related keywords will be retrieved from Wordnet.
+     * @param headers
+     *            HTTP headers
+     * @return JSON string which is constructed by {@link SearchResultWriter}. {@link SearchResult} returned
+     *         by {@link RelatedKeywordSearchManager#getRelatedKeywordsFromWordnet(String)} contains only related keywords from Wordnet. (No
+     *         resultant documents or facet fields are returned within the {@link SearchResult}).
+     * @throws SearchException
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/wordnet")
@@ -117,6 +154,22 @@ public class RelatedKeywordResource extends BaseStanbolResource {
         return prepareResponse(searchResult, headers);
     }
 
+    /**
+     * HTTP GET method to retrieve related keywords from ontology resources. Given the ontology URI, this
+     * method looks for subsumption/hierarchy relations among the concepts to come up with related keywords.
+     * 
+     * @param keyword
+     *            The keyword whose related keywords will be retrieved from ontology resources.
+     * @param ontologyURI
+     *            URI of the ontology in which related keywords will be searched. The ontology should be
+     *            available in the Contenthub system.
+     * @param headers
+     *            HTTP headers
+     * @return JSON string which is constructed by {@link SearchResultWriter}. {@link SearchResult} returned
+     *         by {@link RelatedKeywordSearchManager#getRelatedKeywordsFromOntology(String, String)} contains only related keywords from ontology resources.
+     *         (No resultant documents or facet fields are returned within the {@link SearchResult}).
+     * @throws SearchException
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/ontology")
@@ -146,6 +199,20 @@ public class RelatedKeywordResource extends BaseStanbolResource {
         return prepareResponse(searchResult, headers);
     }
 
+    /**
+     * 
+     * HTTP GET method to retrieve related keywords from the referenced sites.
+     * 
+     * @param keyword
+     *            The keyword whose related keywords will be retrieved from referenced sites.
+     * @param headers
+     *            HTTP headers
+     * @return JSON string which is constructed by {@link SearchResultWriter}. {@link SearchResult} returned
+     *         by {@link RelatedKeywordSearchManager#getRelatedKeywordsFromReferencedSites(String)} contains
+     *         only related keywords from referenced sites. (No resultant documents or facet fields are
+     *         returned within the {@link SearchResult}).
+     * @throws SearchException
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/referencedsite")
@@ -163,7 +230,7 @@ public class RelatedKeywordResource extends BaseStanbolResource {
         }
 
         SearchResult searchResult = relatedKeywordSearchManager
-                .getRelatedKeywordsFromReferencedCites(keyword);
+                .getRelatedKeywordsFromReferencedSites(keyword);
         return prepareResponse(searchResult, headers);
     }
 
@@ -175,6 +242,7 @@ public class RelatedKeywordResource extends BaseStanbolResource {
     }
 
     /**
+     * TODO: Not completed yet.
      * This method is used to provide data to autocomplete component. It queries entityhub with the provided
      * query term.
      */

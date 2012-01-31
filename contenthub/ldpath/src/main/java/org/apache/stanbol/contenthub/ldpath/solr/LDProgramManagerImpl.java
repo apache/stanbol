@@ -192,7 +192,8 @@ public class LDProgramManagerImpl implements LDProgramManager {
     @Override
     public void deleteProgram(String programName) {
         if (isManagedProgram(programName)) {
-            SolrCoreManager.getInstance(bundle.getBundleContext(), managedSolrServer).deleteSolrCore(programName);
+            SolrCoreManager.getInstance(bundle.getBundleContext(), managedSolrServer).deleteSolrCore(
+                programName);
             nameProgramMap.remove(programName);
             String programFilePath = managedProgramsDir.getAbsolutePath() + File.separator + programName;
             File programFile = new File(programFilePath);
@@ -219,16 +220,18 @@ public class LDProgramManagerImpl implements LDProgramManager {
         LDPath<Resource> ldpath = new LDPath<Resource>(new ClerezzaBackend(graph));
         String ldPathProgram = getProgramByName(programName);
         Iterator<Triple> it = graph.filter(null, Properties.ENHANCER_ENTITY_REFERENCE, null);
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             try {
-                Map<String,Collection<?>> entityResults = ldpath.programQuery(it.next().getObject(), LDPathUtils.constructReader(ldPathProgram));
-                for(Entry<String,Collection<?>> entry : entityResults.entrySet()) {
-                    if(results.containsKey(entry.getKey())) {
+                Map<String,Collection<?>> entityResults = ldpath.programQuery(it.next().getObject(),
+                    LDPathUtils.constructReader(ldPathProgram));
+                for (Entry<String,Collection<?>> entry : entityResults.entrySet()) {
+                    if (results.containsKey(entry.getKey())) {
                         @SuppressWarnings("unchecked")
-                        Collection<Object> resultCollection = (Collection<Object>) results.get(entry.getKey());
+                        Collection<Object> resultCollection = (Collection<Object>) results
+                                .get(entry.getKey());
                         @SuppressWarnings("unchecked")
                         Collection<Object> tmpCol = (Collection<Object>) entry.getValue();
-                        for(Object o : tmpCol) {
+                        for (Object o : tmpCol) {
                             resultCollection.add(o);
                         }
                     } else {
@@ -242,7 +245,7 @@ public class LDProgramManagerImpl implements LDProgramManager {
             }
         }
         return results;
-        
+
     }
 
 }
