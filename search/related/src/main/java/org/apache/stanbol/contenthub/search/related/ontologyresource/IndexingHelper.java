@@ -19,7 +19,7 @@ package org.apache.stanbol.contenthub.search.related.ontologyresource;
 import java.util.List;
 
 import org.apache.stanbol.cmsadapter.servicesapi.helper.CMSAdapterVocabulary;
-import org.apache.stanbol.contenthub.servicesapi.search.vocabulary.SearchVocabulary;
+import org.apache.stanbol.contenthub.servicesapi.Constants;
 
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -34,16 +34,28 @@ import com.hp.hpl.jena.vocabulary.RDF;
  * This class is created to create LARQ index of external ontology provided for the search operation
  */
 public class IndexingHelper {
+
+    /**
+     * Represents the special property which is used by Lucene while creating the index. At the beginning of a
+     * search operation, user ontology is processed to add this special property to each class and individual
+     * resource by using their local names.
+     */
+    public static final Property HAS_LOCAL_NAME = property("hasLocalName");
+
+    private static Property property(String local) {
+        return ResourceFactory.createProperty(Constants.SEARCH_URI, local);
+    }
+
     public static void addIndexPropertyToOntResources(OntModel model) {
         // Add class names
         for (OntClass klass : model.listClasses().toList()) {
             if (klass == null || klass.isAnon()) continue;
-            klass.addProperty(SearchVocabulary.HAS_LOCAL_NAME, klass.getLocalName());
+            klass.addProperty(HAS_LOCAL_NAME, klass.getLocalName());
         }
         // Add individual names
         for (OntResource ind : model.listIndividuals().toList()) {
             if (ind == null || ind.isAnon()) continue;
-            ind.addProperty(SearchVocabulary.HAS_LOCAL_NAME, ind.getLocalName());
+            ind.addProperty(HAS_LOCAL_NAME, ind.getLocalName());
         }
 
         // Add CMS objects
@@ -58,7 +70,7 @@ public class IndexingHelper {
              */
             String name = getCMSObjectName(subject);
             if (!name.equals("")) {
-                Statement s = ResourceFactory.createStatement(subject, SearchVocabulary.HAS_LOCAL_NAME,
+                Statement s = ResourceFactory.createStatement(subject, HAS_LOCAL_NAME,
                     ResourceFactory.createPlainLiteral(name));
                 model.add(s);
             }

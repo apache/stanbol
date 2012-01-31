@@ -17,15 +17,25 @@
 package org.apache.stanbol.contenthub.servicesapi.exception;
 
 /**
+ * Abstract exception class to be used as a parent in various types of other Contenthub exceptions.
  * 
  * @author anil.sinaci
- *
+ * 
  */
-public class ContenthubException extends Exception {
+public abstract class AbstractContenthubException extends Exception {
 
     private static final long serialVersionUID = -2303415622874917355L;
 
-    public ContenthubException(String msg) {
+    protected AbstractContenthubException(String msg) {
         super(msg);
     }
+
+    protected AbstractContenthubException(Throwable cause) {
+        super(cause);
+    }
+
+    protected AbstractContenthubException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+
 }

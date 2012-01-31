@@ -33,7 +33,6 @@ import org.apache.stanbol.contenthub.search.related.RelatedKeywordImpl;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearch;
-import org.apache.stanbol.contenthub.servicesapi.search.vocabulary.SearchVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +127,7 @@ public class OntologyResourceSearch implements RelatedKeywordSearch {
                 userOntologyURI));
         }
         this.userOntology = userGraph;
-        this.userGraphIndexBuilder = new IndexBuilderString(SearchVocabulary.HAS_LOCAL_NAME);
+        this.userGraphIndexBuilder = new IndexBuilderString(IndexingHelper.HAS_LOCAL_NAME);
         this.userGraphIndexBuilder.indexStatements(userGraph.listStatements());
         // Do not forget to set the default index just before the query execution according to its context
         // LARQ.setDefaultIndex(index);

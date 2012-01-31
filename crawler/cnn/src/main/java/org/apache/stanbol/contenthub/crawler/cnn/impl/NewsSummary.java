@@ -20,6 +20,7 @@ package org.apache.stanbol.contenthub.crawler.cnn.impl;
 import java.net.URI;
 
 /**
+ * Bean class to keep information about news that are obtained from news sources.
  * 
  * @author cihan
  * 
@@ -53,14 +54,4 @@ public class NewsSummary {
     public void setTitle(String title) {
         this.title = title;
     }
-    
-    /*public Map<String, List<Object>> getTitleConstraint() {
-        if(title == null || title.isEmpty()) return null;
-        Map<String, List<Object>> titleConstraint = new HashMap<String,List<Object>>();
-        List<Object> titleList = new ArrayList<Object>(1);
-        titleList.add(title);
-        titleConstraint.put(SolrVocabulary.SolrFieldName.TITLE.toString(), titleList);
-        return titleConstraint;
-    }*/
-
 }

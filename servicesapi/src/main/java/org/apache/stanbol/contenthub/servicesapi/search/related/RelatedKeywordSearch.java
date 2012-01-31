@@ -21,9 +21,36 @@ import java.util.Map;
 
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
 
+/**
+ * Related keyword searcher for a given query keyword.
+ * 
+ * @author suat
+ * 
+ */
 public interface RelatedKeywordSearch {
 
+    /**
+     * This method searches for related keywords for the given <code>keyword</code>.
+     * 
+     * @param keyword
+     *            The query keyword for which related keywords will be obtained.
+     * @return a {@link Map} containing the related keywords. Keys of this map represents sources/categories
+     *         of the related keywords. Values of the map keeps {@link List} of {@link RelatedKeyword}s.
+     * @throws SearchException
+     */
     Map<String,List<RelatedKeyword>> search(String keyword) throws SearchException;
 
+    /**
+     * This method searches for related keywords for the given <code>keyword</code>. It also takes URI of an
+     * ontology which will be used as a related keyword source while searching through ontology resources.
+     * 
+     * @param keyword
+     *            The query keyword for which related keywords will be obtained.
+     * @param ontologyURI
+     *            URI of the ontology in which related keyword will be searched
+     * @return a {@link Map} containing the related keywords. Keys of this map represents sources/categories
+     *         of the related keywords. Values of the map keeps {@link List} of {@link RelatedKeyword}s.
+     * @throws SearchException
+     */
     Map<String,List<RelatedKeyword>> search(String keyword, String ontologyURI) throws SearchException;
 }

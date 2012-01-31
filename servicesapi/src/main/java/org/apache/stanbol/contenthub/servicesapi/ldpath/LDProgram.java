@@ -17,8 +17,10 @@
 package org.apache.stanbol.contenthub.servicesapi.ldpath;
 
 /**
+ * Simple bean class representing the LDPath programs. Contains the program itself together with its name.
+ * 
  * @author anil.sinaci
- *
+ * 
  */
 public class LDProgram {
 
@@ -29,18 +31,21 @@ public class LDProgram {
         this.name = name;
         this.ldPathProgram = ldPathProgram;
     }
-    
+
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
+
     public String getLdPathProgram() {
         return ldPathProgram;
     }
+
     public void setLdPathProgram(String ldPathProgram) {
         this.ldPathProgram = ldPathProgram;
     }
-    
+
 }

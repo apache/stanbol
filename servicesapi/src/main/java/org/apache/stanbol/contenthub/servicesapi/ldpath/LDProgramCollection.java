@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * A collection class for the managed LDPath programs in the Contenthub. Operates on a {@link Map} keeping the
+ * &lt;name,program> pairs.
+ * 
  * @author anil.sinaci
  * 
  */
@@ -28,26 +31,52 @@ public class LDProgramCollection {
 
     private Map<String,String> nameProgramMap;
 
+    /**
+     * Creates an {@link LDProgramCollection} based on a provide {@link Map} keeping &lt;name,program> pairs.
+     * 
+     * @param nameProgramMap
+     *            On which the {@link LDProgramCollection} will be initialized.
+     */
     public LDProgramCollection(Map<String,String> nameProgramMap) {
         this.nameProgramMap = nameProgramMap;
     }
 
+    /**
+     * This method returns the list of LDPath programs stored in the scope of Contenthub.
+     * 
+     * @return {@link List} of {@link LDProgram}s.
+     */
     public List<LDProgram> asList() {
         List<LDProgram> list = new ArrayList<LDProgram>();
-        for(Map.Entry<String,String> entry : nameProgramMap.entrySet()) {
+        for (Map.Entry<String,String> entry : nameProgramMap.entrySet()) {
             list.add(new LDProgram(entry.getKey(), entry.getValue()));
         }
         return list;
     }
 
+    /**
+     * This method returns the programs stored in the scope of Contenthub as a {@link Map}.
+     * 
+     * @return {@link Map} keeping the &lt;name,program> pairs.
+     */
     public Map<String,String> asMap() {
         return this.nameProgramMap;
     }
-    
+
+    /**
+     * This method returns the names of LDPath programs stored in the scope of Contenthub.
+     * 
+     * @return {@link List} of program names.
+     */
     public List<String> getProgramNames() {
         return new ArrayList<String>(nameProgramMap.keySet());
     }
-    
+
+    /**
+     * This method returns the LDPath programs themselves that are stored in the scope of Contenthub.
+     * 
+     * @return {@link List} of programs.
+     */
     public List<String> getPrograms() {
         return new ArrayList<String>(nameProgramMap.values());
     }

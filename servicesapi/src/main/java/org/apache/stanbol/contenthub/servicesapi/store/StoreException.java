@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.contenthub.servicesapi.store;
 
-import org.apache.stanbol.contenthub.servicesapi.AbstractContenthubException;
+import org.apache.stanbol.contenthub.servicesapi.exception.AbstractContenthubException;
 
 /**
  * @author anil.sinaci
