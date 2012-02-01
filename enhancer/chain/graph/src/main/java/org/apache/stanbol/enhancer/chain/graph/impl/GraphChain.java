@@ -411,8 +411,7 @@ public class GraphChain extends AbstractChain implements Chain {
 
         @Override
         public String getName() {
-            throw new UnsupportedOperationException("Not expected to be called" +
-            		"on this internally used Chain implementation");
+            return GraphChain.this.getName();
         }
     }
     /**
@@ -495,8 +494,7 @@ public class GraphChain extends AbstractChain implements Chain {
 
         @Override
         public String getName() {
-            throw new UnsupportedOperationException("Not expected to be called" +
-                    "on this internally used Chain implementation");
+            return GraphChain.this.getName();
         }
 
     }
