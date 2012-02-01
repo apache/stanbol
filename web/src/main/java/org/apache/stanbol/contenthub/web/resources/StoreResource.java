@@ -192,7 +192,8 @@ public class StoreResource extends BaseStanbolResource {
         // handle smart redirection to browser view
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (mt.toString().startsWith(TEXT_HTML)) {
-                URI pageUri = uriInfo.getBaseUriBuilder().path("/contenthub/store/page").path(contentURI).build();
+                URI pageUri = uriInfo.getBaseUriBuilder().path("/contenthub/store/page").path(contentURI)
+                        .build();
                 return Response.temporaryRedirect(pageUri).build();
             }
         }
@@ -200,8 +201,8 @@ public class StoreResource extends BaseStanbolResource {
         // handle smart redirection to RDF metadata view
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (RDF_MEDIA_TYPES.contains(mt.toString())) {
-                URI metadataUri = uriInfo.getBaseUriBuilder().path("/contenthub/store/metadata").path(contentURI)
-                        .build();
+                URI metadataUri = uriInfo.getBaseUriBuilder().path("/contenthub/store/metadata")
+                        .path(contentURI).build();
                 return Response.temporaryRedirect(metadataUri).build();
             }
         }
@@ -226,7 +227,7 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/download/{type}/{uri:.+}")
     public Response downloadContentItem(@PathParam(value = "type") String type,
                                         @PathParam(value = "uri") String contentURI) throws IOException,
-                                                                             StoreException {
+                                                                                    StoreException {
 
         ContentItem ci = solrStore.get(contentURI);
         if (ci == null) {
@@ -286,7 +287,7 @@ public class StoreResource extends BaseStanbolResource {
     @GET
     @Path("/metadata/{uri:.+}")
     public Response getContentItemMetaData(@PathParam(value = "uri") String contentURI) throws IOException,
-                                                                                StoreException {
+                                                                                       StoreException {
         ContentItem ci = solrStore.get(contentURI);
         if (ci == null) {
             throw new WebApplicationException(404);
@@ -309,7 +310,8 @@ public class StoreResource extends BaseStanbolResource {
      */
     @GET
     @Path("/raw/{uri:.+}")
-    public Response getRawContent(@PathParam(value = "uri") String contentURI) throws IOException, StoreException {
+    public Response getRawContent(@PathParam(value = "uri") String contentURI) throws IOException,
+                                                                              StoreException {
         ContentItem ci = solrStore.get(contentURI);
         if (ci == null) {
             throw new WebApplicationException(404);
@@ -386,8 +388,8 @@ public class StoreResource extends BaseStanbolResource {
      *            corresponding Solr schema includes the author field. Solr indexed can be created/adjusted
      *            through LDPath programs.
      * @param contentURI
-     *            URI for the content item. If not supplied, Contenthub automatically assigns a URI to the
-     *            content item.
+     *            URI for the content item if this post is an update action on an existing Content item.
+     *            Existing content item will first removed and a new URI will be assigned for the new content.
      * @param title
      *            The title for the content item. Titles can be used to present summary of the actual content.
      *            For example, search results are presented by showing the titles of resultant content items.
@@ -437,9 +439,9 @@ public class StoreResource extends BaseStanbolResource {
      *            "John Doe"}. Then, this constraint is added to the Solr and will be indexed if the
      *            corresponding Solr schema includes the author field. Solr indexed can be created/adjusted
      *            through LDPath programs.
-     * @param contentId
-     *            The unique ID for the content item. If not supplied, Contenthub automatically assigns an ID
-     *            to the content item.
+     * @param contentURI
+     *            URI for the content item if this post is an update action on an existing Content item.
+     *            Existing content item will first removed and a new URI will be assigned for the new content.
      * @param title
      *            The title for the content item. Titles can be used to present summary of the actual content.
      *            For example, search results are presented by showing the titles of resultant content items.
@@ -460,7 +462,7 @@ public class StoreResource extends BaseStanbolResource {
     public Response createContentItemFromForm(@FormDataParam("file") File file,
                                               @FormDataParam("file") FormDataContentDisposition disposition,
                                               @FormDataParam("constraints") String jsonCons,
-                                              @FormDataParam("contentId") String contentId,
+                                              @FormDataParam("uri") String contentURI,
                                               @FormDataParam("title") String title,
                                               @FormDataParam("ldprogram") String ldprogram,
                                               @Context HttpHeaders headers) throws URISyntaxException,
@@ -472,7 +474,7 @@ public class StoreResource extends BaseStanbolResource {
         if (jsonCons != null) {
             constraints = JSONUtils.convertToMap(jsonCons);
         }
-        return createContentItemFromForm(null, contentId, null, file, disposition, headers, constraints,
+        return createContentItemFromForm(null, contentURI, null, file, disposition, headers, constraints,
             title, ldprogram);
     }
 
@@ -481,8 +483,8 @@ public class StoreResource extends BaseStanbolResource {
      * HTTP PUT method to create a content item in Contenthub.
      * 
      * @param contentURI
-     *            URI for the content item. If not supplied, Contenthub automatically assigns an ID
-     *            to the content item.
+     *            URI for the content item. If not supplied, Contenthub automatically assigns an ID to the
+     *            content item.
      * @param data
      * @param headers
      * @return
@@ -581,7 +583,9 @@ public class StoreResource extends BaseStanbolResource {
 
     /**
      * HTTP DELETE method to delete a content item from Contenhub.
-     * @param contentURI URI of the content item to be deleted.
+     * 
+     * @param contentURI
+     *            URI of the content item to be deleted.
      * @return HTTP OK
      * @throws StoreException
      */
@@ -649,7 +653,8 @@ public class StoreResource extends BaseStanbolResource {
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-        return new ContentItemResource(localId, ci, uriInfo, tcManager, serializer, servletContext);
+        return new ContentItemResource(localId, ci, uriInfo, uriInfo.getBaseUriBuilder().path(
+            "/contenthub/store"), tcManager, serializer, servletContext);
     }
 
     // Helper methods for HTML view
