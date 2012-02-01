@@ -1,26 +1,25 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.enhancer.jersey.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.WILDCARD;
-import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.SUPPORTED_RDF_TYPES;
@@ -37,10 +36,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -61,16 +57,13 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
-import org.apache.stanbol.enhancer.jersey.resource.EnhancerRootResource.ExecutionNode;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
@@ -120,7 +113,6 @@ public class EnhancerRootResource extends BaseStanbolResource {
 
     protected Serializer serializer;
 
-    
     public EnhancerRootResource(@Context ServletContext context) {
         // bind the job manager by looking it up from the servlet request context
         jobManager = ContextHelper.getServiceFromContext(EnhancementJobManager.class, context);
@@ -130,64 +122,66 @@ public class EnhancerRootResource extends BaseStanbolResource {
         engineManager = ContextHelper.getServiceFromContext(EnhancementEngineManager.class, context);
         chain = chainManager.getDefault();
     }
-    
+
     public URI getServiceUrl(){
         return uriInfo.getAbsolutePath();
     }
     
     @OPTIONS
-    public Response handleCorsPreflight(@Context HttpHeaders headers){
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext,res, headers);
+        enableCORS(servletContext, res, headers);
         return res.build();
     }
 
     @GET
     @Produces(TEXT_HTML)
     public Response get(@Context HttpHeaders headers) {
-        ResponseBuilder res = Response.ok(new Viewable("index", this),TEXT_HTML);
-        addCORSOrigin(servletContext,res, headers);
+        ResponseBuilder res = Response.ok(new Viewable("index", this), TEXT_HTML);
+        addCORSOrigin(servletContext, res, headers);
         return res.build();
     }
 
-    public boolean isEngineActive(String name){
+    public boolean isEngineActive(String name) {
         return engineManager.isEngine(name);
     }
-    
+
     /**
-     * Getter for the executionNodes 
+     * Getter for the executionNodes
+     * 
      * @return
      */
     public Set<ExecutionNode> getExecutionNodes() {
-        if(_executionNodes == null){
+        if (_executionNodes == null) {
             Graph ep;
             try {
                 ep = chain.getExecutionPlan();
             } catch (ChainException e) {
                 ep = null;
             }
-            if(ep != null){
+            if (ep != null) {
                 _executionNodes = new LinkedHashSet<ExecutionNode>();
                 Set<NonLiteral> processed = new HashSet<NonLiteral>();
                 Set<NonLiteral> next;
                 do {
                     next = ExecutionPlanHelper.getExecutable(ep, processed);
-                    for(NonLiteral node : next){
+                    for (NonLiteral node : next) {
                         _executionNodes.add(new ExecutionNode(ep, node));
                     }
                     processed.addAll(next);
-                } while(!next.isEmpty());
+                } while (!next.isEmpty());
             }
         }
         return _executionNodes;
     }
+
     public Set<ExecutionNode> getActiveNodes() {
-        if(_activeNodes == null){
+        if (_activeNodes == null) {
             Set<ExecutionNode> ens = getExecutionNodes();
-            if(ens != null){
+            if (ens != null) {
                 _activeNodes = new LinkedHashSet<ExecutionNode>();
-                for(ExecutionNode en : ens){
-                    if(en.isEngineActive()){
+                for (ExecutionNode en : ens) {
+                    if (en.isEngineActive()) {
                         _activeNodes.add(en);
                     }
                 }
@@ -195,45 +189,46 @@ public class EnhancerRootResource extends BaseStanbolResource {
         }
         return _activeNodes;
     }
-//    public EnhancementEngine getEngine(String name){
-//        return engineManager.getEngine(name);
-//    }
-//    public Map<String,EnhancementEngine> getActiveEngines() {
-//        Graph ep;
-//        try {
-//            ep = chain.getExecutionPlan();
-//        } catch (ChainException e) {
-//            return null;
-//        }
-//        Map<String,EnhancementEngine> active;
-//        if(ep != null){
-//            active = new HashMap<String,EnhancementEngine>();
-//            for(EnhancementEngine engine :  ExecutionPlanHelper.getActiveEngines(engineManager, ep)){
-//                active.put(engine.getName(), engine);
-//            }
-//        } else {
-//            active = null;
-//        }
-//        return active;
-//    }
-    
-    public Chain getChain(){
+
+    // public EnhancementEngine getEngine(String name){
+    // return engineManager.getEngine(name);
+    // }
+    // public Map<String,EnhancementEngine> getActiveEngines() {
+    // Graph ep;
+    // try {
+    // ep = chain.getExecutionPlan();
+    // } catch (ChainException e) {
+    // return null;
+    // }
+    // Map<String,EnhancementEngine> active;
+    // if(ep != null){
+    // active = new HashMap<String,EnhancementEngine>();
+    // for(EnhancementEngine engine : ExecutionPlanHelper.getActiveEngines(engineManager, ep)){
+    // active.put(engine.getName(), engine);
+    // }
+    // } else {
+    // active = null;
+    // }
+    // return active;
+    // }
+
+    public Chain getChain() {
         return chain;
     }
 
-    public boolean isChainAvailable(){
+    public boolean isChainAvailable() {
         Set<ExecutionNode> nodes = getExecutionNodes();
-        if(nodes == null){
+        if (nodes == null) {
             return false;
         }
-        for(ExecutionNode node : getExecutionNodes()){
-            if(!node.isOptional() && ! node.isEngineActive()){
+        for (ExecutionNode node : getExecutionNodes()) {
+            if (!node.isOptional() && !node.isEngineActive()) {
                 return false;
             }
         }
         return true;
     }
-    
+
     public static String makeEngineId(EnhancementEngine engine) {
         // TODO: add a property on engines to provided custom local ids and make
         // this static method a method of the interface EnhancementEngine
@@ -303,20 +298,20 @@ public class EnhancerRootResource extends BaseStanbolResource {
                                                boolean inclExecMetadata ,
                                                boolean buildAjaxview) throws EnhancementException, IOException {
         if (jobManager != null) {
-            jobManager.enhanceContent(ci,chain);
+            jobManager.enhanceContent(ci, chain);
         }
 
         if (buildAjaxview) {
-            ContentItemResource contentItemResource = new ContentItemResource(null, ci, uriInfo, tcManager,
-                    serializer, servletContext);
+            ContentItemResource contentItemResource = new ContentItemResource(null, ci, uriInfo,
+                    uriInfo.getBaseUriBuilder(), tcManager, serializer, servletContext);
             contentItemResource.setRdfSerializationFormat(format);
             Viewable ajaxView = new Viewable("/ajax/contentitem", contentItemResource);
-            ResponseBuilder rb =  Response.ok(ajaxView);
-            rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=UTF-8");
-            addCORSOrigin(servletContext,rb, headers);
+            ResponseBuilder rb = Response.ok(ajaxView);
+            rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=UTF-8");
+            addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
-        
+
         MGraph graph = ci.getMetadata();
         if(inclExecMetadata){
             try {
@@ -326,55 +321,59 @@ public class EnhancerRootResource extends BaseStanbolResource {
             }
         }
         ResponseBuilder rb = Response.ok(graph);
-        List<String> accepted = headers.getRequestHeader(HttpHeaders.ACCEPT);
-        MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers,null);
-        //This can be used to create a customised WebExection. Jersey will sent
-        //a 500er response code in any case
-//        if(isAcceptableMediaType(mediaType, SUPPORTED_RDF_TYPES)){
-//           //USE THIS for special error response    
-//        }
+        // List<String> accepted = headers.getRequestHeader(HttpHeaders.ACCEPT);
+        MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+        // This can be used to create a customised WebExection. Jersey will sent
+        // a 500er response code in any case
+        // if(isAcceptableMediaType(mediaType, SUPPORTED_RDF_TYPES)){
+        // //USE THIS for special error response
+        // }
         if (mediaType != null) {
             rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
         }
-        
-        addCORSOrigin(servletContext,rb, headers);
+
+        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
     public class ExecutionNode {
-        
+
         private final NonLiteral node;
         private final TripleCollection ep;
         private final boolean optional;
         private final String engineName;
-        
+
         public ExecutionNode(TripleCollection executionPlan, NonLiteral node) {
             this.node = node;
             this.ep = executionPlan;
             this.optional = ExecutionPlanHelper.isOptional(ep, node);
             this.engineName = ExecutionPlanHelper.getEngine(ep, node);
         }
-        
+
         public boolean isOptional() {
             return optional;
         }
+
         public String getEngineName() {
             return engineName;
         }
-        
-        public EnhancementEngine getEngine(){
+
+        public EnhancementEngine getEngine() {
             return engineManager.getEngine(engineName);
         }
-        public boolean isEngineActive(){
+
+        public boolean isEngineActive() {
             return engineManager.isEngine(engineName);
         }
+
         @Override
         public int hashCode() {
             return node.hashCode();
         }
+
         @Override
         public boolean equals(Object o) {
-            return o instanceof ExecutionNode && ((ExecutionNode)o).node.equals(node);
+            return o instanceof ExecutionNode && ((ExecutionNode) o).node.equals(node);
         }
     }
 
