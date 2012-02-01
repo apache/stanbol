@@ -32,7 +32,10 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.apache.stanbol.enhancer.jersey.resource.ChainsRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnginesRootResource;
+import org.apache.stanbol.enhancer.jersey.resource.EnhancementEngineResource;
+import org.apache.stanbol.enhancer.jersey.resource.EnhancementEnginesRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnhancerRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnhancementChainResource;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
@@ -84,6 +87,9 @@ public class EnhancerWebFragment implements WebFragment {
         classes.add(EnginesRootResource.class);
         classes.add(EnhancerRootResource.class);
         classes.add(EnhancementChainResource.class);
+        classes.add(ChainsRootResource.class);
+        classes.add(EnhancementEnginesRootResource.class);
+        classes.add(EnhancementEngineResource.class);
         return classes;
     }
 
@@ -121,7 +127,7 @@ public class EnhancerWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("engines", "/engines", "/imports/enginesDescription.ftl", 10));
+        links.add(new NavigationLink("enhancer", "/enhancer", "/imports/enginesDescription.ftl", 10));
         return links;
     }
 

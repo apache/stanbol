@@ -1,7 +1,7 @@
 package org.apache.stanbol.enhancer.jobmanager.event.impl;
 
 import static org.apache.stanbol.enhancer.jobmanager.event.Constants.PROPERTY_JOB_MANAGER;
-import static org.apache.stanbol.enhancer.jobmanager.event.Constants.PROPERTY_NODE;
+import static org.apache.stanbol.enhancer.jobmanager.event.Constants.PROPERTY_EXECUTION;
 import static org.apache.stanbol.enhancer.jobmanager.event.Constants.TOPIC_JOB_MANAGER;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.getEngine;
 
@@ -126,6 +126,7 @@ public class EnhancementJobHandler implements EventHandler {
             processingLock.writeLock().unlock();
         }
         if(init){
+            enhancementJob.startProcessing();
             executeNextNodes(enhancementJob);
         }
         return o;
@@ -134,8 +135,51 @@ public class EnhancementJobHandler implements EventHandler {
     @Override
     public void handleEvent(Event event) {
         EnhancementJob job = (EnhancementJob)event.getProperty(PROPERTY_JOB_MANAGER);
-        NonLiteral node = (NonLiteral)event.getProperty(PROPERTY_NODE);
-        String engineName = getEngine(job.getExecutionPlan(), node);
+        NonLiteral execution = (NonLiteral)event.getProperty(PROPERTY_EXECUTION);
+        if(job == null || execution == null){
+            log.warn("Unable to process EnhancementEvent where EnhancementJob " +
+            		"{} or Execution node {} is null -> ignore",job,execution);
+        }
+        try {
+            processEvent(job, execution);
+        } catch (Throwable t) {
+            //this ensures that an runtime exception does not 
+           job.setFailed(execution, null, new IllegalStateException(
+               "Unexpected Exception while processing ContentItem '"
+               + job.getContentItem().getUri()+"' with EnhancementJobManager: "
+               + EventJobManagerImpl.class,t)); 
+        }
+        //(2) trigger the next actions
+        log.debug("++ w: {}","check for next Executions");
+        job.getLock().writeLock().lock();
+        log.debug(">> w: {}","check for next Executions");
+        try {
+            if(job.isFinished()){
+                finish(job);
+            } else if(!job.isFailed()){
+                executeNextNodes(job);
+            } else {
+                if(log.isInfoEnabled()){
+                    Collection<String> running = new ArrayList<String>(3);
+                    for(NonLiteral runningNode : job.getRunning()){
+                        running.add(getEngine(job.getExecutionPlan(), runningNode));
+                    }
+                    log.debug("Job {} failed, but {} still running!",
+                        job.getContentItem().getUri(),running);
+                }
+            }
+        } finally {
+            log.debug("<< w: {}","check for next Executions");
+            job.getLock().writeLock().unlock();
+        }
+    }
+    /**
+     * @param job
+     * @param execution
+     */
+    private void processEvent(EnhancementJob job, NonLiteral execution) {
+        NonLiteral executionNode = job.getExecutionNode(execution);
+        String engineName = getEngine(job.getExecutionPlan(), executionNode);
         //(1) execute the parsed ExecutionNode
         EnhancementEngine engine = engineManager.getEngine(engineName);
         if(engine != null){
@@ -158,9 +202,9 @@ public class EnhancementJobHandler implements EventHandler {
                 log.debug(">> w: {}: {}","start sync execution", engine.getName());
                 try {
                     engine.computeEnhancements(job.getContentItem());
-                    job.setCompleted(node);
+                    job.setCompleted(execution);
                 } catch (EngineException e){
-                    job.setFailed(node, engine, e);
+                    job.setFailed(execution, engine, e);
                 } finally{
                     log.debug("<< w: {}: {}","finished sync execution", engine.getName());
                     job.getLock().writeLock().unlock();
@@ -170,38 +214,15 @@ public class EnhancementJobHandler implements EventHandler {
                     log.debug("++ n: start async execution of Engine {}",engine.getName());
                     engine.computeEnhancements(job.getContentItem());
                     log.debug("++ n: finished async execution of Engine {}",engine.getName());
-                    job.setCompleted(node);
+                    job.setCompleted(execution);
                 } catch (EngineException e) {
-                    job.setFailed(node, engine, e);
+                    job.setFailed(execution, engine, e);
                 }
             } else { //required engine is unable to enhance the content 
-                job.setFailed(node,engine,exception);
+                job.setFailed(execution,engine,exception);
             }
         } else { //engine with that name is not available
-            job.setFailed(node, null, null);
-        }
-        //(2) trigger the next actions
-        log.debug("++ w: {}: {}","check next after", engineName);
-        job.getLock().writeLock().lock();
-        log.debug(">> w: {}: {}","check next after", engineName);
-        try {
-            if(job.isFinished()){
-                finish(job);
-            } else if(!job.isFailed()){
-                executeNextNodes(job);
-            } else {
-                if(log.isInfoEnabled()){
-                    Collection<String> running = new ArrayList<String>(3);
-                    for(NonLiteral runningNode : job.getRunning()){
-                        running.add(getEngine(job.getExecutionPlan(), runningNode));
-                    }
-                    log.debug("Job {} failed, but {} still running!",
-                        job.getContentItem().getUri(),running);
-                }
-            }
-        } finally {
-            log.debug("<< w: {}: {}","check next after", engineName);
-            job.getLock().writeLock().unlock();
+            job.setFailed(execution, null, null);
         }
     }
     /**
@@ -240,7 +261,7 @@ public class EnhancementJobHandler implements EventHandler {
         for(NonLiteral executable : job.getExecutable()){
             Dictionary<String,Object> properties = new Hashtable<String,Object>();
             properties.put(PROPERTY_JOB_MANAGER, job);
-            properties.put(PROPERTY_NODE, executable);
+            properties.put(PROPERTY_EXECUTION, executable);
             job.setRunning(executable);
             if(log.isDebugEnabled()){
                 log.debug("SHEDULE execution of Engine {}",ExecutionPlanHelper.getEngine(job.getExecutionPlan(), executable));

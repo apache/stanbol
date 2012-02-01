@@ -1,25 +1,60 @@
 package org.apache.stanbol.enhancer.jobmanager.event.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getReference;
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getString;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.createChainExecutionNode;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.getChainExecution;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.getExecutionPlanNode;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.initExecutionMetadata;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.initExecutionMetadataContentPart;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.isExecutionFailed;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.setExecutionCompleted;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.setExecutionFaild;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.setExecutionInProgress;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.getDependend;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.getEngine;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.isOptional;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata.CHAIN_EXECUTION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata.ENHANCED_BY;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata.ENHANCES;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata.STATUS;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata.STATUS_IN_PROGRESS;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.CHAIN;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.LockableMGraph;
+import org.apache.clerezza.rdf.core.access.LockableMGraphWrapper;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.commons.collections.BidiMap;
+import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
+import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
+import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
+import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,35 +83,200 @@ public class EnhancementJob {
 
     private final Lock readLock;
     private final Lock writeLock;
+    /**
+     * The read only executionPlan
+     */
     private final Graph executionPlan;
+    /**
+     * The read/write able execution metadata. Also accessible via
+     * {@link ContentItem#getPart(UriRef, Class)} with the URI
+     * {@link ExecutionMetadata#CHAIN_EXECUTION}
+     */
+    private final MGraph executionMetadata;
+    /**
+     * Map with the em:Execution nodes of the em:ChainExecution for this
+     * ContentItem. Values are are ep:ExecutionNodes of the ep:ExecutionPlan
+     */
+    private final BidiMap executionsMap;
+    /**
+     * The em:ChainExecution for this {@link ContentItem}
+     */
+    private final NonLiteral chainExecutionNode;
+    /**
+     * The ep:ExecutionPlan for this {@link ContentItem}
+     */
+    private final NonLiteral executionPlanNode;
+    /**
+     * The name of the {@link Chain} used to enhance this {@link ContentItem}.
+     */
     private final String chain;
+    /**
+     * The ContentItem
+     */
     private final ContentItem contentItem;
 
-    private final Set<NonLiteral> completed;
-    private final Set<NonLiteral> unmodCompleted;
-    private final Set<NonLiteral> running;
-    private final Set<NonLiteral> unmodRunning;
+    /**
+     * The completed ep:ExecutionPlan nodes. <p>
+     * NOTE: This contains ep:ExecutionNodes and NOT em:Exetution instances!
+     */
+    private final Set<NonLiteral> completed = new HashSet<NonLiteral>();
+    /**
+     * Unmodifiable and final set of completed executables. Replaced by a new
+     * instance every time {@link #completed} changes
+     */
+    private Set<NonLiteral> completedExec = Collections.emptySet();
+    /**
+     * The running ep:ExecutionPlan nodes <p>
+     * NOTE: This contains ep:ExecutionNodes and NOT em:Exetution instances!
+     */
+    private final Set<NonLiteral> running = new HashSet<NonLiteral>();
+    /**
+     * Unmodifiable and final set of running executables. Replaced by a new
+     * instance every time {@link #running} changes.
+     */
+    private Set<NonLiteral> runningExec = Collections.emptySet();
 
+    /**
+     * Unmodifiable and final set of executable em:Execution nodes. 
+     * Replaced by a new instance every time {@link #running} or 
+     * {@link #completed} changes.
+     */
     private Set<NonLiteral> executable;
-    private boolean failed = false;
-    private List<String> errormessages = new ArrayList<String>();
+    /**
+     * Used to store any {@link Exception} parsed with the call to
+     * {@link #setFailed(NonLiteral, EnhancementEngine, Exception)} causing the
+     * enhancement process to fail. This Exception is typically re-thrown by the
+     * {@link EnhancementJobManager#enhanceContent(ContentItem, Chain)} method.
+     * @see #getError()
+     */
     private Exception error = null;
-
-    public EnhancementJob(ContentItem contentItem, String chainName, Graph executionPlan) {
+    /**
+     * Constructor used to create and initialise a new enhancement job. This
+     * will create the initial set of ExecutionMetadata and add them as
+     * ContentPart with the URI {@link ExecutionMetadata#CHAIN_EXECUTION} to the
+     * ContentItem.
+     * @param contentItem
+     * @param chainName
+     * @param executionPlan
+     * @param isDefaultChain
+     */
+    public EnhancementJob(ContentItem contentItem, String chainName, Graph executionPlan, boolean isDefaultChain) {
         if (contentItem == null || chainName == null || executionPlan == null) {
             throw new IllegalArgumentException("The parsed contentItem and executionPlan MUST NOT be NULL");
+        }
+        this.readLock = contentItem.getLock().readLock();
+        this.writeLock = contentItem.getLock().writeLock();
+        executionMetadata = initExecutionMetadataContentPart(contentItem);
+        if(executionMetadata.isEmpty()){
+            //if we init from scratch 
+            this.executionsMap = new DualHashBidiMap(initExecutionMetadata(executionMetadata, executionPlan, 
+                contentItem.getUri(), chainName, isDefaultChain));
+            chainExecutionNode = getChainExecution(executionMetadata, contentItem.getUri());
+            executionPlanNode = getExecutionPlanNode(executionMetadata, chainExecutionNode);
+            executionMetadata.addAll(executionPlan);
+        } else {
+            throw new IllegalArgumentException("Unable to create EnhancementJob for "
+                    + "a parsed execution plan if the ContentItem already contains "
+                    + "some Execution Metadata!");
+        }
+        this.contentItem = contentItem;
+        this.executionPlan = executionPlan;
+        this.chain = chainName;
+        //check the first engines to execute
+        checkExecutable();
+    }
+    /**
+     * Creates an EnhancemenJob based on already existing execution metadata present
+     * for a ContentItem.
+     * @param contentItem the ContentItem with an already existing content part
+     * containing an {@link MGraph} with all required execution metadata and the 
+     * execution plan.
+     * @throws IllegalArgumentException if the parsed {@link ContentItem} does
+     * not provide the required data to (re)initialise the EnhancementJob.
+     */
+    public EnhancementJob(ContentItem contentItem){
+        if (contentItem == null){
+            throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
         }
         this.contentItem = contentItem;
         this.readLock = contentItem.getLock().readLock();
         this.writeLock = contentItem.getLock().writeLock();
-        this.executionPlan = executionPlan;
-        this.chain = chainName;
-        completed = new HashSet<NonLiteral>();
-        unmodCompleted = Collections.unmodifiableSet(completed);
-        running = new HashSet<NonLiteral>();
-        unmodRunning = Collections.unmodifiableSet(running);
-        //check the first engines to execute
+        try {
+            contentItem.getPart(ExecutionMetadata.CHAIN_EXECUTION, MGraph.class);
+        } catch (NoSuchPartException e) {
+            throw new IllegalArgumentException("Cannot (re)initialise an EnhancementJob" +
+                    "without existing execution metadata content part!",e);
+        }
+        executionMetadata = initExecutionMetadataContentPart(contentItem);
+        this.executionPlan = executionMetadata.getGraph();
+        chainExecutionNode = getChainExecution(executionMetadata, contentItem.getUri());
+        if(chainExecutionNode == null){
+            throw new IllegalArgumentException("Cannot (re)initialise an EnhancementJob" +
+                    "because the ExecutionMetadata do not contain an em:ChainExecution" +
+                    "for the given ContentItem '"+contentItem.getUri()+"'!");
+        }
+        executionPlanNode = getExecutionPlanNode(executionMetadata, chainExecutionNode);
+        if(executionPlanNode == null){
+            throw new IllegalArgumentException("Cannot (re)initialise an EnhancementJob" +
+                    "because the ExecutionMetadata do not contain an ep:ExecutionPlan" +
+                    "for the given ContentItem '"+contentItem.getUri()+"'!");
+        }
+        this.chain = getString(executionPlan, executionPlanNode, CHAIN);
+        if(chain == null || chain.isEmpty()){
+            throw new IllegalArgumentException("Cannot (re)initialise an EnhancementJob " +
+                    "because the ExecutionMetadata do not define a valid chain name for " +
+                    "the ep:ExecutionPlan node '" + executionPlanNode+"' as used to " +
+                    "enhance  ContentItem '"+contentItem.getUri()+"'!");
+        }
+        //the executionPlan is part of the execution metadata
+        Map<NonLiteral,NonLiteral> executionsMap = initExecutionMetadata(executionMetadata, 
+            executionPlan, contentItem.getUri(), null, null);
+        for(Entry<NonLiteral,NonLiteral> executionEntry : executionsMap.entrySet()){
+            UriRef status = getReference(executionMetadata, executionEntry.getKey(), STATUS);
+            if(status == null){
+                throw new IllegalArgumentException("The ex:Execution '"
+                        + executionEntry.getKey()+"' of the ex:ChainExecution for ContentItme '"
+                        + contentItem.getUri()+"' is missing a required value for the property '"
+                        + STATUS+"'!");
+            }
+            if(status.equals(STATUS_IN_PROGRESS)){
+                //re-schedule unfinished enhancement jobs
+                ExecutionMetadataHelper.setExecutionScheduled(executionMetadata, executionEntry.getKey());
+            } else if(status.equals(ExecutionMetadata.STATUS_COMPLETED) ||
+                    status.equals(ExecutionMetadata.STATUS_FAILED)){
+               completed.add(executionEntry.getValue());
+            }
+        }
+        this.executionsMap = new DualHashBidiMap(executionsMap);
+        //check the first engines to execute after continuation
         checkExecutable();
+    }
+
+    /**
+     * Getter for the ep:ExecutionNode linked to a em:Execution
+     * @return the ep:ExecutionNode instance
+     * @throws IllegalArgumentException if the parsed em:Execution is not
+     * part of the execution metadata of this enhancement job
+     */
+    public NonLiteral getExecutionNode(NonLiteral execution){
+        NonLiteral node = (NonLiteral)executionsMap.get(execution);
+        if(node == null){
+            throw new IllegalArgumentException("Unknown sp:ExecutionNode instance "+node);
+        }
+        return node;
+    }
+    /**
+     * Getter for the em:Execution linked to a ep:ExecutionNode
+     * @return the em:Execution instance 
+     * @throws IllegalArgumentException if the parsed ep:ExecutionNode is not
+     * part of the execution plan of this enhancement job
+     */
+    public NonLiteral getExecution(NonLiteral executionNode){
+        NonLiteral execution = (NonLiteral)executionsMap.getKey(executionNode);
+        if(execution == null){
+            throw new IllegalArgumentException("Unknown em:Execution instance "+executionNode);
+        }
+        return execution;
     }
 
     /**
@@ -132,7 +332,7 @@ public class EnhancementJob {
         readLock.lock();
         try {
             log.debug(">> r: {}","getRunning");
-            return unmodRunning;
+            return runningExec;
         } finally {
             log.debug("<< r: {}","getRunning");
             readLock.unlock();
@@ -149,7 +349,7 @@ public class EnhancementJob {
         readLock.lock();
         try {
             log.debug(">> r: {}","getCompleted");
-            return unmodCompleted;
+            return completedExec;
         } finally {
             log.debug("<< r: {}","getCompleted");
             readLock.unlock();
@@ -161,150 +361,206 @@ public class EnhancementJob {
      * confirms to the ExectionPlan (e.g. if all nodes the parsed node depends on are also marked as
      * completed).
      * 
-     * @param executionNode
-     *            the exectionNode to be marked as running
+     * @param execution
+     *            the exection to be marked as running
      * @throws IllegalArgumentException
      *             if <code>null</code> is parsed as execution node
      * @throws IllegalStateException
      *             if the parsed execution node can not be marked as completed because some of its
      *             depended nodes are not yet marked as completed.
      */
-    public void setCompleted(NonLiteral executionNode) {
-        if (executionNode != null) {
-            String engine = getEngine(executionPlan, executionNode);
-            boolean optional = isOptional(executionPlan, executionNode);
-            Set<NonLiteral> dependsOn = getDependend(executionPlan, executionNode);
-            log.debug("++ w: {}: {}","setCompleted",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
-            writeLock.lock();
-            try {
-                log.debug(">> w: {}: {}","setCompleted",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
-                if (completed.contains(executionNode)) {
-                    log.warn("Execution of Engine '{}' for ContentItem {} already "
-                             + "marked as completed(chain: {}, node: {}, optional {})."
-                             + " -> call ignored", 
-                             new Object[] {engine, contentItem.getUri().getUnicodeString(),
-                                           chain, executionNode, optional});
-                    return;
-                }
-                if (!completed.containsAll(dependsOn)) {
-                    // TODO maybe define an own Exception for such cases
-                    throw new IllegalStateException(
-                            "Unable to set state of ExectionNode '"
-                                    + executionNode+ "' (chain '"+ chain
-                                    + "' | contentItem '"+ contentItem.getUri()
-                                    + "') to completed, because some of its depended "
-                                    + "nodes are not marked completed yet. This indicates an Bug in the "
-                                    + "implementation of the JobManager used to execute the ExecutionPlan. "
-                                    + "(this.dependsOn=" + dependsOn + "| chain.completed " + completed
-                                    + " | chain.running " + running + ")!");
-                }
-                if (running.remove(executionNode)) {
-                    log.info(
-                        "Execution of '{}' for ContentItem {} completed "
-                        + "(chain: {}, node: {}, optional {})",
-                        new Object[] {engine, contentItem.getUri().getUnicodeString(), 
-                                      chain, executionNode, optional});
-                }
-                completed.add(executionNode);
-                // update the executables ... this will also recognise if finished 
-                checkExecutable();
-            } finally {
-                log.debug("<< w: {}: {}","setCompleted",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
-                writeLock.unlock();
-            }
+    public void setCompleted(NonLiteral execution) {
+        if(execution == null) {
+            throw new IllegalArgumentException("The parsed em:Execution instance MUST NOT be NULL!");
         }
+        writeLock.lock();
+        log.debug("++ w: {}: {}","setCompleted",getEngine(executionPlan, execution));
+        try {
+            log.debug(">> w: {}: {}","setCompleted",getEngine(executionPlan, execution));
+            setNodeCompleted(getExecutionNode(execution));
+            setExecutionCompleted(executionMetadata, execution, null);
+        } finally {
+            log.debug("<< w: {}: {}","setCompleted",getEngine(executionPlan, execution));
+            writeLock.unlock();
+        }
+    }
+    /**
+     * Internally used to update the state kept in {@link #completed} and
+     * {@link #running} and {@link #executable} after an execution was set to
+     * {@link #setCompleted(NonLiteral) completed} or 
+     * {@link #setFailed(NonLiteral, EnhancementEngine, Exception) failed}.<p>
+     * This method expects to be called within an active {@link #writeLock}.
+     * @param executionNode the ep:ExecutionNode linked to the em:Execution that
+     * finished. 
+     */
+    private void setNodeCompleted(NonLiteral executionNode) {
+        String engine = getEngine(executionPlan, executionNode);
+        boolean optional = isOptional(executionPlan, executionNode);
+        Set<NonLiteral> dependsOn = getDependend(executionPlan, executionNode);
+        if (completed.contains(executionNode)) {
+            log.warn("Execution of Engine '{}' for ContentItem {} already "
+                     + "marked as completed(chain: {}, node: {}, optional {})."
+                     + " -> call ignored", 
+                     new Object[] {engine, contentItem.getUri().getUnicodeString(),
+                                   chain, executionNode, optional});
+            return;
+        }
+        if (!completed.containsAll(dependsOn)) {
+            // TODO maybe define an own Exception for such cases
+            throw new IllegalStateException("Unable to set state of ExectionNode '"
+                    + executionNode+ "' (chain '"+ chain
+                    + "' | contentItem '"+ contentItem.getUri()
+                    + "') to completed, because some of its depended "
+                    + "nodes are not marked completed yet. This indicates an Bug in the "
+                    + "implementation of the JobManager used to execute the ExecutionPlan. "
+                    + "(this.dependsOn=" + dependsOn + "| chain.completed " + completed
+                    + " | chain.running " + running + ")!");
+        }
+        if (running.remove(executionNode)) {
+            log.info(
+                "Execution of '{}' for ContentItem {} completed "
+                + "(chain: {}, node: {}, optional {})",
+                new Object[] {engine, contentItem.getUri().getUnicodeString(), 
+                              chain, executionNode, optional});
+        }
+        completed.add(executionNode);
+        //update the set with the completed and running executables
+        updateCompletedExec();
+        updateRunningExec();
+        // update the executables ... this will also recognise if finished 
+        checkExecutable();
     }
 
     /**
-     * Sets the state of the parsed executionNode to running. This also validates if the new state
+     * Sets the state of the parsed execution to running. This also validates if the new state
      * confirms to the ExectionPlan (e.g. if all nodes the parsed node depends on are already marked as
      * completed).
      * 
-     * @param executionNode
-     *            the exectionNode to be marked as running
+     * @param execution
+     *            the execution to be marked as running
      * @throws IllegalArgumentException
      *             if <code>null</code> is parsed as execution node
      * @throws IllegalStateException
      *             if the parsed execution node can not be marked as running because some of its depended
      *             nodes are not yet marked as completed.
      */
-    public void setRunning(NonLiteral executionNode) {
-        if (executionNode != null) {
-            String engine = getEngine(executionPlan, executionNode);
-            boolean optional = isOptional(executionPlan, executionNode);
-            Set<NonLiteral> dependsOn = getDependend(executionPlan, executionNode);
-            log.debug("++ w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
-            writeLock.lock();
-            try {
-                log.debug(">> w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
-                if (completed.contains(executionNode)) {
-                    throw new IllegalStateException(
-                            "Unable to set state of ExectionNode '"+ executionNode
-                            + "'(chain '"+chain+ "' | contentItem '"
-                            + contentItem.getUri()+"') to running, because"
-                            + "it is already marked as completed. This indicates "
-                            + "an Bug in the implementation of the JobManager "
-                            + "used to execute the ExecutionPlan (chain state: "
-                            +"completed " + completed + " | running " + running
-                            + ")!");
-                }
-                if (!completed.containsAll(dependsOn)) {
-                    // TODO maybe define an own Exception for such cases
-                    throw new IllegalStateException(
-                            "Unable to set state of ExectionNode '"+ executionNode
-                            + "' (chain '"+chain+ "' | contentItem '"
-                            + contentItem.getUri()+"') to running, because "
-                            + "some of its depended nodes are not marked "
-                            + "completed yet. This indicates an Bug in the "
-                            + "implementation of the JobManager used to execute "
-                            + "the ExecutionPlan (this.dependsOn=" + dependsOn 
-                            + "| chain.completed " + completed
-                            + " | chain.running " + running + ")!");
-                }
-                if (!running.add(executionNode)) {
-                    log.warn("Execution of Engine '{}' for ContentItem {} already "
-                             + "marked as running(chain: {}, node: {}, optional {})."
-                             + " -> call ignored", 
-                             new Object[] {engine, contentItem.getUri().getUnicodeString(),
-                                           chain, executionNode, optional});
-                    return;
-                } else {
-                    log.info("Started Execution of '{}' for ContentItem {} "
-                             + "(chain: {}, node: {}, optional {})",
-                        new Object[] {engine, contentItem.getUri().getUnicodeString(), chain,
-                                      executionNode, optional});
-                    // update the executables ... this will also recognise if finished 
-                    checkExecutable();
-                }
-            } finally {
-                log.debug("<< w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
-                writeLock.unlock();
-            }
-        } else {
-            throw new IllegalArgumentException("The parsed ExecutionNode MUST NOT be NULL!");
+    public void setRunning(NonLiteral execution) {
+        if(execution == null) {
+            throw new IllegalArgumentException("The parsed em:Execution instance MUST NOT be NULL!");
         }
+        NonLiteral executionNode = getExecutionNode(execution);
+        String engine = getEngine(executionPlan, executionNode);
+        boolean optional = isOptional(executionPlan, executionNode);
+        Set<NonLiteral> dependsOn = getDependend(executionPlan, executionNode);
+        log.debug("++ w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
+        writeLock.lock();
+        try {
+            log.debug(">> w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
+            if (completed.contains(executionNode)) {
+                throw new IllegalStateException(
+                        "Unable to set state of ExectionNode '"+ executionNode
+                        + "'(chain '"+chain+ "' | contentItem '"
+                        + contentItem.getUri()+"') to running, because"
+                        + "it is already marked as completed. This indicates "
+                        + "an Bug in the implementation of the JobManager "
+                        + "used to execute the ExecutionPlan (chain state: "
+                        +"completed " + completed + " | running " + running
+                        + ")!");
+            }
+            if (!completed.containsAll(dependsOn)) {
+                // TODO maybe define an own Exception for such cases
+                throw new IllegalStateException(
+                        "Unable to set state of ExectionNode '"+ executionNode
+                        + "' (chain '"+chain+ "' | contentItem '"
+                        + contentItem.getUri()+"') to running, because "
+                        + "some of its depended nodes are not marked "
+                        + "completed yet. This indicates an Bug in the "
+                        + "implementation of the JobManager used to execute "
+                        + "the ExecutionPlan (this.dependsOn=" + dependsOn 
+                        + "| chain.completed " + completed
+                        + " | chain.running " + running + ")!");
+            }
+            if (!running.add(executionNode)) {
+                log.warn("Execution of Engine '{}' for ContentItem {} already "
+                         + "marked as running(chain: {}, node: {}, optional {})."
+                         + " -> call ignored", 
+                         new Object[] {engine, contentItem.getUri().getUnicodeString(),
+                                       chain, executionNode, optional});
+                return;
+            } else { //added an engine to running
+                log.info("Started Execution of '{}' for ContentItem {} "
+                         + "(chain: {}, node: {}, optional {})",
+                    new Object[] {engine, contentItem.getUri().getUnicodeString(), chain,
+                                  executionNode, optional});
+                //set the status of the execution to be in progress
+                ExecutionMetadataHelper.setExecutionInProgress(executionMetadata, execution);
+                // update the executables ... this will also recognise if finished
+                updateRunningExec();
+                //update executables
+                checkExecutable();
+            }
+        } finally {
+            log.debug("<< w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
+            writeLock.unlock();
+        }
+    }
+    /**
+     * updates the {@link #runningExec} based on {@link #running}
+     */
+    private void updateRunningExec() {
+        Set<NonLiteral> runningExec = new HashSet<NonLiteral>(running.size());
+        for(NonLiteral node : running){
+            runningExec.add(getExecution(node));
+        }
+        this.runningExec = Collections.unmodifiableSet(runningExec);
+    }
+    /**
+     * updates the {@link #runningExec} based on {@link #running}
+     */
+    private void updateCompletedExec() {
+        Set<NonLiteral> completedExec = new HashSet<NonLiteral>(completed.size());
+        for(NonLiteral node : completed){
+            completedExec.add(getExecution(node));
+        }
+        this.completedExec = Collections.unmodifiableSet(completedExec);
     }
     /**
      * updated the {@link #executable} and also checks for {@link #finished}<p>
      * Assumed to be called within a write lock!
      */
     private void checkExecutable(){
-        Set<NonLiteral> executeable = 
+        Set<NonLiteral> executeableNodes = 
                 ExecutionPlanHelper.getExecutable(executionPlan, completed);
         //a Chain finishes if no engine is running and no more nodes are executable
-        if(!failed) { 
-            executeable.removeAll(running);
-            if(log.isInfoEnabled()){
-                Collection<String> engines = new ArrayList<String>(executeable.size());
-                for(NonLiteral node : executeable){
+        if(!ExecutionMetadata.STATUS_FAILED.equals(
+                getReference(executionMetadata, chainExecutionNode, STATUS))) { 
+            executeableNodes.removeAll(running);
+            if(log.isDebugEnabled()){
+                Collection<String> engines = new ArrayList<String>(executeableNodes.size());
+                for(NonLiteral node : executeableNodes){
                     engines.add(getEngine(executionPlan, node));
                 }
-                log.info("MARK {} as executeable",engines);
+                log.debug("MARK {} as executeable",engines);
             }
-            this.executable = Collections.unmodifiableSet(executeable);
+            //we need to get the em:Executables for the ep:ExecutionNodes ...
+            if(executeableNodes.isEmpty()){
+                this.executable = Collections.emptySet();
+            } else if( executeableNodes.size() == 1){
+                this.executable = Collections.singleton(getExecution(executeableNodes.iterator().next()));
+            } else {
+                Set<NonLiteral> executable = new HashSet<NonLiteral>(executeableNodes.size());
+                for(NonLiteral exeutableNode : executeableNodes){
+                    executable.add(getExecution(exeutableNode));
+                }
+                this.executable = Collections.unmodifiableSet(executable);
+            }
         } else {
             //do not mark engines as executeable if chain already failed
             this.executable = Collections.emptySet();
+        }
+        if(isFinished() && !isFailed()){
+            //mark the execution process as completed
+            setExecutionCompleted(executionMetadata, chainExecutionNode, null);
         }
     }
     /**
@@ -332,34 +588,28 @@ public class EnhancementJob {
         readLock.lock();
         try {
             log.debug(">> r: {}","isFinished");
-            return this.executable.isEmpty() && running.isEmpty();
+            return executable.isEmpty() && running.isEmpty();
         } finally {
             log.debug("<< r: {}","isFinished");
             readLock.unlock();
         }
     }
 
-    public void setFailed(NonLiteral node, EnhancementEngine engine, Exception exception) {
-        final boolean optional = isOptional(executionPlan, node);
-        final String engineName = getEngine(executionPlan, node);
-        log.debug("++ w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, node));
+    public void setFailed(NonLiteral execution, EnhancementEngine engine, Exception exception) {
+        if(execution == null) {
+            throw new IllegalArgumentException("The parsed em:Execution instance MUST NOT be NULL!");
+        }
+        NonLiteral executionNode = getExecutionNode(execution);
+        final boolean optional = isOptional(executionPlan, executionNode);
+        final String engineName = getEngine(executionPlan, executionNode);
+        log.debug("++ w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
         writeLock.lock();
         try {
-            log.debug(">> w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, node));
-            if(!optional && !failed){ //the first errors for this chain
-                failed = true;
-                error = exception;
-            }
+            log.debug(">> w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
             StringBuilder message = new StringBuilder();
-            if(optional){
-                message.append(String.format("Optional Engine '%s' of enhancement " +
-                		"Chain '%s' skiped for ContentItem %s because the Engine",
-                		engineName,chain,contentItem.getUri()));
-            } else {
-                message.append(String.format("Failed to enhance ContentItem '%s' by using " +
-                		"enhancement chain '%s' because the required Enhancement Engine %s ",
-                		contentItem.getUri(),chain, engineName));
-            }
+            message.append(String.format("Unable to process ContentItem '%s' with " +
+            		"Enhancement Engine %s because the engine ", 
+            		contentItem.getUri(), engineName));
             if(engine == null){
                 message.append("is currently not active");
             } else {
@@ -367,17 +617,24 @@ public class EnhancementJob {
                 		"(Engine class: %s)",engine.getClass().getName()));
             }
             if(exception != null){
-                message.append("(reason:").append(exception.getMessage()).append(')');
+                message.append("(Reason: ").append(exception.getMessage()).append(')');
             }
             message.append('!');
-            if(optional){
-                log.info(message.toString(),exception);
-            } else {
-                errormessages.add(message.toString());
+            setNodeCompleted(executionNode); //update the internal state
+            //set this execution to failed
+            setExecutionFaild(executionMetadata, execution, message.toString());
+            //if not optional and the chain is not yet failed
+            if(!optional && !isExecutionFailed(executionMetadata, chainExecutionNode)){
+                //set also the whole chain to faild!
+                String chainMessage = String.format(
+                    "Enhancement Chain failed because of required Engine '%s' failed" +
+                    "with Message: %s", engineName, message);
+                setExecutionFaild(executionMetadata, execution, chainMessage);
+                error = exception; //this member stores the exception to allow
+                //re-throwing by the EnhancementJobManager.
             }
-            setCompleted(node); //we are done with that node!
         } finally {
-            log.debug("<< w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, node));
+            log.debug("<< w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
             writeLock.unlock();
         }
 
@@ -392,7 +649,7 @@ public class EnhancementJob {
         readLock.lock();
         try {
             log.debug(">> r: {}","isFailed");
-            return failed;
+            return isExecutionFailed(executionMetadata, chainExecutionNode);
         } finally {
             log.debug("<< r: {}","isFailed");
             readLock.unlock();
@@ -412,14 +669,7 @@ public class EnhancementJob {
     public String toString() {
         return "EnhancementJob for ContentItem "+contentItem.getUri();
     }
-    /**
-     * If {@link #isFailed()} this can be used to retrieve the message of the
-     * occurred error.
-     * @return the message of the error that caused the enhancement job to fail.
-     */
-    public String getErrorMessage(){
-        return errormessages == null || errormessages.isEmpty() ? null : errormessages.get(0);
-    }
+
     /**
      * if {@link #isFailed()} this may contain the {@link Exception} that caused
      * the enhancement job to fail. 
@@ -427,5 +677,35 @@ public class EnhancementJob {
      */
     public Exception getError(){
         return error;
+    }
+    public String getErrorMessage() {
+        readLock.lock();
+        try {
+            return getString(executionMetadata, executionPlanNode, ExecutionMetadata.STATUS_MESSAGE);
+        } finally {
+            readLock.unlock();
+        }
+    }
+    /**
+     * Getter for the ExecutionMetadata.
+     * @return the execution metadata.
+     */
+    public MGraph getExecutionMetadata() {
+        return executionMetadata;
+    }
+    /**
+     * Marks the execution of the enhancement process as started. In other
+     * words this sets the status of the 'em:ChainExecution' instance that
+     * 'em:enhances' the {@link ContentItem} to 
+     * {@link ExecutionMetadata#STATUS_IN_PROGRESS}
+     */
+    public void startProcessing() {
+        writeLock.lock();
+        try {
+            setExecutionInProgress(executionMetadata, chainExecutionNode);
+        } finally {
+            writeLock.unlock();
+        }
+        
     }
 }

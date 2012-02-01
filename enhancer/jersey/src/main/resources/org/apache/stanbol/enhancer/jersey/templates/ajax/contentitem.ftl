@@ -15,7 +15,10 @@
   limitations under the License.
 -->
 <#import "/imports/contentitem.ftl" as contentitem>
+<#import "/imports/executionmetadata.ftl" as executionmetadata>
 <#escape x as x?html>
+
+<@executionmetadata.view />
 
 <@contentitem.view />
 

@@ -61,6 +61,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
     private ServiceRegistration jobHandlerRegistration;
     private EnhancementJobHandler jobHandler;
     
+    
     /**
      * Instantiates and registers the {@link EnhancementJobHandler} as
      * {@link EventHandler} for the topic 
@@ -114,7 +115,8 @@ public class EventJobManagerImpl implements EnhancementJobManager {
                 "' because NULL was parsed as enhancement chain");
         }
         long start = System.currentTimeMillis();
-        EnhancementJob job = new EnhancementJob(ci, chain.getName(), chain.getExecutionPlan());
+        boolean isDefaultChain = chain.equals(chainManager.getDefault());
+        EnhancementJob job = new EnhancementJob(ci, chain.getName(), chain.getExecutionPlan(),isDefaultChain);
         //start the execution
         //wait for the results
         Object object = jobHandler.register(job);
@@ -132,6 +134,11 @@ public class EventJobManagerImpl implements EnhancementJobManager {
             new Object[]{ job.isFailed() ? "Failed" : "Finished",
                     job.getContentItem().getUri(),
                     System.currentTimeMillis()-start});
+        //NOTE: ExecutionMetadata are not added to the metadata of the ContentItem
+        //      by the EnhancementJobManager.
+        //      However one could add this as an optional feature to the
+        //      RESTful interface of the Enhancer!
+        //ci.getMetadata().addAll(job.getExecutionMetadata());
         if(job.isFailed()){
             throw new ChainException(job.getErrorMessage(), job.getError());
         }
