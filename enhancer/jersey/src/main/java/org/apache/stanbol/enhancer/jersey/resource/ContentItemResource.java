@@ -56,8 +56,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
@@ -88,7 +88,6 @@ import com.sun.jersey.api.view.Viewable;
 
 public class ContentItemResource extends BaseStanbolResource {
 
-    @SuppressWarnings("unused")
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     // TODO make this configurable trough a property
@@ -141,7 +140,7 @@ public class ContentItemResource extends BaseStanbolResource {
         this.servletContext = servletContext;
 
         if (localId != null) {
-            URI rawURI = uriInfo.getBaseUriBuilder().path("/store/raw").path(localId).build();
+            URI rawURI = uriInfo.getBaseUriBuilder().path("/contenthub/store/raw").path(localId).build();
             if (ci.getMimeType().equals("text/plain")) {
                 this.textContent = IOUtils.toString(ci.getStream(), "UTF-8");
             } else if (ci.getMimeType().startsWith("image/")) {
@@ -154,7 +153,7 @@ public class ContentItemResource extends BaseStanbolResource {
               }
             }
             this.downloadHref = rawURI;
-            this.metadataHref = uriInfo.getBaseUriBuilder().path("/store/metadata").path(localId).build();
+            this.metadataHref = uriInfo.getBaseUriBuilder().path("/contenthub/store/metadata").path(localId).build();
         }
         defaultThumbnails.put(DBPEDIA_PERSON, getStaticRootUrl() + "/home/images/user_48.png");
         defaultThumbnails.put(DBPEDIA_ORGANISATION, getStaticRootUrl() + "/home/images/organization_48.png");
