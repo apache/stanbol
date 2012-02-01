@@ -48,10 +48,9 @@
 					<instructions>
 						<Bundle-ClassPath>
 							.,
-							<!-- mysql-connector-java-5.1.10.jar, -->
 							OSGI-INF
 						</Bundle-ClassPath>
-						<Embed-Dependency>*;scope=compile;artifactId=!slf4j-api</Embed-Dependency>
+						<Embed-Dependency>mysql-connector-java</Embed-Dependency>
 						<Embed-Transitive>false</Embed-Transitive>
 						<Export-Package>
 							org.apache.stanbol.reengineer.db.*
