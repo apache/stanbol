@@ -25,12 +25,16 @@ import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.SUPPORTED_RDF_TYPES;
 import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.isAcceptableMediaType;
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getReference;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.getExecutionNode;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.isOptional;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.EXECUTION_NODE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,6 +62,8 @@ import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
@@ -74,8 +80,12 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
+import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
@@ -119,6 +129,10 @@ public class EnhancerRootResource extends BaseStanbolResource {
         chainManager = ContextHelper.getServiceFromContext(ChainManager.class, context);
         engineManager = ContextHelper.getServiceFromContext(EnhancementEngineManager.class, context);
         chain = chainManager.getDefault();
+    }
+    
+    public URI getServiceUrl(){
+        return uriInfo.getAbsolutePath();
     }
     
     @OPTIONS
@@ -251,7 +265,7 @@ public class EnhancerRootResource extends BaseStanbolResource {
                                     @Context HttpHeaders headers) throws EnhancementException, IOException {
         log.info("enhance from From: " + content);
         ContentItem ci = new InMemoryContentItem(content.getBytes("UTF-8"), TEXT_PLAIN);
-        return enhanceAndBuildResponse(format, headers, ci, buildAjaxview);
+        return enhanceAndBuildResponse(format, headers, ci, false ,buildAjaxview);
     }
 
     /**
@@ -269,6 +283,7 @@ public class EnhancerRootResource extends BaseStanbolResource {
     @Consumes(WILDCARD)
     public Response enhanceFromData(byte[] data,
                                     @QueryParam(value = "uri") String uri,
+                                    @QueryParam(value = "executionmetadata") boolean inclExecMetadata,
                                     @Context HttpHeaders headers) throws EnhancementException, IOException {
         String format = TEXT_PLAIN;
         if (headers.getMediaType() != null) {
@@ -279,12 +294,13 @@ public class EnhancerRootResource extends BaseStanbolResource {
             uri = null;
         }
         ContentItem ci = new InMemoryContentItem(uri, data, format);
-        return enhanceAndBuildResponse(null, headers, ci, false);
+        return enhanceAndBuildResponse(null, headers, ci, inclExecMetadata, false);
     }
 
     protected Response enhanceAndBuildResponse(String format,
                                                HttpHeaders headers,
                                                ContentItem ci,
+                                               boolean inclExecMetadata ,
                                                boolean buildAjaxview) throws EnhancementException, IOException {
         if (jobManager != null) {
             jobManager.enhanceContent(ci,chain);
@@ -302,6 +318,13 @@ public class EnhancerRootResource extends BaseStanbolResource {
         }
         
         MGraph graph = ci.getMetadata();
+        if(inclExecMetadata){
+            try {
+                graph.addAll(ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, MGraph.class));
+            } catch (NoSuchPartException e) {
+                // no executionMetadata available
+            }
+        }
         ResponseBuilder rb = Response.ok(graph);
         List<String> accepted = headers.getRequestHeader(HttpHeaders.ACCEPT);
         MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers,null);
@@ -321,11 +344,11 @@ public class EnhancerRootResource extends BaseStanbolResource {
     public class ExecutionNode {
         
         private final NonLiteral node;
-        private final Graph ep;
+        private final TripleCollection ep;
         private final boolean optional;
         private final String engineName;
         
-        public ExecutionNode(Graph executionPlan, NonLiteral node) {
+        public ExecutionNode(TripleCollection executionPlan, NonLiteral node) {
             this.node = node;
             this.ep = executionPlan;
             this.optional = ExecutionPlanHelper.isOptional(ep, node);
@@ -354,4 +377,5 @@ public class EnhancerRootResource extends BaseStanbolResource {
             return o instanceof ExecutionNode && ((ExecutionNode)o).node.equals(node);
         }
     }
+
 }

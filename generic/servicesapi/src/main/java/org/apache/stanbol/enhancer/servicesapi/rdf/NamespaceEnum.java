@@ -33,7 +33,11 @@ public enum NamespaceEnum {
     /**
      * Namespace for the Stanbol Enhancer Execution Plan ontology
      */
-    ep("http://stanbol.apache.org/ontology/enhancer/executionplan#");
+    ep("http://stanbol.apache.org/ontology/enhancer/executionplan#"),
+    /**
+     * Namespace for the Stanbol Enhancer Execution Metadata ontology
+     */
+    em("http://stanbol.apache.org/ontology/enhancer/executionMetadata#");
 
     String ns;
     String prefix;

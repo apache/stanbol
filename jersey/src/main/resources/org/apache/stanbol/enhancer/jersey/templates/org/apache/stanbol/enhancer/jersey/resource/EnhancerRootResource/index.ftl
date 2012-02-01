@@ -16,7 +16,7 @@
 -->
 <#import "/imports/common.ftl" as common>
 <#escape x as x?html>
-<@common.page title="Enhancement Engines" hasrestapi=true>
+<@common.page title="Apache Stanbol Enhancer" hasrestapi=true>
 
 
 <div class="panel" id="webview">
@@ -36,16 +36,20 @@
   <#else>
     <div>
   </#if>
-  <p class="collapseheader">There are currently 
-    <#if it.activeNodes?size < it.executionNodes?size>
-      <strong>${it.activeNodes?size}/</strong><#else>all </#if><strong>${it.executionNodes?size}</strong>
-    engines available for enhancement chain 
+  <p class="collapseheader">Enhancement Chain: 
     <#if it.chainAvailable>
       <span style="color:#006600">
     <#else>
       <span style="color:#660000">
     </#if>
-    <strong>${it.chain.name}</strong></span></p>
+    <strong>${it.chain.name}</strong></span> 
+    <#if it.activeNodes?size &lt; it.executionNodes?size>
+      <strong>${it.activeNodes?size}/</strong><#else> all </#if><strong>${it.executionNodes?size}</strong>
+    engines available 
+      <span style="float: right; margin-right: 25px;">
+        &lt; List of <a href="#">Enhancement Chains</a> &gt;
+      </span>
+    </p>
     <div class="collapsable">
     <ul>
       <#list executionNodes as node>
@@ -78,10 +82,17 @@
 <script>
 $(".enginelisting p").click(function () {
   $(this).parents("div").toggleClass("collapsed");
-});    
+})
+.find("a").click(function(e){
+    e.stopPropagation();
+    //link to all active Enhancement Chains
+    window.location = "${it.publicBaseUri}enhancer/chain";
+    return false;
+});     
 </script>
-
-  <p>Paste some text below and submit the form to let the active engines enhance it:</p>
+</#if>
+<#if it.chainAvailable>
+  <p>Paste some text below and submit the form to let the Enhancement Chain ${it.chain.name} enhance it:</p>
   <form id="enginesInput" method="POST" accept-charset="utf-8">
     <p><textarea rows="15" name="content"></textarea></p>
     <p class="submitButtons">Output format:
@@ -150,7 +161,7 @@ in the format specified in the <code>Accept</code> header:</p>
    
 <pre>
 curl -X POST -H "Accept: text/turtle" -H "Content-type: text/plain" \
-     --data "John Smith was born in London." ${it.publicBaseUri}engines
+     --data "John Smith was born in London." ${it.serviceUrl}
 </pre> 
 
 <p>The list of mimetypes accepted as inputs depends on the deployed engines. By default only
@@ -165,16 +176,28 @@ curl -X POST -H "Accept: text/turtle" -H "Content-type: text/plain" \
 <li><code>text/rdf+nt</code> (N-TRIPLES)</li>
 </ul> 
 
-<p>By default the URI of the content item being enhanced is a local, non
-de-referencable URI automatically built out of a hash digest of the binary
-content. Sometimes it might be helpful to provide the URI of the content-item
-to be used in the enhancements RDF graph. This can be achieved by passing a
-<code>uri</code> request parameter as follows:</p>
+<p> Additional supported QueryParameters:<ul>
+<li><code>uri={content-item-uri}</code>: By default the URI of the content 
+    item being enhanced is a local, non de-referencable URI automatically built 
+    out of a hash digest of the binary content. Sometimes it might be helpful 
+    to provide the URI of the content-item to be used in the enhancements RDF 
+    graph.
+<code>uri</code> request parameter
+<li><code>executionmetadata=true/false</code>: 
+    Allows the include of execution metadata in the response. Such data include
+    the ExecutionPlan as provided by the enhancement chain as well as
+    information about the actual execution of that plan. The default value
+    is <code>false</code>.</li>
+</ul>
+
+<p>The following example shows how to send an enhancement request with a
+custom content item URI that will include the execution metadata in the
+response.</p>
 
 <pre>
 curl -X POST -H "Accept: text/turtle" -H "Content-type: text/plain" \
      --data "John Smith was born in London." \
-     "${it.publicBaseUri}engines?uri=urn:fise-example-content-item"
+     "${it.serviceUrl}?uri=urn:fise-example-content-item&executionmetadata=true"
 </pre> 
 
 </div>

@@ -130,7 +130,7 @@ public final class ExecutionPlanHelper {
      * @return the set of nodes that can be executed next or an empty set if
      * there are no more nodes to execute.
      */
-    public static Set<NonLiteral>getExecutable(Graph executionPlan, Set<NonLiteral> executed){
+    public static Set<NonLiteral>getExecutable(TripleCollection executionPlan, Set<NonLiteral> executed){
         Set<NonLiteral> executeable = new HashSet<NonLiteral>();
         for(Iterator<Triple> nodes = executionPlan.filter(null, RDF_TYPE, EXECUTION_NODE);nodes.hasNext();){
             NonLiteral node = nodes.next().getSubject();
@@ -184,6 +184,7 @@ public final class ExecutionPlanHelper {
             Integer order = getEngineOrder(engine);
             if(prevOrder == null || !prevOrder.equals(order)){
                 prev = current;
+                current = new HashSet<NonLiteral>();
                 prevOrder = order;
             }
             current.add(writeExecutionNode(ep, epNode, name, optional.contains(name), prev));
@@ -268,11 +269,11 @@ public final class ExecutionPlanHelper {
         for(Iterator<Triple> it = executionPlan.filter(executionNode, DEPENDS_ON, null);
                 it.hasNext();collection.add((NonLiteral)it.next().getObject()));
     }
-    public static boolean isOptional(Graph executionPlan, NonLiteral executionNode) {
+    public static boolean isOptional(TripleCollection executionPlan, NonLiteral executionNode) {
         Boolean optional = get(executionPlan,executionNode,OPTIONAL,Boolean.class,lf);
         return optional == null ? false : optional.booleanValue();
     }
-    public static String getEngine(Graph executionPlan, NonLiteral executionNode) {
+    public static String getEngine(TripleCollection executionPlan, NonLiteral executionNode) {
         return getString(executionPlan, executionNode, ENGINE);
     }
 
@@ -283,7 +284,7 @@ public final class ExecutionPlanHelper {
      * @param ep the execution plan
      * @return
      */
-    public static List<EnhancementEngine> getActiveEngines(EnhancementEngineManager engineManager, Graph ep) {
+    public static List<EnhancementEngine> getActiveEngines(EnhancementEngineManager engineManager, TripleCollection ep) {
         List<EnhancementEngine> engines = new ArrayList<EnhancementEngine>();
         Set<NonLiteral> visited = new HashSet<NonLiteral>();
         Set<NonLiteral> executeable;
@@ -299,5 +300,56 @@ public final class ExecutionPlanHelper {
             }
         } while(!executeable.isEmpty());
         return engines;
+    }
+    
+    /**
+     * Getter for the {@link ExecutionPlan#EXECUTION_PLAN} node of an execution
+     * plan for the given chainNmame. This method is handy for components that
+     * need to get an execution plan for a graph that might potentially contain
+     * more than a single execution plan.
+     * @param graph the graph
+     * @param chainName the chain name
+     * @return the node or <code>null</code> if not found
+     */
+    public static NonLiteral getExecutionPlan(TripleCollection graph, String chainName){
+        if(graph == null){
+            throw new IllegalArgumentException("The parsed graph MUST NOT be NULL!");
+        }
+        if(chainName == null || chainName.isEmpty()){
+            throw new IllegalArgumentException("The parsed chain name MUST NOT be NULL nor empty!");
+        }
+        Iterator<Triple> it = graph.filter(null, CHAIN, new PlainLiteralImpl(chainName));
+        if(it.hasNext()){
+            return it.next().getSubject();
+        } else {
+            return null;
+        }
+
+    }
+    /**
+     * Getter for the set of ExecutionNodes part of an execution plan.
+     * @param ep the execution plan graph
+     * @param executionPlanNode the execution plan node
+     */
+    public static Set<NonLiteral> getExecutionNodes(TripleCollection ep, final NonLiteral executionPlanNode) {
+        if(ep == null){
+            throw new IllegalArgumentException("The parsed graph with the Executionplan MUST NOT be NULL!");
+        }
+        if(executionPlanNode == null){
+            throw new IllegalArgumentException("The parsed execution plan node MUST NOT be NULL!");
+        }
+        Set<NonLiteral> executionNodes = new HashSet<NonLiteral>();
+        Iterator<Triple> it = ep.filter(executionPlanNode, HAS_EXECUTION_NODE, null);
+        while(it.hasNext()){
+            Triple t = it.next();
+            Resource node = t.getObject();
+            if(node instanceof NonLiteral){
+                executionNodes.add((NonLiteral)node);
+            } else {
+                throw new IllegalStateException("The value of the "+HAS_EXECUTION_NODE
+                    + " property MUST BE a NonLiteral (triple: "+t+")!");
+            }
+        }
+        return executionNodes;
     }
 }

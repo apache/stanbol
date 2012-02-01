@@ -40,9 +40,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -79,7 +82,12 @@ import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
+import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
+import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,6 +133,12 @@ public class ContentItemResource extends BaseStanbolResource {
      */
     protected Map<UriRef,Map<String,EntityExtractionSummary>> extractionsByTypeMap = 
         new HashMap<UriRef,Map<String,EntityExtractionSummary>>();
+
+    private MGraph executionMetadata;
+
+    private ChainExecution chainExecution;
+
+    private ArrayList<org.apache.stanbol.enhancer.jersey.resource.ContentItemResource.Execution> engineExecutions;
     
     public ContentItemResource(String localId,
                                ContentItem ci,
@@ -162,6 +176,26 @@ public class ContentItemResource extends BaseStanbolResource {
         defaultThumbnails.put(null, getStaticRootUrl() + "/home/images/unknown_48.png");
         long start = System.currentTimeMillis();
         initOccurrences();
+        //init ExecutionMetadata
+        try {
+            executionMetadata = ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, MGraph.class);
+        } catch(NoSuchPartException e){
+            executionMetadata = null;
+        }
+        if(executionMetadata != null){
+            NonLiteral ce = ExecutionMetadataHelper.getChainExecution(executionMetadata, ci.getUri());
+            if(ce != null){
+                chainExecution = new ChainExecution(executionMetadata, ce);
+                engineExecutions = new ArrayList<Execution>();
+                for(NonLiteral ex : ExecutionMetadataHelper.getExecutions(executionMetadata, ce)){
+                    engineExecutions.add(new Execution(chainExecution,executionMetadata, ex));
+                }
+                Collections.sort(engineExecutions);
+            } else {
+                chainExecution = null;
+                engineExecutions = null;
+            }
+        }
         log.info(" ... {}ms fro parsing Enhancement Reuslts",System.currentTimeMillis()-start);
     }
 
@@ -305,6 +339,15 @@ public class ContentItemResource extends BaseStanbolResource {
         }
     }
 
+    public ChainExecution getChainExecution(){
+        return chainExecution;
+    }
+    
+    public Collection<Execution> getEngineExecutions(){
+        return engineExecutions;
+    }
+    
+    
     public static class EntityExtractionSummary implements Comparable<EntityExtractionSummary> {
 
         protected final String name;
@@ -556,5 +599,183 @@ public class ContentItemResource extends BaseStanbolResource {
         addCORSOrigin(servletContext,rb, headers);
         return rb.build();
     }
+    
+    public class ExecutionNode {
+        
+        private final NonLiteral node;
+        private final TripleCollection ep;
+        private final boolean optional;
+        private final String engineName;
+        
+        public ExecutionNode(TripleCollection executionPlan, NonLiteral node) {
+            this.node = node;
+            this.ep = executionPlan;
+            this.optional = ExecutionPlanHelper.isOptional(ep, node);
+            this.engineName = ExecutionPlanHelper.getEngine(ep, node);
+        }
+        
+        public boolean isOptional() {
+            return optional;
+        }
+        public String getEngineName() {
+            return engineName;
+        }
+        
+        @Override
+        public int hashCode() {
+            return node.hashCode();
+        }
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof ExecutionNode && ((ExecutionNode)o).node.equals(node);
+        }
+    }
+    public class Execution implements Comparable<Execution>{
+        
+        protected DateFormat format = new SimpleDateFormat("HH-mm-ss.SSS");
+        protected final NonLiteral node;
+        private final ExecutionNode executionNode;
+        private final UriRef status;
+        protected final TripleCollection graph;
+        private final Date started;
+        private final Date completed;
+        private final Long duration;
+        private ChainExecution chain;
+        public Execution(ChainExecution parent, TripleCollection graph, NonLiteral node) {
+            this.chain = parent;
+            this.graph = graph;
+            this.node = node;
+            NonLiteral executionNode = ExecutionMetadataHelper.getExecutionNode(graph, node);
+            if(executionNode != null){
+                this.executionNode = new ExecutionNode(graph, executionNode);
+            } else {
+                this.executionNode = null;
+            }
+            this.status = getReference(graph, node, ExecutionMetadata.STATUS);
+            this.started = ExecutionMetadataHelper.getStarted(graph, node);
+            this.completed = ExecutionMetadataHelper.getCompleted(graph, node);
+            if(started != null && completed != null){
+                this.duration = completed.getTime() - started.getTime();
+            } else {
+                this.duration = null;
+            }
+        }
 
+        /**
+         * @return the executionNode
+         */
+        public ExecutionNode getExecutionNode() {
+            return executionNode;
+        }
+        public String getStatusText(){
+            if(ExecutionMetadata.STATUS_COMPLETED.equals(status)){
+                return "completed";
+            } else if(ExecutionMetadata.STATUS_FAILED.equals(status)){
+                return "failed";
+            } else if(ExecutionMetadata.STATUS_IN_PROGRESS.equals(status)){
+                return "in-progress";
+            } else if(ExecutionMetadata.STATUS_SCHEDULED.equals(status)){
+                return "scheduled";
+            } else if(ExecutionMetadata.STATUS_SKIPPED.equals(status)){
+                return "skipped";
+            } else {
+                return "unknown";
+            }
+        }
+        public Date getStart(){
+            return started;
+        }
+        public Date getCompleted(){
+            return completed;
+        }
+        public boolean isFailed(){
+            return ExecutionMetadata.STATUS_FAILED.equals(status);
+        }
+        public boolean isCompleted(){
+            return ExecutionMetadata.STATUS_COMPLETED.equals(status);
+        }
+        public String getOffsetText(){
+            if(chain == null || chain.getStart() == null || started == null){
+                return null;
+            } else {
+                return String.format("%6dms",started.getTime() - chain.getStart().getTime());
+            }
+        }
+        public String getDurationText(){
+            if(duration == null){
+                return "[duration not available]";
+            } else if(duration < 1025){
+                return duration+"ms";
+            } else {
+                return String.format("%.2fsec",(duration.floatValue()/1000));
+            }
+        }
+        public String getStartTime(){
+            if(started != null){
+                return format.format(started);
+            } else {
+                return "unknown";
+            }
+        }
+        public String getCompletionTime(){
+            if(completed != null){
+                return format.format(completed);
+            } else {
+                return "unknown";
+            }
+        }
+        @Override
+        public int hashCode() {
+            return node.hashCode();
+        }
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof ExecutionNode && ((ExecutionNode)o).node.equals(node);
+        }
+        @Override
+        public int compareTo(Execution e2) {
+            if(started != null && e2.started != null){
+                int result = started.compareTo(e2.started);
+                if(result == 0){
+                    if(completed != null && e2.completed != null){
+                        result = started.compareTo(e2.completed);
+                        if(result == 0){
+                            return node.toString().compareTo(e2.toString());
+                        } else {
+                            return result;
+                        }
+                    } else if (completed == null && e2.completed == null){
+                        return node.toString().compareTo(e2.toString());
+                    } else {
+                        return completed == null ? -1 : 1;
+                    }
+                } else {
+                    return result;
+                }
+            } else if (started == null && e2.started == null){
+                return node.toString().compareTo(e2.toString());
+            } else {
+                return started == null ? -1 : 1;
+            }
+        }
+    }
+    public class ChainExecution extends Execution {
+        
+        private final String chainName;
+        
+        public ChainExecution(TripleCollection graph, NonLiteral node) {
+            super(null,graph,node);
+            NonLiteral ep = ExecutionMetadataHelper.getExecutionPlanNode(graph, node);
+            if(ep != null){
+                chainName = EnhancementEngineHelper.getString(graph, ep, ExecutionPlan.CHAIN);
+            } else {
+                chainName = null;
+            }
+        }
+        
+        public String getChainName(){
+            return chainName;
+        }
+    }
+    
 }
