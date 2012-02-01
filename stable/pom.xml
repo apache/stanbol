@@ -125,6 +125,7 @@
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.base</artifactId>
       <classifier>app</classifier>
+      <scope>provided</scope>
     </dependency>
 
     <!-- OSGi Framemework Bundle List -->
@@ -132,6 +133,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Stanbol Commons Bundle List -->
@@ -139,17 +141,32 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
 
+    <!-- Stanbol Enhancer Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol Data Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.bundlelist</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
+
+    <!-- Stanbol Entityhub Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.bundlelist</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
+
   </dependencies>
 </project>
