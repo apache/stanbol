@@ -653,8 +653,8 @@ public class StoreResource extends BaseStanbolResource {
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-        return new ContentItemResource(localId, ci, uriInfo, uriInfo.getBaseUriBuilder().path(
-            "/contenthub/store"), tcManager, serializer, servletContext);
+        return new ContentItemResource(localId, ci, uriInfo, "/contenthub/store/download", tcManager,
+                serializer, servletContext);
     }
 
     // Helper methods for HTML view
