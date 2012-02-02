@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.enhancer.engine.topic;
 
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +31,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -62,11 +62,13 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MoreLikeThisParams;
 import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.enhancer.topic.Batch;
@@ -161,6 +163,15 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     private static final Logger log = LoggerFactory.getLogger(TopicClassificationEngine.class);
 
+    /**
+     * The "text/plain" mime type
+     */
+    protected static final String PLAIN_TEXT_MIMETYPE = "text/plain";
+    /**
+     * Contains the only supported mime type {@link #PLAIN_TEXT_MIMETYPE}
+     */
+    protected static final Set<String> SUPPORTED_MIMETYPES = Collections.singleton(PLAIN_TEXT_MIMETYPE);
+    
     public static final String SOLR_NON_EMPTY_FIELD = "[\"\" TO *]";
 
     // TODO: make the following fields configurable
@@ -267,20 +278,41 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
-        String text = getTextFromContentItem(ci);
-        if (getActiveSolrServer() == null) {
-            log.warn(String.format("Solr Core '%s' is not available.", solrCoreId));
+        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null &&
+                getActiveSolrServer() != null){
+            return ENHANCE_SYNCHRONOUS;
+        } else {
             return CANNOT_ENHANCE;
         }
-        if (text.trim().length() == 0) {
-            return CANNOT_ENHANCE;
-        }
-        return ENHANCE_SYNCHRONOUS;
+        //TODO ogrisel: validate that it is no problem that this does no longer
+        //check that the text is not empty
+//        if (text.trim().length() == 0) {
+//            return CANNOT_ENHANCE;
+//        }
     }
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        String text = getTextFromContentItem(ci);
+        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        if(contentPart == null){
+            throw new IllegalStateException("No ContentPart with a supported Mime Type"
+                    + "found for ContentItem "+ci.getUri()+"(supported: '"
+                    + SUPPORTED_MIMETYPES+"') -> this indicates that canEnhance was" 
+                    + "NOT called and indicates a bug in the used EnhancementJobManager!");
+        }
+        String text;
+        try {
+            text = ContentItemHelper.getText(contentPart.getValue());
+        } catch (IOException e) {
+            throw new InvalidContentException(String.format("Unable to extract "
+                +" textual content from ContentPart %s of ContentItem %s!",
+                contentPart.getKey(),ci.getUri()), e);
+        }
+        if(text.trim().isEmpty()){
+            log.warn("ContentPart {} of ContentItem {} does not contain any " +
+            		"text to extract topics from",contentPart.getKey(),ci.getUri());
+            return;
+        }
         MGraph metadata = ci.getMetadata();
         List<TopicSuggestion> topics;
         try {
@@ -288,18 +320,23 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         } catch (ClassifierException e) {
             throw new EngineException(e);
         }
-        for (TopicSuggestion topic : topics) {
-            UriRef enhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this);
-            metadata.add(new TripleImpl(enhancement,
-                    org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE,
-                    TechnicalClasses.ENHANCER_TOPICANNOTATION));
-
-            // add link to entity
-            metadata.add(new TripleImpl(enhancement,
-                    org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE,
-                    new UriRef(topic.uri)));
-            // TODO: make it possible to dereference and the path to the root the entities according to a
-            // configuration parameter
+        ci.getLock().writeLock().lock();
+        try {
+            for (TopicSuggestion topic : topics) {
+                UriRef enhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this);
+                metadata.add(new TripleImpl(enhancement,
+                        org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE,
+                        TechnicalClasses.ENHANCER_TOPICANNOTATION));
+    
+                // add link to entity
+                metadata.add(new TripleImpl(enhancement,
+                        org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE,
+                        new UriRef(topic.uri)));
+                // TODO: make it possible to dereference and the path to the root the entities according to a
+                // configuration parameter
+            }
+        } finally {
+            ci.getLock().writeLock().unlock();
         }
     }
 
@@ -307,25 +344,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     public Map<String,Object> getServiceProperties() {
         return Collections.unmodifiableMap(Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING,
             (Object) order));
-    }
-
-    protected String getTextFromContentItem(ContentItem ci) throws InvalidContentException {
-        // Refactor the following using an adapter.
-        String text = "";
-        if (ci.getMimeType().startsWith("text/plain")) {
-            try {
-                // TODO: handle explicit charsets if any and fallback to UTF-8 if missing
-                text = IOUtils.toString(ci.getStream(), "UTF-8");
-            } catch (IOException e) {
-                throw new InvalidContentException(this, ci, e);
-            }
-        } else {
-            Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
-            while (it.hasNext()) {
-                text += it.next().getObject();
-            }
-        }
-        return text;
     }
 
     public static TopicClassificationEngine fromParameters(Dictionary<String,Object> config) throws ConfigurationException {

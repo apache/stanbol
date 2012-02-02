@@ -35,6 +35,7 @@ import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.node.BlankNode;
 import org.ontoware.rdf2go.model.node.Variable;
+import org.ontoware.rdf2go.model.node.impl.URIImpl;
 import org.semanticdesktop.aperture.extractor.ExtractorException;
 import org.semanticdesktop.aperture.vocabulary.NMO;
 import org.slf4j.Logger;
@@ -88,7 +89,7 @@ public class TestMetaxaCore {
         InputStream in = getResourceAsStream(testFile);
         assertNotNull("failed to load resource " + testFile, in);
 
-        Model m = extractor.extract(in, "file://" + testFile, "application/pdf");
+        Model m = extractor.extract(in, new URIImpl("file://" + testFile), "application/pdf");
         String text = MetaxaCore.getText(m);
         // get expected result
         InputStream in2 = getResourceAsStream(testResultFile);
@@ -119,7 +120,7 @@ public class TestMetaxaCore {
         InputStream in = getResourceAsStream(testFile);
         assertNotNull("failed to load resource " + testFile, in);
 
-        Model m = extractor.extract(in, "file://" + testFile, "text/html");
+        Model m = extractor.extract(in, new URIImpl("file://" + testFile), "text/html");
         String text = MetaxaCore.getText(m);
         // get expected result
         InputStream in2 = getResourceAsStream(testResultFile);
@@ -149,7 +150,7 @@ public class TestMetaxaCore {
         InputStream in = getResourceAsStream(testFile);
         assertNotNull("failed to load resource " + testFile, in);
 
-        Model m = extractor.extract(in, "file://" + testFile, "text/html");
+        Model m = extractor.extract(in, new URIImpl("file://" + testFile), "text/html");
         String text = MetaxaCore.getText(m);
         // get expected result
         InputStream in2 = getResourceAsStream(testResultFile);
@@ -169,7 +170,7 @@ public class TestMetaxaCore {
       String testFile = "mail-multipart-test.eml";
       InputStream in = getResourceAsStream(testFile);
       assertNotNull("failed to load resource " + testFile, in);
-      Model m = extractor.extract(in, "file://" + testFile, "message/rfc822");
+      Model m = extractor.extract(in, new URIImpl("file://" + testFile), "message/rfc822");
       boolean textContained = m.contains(Variable.ANY, NMO.plainTextMessageContent, Variable.ANY);
       assertTrue(textContained);
     }

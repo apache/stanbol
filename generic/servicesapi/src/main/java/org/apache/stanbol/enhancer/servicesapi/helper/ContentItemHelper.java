@@ -22,16 +22,21 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 
 
 /**
@@ -48,6 +53,8 @@ public class ContentItemHelper {
     public static final int MAX_BUF_SIZE = 64 * 1024; // 64 kB
 
     private static final char[] HEX_DIGITS = "0123456789abcdef".toCharArray();
+    
+    public static final String UTF8 = "UTF-8";
 
     // TODO: instead of using a static helper, build an OSGi component with a
     // configurable site-wide URI namespace for ids that are local to the
@@ -213,5 +220,69 @@ public class ContentItemHelper {
             }
         }
         return parsed;
+    }
+    /**
+     * Searches an {@link ContentItem#getPart(UriRef, Class) content part}
+     * of the type {@link Blob} with one of the the parsed mimeTypes. <p>
+     * NOTE:<ul>
+     * <li> MimeTypes are converted to lower case before compared with
+     * the entries of the parsed set. Therefore it is important that the parsed
+     * set only contains lower case values!
+     * <li> A read lock on the parsed {@link ContentItem} is applied while
+     * searching for a fitting {@link Blob}
+     * </ul>
+     * @param ci the contentITem
+     * @param mimeTypes List of possible mimeTypes
+     * @return the {@link UriRef URI} and the {@link Blob content} of the content 
+     * part or <code>null</code> if not found
+     * @throws IllegalArgumentException If the parsed {@link ContentItem} is
+     * <code>null</code> or the parsed Set with the mimeTypes is <code>null</code>
+     * or {@link Set#isEmpty() empty}.
+     */
+    public static Entry<UriRef, Blob> getBlob(ContentItem ci, Set<String> mimeTypes){
+        if(ci == null){
+            throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
+        }
+        if(mimeTypes == null || mimeTypes.isEmpty()){
+            throw new IllegalArgumentException("The parsed Set with mime type  MUST NOT be NULL nor empty!");
+        }
+        UriRef cpUri = null;
+        int index = 0;
+        ci.getLock().readLock().lock();
+        try {
+            do {
+                try {
+                    cpUri = ci.getPartUri(index);
+                    if(cpUri != null){
+                        Blob blob = ci.getPart(cpUri, Blob.class);
+                        if(blob != null && mimeTypes.contains(
+                            blob.getMimeType().toLowerCase())){
+                            return Collections.singletonMap(cpUri, blob)
+                                    .entrySet().iterator().next();
+                        } // else no match
+                    } // else no more parts
+                } catch (NoSuchPartException e) {/* ignore*/}
+            } while(cpUri != null);
+        } finally {
+            ci.getLock().readLock().unlock();
+        }
+        return null; // not found
+    }
+    /**
+     * Getter for the Text of an {@link Blob}. This method respects the
+     * "charset" if present in the {@link Blob#getParameter() parameter} of the
+     * Blob.
+     * @param blob the {@link Blob}. MUST NOT be <code>null</code>.
+     * @return the text
+     * @throws IOException on any exception while reading from the
+     * {@link InputStream} provided by the Blob.
+     * @throws IllegalArgumentException if the parsed Blob is <code>null</code>
+     */
+    public static String getText(Blob blob) throws IOException {
+        if(blob == null){
+            throw new IllegalArgumentException("The parsed Blob MUST NOT be NULL!");
+        }
+        String charset = blob.getParameter().get("charset");
+        return IOUtils.toString(blob.getStream(), charset != null ? charset : UTF8);
     }
 }

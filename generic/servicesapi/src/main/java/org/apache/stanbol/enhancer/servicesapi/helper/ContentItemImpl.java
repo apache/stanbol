@@ -136,11 +136,16 @@ public abstract class ContentItemImpl implements ContentItem {
     @SuppressWarnings("unchecked")
 	@Override
 	public <T> T getPart(UriRef uri, Class<T> clazz) throws NoSuchPartException {
-        if(parts.containsKey(uri)){
-            return (T) parts.get(uri);
-        } else {
-		    throw new NoSuchPartException(uri);
-		}
+        readLock.lock();
+        try {
+            if(parts.containsKey(uri)){
+                return (T) parts.get(uri);
+            } else {
+    		    throw new NoSuchPartException(uri);
+    		}
+        }finally {
+            readLock.unlock();
+        }
 	}
 
 	@Override

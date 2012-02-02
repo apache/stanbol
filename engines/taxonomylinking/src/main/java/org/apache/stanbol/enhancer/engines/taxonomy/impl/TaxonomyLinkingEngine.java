@@ -16,8 +16,6 @@
 */
 package org.apache.stanbol.enhancer.engines.taxonomy.impl;
 
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -48,11 +47,9 @@ import opennlp.tools.util.Span;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -68,12 +65,14 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -149,6 +148,10 @@ public class TaxonomyLinkingEngine
     public static final String SERVICE_RANKING = Constants.SERVICE_RANKING;
     
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
+    /**
+     * Contains the only supported mime type {@link #TEXT_PLAIN_MIMETYPE}
+     */
+    protected static final Set<String> SUPPORTED_MIMETYPES = Collections.singleton(TEXT_PLAIN_MIMETYPE);
     /**
      * The default value for the Execution of this Engine. Currently set to
      * {@link ServiceProperties#ORDERING_EXTRACTION_ENHANCEMENT} + 10. It should run after Metaxa and LangId.
@@ -360,17 +363,11 @@ public class TaxonomyLinkingEngine
     
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
-        String mimeType = ci.getMimeType().split(";", 2)[0];
-        if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
+        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null){
             return ENHANCE_SYNCHRONOUS;
+        } else {
+            return ENHANCE_ASYNC;
         }
-        // check for existence of textual content in metadata
-        UriRef subj = ci.getUri();
-        Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
-        if (it.hasNext()) {
-            return ENHANCE_SYNCHRONOUS;
-        }
-        return CANNOT_ENHANCE;
     }
 
     @Override
@@ -398,35 +395,32 @@ public class TaxonomyLinkingEngine
         } else { // null indicates to use the Entityhub to lookup Entities
             site = null;
         }
-        String mimeType = ci.getMimeType().split(";", 2)[0];
+        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        if(contentPart == null){
+            throw new IllegalStateException("No ContentPart with a supported Mime Type"
+                    + "found for ContentItem "+ci.getUri()+"(supported: '"
+                    + SUPPORTED_MIMETYPES+"') -> this indicates that canEnhance was" 
+                    + "NOT called and indicates a bug in the used EnhancementJobManager!");
+        }
         String text;
-        if (TEXT_PLAIN_MIMETYPE.equals(mimeType)) {
-            try {
-                text = IOUtils.toString(ci.getStream(),"UTF-8");
-            } catch (IOException e) {
-                throw new InvalidContentException(this, ci, e);
-            }
-        } else {
-            //TODO: change that as soon the Adapter Pattern is used for multiple
-            // mimetype support.
-            StringBuilder textBuilder = new StringBuilder();
-            Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
-            while (it.hasNext()) {
-                textBuilder.append(it.next().getObject());
-            }
-            text = textBuilder.toString();
+        try {
+            text = ContentItemHelper.getText(contentPart.getValue());
+        } catch (IOException e) {
+            throw new InvalidContentException(this, ci, e);
         }
         if (text.trim().length() == 0) {
             // TODO: make the length of the data a field of the ContentItem
             // interface to be able to filter out empty items in the canEnhance
             // method
-            log.warn("nothing to extract knowledge from in ContentItem {}", ci);
+            log.warn("ContentPart {} of ContentItem {} does not contain any text to extract knowledge from.",
+                contentPart.getKey(),ci.getUri());
             return;
         }
-        //TODO: determin the language
+        //TODO: determine the language
         String language = "en";
-        log.debug("computeEnhancements for ContentItem {} language {} text={}", 
-            new Object []{ci.getUri().getUnicodeString(), language, StringUtils.abbreviate(text, 100)});
+        log.debug("computeEnhancements for ContentPart {} of ContentItem {} language {} text={}", 
+            new Object [] { contentPart.getKey(),ci.getUri().getUnicodeString(), 
+                            language, StringUtils.abbreviate(text, 100) });
         
         //first get the models
         Tokenizer tokenizer = initTokenizer(language);
