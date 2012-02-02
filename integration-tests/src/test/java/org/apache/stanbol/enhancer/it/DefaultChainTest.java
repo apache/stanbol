@@ -63,13 +63,16 @@ public class DefaultChainTest extends EnhancerTestBase {
     @Test
     public void testSimpleEnhancement() throws Exception {
         executor.execute(
-            builder.buildPostRequest(getEndpoint())
+            builder.buildPostRequest(getEndpoint()+"?executionmetadata=true")
             .withHeader("Accept","text/rdf+nt")
             .withContent("The Stanbol enhancer can detect famous cities such as Paris and people such as Bob Marley.")
         )
         .assertStatus(200)
         .assertContentRegexp(
-                "http://purl.org/dc/terms/creator.*MetaxaEngine",
+                //check execution metadata
+                "http://stanbol.apache.org/ontology/enhancer/executionMetadata#executionPart",
+                //check execution of metaxa & if executionPlan is incuded
+                "http://stanbol.apache.org/ontology/enhancer/executionplan#engine.*metaxa", 
                 "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
                 "http://purl.org/dc/terms/language.*en",
                 "http://fise.iks-project.eu/ontology/entity-label.*Paris",
