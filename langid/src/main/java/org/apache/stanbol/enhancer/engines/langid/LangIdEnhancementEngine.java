@@ -17,30 +17,30 @@
 package org.apache.stanbol.enhancer.engines.langid;
 
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.tika.language.LanguageIdentifier;
 import org.osgi.service.cm.ConfigurationException;
@@ -81,6 +81,10 @@ public class LangIdEnhancementEngine
      * This contains the only MIME type directly supported by this enhancement engine.
      */
     private static final String TEXT_PLAIN_MIMETYPE = "text/plain";
+    /**
+     * Set containing the only supported mime type {@link #TEXT_PLAIN_MIMETYPE}
+     */
+    private static final Set<String> SUPPORTED_MIMTYPES = Collections.singleton(TEXT_PLAIN_MIMETYPE);
 
     /**
      * This contains the logger.
@@ -115,36 +119,31 @@ public class LangIdEnhancementEngine
     }
 
     public int canEnhance(ContentItem ci) throws EngineException {
-        String mimeType = ci.getMimeType().split(";", 2)[0];
-        if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
-            return ENHANCE_SYNCHRONOUS;
+        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES) != null){
+            return ENHANCE_ASYNC; //Langid now supports async processing
+        } else {
+            return CANNOT_ENHANCE;
         }
-
-        // TODO: check whether there is the graph contains the text
-        UriRef subj = ci.getUri();
-        Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
-        if (it.hasNext()) {
-            return ENHANCE_SYNCHRONOUS;
-        }
-        return CANNOT_ENHANCE;
     }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
+        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
+        if(contentPart == null){
+            throw new IllegalStateException("No ContentPart with Mimetype '"
+                    + TEXT_PLAIN_MIMETYPE+"' found for ContentItem "+ci.getUri()
+                    + ": This is also checked in the canEnhance method! -> This "
+                    + "indicated an Bug in the implementation of the "
+                    + "EnhancementJobManager!");
+        }
         String text = "";
-        if (TEXT_PLAIN_MIMETYPE.equals(ci.getMimeType())) {
-            try {
-                text = IOUtils.toString(ci.getStream(),"UTF-8");
-            } catch (IOException e) {
-                throw new InvalidContentException(this, ci, e);
-            }
-        } else {
-            Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
-            while (it.hasNext()) {
-                text += it.next().getObject();
-            }
+        try {
+            text = ContentItemHelper.getText(contentPart.getValue());
+        } catch (IOException e) {
+            throw new InvalidContentException(this, ci, e);
         }
         if (text.trim().length() == 0) {
-            log.warn("no text found");
+            log.info("No text contained in ContentPart {} of ContentItem {}",
+                contentPart.getKey(),ci.getUri());
             return;
         }
 
@@ -159,8 +158,13 @@ public class LangIdEnhancementEngine
 
         // add language to metadata
         MGraph g = ci.getMetadata();
-        UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
-        g.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl(language)));
+        ci.getLock().writeLock().lock();
+        try {
+            UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+            g.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl(language)));
+        } finally {
+            ci.getLock().writeLock().unlock();
+        }
     }
 
     public int getProbeLength() {

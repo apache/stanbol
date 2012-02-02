@@ -17,8 +17,6 @@
 package org.apache.stanbol.enhancer.engines.entitytagging.impl;
 
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 
 import java.util.ArrayList;
@@ -28,12 +26,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -52,7 +50,6 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
-import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
@@ -318,36 +315,72 @@ public class NamedEntityTaggingEngine
         } else { // null indicates to use the Entityhub to lookup Entities
             site = null;
         }
-        UriRef contentItemId = ci.getUri();
-
         MGraph graph = ci.getMetadata();
         LiteralFactory literalFactory = LiteralFactory.getInstance();
-
-        // Retrieve the existing text annotations
-        Map<UriRef,List<UriRef>> textAnnotations = new HashMap<UriRef,List<UriRef>>();
-        for (Iterator<Triple> it = graph.filter(null, RDF_TYPE, TechnicalClasses.ENHANCER_TEXTANNOTATION); it
-                .hasNext();) {
-            UriRef uri = (UriRef) it.next().getSubject();
-            if (graph.filter(uri, Properties.DC_RELATION, null).hasNext()) {
-                // this is not the most specific occurrence of this name: skip
-                continue;
+        // Retrieve the existing text annotations (requires read lock)
+        Map<NamedEntity,List<UriRef>> textAnnotations = new HashMap<NamedEntity,List<UriRef>>();
+        ci.getLock().readLock().lock();
+        try {
+            for (Iterator<Triple> it = graph.filter(null, RDF_TYPE, TechnicalClasses.ENHANCER_TEXTANNOTATION); it
+                    .hasNext();) {
+                UriRef uri = (UriRef) it.next().getSubject();
+                if (graph.filter(uri, Properties.DC_RELATION, null).hasNext()) {
+                    // this is not the most specific occurrence of this name: skip
+                    continue;
+                }
+                NamedEntity namedEntity = NamedEntity.createFromTextAnnotation(graph, uri);
+                if(namedEntity != null){
+                    // This is a first occurrence, collect any subsumed annotations
+                    List<UriRef> subsumed = new ArrayList<UriRef>();
+                    for (Iterator<Triple> it2 = graph.filter(null, Properties.DC_RELATION, uri); it2.hasNext();) {
+                        subsumed.add((UriRef) it2.next().getSubject());
+                    }
+                    textAnnotations.put(namedEntity, subsumed);
+                }
             }
-            // This is a first occurrence, collect any subsumed annotations
-            List<UriRef> subsumed = new ArrayList<UriRef>();
-            for (Iterator<Triple> it2 = graph.filter(null, Properties.DC_RELATION, uri); it2.hasNext();) {
-                subsumed.add((UriRef) it2.next().getSubject());
-            }
-            textAnnotations.put(uri, subsumed);
+        } finally {
+            ci.getLock().readLock().unlock();
         }
-
-        for (Map.Entry<UriRef,List<UriRef>> entry : textAnnotations.entrySet()) {
+        //search the suggestions
+        Map<NamedEntity,List<Entity>> suggestions = new HashMap<NamedEntity,List<Entity>>(textAnnotations.size());
+        for (Entry<NamedEntity,List<UriRef>> entry : textAnnotations.entrySet()) {
             try {
-                computeEntityRecommentations(site,literalFactory, graph, contentItemId, entry.getKey(),
-                    entry.getValue());
+                List<Entity> entitySuggestions = computeEntityRecommentations(
+                    site, entry.getKey(),entry.getValue());
+                if(entitySuggestions != null && !entitySuggestions.isEmpty()){
+                    suggestions.put(entry.getKey(), entitySuggestions);
+                }
             } catch (EntityhubException e) {
                 throw new EngineException(this, ci, e);
             }
         }
+        //now write the results (requires write lock)
+        ci.getLock().writeLock().lock();
+        try {
+            RdfValueFactory factory = RdfValueFactory.getInstance();
+            Map<String, Representation> entityData = new HashMap<String,Representation>();
+            for(Entry<NamedEntity,List<Entity>> entitySuggestions : suggestions.entrySet()){
+                List<UriRef> subsumed = textAnnotations.get(entitySuggestions.getKey());
+                List<NonLiteral> annotationsToRelate = new ArrayList<NonLiteral>(subsumed);
+                annotationsToRelate.add(entitySuggestions.getKey().getEntity());
+                for(Entity suggestion : entitySuggestions.getValue()){
+                    log.debug("Add Suggestion {} for {}", suggestion.getId(), entitySuggestions.getKey());
+                    EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory, graph, ci.getUri(),
+                        annotationsToRelate, suggestion.getRepresentation(), nameField);
+                    if (dereferenceEntities) {
+                        entityData.put(suggestion.getId(), suggestion.getRepresentation());
+                    }
+                }
+            }
+            //if dereferneceEntities is true the entityData will also contain all
+            //Representations to add! If false entityData will be empty
+            for(Representation rep : entityData.values()){
+                graph.addAll(factory.toRdfRepresentation(rep).getRdfGraph());
+            }
+        } finally {
+            ci.getLock().writeLock().unlock();
+        }
+
     }
 
     /**
@@ -355,7 +388,6 @@ public class NamedEntityTaggingEngine
      * @param site The {@link ReferencedSiteException} id or <code>null</code> to
      * use the {@link Entityhub}
      * @param literalFactory the {@link LiteralFactory} used to create RDF Literals
-     * @param graph the graph to write the lined entities
      * @param contentItemId the id of the contentItem
      * @param textAnnotation the text annotation to enhance
      * @param subsumedAnnotations other text annotations for the same entity 
@@ -363,42 +395,19 @@ public class NamedEntityTaggingEngine
      * @throws EntityhubException On any Error while looking up Entities via
      * the Entityhub
      */
-    protected final Iterable<Entity> computeEntityRecommentations(ReferencedSite site,
-            LiteralFactory literalFactory,
-            MGraph graph,
-            UriRef contentItemId,
-            UriRef textAnnotation,
+    protected final List<Entity> computeEntityRecommentations(ReferencedSite site,
+            NamedEntity namedEntity,
             List<UriRef> subsumedAnnotations) throws EntityhubException {
         // First get the required properties for the parsed textAnnotation
         // ... and check the values
-        String name = EnhancementEngineHelper.getString(graph, textAnnotation, ENHANCER_SELECTED_TEXT);
-        if (name == null) {
-            log.info("Unable to process TextAnnotation " + textAnnotation + " because property"
-                     + ENHANCER_SELECTED_TEXT + " is not present");
-            return Collections.emptyList();
-        }
-        if(name.isEmpty()){
-            log.info("Unable to process TextAnnotation " + textAnnotation + 
-                " because an empty Stirng is selected by " + ENHANCER_SELECTED_TEXT + "");
-            return Collections.emptyList();
-        }
 
-        UriRef type = EnhancementEngineHelper.getReference(graph, textAnnotation, DC_TYPE);
-        if (type == null) {
-            log.warn("Unable to process TextAnnotation " + textAnnotation + " because property" + DC_TYPE
-                     + " is not present");
-            return Collections.emptyList();
-        }
-        // remove punctuation form the search string
-        name = cleanupKeywords(name);
-
-        log.debug("Process TextAnnotation " + name + " type=" + type);
+        log.debug("Process {}", namedEntity);
         FieldQuery query = site == null ? //if site is NULL use the Entityhub
                 entityhub.getQueryFactory().createFieldQuery() : 
                     site.getQueryFactory().createFieldQuery();
         // replace spaces with plus to create an AND search for all words in the name!
-        query.setConstraint(nameField, new TextConstraint(name));// name.replace(' ', '+')));
-        if (OntologicalClasses.DBPEDIA_PERSON.equals(type)) {
+        query.setConstraint(nameField, new TextConstraint(namedEntity.getName()));// name.replace(' ', '+')));
+        if (OntologicalClasses.DBPEDIA_PERSON.equals(namedEntity.getType())) {
             if (personState) {
                 if (personType != null) {
                     query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(personType));
@@ -408,7 +417,7 @@ public class NamedEntityTaggingEngine
                 // ignore people
                 return Collections.emptyList();
             }
-        } else if (DBPEDIA_ORGANISATION.equals(type)) {
+        } else if (DBPEDIA_ORGANISATION.equals(namedEntity.getType())) {
             if (orgState) {
                 if (orgType != null) {
                     query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(orgType));
@@ -418,7 +427,7 @@ public class NamedEntityTaggingEngine
                 // ignore people
                 return Collections.emptyList();
             }
-        } else if (OntologicalClasses.DBPEDIA_PLACE.equals(type)) {
+        } else if (OntologicalClasses.DBPEDIA_PLACE.equals(namedEntity.getType())) {
             if (this.placeState) {
                 if (this.placeType != null) {
                     query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(placeType));
@@ -435,9 +444,6 @@ public class NamedEntityTaggingEngine
                     site.findEntities(query); //else the referenced site
         log.debug("{} results returned by query {}", results.size(), query);
 
-        List<NonLiteral> annotationsToRelate = new ArrayList<NonLiteral>();
-        annotationsToRelate.add(textAnnotation);
-        annotationsToRelate.addAll(subsumedAnnotations);
         Float maxScore = null;
         int exactCount = 0;
         List<Entity> matches = new ArrayList<Entity>(numSuggestions);
@@ -452,7 +458,7 @@ public class NamedEntityTaggingEngine
             while(labels.hasNext() && !found){
                 Text label = labels.next();
                 if(label.getLanguage() == null || label.getLanguage().startsWith("en")){
-                    if(label.getText().equalsIgnoreCase(name)){
+                    if(label.getText().equalsIgnoreCase(namedEntity.getName())){
                         found = true;
                     }
                 }
@@ -464,7 +470,6 @@ public class NamedEntityTaggingEngine
                 matches.add(guess);
             }
         }
-        RdfValueFactory factory = RdfValueFactory.getInstance();
         //now write the results
         for(int i=0;i<matches.size();i++){
             Representation rep = matches.get(i).getRepresentation();
@@ -477,15 +482,8 @@ public class NamedEntityTaggingEngine
                         maxScore.doubleValue()+(score != null?score.doubleValue():0));
                 }
             }
-            log.debug("Adding {} to ContentItem {}", rep.getId(), contentItemId);
-            EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory, graph, contentItemId,
-                annotationsToRelate, rep, nameField);
-
-            if (dereferenceEntities) {
-                graph.addAll(factory.toRdfRepresentation(rep).getRdfGraph());
-            }
         }
-        return results;
+        return matches;
     }
 
     public int canEnhance(ContentItem ci) {
@@ -493,7 +491,7 @@ public class NamedEntityTaggingEngine
          * This engine consumes existing enhancements because of that it can enhance any type of ci! TODO: It
          * would also be possible to check here if there is an TextAnnotation and use that as result!
          */
-        return ENHANCE_SYNCHRONOUS;
+        return ENHANCE_ASYNC; //Entity tagging now supports asyc processing
     }
 
     @Override
@@ -502,10 +500,4 @@ public class NamedEntityTaggingEngine
             (Object) defaultOrder));
     }
 
-    /**
-     * Removes punctuation form a parsed string
-     */
-    private static String cleanupKeywords(String keywords) {
-        return keywords.replaceAll("\\p{P}", " ").trim();
-    }
 }

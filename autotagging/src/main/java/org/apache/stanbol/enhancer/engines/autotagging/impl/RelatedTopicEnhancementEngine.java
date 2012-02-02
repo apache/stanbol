@@ -17,20 +17,18 @@
 package org.apache.stanbol.enhancer.engines.autotagging.impl;
 
 import static org.apache.stanbol.enhancer.servicesapi.EnhancementEngine.PROPERTY_NAME;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -39,11 +37,13 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.autotagging.Autotagger;
 import org.apache.stanbol.autotagging.TagInfo;
 import org.apache.stanbol.enhancer.engines.autotagging.AutotaggerProvider;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 public class RelatedTopicEnhancementEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements EnhancementEngine {
 
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
-
+    protected static final Set<String> SUPPORTED_MIMETYPES = Collections.singleton(TEXT_PLAIN_MIMETYPE);
     public static final String DEFAULT_NAME = "autotaggingRelatedTopic";
     
     private static final Logger log = LoggerFactory.getLogger(RelatedTopicEnhancementEngine.class);
@@ -87,25 +87,25 @@ public class RelatedTopicEnhancementEngine extends AbstractEnhancementEngine<Run
                     + ci.getUri().getUnicodeString());
             return;
         }
-        String mimeType = ci.getMimeType().split(";", 2)[0];
+        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        if(contentPart == null){
+            throw new IllegalStateException("No ContentPart with a supported Mime Type"
+                    + "found for ContentItem "+ci.getUri()+"(supported: '"
+                    + SUPPORTED_MIMETYPES+"') -> this indicates that canEnhance was" 
+                    + "NOT called and indicates a bug in the used EnhancementJobManager!");
+        }
         String text = "";
-        if (TEXT_PLAIN_MIMETYPE.equals(mimeType)) {
-            try {
-                text = IOUtils.toString(ci.getStream(),"UTF-8");
-            } catch (IOException e) {
-                throw new InvalidContentException(this, ci, e);
-            }
-        } else {
-            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getUri().getUnicodeString()), NIE_PLAINTEXTCONTENT, null);
-            while (it.hasNext()) {
-                text += it.next().getObject();
-            }
+        try {
+            text = ContentItemHelper.getText(contentPart.getValue());
+        } catch (IOException e) {
+            throw new InvalidContentException(this, ci, e);
         }
         if (text.trim().length() == 0) {
             // TODO: make the length of the data a field of the ContentItem
             // interface to be able to filter out empty items in the canEnhance
             // method
-            log.warn("nothing to extract a topic from");
+            log.warn("ContentPart {} of ContentItem {} does contain no text to extract a topic from",
+                contentPart.getKey(),ci.getUri());
             return;
         }
 
@@ -115,10 +115,16 @@ public class RelatedTopicEnhancementEngine extends AbstractEnhancementEngine<Run
         try {
             List<TagInfo> suggestions = autotagger.suggestForType(text, type);
             Collection<NonLiteral> noRelatedEnhancements = Collections.emptyList();
-            for (TagInfo tag : suggestions) {
-                EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory,
-                        graph, contentItemId,
-                        noRelatedEnhancements, tag);
+            //Acquire a write lock while writing the enhancement results
+            ci.getLock().writeLock().lock();
+            try {
+                for (TagInfo tag : suggestions) {
+                    EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory,
+                            graph, contentItemId,
+                            noRelatedEnhancements, tag);
+                }
+            } finally {
+                ci.getLock().writeLock().unlock();
             }
         } catch (IOException e) {
             throw new EngineException(this, ci, e);
@@ -126,17 +132,11 @@ public class RelatedTopicEnhancementEngine extends AbstractEnhancementEngine<Run
     }
 
     public int canEnhance(ContentItem ci) {
-           String mimeType = ci.getMimeType().split(";",2)[0];
-        if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
-            return ENHANCE_SYNCHRONOUS;
+        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null){
+            return ENHANCE_ASYNC; //RelatedTopic engine now supports async processing
+        } else {
+            return CANNOT_ENHANCE;
         }
-        // check for existence of textual content in metadata
-        UriRef subj = new UriRef(ci.getUri().getUnicodeString());
-        Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
-        if (it.hasNext()) {
-            return ENHANCE_SYNCHRONOUS;
-        }
-        return CANNOT_ENHANCE;
     }
 
     public void bindAutotaggerProvider(AutotaggerProvider autotaggerProvider) {

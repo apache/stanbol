@@ -23,7 +23,6 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EN
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -35,6 +34,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import opennlp.tools.namefind.NameFinderME;
@@ -56,10 +56,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -71,6 +73,11 @@ import org.slf4j.LoggerFactory;
  */
 public class NEREngineCore implements EnhancementEngine {
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
+    /**
+     * Contains the only supported mimetype {@link #TEXT_PLAIN_MIMETYPE}
+     */
+    protected static final Set<String> SUPPORTED_MIMETYPES = 
+            Collections.singleton(TEXT_PLAIN_MIMETYPE);
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     private static Map<String,UriRef> entityTypes = new HashMap<String,UriRef>();
@@ -119,43 +126,44 @@ public class NEREngineCore implements EnhancementEngine {
         //first check the langauge before processing the content (text)
         String language = extractLanguage(ci);
         if(language == null){
-            log.warn("Unable to extract Language for ContentItem {}: The text" +
-                    "of this ContentItem will not be processed by the NER engine!",
-                    ci.getUri());
-            return;
+            throw new IllegalStateException("Unable to extract Language for "
+                + "ContentItem "+ci.getUri()+": This is also checked in the canEnhance "
+                + "method! -> This indicated an Bug in the implementation of the "
+                + "EnhancementJobManager!");
         }
         if(!isProcessedLangage(language)){
-            log.warn("The language {} of ContentItem {} is not configured to be" +
-            		"processed by this NER engine instance (processed {})!",
-            		new Object[]{language,ci.getUri(),processedLangs});
-            return;
+            throw new IllegalStateException("The language '"+language+"' of ContentItem "+ci.getUri() 
+                + " is not configured to be processed by this NER engine instance "
+                + "(processed "+processedLangs+"): This is also checked in the canEnhance "
+                + "method! -> This indicated an Bug in the implementation of the "
+                + "EnhancementJobManager!");
         }
-        String mimeType = ci.getMimeType().split(";", 2)[0];
+        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        if(contentPart == null){
+            throw new IllegalStateException("No ContentPart with Mimetype '"
+                + TEXT_PLAIN_MIMETYPE+"' found for ContentItem "+ci.getUri()
+                + ": This is also checked in the canEnhance method! -> This "
+                + "indicated an Bug in the implementation of the "
+                + "EnhancementJobManager!");
+        }
         String text;
-        if (TEXT_PLAIN_MIMETYPE.equals(mimeType)) {
-            try {
-                text = IOUtils.toString(ci.getStream(),"UTF-8");
-            } catch (IOException e) {
-                throw new InvalidContentException(this, ci, e);
-            }
-        } else {
-            //TODO: change that as soon the Adapter Pattern is used for multiple
-            // mimetype support.
-            StringBuilder textBuilder = new StringBuilder();
-            Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
-            while (it.hasNext()) {
-                textBuilder.append(it.next().getObject());
-            }
-            text = textBuilder.toString();
+        try {
+            text = ContentItemHelper.getText(contentPart.getValue());
+        } catch (IOException e) {
+            throw new InvalidContentException(this, ci, e);
         }
         if (text.trim().length() == 0) {
             // TODO: make the length of the data a field of the ContentItem
             // interface to be able to filter out empty items in the canEnhance
             // method
-            log.warn("nothing to extract knowledge from in ContentItem {}", ci);
+            log.warn("ContentPart {} of ContentItem {} does not contain any text" +
+            		"to extract knowledge from in ContentItem {}", 
+            		contentPart.getKey(),ci);
             return;
         }
-        log.debug("computeEnhancements {} text={}", ci.getUri().getUnicodeString(), StringUtils.abbreviate(text, 100));
+        log.debug("computeEnhancements from ContentPart {} of ContentItem {}: text={}",
+            new Object[]{contentPart.getKey(),ci.getUri().getUnicodeString(), 
+                         StringUtils.abbreviate(text, 100)});
         try {
             for (Map.Entry<String,UriRef> type : entityTypes.entrySet()) {
                 String typeLabel = type.getKey();
@@ -190,57 +198,62 @@ public class NEREngineCore implements EnhancementEngine {
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         MGraph g = ci.getMetadata();
         Map<String,List<NameOccurrence>> entityNames = extractNameOccurrences(nameFinderModel, text);
-
-        Map<String,UriRef> previousAnnotations = new LinkedHashMap<String,UriRef>();
-        for (Map.Entry<String,List<NameOccurrence>> nameInContext : entityNames.entrySet()) {
-
-            String name = nameInContext.getKey();
-            List<NameOccurrence> occurrences = nameInContext.getValue();
-
-            UriRef firstOccurrenceAnnotation = null;
-
-            for (NameOccurrence occurrence : occurrences) {
-                UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
-                g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, literalFactory
-                        .createTypedLiteral(name)));
-                g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, literalFactory
-                        .createTypedLiteral(occurrence.context)));
-                g.add(new TripleImpl(textAnnotation, DC_TYPE, typeUri));
-                g.add(new TripleImpl(textAnnotation, ENHANCER_CONFIDENCE, literalFactory
-                        .createTypedLiteral(occurrence.confidence)));
-                if (occurrence.start != null && occurrence.end != null) {
-                    g.add(new TripleImpl(textAnnotation, ENHANCER_START, literalFactory
-                            .createTypedLiteral(occurrence.start)));
-                    g.add(new TripleImpl(textAnnotation, ENHANCER_END, literalFactory
-                            .createTypedLiteral(occurrence.end)));
-                }
-
-                // add the subsumption relationship among occurrences of the same
-                // name
-                if (firstOccurrenceAnnotation == null) {
-                    // check already extracted annotations to find a first most
-                    // specific occurrence
-                    for (Map.Entry<String,UriRef> entry : previousAnnotations.entrySet()) {
-                        if (entry.getKey().contains(name)) {
-                            // we have found a most specific previous
-                            // occurrence, use it as subsumption target
-                            firstOccurrenceAnnotation = entry.getValue();
-                            g.add(new TripleImpl(textAnnotation, DC_RELATION, firstOccurrenceAnnotation));
-                            break;
-                        }
+        //lock the ContentItem while writing the RDF data for found Named Entities
+        ci.getLock().writeLock().lock();
+        try {
+            Map<String,UriRef> previousAnnotations = new LinkedHashMap<String,UriRef>();
+            for (Map.Entry<String,List<NameOccurrence>> nameInContext : entityNames.entrySet()) {
+    
+                String name = nameInContext.getKey();
+                List<NameOccurrence> occurrences = nameInContext.getValue();
+    
+                UriRef firstOccurrenceAnnotation = null;
+    
+                for (NameOccurrence occurrence : occurrences) {
+                    UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                    g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, literalFactory
+                            .createTypedLiteral(name)));
+                    g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, literalFactory
+                            .createTypedLiteral(occurrence.context)));
+                    g.add(new TripleImpl(textAnnotation, DC_TYPE, typeUri));
+                    g.add(new TripleImpl(textAnnotation, ENHANCER_CONFIDENCE, literalFactory
+                            .createTypedLiteral(occurrence.confidence)));
+                    if (occurrence.start != null && occurrence.end != null) {
+                        g.add(new TripleImpl(textAnnotation, ENHANCER_START, literalFactory
+                                .createTypedLiteral(occurrence.start)));
+                        g.add(new TripleImpl(textAnnotation, ENHANCER_END, literalFactory
+                                .createTypedLiteral(occurrence.end)));
                     }
+    
+                    // add the subsumption relationship among occurrences of the same
+                    // name
                     if (firstOccurrenceAnnotation == null) {
-                        // no most specific previous occurrence, I am the first,
-                        // most specific occurrence to be later used as a target
-                        firstOccurrenceAnnotation = textAnnotation;
-                        previousAnnotations.put(name, textAnnotation);
+                        // check already extracted annotations to find a first most
+                        // specific occurrence
+                        for (Map.Entry<String,UriRef> entry : previousAnnotations.entrySet()) {
+                            if (entry.getKey().contains(name)) {
+                                // we have found a most specific previous
+                                // occurrence, use it as subsumption target
+                                firstOccurrenceAnnotation = entry.getValue();
+                                g.add(new TripleImpl(textAnnotation, DC_RELATION, firstOccurrenceAnnotation));
+                                break;
+                            }
+                        }
+                        if (firstOccurrenceAnnotation == null) {
+                            // no most specific previous occurrence, I am the first,
+                            // most specific occurrence to be later used as a target
+                            firstOccurrenceAnnotation = textAnnotation;
+                            previousAnnotations.put(name, textAnnotation);
+                        }
+                    } else {
+                        // I am referring to a most specific first occurrence of the
+                        // same name
+                        g.add(new TripleImpl(textAnnotation, DC_RELATION, firstOccurrenceAnnotation));
                     }
-                } else {
-                    // I am referring to a most specific first occurrence of the
-                    // same name
-                    g.add(new TripleImpl(textAnnotation, DC_RELATION, firstOccurrenceAnnotation));
                 }
             }
+        } finally {
+            ci.getLock().writeLock().unlock();
         }
     }
 
@@ -390,21 +403,11 @@ public class NEREngineCore implements EnhancementEngine {
     }
 
     public int canEnhance(ContentItem ci) {
-        // in case text/pain;charSet=UTF8 is parsed
-        String mimeType = ci.getMimeType().split(";", 2)[0];
-        if(TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType) || //plain test
-                //or extracted text
-                ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null).hasNext()){
-            //TODO: check if the language metadata are already present when
-            //canEnhance is called. If not than return ENHANCE_SYNCHRONOUS
-            if(isProcessedLangage(extractLanguage(ci))){
-                return ENHANCE_SYNCHRONOUS;
-            } else {
-                return CANNOT_ENHANCE;
-            }
-        } else { //no textual content available
-            return CANNOT_ENHANCE;
+        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null 
+                && isProcessedLangage(extractLanguage(ci))){
+                return ENHANCE_ASYNC; //The NER engine now supports Async processing!
         }
+        return CANNOT_ENHANCE;
     }
 
     /**

@@ -99,7 +99,7 @@ public class LocationEnhancementEngine
 
     public static final Map<String, Collection<UriRef>> FEATURE_TYPE_CONCEPT_MAPPINGS;
 
-    private static final Logger log = LoggerFactory.getLogger(EnhancementEngineHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(LocationEnhancementEngine.class);
 
     /**
      * Default value for minimum scores of search results are added to the
@@ -372,9 +372,9 @@ public class LocationEnhancementEngine
             }
             if (results != null) {
                 for (Toponym result : results) {
-                    log.info("process result " + result.getGeoNameId() + " " + result.getName());
+                    log.debug("process result {} {}",result.getGeoNameId(),result.getName());
                     Double score = getToponymScore(result);
-                    log.info("  > score " + score);
+                    log.debug("  > score {}",score);
                     if (score != null) {
                         if (score < minScore) {
                             //if score is lower than the under bound, than stop
@@ -391,9 +391,9 @@ public class LocationEnhancementEngine
                     //write the enhancement!
                     NonLiteral locationEnhancement = writeEntityEnhancement(
                             contentItemId, graph, literalFactory, result, entry.getValue(), null, null);
-                    log.info("  > " + score + " >= " + minHierarchyScore);
+                    log.debug("  > {}  >= {}",score,minHierarchyScore);
                     if (score != null && score >= minHierarchyScore) {
-                        log.info("  > getHierarchy for " + result.getGeoNameId() + " " + result.getName());
+                        log.debug("  > getHierarchy for {} {}",result.getGeoNameId(),result.getName());
                         //get the hierarchy
                         try {
                             Iterator<Toponym> hierarchy = getHierarchy(result).iterator();
@@ -409,7 +409,7 @@ public class LocationEnhancementEngine
                                 if (result.getGeoNameId() != hierarchyEntry.getGeoNameId()) {
                                     //TODO: add additional checks based on possible
                                     //      configuration here!
-                                    log.info("    - write hierarchy " + hierarchyEntry.getGeoNameId() + " " + hierarchyEntry.getName());
+                                    log.debug("    - write hierarchy {} {}",hierarchyEntry.getGeoNameId(),hierarchyEntry.getName());
                                     /*
                                      * The hierarchy service dose not provide a score, because it would be 1.0
                                      * so we need to set the score to this value.

@@ -23,7 +23,6 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EN
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -44,9 +43,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Literal;
@@ -73,12 +74,14 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
@@ -108,9 +111,10 @@ public class OpenCalaisEngine
 
     /**
      * This contains the directly supported MIME types of this enhancement engine.
-     * For handling other mime-types the plain text must be contained in the metadata as by Metaxa.
      */
-    protected static final List<String> SUPPORTED_MIMETYPES = Arrays.asList(new String[]{"text/plain", "text/html"});
+    protected static final Set<String> SUPPORTED_MIMETYPES = 
+            Collections.unmodifiableSet(new HashSet<String>(
+                    Arrays.asList("text/plain", "text/html")));
 
     /**
      * This contains a list of languages supported by OpenCalais.
@@ -118,7 +122,9 @@ public class OpenCalaisEngine
      * it is left to the grace of the OpenCalais whether it accepts the text.
      * OpenCalais uses its own language identifcation anyway.
      */
-    protected static final List<String> SUPPORTED_LANGUAGES = Arrays.asList(new String[]{"en", "fr", "es"});
+    protected static final Set<String> SUPPORTED_LANGUAGES = 
+            Collections.unmodifiableSet(new HashSet<String>(
+                    Arrays.asList("en", "fr", "es")));
 
     /**
      * The default value for the Execution of this Engine. Currently set to
@@ -248,62 +254,53 @@ public class OpenCalaisEngine
     }
 
     public int canEnhance(ContentItem ci) throws EngineException {
-        //Engine will no longer activate if no license key is set
-//        if (getLicenseKey() == null || getLicenseKey().trim().length() == 0) {
-//            //do nothing if no license key is defined
-//            log.warn("No license key defined. The engine will not work!");
-//            return CANNOT_ENHANCE;
-//        }
-        UriRef subj = ci.getUri();
-        String mimeType = ci.getMimeType().split(";", 2)[0];
-        if (SUPPORTED_MIMETYPES.contains(mimeType.toLowerCase())) {
-            // check language
+        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null){
             String language = getMetadataLanguage(ci.getMetadata(), null);
             if (language != null && !SUPPORTED_LANGUAGES.contains(language)) {
-                log.warn("Wrong language for Calais: {}", language);
+                log.info("OpenCalais can not process ContentItem {} because "
+                    + "language {} is not supported (supported: {})",
+                    new Object[]{ci.getUri(),language,SUPPORTED_LANGUAGES});
                 return CANNOT_ENHANCE;
             }
-            return ENHANCE_SYNCHRONOUS;
-        } else {
-            // TODO: check whether the metadata graph contains the text
-            Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
-            if (it.hasNext()) {
-                return ENHANCE_SYNCHRONOUS;
-            }
-        }
+            return ENHANCE_ASYNC; //OpenCalais now support async processing!
+        } 
         return CANNOT_ENHANCE;
     }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        String mimeType = ci.getMimeType().split(";", 2)[0].toLowerCase();
-        String text = "";
-        if (SUPPORTED_MIMETYPES.contains(mimeType)) {
-            try {
-                text = IOUtils.toString(ci.getStream(),"UTF-8");
-            } catch (IOException e) {
-                throw new InvalidContentException(this, ci, e);
-            }
-        } else {
-            mimeType = "text/plain";
-            text = getMetadataText(ci.getMetadata(), ci.getUri());
+        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        if(contentPart == null){
+            throw new IllegalStateException("No ContentPart with an supported Mimetype '"
+                    + SUPPORTED_MIMETYPES+"' found for ContentItem "+ci.getUri()
+                    + ": This is also checked in the canEnhance method! -> This "
+                    + "indicated an Bug in the implementation of the "
+                    + "EnhancementJobManager!");
         }
-        if (text == null) {
-            log.warn("no text found");
-            return;
+        String text;
+        try {
+            text = ContentItemHelper.getText(contentPart.getValue());
+        } catch (IOException e) {
+            throw new InvalidContentException(this, ci, e);
         }
 
-        MGraph calaisModel = getCalaisAnalysis(text, mimeType);
+        MGraph calaisModel = getCalaisAnalysis(text, contentPart.getValue().getMimeType());
         if (calaisModel != null) {
-            createEnhancements(queryModel(calaisModel), ci);
-            if (log.isDebugEnabled()) {
-              Serializer serializer = Serializer.getInstance();
-              ByteArrayOutputStream debugStream = new ByteArrayOutputStream();
-              serializer.serialize(debugStream, ci.getMetadata(), "application/rdf+xml");
-              try {
-                log.debug("Calais Enhancements:\n{}",debugStream.toString("UTF-8"));
-              } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-              }
+            //Acquire a write lock on the ContentItem when adding the enhancements
+            ci.getLock().writeLock().lock();
+            try {
+                createEnhancements(queryModel(calaisModel), ci);
+                if (log.isDebugEnabled()) {
+                    Serializer serializer = Serializer.getInstance();
+                    ByteArrayOutputStream debugStream = new ByteArrayOutputStream();
+                    serializer.serialize(debugStream, ci.getMetadata(), "application/rdf+xml");
+                    try {
+                        log.debug("Calais Enhancements:\n{}",debugStream.toString("UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } finally {
+                ci.getLock().writeLock().unlock();
             }
         }
 
@@ -587,17 +584,6 @@ public class OpenCalaisEngine
                 urlConn.getInputStream(), responseEncoding);
     }
 
-    public String getMetadataText(MGraph model, NonLiteral subj) {
-        String text = "";
-        for (Iterator<Triple> it = model.filter(subj, NIE_PLAINTEXTCONTENT, null); it.hasNext();) {
-            text += getLexicalForm(it.next().getObject());
-        }
-        if (text.trim().length() > 0) {
-            return text;
-        }
-        return null;
-    }
-
     public String getMetadataLanguage(MGraph model, NonLiteral subj) {
         Iterator<Triple> it = model.filter(subj, DC_LANGUAGE, null);
         if (it.hasNext()) {
@@ -624,21 +610,19 @@ public class OpenCalaisEngine
      */
     protected void activate(ComponentContext ce) throws ConfigurationException {
         super.activate(ce);
-        if (ce != null) {
-            this.bundleContext = ce.getBundleContext();
-            //TODO initialize Extractor
-            Dictionary<String, String> properties = ce.getProperties();
-            String license = properties.get(LICENSE_KEY);
-            String url = properties.get(CALAIS_URL_KEY);
-            calaisTypeMapFile = properties.get(CALAIS_TYPE_MAP_KEY);
-            String standAlone = properties.get(CALAIS_NER_ONLY_MODE_KEY);
-            setLicenseKey(license);
-            setCalaisUrl(url);
-            calaisTypeMap = new HashMap<UriRef,UriRef>();
-            loadTypeMap(calaisTypeMapFile);
-            onlyNERMode = Boolean.parseBoolean(standAlone);
-            //      this.tcManager = TcManager.getInstance();
-        }
+        this.bundleContext = ce.getBundleContext();
+        //TODO initialize Extractor
+        Dictionary<String, Object> properties = ce.getProperties();
+        String license = (String)properties.get(LICENSE_KEY);
+        String url = (String)properties.get(CALAIS_URL_KEY);
+        calaisTypeMapFile = (String)properties.get(CALAIS_TYPE_MAP_KEY);
+        String standAlone = (String)properties.get(CALAIS_NER_ONLY_MODE_KEY);
+        setLicenseKey(license);
+        setCalaisUrl(url);
+        calaisTypeMap = new HashMap<UriRef,UriRef>();
+        loadTypeMap(calaisTypeMapFile);
+        onlyNERMode = Boolean.parseBoolean(standAlone);
+        //      this.tcManager = TcManager.getInstance();
     }
 
     /**

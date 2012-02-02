@@ -16,7 +16,6 @@
 */
 package org.apache.stanbol.enhancer.engines.keywordextraction.engine;
 
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 import static org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum.getFullName;
 
 import java.io.IOException;
@@ -28,6 +27,7 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Language;
@@ -38,7 +38,6 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -66,17 +65,18 @@ import org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl.Entity
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl.OpenNlpAnalysedContentFactory;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl.ReferencedSiteSearcher;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl.TrackingEntitySearcher;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
@@ -131,6 +131,10 @@ public class KeywordLinkingEngine
      * plain text
      */
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
+    /**
+     * Contains the only supported mime type {@link #TEXT_PLAIN_MIMETYPE}
+     */
+    protected static final Set<String> SUPPORTED_MIMETYPES = Collections.singleton(TEXT_PLAIN_MIMETYPE);
     /**
      * The default value for the Execution of this Engine.
      * This Engine creates TextAnnotations that should not be processed by other Engines.
@@ -309,17 +313,11 @@ public class KeywordLinkingEngine
 
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
-        String mimeType = ci.getMimeType().split(";", 2)[0];
-        if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
-            return ENHANCE_SYNCHRONOUS;
+        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null){
+            return ENHANCE_ASYNC; //KeywordLinking now supports async processing
+        } else {
+            return CANNOT_ENHANCE;
         }
-        // check for existence of textual content in metadata
-        UriRef subj = ci.getUri();
-        Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
-        if (it.hasNext()) {
-            return ENHANCE_SYNCHRONOUS;
-        }
-        return CANNOT_ENHANCE;
     }
 
     @Override
@@ -327,28 +325,53 @@ public class KeywordLinkingEngine
         if(isOfflineMode() && !entitySearcher.supportsOfflineMode()){
             throw new EngineException("Offline mode is not supported by the Component used to lookup Entities");
         }
-        String mimeType = ci.getMimeType().split(";", 2)[0];
-        String text = extractText(ci, mimeType);
+        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        if(contentPart == null){
+            throw new IllegalStateException("No ContentPart with a supported Mime Type"
+                    + "found for ContentItem "+ci.getUri()+"(supported: '"
+                    + SUPPORTED_MIMETYPES+"') -> this indicates that canEnhance was" 
+                    + "NOT called and indicates a bug in the used EnhancementJobManager!");
+        }
+        String text;
+        try {
+            text = ContentItemHelper.getText(contentPart.getValue());
+        } catch (IOException e) {
+            throw new InvalidContentException(String.format("Unable to extract "
+                +" text from ContentPart %s of ContentItem %s!",
+                contentPart.getKey(),ci.getUri()),e);
+        }
         if (text.trim().length() == 0) {
             // TODO: make the length of the data a field of the ContentItem
             // interface to be able to filter out empty items in the canEnhance
             // method
-            log.warn("nothing to extract knowledge from in ContentItem {}", ci);
+            log.warn("ContentPart {} of ContentItem does not contain any Text to extract knowledge from",
+                contentPart.getKey(), ci);
             return;
         }
         //Determine the language
-        String language = extractLanguage(ci);
+        String language;
+        ci.getLock().readLock().lock();
+        try {
+         language = extractLanguage(ci);
+        } finally {
+            ci.getLock().readLock().unlock();
+        }
         if(isProcessableLanguages(language)){
             log.debug("computeEnhancements for ContentItem {} language {} text={}", 
                 new Object []{ci.getUri().getUnicodeString(), language, StringUtils.abbreviate(text, 100)});
             
-            EntityLinker taxonomyLinker = new EntityLinker(
+            EntityLinker entityLinker = new EntityLinker(
                 analysedContentFactory.create(text, language),
                 entitySearcher, linkerConfig);
             //process
-            taxonomyLinker.process();
-            //write results
-            writeEnhancements(ci, taxonomyLinker.getLinkedEntities().values(), language);
+            entityLinker.process();
+            //write results (requires a write lock)
+            ci.getLock().writeLock().lock();
+            try {
+                writeEnhancements(ci, entityLinker.getLinkedEntities().values(), language);
+            } finally {
+                ci.getLock().writeLock().unlock();
+            }
         } else {
             log.debug("ignore ContentItem {} because language '{}' is not configured to" +
             		"be processed by this engine.",ci.getUri().getUnicodeString(),language);
@@ -456,39 +479,6 @@ public class KeywordLinkingEngine
         }
     }
 
-    /**
-     * Extracts the text from the parsed contentItem. In case the content type is
-     * plain text, it directly reads the text from the stream. In other cases it
-     * tries to read the string representation from the metadata by looking for
-     * values of the {@link org.apache.stanbol.enhancer.servicesapi.rdf.Properties#NIE_PLAINTEXTCONTENT}
-     * property.<p>
-     * TODO: This is a Workaround for the currently not implemented Adapter
-     * Pattern for the Stanbol Enhancer.
-     * @param ci
-     * @param mimeType
-     * @return
-     * @throws InvalidContentException
-     */
-    private String extractText(ContentItem ci, String mimeType) throws InvalidContentException {
-        String text;
-        if (TEXT_PLAIN_MIMETYPE.equals(mimeType)) {
-            try {
-                text = IOUtils.toString(ci.getStream(),"UTF-8");
-            } catch (IOException e) {
-                throw new InvalidContentException(this, ci, e);
-            }
-        } else {
-            //TODO: change that as soon the Adapter Pattern is used for multiple
-            // mimetype support.
-            StringBuilder textBuilder = new StringBuilder();
-            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getUri().getUnicodeString()), NIE_PLAINTEXTCONTENT, null);
-            while (it.hasNext()) {
-                textBuilder.append(it.next().getObject());
-            }
-            text = textBuilder.toString();
-        }
-        return text;
-    }
     
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      * Methods for activate() and deactivate() the properties configureable via
