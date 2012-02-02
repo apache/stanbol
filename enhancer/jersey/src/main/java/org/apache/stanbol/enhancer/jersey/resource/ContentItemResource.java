@@ -32,7 +32,6 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EN
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LAT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LONG;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
@@ -51,6 +50,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
@@ -81,8 +81,10 @@ import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
@@ -156,16 +158,12 @@ public class ContentItemResource extends BaseStanbolResource {
 
         if (localId != null) {
             URI rawURI = uriInfo.getBaseUriBuilder().path(storePath).path("raw").path(localId).build();
-            if (ci.getMimeType().equals("text/plain")) {
-                this.textContent = IOUtils.toString(ci.getStream(), "UTF-8");
-            } else if (ci.getMimeType().startsWith("image/")) {
+            Entry<UriRef,Blob> plainTextContentPart = ContentItemHelper.getBlob(contentItem, Collections.singleton("text/plain"));
+            if (plainTextContentPart != null) {
+                this.textContent = ContentItemHelper.getText(plainTextContentPart.getValue());
+            } 
+            if (ci.getMimeType().startsWith("image/")) {
                 this.imageSrc = rawURI;
-            }
-            else {
-              Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
-              if (it.hasNext()) {
-                this.textContent = ((Literal)it.next().getObject()).getLexicalForm();
-              }
             }
             this.downloadHref = rawURI;
             this.metadataHref = uriInfo.getBaseUriBuilder().path(storePath).path("metadata").path(localId).build();

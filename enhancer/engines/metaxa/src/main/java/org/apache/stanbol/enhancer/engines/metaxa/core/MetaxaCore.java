@@ -102,7 +102,7 @@ public class MetaxaCore {
      *             if there is an error when reading the input stream
      */
     public Model extract(
-            InputStream in, String docId, String mimeType)
+            InputStream in, URIImpl docId, String mimeType)
             throws ExtractorException, IOException {
 
         @SuppressWarnings("rawtypes")
@@ -116,7 +116,7 @@ public class MetaxaCore {
             RDFContainerFactory containerFactory =
                 new RDFContainerFactoryImpl();
             RDFContainer container =
-                containerFactory.getRDFContainer(new URIImpl(docId));
+                containerFactory.getRDFContainer(docId);
             extractor.extract(
                 container.getDescribedUri(),
                 new BufferedInputStream(in, 8192),

@@ -25,19 +25,20 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EN
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_CATEGORY;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Literal;
@@ -59,18 +60,21 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
 import org.apache.stanbol.enhancer.engines.zemanta.ZemantaOntologyEnum;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 
 /**
@@ -104,8 +108,9 @@ public class ZemantaEnhancementEngine
     public static final String DMOZ_BASE_URL = "http://www.dmoz.org/";
     public static final String ZEMANTA_DMOZ_PREFIX = "Top/";
 
-    protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
-    protected static final String TEXT_HTML_MIMETYPE = "text/html";
+    protected static final Set<String> SUPPORTED_MIMETYPES = 
+            Collections.unmodifiableSet(new HashSet<String>(
+                    Arrays.asList("text/plain","text/html")));
 
     private static final Logger log = LoggerFactory.getLogger(ZemantaEnhancementEngine.class);
 
@@ -158,53 +163,31 @@ public class ZemantaEnhancementEngine
     }
 
     public int canEnhance(ContentItem ci) {
-        if(isTextOrHtml(ci)){
-            return ENHANCE_SYNCHRONOUS;
+        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null){
+            return ENHANCE_ASYNC; //the ZEMANTA engine now supports async processing!
         } else {
-            // check for existence of textual content in metadata
-            UriRef subj = ci.getUri();
-            Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
-            if (it.hasNext()) {
-                return ENHANCE_SYNCHRONOUS;
-            }
+            return CANNOT_ENHANCE;
         }
-        return CANNOT_ENHANCE;
     }
 
-    /**
-     * @param ci
-     */
-    private boolean isTextOrHtml(ContentItem ci) {
-        String mimeType = ci.getMimeType().split(";", 2)[0];
-        if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
-            return true;
-        } else if (TEXT_HTML_MIMETYPE.equalsIgnoreCase(mimeType)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
+        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        if(contentPart == null){
+            throw new IllegalStateException("No ContentPart with a supported Mime Type"
+                + "found for ContentItem "+ci.getUri()+"(supported: '"
+                + SUPPORTED_MIMETYPES+"') -> this indicates that canEnhance was" 
+                + "NOT called and indicates a bug in the used EnhancementJobManager!");
+        }
         String text;
-        if(isTextOrHtml(ci)){
-            try {
-                text = IOUtils.toString(ci.getStream(),"UTF-8");
-            } catch (IOException e) {
-                throw new InvalidContentException(this, ci, e);
-            }
-        } else {
-            //TODO: change that as soon the Adapter Pattern is used for multiple
-            // mimetype support.
-            StringBuilder textBuilder = new StringBuilder();
-            Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
-            while (it.hasNext()) {
-                textBuilder.append(it.next().getObject());
-            }
-            text = textBuilder.toString();
+        try {
+            text = ContentItemHelper.getText(contentPart.getValue());
+        } catch (IOException e) {
+            throw new InvalidContentException(this, ci, e);
         }
         if (text.trim().length() == 0) {
-            log.warn("nothing to enhance");
+            log.warn("ContentPart {} of ContentItem {} does not contain any text to enhance",
+                contentPart.getKey(),ci.getUri());
             return;
         }
         MGraph graph = ci.getMetadata();
@@ -219,8 +202,13 @@ public class ZemantaEnhancementEngine
         }
         //now we need to process the results and convert them into the Enhancer
         //annotation structure
-        processRecognition(results, graph, text, ciId);
-        processCategories(results, graph, ciId);
+        ci.getLock().writeLock().lock();
+        try {
+            processRecognition(results, graph, text, ciId);
+            processCategories(results, graph, ciId);
+        } finally {
+            ci.getLock().writeLock().unlock();
+        }
     }
     public Map<String, Object> getServiceProperties() {
         // TODO Auto-generated method stub

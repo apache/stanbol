@@ -143,11 +143,12 @@ public class EnhancementJobHandler implements EventHandler {
         try {
             processEvent(job, execution);
         } catch (Throwable t) {
+            String message = String.format("Unexpected Exception while processing " +
+            		"ContentItem %s with EnhancementJobManager: %s",
+                    job.getContentItem().getUri(),EventJobManagerImpl.class);
             //this ensures that an runtime exception does not 
-           job.setFailed(execution, null, new IllegalStateException(
-               "Unexpected Exception while processing ContentItem '"
-               + job.getContentItem().getUri()+"' with EnhancementJobManager: "
-               + EventJobManagerImpl.class,t)); 
+           job.setFailed(execution, null, new IllegalStateException(message,t));
+           log.error(message,t);
         }
         //(2) trigger the next actions
         log.debug("++ w: {}","check for next Executions");
@@ -218,8 +219,13 @@ public class EnhancementJobHandler implements EventHandler {
                 } catch (EngineException e) {
                     job.setFailed(execution, engine, e);
                 }
-            } else { //required engine is unable to enhance the content 
-                job.setFailed(execution,engine,exception);
+            } else { //CANNOT_ENHANCE
+                if(exception != null){
+                    job.setFailed(execution,engine,exception);
+                } else { //can not enhance is not an error
+                    //it just says this engine can not enhance this content item
+                    job.setCompleted(execution);
+                }
             }
         } else { //engine with that name is not available
             job.setFailed(execution, null, null);

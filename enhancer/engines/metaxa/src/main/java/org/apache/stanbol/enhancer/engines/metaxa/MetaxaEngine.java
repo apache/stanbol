@@ -16,20 +16,29 @@
  */
 package org.apache.stanbol.enhancer.engines.metaxa;
 
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
+
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
 import org.apache.felix.scr.annotations.Component;
@@ -39,12 +48,14 @@ import org.apache.stanbol.enhancer.engines.metaxa.core.MetaxaCore;
 import org.apache.stanbol.enhancer.engines.metaxa.core.RDF2GoUtils;
 import org.apache.stanbol.enhancer.engines.metaxa.core.html.BundleURIResolver;
 import org.apache.stanbol.enhancer.engines.metaxa.core.html.HtmlExtractorFactory;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
-import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryBlob;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.model.Model;
@@ -54,6 +65,7 @@ import org.ontoware.rdf2go.model.node.DatatypeLiteral;
 import org.ontoware.rdf2go.model.node.Node;
 import org.ontoware.rdf2go.model.node.PlainLiteral;
 import org.ontoware.rdf2go.model.node.URI;
+import org.ontoware.rdf2go.model.node.impl.URIImpl;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -80,6 +92,11 @@ public class MetaxaEngine
     private static final Logger log = LoggerFactory.getLogger(MetaxaEngine.class);
 
     /**
+     * Plain text content of a content item.
+      */
+    public static final UriRef NIE_PLAINTEXTCONTENT = new UriRef(NamespaceEnum.nie + "plainTextContent");
+    private static final URIImpl NIE_PLAINTEXT_PROPERTY = new URIImpl(NIE_PLAINTEXTCONTENT.getUnicodeString());
+    /**
      * The default value for the Execution of this Engine. Currently set to
      * {@link ServiceProperties#ORDERING_PRE_PROCESSING}
      */
@@ -97,6 +114,8 @@ public class MetaxaEngine
     @Property(value=MetaxaEngine.DEFAULT_HTML_EXTRACTOR_REGISTRY)
     public static final String HTML_EXTRACTOR_REGISTRY = "org.apache.stanbol.enhancer.engines.metaxa.htmlextractors";
 
+    @Property(value={"text/plain"},cardinality=1000)
+    public static final String IGNORE_MIME_TYPES = "org.apache.stanbol.enhancer.engines.metaxa.ignoreMimeTypes";
     private MetaxaCore extractor;
     
     BundleContext bundleContext;
@@ -104,6 +123,8 @@ public class MetaxaEngine
     public static final String DEFAULT_EXTRACTION_REGISTRY = "extractionregistry.xml";
     public static final String DEFAULT_HTML_EXTRACTOR_REGISTRY = "htmlextractors.xml";
     
+    private Set<String> ignoredMimeTypes;
+
     /**
      * The activate method.
      *
@@ -114,25 +135,38 @@ public class MetaxaEngine
         super.activate(ce);
         String extractionRegistry = DEFAULT_EXTRACTION_REGISTRY;
         String htmlExtractors = DEFAULT_HTML_EXTRACTOR_REGISTRY;
-        if (ce != null) {
-            this.bundleContext = ce.getBundleContext();
-            BundleURIResolver.BUNDLE = this.bundleContext.getBundle();
-            try {
-                Dictionary<String, String> properties = ce.getProperties();
-                String confFile = properties.get(GLOBAL_EXTRACTOR_REGISTRY);
-                if (confFile != null && confFile.trim().length() > 0) {
-                    extractionRegistry = confFile;
-                }
-                confFile = properties.get(HTML_EXTRACTOR_REGISTRY);
-                if (confFile != null && confFile.trim().length() > 0) {
-                    htmlExtractors = confFile;
-                }
-                this.extractor = new MetaxaCore(extractionRegistry);
-                HtmlExtractorFactory.REGISTRY_CONFIGURATION = htmlExtractors;
-            } catch (IOException e) {
-                log.error(e.getLocalizedMessage(), e);
-                throw e;
+        this.bundleContext = ce.getBundleContext();
+        BundleURIResolver.BUNDLE = this.bundleContext.getBundle();
+        try {
+            Dictionary<String, Object> properties = ce.getProperties();
+            String confFile = (String)properties.get(GLOBAL_EXTRACTOR_REGISTRY);
+            if (confFile != null && confFile.trim().length() > 0) {
+                extractionRegistry = confFile;
             }
+            confFile = (String)properties.get(HTML_EXTRACTOR_REGISTRY);
+            if (confFile != null && confFile.trim().length() > 0) {
+                htmlExtractors = confFile;
+            }
+            this.extractor = new MetaxaCore(extractionRegistry);
+            HtmlExtractorFactory.REGISTRY_CONFIGURATION = htmlExtractors;
+        } catch (IOException e) {
+            log.error(e.getLocalizedMessage(), e);
+            throw e;
+        }
+        Object value = ce.getProperties().get(IGNORE_MIME_TYPES);
+        if(value instanceof String[]){
+            ignoredMimeTypes = new HashSet<String>(Arrays.asList((String[])value));
+        } else if(value instanceof Iterable<?>){
+            ignoredMimeTypes = new HashSet<String>();
+            for(Object mimeType : (Iterable<?>)value){
+                if(mimeType != null){
+                    ignoredMimeTypes.add(mimeType.toString());
+                }
+            }
+        } else if(value != null && !value.toString().isEmpty()){
+            ignoredMimeTypes = Collections.singleton(value.toString());
+        } else {
+            ignoredMimeTypes = Collections.singleton("text/plain");
         }
     }
 
@@ -147,18 +181,26 @@ public class MetaxaEngine
     }
 
     public int canEnhance(ContentItem ci) throws EngineException {
-        String mimeType = ci.getMimeType().split(";", 2)[0];
-        if (this.extractor.isSupported(mimeType)) {
-            return ENHANCE_SYNCHRONOUS;
+        String mimeType = ci.getMimeType();
+        if (!ignoredMimeTypes.contains(mimeType) && 
+                this.extractor.isSupported(mimeType)) {
+            return ENHANCE_ASYNC; //supports now asynchronous execution!
         }
         return CANNOT_ENHANCE;
     }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
-
         try {
             // get model from the extraction
-            Model m = this.extractor.extract(ci.getStream(), ci.getUri().getUnicodeString(), ci.getMimeType());
+            URIImpl docId;
+            Model m;
+            ci.getLock().readLock().lock();
+            try {
+                docId = new URIImpl(ci.getUri().getUnicodeString());
+                m = this.extractor.extract(ci.getStream(), docId, ci.getMimeType());
+            } finally {
+                ci.getLock().readLock().unlock();
+            }
             // add the statements from this model to the Metadata model
             if (null != m) {
                 /*
@@ -166,27 +208,61 @@ public class MetaxaEngine
                log.info(text);
                 */
                 // get the model where to add the statements
-                MGraph g = ci.getMetadata();
+                /*
+                 * NOTE(rweten): 
+                 *  There is no need to create an TextEnhancement to mark that
+                 *  a ContentItem was processed by Metaxa, because the
+                 *  ExecutionMetadata do record this anyway.
+                 */
+                //     
                 // create enhancement
-                UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                //UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
                 // set confidence value to 1.0
-                LiteralFactory literalFactory = LiteralFactory.getInstance();
-                g.add(new TripleImpl(textEnhancement, Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(1.0)));
+                //g.add(new TripleImpl(textEnhancement, Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(1.0)));
                 RDF2GoUtils.urifyBlankNodes(m);
                 HashMap<BlankNode, BNode> blankNodeMap = new HashMap<BlankNode, BNode>();
                 ClosableIterator<Statement> it = m.iterator();
+                ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+                Charset charset = Charset.forName("UTF-8");
+                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(byteOut, charset));
+                MGraph g = new SimpleMGraph(); //first add to a temporary graph
                 while (it.hasNext()) {
                     Statement oneStmt = it.next();
-
-                    NonLiteral subject = (NonLiteral) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
-                    UriRef predicate = (UriRef) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
-                    Resource object = asClerezzaResource(oneStmt.getObject(), blankNodeMap);
-
-                    if (null != subject && null != predicate && null != object) {
-                        Triple t = new TripleImpl(subject, predicate, object);
-                        g.add(t);
-                        log.debug("added " + t.toString());
+                    //we need to treat triples that provide the plain/text
+                    //version differently. Such Objects need to be added to
+                    //the plain text Blob!
+                    if(oneStmt.getSubject().equals(docId) && 
+                            oneStmt.getPredicate().equals(NIE_PLAINTEXT_PROPERTY)){
+                        out.write(oneStmt.getObject().toString());
+                    } else { //add metadata to the metadata of the contentItem
+                        NonLiteral subject = (NonLiteral) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
+                        UriRef predicate = (UriRef) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
+                        Resource object = asClerezzaResource(oneStmt.getObject(), blankNodeMap);
+    
+                        if (null != subject && null != predicate && null != object) {
+                            Triple t = new TripleImpl(subject, predicate, object);
+                            g.add(t);
+                            log.debug("added " + t.toString());
+                        }
                     }
+                }
+                ci.getLock().writeLock().lock();
+                try { 
+                    //now acquire a write lock and add the extracted 
+                    //metadata to the content item
+                    ci.getMetadata().addAll(g);
+                } finally {
+                    ci.getLock().writeLock().unlock();
+                }
+                out.close();
+                byte[] plainTextData = byteOut.toByteArray();
+                if(plainTextData.length > 0){
+                    //add plain text to the content item
+                    UriRef blobUri = new UriRef("urn:metaxa:plain-text:"+randomUUID());
+                    Blob plainTextBlob = new InMemoryBlob(plainTextData, 
+                        "text/plain;charset="+charset.toString());
+                    ci.addPart(blobUri, plainTextBlob);
+                    //TODO: add contentPart metadata to the contentItem
                 }
                 it.close();
                 m.close();
