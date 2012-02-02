@@ -60,7 +60,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.Language;
@@ -144,7 +143,7 @@ public class ContentItemResource extends BaseStanbolResource {
     public ContentItemResource(String localId,
                                ContentItem ci,
                                UriInfo uriInfo,
-                               UriBuilder uriBuilder,
+                               String storePath,
                                TcManager tcManager,
                                Serializer serializer,
                                ServletContext servletContext) throws IOException {
@@ -156,7 +155,7 @@ public class ContentItemResource extends BaseStanbolResource {
         this.servletContext = servletContext;
 
         if (localId != null) {
-            URI rawURI = uriBuilder.path("raw").path(localId).build();
+            URI rawURI = uriInfo.getBaseUriBuilder().path(storePath).path("raw").path(localId).build();
             if (ci.getMimeType().equals("text/plain")) {
                 this.textContent = IOUtils.toString(ci.getStream(), "UTF-8");
             } else if (ci.getMimeType().startsWith("image/")) {
@@ -169,7 +168,7 @@ public class ContentItemResource extends BaseStanbolResource {
               }
             }
             this.downloadHref = rawURI;
-            this.metadataHref = uriBuilder.path("metadata").path(localId).build();
+            this.metadataHref = uriInfo.getBaseUriBuilder().path(storePath).path("metadata").path(localId).build();
         }
         defaultThumbnails.put(DBPEDIA_PERSON, getStaticRootUrl() + "/home/images/user_48.png");
         defaultThumbnails.put(DBPEDIA_ORGANISATION, getStaticRootUrl() + "/home/images/organization_48.png");

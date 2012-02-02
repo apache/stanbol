@@ -22,19 +22,9 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.WILDCARD;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
-import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.SUPPORTED_RDF_TYPES;
-import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.isAcceptableMediaType;
-import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getReference;
-import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.getExecutionNode;
-import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.isOptional;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.EXECUTION_NODE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -58,7 +48,6 @@ import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.stanbol.commons.web.base.ContextHelper;
@@ -74,13 +63,9 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
-import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
-import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
-import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,10 +108,10 @@ public class EnhancerRootResource extends BaseStanbolResource {
         chain = chainManager.getDefault();
     }
 
-    public URI getServiceUrl(){
+    public URI getServiceUrl() {
         return uriInfo.getAbsolutePath();
     }
-    
+
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
@@ -260,7 +245,7 @@ public class EnhancerRootResource extends BaseStanbolResource {
                                     @Context HttpHeaders headers) throws EnhancementException, IOException {
         log.info("enhance from From: " + content);
         ContentItem ci = new InMemoryContentItem(content.getBytes("UTF-8"), TEXT_PLAIN);
-        return enhanceAndBuildResponse(format, headers, ci, false ,buildAjaxview);
+        return enhanceAndBuildResponse(format, headers, ci, false, buildAjaxview);
     }
 
     /**
@@ -295,15 +280,16 @@ public class EnhancerRootResource extends BaseStanbolResource {
     protected Response enhanceAndBuildResponse(String format,
                                                HttpHeaders headers,
                                                ContentItem ci,
-                                               boolean inclExecMetadata ,
-                                               boolean buildAjaxview) throws EnhancementException, IOException {
+                                               boolean inclExecMetadata,
+                                               boolean buildAjaxview) throws EnhancementException,
+                                                                     IOException {
         if (jobManager != null) {
             jobManager.enhanceContent(ci, chain);
         }
 
         if (buildAjaxview) {
-            ContentItemResource contentItemResource = new ContentItemResource(null, ci, uriInfo,
-                    uriInfo.getBaseUriBuilder(), tcManager, serializer, servletContext);
+            ContentItemResource contentItemResource = new ContentItemResource(null, ci, uriInfo, "",
+                    tcManager, serializer, servletContext);
             contentItemResource.setRdfSerializationFormat(format);
             Viewable ajaxView = new Viewable("/ajax/contentitem", contentItemResource);
             ResponseBuilder rb = Response.ok(ajaxView);
@@ -313,7 +299,7 @@ public class EnhancerRootResource extends BaseStanbolResource {
         }
 
         MGraph graph = ci.getMetadata();
-        if(inclExecMetadata){
+        if (inclExecMetadata) {
             try {
                 graph.addAll(ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, MGraph.class));
             } catch (NoSuchPartException e) {
