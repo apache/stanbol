@@ -19,8 +19,6 @@
 
 <#escape x as x?html>
   <@common.page title="Apache Stanbol OntoNet" hasrestapi=true>
-
-    <@ontonetDescription.view />
 		
     <div class="panel" id="webview"> 
       <#include "webview.ftl">
