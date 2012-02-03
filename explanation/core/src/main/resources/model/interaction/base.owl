@@ -1,0 +1,886 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY error "http://org.semanticweb.owlapi/error#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY DUL "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#" >
+    <!ENTITY interaction "http://stanbol.apache.org/ontologies/models/interaction#" >
+    <!ENTITY taskrole "http://www.ontologydesignpatterns.org/cp/owl/taskrole.owl#" >
+    <!ENTITY description "http://www.ontologydesignpatterns.org/cp/owl/description.owl#" >
+    <!ENTITY participation "http://www.ontologydesignpatterns.org/cp/owl/participation.owl#" >
+    <!ENTITY codkernel "http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#" >
+    <!ENTITY cpannotationschema "http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#"
+     xml:base="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl"
+     xmlns:DUL="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#"
+     xmlns:error="http://org.semanticweb.owlapi/error#"
+     xmlns:taskrole="http://www.ontologydesignpatterns.org/cp/owl/taskrole.owl#"
+     xmlns:interaction="http://stanbol.apache.org/ontologies/models/interaction#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:codkernel="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#"
+     xmlns:cpannotationschema="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#"
+     xmlns:description="http://www.ontologydesignpatterns.org/cp/owl/description.owl#"
+     xmlns:participation="http://www.ontologydesignpatterns.org/cp/owl/participation.owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl">
+        <owl:versionInfo xml:lang="en">0.1 : created by Alessandro Adamou
+0.1.1 : added OWL restrictions
+0.2 : simplified codolight alignments, replaced AgentCategory with dul:Role, added class unit tests</owl:versionInfo>
+        <rdfs:comment xml:lang="en">An ontology on user interaction that can be used to model interaction patterns and log discourse traces. Its usage can be configured in environments where interacting agents are known or simple placeholders for User and System can be used instead.</rdfs:comment>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl"/>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#boundTo -->
+
+    <owl:ObjectProperty rdf:about="&interaction;boundTo">
+        <rdf:type rdf:resource="&owl;SymmetricProperty"/>
+        <rdfs:label xml:lang="en">binds</rdfs:label>
+        <rdfs:domain rdf:resource="&interaction;InteractionPattern"/>
+        <rdfs:range rdf:resource="&interaction;InteractionPattern"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#hasResponse -->
+
+    <owl:ObjectProperty rdf:about="&interaction;hasResponse">
+        <rdfs:label xml:lang="en">hasResponse</rdfs:label>
+        <owl:inverseOf rdf:resource="&interaction;respondsTo"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#implementedBy -->
+
+    <owl:ObjectProperty rdf:about="&interaction;implementedBy">
+        <rdfs:label xml:lang="en">implemented by</rdfs:label>
+        <owl:inverseOf rdf:resource="&interaction;implements"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#implements -->
+
+    <owl:ObjectProperty rdf:about="&interaction;implements">
+        <rdfs:label xml:lang="en">implements</rdfs:label>
+        <rdfs:range rdf:resource="&interaction;DiscoursePlan"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#issuedBy -->
+
+    <owl:ObjectProperty rdf:about="&interaction;issuedBy">
+        <rdfs:label xml:lang="en">performedby</rdfs:label>
+        <owl:inverseOf rdf:resource="&interaction;issues"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#issues -->
+
+    <owl:ObjectProperty rdf:about="&interaction;issues">
+        <rdfs:label xml:lang="en">performs</rdfs:label>
+        <rdfs:domain rdf:resource="&interaction;Agent"/>
+        <rdfs:range rdf:resource="&interaction;Utterance"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#respondsTo -->
+
+    <owl:ObjectProperty rdf:about="&interaction;respondsTo">
+        <rdf:type rdf:resource="&owl;IrreflexiveProperty"/>
+        <rdfs:label xml:lang="en">respondsTo</rdfs:label>
+        <rdfs:range rdf:resource="&interaction;Utterance"/>
+        <rdfs:domain rdf:resource="&interaction;Utterance"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#triggeredBy -->
+
+    <owl:ObjectProperty rdf:about="&interaction;triggeredBy">
+        <rdfs:label xml:lang="en">triggeredBy</rdfs:label>
+        <owl:inverseOf rdf:resource="&interaction;triggers"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#triggers -->
+
+    <owl:ObjectProperty rdf:about="&interaction;triggers">
+        <rdf:type rdf:resource="&owl;IrreflexiveProperty"/>
+        <rdfs:label xml:lang="en">triggers</rdfs:label>
+        <rdfs:range rdf:resource="&interaction;Utterance"/>
+        <rdfs:domain rdf:resource="&interaction;Utterance"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#usesStrategy -->
+
+    <owl:ObjectProperty rdf:about="&interaction;usesStrategy">
+        <rdfs:label xml:lang="en">usesStrategy</rdfs:label>
+        <rdfs:range rdf:resource="&interaction;DiscourseStrategy"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#contributedBy -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#contributedBy">
+        <rdfs:label xml:lang="en">contributed by</rdfs:label>
+        <owl:inverseOf rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#contributes"/>
+        <rdfs:subPropertyOf rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvedElementOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#contributes -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#contributes">
+        <rdfs:label xml:lang="en">contributes</rdfs:label>
+        <rdfs:domain rdf:resource="&interaction;DiscourseEvent"/>
+        <rdfs:range rdf:resource="&interaction;UIElement"/>
+        <rdfs:subPropertyOf rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvesElement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#hasInputNode -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#hasInputNode">
+        <rdfs:label xml:lang="en">has input node</rdfs:label>
+        <rdfs:subPropertyOf rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvesElement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#hasOutputNode -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#hasOutputNode">
+        <rdfs:label xml:lang="en">has output node</rdfs:label>
+        <rdfs:subPropertyOf rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvesElement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvedElementOf -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvedElementOf">
+        <rdfs:label xml:lang="en">affectedWidgetBy</rdfs:label>
+        <owl:inverseOf rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvesElement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvesElement -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvesElement">
+        <rdfs:label xml:lang="en">involves element</rdfs:label>
+        <rdfs:range rdf:resource="&interaction;UIElement"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#isInputNodeOf -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#isInputNodeOf">
+        <rdfs:label xml:lang="en">is input node of</rdfs:label>
+        <owl:inverseOf rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#hasInputNode"/>
+        <rdfs:subPropertyOf rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvedElementOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#isOutputNodeOf -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#isOutputNodeOf">
+        <rdfs:label xml:lang="en">is output node of</rdfs:label>
+        <owl:inverseOf rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#hasOutputNode"/>
+        <rdfs:subPropertyOf rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvedElementOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#supersededBy -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#supersededBy">
+        <rdfs:label xml:lang="en">supersededBy</rdfs:label>
+        <owl:inverseOf rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#supersedes"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#supersedes -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#supersedes">
+        <rdf:type rdf:resource="&owl;IrreflexiveProperty"/>
+        <rdfs:label xml:lang="en">supersedes</rdfs:label>
+        <rdfs:range rdf:resource="&interaction;DiscourseEvent"/>
+        <rdfs:domain rdf:resource="&interaction;DiscourseEvent"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#directlyFollows -->
+
+    <owl:ObjectProperty rdf:about="&DUL;directlyFollows"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#directlyPrecedes -->
+
+    <owl:ObjectProperty rdf:about="&DUL;directlyPrecedes"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasComponent -->
+
+    <owl:ObjectProperty rdf:about="&DUL;hasComponent"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isPartOf -->
+
+    <owl:ObjectProperty rdf:about="&DUL;isPartOf"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#occursAt -->
+
+    <owl:DatatypeProperty rdf:about="&interaction;occursAt">
+        <rdfs:label xml:lang="en">occurs at</rdfs:label>
+        <rdfs:comment xml:lang="en">The exact time on which the discourse event was fired.
+
+This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike that property, more fine-grained values are required (possibly even timestamps in milliseconds).</rdfs:comment>
+        <rdfs:domain rdf:resource="&interaction;DiscourseEvent"/>
+        <rdfs:subPropertyOf rdf:resource="&DUL;hasEventDate"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasEventDate -->
+
+    <owl:DatatypeProperty rdf:about="&DUL;hasEventDate"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#Agent -->
+
+    <owl:Class rdf:about="&interaction;Agent">
+        <rdfs:label xml:lang="en">Agent</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&DUL;Object"/>
+        <rdfs:comment xml:lang="en">A sibling class to dul:Agent, neither equivalent nor disjoint.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#AncillaryInteractionPattern -->
+
+    <owl:Class rdf:about="&interaction;AncillaryInteractionPattern">
+        <rdfs:label xml:lang="en">Ancillary interaction pattern</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;InteractionPattern"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&interaction;boundTo"/>
+                <owl:someValuesFrom rdf:resource="&interaction;InteractionPattern"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <cpannotationschema:hasUnitTest xml:lang="en">PREFIX interaction: &lt;http://stanbol.apache.org/ontologies/models/interaction#&gt;
+SELECT ?d
+WHERE {
+  ?p1 a interaction:InteractionPattern .
+  ?p1 interaction:boundTo ?p2 .
+  ?p2 a interaction:InteractionPattern
+}</cpannotationschema:hasUnitTest>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#CommunicationChannel -->
+
+    <owl:Class rdf:about="&interaction;CommunicationChannel">
+        <rdfs:label xml:lang="en">CommunicationChannel</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;InteractionComponent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#Discourse -->
+
+    <owl:Class rdf:about="&interaction;Discourse">
+        <rdfs:label xml:lang="en">Discourse</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&description;Concept"/>
+        <rdfs:comment xml:lang="en">A utility class for sequencing discourse events</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#DiscourseEvent -->
+
+    <owl:Class rdf:about="&interaction;DiscourseEvent">
+        <rdfs:label xml:lang="en">Discourse event</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&DUL;Event"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&DUL;isPartOf"/>
+                <owl:someValuesFrom rdf:resource="&interaction;Discourse"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&interaction;occursAt"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;dateTime"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <cpannotationschema:hasUnitTest rdf:datatype="&xsd;string">PREFIX dul: &lt;http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#&gt;
+PREFIX interaction: &lt;http://stanbol.apache.org/ontologies/models/interaction#&gt;
+SELECT ?d
+WHERE {
+  ?e a interaction:DiscourseEvent .
+  ?e1 interaction:issuedBy ?p .
+  { ?p a dul:Role } UNION  { ?p a interaction:Agent }
+}</cpannotationschema:hasUnitTest>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#DiscoursePlan -->
+
+    <owl:Class rdf:about="&interaction;DiscoursePlan">
+        <rdfs:label xml:lang="en">DiscoursePlan</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&DUL;Plan"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#DiscourseStrategy -->
+
+    <owl:Class rdf:about="&interaction;DiscourseStrategy">
+        <rdfs:label xml:lang="en">DiscourseStrategy</rdfs:label>
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:oneOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&interaction;Strategy.PUSH"/>
+                    <rdf:Description rdf:about="&interaction;Strategy.PULL"/>
+                </owl:oneOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="&description;Concept"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#InteractionComponent -->
+
+    <owl:Class rdf:about="&interaction;InteractionComponent">
+        <rdfs:label xml:lang="en">interaction component</rdfs:label>
+        <rdfs:comment xml:lang="en">Anything that participates in some discourse event.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#InteractionPattern -->
+
+    <owl:Class rdf:about="&interaction;InteractionPattern">
+        <owl:equivalentClass rdf:resource="&codkernel;InteractionPattern"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&DUL;hasComponent"/>
+                <owl:someValuesFrom rdf:resource="&interaction;DiscourseEvent"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&interaction;implements"/>
+                <owl:someValuesFrom rdf:resource="&interaction;DiscoursePlan"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&DUL;hasComponent"/>
+                <owl:someValuesFrom rdf:resource="&interaction;InteractionComponent"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment xml:lang="en">Depending on the needed usage, types of interaction pattern can either subsume or instantiate this class, or both.</rdfs:comment>
+        <cpannotationschema:hasUnitTest xml:lang="en">PREFIX interaction: &lt;http://stanbol.apache.org/ontologies/models/interaction#&gt;
+SELECT ?d
+WHERE {
+  ?x a interaction:InteractionPattern .
+  ?x interaction:implements ?d .
+  ?d a interaction:Discourse
+}</cpannotationschema:hasUnitTest>
+        <owl:disjointUnionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="&interaction;AncillaryInteractionPattern"/>
+            <rdf:Description rdf:about="&interaction;StandaloneInteractionPattern"/>
+        </owl:disjointUnionOf>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#Medium -->
+
+    <owl:Class rdf:about="&interaction;Medium">
+        <rdfs:label xml:lang="en">Medium</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;InteractionComponent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#Mode -->
+
+    <owl:Class rdf:about="&interaction;Mode">
+        <rdfs:label xml:lang="en">Mode</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;InteractionComponent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#Pointer -->
+
+    <owl:Class rdf:about="&interaction;Pointer">
+        <rdfs:label xml:lang="en">Pointer</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;Medium"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#PositionInDiscourse -->
+
+    <owl:Class rdf:about="&interaction;PositionInDiscourse">
+        <rdfs:label xml:lang="en">Position in discourse</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&DUL;Region"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&DUL;directlyPrecedes"/>
+                <owl:allValuesFrom rdf:resource="&interaction;PositionInDiscourse"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&DUL;directlyFollows"/>
+                <owl:allValuesFrom rdf:resource="&interaction;PositionInDiscourse"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#StandaloneInteractionPattern -->
+
+    <owl:Class rdf:about="&interaction;StandaloneInteractionPattern">
+        <rdfs:label xml:lang="en">StandaloneInteractionPattern</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;InteractionPattern"/>
+        <cpannotationschema:hasUnitTest xml:lang="en">PREFIX interaction: &lt;http://stanbol.apache.org/ontologies/models/interaction#&gt;
+SELECT ?d
+WHERE {
+  ?p1 a interaction:InteractionPattern .
+  ?p1 interaction:boundTo ?p2 .
+  ?p2 a interaction:InteractionPattern
+}</cpannotationschema:hasUnitTest>
+        <rdfs:comment xml:lang="en">Unit test must yield no results</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#System -->
+
+    <owl:Class rdf:about="&interaction;System">
+        <rdfs:label xml:lang="en">System</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;Agent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#SystemAction -->
+
+    <owl:Class rdf:about="&interaction;SystemAction">
+        <rdfs:label xml:lang="en">System action</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;Utterance"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&interaction;issuedBy"/>
+                <owl:allValuesFrom>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="&interaction;System"/>
+                            <owl:Class>
+                                <owl:oneOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="&interaction;System"/>
+                                </owl:oneOf>
+                            </owl:Class>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&interaction;issuedBy"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="&interaction;System"/>
+                            <owl:Class>
+                                <owl:oneOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="&interaction;System"/>
+                                </owl:oneOf>
+                            </owl:Class>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#UIElement -->
+
+    <owl:Class rdf:about="&interaction;UIElement">
+        <rdfs:label xml:lang="en">UIElement</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;InteractionComponent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#User -->
+
+    <owl:Class rdf:about="&interaction;User">
+        <rdfs:label xml:lang="en">User</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;Agent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#UserAction -->
+
+    <owl:Class rdf:about="&interaction;UserAction">
+        <rdfs:label xml:lang="en">User action</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;Utterance"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&interaction;issuedBy"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="&interaction;User"/>
+                            <owl:Class>
+                                <owl:oneOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="&interaction;User"/>
+                                </owl:oneOf>
+                            </owl:Class>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&interaction;issuedBy"/>
+                <owl:allValuesFrom>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="&interaction;User"/>
+                            <owl:Class>
+                                <owl:oneOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="&interaction;User"/>
+                                </owl:oneOf>
+                            </owl:Class>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#Utterance -->
+
+    <owl:Class rdf:about="&interaction;Utterance">
+        <rdfs:label xml:lang="en">Utterance</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;DiscourseEvent"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&interaction;issuedBy"/>
+                <owl:onClass>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="&interaction;Agent"/>
+                            <rdf:Description rdf:about="&DUL;Role"/>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:onClass>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment xml:lang="en">A discourse event that incorporates a linguistic act. It implies an issuing agent</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#Widget -->
+
+    <owl:Class rdf:about="&interaction;Widget">
+        <rdfs:label xml:lang="en">Widget</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&interaction;UIElement"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status -->
+
+    <owl:Class rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status">
+        <rdfs:label xml:lang="en">Status</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&DUL;Quality"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/description.owl#Concept -->
+
+    <owl:Class rdf:about="&description;Concept"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#InteractionPattern -->
+
+    <owl:Class rdf:about="&codkernel;InteractionPattern"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#InterfaceObject -->
+
+    <owl:Class rdf:about="&codkernel;InterfaceObject">
+        <rdfs:subClassOf rdf:resource="&interaction;UIElement"/>
+        <rdfs:comment xml:lang="en">Because codkernel:InterfaceObject is a subclass of codkernel:IconicObject, it cannot be equivalent to the more general, multimodal-oriented class UIElement.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#UserType -->
+
+    <owl:Class rdf:about="&codkernel;UserType"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Abstract -->
+
+    <owl:Class rdf:about="&DUL;Abstract"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Event -->
+
+    <owl:Class rdf:about="&DUL;Event"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Goal -->
+
+    <owl:Class rdf:about="&DUL;Goal"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Object -->
+
+    <owl:Class rdf:about="&DUL;Object"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Plan -->
+
+    <owl:Class rdf:about="&DUL;Plan"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Quality -->
+
+    <owl:Class rdf:about="&DUL;Quality"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Region -->
+
+    <owl:Class rdf:about="&DUL;Region"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#Strategy.PULL -->
+
+    <owl:NamedIndividual rdf:about="&interaction;Strategy.PULL">
+        <rdf:type rdf:resource="&interaction;DiscourseStrategy"/>
+        <rdfs:label xml:lang="en">Pull strategy</rdfs:label>
+        <rdfs:comment xml:lang="en">Denotes a discourse strategy where information, content or knowledge is delivered to a target agent on demand.</rdfs:comment>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#Strategy.PUSH -->
+
+    <owl:NamedIndividual rdf:about="&interaction;Strategy.PUSH">
+        <rdf:type rdf:resource="&interaction;DiscourseStrategy"/>
+        <rdfs:label xml:lang="en">Push strategy</rdfs:label>
+        <rdfs:comment xml:lang="en">Denotes a discourse strategy where information, content or knowledge is delivered to a target agent beyond prior demand.</rdfs:comment>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#System -->
+
+    <owl:NamedIndividual rdf:about="&interaction;System">
+        <rdf:type rdf:resource="&DUL;Role"/>
+        <rdfs:label xml:lang="en">System</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction#User -->
+
+    <owl:NamedIndividual rdf:about="&interaction;User">
+        <rdf:type rdf:resource="&DUL;Role"/>
+        <rdfs:label xml:lang="en">User</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.COMPLETE -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.COMPLETE">
+        <rdf:type rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status"/>
+        <rdfs:label xml:lang="en">Status.COMPLETE</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.HOLD_USER -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.HOLD_USER">
+        <rdf:type rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status"/>
+        <rdfs:label xml:lang="en">Status.HOLD_USER</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.PROMPTING -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.PROMPTING">
+        <rdf:type rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status"/>
+        <rdfs:label xml:lang="en">Status.PROMPTING</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.COMPLETE"/>
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.HOLD_USER"/>
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.PROMPTING"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&interaction;Strategy.PULL"/>
+            <rdf:Description rdf:about="&interaction;Strategy.PUSH"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net -->
+

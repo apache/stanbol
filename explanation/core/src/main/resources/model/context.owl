@@ -1,0 +1,225 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY agentrole "http://www.ontologydesignpatterns.org/cp/owl/agentrole.owl#" >
+    <!ENTITY objectrole "http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl#" >
+    <!ENTITY description "http://www.ontologydesignpatterns.org/cp/owl/description.owl#" >
+    <!ENTITY explbase "http://www.ontologydesignpatterns.org/cpont/expl/explbase.owl#" >
+    <!ENTITY classification "http://www.ontologydesignpatterns.org/cp/owl/classification.owl#" >
+    <!ENTITY typesofentities "http://www.ontologydesignpatterns.org/cp/owl/typesofentities.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#"
+     xml:base="http://www.ontologydesignpatterns.org/cpont/expl/context.owl"
+     xmlns:agentrole="http://www.ontologydesignpatterns.org/cp/owl/agentrole.owl#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:description="http://www.ontologydesignpatterns.org/cp/owl/description.owl#"
+     xmlns:typesofentities="http://www.ontologydesignpatterns.org/cp/owl/typesofentities.owl#"
+     xmlns:classification="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#"
+     xmlns:explbase="http://www.ontologydesignpatterns.org/cpont/expl/explbase.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:objectrole="http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl#">
+    <owl:Ontology rdf:about="http://www.ontologydesignpatterns.org/cpont/expl/context.owl">
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/persons.owl"/>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cpont/expl/explbase.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/expl/context.owl#focusesOn -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#focusesOn">
+        <rdfs:range rdf:resource="&agentrole;Agent"/>
+        <rdfs:domain rdf:resource="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#UsageContext"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#involves"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/expl/context.owl#involves -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#involves">
+        <rdfs:domain rdf:resource="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#UsageContext"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/expl/context.owl#isFocusOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#isFocusOf">
+        <owl:inverseOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#focusesOn"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#isInvolvedIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/expl/context.owl#isInvolvedIn -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#isInvolvedIn">
+        <owl:inverseOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#involves"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/classification.owl#Concept -->
+
+    <rdf:Description rdf:about="&classification;Concept">
+        <owl:equivalentClass rdf:resource="&description;Concept"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/description.owl#Concept -->
+
+    <rdf:Description rdf:about="&description;Concept"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl#Object -->
+
+    <rdf:Description rdf:about="&objectrole;Object">
+        <owl:equivalentClass rdf:resource="&typesofentities;Object"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/typesofentities.owl#Object -->
+
+    <rdf:Description rdf:about="&typesofentities;Object"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/expl/context.owl#DiscourseContext -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#DiscourseContext">
+        <rdfs:label xml:lang="en">Discourse context</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#InteractionContext"/>
+        <rdfs:comment xml:lang="en">The history of user actions in the interaction with a system within a given interval.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/expl/context.owl#InteractionContext -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#InteractionContext">
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#UsageContext"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/expl/context.owl#SocialContext -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#SocialContext">
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#UsageContext"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/expl/context.owl#UsageContext -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#UsageContext">
+        <rdfs:subClassOf rdf:resource="&classification;Concept"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#focusesOn"/>
+                <owl:someValuesFrom rdf:resource="&explbase;User"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/expl/explbase.owl#User -->
+
+    <rdf:Description rdf:about="&explbase;User">
+        <rdfs:subClassOf rdf:resource="&agentrole;Agent"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&objectrole;hasRole"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:oneOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#user_role"/>
+                        </owl:oneOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </rdf:Description>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/expl/context.owl#user_role -->
+
+    <owl:NamedIndividual rdf:about="http://www.ontologydesignpatterns.org/cpont/expl/context.owl#user_role">
+        <rdf:type rdf:resource="&objectrole;Role"/>
+    </owl:NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.22702) http://owlapi.sourceforge.net -->
+

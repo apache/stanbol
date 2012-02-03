@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <uri id="Imports Wizard Entry" name="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl" uri="http://ontologydesignpatterns.org/ont/dul/DUL.owl"/>
+    <group id="Folder Repository, directory=, recursive=true, Auto-Update=true, version=2" prefer="public" xml:base="">
+        <uri id="Automatically generated entry, Timestamp=1324340369441" name="http://stanbol.apache.org/ontologies/interaction/patterns/cms.owl" uri="patterns/cms.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1324340369441" name="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl" uri="base.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1324340369441" name="http://stanbol.apache.org/ontologies/models/interaction/patterns/interpretation.owl" uri="interpretation.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1324340369441" name="http://stanbol.apache.org/ontologies/models/interaction/patterns/recommendation.owl" uri="patterns/recommendation.owl"/>
+    </group>
+</catalog>

@@ -1,0 +1,156 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY sequence "http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#" >
+    <!ENTITY agentrole "http://www.ontologydesignpatterns.org/cp/owl/agentrole.owl#" >
+    <!ENTITY objectrole "http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl#" >
+    <!ENTITY communities "http://www.ontologydesignpatterns.org/cp/owl/communities.owl#" >
+    <!ENTITY explanationschema "http://www.ontologydesignpatterns.org/schemas/explanationschema.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#"
+     xml:base="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl"
+     xmlns:agentrole="http://www.ontologydesignpatterns.org/cp/owl/agentrole.owl#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:communities="http://www.ontologydesignpatterns.org/cp/owl/communities.owl#"
+     xmlns:sequence="http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:objectrole="http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl#"
+     xmlns:explanationschema="http://www.ontologydesignpatterns.org/schemas/explanationschema.owl#">
+    <owl:Ontology rdf:about="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl">
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/communities.owl"/>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/sequence.owl"/>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/explanationschema.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#hasDirectSuperior -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#hasDirectSuperior">
+        <rdfs:label xml:lang="en">hasDirectSuperior</rdfs:label>
+        <rdfs:domain rdf:resource="&agentrole;Agent"/>
+        <rdfs:range rdf:resource="&agentrole;Agent"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#hasLowerRank"/>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="&objectrole;hasRole"/>
+            <rdf:Description rdf:about="&sequence;directlyFollows"/>
+            <rdf:Description rdf:about="&objectrole;isRoleOf"/>
+        </owl:propertyChainAxiom>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#hasHigherRank -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#hasHigherRank">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:label xml:lang="en">isSuperior</rdfs:label>
+        <explanationschema:keySchemaElement rdf:datatype="&xsd;boolean">true</explanationschema:keySchemaElement>
+        <rdfs:domain rdf:resource="&agentrole;Agent"/>
+        <rdfs:range rdf:resource="&agentrole;Agent"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#hasLowerRank -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#hasLowerRank">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:label xml:lang="en">hasLowerRank</rdfs:label>
+        <explanationschema:keySchemaElement rdf:datatype="&xsd;boolean"></explanationschema:keySchemaElement>
+        <rdfs:domain rdf:resource="&agentrole;Agent"/>
+        <rdfs:range rdf:resource="&agentrole;Agent"/>
+        <owl:inverseOf rdf:resource="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#hasHigherRank"/>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="&objectrole;hasRole"/>
+            <rdf:Description rdf:about="&sequence;follows"/>
+            <rdf:Description rdf:about="&objectrole;isRoleOf"/>
+        </owl:propertyChainAxiom>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#isDirectSuperiorOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#isDirectSuperiorOf">
+        <rdfs:label xml:lang="en">is direct superior of</rdfs:label>
+        <rdfs:domain rdf:resource="&agentrole;Agent"/>
+        <rdfs:range rdf:resource="&agentrole;Agent"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#hasHigherRank"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#Organization -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#Organization">
+        <rdfs:label xml:lang="en">OWLClass_01308824784545248000</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&communities;Community"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#RoleInOrganization -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy.owl#RoleInOrganization">
+        <rdfs:subClassOf rdf:resource="&objectrole;Role"/>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.22702) http://owlapi.sourceforge.net -->
+
