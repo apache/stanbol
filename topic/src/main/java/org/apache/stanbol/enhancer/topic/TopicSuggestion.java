@@ -26,27 +26,44 @@ import org.apache.commons.lang.StringUtils;
  */
 public class TopicSuggestion {
 
-    public final String uri;
+    /**
+     * The URI of the concept in the hierarchical conceptual scheme (that holds the broader relationship)
+     */
+    public final String conceptUri;
 
-    public final List<String> paths = new ArrayList<String>();
+    /**
+     * Reference to the broader concepts of this suggestion.
+     */
+    public final List<String> broader = new ArrayList<String>();
 
+    /**
+     * The (optional) URI of a resource that grounds this concepts in the real world. Can be null.
+     */
+    public final String primaryTopicUri;
+
+    /**
+     * The (positive) score of the suggestion: higher is better. Zero would mean unrelated. The absolute value
+     * is meaningless: suggestions scores cannot be compared across different input text documents nor
+     * distinct concept schemes.
+     */
     public final float score;
 
-    public TopicSuggestion(String uri, List<String> paths, float score) {
-        this.uri = uri;
-        if (paths != null) {
-            this.paths.addAll(paths);
+    public TopicSuggestion(String conceptUri, String primaryTopicUri, List<String> broader, float score) {
+        this.conceptUri = conceptUri;
+        this.primaryTopicUri = primaryTopicUri;
+        if (broader != null) {
+            this.broader.addAll(broader);
         }
         this.score = score;
     }
 
-    public TopicSuggestion(String uri, float score) {
-        this(uri, null, score);
+    public TopicSuggestion(String conceptUri, float score) {
+        this(conceptUri, null, null, score);
     }
 
     @Override
     public String toString() {
-        return String.format("TopicSuggestion(\"%s\", [%s], %f)", uri, StringUtils.join(paths, "\", \""),
-            score);
+        return String.format("TopicSuggestion(\"%s\", [%s], %f)", conceptUri,
+            StringUtils.join(broader, "\", \""), score);
     }
 }
