@@ -25,8 +25,8 @@ import org.apache.stanbol.enhancer.topic.training.TrainingSet;
 import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
 
 /**
- * Service interface for suggesting hierarchical concepts from a specific scheme (a.k.a. taxonomy, thesaurus or
- * concepts hierarchy) from the text content of a document or part of a document.
+ * Service interface for suggesting hierarchical concepts from a specific scheme (a.k.a. taxonomy, thesaurus
+ * or concepts hierarchy) from the text content of a document or part of a document.
  */
 public interface TopicClassifier {
 
@@ -69,8 +69,8 @@ public interface TopicClassifier {
     Set<String> getRootConcepts() throws ClassifierException;
 
     /**
-     * @return true if the classifier model can be updated with the {@code addConcept} / {@code removeConcept} /
-     *         {@code updateModel} / methods.
+     * @return true if the classifier model can be updated with the {@code addConcept} / {@code removeConcept}
+     *         / {@code updateModel} / methods.
      */
     boolean isUpdatable();
 
@@ -79,12 +79,26 @@ public interface TopicClassifier {
      * can delete the underlying statistical model. Calling {@code updateModel} is necessary to rebuild the
      * statistical model based on the hierarchical structure of the concepts and the registered training set.
      * 
-     * @param id
-     *            the new topic id
+     * @param conceptUri
+     *            the new concept identifier
+     * @param primaryTopicUri
+     *            optional identifier of a resource best describing that concept.
      * @param broaderConcepts
      *            list of directly broader concepts in the thesaurus
      */
-    void addConcept(String id, Collection<String> broaderConcepts) throws ClassifierException;
+    void addConcept(String conceptUri, String primaryTopicUri, Collection<String> broaderConcepts) throws ClassifierException;
+
+    /**
+     * Register a topic and set it's ancestors in the taxonomy. Warning: re-adding an already existing topic
+     * can delete the underlying statistical model. Calling {@code updateModel} is necessary to rebuild the
+     * statistical model based on the hierarchical structure of the concepts and the registered training set.
+     * 
+     * @param conceptUri
+     *            the new concept identifier
+     * @param broaderConcepts
+     *            list of directly broader concepts in the thesaurus
+     */
+    void addConcept(String conceptUri, Collection<String> broaderConcepts) throws ClassifierException;
 
     /**
      * Remove a topic from the thesaurus. WARNING: it is the caller responsibility to recursively remove or
@@ -92,10 +106,10 @@ public interface TopicClassifier {
      * {@code updateModel} should be called to re-align the statistical model to match the new hierarchy by
      * drawing examples from the dataset.
      * 
-     * @param id
+     * @param conceptUri
      *            if of the topic to remove from the model
      */
-    void removeConcept(String id) throws ClassifierException;
+    void removeConcept(String conceptUri) throws ClassifierException;
 
     /**
      * Register a training set to use to build the statistical model of the classifier.

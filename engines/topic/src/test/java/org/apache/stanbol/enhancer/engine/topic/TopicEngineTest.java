@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.engine.topic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -122,7 +123,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertNotNull(classifier);
         assertEquals(classifier.engineId, "test-engine");
         assertEquals(classifier.getActiveSolrServer(), classifierSolrServer);
-        assertEquals(classifier.conceptUriField, "topic");
+        assertEquals(classifier.conceptUriField, "concept");
         assertEquals(classifier.similarityField, "classifier_features");
         assertEquals(classifier.acceptedLanguages, new ArrayList<String>());
 
@@ -220,8 +221,8 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
     public void testTrainClassifierFromExamples() throws Exception {
 
         // mini taxonomy for news articles
-        String business = "urn:topics/business";
-        String technology = "urn:topics/technology";
+        String[] business = {"urn:topics/business", "http://dbpedia.org/resource/Business"};
+        String[] technology = {"urn:topics/technology", "http://dbpedia.org/resource/Technology"};
         String apple = "urn:topics/apple";
         String sport = "urn:topics/sport";
         String football = "urn:topics/football";
@@ -229,11 +230,11 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         String music = "urn:topics/music";
         String law = "urn:topics/law";
 
-        classifier.addConcept(business, null);
-        classifier.addConcept(technology, null);
+        classifier.addConcept(business[0], business[1], null);
+        classifier.addConcept(technology[0], technology[1], null);
         classifier.addConcept(sport, null);
         classifier.addConcept(music, null);
-        classifier.addConcept(apple, Arrays.asList(business, technology));
+        classifier.addConcept(apple, Arrays.asList(business[0], technology[0]));
         classifier.addConcept(football, Arrays.asList(sport));
         classifier.addConcept(worldcup, Arrays.asList(football));
 
@@ -255,13 +256,13 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         trainingSet.registerExample(null, "Money, money, money is the root of all evil." + STOP_WORDS,
             Arrays.asList(business));
         trainingSet.registerExample(null, "VC invested more money in tech startups in 2011." + STOP_WORDS,
-            Arrays.asList(business, technology));
+            Arrays.asList(business[0], technology[0]));
 
         trainingSet.registerExample(null, "Apple's iPad is a small handheld computer with a touch screen UI"
-                                          + STOP_WORDS, Arrays.asList(apple, technology));
+                                          + STOP_WORDS, Arrays.asList(apple, technology[0]));
         trainingSet.registerExample(null, "Apple sold the iPad at a very high price"
                                           + " and made record profits." + STOP_WORDS,
-            Arrays.asList(apple, business));
+            Arrays.asList(apple, business[0]));
 
         trainingSet.registerExample(null, "Manchester United won 3-2 against FC Barcelona." + STOP_WORDS,
             Arrays.asList(football));
@@ -292,8 +293,14 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         suggestions = classifier.suggestTopics("Apple is no longer a startup.");
         assertTrue(suggestions.size() >= 3);
         assertEquals(apple, suggestions.get(0).conceptUri);
-        assertEquals(technology, suggestions.get(1).conceptUri);
-        assertEquals(business, suggestions.get(2).conceptUri);
+        assertNull(suggestions.get(0).primaryTopicUri);
+        assertEquals(Arrays.asList(business[0], technology[0]), suggestions.get(0).broader);
+
+        assertEquals(technology[0], suggestions.get(1).conceptUri);
+        assertEquals(technology[1], suggestions.get(1).primaryTopicUri);
+
+        assertEquals(business[0], suggestions.get(2).conceptUri);
+        assertEquals(business[1], suggestions.get(2).primaryTopicUri);
 
         suggestions = classifier.suggestTopics("You can watch the worldcup on your iPad.");
         assertTrue(suggestions.size() >= 2);
@@ -336,10 +343,9 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertEquals(0, classifier.updateModel(true));
 
         // registering new subtopics invalidate the models of the parent as well
-        classifier.addConcept("urn:topics/sportsmafia", Arrays.asList(football, business));
+        classifier.addConcept("urn:topics/sportsmafia", Arrays.asList(football, business[0]));
         assertEquals(3, classifier.updateModel(true));
         assertEquals(0, classifier.updateModel(true));
-
     }
 
     @Test
@@ -521,7 +527,8 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         config.put(TopicClassificationEngine.ENTRY_TYPE_FIELD, "entry_type");
         config.put(TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, "model_entry_id");
         config.put(TopicClassificationEngine.SOLR_CORE, classifierSolrServer);
-        config.put(TopicClassificationEngine.CONCEPT_URI_FIELD, "topic");
+        config.put(TopicClassificationEngine.CONCEPT_URI_FIELD, "concept");
+        config.put(TopicClassificationEngine.PRIMARY_TOPIC_URI_FIELD, "primary_topic");
         config.put(TopicClassificationEngine.SIMILARTITY_FIELD, "classifier_features");
         config.put(TopicClassificationEngine.BROADER_FIELD, "broader");
         config.put(TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, "last_update_dt");

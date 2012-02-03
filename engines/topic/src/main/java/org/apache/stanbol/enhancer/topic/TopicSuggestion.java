@@ -17,6 +17,7 @@
 package org.apache.stanbol.enhancer.topic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -48,11 +49,16 @@ public class TopicSuggestion {
      */
     public final float score;
 
-    public TopicSuggestion(String conceptUri, String primaryTopicUri, List<String> broader, float score) {
+    public TopicSuggestion(String conceptUri,
+                           String primaryTopicUri,
+                           Collection<? extends Object> broader,
+                           float score) {
         this.conceptUri = conceptUri;
         this.primaryTopicUri = primaryTopicUri;
         if (broader != null) {
-            this.broader.addAll(broader);
+            for (Object broaderConcept : broader) {
+                this.broader.add(broaderConcept.toString());
+            }
         }
         this.score = score;
     }
