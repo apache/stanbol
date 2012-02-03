@@ -410,6 +410,11 @@
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
@@ -885,6 +890,11 @@
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.metadata</artifactId>
         <version>0.1-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.ontologies</artifactId>
+        <version>0.11-incubating-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
