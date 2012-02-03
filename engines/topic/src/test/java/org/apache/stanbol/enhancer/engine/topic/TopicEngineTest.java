@@ -105,7 +105,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         query.set("commit", true);
         query.set("separator", "\t");
         query.set("headers", false);
-        query.set("fieldnames", "topic,popularity,paths,text");
+        query.set("fieldnames", "topic,popularity,broader,text");
         query.set(CommonParams.STREAM_CONTENTTYPE, "text/plan;charset=utf-8");
         query.set(CommonParams.STREAM_BODY, IOUtils.toString(is, "utf-8"));
 
@@ -122,14 +122,14 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertNotNull(classifier);
         assertEquals(classifier.engineId, "test-engine");
         assertEquals(classifier.getActiveSolrServer(), classifierSolrServer);
-        assertEquals(classifier.topicUriField, "topic");
+        assertEquals(classifier.conceptUriField, "topic");
         assertEquals(classifier.similarityField, "classifier_features");
         assertEquals(classifier.acceptedLanguages, new ArrayList<String>());
 
         // check some required attributes
         Hashtable<String,Object> configWithMissingTopicField = new Hashtable<String,Object>();
         configWithMissingTopicField.putAll(config);
-        configWithMissingTopicField.remove(TopicClassificationEngine.TOPIC_URI_FIELD);
+        configWithMissingTopicField.remove(TopicClassificationEngine.CONCEPT_URI_FIELD);
         try {
             TopicClassificationEngine.fromParameters(configWithMissingTopicField);
             fail("Should have raised a ConfigurationException");
@@ -155,40 +155,40 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
     @Test
     public void testProgrammaticThesaurusConstruction() throws Exception {
         // Register the roots of the taxonomy
-        classifier.addTopic("http://example.com/topics/root1", null);
-        classifier.addTopic("http://example.com/topics/root2", null);
-        classifier.addTopic("http://example.com/topics/root3", new ArrayList<String>());
-        assertEquals(0, classifier.getBroaderTopics("http://example.com/topics/root1").size());
-        assertEquals(0, classifier.getBroaderTopics("http://example.com/topics/root2").size());
-        assertEquals(0, classifier.getBroaderTopics("http://example.com/topics/root3").size());
-        assertEquals(3, classifier.getTopicRoots().size());
+        classifier.addConcept("http://example.com/topics/root1", null);
+        classifier.addConcept("http://example.com/topics/root2", null);
+        classifier.addConcept("http://example.com/topics/root3", new ArrayList<String>());
+        assertEquals(0, classifier.getBroaderConcepts("http://example.com/topics/root1").size());
+        assertEquals(0, classifier.getBroaderConcepts("http://example.com/topics/root2").size());
+        assertEquals(0, classifier.getBroaderConcepts("http://example.com/topics/root3").size());
+        assertEquals(3, classifier.getRootConcepts().size());
 
         // Register some non root nodes
-        classifier.addTopic("http://example.com/topics/node1",
+        classifier.addConcept("http://example.com/topics/node1",
             Arrays.asList("http://example.com/topics/root1", "http://example.com/topics/root2"));
-        classifier.addTopic("http://example.com/topics/node2",
+        classifier.addConcept("http://example.com/topics/node2",
             Arrays.asList("http://example.com/topics/root3"));
-        classifier.addTopic("http://example.com/topics/node3",
+        classifier.addConcept("http://example.com/topics/node3",
             Arrays.asList("http://example.com/topics/node1", "http://example.com/topics/node2"));
 
         // the root where not impacted
-        assertEquals(0, classifier.getBroaderTopics("http://example.com/topics/root1").size());
-        assertEquals(0, classifier.getBroaderTopics("http://example.com/topics/root2").size());
-        assertEquals(0, classifier.getBroaderTopics("http://example.com/topics/root3").size());
-        assertEquals(3, classifier.getTopicRoots().size());
+        assertEquals(0, classifier.getBroaderConcepts("http://example.com/topics/root1").size());
+        assertEquals(0, classifier.getBroaderConcepts("http://example.com/topics/root2").size());
+        assertEquals(0, classifier.getBroaderConcepts("http://example.com/topics/root3").size());
+        assertEquals(3, classifier.getRootConcepts().size());
 
         // the other nodes have the same broader topics as at creation time
-        assertEquals(2, classifier.getBroaderTopics("http://example.com/topics/node1").size());
-        assertEquals(1, classifier.getBroaderTopics("http://example.com/topics/node2").size());
-        assertEquals(2, classifier.getBroaderTopics("http://example.com/topics/node3").size());
+        assertEquals(2, classifier.getBroaderConcepts("http://example.com/topics/node1").size());
+        assertEquals(1, classifier.getBroaderConcepts("http://example.com/topics/node2").size());
+        assertEquals(2, classifier.getBroaderConcepts("http://example.com/topics/node3").size());
 
         // check the induced narrower relationships
-        assertEquals(1, classifier.getNarrowerTopics("http://example.com/topics/root1").size());
-        assertEquals(1, classifier.getNarrowerTopics("http://example.com/topics/root2").size());
-        assertEquals(1, classifier.getNarrowerTopics("http://example.com/topics/root3").size());
-        assertEquals(1, classifier.getNarrowerTopics("http://example.com/topics/node1").size());
-        assertEquals(1, classifier.getNarrowerTopics("http://example.com/topics/node2").size());
-        assertEquals(0, classifier.getNarrowerTopics("http://example.com/topics/node3").size());
+        assertEquals(1, classifier.getNarrowerConcepts("http://example.com/topics/root1").size());
+        assertEquals(1, classifier.getNarrowerConcepts("http://example.com/topics/root2").size());
+        assertEquals(1, classifier.getNarrowerConcepts("http://example.com/topics/root3").size());
+        assertEquals(1, classifier.getNarrowerConcepts("http://example.com/topics/node1").size());
+        assertEquals(1, classifier.getNarrowerConcepts("http://example.com/topics/node2").size());
+        assertEquals(0, classifier.getNarrowerConcepts("http://example.com/topics/node3").size());
     }
 
     @Test
@@ -213,7 +213,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertNotNull(suggestedTopics);
         assertEquals(suggestedTopics.size(), 10);
         TopicSuggestion bestSuggestion = suggestedTopics.get(0);
-        assertEquals(bestSuggestion.uri, "Category:American_films");
+        assertEquals(bestSuggestion.conceptUri, "Category:American_films");
     }
 
     @Test
@@ -229,13 +229,13 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         String music = "urn:topics/music";
         String law = "urn:topics/law";
 
-        classifier.addTopic(business, null);
-        classifier.addTopic(technology, null);
-        classifier.addTopic(sport, null);
-        classifier.addTopic(music, null);
-        classifier.addTopic(apple, Arrays.asList(business, technology));
-        classifier.addTopic(football, Arrays.asList(sport));
-        classifier.addTopic(worldcup, Arrays.asList(football));
+        classifier.addConcept(business, null);
+        classifier.addConcept(technology, null);
+        classifier.addConcept(sport, null);
+        classifier.addConcept(music, null);
+        classifier.addConcept(apple, Arrays.asList(business, technology));
+        classifier.addConcept(football, Arrays.asList(sport));
+        classifier.addConcept(worldcup, Arrays.asList(football));
 
         // train the classifier on an empty dataset
         classifier.setTrainingSet(trainingSet);
@@ -280,10 +280,10 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         // test the trained classifier
         suggestions = classifier.suggestTopics("I like the sound of vuvuzula in the morning!");
         assertTrue(suggestions.size() >= 4);
-        assertEquals(worldcup, suggestions.get(0).uri);
-        assertEquals(music, suggestions.get(1).uri);
-        assertEquals(football, suggestions.get(2).uri);
-        assertEquals(sport, suggestions.get(3).uri);
+        assertEquals(worldcup, suggestions.get(0).conceptUri);
+        assertEquals(music, suggestions.get(1).conceptUri);
+        assertEquals(football, suggestions.get(2).conceptUri);
+        assertEquals(sport, suggestions.get(3).conceptUri);
         // check that the scores are decreasing:
         assertTrue(suggestions.get(0).score >= suggestions.get(1).score);
         assertTrue(suggestions.get(1).score >= suggestions.get(2).score);
@@ -291,14 +291,14 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
 
         suggestions = classifier.suggestTopics("Apple is no longer a startup.");
         assertTrue(suggestions.size() >= 3);
-        assertEquals(apple, suggestions.get(0).uri);
-        assertEquals(technology, suggestions.get(1).uri);
-        assertEquals(business, suggestions.get(2).uri);
+        assertEquals(apple, suggestions.get(0).conceptUri);
+        assertEquals(technology, suggestions.get(1).conceptUri);
+        assertEquals(business, suggestions.get(2).conceptUri);
 
         suggestions = classifier.suggestTopics("You can watch the worldcup on your iPad.");
         assertTrue(suggestions.size() >= 2);
-        assertEquals(apple, suggestions.get(0).uri);
-        assertEquals(worldcup, suggestions.get(1).uri);
+        assertEquals(apple, suggestions.get(0).conceptUri);
+        assertEquals(worldcup, suggestions.get(1).conceptUri);
 
         // test incremental update of a single root node
         Thread.sleep(10);
@@ -308,7 +308,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertEquals(0, classifier.updateModel(true));
         suggestions = classifier.suggestTopics("Glory box is best mixed as dubstep.");
         assertTrue(suggestions.size() >= 1);
-        assertEquals(music, suggestions.get(0).uri);
+        assertEquals(music, suggestions.get(0).conceptUri);
 
         // test incremental update of a leaf node (the parent topic needs re-indexing too)
         Thread.sleep(10);
@@ -331,12 +331,12 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
                                           + " in which they intend to represent the state.",
             Arrays.asList(law));
         assertEquals(0, classifier.updateModel(true));
-        classifier.addTopic(law, null);
+        classifier.addConcept(law, null);
         assertEquals(1, classifier.updateModel(true));
         assertEquals(0, classifier.updateModel(true));
 
         // registering new subtopics invalidate the models of the parent as well
-        classifier.addTopic("urn:topics/sportsmafia", Arrays.asList(football, business));
+        classifier.addConcept("urn:topics/sportsmafia", Arrays.asList(football, business));
         assertEquals(3, classifier.updateModel(true));
         assertEquals(0, classifier.updateModel(true));
 
@@ -354,8 +354,8 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         }
 
         // register some topics
-        classifier.addTopic("urn:t/001", null);
-        classifier.addTopic("urn:t/002", Arrays.asList("urn:t/001"));
+        classifier.addConcept("urn:t/001", null);
+        classifier.addConcept("urn:t/002", Arrays.asList("urn:t/001"));
         performanceEstimates = classifier.getPerformanceEstimates("urn:t/002");
         assertFalse(performanceEstimates.uptodate);
 
@@ -370,7 +370,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertEquals(0.67f, performanceEstimates.f1, 0.01);
         assertEquals(34, performanceEstimates.positiveSupport);
         assertEquals(32, performanceEstimates.negativeSupport);
-        assertTrue(classifier.getBroaderTopics("urn:t/002").contains("urn:t/001"));
+        assertTrue(classifier.getBroaderConcepts("urn:t/002").contains("urn:t/001"));
 
         // accumulate other folds statistics and compute means of statistics
         classifier.updatePerformanceMetadata("urn:t/002", 0.79f, 0.63f, 10, 10, Arrays.asList("ex1", "ex5"),
@@ -456,7 +456,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         for (int i = 0; i < numberOfTopics; i++) {
             String topic = String.format("urn:t/%03d", i + 1);
             topics[i] = topic;
-            classifier.addTopic(topic, null);
+            classifier.addConcept(topic, null);
             String[] terms = randomVocabulary(i, vocabSizeMin, vocabSizeMax, rng);
             vocabularies.put(topic, terms);
         }
@@ -521,7 +521,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         config.put(TopicClassificationEngine.ENTRY_TYPE_FIELD, "entry_type");
         config.put(TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, "model_entry_id");
         config.put(TopicClassificationEngine.SOLR_CORE, classifierSolrServer);
-        config.put(TopicClassificationEngine.TOPIC_URI_FIELD, "topic");
+        config.put(TopicClassificationEngine.CONCEPT_URI_FIELD, "topic");
         config.put(TopicClassificationEngine.SIMILARTITY_FIELD, "classifier_features");
         config.put(TopicClassificationEngine.BROADER_FIELD, "broader");
         config.put(TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, "last_update_dt");

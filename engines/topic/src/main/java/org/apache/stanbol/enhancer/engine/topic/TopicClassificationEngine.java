@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.enhancer.engine.topic;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +34,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -91,11 +87,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Enhancement Engine that provides the ability to assign a text document to a set of topics indexed in a
+ * Enhancement Engine that provides the ability to assign a text document to a set of concepts indexed in a
  * dedicated Solr core. The assignment logic comes from terms frequencies match of the text of the document to
- * categorize with the text indexed for each topic.
+ * categorize with the text indexed for each concept.
  * 
- * The solr server is expected to be configured with the MoreLikeThisHandler and the matching fields from the
+ * The data model of the concept tree follows the SKOS model: concepts are organized in a hierarchical
+ * "scheme" with a "broader" relation (and the inferred "narrower" inverse relation). Concepts can also
+ * optionally be grounded in the real world by the mean of a foaf:primaryTopic link to an external resource
+ * such as a DBpedia entry.
+ * 
+ * A document is typically classified with the concept by using the dct:subject property to link the document
+ * (subject) to the concept (object).
+ * 
+ * The Solr server is expected to be configured with the MoreLikeThisHandler and the matching fields from the
  * engine configuration.
  */
 @Component(metatype = true, immediate = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
@@ -106,7 +110,7 @@ import org.slf4j.LoggerFactory;
                      @Property(name = TopicClassificationEngine.SOLR_CORE),
                      @Property(name = TopicClassificationEngine.LANGUAGES),
                      @Property(name = TopicClassificationEngine.SIMILARTITY_FIELD),
-                     @Property(name = TopicClassificationEngine.TOPIC_URI_FIELD),
+                     @Property(name = TopicClassificationEngine.CONCEPT_URI_FIELD),
                      @Property(name = TopicClassificationEngine.BROADER_FIELD),
                      @Property(name = TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, value = "last_update_dt"),
                      @Property(name = TopicClassificationEngine.PRECISION_FIELD, value = "precision"),
@@ -117,7 +121,7 @@ import org.slf4j.LoggerFactory;
                      @Property(name = TopicClassificationEngine.FALSE_POSITIVES_FIELD, value = "false_positives"),
                      @Property(name = TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, value = "positive_support"),
                      @Property(name = TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, value = "negative_support"),
-                     @Property(name = Constants.SERVICE_RANKING, intValue=0)})
+                     @Property(name = Constants.SERVICE_RANKING, intValue = 0)})
 public class TopicClassificationEngine extends ConfiguredSolrCoreTracker implements EnhancementEngine,
         ServiceProperties, TopicClassifier {
 
@@ -139,9 +143,11 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     public static final String SIMILARTITY_FIELD = "org.apache.stanbol.enhancer.engine.topic.similarityField";
 
-    public static final String TOPIC_URI_FIELD = "org.apache.stanbol.enhancer.engine.topic.uriField";
+    public static final String CONCEPT_URI_FIELD = "org.apache.stanbol.enhancer.engine.topic.uriField";
 
     public static final String BROADER_FIELD = "org.apache.stanbol.enhancer.engine.topic.broaderField";
+
+    public static final String PRIMARY_TOPIC_FIELD = "org.apache.stanbol.enhancer.engine.topic.primaryTopicField";
 
     public static final String MODEL_UPDATE_DATE_FIELD = "org.apache.stanbol.enhancer.engine.topic.modelUpdateDateField";
 
@@ -171,7 +177,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
      * Contains the only supported mime type {@link #PLAIN_TEXT_MIMETYPE}
      */
     protected static final Set<String> SUPPORTED_MIMETYPES = Collections.singleton(PLAIN_TEXT_MIMETYPE);
-    
+
     public static final String SOLR_NON_EMPTY_FIELD = "[\"\" TO *]";
 
     // TODO: make the following fields configurable
@@ -195,7 +201,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     protected String similarityField;
 
-    protected String topicUriField;
+    protected String conceptUriField;
 
     protected String broaderField;
 
@@ -254,7 +260,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         engineId = getRequiredStringParam(config, ENGINE_ID);
         entryIdField = getRequiredStringParam(config, ENTRY_ID_FIELD);
         modelEntryIdField = getRequiredStringParam(config, MODEL_ENTRY_ID_FIELD);
-        topicUriField = getRequiredStringParam(config, TOPIC_URI_FIELD);
+        conceptUriField = getRequiredStringParam(config, CONCEPT_URI_FIELD);
         entryTypeField = getRequiredStringParam(config, ENTRY_TYPE_FIELD);
         similarityField = getRequiredStringParam(config, SIMILARTITY_FIELD);
         acceptedLanguages = getStringListParan(config, LANGUAGES);
@@ -278,39 +284,40 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
-        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null &&
-                getActiveSolrServer() != null){
+        if (ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null && getActiveSolrServer() != null) {
             return ENHANCE_SYNCHRONOUS;
         } else {
             return CANNOT_ENHANCE;
         }
-        //TODO ogrisel: validate that it is no problem that this does no longer
-        //check that the text is not empty
-//        if (text.trim().length() == 0) {
-//            return CANNOT_ENHANCE;
-//        }
+        // TODO ogrisel: validate that it is no problem that this does no longer
+        // check that the text is not empty
+        // if (text.trim().length() == 0) {
+        // return CANNOT_ENHANCE;
+        // }
     }
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
         Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
-        if(contentPart == null){
-            throw new IllegalStateException("No ContentPart with a supported Mime Type"
-                    + "found for ContentItem "+ci.getUri()+"(supported: '"
-                    + SUPPORTED_MIMETYPES+"') -> this indicates that canEnhance was" 
-                    + "NOT called and indicates a bug in the used EnhancementJobManager!");
+        if (contentPart == null) {
+            throw new IllegalStateException(
+                    "No ContentPart with a supported Mime Type" + "found for ContentItem " + ci.getUri()
+                            + "(supported: '" + SUPPORTED_MIMETYPES
+                            + "') -> this indicates that canEnhance was"
+                            + "NOT called and indicates a bug in the used EnhancementJobManager!");
         }
         String text;
         try {
             text = ContentItemHelper.getText(contentPart.getValue());
         } catch (IOException e) {
-            throw new InvalidContentException(String.format("Unable to extract "
-                +" textual content from ContentPart %s of ContentItem %s!",
-                contentPart.getKey(),ci.getUri()), e);
+            throw new InvalidContentException(String.format(
+                "Unable to extract " + " textual content from ContentPart %s of ContentItem %s!",
+                contentPart.getKey(), ci.getUri()), e);
         }
-        if(text.trim().isEmpty()){
-            log.warn("ContentPart {} of ContentItem {} does not contain any " +
-            		"text to extract topics from",contentPart.getKey(),ci.getUri());
+        if (text.trim().isEmpty()) {
+            log.warn(
+                "ContentPart {} of ContentItem {} does not contain any " + "text to extract topics from",
+                contentPart.getKey(), ci.getUri());
             return;
         }
         MGraph metadata = ci.getMetadata();
@@ -327,11 +334,11 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 metadata.add(new TripleImpl(enhancement,
                         org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE,
                         TechnicalClasses.ENHANCER_TOPICANNOTATION));
-    
+
                 // add link to entity
                 metadata.add(new TripleImpl(enhancement,
                         org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE,
-                        new UriRef(topic.uri)));
+                        new UriRef(topic.conceptUri)));
                 // TODO: make it possible to dereference and the path to the root the entities according to a
                 // configuration parameter
             }
@@ -358,11 +365,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     public String getSchemeId() {
         return engineId;
     }
+
     @Override
     public String getName() {
         return engineId;
     }
-    
+
     @Override
     public List<String> getAcceptedLanguages() {
         return acceptedLanguages;
@@ -391,17 +399,17 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         // over query the number of suggestions to find a statistical cut based on the curve of the scores of
         // the top suggestion
         query.setRows(MAX_SUGGESTIONS * 3);
-        query.setFields(topicUriField);
+        query.setFields(conceptUriField);
         query.setIncludeScore(true);
         try {
             StreamQueryRequest request = new StreamQueryRequest(query);
             QueryResponse response = request.process(solrServer);
             SolrDocumentList results = response.getResults();
             for (SolrDocument result : results.toArray(new SolrDocument[0])) {
-                String uri = (String) result.getFirstValue(topicUriField);
+                String uri = (String) result.getFirstValue(conceptUriField);
                 if (uri == null) {
                     throw new ClassifierException(String.format(
-                        "Solr Core '%s' is missing required field '%s'.", solrCoreId, topicUriField));
+                        "Solr Core '%s' is missing required field '%s'.", solrCoreId, conceptUriField));
                 }
                 Float score = (Float) result.getFirstValue("score");
                 suggestedTopics.add(new TopicSuggestion(uri, score));
@@ -441,36 +449,36 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     @Override
-    public Set<String> getNarrowerTopics(String broadTopicId) throws ClassifierException {
-        LinkedHashSet<String> narrowerTopics = new LinkedHashSet<String>();
+    public Set<String> getNarrowerConcepts(String broadTopicId) throws ClassifierException {
+        LinkedHashSet<String> narrowerConcepts = new LinkedHashSet<String>();
         if (broaderField == null) {
-            return narrowerTopics;
+            return narrowerConcepts;
         }
         SolrServer solrServer = getActiveSolrServer();
         SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY);
         query.addFilterQuery(broaderField + ":" + ClientUtils.escapeQueryChars(broadTopicId));
-        query.addField(topicUriField);
-        query.addSortField(topicUriField, SolrQuery.ORDER.asc);
+        query.addField(conceptUriField);
+        query.addSortField(conceptUriField, SolrQuery.ORDER.asc);
         try {
             for (SolrDocument result : solrServer.query(query).getResults()) {
-                narrowerTopics.add(result.getFirstValue(topicUriField).toString());
+                narrowerConcepts.add(result.getFirstValue(conceptUriField).toString());
             }
         } catch (SolrServerException e) {
             String msg = String.format("Error while fetching narrower topics of '%s' on Solr Core '%s'.",
                 broadTopicId, solrCoreId);
             throw new ClassifierException(msg, e);
         }
-        return narrowerTopics;
+        return narrowerConcepts;
     }
 
     @Override
-    public Set<String> getBroaderTopics(String id) throws ClassifierException {
-        LinkedHashSet<String> broaderTopics = new LinkedHashSet<String>();
+    public Set<String> getBroaderConcepts(String id) throws ClassifierException {
+        LinkedHashSet<String> broaderConcepts = new LinkedHashSet<String>();
         if (broaderField == null) {
-            return broaderTopics;
+            return broaderConcepts;
         }
         SolrServer solrServer = getActiveSolrServer();
-        SolrQuery query = new SolrQuery(topicUriField + ":" + ClientUtils.escapeQueryChars(id));
+        SolrQuery query = new SolrQuery(conceptUriField + ":" + ClientUtils.escapeQueryChars(id));
         query.addField(broaderField);
         try {
             for (SolrDocument result : solrServer.query(query).getResults()) {
@@ -480,7 +488,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     continue;
                 }
                 for (Object value : broaderFieldValues) {
-                    broaderTopics.add(value.toString());
+                    broaderConcepts.add(value.toString());
                 }
             }
         } catch (SolrServerException e) {
@@ -488,18 +496,18 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 solrCoreId);
             throw new ClassifierException(msg, e);
         }
-        return broaderTopics;
+        return broaderConcepts;
     }
 
     @Override
-    public Set<String> getTopicRoots() throws ClassifierException {
-        LinkedHashSet<String> rootTopics = new LinkedHashSet<String>();
+    public Set<String> getRootConcepts() throws ClassifierException {
+        LinkedHashSet<String> rootConcepts = new LinkedHashSet<String>();
         SolrServer solrServer = getActiveSolrServer();
         SolrQuery query = new SolrQuery();
         // TODO: this can be very big on flat thesauri: should we enable a paging API instead?
         query.setRows(MAX_ROOTS);
-        query.setFields(topicUriField);
-        query.setSortField(topicUriField, SolrQuery.ORDER.asc);
+        query.setFields(conceptUriField);
+        query.setSortField(conceptUriField, SolrQuery.ORDER.asc);
         if (broaderField != null) {
             // find any topic with an empty broaderField
             query.setParam("q", entryTypeField + ":" + METADATA_ENTRY + " AND -" + broaderField + ":"
@@ -515,36 +523,36 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                                        + " Some roots might be ignored.", engineId, MAX_ROOTS));
             }
             for (SolrDocument result : response.getResults()) {
-                rootTopics.add(result.getFirstValue(topicUriField).toString());
+                rootConcepts.add(result.getFirstValue(conceptUriField).toString());
             }
         } catch (SolrServerException e) {
             String msg = String.format("Error while fetching root topics on Solr Core '%s'.", solrCoreId);
             throw new ClassifierException(msg, e);
         }
-        return rootTopics;
+        return rootConcepts;
     }
 
     @Override
-    public void addTopic(String topicId, Collection<String> broaderTopics) throws ClassifierException {
+    public void addConcept(String conceptId, Collection<String> broaderConcepts) throws ClassifierException {
         // ensure that there is no previous topic registered with the same id
-        removeTopic(topicId);
+        removeConcept(conceptId);
 
         SolrInputDocument metadataEntry = new SolrInputDocument();
         String metadataEntryId = UUID.randomUUID().toString();
         String modelEntryId = UUID.randomUUID().toString();
-        metadataEntry.addField(topicUriField, topicId);
+        metadataEntry.addField(conceptUriField, conceptId);
         metadataEntry.addField(entryIdField, metadataEntryId);
         metadataEntry.addField(modelEntryIdField, modelEntryId);
         metadataEntry.addField(entryTypeField, METADATA_ENTRY);
-        if (broaderTopics != null && broaderField != null) {
-            metadataEntry.addField(broaderField, broaderTopics);
+        if (broaderConcepts != null && broaderField != null) {
+            metadataEntry.addField(broaderField, broaderConcepts);
         }
         SolrInputDocument modelEntry = new SolrInputDocument();
         modelEntry.addField(entryIdField, modelEntryId);
-        modelEntry.addField(topicUriField, topicId);
+        modelEntry.addField(conceptUriField, conceptId);
         modelEntry.addField(entryTypeField, MODEL_ENTRY);
-        if (broaderTopics != null) {
-            invalidateModelFields(broaderTopics, modelUpdateDateField, modelEvaluationDateField);
+        if (broaderConcepts != null) {
+            invalidateModelFields(broaderConcepts, modelUpdateDateField, modelEvaluationDateField);
         }
         SolrServer solrServer = getActiveSolrServer();
         try {
@@ -554,7 +562,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             solrServer.request(request);
             solrServer.commit();
         } catch (Exception e) {
-            String msg = String.format("Error adding topic with id '%s' on Solr Core '%s'", topicId,
+            String msg = String.format("Error adding topic with id '%s' on Solr Core '%s'", conceptId,
                 solrCoreId);
             throw new ClassifierException(msg, e);
         }
@@ -563,17 +571,18 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     /*
      * The commit is the responsibility of the caller.
      */
-    protected void invalidateModelFields(Collection<String> topicIds, String... fieldNames) throws ClassifierException {
-        if (topicIds.isEmpty() || fieldNames.length == 0) {
+    protected void invalidateModelFields(Collection<String> conceptIds, String... fieldNames) throws ClassifierException {
+        if (conceptIds.isEmpty() || fieldNames.length == 0) {
             return;
         }
         SolrServer solrServer = getActiveSolrServer();
         List<String> invalidatedFields = Arrays.asList(fieldNames);
         try {
             UpdateRequest request = new UpdateRequest();
-            for (String topicId : topicIds) {
+            for (String conceptId : conceptIds) {
                 SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY + " AND "
-                                                + topicUriField + ":" + ClientUtils.escapeQueryChars(topicId));
+                                                + conceptUriField + ":"
+                                                + ClientUtils.escapeQueryChars(conceptId));
                 for (SolrDocument result : solrServer.query(query).getResults()) {
                     // there should be only one (or none: tolerated)
                     SolrInputDocument newEntry = new SolrInputDocument();
@@ -588,19 +597,19 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             solrServer.request(request);
         } catch (Exception e) {
             String msg = String.format("Error invalidating topics [%s] on Solr Core '%s'",
-                StringUtils.join(topicIds, ", "), solrCoreId);
+                StringUtils.join(conceptIds, ", "), solrCoreId);
             throw new ClassifierException(msg, e);
         }
     }
 
     @Override
-    public void removeTopic(String topicId) throws ClassifierException {
+    public void removeConcept(String conceptId) throws ClassifierException {
         SolrServer solrServer = getActiveSolrServer();
         try {
-            solrServer.deleteByQuery(topicUriField + ":" + ClientUtils.escapeQueryChars(topicId));
+            solrServer.deleteByQuery(conceptUriField + ":" + ClientUtils.escapeQueryChars(conceptId));
             solrServer.commit();
         } catch (Exception e) {
-            String msg = String.format("Error removing topic with id '%s' on Solr Core '%s'", topicId,
+            String msg = String.format("Error removing topic with id '%s' on Solr Core '%s'", conceptId,
                 solrCoreId);
             throw new ClassifierException(msg, e);
         }
@@ -625,13 +634,13 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         String offset = null;
         boolean done = false;
         int batchSize = 1000;
-        query.addSortField(topicUriField, SolrQuery.ORDER.asc);
+        query.addSortField(conceptUriField, SolrQuery.ORDER.asc);
         query.setRows(batchSize + 1);
         try {
             while (!done) {
                 // batch over all the indexed topics
                 if (offset != null) {
-                    q += " AND " + topicUriField + ":[" + ClientUtils.escapeQueryChars(offset.toString())
+                    q += " AND " + conceptUriField + ":[" + ClientUtils.escapeQueryChars(offset.toString())
                          + " TO *]";
                 }
                 query.setQuery(q);
@@ -639,9 +648,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 int count = 0;
                 List<SolrDocument> batchDocuments = new ArrayList<SolrDocument>();
                 for (SolrDocument result : response.getResults()) {
-                    String topicId = result.getFirstValue(topicUriField).toString();
+                    String conceptId = result.getFirstValue(conceptUriField).toString();
                     if (count == batchSize) {
-                        offset = topicId;
+                        offset = conceptId;
                     } else {
                         count++;
                         batchDocuments.add(result);
@@ -676,10 +685,10 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             public int process(List<SolrDocument> batch) throws ClassifierException, TrainingSetException {
                 int processed = 0;
                 for (SolrDocument result : batch) {
-                    String topicId = result.getFirstValue(topicUriField).toString();
+                    String conceptId = result.getFirstValue(conceptUriField).toString();
                     List<String> impactedTopics = new ArrayList<String>();
-                    impactedTopics.add(topicId);
-                    impactedTopics.addAll(getNarrowerTopics(topicId));
+                    impactedTopics.add(conceptId);
+                    impactedTopics.addAll(getNarrowerConcepts(conceptId));
                     if (incr) {
                         Date lastModelUpdate = (Date) result.getFirstValue(modelUpdateDateField);
                         if (lastModelUpdate != null
@@ -689,7 +698,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     }
                     String metadataEntryId = result.getFirstValue(entryIdField).toString();
                     String modelEntryId = result.getFirstValue(modelEntryIdField).toString();
-                    updateTopic(topicId, metadataEntryId, modelEntryId, impactedTopics,
+                    updateTopic(conceptId, metadataEntryId, modelEntryId, impactedTopics,
                         result.getFieldValues(broaderField));
                     processed++;
                 }
@@ -702,7 +711,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     /**
-     * @param topicId
+     * @param conceptId
      *            the topic model to update
      * @param metadataEntryId
      *            of the metadata entry id of the topic
@@ -710,14 +719,14 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
      *            of the model entry id of the topic
      * @param impactedTopics
      *            the list of impacted topics (e.g. the topic node and direct children)
-     * @param broaderTopics
+     * @param broaderConcepts
      *            the collection of broader to re-add in the broader field
      */
-    protected void updateTopic(String topicId,
+    protected void updateTopic(String conceptId,
                                String metadataId,
                                String modelId,
                                List<String> impactedTopics,
-                               Collection<Object> broaderTopics) throws TrainingSetException,
+                               Collection<Object> broaderConcepts) throws TrainingSetException,
                                                                 ClassifierException {
         long start = System.currentTimeMillis();
         Batch<Example> examples = Batch.emtpyBatch(Example.class);
@@ -741,7 +750,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         // reindex the topic with the new text data collected from the examples
         SolrInputDocument modelEntry = new SolrInputDocument();
         modelEntry.addField(entryIdField, modelId);
-        modelEntry.addField(topicUriField, topicId);
+        modelEntry.addField(conceptUriField, conceptId);
         modelEntry.addField(entryTypeField, MODEL_ENTRY);
         if (sb.length() > 0) {
             modelEntry.addField(similarityField, sb);
@@ -752,9 +761,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         metadataEntry.addField(entryIdField, metadataId);
         metadataEntry.addField(modelEntryIdField, modelId);
         metadataEntry.addField(entryTypeField, METADATA_ENTRY);
-        metadataEntry.addField(topicUriField, topicId);
-        if (broaderTopics != null && broaderField != null) {
-            metadataEntry.addField(broaderField, broaderTopics);
+        metadataEntry.addField(conceptUriField, conceptId);
+        if (broaderConcepts != null && broaderField != null) {
+            metadataEntry.addField(broaderField, broaderConcepts);
         }
         if (modelUpdateDateField != null) {
             metadataEntry.addField(modelUpdateDateField, UTCTimeStamper.nowUtcDate());
@@ -767,12 +776,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             solrServer.request(request);
             // the commit is done by the caller in batch
         } catch (Exception e) {
-            String msg = String.format("Error updating topic with id '%s' on Solr Core '%s'", topicId,
+            String msg = String.format("Error updating topic with id '%s' on Solr Core '%s'", conceptId,
                 solrCoreId);
             throw new ClassifierException(msg, e);
         }
         long stop = System.currentTimeMillis();
-        log.debug("Sucessfully updated topic {} in {}s", topicId, (double) (stop - start) / 1000.);
+        log.debug("Sucessfully updated topic {} in {}s", conceptId, (double) (stop - start) / 1000.);
     }
 
     protected void checkTrainingSet() throws TrainingSetException {
@@ -800,7 +809,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         config.put(TopicClassificationEngine.ENTRY_TYPE_FIELD, "entry_type");
         config.put(TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, "model_entry_id");
         config.put(TopicClassificationEngine.SOLR_CORE, server);
-        config.put(TopicClassificationEngine.TOPIC_URI_FIELD, "topic");
+        config.put(TopicClassificationEngine.CONCEPT_URI_FIELD, "topic");
         config.put(TopicClassificationEngine.SIMILARTITY_FIELD, "classifier_features");
         config.put(TopicClassificationEngine.BROADER_FIELD, "broader");
         config.put(TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, "last_update_dt");
@@ -870,16 +879,16 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             @Override
             public int process(List<SolrDocument> batch) throws ClassifierException {
                 for (SolrDocument topicEntry : batch) {
-                    String topicId = topicEntry.getFirstValue(topicUriField).toString();
+                    String conceptId = topicEntry.getFirstValue(conceptUriField).toString();
                     Collection<Object> broader = topicEntry.getFieldValues(broaderField);
                     if (broader == null) {
-                        classifier.addTopic(topicId, null);
+                        classifier.addConcept(conceptId, null);
                     } else {
-                        List<String> broaderTopics = new ArrayList<String>();
-                        for (Object broaderTopic : broader) {
-                            broaderTopics.add(broaderTopic.toString());
+                        List<String> broaderConcepts = new ArrayList<String>();
+                        for (Object broaderConcept : broader) {
+                            broaderConcepts.add(broaderConcept.toString());
                         }
-                        classifier.addTopic(topicId, broaderTopics);
+                        classifier.addConcept(conceptId, broaderConcepts);
                     }
                 }
                 return batch.size();
@@ -900,7 +909,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             public int process(List<SolrDocument> batch) throws TrainingSetException, ClassifierException {
                 int offset;
                 for (SolrDocument topicMetadata : batch) {
-                    String topic = topicMetadata.getFirstValue(topicUriField).toString();
+                    String topic = topicMetadata.getFirstValue(conceptUriField).toString();
                     List<String> topics = Arrays.asList(topic);
                     List<String> falseNegativeExamples = new ArrayList<String>();
                     int truePositives = 0;
@@ -922,7 +931,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                                     .suggestTopics(example.contents);
                             boolean match = false;
                             for (TopicSuggestion suggestedTopic : suggestedTopics) {
-                                if (topic.equals(suggestedTopic.uri)) {
+                                if (topic.equals(suggestedTopic.conceptUri)) {
                                     match = true;
                                     truePositives++;
                                     break;
@@ -955,7 +964,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                             List<TopicSuggestion> suggestedTopics = classifier
                                     .suggestTopics(example.contents);
                             for (TopicSuggestion suggestedTopic : suggestedTopics) {
-                                if (topic.equals(suggestedTopic.uri)) {
+                                if (topic.equals(suggestedTopic.conceptUri)) {
                                     falsePositives++;
                                     if (falsePositiveExamples.size() < MAX_COLLECTED_EXAMPLES / foldCount) {
                                         falsePositiveExamples.add(example.id);
@@ -999,7 +1008,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
      * Update the performance statistics in a metadata entry of a topic. It is the responsibility of the
      * caller to commit.
      */
-    protected void updatePerformanceMetadata(String topicId,
+    protected void updatePerformanceMetadata(String conceptId,
                                              float precision,
                                              float recall,
                                              int positiveSupport,
@@ -1008,8 +1017,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                                              List<String> falseNegativeExamples) throws ClassifierException {
         SolrServer solrServer = getActiveSolrServer();
         try {
-            SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY + " AND " + topicUriField
-                                            + ":" + ClientUtils.escapeQueryChars(topicId));
+            SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY + " AND " + conceptUriField
+                                            + ":" + ClientUtils.escapeQueryChars(conceptId));
             for (SolrDocument result : solrServer.query(query).getResults()) {
                 // there should be only one (or none: tolerated)
                 // fetch any old values to update (all metadata fields are assumed to be stored)s
@@ -1032,7 +1041,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             }
         } catch (Exception e) {
             String msg = String.format(
-                "Error updating performance metadata for topic '%s' on Solr Core '%s'", topicId, solrCoreId);
+                "Error updating performance metadata for topic '%s' on Solr Core '%s'", conceptId, solrCoreId);
             throw new ClassifierException(msg, e);
         }
     }
@@ -1063,15 +1072,15 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     @Override
-    public ClassificationReport getPerformanceEstimates(String topicId) throws ClassifierException {
+    public ClassificationReport getPerformanceEstimates(String conceptId) throws ClassifierException {
 
         SolrServer solrServer = getActiveSolrServer();
-        SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY + " AND " + topicUriField + ":"
-                                        + ClientUtils.escapeQueryChars(topicId));
+        SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY + " AND " + conceptUriField
+                                        + ":" + ClientUtils.escapeQueryChars(conceptId));
         try {
             SolrDocumentList results = solrServer.query(query).getResults();
             if (results.isEmpty()) {
-                throw new ClassifierException(String.format("'%s' is not a registered topic", topicId));
+                throw new ClassifierException(String.format("'%s' is not a registered topic", conceptId));
             }
             SolrDocument metadata = results.get(0);
             Float precision = computeMeanValue(metadata, precisionField);
@@ -1097,7 +1106,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             return report;
         } catch (SolrServerException e) {
             throw new ClassifierException(String.format("Error fetching the performance report for topic "
-                                                        + topicId));
+                                                        + conceptId));
         }
     }
 
