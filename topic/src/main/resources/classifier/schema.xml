@@ -62,7 +62,7 @@
       required="true" />
 
     <!-- Mandatory field for all entries: this is the logical primary key -->
-    <field name="topic" type="string" indexed="true" stored="true"
+    <field name="concept" type="string" indexed="true" stored="true"
       required="true" />
 
     <!-- If entry_type can be model 'model' or 'metadata' -->
@@ -77,6 +77,7 @@
     <!-- Classifier model stored attributes when entry_type == 'metadata' -->
     <field name="model_entry_id" type="string" indexed="true"
       stored="true" />
+    <field name="primary_topic" type="string" indexed="true" stored="true" />
     <field name="broader" type="string" indexed="true" stored="true"
       multiValued="true" />
     <field name="last_update_dt" type="tdate" indexed="true"
