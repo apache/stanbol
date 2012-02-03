@@ -79,7 +79,7 @@ class IndexedTripleCollection extends AbstractTripleCollection implements Triple
     @Override
     protected Iterator<Triple> performFilter(final NonLiteral subject, final UriRef predicate, final Resource object) {
         if(subject == null && predicate == null && object == null){ //[n,n,n]
-            return iterator();
+            return createIterator(spo, spo.iterator());
         }
         final Triple low = new TripleImpl(
             subject == null ? MIN : subject, 
@@ -123,10 +123,10 @@ class IndexedTripleCollection extends AbstractTripleCollection implements Triple
     public int size() {
         return spo.size();
     }
-    @Override
-    public Iterator<Triple> iterator() {
-        return createIterator(spo, spo.iterator());
-    }
+//    @Override
+//    public Iterator<Triple> iterator() {
+//        return createIterator(spo, spo.iterator());
+//    }
 
     /**
      * Returns an Iterator that ensures that calls to {@link Iterator#remove()}
@@ -162,9 +162,6 @@ class IndexedTripleCollection extends AbstractTripleCollection implements Triple
                     if(!(index == osp)){
                         osp.remove(current);
                     }
-                    //this bye-passes the parent remove methods 
-                    //because of that we need to manually dispatch remove events
-                    dispatchEvent(new RemoveEvent(IndexedTripleCollection.this, current));
                 }
             }
         };

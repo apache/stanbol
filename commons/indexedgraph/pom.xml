@@ -84,6 +84,12 @@
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core.test</artifactId>
+      <version>0.13-incubating-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.ontologies</artifactId>
       <scope>test</scope>
     </dependency>

@@ -25,6 +25,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.core.test.MGraphTest;
 import org.apache.clerezza.rdf.ontologies.FOAF;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.ontologies.RDFS;
@@ -32,9 +33,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.NodeList;
 
-public class IndexedGraphTest {
+public class IndexedGraphTest  extends MGraphTest {
 
     protected static final Logger log = LoggerFactory.getLogger(IndexedGraphTest.class);
     
@@ -46,7 +46,11 @@ public class IndexedGraphTest {
     private Triple triple3 = new TripleImpl(uriRef3, uriRef1, uriRef3);
     private Triple triple4 = new TripleImpl(uriRef1, uriRef3, uriRef2);
     private Triple triple5 = new TripleImpl(uriRef2, uriRef3, uriRef2);
-        
+    
+    @Override
+    protected MGraph getEmptyMGraph() {
+        return new IndexedMGraph();
+    }
     @Test
     public void iteratorRemove() {
         TripleCollection itc = new IndexedTripleCollection();
