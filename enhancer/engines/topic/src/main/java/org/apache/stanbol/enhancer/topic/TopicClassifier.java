@@ -25,8 +25,8 @@ import org.apache.stanbol.enhancer.topic.training.TrainingSet;
 import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
 
 /**
- * Service interface for suggesting hierarchical topics from a specific scheme (a.k.a. taxonomy, thesaurus or
- * topics hierarchy) from the text content of a document or part of a document.
+ * Service interface for suggesting hierarchical concepts from a specific scheme (a.k.a. taxonomy, thesaurus or
+ * concepts hierarchy) from the text content of a document or part of a document.
  */
 public interface TopicClassifier {
 
@@ -46,30 +46,30 @@ public interface TopicClassifier {
      * 
      * @param text
      *            the text content to analyze
-     * @return the most likely topics related to the text
+     * @return the most likely concepts related to the text
      * @throws EngineException
      */
     List<TopicSuggestion> suggestTopics(String text) throws ClassifierException;
 
     /**
-     * @return the set of ids of topics directly broader than
+     * @return the set of ids of concepts directly broader than
      * @param id
      */
-    Set<String> getNarrowerTopics(String broadTopicId) throws ClassifierException;
+    Set<String> getNarrowerConcepts(String broadConceptId) throws ClassifierException;
 
     /**
-     * @return the set of ids of topics directly narrower than
+     * @return the set of ids of concepts directly narrower than
      * @param id
      */
-    Set<String> getBroaderTopics(String id) throws ClassifierException;
+    Set<String> getBroaderConcepts(String id) throws ClassifierException;
 
     /**
-     * @return the set of ids of topics without broader topics.
+     * @return the set of ids of concepts without broader concepts.
      */
-    Set<String> getTopicRoots() throws ClassifierException;
+    Set<String> getRootConcepts() throws ClassifierException;
 
     /**
-     * @return true if the classifier model can be updated with the {@code addTopic} / {@code removeTopic} /
+     * @return true if the classifier model can be updated with the {@code addConcept} / {@code removeConcept} /
      *         {@code updateModel} / methods.
      */
     boolean isUpdatable();
@@ -77,14 +77,14 @@ public interface TopicClassifier {
     /**
      * Register a topic and set it's ancestors in the taxonomy. Warning: re-adding an already existing topic
      * can delete the underlying statistical model. Calling {@code updateModel} is necessary to rebuild the
-     * statistical model based on the hierarchical structure of the topics and the registered training set.
+     * statistical model based on the hierarchical structure of the concepts and the registered training set.
      * 
      * @param id
      *            the new topic id
-     * @param broaderTopics
-     *            list of directly broader topics in the thesaurus
+     * @param broaderConcepts
+     *            list of directly broader concepts in the thesaurus
      */
-    void addTopic(String id, Collection<String> broaderTopics) throws ClassifierException;
+    void addConcept(String id, Collection<String> broaderConcepts) throws ClassifierException;
 
     /**
      * Remove a topic from the thesaurus. WARNING: it is the caller responsibility to recursively remove or
@@ -95,7 +95,7 @@ public interface TopicClassifier {
      * @param id
      *            if of the topic to remove from the model
      */
-    void removeTopic(String id) throws ClassifierException;
+    void removeConcept(String id) throws ClassifierException;
 
     /**
      * Register a training set to use to build the statistical model of the classifier.
@@ -104,10 +104,10 @@ public interface TopicClassifier {
 
     /**
      * Update (incrementally or from scratch) the statistical model of the classifier. Note: depending on the
-     * size of the dataset and the number of topics to update, this process can take a long time and should
+     * size of the dataset and the number of concepts to update, this process can take a long time and should
      * probably be wrapped in a dedicated thread if called by a the user interface layer.
      * 
-     * @return the number of updated topics
+     * @return the number of updated concepts
      */
     int updateModel(boolean incremental) throws TrainingSetException, ClassifierException;
 
@@ -115,7 +115,7 @@ public interface TopicClassifier {
      * Perform k-fold cross validation of the model to compute estimates of the precision, recall and f1
      * score.
      * 
-     * @return number of updated topics
+     * @return number of updated concepts
      */
     public int updatePerformanceEstimates(boolean incremental) throws ClassifierException,
                                                               TrainingSetException;
