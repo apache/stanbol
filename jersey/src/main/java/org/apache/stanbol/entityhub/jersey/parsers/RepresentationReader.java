@@ -48,6 +48,7 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedParsingFormatException;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.jersey.utils.MessageBodyReaderUtils;
@@ -245,7 +246,7 @@ public class RepresentationReader implements MessageBodyReader<Set<Representatio
             Set<Representation> representations = new HashSet<Representation>();
             Set<NonLiteral> processed = new HashSet<NonLiteral>();
             Parser parser = ContextHelper.getServiceFromContext(Parser.class, servletContext);
-            MGraph graph = new SimpleMGraph();
+            MGraph graph = new IndexedMGraph();
             try {
                 parser.parse(graph,content.getEntityStream(), content.getMediaType().toString());
             } catch (UnsupportedParsingFormatException e) {

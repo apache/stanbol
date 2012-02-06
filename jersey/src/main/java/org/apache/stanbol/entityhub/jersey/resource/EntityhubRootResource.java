@@ -73,6 +73,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
@@ -585,7 +586,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
      */
     private Response executeLDPathQuery(Entityhub entityhub,FieldQuery query, String ldpathProgramString, MediaType mediaType, HttpHeaders headers) {
         QueryResultList<Representation> result;
-        ValueFactory vf = new RdfValueFactory(new SimpleMGraph());
+        ValueFactory vf = new RdfValueFactory(new IndexedMGraph());
         EntityhubBackend backend = new EntityhubBackend(entityhub);
         EntityhubLDPath ldPath = new EntityhubLDPath(backend,vf);
         //copy the selected fields, because we might need to delete some during

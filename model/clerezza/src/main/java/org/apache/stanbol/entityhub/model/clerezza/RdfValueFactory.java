@@ -24,6 +24,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 /**
@@ -103,7 +104,7 @@ public final class RdfValueFactory implements ValueFactory {
             throw new IllegalArgumentException("The parsed id MUST NOT be empty!");
         } else {
             return createRdfRepresentation(new UriRef(id), 
-                graph == null ? new SimpleMGraph() : graph);
+                graph == null ? new IndexedMGraph() : graph);
         }
     }
 

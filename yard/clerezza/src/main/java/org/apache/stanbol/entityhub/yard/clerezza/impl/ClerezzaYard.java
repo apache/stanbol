@@ -49,6 +49,7 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.query.QueryUtils;
 import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
@@ -224,7 +225,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      * @return the extracted graph.
      */
     protected MGraph createRepresentationGraph(UriRef id, TripleCollection graph){
-        return extractRepresentation(graph, new SimpleMGraph(), id, new HashSet<BNode>());
+        return extractRepresentation(graph, new IndexedMGraph(), id, new HashSet<BNode>());
     }
     /**
      * Recursive Method internally doing all the work for 
@@ -495,7 +496,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         if(resultObject instanceof MGraph){
             resultGraph = (MGraph)resultObject;
         } else if(resultObject instanceof Graph){
-            resultGraph = new SimpleMGraph();
+            resultGraph = new IndexedMGraph();
             resultGraph.addAll((Graph)resultObject);
         } else {
             log.error("Unable to create "+MGraph.class+" instance for query reults of type "+resultObject.getClass()+" (this indicates that the used SPARQL Query was not of type CONSTRUCT)");

@@ -27,6 +27,7 @@ import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.site.AbstractEntitySearcher;
 import org.apache.stanbol.entityhub.query.clerezza.RdfQueryResultList;
@@ -72,7 +73,7 @@ public class LarqSearcher extends AbstractEntitySearcher implements EntitySearch
             if(rdfData instanceof MGraph){
                 graph = (MGraph) rdfData;
             } else {
-                graph = new SimpleMGraph(rdfData);
+                graph = new IndexedMGraph(rdfData);
             }
             long parseEnd = System.currentTimeMillis();
             log.info("  > ParseTime: "+(parseEnd-queryEnd));

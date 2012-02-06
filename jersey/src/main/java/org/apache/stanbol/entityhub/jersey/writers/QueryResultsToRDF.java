@@ -24,6 +24,7 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.query.clerezza.RdfQueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -57,7 +58,7 @@ final class QueryResultsToRDF {
         final MGraph resultGraph;
         Class<?> type = resultList.getType();
         if (String.class.isAssignableFrom(type)) {
-            resultGraph = new SimpleMGraph(); //create a new Graph
+            resultGraph = new IndexedMGraph(); //create a new Graph
             for (Object result : resultList) {
                 //add a triple to each reference in the result set
                 resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, QUERY_RESULT, new UriRef(result.toString())));
@@ -92,7 +93,7 @@ final class QueryResultsToRDF {
                     }
                 }
             } else { //any other implementation of the QueryResultList interface
-                resultGraph = new SimpleMGraph(); //create a new graph
+                resultGraph = new IndexedMGraph(); //create a new graph
                 if (Representation.class.isAssignableFrom(type)) {
                     for (Object result : resultList) {
                         UriRef resultId;

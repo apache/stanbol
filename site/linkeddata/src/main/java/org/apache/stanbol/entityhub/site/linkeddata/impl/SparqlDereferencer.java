@@ -28,6 +28,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.core.site.AbstractEntityDereferencer;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -88,7 +89,7 @@ public class SparqlDereferencer extends AbstractEntityDereferencer {
         long queryEnd = System.currentTimeMillis();
         log.info("  > DereferenceTime: "+(queryEnd-start));
         if(in != null){
-            MGraph rdfData = new SimpleMGraph(parser.parse(in, format));
+            MGraph rdfData = new IndexedMGraph(parser.parse(in, format));
             long parseEnd = System.currentTimeMillis();
             log.info("  > ParseTime: "+(parseEnd-queryEnd));
             return valueFactory.createRdfRepresentation(new UriRef(uri), rdfData);
