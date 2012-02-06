@@ -57,7 +57,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.commons.indexedgraph.*;version=${project.version}ion}
+              org.apache.stanbol.commons.indexedgraph.*;version=${project.version}
             </Export-Package>
           </instructions>
         </configuration>
