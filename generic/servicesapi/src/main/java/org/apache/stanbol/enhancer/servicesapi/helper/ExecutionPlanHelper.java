@@ -55,6 +55,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
@@ -167,7 +168,7 @@ public final class ExecutionPlanHelper {
         Collections.sort(availableEngines,EXECUTION_ORDER_COMPARATOR);
         //now we have all required and possible also optional engines
         //  -> build the execution plan
-        MGraph ep = new SimpleMGraph();
+        MGraph ep = new IndexedMGraph();
         NonLiteral epNode = createExecutionPlan(ep, chainName);
         Integer prevOrder = null;
         Set<NonLiteral> prev = null;

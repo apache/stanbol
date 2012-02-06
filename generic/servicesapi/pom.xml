@@ -81,6 +81,10 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
+		<dependency>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
+       </dependency>
 		<!-- for tests -->
 		<dependency>
 			<groupId>junit</groupId>

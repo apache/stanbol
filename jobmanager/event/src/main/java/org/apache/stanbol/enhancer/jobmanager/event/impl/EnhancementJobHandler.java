@@ -1,7 +1,7 @@
 package org.apache.stanbol.enhancer.jobmanager.event.impl;
 
-import static org.apache.stanbol.enhancer.jobmanager.event.Constants.PROPERTY_JOB_MANAGER;
 import static org.apache.stanbol.enhancer.jobmanager.event.Constants.PROPERTY_EXECUTION;
+import static org.apache.stanbol.enhancer.jobmanager.event.Constants.PROPERTY_JOB_MANAGER;
 import static org.apache.stanbol.enhancer.jobmanager.event.Constants.TOPIC_JOB_MANAGER;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.getEngine;
 
@@ -11,7 +11,6 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 

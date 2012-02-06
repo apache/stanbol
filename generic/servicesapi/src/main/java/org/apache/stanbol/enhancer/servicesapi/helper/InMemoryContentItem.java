@@ -20,6 +20,7 @@ package org.apache.stanbol.enhancer.servicesapi.helper;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 
 
@@ -67,7 +68,7 @@ public class InMemoryContentItem extends ContentItemImpl {
     }
     protected InMemoryContentItem(UriRef uri, Blob blob, MGraph metadata) {
         super(uri == null ? ContentItemHelper.makeDefaultUrn(blob): uri,blob,
-                metadata == null ? new SimpleMGraph() : metadata);
+                metadata == null ? new IndexedMGraph() : metadata);
     }
 
 	protected static final InMemoryContentItem fromString(String content) {

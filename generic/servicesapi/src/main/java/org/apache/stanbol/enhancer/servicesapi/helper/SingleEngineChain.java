@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -55,7 +56,7 @@ public class SingleEngineChain implements Chain {
         }
         this.engine = engine;
         this.name = engine.getName()+"Chain";
-        MGraph graph = new SimpleMGraph();
+        MGraph graph = new IndexedMGraph();
         writeExecutionNode(graph, createExecutionPlan(graph, name),
             engine.getName(), false, null);
         executionPlan = graph.getGraph();

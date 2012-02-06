@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 
 /**
@@ -59,7 +60,7 @@ public class WebContentItem extends ContentItemImpl {
      */
 	public WebContentItem(URL url, MGraph metadata) {
 		super(new UriRef(url.toString()), new UrlBlob(url),
-		    metadata == null ? new SimpleMGraph() : metadata);
+		    metadata == null ? new IndexedMGraph() : metadata);
 	}
 	
 	/**
