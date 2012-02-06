@@ -266,6 +266,14 @@
       <artifactId>org.json.simple</artifactId>
       <version>0.3-incubating-SNAPSHOT</version>
     </bundle>
+    <!-- 
+      Add support for fast index based in-memory models
+     -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
   </startLevel>
 
   <!-- Stanbol Commons -->
@@ -334,6 +342,7 @@
       <artifactId>org.apache.stanbol.commons.jobs.web</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
+    
     <!-- The common web interface -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
@@ -346,4 +355,25 @@
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
+  
+  <!-- LD Path -->
+  <startLevel level="17">
+    <bundle> <!-- LD Path -->
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-api</artifactId>
+      <version>0.9.4-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-core-bundle</artifactId>
+      <version>0.9.4-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.ldpath.clerezza</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+
+  
 </bundles>
