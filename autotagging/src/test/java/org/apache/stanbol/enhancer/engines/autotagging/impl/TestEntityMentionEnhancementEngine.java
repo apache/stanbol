@@ -111,7 +111,7 @@ public class TestEntityMentionEnhancementEngine {
         }
         RdfEntityFactory factory = RdfEntityFactory.createInstance(ci.getMetadata());
         TextAnnotation testAnnotation = factory.getProxy(
-                new UriRef("urn:org.apache:stanbol.ehnacer:test:text-annotation:person"), TextAnnotation.class);
+                new UriRef("urn:org.apache:stanbol.ehnacer:test:text-annotation:"+name.replace(' ', '_')), TextAnnotation.class);
         testAnnotation.setCreator(new UriRef("urn:org.apache:stanbol.ehnacer:test:dummyEngine"));
         testAnnotation.setCreated(new Date());
         testAnnotation.setSelectedText(name);
