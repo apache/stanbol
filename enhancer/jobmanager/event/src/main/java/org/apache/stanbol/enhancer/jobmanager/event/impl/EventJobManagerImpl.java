@@ -1,19 +1,12 @@
 package org.apache.stanbol.enhancer.jobmanager.event.impl;
 
 import static org.apache.stanbol.enhancer.jobmanager.event.Constants.TOPIC_JOB_MANAGER;
-import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getString;
-import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.getExecutable;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.ENGINE;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -29,7 +22,6 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
-import org.apache.stanbol.enhancer.servicesapi.helper.EnginesTracker;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;

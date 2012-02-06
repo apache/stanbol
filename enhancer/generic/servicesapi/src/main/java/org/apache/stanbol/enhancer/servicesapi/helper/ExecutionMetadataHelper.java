@@ -27,6 +27,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
@@ -239,7 +240,7 @@ public class ExecutionMetadataHelper {
             try {
                 executionMetadata = contentItem.getPart(CHAIN_EXECUTION, MGraph.class);
             } catch (NoSuchPartException e) {
-                executionMetadata = new SimpleMGraph();
+                executionMetadata = new IndexedMGraph();
                 contentItem.addPart(CHAIN_EXECUTION, executionMetadata);
             }
         } finally {

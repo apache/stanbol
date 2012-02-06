@@ -51,7 +51,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.contenthub.ldpath.backend.clerezza.ClerezzaBackend;
+import org.apache.stanbol.commons.ldpath.clerezza.ClerezzaBackend;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
 import org.osgi.framework.Bundle;

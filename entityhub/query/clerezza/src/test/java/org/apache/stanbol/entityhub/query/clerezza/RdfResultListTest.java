@@ -24,6 +24,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.core.query.FieldQueryImpl;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
@@ -43,7 +44,7 @@ public class RdfResultListTest {
     @Test
     public void testRdfResultSorting(){
         SortedMap<Double,RdfRepresentation> sorted = new TreeMap<Double,RdfRepresentation>();
-        MGraph resultGraph = new SimpleMGraph();
+        MGraph resultGraph = new IndexedMGraph();
         RdfValueFactory vf = new RdfValueFactory(resultGraph);
         UriRef resultListNode = new UriRef(RdfResourceEnum.QueryResultSet.getUri());
         UriRef resultProperty = new UriRef(RdfResourceEnum.queryResult.getUri());

@@ -80,6 +80,7 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -564,7 +565,7 @@ public class ContentItemResource extends BaseStanbolResource {
      * @return an RDF/JSON descriptions of places for the word map widget
      */
     public String getPlacesAsJSON() throws ParseException, UnsupportedEncodingException {
-        MGraph g = new SimpleMGraph();
+        MGraph g = new IndexedMGraph();
         LiteralFactory lf = LiteralFactory.getInstance();
         MGraph metadata = contentItem.getMetadata();
         for (EntityExtractionSummary p : getPlaceOccurrences()) {

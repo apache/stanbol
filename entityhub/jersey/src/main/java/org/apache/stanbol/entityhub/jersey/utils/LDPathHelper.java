@@ -39,6 +39,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
@@ -92,7 +93,7 @@ public class LDPathHelper {
     private static MGraph executeLDPath(RDFBackend<Object> backend,
                                  String ldpath,
                                  Set<String> contexts ) throws LDPathParseException {
-        MGraph data = new SimpleMGraph();
+        MGraph data = new IndexedMGraph();
         RdfValueFactory vf = new RdfValueFactory(data);
         EntityhubLDPath ldPath = new EntityhubLDPath(backend,vf);
         Program<Object> program = ldPath.parseProgram(getReader(ldpath));

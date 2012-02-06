@@ -25,6 +25,7 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.FOAF;
 import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -58,7 +59,7 @@ final class EntityToRDF {
     static final LiteralFactory literalFactory = LiteralFactory.getInstance();
 
     static MGraph toRDF(Representation representation) {
-        MGraph graph = new SimpleMGraph();
+        MGraph graph = new IndexedMGraph();
         addRDFTo(graph, representation);
         return graph;
     }
@@ -68,7 +69,7 @@ final class EntityToRDF {
     }
 
     static TripleCollection toRDF(Entity entity) {
-        MGraph graph = new SimpleMGraph();
+        MGraph graph = new IndexedMGraph();
         addRDFTo(graph, entity);
         return graph;
     }

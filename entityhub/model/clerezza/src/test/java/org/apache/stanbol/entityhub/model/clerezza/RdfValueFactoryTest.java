@@ -16,8 +16,10 @@
  */
 package org.apache.stanbol.entityhub.model.clerezza;
 
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.test.model.ValueFactoryTest;
 import org.junit.Before;
@@ -49,7 +51,7 @@ public class RdfValueFactoryTest extends ValueFactoryTest {
     }
     @Test(expected=IllegalArgumentException.class)
     public void testNullNodeRepresentation() {
-        SimpleMGraph graph = new SimpleMGraph();
+        MGraph graph = new IndexedMGraph();
         valueFactory.createRdfRepresentation(null, graph);
     }
     @Test(expected=IllegalArgumentException.class)
