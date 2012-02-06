@@ -17,78 +17,78 @@
 -->
 
 <bundles>
-	<!-- Stanbol Enhancer infrastructure and required libraries -->
-	<startLevel level="20">
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.chainmanager</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.enginemanager</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-    </startLevel>
-    <!-- EnhancementJobManager implementations -->
-    <startLevel level="20">
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.eventjobmanager</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-        <bundle>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.enhancer.weightedjobmanager</artifactId>
-            <version>0.9.0-incubating-SNAPSHOT</version>
-        </bundle>
-	</startLevel>
-    <!-- Enhancement Chain implementations -->
-    <startLevel level="20">
-        <bundle>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.enhancer.chain.allactive</artifactId>
-            <version>0.9.0-incubating-SNAPSHOT</version>
-        </bundle>
-        <bundle>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.enhancer.chain.graph</artifactId>
-            <version>0.9.0-incubating-SNAPSHOT</version>
-        </bundle>
-        <bundle>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.enhancer.chain.weighted</artifactId>
-            <version>0.9.0-incubating-SNAPSHOT</version>
-        </bundle>
-        <bundle>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.enhancer.chain.list</artifactId>
-            <version>0.9.0-incubating-SNAPSHOT</version>
-        </bundle>
-    </startLevel>
-	<!-- Web Fragment -->
-	<startLevel level="21">
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-	</startLevel>
+  <!-- Stanbol Enhancer infrastructure and required libraries -->
+  <startLevel level="20">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.chainmanager</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.enginemanager</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+  <!-- EnhancementJobManager implementations -->
+  <startLevel level="20">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.eventjobmanager</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.weightedjobmanager</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+  <!-- Enhancement Chain implementations -->
+  <startLevel level="20">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.chain.allactive</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.chain.graph</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.chain.weighted</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.chain.list</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+  <!-- Web Fragment -->
+  <startLevel level="21">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
 
-	<!-- Benchmarks for the Stanbol Enhancer -->
-	<startLevel level="21">
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.benchmark</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-	</startLevel>
-	
+  <!-- Benchmarks for the Stanbol Enhancer -->
+  <startLevel level="21">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.benchmark</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+
   <!-- Stanbol Enhancer plug-ins (the Enhancement Engines) -->
   <startLevel level="25">
     <bundle>
@@ -131,7 +131,7 @@
       <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <!-- Taxonomy Linking Engine (depends on the Entityhub) Deprecated 
+    <!-- Taxonomy Linking Engine (depends on the Entityhub) Deprecated
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.taxonomy</artifactId>
@@ -144,4 +144,4 @@
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
-</bundles>  
+</bundles>
