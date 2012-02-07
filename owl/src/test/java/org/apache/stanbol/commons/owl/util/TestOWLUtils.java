@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.owl.util;
+package org.apache.stanbol.commons.owl.util;
 
 import static org.junit.Assert.*;
 
@@ -26,6 +26,7 @@ import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
+import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
