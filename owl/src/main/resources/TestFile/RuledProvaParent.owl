@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<!DOCTYPE Ontology [
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY xml "http://www.w3.org/XML/1998/namespace" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     ontologyIRI="http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl">
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Declaration>
+        <Class IRI="#Adult"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Person"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasBrother"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasParent"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasUncle"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#isParentOf"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasAge"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="owl:topDataProperty"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Fred"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#John"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Tom"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://www.semanticweb.org/owlapi#iri"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="#Adult"/>
+        <Class IRI="#Person"/>
+    </SubClassOf>
+    <ClassAssertion>
+        <Class IRI="#Adult"/>
+        <NamedIndividual IRI="#Fred"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Adult"/>
+        <NamedIndividual IRI="#John"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Person"/>
+        <NamedIndividual IRI="#Tom"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasBrother"/>
+        <NamedIndividual IRI="#Fred"/>
+        <NamedIndividual IRI="#John"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Tom"/>
+        <NamedIndividual IRI="#Fred"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasAge"/>
+        <NamedIndividual IRI="#Tom"/>
+        <Literal datatypeIRI="&xsd;int">19</Literal>
+    </DataPropertyAssertion>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#hasBrother"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#hasParent"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#hasUncle"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#isParentOf"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#isParentOf"/>
+        <ObjectProperty IRI="#hasParent"/>
+    </InverseObjectProperties>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasBrother"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasParent"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasUncle"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#isParentOf"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasBrother"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasParent"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasUncle"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#isParentOf"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyRange>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasAge"/>
+        <DataProperty abbreviatedIRI="owl:topDataProperty"/>
+    </SubDataPropertyOf>
+    <DataPropertyDomain>
+        <DataProperty IRI="#hasAge"/>
+        <Class IRI="#Person"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty IRI="#hasAge"/>
+        <Datatype abbreviatedIRI="xsd:int"/>
+    </DataPropertyRange>
+    <DLSafeRule>
+        <Annotation>
+            <AnnotationProperty IRI="http://www.semanticweb.org/owlapi#nodeID"/>
+            <Literal>_:http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#genid1</Literal>
+        </Annotation>
+        <Body>
+            <ObjectPropertyAtom>
+                <ObjectProperty IRI="#hasBrother"/>
+                <Variable IRI="#y"/>
+                <Variable IRI="#z"/>
+            </ObjectPropertyAtom>
+            <ObjectPropertyAtom>
+                <ObjectProperty IRI="#hasParent"/>
+                <Variable IRI="#x"/>
+                <Variable IRI="#y"/>
+            </ObjectPropertyAtom>
+        </Body>
+        <Head>
+            <ObjectPropertyAtom>
+                <ObjectProperty IRI="#hasUncle"/>
+                <Variable IRI="#x"/>
+                <Variable IRI="#z"/>
+            </ObjectPropertyAtom>
+        </Head>
+    </DLSafeRule>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 3.0.0.1451) http://owlapi.sourceforge.net -->
+
