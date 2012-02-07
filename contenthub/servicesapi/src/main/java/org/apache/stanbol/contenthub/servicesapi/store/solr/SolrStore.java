@@ -70,48 +70,50 @@ public interface SolrStore extends Store {
 
     /**
      * Sends the {@link SolrContentItem} to the {@link EnhancementJobManager} to enhance the content.
-     * Afterwards saves the item in the Solr core corresponding to the given <code>ldProgramName</code>.
+     * Afterwards saves the item in the Solr core corresponding to the given <code>indexName</code>.
      * 
      * @param sci
      *            The {@link SolrContentItem} to be enhanced and saved
-     * @param ldProgramName
-     *            LDPath program name to obtain the corresponding Solr core to store the content item
+     * @param indexName
+     *            LDPath program name (name of the Solr core/index) to obtain the corresponding Solr core to
+     *            store the content item
      * @return The unique ID of the {@link SolrContentItem}.
      * @throws StoreException
      */
-    String enhanceAndPut(SolrContentItem sci, String ldProgramName) throws StoreException;
+    String enhanceAndPut(SolrContentItem sci, String indexName) throws StoreException;
 
     /**
      * Stores the passed {@link SolrContentItem} in the Solr core corresponding to the specified
-     * <code>ldProgramName</code>. If <code>null</code> is passed as the LDPath program name, the default Solr
-     * core of Contenthub is used.
+     * <code>indexName</code>. If <code>null</code> is passed as the LDPath program name (index name), the
+     * default Solr core of Contenthub is used.
      * 
      * @param ci
      *            {@link SolrContentItem} to be stored
-     * @param ldProgramName
-     *            LDPath program name to obtain the corresponding Solr core to store the content item
+     * @param indexName
+     *            LDPath program name (name of the Solr core/index) to obtain the corresponding Solr core to
+     *            store the content item
      * @return The unique ID of the {@link SolrContentItem}.
      * @throws StoreException
      */
-    String put(SolrContentItem ci, String ldProgramName) throws StoreException;
+    String put(SolrContentItem ci, String indexName) throws StoreException;
 
     /**
      * Retrieves the {@link SolrContentItem} from the Solr core corresponding to the specified
-     * <code>ldProgramName</code>. If <code>null</code> is passed as the LDPath program name, the default Solr
-     * core of Contenthub is used.
+     * <code>indexName</code>. If <code>null</code> is passed as the LDPath program name (index name), the
+     * default Solr core of Contenthub is used.
      * 
      * @param id
      *            The ID of {@link SolrContentItem} to be retrieved.
-     * @param ldProgramName
-     *            LDPath program name to obtain the corresponding Solr core from which the content item will
-     *            be retrieved
+     * @param indexName
+     *            LDPath program name (name of the Solr core/index) to obtain the corresponding Solr core from
+     *            which the content item will be retrieved
      * @return {@link SolrContentItem} having the specified id
      * @throws StoreException
      */
-    SolrContentItem get(String id, String ldProgramName) throws StoreException;
+    SolrContentItem get(String id, String indexName) throws StoreException;
 
     /**
-     * Deletes the {@link ContentItem} from the default Solr core of Contenthub.
+     * Deletes the {@link ContentItem} from the default Solr core/index of Contenthub.
      * 
      * @param id
      *            The ID of the item to be deleted.
@@ -120,16 +122,16 @@ public interface SolrStore extends Store {
 
     /**
      * Deletes the {@link ContentItem} from the default Solr core corresponding to the given
-     * <code>ldProgramName</code> of the Contenthub.
+     * <code>indexName</code> of the Contenthub.
      * 
      * @param id
      *            The ID of the item to be deleted.
-     * @param ldProgramName
-     *            LDPath program name to obtain the corresponding Solr core from which the content item will
-     *            be deleted
+     * @param indexName
+     *            LDPath program name (name of the Solr core/index) to obtain the corresponding Solr core from
+     *            which the content item will be deleted
      * @throws StoreException
      */
-    void deleteById(String id, String ldProgramName) throws StoreException;
+    void deleteById(String id, String indexName) throws StoreException;
 
     /**
      * Deletes the {@link ContentItem}s from the default Solr core of Contenthub.
@@ -140,14 +142,13 @@ public interface SolrStore extends Store {
     void deleteById(List<String> idList) throws StoreException;
 
     /**
-     * Deletes the {@link ContentItem}s from the Solr core corresponding to the given
-     * <code>ldProgramName</code>.
+     * Deletes the {@link ContentItem}s from the Solr core corresponding to the given <code>indexName</code>.
      * 
      * @param idList
      *            The list of IDs of the items to be deleted.
-     * @param ldProgramName
-     *            LDPath program name to obtain the corresponding Solr core from which the content items will
-     *            be deleted
+     * @param indexName
+     *            LDPath program name (name of the Solr core/index) to obtain the corresponding Solr core from
+     *            which the content items will be deleted
      */
-    void deleteById(List<String> idList, String ldProgramName) throws StoreException;
+    void deleteById(List<String> idList, String indexName) throws StoreException;
 }

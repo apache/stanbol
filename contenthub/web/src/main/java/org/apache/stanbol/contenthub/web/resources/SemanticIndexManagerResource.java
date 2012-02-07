@@ -17,9 +17,10 @@
 package org.apache.stanbol.contenthub.web.resources;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -34,6 +35,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -41,10 +43,14 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
+import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgram;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramManager;
+import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
+import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.api.view.Viewable;
 
 /**
  * This class the the web resource to handle the RESTful requests and HTML view of the LDProgram management
@@ -55,14 +61,14 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @Path("/contenthub/ldpath")
-public class LDProgramManagerResource extends BaseStanbolResource {
+public class SemanticIndexManagerResource extends BaseStanbolResource {
 
-    private static final Logger logger = LoggerFactory.getLogger(LDProgramManagerResource.class);
+    private static final Logger logger = LoggerFactory.getLogger(SemanticIndexManagerResource.class);
 
-    private LDProgramManager programManager;
+    private SemanticIndexManager programManager;
 
-    public LDProgramManagerResource(@Context ServletContext context) {
-        programManager = ContextHelper.getServiceFromContext(LDProgramManager.class, context);
+    public SemanticIndexManagerResource(@Context ServletContext context) {
+        programManager = ContextHelper.getServiceFromContext(SemanticIndexManager.class, context);
         if (programManager == null) {
             logger.error("Missing LDProgramManager = {}", programManager);
             throw new WebApplicationException(404);
@@ -103,12 +109,17 @@ public class LDProgramManagerResource extends BaseStanbolResource {
      * @return JSON string of {@code name:program} pairs.
      */
     @GET
-    @Produces(APPLICATION_JSON)
+    @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
     public Response retrieveAllPrograms(@Context HttpHeaders headers) {
-        LDProgramCollection ldProgramCollection = programManager.retrieveAllPrograms();
-        ResponseBuilder rb = Response.ok(ldProgramCollection);
-        addCORSOrigin(servletContext, rb, headers);
-        return rb.build();
+        MediaType acceptedHeader = RestUtil.getAcceptedMediaType(headers);
+        if (acceptedHeader.isCompatible(MediaType.TEXT_HTML_TYPE)) {
+        	return Response.ok(new Viewable("index", this), MediaType.TEXT_HTML).build();
+        } else{
+	        LDProgramCollection ldProgramCollection = programManager.retrieveAllPrograms();
+	        ResponseBuilder rb = Response.ok(ldProgramCollection, MediaType.APPLICATION_JSON);
+	        addCORSOrigin(servletContext, rb, headers);
+	        return rb.build();
+        }
     }
 
     /**
@@ -176,7 +187,7 @@ public class LDProgramManagerResource extends BaseStanbolResource {
     @DELETE
     @Path("/program")
     @Consumes(APPLICATION_FORM_URLENCODED)
-    public Response deleteProgram(@QueryParam("name") String programName, @Context HttpHeaders headers) {
+    public Response deleteProgram(@FormParam("name") String programName, @Context HttpHeaders headers) {
         programManager.deleteProgram(programName);
         ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
@@ -204,6 +215,11 @@ public class LDProgramManagerResource extends BaseStanbolResource {
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
+    }
+
+    // Helper methods for HTML view
+    public List<LDProgram> getLdPrograms() {
+        return programManager.retrieveAllPrograms().asList();
     }
 
 }

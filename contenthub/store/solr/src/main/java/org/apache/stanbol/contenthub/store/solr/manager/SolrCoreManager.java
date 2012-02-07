@@ -37,7 +37,7 @@ public class SolrCoreManager {
     private static final Logger log = LoggerFactory.getLogger(SolrCoreManager.class);
     private static SolrCoreManager instance;
 
-    public static final String CONTENTHUB_SOLR_SERVER_NAME = "contenthub";
+    public static final String CONTENTHUB_DEFAULT_INDEX_NAME = "contenthub";
 
     private static final int SECONDS_TO_WAITFOR_CORE_TO_BEREADY = 2;
 
@@ -78,11 +78,11 @@ public class SolrCoreManager {
     }
 
     public void createDefaultSolrServer() throws StoreException {
-        if (!cache.containsKey(CONTENTHUB_SOLR_SERVER_NAME)) {
-            if (!managedSolrServer.isManagedIndex(CONTENTHUB_SOLR_SERVER_NAME)) {
+        if (!cache.containsKey(CONTENTHUB_DEFAULT_INDEX_NAME)) {
+            if (!managedSolrServer.isManagedIndex(CONTENTHUB_DEFAULT_INDEX_NAME)) {
                 try {
-                    managedSolrServer.createSolrIndex(CONTENTHUB_SOLR_SERVER_NAME,
-                        CONTENTHUB_SOLR_SERVER_NAME, null);
+                    managedSolrServer.createSolrIndex(CONTENTHUB_DEFAULT_INDEX_NAME,
+                        CONTENTHUB_DEFAULT_INDEX_NAME, null);
                 } catch (IOException e) {
                     String msg = "Error while creating default solr index";
                     log.error(msg, e);
@@ -154,13 +154,13 @@ public class SolrCoreManager {
     }
 
     public SolrServer getServer() throws StoreException {
-        return getServer(CONTENTHUB_SOLR_SERVER_NAME);
+        return getServer(CONTENTHUB_DEFAULT_INDEX_NAME);
     }
 
     public SolrServer getServer(String coreName) throws StoreException {
         SolrServer solrServer = null;
         if (coreName == null || coreName.trim().isEmpty()) {
-            coreName = CONTENTHUB_SOLR_SERVER_NAME;
+            coreName = CONTENTHUB_DEFAULT_INDEX_NAME;
         }
         if (cache.containsKey(coreName)) {
             // check cache for the server reference

@@ -155,7 +155,7 @@ public class FeaturedSearchImpl implements FeaturedSearch {
                                 String ldProgramName) throws SearchException {
         List<ResultantDocument> resultantDocuments = new ArrayList<ResultantDocument>();
         for (SolrDocument solrDocument : queryResponse.getResults()) {
-            resultantDocuments.add(SolrContentItemConverter.solrDocument2solrContentItem(solrDocument));
+            resultantDocuments.add(SolrContentItemConverter.solrDocument2solrContentItem(solrDocument, ldProgramName));
         }
         Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords = new HashMap<String,Map<String,List<RelatedKeyword>>>();
         List<String> queryTerms = tokenizeEntities(queryTerm);

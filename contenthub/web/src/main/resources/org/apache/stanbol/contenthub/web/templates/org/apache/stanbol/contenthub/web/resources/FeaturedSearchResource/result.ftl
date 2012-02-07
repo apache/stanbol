@@ -22,7 +22,7 @@
 <div id="text">
 </div>
 <div id="result" class="result">
-<a href="${it.publicBaseUri}contenthub/search/featured">Back to Search</a></br>
+<a href="${it.publicBaseUri}contenthub/${it.indexName}/search/featured">Back to Search</a></br>
   <div class="keywords">
   	<#list it.searchResults.relatedKeywords?keys as queryTermToken>
   	  <#assign queryTerm = queryTermToken?replace("*","_")?replace(" ", "_")?replace("'", "_")>
@@ -51,7 +51,7 @@
           <#else>
             <#list it.resultantDocuments as docRes>
               <div class="bordered-bottom">
-                <li class="lined"><a href="${it.publicBaseUri}contenthub/store/page/${docRes.localId}">${docRes.title}</a></li>
+                <li class="lined"><a href="${it.publicBaseUri}contenthub/${it.indexName}/store/page/${docRes.localId}">${docRes.title}</a></li>
               </div>  
             </#list>
           </#if>

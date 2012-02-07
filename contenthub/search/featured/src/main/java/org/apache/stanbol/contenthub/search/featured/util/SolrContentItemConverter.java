@@ -27,16 +27,16 @@ public class SolrContentItemConverter {
      * its metadata produced after enhancement process and stored. Its constraints indexed in Solr are also
      * ignored as these items are only shown as a list in HTML interface.
      */
-    public static ResultantDocument solrDocument2solrContentItem(SolrDocument solrDocument) {
-        return solrDocument2solrContentItem(solrDocument, null);
+    public static ResultantDocument solrDocument2solrContentItem(SolrDocument solrDocument, String indexName) {
+        return solrDocument2solrContentItem(solrDocument, null, indexName);
     }
     
-    public static ResultantDocument solrDocument2solrContentItem(SolrDocument solrDocument, String baseURI) {
+    public static ResultantDocument solrDocument2solrContentItem(SolrDocument solrDocument, String baseURI, String indexName) {
         String id = getStringValueFromSolrField(solrDocument, SolrFieldName.ID.toString());
         String mimeType = getStringValueFromSolrField(solrDocument, SolrFieldName.MIMETYPE.toString());
         String title = getStringValueFromSolrField(solrDocument, SolrFieldName.TITLE.toString());
         long enhancementCount = (Long) solrDocument.getFieldValue(SolrFieldName.ENHANCEMENTCOUNT.toString());
-        String dereferencableURI = baseURI != null ? (baseURI + "contenthub/store/content/" + id) : null;
+        String dereferencableURI = baseURI != null ? (baseURI + "contenthub/" + indexName + "/store/content/" + id) : null;
         title = (title == null || title.trim().equals("") ? id : title);
         ResultantDocumentImpl resultantDocument = new ResultantDocumentImpl(id, dereferencableURI, mimeType,
                 enhancementCount, title);

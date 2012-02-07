@@ -33,6 +33,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -50,10 +51,12 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
+import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearchManager;
+import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
 import org.apache.stanbol.contenthub.web.util.JSONUtils;
 import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -70,7 +73,7 @@ import com.sun.jersey.api.view.Viewable;
  * @author suat
  * 
  */
-@Path("/contenthub/search/featured")
+@Path("/contenthub/{index}/search/featured")
 public class FeaturedSearchResource extends BaseStanbolResource {
 
     private final static Logger log = LoggerFactory.getLogger(FeaturedSearchResource.class);
@@ -79,7 +82,22 @@ public class FeaturedSearchResource extends BaseStanbolResource {
 
     private FeaturedSearch featuredSearch;
 
-    public FeaturedSearchResource(@Context ServletContext context) throws IOException, InvalidSyntaxException {
+    private String indexName;
+
+    /**
+     * 
+     * @param context
+     * @param indexName
+     *            Name of the LDPath program (name of the Solr core/index) to be used while storing this
+     *            content item. LDPath programs can be managed through {@link SemanticIndexManagerResource} or
+     *            {@link SemanticIndexManager}
+     * @throws IOException
+     * @throws InvalidSyntaxException
+     */
+    public FeaturedSearchResource(@Context ServletContext context,
+                                  @PathParam(value = "index") String indexName) throws IOException,
+                                                                               InvalidSyntaxException {
+        this.indexName = indexName;
         featuredSearch = ContextHelper.getServiceFromContext(FeaturedSearch.class, context);
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
     }
@@ -96,8 +114,6 @@ public class FeaturedSearchResource extends BaseStanbolResource {
      *            example, {@code q="john doe"&fl=score} is a valid value for this parameter. If this
      *            parameter exists, search is performed based on this solrQuery and any queryTerms are
      *            neglected.
-     * @param ldProgram
-     *            The name of the LDPath program (actually name of the Solr core/index) to be searched over.
      * @param jsonCons
      *            Constrainst in JSON format. These constraints are tranformed to corresponding Solr queries
      *            to enable faceted search. Each constraint is a facet field and values of the constraints
@@ -127,7 +143,6 @@ public class FeaturedSearchResource extends BaseStanbolResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public final Response post(@FormParam("queryTerm") String queryTerm,
                                @FormParam("solrQuery") String solrQuery,
-                               @FormParam("ldProgram") String ldProgram,
                                @FormParam("constraints") String jsonCons,
                                @FormParam("graph") String graphURI,
                                @FormParam("offset") @DefaultValue("0") int offset,
@@ -138,7 +153,7 @@ public class FeaturedSearchResource extends BaseStanbolResource {
                                                             SolrServerException,
                                                             SearchException,
                                                             IOException {
-        return get(queryTerm, solrQuery, ldProgram, jsonCons, graphURI, offset, limit, null, headers);
+        return get(queryTerm, solrQuery, jsonCons, graphURI, offset, limit, null, headers);
     }
 
     /**
@@ -151,8 +166,6 @@ public class FeaturedSearchResource extends BaseStanbolResource {
      *            example, {@code q="john doe"&fl=score} is a valid value for this parameter. If this
      *            parameter exists, search is performed based on this solrQuery and any queryTerms are
      *            neglected.
-     * @param ldProgram
-     *            The name of the LDPath program (actually name of the Solr core/index) to be searched over.
      * @param jsonCons
      *            Constrainst in JSON format. These constraints are tranformed to corresponding Solr queries
      *            to enable faceted search. Each constraint is a facet field and values of the constraints
@@ -183,7 +196,6 @@ public class FeaturedSearchResource extends BaseStanbolResource {
     @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
     public final Response get(@QueryParam("queryTerm") String queryTerm,
                               @QueryParam("solrQuery") String solrQuery,
-                              @QueryParam("ldProgram") String ldProgram,
                               @QueryParam("constraints") String jsonCons,
                               @QueryParam("graphURI") String graphURI,
                               @QueryParam("offset") @DefaultValue("0") int offset,
@@ -199,7 +211,6 @@ public class FeaturedSearchResource extends BaseStanbolResource {
 
         this.queryTerm = queryTerm = RestUtil.nullify(queryTerm);
         solrQuery = RestUtil.nullify(solrQuery);
-        ldProgram = RestUtil.nullify(ldProgram);
         graphURI = RestUtil.nullify(graphURI);
         jsonCons = RestUtil.nullify(jsonCons);
         this.offset = offset;
@@ -222,8 +233,8 @@ public class FeaturedSearchResource extends BaseStanbolResource {
                 }
                 return Response.ok(new Viewable("index", this), MediaType.TEXT_HTML).build();
             } else {
-                ResponseBuilder rb = performSearch(queryTerm, solrQuery, ldProgram, jsonCons, graphURI,
-                    offset, limit, MediaType.TEXT_HTML_TYPE);
+                ResponseBuilder rb = performSearch(queryTerm, solrQuery, jsonCons, graphURI, offset, limit,
+                    MediaType.TEXT_HTML_TYPE);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             }
@@ -232,8 +243,8 @@ public class FeaturedSearchResource extends BaseStanbolResource {
                 return Response.status(Status.BAD_REQUEST)
                         .entity("Either 'queryTerm' or 'solrQuery' should be specified").build();
             } else {
-                ResponseBuilder rb = performSearch(queryTerm, solrQuery, ldProgram, jsonCons, graphURI,
-                    offset, limit, MediaType.APPLICATION_JSON_TYPE);
+                ResponseBuilder rb = performSearch(queryTerm, solrQuery, jsonCons, graphURI, offset, limit,
+                    MediaType.APPLICATION_JSON_TYPE);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             }
@@ -242,7 +253,6 @@ public class FeaturedSearchResource extends BaseStanbolResource {
 
     private ResponseBuilder performSearch(String queryTerm,
                                           String solrQuery,
-                                          String ldProgramName,
                                           String jsonCons,
                                           String ontologyURI,
                                           int offset,
@@ -250,22 +260,22 @@ public class FeaturedSearchResource extends BaseStanbolResource {
                                           MediaType acceptedMediaType) throws SearchException {
 
         if (solrQuery != null) {
-            this.searchResults = featuredSearch.search(new SolrQuery(solrQuery), ontologyURI, ldProgramName);
+            this.searchResults = featuredSearch.search(new SolrQuery(solrQuery), ontologyURI, indexName);
         } else if (queryTerm != null) {
             Map<String,List<Object>> constraintsMap = JSONUtils.convertToMap(jsonCons);
             this.chosenFacets = JSONUtils.convertToString(constraintsMap);
-            List<String> allAvailableFacetNames = featuredSearch.getFieldNames(ldProgramName);
+            List<String> allAvailableFacetNames = featuredSearch.getFieldNames(indexName);
             if (this.chosenFacets != null) {
                 SolrQuery sq = SolrQueryUtil.prepareFacetedSolrQuery(queryTerm, allAvailableFacetNames,
                     constraintsMap);
                 sq.setStart(offset);
                 sq.setRows(limit + 1);
-                this.searchResults = featuredSearch.search(sq, ontologyURI, ldProgramName);
+                this.searchResults = featuredSearch.search(sq, ontologyURI, indexName);
             } else {
                 SolrQuery sq = SolrQueryUtil.prepareDefaultSolrQuery(queryTerm, allAvailableFacetNames);
                 sq.setStart(offset);
                 sq.setRows(limit + 1);
-                this.searchResults = featuredSearch.search(sq, ontologyURI, ldProgramName);
+                this.searchResults = featuredSearch.search(sq, ontologyURI, indexName);
             }
         } else {
             log.error("Should never reach here!!!!");
@@ -355,5 +365,9 @@ public class FeaturedSearchResource extends BaseStanbolResource {
 
     public String getChosenFacets() {
         return this.chosenFacets;
+    }
+    
+    public String getIndexName() {
+    	return this.indexName;
     }
 }

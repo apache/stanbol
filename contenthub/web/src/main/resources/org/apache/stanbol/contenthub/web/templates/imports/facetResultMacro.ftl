@@ -30,7 +30,11 @@
 					<a href="javascript:getResults('${consLinkEscaped}','stanbolreserved_creationdate','','date')"><input type="button" value=">" /></a>
 				</li></ul>
 			<#else>
-				<#assign facetName=facetField.name?substring(0,facetField.name?last_index_of("_"))/>
+				<#if facetField.name?last_index_of("_") &gt; 0>
+					<#assign facetName=facetField.name?substring(0,facetField.name?last_index_of("_"))/>
+				<#else>
+					<#assign facetName=facetField.name />
+				</#if>
 				${facetName}
 				<ul id="${facetName}list">
 					<#if facetField.name?ends_with("_l")>

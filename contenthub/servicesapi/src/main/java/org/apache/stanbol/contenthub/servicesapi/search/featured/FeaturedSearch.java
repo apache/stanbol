@@ -55,27 +55,27 @@ public interface FeaturedSearch {
 
     /**
      * This method returns a {@link SearchResult} as a unified search response. The response contains content
-     * items retrieved from the index, which is accessed using the given <code>ldProgramName</code>, of
-     * Contenthub for the given <code>queryTerm</code>. This name corresponds to a Solr Core name within
-     * Contenthub. It also consists of related keywords that are obtained from the available
-     * {@link RelatedKeywordSearch} instances. This method also takes an ontology URI. Using the URI, actual
-     * ontology is retrieved and it is used as related keyword source. To obtain related keywords, the given
-     * query term is tokenized with {@link #tokenizeEntities(String)}. And then, related keyword searchers are
-     * queried for all the query tokens. Furthermore, the {@link SearchResult} includes Solr facets that are
-     * obtained for the obtained content items.
+     * items retrieved from the index, which is accessed using the given <code>indexName</code>, of Contenthub
+     * for the given <code>queryTerm</code>. This name corresponds to a Solr Core name within Contenthub. It
+     * also consists of related keywords that are obtained from the available {@link RelatedKeywordSearch}
+     * instances. This method also takes an ontology URI. Using the URI, actual ontology is retrieved and it
+     * is used as related keyword source. To obtain related keywords, the given query term is tokenized with
+     * {@link #tokenizeEntities(String)}. And then, related keyword searchers are queried for all the query
+     * tokens. Furthermore, the {@link SearchResult} includes Solr facets that are obtained for the obtained
+     * content items.
      * 
      * @param queryTerm
      *            Query term for which the unified response will be obtained
      * @param ontologyURI
      *            URI of an ontology in which related keywords will be searched
-     * @param ldProgramName
-     *            LDPath program name which is used to obtained the corresponding Solr core which will be
-     *            searched for the given query term
+     * @param indexName
+     *            LDPath program name (name of the Solr core/index) which is used to obtained the
+     *            corresponding Solr core which will be searched for the given query term
      * @return {@link SearchResult} for the given query term. For details of the response see
      *         {@link SearchResult}.
      * @throws SearchException
      */
-    SearchResult search(String queryTerm, String ontologyURI, String ldProgramName) throws SearchException;
+    SearchResult search(String queryTerm, String ontologyURI, String indexName) throws SearchException;
 
     /**
      * This methods returns a {@link SearchResult} as a unified search response. The response contains content
@@ -96,7 +96,7 @@ public interface FeaturedSearch {
 
     /**
      * This methods returns a {@link SearchResult} as a unified search response. The response contains content
-     * items retrieved from the index, which is accessed using the given <code>ldProgramName</code>, of
+     * items retrieved from the index, which is accessed using the given <code>indexName</code>, of
      * Contenthub for the given <code>queryTerm</code>. This name corresponds to a Solr Core name within
      * Contenthub. It also consists of related keywords that are obtained from the available
      * {@link RelatedKeywordSearch} instances. This method also takes an ontology URI. Using the URI, actual
@@ -112,7 +112,7 @@ public interface FeaturedSearch {
      *         and facets for the obtained content items.
      * @throws SearchException
      */
-    SearchResult search(SolrParams solrQuery, String ontologyURI, String ldProgramName) throws SearchException;
+    SearchResult search(SolrParams solrQuery, String ontologyURI, String indexName) throws SearchException;
 
     /**
      * This method obtains the available field names of the default index of Contenthub.
@@ -124,14 +124,14 @@ public interface FeaturedSearch {
 
     /**
      * This method obtains the available field names of the index, corresponding to the given
-     * <code>ldProgramName</code> of Contenthub. This name corresponds to a Solr Core name within Contenthub.
+     * <code>indexName</code> of Contenthub. This name corresponds to a Solr Core name within Contenthub.
      * 
-     * @param ldProgramName
+     * @param indexName
      *            Name of the index for which the field names will be obtained.
      * @return {@link List} of field names related index
      * @throws SearchException
      */
-    List<String> getFieldNames(String ldProgramName) throws SearchException;
+    List<String> getFieldNames(String indexName) throws SearchException;
 
     /**
      * This method tokenizes the given query term with the help of Stanbol Enhancer. The query term is fed to
