@@ -39,7 +39,7 @@ import org.apache.stanbol.commons.ldpath.clerezza.ClerezzaBackend;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramManager;
+import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -62,9 +62,9 @@ import at.newmedialab.ldpath.exception.LDPathParseException;
 
 @Component(immediate = false)
 @Service
-public class LDProgramManagerImpl implements LDProgramManager {
+public class SemanticIndexManagerImpl implements SemanticIndexManager {
 
-    private final Logger logger = LoggerFactory.getLogger(LDProgramManagerImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(SemanticIndexManagerImpl.class);
 
     private final static String DEFAULT_ROOT_PATH = "datafiles/contenthub";
     private final static String DEFAULT_FOLDER_NAME = "ldpath";

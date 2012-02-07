@@ -212,7 +212,7 @@ public class JSONUtils {
         JSONObject jObj = new JSONObject(sci.getConstraints());
         jObj.put("content", content);
         jObj.put("mimeType", sci.getMimeType());
-        jObj.put("id", ContentItemIDOrganizer.detachBaseURI(sci.getUri().getUnicodeString()));
+        jObj.put("uri", ContentItemIDOrganizer.detachBaseURI(sci.getUri().getUnicodeString()));
         jObj.put("title", sci.getTitle());
         return jObj.toString(4);
     }

@@ -29,7 +29,7 @@ import org.apache.clerezza.rdf.core.MGraph;
  * @author anil.sinaci
  * 
  */
-public interface LDProgramManager {
+public interface SemanticIndexManager {
 
     /**
      * Saves LDPath program to persistent storage with given name and initializes a new Solr core with the

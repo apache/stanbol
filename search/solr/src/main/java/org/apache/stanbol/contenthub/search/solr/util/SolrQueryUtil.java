@@ -65,7 +65,12 @@ public class SolrQueryUtil {
                 for (Entry<String,List<Object>> entry : constraints.entrySet()) {
                     String fieldName = ClientUtils.escapeQueryChars(entry.getKey());
                     for (Object value : entry.getValue()) {
-                        query.addFilterQuery(fieldName + facetDelimiter + quotation + (String) value + quotation);
+                    	if(SolrVocabulary.isNameRangeField(fieldName)){
+                    		query.addFilterQuery(fieldName + facetDelimiter + (String) value);
+                    	} else {
+                    		query.addFilterQuery(fieldName + facetDelimiter + quotation + (String) value + quotation);
+                    	}
+                        
                         /*query.addFacetQuery(fieldName + facetDelimiter + (SolrVocabulary.isNameRangeField(fieldName) ? (String) value
                                     : ClientUtils.escapeQueryChars(quotation + (String) value
                                                                    + quotation)));*/

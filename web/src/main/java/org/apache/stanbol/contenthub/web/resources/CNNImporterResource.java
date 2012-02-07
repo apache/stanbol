@@ -28,6 +28,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -45,14 +46,17 @@ import com.sun.jersey.api.view.Viewable;
  * @author cihan
  * 
  */
-@Path("/contenthub/import/cnn")
+@Path("/contenthub/{index}/import/cnn")
 public class CNNImporterResource extends BaseStanbolResource {
 
     private CNNImporter cnnImporter;
     private Object templateData = null;
+    private String indexName;
 
-    public CNNImporterResource(@Context ServletContext context) {
-        cnnImporter = ContextHelper.getServiceFromContext(CNNImporter.class, context);
+    public CNNImporterResource(@Context ServletContext context,
+    						   @PathParam(value = "index") String indexName) {
+    	this.indexName = indexName;
+        this.cnnImporter = ContextHelper.getServiceFromContext(CNNImporter.class, context);
     }
 
     private TopicNews importCNNNews(String topic, Integer max, Boolean full) {
@@ -66,7 +70,7 @@ public class CNNImporterResource extends BaseStanbolResource {
             full = false;
         }
 
-        Map<URI,String> newsInfo = cnnImporter.importCNNNews(topic, max, full);
+        Map<URI,String> newsInfo = cnnImporter.importCNNNews(topic, max, full, indexName);
         TopicNews tn = new TopicNews();
         tn.setTopic(topic);
         tn.setUris(new ArrayList<URI>(newsInfo.keySet()));
@@ -108,5 +112,9 @@ public class CNNImporterResource extends BaseStanbolResource {
 
     public Object getTemplateData() {
         return templateData;
+    }
+    
+    public String getIndexName() {
+    	return this.indexName;
     }
 }

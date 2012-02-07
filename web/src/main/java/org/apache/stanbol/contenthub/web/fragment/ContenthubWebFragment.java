@@ -23,25 +23,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.contenthub.servicesapi.store.Store;
 import org.apache.stanbol.contenthub.web.resources.CNNImporterResource;
 import org.apache.stanbol.contenthub.web.resources.FeaturedSearchResource;
-import org.apache.stanbol.contenthub.web.resources.LDProgramManagerResource;
+import org.apache.stanbol.contenthub.web.resources.SemanticIndexManagerResource;
 import org.apache.stanbol.contenthub.web.resources.RootResource;
 import org.apache.stanbol.contenthub.web.resources.StoreResource;
-import org.apache.stanbol.contenthub.web.writers.SearchResultWriter;
 import org.apache.stanbol.contenthub.web.writers.LDProgramCollectionWriter;
-import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
+import org.apache.stanbol.contenthub.web.writers.SearchResultWriter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -63,18 +58,6 @@ public class ContenthubWebFragment implements WebFragment {
 
     private BundleContext bundleContext;
 
-    @Reference
-    TcManager tcManager;
-
-    @Reference
-    Store store;
-
-    @Reference
-    EnhancementJobManager jobManager;
-
-    @Reference
-    Serializer serializer;
-
     @Override
     public String getName() {
         return NAME;
@@ -92,7 +75,7 @@ public class ContenthubWebFragment implements WebFragment {
         classes.add(StoreResource.class);
         classes.add(CNNImporterResource.class);
         classes.add(FeaturedSearchResource.class);
-        classes.add(LDProgramManagerResource.class);
+        classes.add(SemanticIndexManagerResource.class);
 
         classes.add(LDProgramCollectionWriter.class);
         classes.add(SearchResultWriter.class);
@@ -137,7 +120,7 @@ public class ContenthubWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("contenthub/store", "/contenthub", "/imports/contenthubDescription.ftl",
+        links.add(new NavigationLink("contenthub/contenthub/store", "/contenthub", "/imports/contenthubDescription.ftl",
                 20));
         return links;
     }

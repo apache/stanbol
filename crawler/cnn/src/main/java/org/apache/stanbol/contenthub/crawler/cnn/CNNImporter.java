@@ -20,6 +20,8 @@ package org.apache.stanbol.contenthub.crawler.cnn;
 import java.net.URI;
 import java.util.Map;
 
+import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
+
 /**
  * This is the interface to crawl CNN.
  * 
@@ -45,5 +47,27 @@ public interface CNNImporter {
      *         {@code true}, the news content is the full news; if not, it is the summary of the news.
      */
     Map<URI,String> importCNNNews(String topic, int maxNumber, boolean fullNews);
+
+    /**
+     * 
+     * @param topic
+     *            The topic which will be crawled.
+     * @param maxNumber
+     *            Max number of news to be retrieved from CNN about the {@link topic}
+     * @param fullNews
+     *            If {@code true}, the topic will be crawled in detail to retrieve all information from CNN
+     *            about the {@link topic}. If {@code false}, only summary of the news will be crawled and
+     *            imported.
+     *         
+     * @param indexName
+     *            Name of the LDPath program (name of the Solr core/index) to be used while storing this
+     *            content item. LDPath programs can be managed through {@link SemanticIndexManagerResource} or
+     *            {@link SemanticIndexManager}
+     *            
+     * @return A map which includes the URI of the related topic and the news content. If {@link fullNews} is
+     *         {@code true}, the news content is the full news; if not, it is the summary of the news.
+     */
+	Map<URI, String> importCNNNews(String topic, int maxNumber,
+			boolean fullNews, String indexName);
 
 }

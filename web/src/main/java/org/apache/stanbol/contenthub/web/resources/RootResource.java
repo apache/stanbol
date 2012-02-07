@@ -26,7 +26,7 @@ import javax.ws.rs.core.Response;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
 /**
- * Base resource which automatically redirects to "contenthub/store"
+ * Base resource which automatically redirects to "contenthub/contenthub/store"
  * 
  * @author anil.sinaci
  *
@@ -36,6 +36,6 @@ public class RootResource extends BaseStanbolResource {
 
     @GET
     public Response getView() throws URISyntaxException {
-        return Response.seeOther(new URI(uriInfo.getBaseUri() + "contenthub/store/")).build();
+        return Response.seeOther(new URI(uriInfo.getBaseUri() + "contenthub/contenthub/store/")).build();
     }
 }

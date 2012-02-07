@@ -69,9 +69,14 @@ public class CNNImporterImpl implements CNNImporter {
             logger.error("Cannot activate CNNImporter. There is no SolrStore to be binded.");
         }
     }
+    
+    @Override
+    public Map<URI,String> importCNNNews(String topic, int maxNumber, boolean fullNews){
+    	return importCNNNews(topic, maxNumber, fullNews, null);
+    }
 
     @Override
-    public Map<URI,String> importCNNNews(String topic, int maxNumber, boolean fullNews) {
+    public Map<URI,String> importCNNNews(String topic, int maxNumber, boolean fullNews, String indexName) {
         List<NewsSummary> summaries = getRelatedNews(topic, maxNumber);
         Map<URI,String> newsInfo = new HashMap<URI,String>();
         if (fullNews) {
@@ -87,7 +92,7 @@ public class CNNImporterImpl implements CNNImporter {
             try {
                 SolrContentItem sci = solrStore.create(summary.getContent().getBytes(), null,
                     summary.getTitle(), "text/plain", null);
-                URI uri = new URI(solrStore.enhanceAndPut(sci));
+                URI uri = new URI(solrStore.enhanceAndPut(sci, indexName));
                 String title = summary.getTitle();
                 if (uri != null) {
                     newsInfo.put(uri, title);

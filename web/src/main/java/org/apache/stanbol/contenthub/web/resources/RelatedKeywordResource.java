@@ -86,7 +86,7 @@ public class RelatedKeywordResource extends BaseStanbolResource {
      * 
      * @param keyword
      *            The keyword whose related keywords will be retrieved.
-     * @param ontologyURI
+     * @param graphURI
      *            URI of the ontology to be used during the step in which related keywords are searched in
      *            ontology resources. If this parameter is {@code null}, then no related keywords are returned
      *            from ontology resources.
@@ -100,7 +100,7 @@ public class RelatedKeywordResource extends BaseStanbolResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public final Response findAllRelatedKeywords(@QueryParam("keyword") String keyword,
-                                                 @QueryParam("ontologyURI") String ontologyURI,
+                                                 @QueryParam("graphURI") String graphURI,
                                                  @Context HttpHeaders headers) throws SearchException {
 
         if (!RestUtil.isJSONaccepted(headers)) {
@@ -109,14 +109,14 @@ public class RelatedKeywordResource extends BaseStanbolResource {
 
         keyword = RestUtil.nullify(keyword);
         if (keyword == null) {
-            String msg = "RelatedKeywordResource.findAllRelatedKeywords requires \"keyword\" parameter. \"ontologyURI\" is optional";
+            String msg = "RelatedKeywordResource.findAllRelatedKeywords requires \"keyword\" parameter. \"graphURI\" is optional";
             log.error(msg);
             throw new IllegalArgumentException(msg);
         }
 
-        ontologyURI = RestUtil.nullify(ontologyURI);
+        graphURI = RestUtil.nullify(graphURI);
         SearchResult searchResult = relatedKeywordSearchManager.getRelatedKeywordsFromAllSources(keyword,
-            ontologyURI);
+            graphURI);
 
         return prepareResponse(searchResult, headers);
     }
@@ -160,7 +160,7 @@ public class RelatedKeywordResource extends BaseStanbolResource {
      * 
      * @param keyword
      *            The keyword whose related keywords will be retrieved from ontology resources.
-     * @param ontologyURI
+     * @param graphURI
      *            URI of the ontology in which related keywords will be searched. The ontology should be
      *            available in the Contenthub system.
      * @param headers
@@ -174,7 +174,7 @@ public class RelatedKeywordResource extends BaseStanbolResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/ontology")
     public final Response findOntologyRelatedKeywords(@QueryParam("keyword") String keyword,
-                                                      @QueryParam("ontologyURI") String ontologyURI,
+                                                      @QueryParam("graphURI") String graphURI,
                                                       @Context HttpHeaders headers) throws SearchException {
         if (!RestUtil.isJSONaccepted(headers)) {
             return Response.status(Status.BAD_REQUEST).build();
@@ -182,20 +182,20 @@ public class RelatedKeywordResource extends BaseStanbolResource {
 
         keyword = RestUtil.nullify(keyword);
         if (keyword == null) {
-            String msg = "RelatedKeywordResource.findOntologyRelatedKeywords requires \"keyword\" and \"ontologyURI\" parameters.";
+            String msg = "RelatedKeywordResource.findOntologyRelatedKeywords requires \"keyword\" and \"graphURI\" parameters.";
             log.error(msg);
             throw new IllegalArgumentException(msg);
         }
 
-        ontologyURI = RestUtil.nullify(ontologyURI);
-        if (ontologyURI == null) {
-            String msg = "RelatedKeywordResource.findOntologyRelatedKeywords requires \"keyword\" and \"ontologyURI\" parameters.";
+        graphURI = RestUtil.nullify(graphURI);
+        if (graphURI == null) {
+            String msg = "RelatedKeywordResource.findOntologyRelatedKeywords requires \"keyword\" and \"graphURI\" parameters.";
             log.error(msg);
             throw new IllegalArgumentException(msg);
         }
 
         SearchResult searchResult = relatedKeywordSearchManager.getRelatedKeywordsFromOntology(keyword,
-            ontologyURI);
+            graphURI);
         return prepareResponse(searchResult, headers);
     }
 
@@ -224,7 +224,7 @@ public class RelatedKeywordResource extends BaseStanbolResource {
 
         keyword = RestUtil.nullify(keyword);
         if (keyword == null) {
-            String msg = "RelatedKeywordResource.findOntologyRelatedKeywords requires \"keyword\" and \"ontologyURI\" parameters.";
+            String msg = "RelatedKeywordResource.findOntologyRelatedKeywords requires a \"keyword\" parameter.";
             log.error(msg);
             throw new IllegalArgumentException(msg);
         }

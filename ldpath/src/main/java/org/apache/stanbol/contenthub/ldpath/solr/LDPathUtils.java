@@ -111,6 +111,7 @@ public class LDPathUtils {
 
         typeMap.put(NS_XSD + "decimal", "long");
         typeMap.put(NS_XSD + "integer", "int");
+        typeMap.put(NS_XSD + "int", "int");
         typeMap.put(NS_XSD + "long", "long");
         typeMap.put(NS_XSD + "short", "int");
         typeMap.put(NS_XSD + "double", "double");

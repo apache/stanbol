@@ -59,7 +59,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramManager;
+import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrStore;
@@ -100,7 +100,7 @@ public class SolrStoreImpl implements SolrStore {
     private EnhancementJobManager jobManager;
 
     @Reference
-    private LDProgramManager ldProgramManager;
+    private SemanticIndexManager ldProgramManager;
 
     private BundleContext bundleContext;
 
@@ -271,7 +271,7 @@ public class SolrStoreImpl implements SolrStore {
     @Override
     public String put(SolrContentItem sci, String ldProgramName) throws StoreException {
         if (ldProgramName == null || ldProgramName.isEmpty()
-            || ldProgramName.equals(SolrCoreManager.CONTENTHUB_SOLR_SERVER_NAME)) {
+            || ldProgramName.equals(SolrCoreManager.CONTENTHUB_DEFAULT_INDEX_NAME)) {
             return put(sci);
         }
         SolrInputDocument doc = new SolrInputDocument();
@@ -402,13 +402,13 @@ public class SolrStoreImpl implements SolrStore {
             values.add(value);
         }
         if (!values.isEmpty()) {
-            doc.setField(fieldName.toString(), values.toArray());
+            doc.addField(fieldName.toString(), values.toArray());
         }
     }
 
     @Override
     public ContentItem get(String id) throws StoreException {
-        return get(id, SolrCoreManager.CONTENTHUB_SOLR_SERVER_NAME);
+        return get(id, SolrCoreManager.CONTENTHUB_DEFAULT_INDEX_NAME);
     }
 
     // TODO: we can use cache for "Recently uploaded Content Items"..
@@ -507,7 +507,7 @@ public class SolrStoreImpl implements SolrStore {
 
     @Override
     public void deleteById(String id) throws StoreException {
-        deleteById(id, SolrCoreManager.CONTENTHUB_SOLR_SERVER_NAME);
+        deleteById(id, SolrCoreManager.CONTENTHUB_DEFAULT_INDEX_NAME);
     }
 
     @Override
@@ -533,7 +533,7 @@ public class SolrStoreImpl implements SolrStore {
 
     @Override
     public void deleteById(List<String> idList) throws StoreException {
-        deleteById(idList, SolrCoreManager.CONTENTHUB_SOLR_SERVER_NAME);
+        deleteById(idList, SolrCoreManager.CONTENTHUB_DEFAULT_INDEX_NAME);
     }
 
 }

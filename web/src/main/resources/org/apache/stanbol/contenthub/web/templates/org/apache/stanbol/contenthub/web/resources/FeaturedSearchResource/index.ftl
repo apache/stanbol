@@ -21,6 +21,10 @@
 	<#-- this feildset was normally in a form, ajax is used to do the post, dont need to use fom -->
 		<fieldset>
 			<legend>Keyword Based Search</legend>
+			
+			<p>
+				Select an index: <div id="indexDiv"><#--this div will be populated by ajax--></div>
+			</p>
 			<p>
 				Keywords: <input id="keywordIn" class="autoCompleteText" onkeyup="javascript:completePattern();" name="topic" type="text" onkeydown="if (event.keyCode == 13) document.getElementById('submitIn').click()"/><br/>
 			</p>
@@ -68,6 +72,16 @@
 				$("#keywordIn").val(keywords);
 				getResults(null,null,null,'first');
 			}
+			
+	        $.get("${it.publicBaseUri}contenthub/ldpath", function(indexes) {
+	            innerStr = "<select id='indexSelect' onChange='javascript:redirectIndex();'>" + "<option value='contenthub'>contenthub</option>"
+	            for(var index in indexes) {
+	                innerStr += "<option value=" + index + ">" + index + "</option>";
+	            }
+	            innerStr += "</select>";
+	            $("#indexDiv").html(innerStr);
+	            $("#indexSelect").val("${it.indexName}");
+	        });
 		}
 		
 		$(document).ready(init);
@@ -79,9 +93,14 @@
 			$('#facets').show("slow");
 		}
 		
+		function redirectIndex(){
+			var index = $("#indexSelect").val();
+			window.location.replace("${it.publicBaseUri}contenthub/" + index + "/search/featured");
+		}
+    
 		function completePattern(){
 			var pattern = $("#keywordIn").val();
-			$.get("${it.publicBaseUri}contenthub/search/related/autocomplete?pattern="+pattern, function(data) {
+			$.get("${it.publicBaseUri}contenthub/${it.indexName}/search/related/autocomplete?pattern="+pattern, function(data) {
 				var jsonSource = JSON.parse(data);
 				$(".autoCompleteText").autocomplete({
 					source: jsonSource['completedKeywords']
@@ -198,12 +217,12 @@
 				JSONObject[facetName].push(facetValue);
 			}
 			
-	    //make text area invisible
+			//make text area invisible
 			$("#searchResult").fadeOut(100);
 			$("#resultContainer").fadeOut(100);
 			//show busy icon
 			$("#busyIcon").removeClass("invisible");
-		    
+
 			var graph_selected = "";
 			var graphInCombo = document.getElementById('graphIn');
 			if (graphInCombo != null) {
@@ -212,11 +231,12 @@
 					graph_selected = $("#graphIn option:selected").val();
 				}
 			}
+			
       $.ajax({
-        url : "${it.publicBaseUri}contenthub/search/featured",
+        url : "${it.publicBaseUri}contenthub/${it.indexName}/search/featured",
         type : "POST",
         async: true,
-        data: {queryTerm: $("#keywordIn").val(), graph: graph_selected, constraints: JSON.stringify(JSONObject), ldProgram: null, offset: voffset, limit:vpageSize},
+        data: {queryTerm: $("#keywordIn").val(), graph: graph_selected, constraints: JSON.stringify(JSONObject), offset: voffset, limit:vpageSize},
         dataType: "html",
         cache: false,
         success: function(result) {
@@ -255,7 +275,7 @@
 								var escapedFacetName = encodeURI(p.toString());
 								var escapedFacetValue = encodeURI(JSONObject[p][value]);
 								var startindex = (isReserved(p)) ? p.toString().indexOf("_")+1 : 0;
-								var lastindex = (isReserved(p)) ? p.length : p.toString().lastIndexOf("_");
+								var lastindex = (isReserved(p) || p.toString().lastIndexOf("_") < 0) ? p.length : p.toString().lastIndexOf("_");
 								var href = "<a href=javascript:getResults("; 
 								href += 	encodeURI(chosenCons) + ",\"";
 								href +=		escapedFacetName + "\",\"" + escapedFacetValue + "\",\"deleteFacet\") title='Remove'>";
