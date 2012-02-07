@@ -28,7 +28,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.ontologies.OWL;
-import org.apache.stanbol.owl.util.OWLUtils;
+import org.apache.stanbol.commons.owl.util.OWLUtils;
 
 /**
  * Default implementation of an {@link OntologyInputSource} that returns {@link Graph} objects as ontologies.

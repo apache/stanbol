@@ -63,7 +63,7 @@
 			org.apache.stanbol.commons.web.base.*,
 			org.apache.stanbol.commons.jobs.api.*,
 			org.apache.stanbol.commons.jobs.impl.*,
-			org.apache.stanbol.owl.*,
+			org.apache.stanbol.commons.owl.*,
 			org.apache.stanbol.rules.base.api.*,
 			org.apache.stanbol.ontologymanager.ontonet.api.*,
    			org.apache.stanbol.reasoners.servicesapi.*,

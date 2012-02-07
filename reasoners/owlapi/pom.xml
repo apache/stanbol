@@ -11,9 +11,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.apache.stanbol.reasoners.owlapi</artifactId>
 	<packaging>bundle</packaging>
-	<name>Apache Stanbol Reasoners: OWLApi</name>
+	<name>Apache Stanbol Reasoners: OWL API</name>
 
-	<description>API to use an OWLApi based reasoner</description>
+	<description>API to use an OWL API based reasoner</description>
 	<build>
 		<!-- make it an OSGi bundle -->
 		<plugins>

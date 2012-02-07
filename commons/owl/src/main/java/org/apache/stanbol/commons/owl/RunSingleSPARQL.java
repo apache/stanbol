@@ -19,7 +19,7 @@
  * and open the template in the editor.
  */
 
-package org.apache.stanbol.owl;
+package org.apache.stanbol.commons.owl;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,7 +32,7 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.ResultSet;
 
-import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
+import org.apache.stanbol.commons.owl.transformation.JenaToOwlConvert;
 
 /**
  *

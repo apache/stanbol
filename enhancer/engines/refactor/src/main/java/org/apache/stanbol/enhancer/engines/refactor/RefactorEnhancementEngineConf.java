@@ -27,6 +27,10 @@ import org.apache.felix.scr.annotations.Property;
  */
 
 public interface RefactorEnhancementEngineConf {
+    /**
+     * The component name used for the Configuration Service
+     */
+    String NAME = "org.apache.stanbol.enhancer.engines.refactor.RefactorEnhancementEngine";
 
     /**
      * The OntoNet scope that the engine should use.

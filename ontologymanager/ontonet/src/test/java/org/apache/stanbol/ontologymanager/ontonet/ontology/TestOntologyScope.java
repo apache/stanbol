@@ -19,6 +19,7 @@ package org.apache.stanbol.ontologymanager.ontonet.ontology;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
 import static org.junit.Assert.*;
 
+import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
@@ -30,7 +31,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.CoreOntologySpaceImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.CustomOntologySpaceImpl;
-import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

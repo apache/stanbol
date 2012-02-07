@@ -18,7 +18,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
 import java.io.InputStream;
 
-import org.apache.stanbol.owl.util.OWLUtils;
+import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;

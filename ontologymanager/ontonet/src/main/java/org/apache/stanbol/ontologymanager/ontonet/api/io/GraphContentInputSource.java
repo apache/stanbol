@@ -27,8 +27,8 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
+import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
-import org.apache.stanbol.owl.util.OWLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

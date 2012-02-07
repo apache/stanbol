@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.owl.util;
+package org.apache.stanbol.commons.owl.util;
 
 import java.util.Iterator;
 

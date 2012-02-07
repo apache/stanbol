@@ -24,10 +24,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.apache.stanbol.commons.owl.PhonyIRIMapper;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.owl.PhonyIRIMapper;
 import org.junit.After;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;

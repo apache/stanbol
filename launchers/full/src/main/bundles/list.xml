@@ -62,7 +62,8 @@
           (Enhancer, Entityhub, Contenthub, Factstore ... incl. Web Fragments)
        ********************************************************************* -->
 
-  <!-- KReS -->
+  <!-- Stanbol OWL now part of commons -->
+  <!--
   <startLevel level="22">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
@@ -70,6 +71,7 @@
 			<version>0.9.0-incubating-SNAPSHOT</version>
 	  </bundle>
   </startLevel>
+  -->
   
   <!-- *********************************************************************
           start level 25 TO 29 reserved for Stanbol plug-ins

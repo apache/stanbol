@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.owl.web;
+package org.apache.stanbol.commons.owl.web;
 
 import javax.ws.rs.core.MediaType;
 

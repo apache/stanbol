@@ -19,7 +19,7 @@
  * and open the template in the editor.
  */
 
-package org.apache.stanbol.owl.transformation;
+package org.apache.stanbol.commons.owl.transformation;
 
 /**
  *
@@ -32,7 +32,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
+import org.apache.stanbol.commons.owl.transformation.JenaToOwlConvert;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;

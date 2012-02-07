@@ -19,7 +19,7 @@
  * and open the template in the editor.
  */
 
-package org.apache.stanbol.owl.transformation;
+package org.apache.stanbol.commons.owl.transformation;
 
 
 import com.hp.hpl.jena.ontology.AnnotationProperty;

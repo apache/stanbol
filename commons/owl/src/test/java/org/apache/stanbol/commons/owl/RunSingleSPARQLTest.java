@@ -19,13 +19,14 @@
  * and open the template in the editor.
  */
 
-package org.apache.stanbol.owl;
+package org.apache.stanbol.commons.owl;
 
 import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.HashMap;
 
+import org.apache.stanbol.commons.owl.RunSingleSPARQL;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

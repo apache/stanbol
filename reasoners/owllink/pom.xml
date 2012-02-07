@@ -28,7 +28,7 @@
 
   <artifactId>org.apache.stanbol.reasoners.owllink</artifactId>
   <packaging>bundle</packaging>
-  <name>Apache Stanbol Reasoners: OwlLink Dependency</name>
+  <name>Apache Stanbol Reasoners: OWLlink Dependency</name>
 
   <repositories>
     <repository>

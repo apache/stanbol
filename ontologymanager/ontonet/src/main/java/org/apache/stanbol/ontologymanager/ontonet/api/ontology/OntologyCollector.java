@@ -118,6 +118,14 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      */
     OWLOntology getOntology(IRI ontologyIri);
 
+    /**
+     * TODO replace merge parameter with integer for merge level (-1 for infinite).
+     * 
+     * @param ontologyIri
+     * @param returnType
+     * @param merge
+     * @return
+     */
     <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge);
 
     <O> O getOntology(IRI ontologyIri, Class<O> returnType);
