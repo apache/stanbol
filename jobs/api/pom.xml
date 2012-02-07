@@ -95,10 +95,6 @@
 		</dependency>
 
 		<!-- Stanbol dependencies -->
-		<!-- dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owl</artifactId>
-		</dependency -->
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
