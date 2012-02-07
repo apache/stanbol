@@ -57,21 +57,6 @@
   </startLevel>
 
   <!-- *********************************************************************
-          start level 20 TO 24 reserved for Stanbol Framework
-          (Enhancer, Entityhub, Contenthub, Factstore ... incl. Web Fragments)
-       ********************************************************************* -->
-
-  <!-- OWL utils -->
-  <!-- FIXME This should be moved to stanbol.commons -->
-  <startLevel level="22">
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owl</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-	  </bundle>
-  </startLevel>
-
-  <!-- *********************************************************************
           start level 25 TO 29 reserved for Stanbol plug-ins
           (currently the Enhancement Engines)
        ********************************************************************* -->

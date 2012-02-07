@@ -71,7 +71,7 @@
   <startLevel level="22">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owl</artifactId>
+			<artifactId>org.apache.stanbol.commons.owl</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 	  </bundle>
   </startLevel>

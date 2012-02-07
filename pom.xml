@@ -77,7 +77,6 @@
     <module>ontologymanager/registry</module>
     <module>ontologymanager/web</module>
     <module>ontologymanager/bundlelist</module>
-    <module>owl</module>
     <module>rules</module>
   </modules>
 
@@ -158,7 +157,7 @@
                 <!-- approved licenses, see modules' POMs for details -->
                 <exclude>contenthub/web/src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jit.js</exclude>
                 <exclude>enhancer/jersey/src/main/resources/org/apache/stanbol/enhancer/jersey/static/openlayers-2.9/**</exclude>
-                <exclude>owl/**</exclude>
+                <exclude>commons/owl/**</exclude>
 
                 <!-- unstable and not release relevant stuff -->
                 <exclude>PLAYGROUND.txt</exclude>
@@ -166,7 +165,6 @@
                 <exclude>enhancer/data/text-examples/**</exclude>
                 <exclude>enhancer/query-rendering/**</exclude>
                 <exclude>enhancer/stores/**</exclude>
-                <exclude>explanation/**</exclude>
                 <exclude>demos/**</exclude>
                 <exclude>launchers/kres/**</exclude>
                 <exclude>reasoners/**</exclude>
