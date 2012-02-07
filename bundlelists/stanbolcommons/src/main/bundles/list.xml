@@ -325,6 +325,12 @@
       <artifactId>org.apache.stanbol.commons.solr.web</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
+    <!-- OWL libraries and utilities -->
+    <bundle>
+	  <groupId>org.apache.stanbol</groupId>
+	  <artifactId>org.apache.stanbol.commons.owl</artifactId>
+	  <version>0.9.0-incubating-SNAPSHOT</version>
+	</bundle>
     <!-- support for JSON-LD -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
