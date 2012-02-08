@@ -59,7 +59,7 @@
             <Export-Package>
               org.apache.stanbol.enhancer.jersey.*
             </Export-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
+            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl|httpmime
             </Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
@@ -164,7 +164,20 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
-
+    <!-- dependencies to read/write ContentItems as multipart mime -->    
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore-osgi</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpmime</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+        <!--  <version>1.2.2</version>  -->
+      </dependency>
     <!-- OSGi tax -->
     <dependency>
       <groupId>org.osgi</groupId>

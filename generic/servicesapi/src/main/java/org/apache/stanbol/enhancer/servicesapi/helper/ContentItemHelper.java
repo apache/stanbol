@@ -27,6 +27,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -230,7 +233,9 @@ public class ContentItemHelper {
      * set only contains lower case values!
      * <li> A read lock on the parsed {@link ContentItem} is applied while
      * searching for a fitting {@link Blob}
-     * </ul>
+     * </ul><p>
+     * In contrast to the contentPart related methods of the {@link ContentItem}
+     * this method does NOT throw {@link NoSuchPartException}.
      * @param ci the contentITem
      * @param mimeTypes List of possible mimeTypes
      * @return the {@link UriRef URI} and the {@link Blob content} of the content 
@@ -253,21 +258,66 @@ public class ContentItemHelper {
             do {
                 try {
                     cpUri = ci.getPartUri(index);
-                    if(cpUri != null){
+                    index++;
+                    try {
                         Blob blob = ci.getPart(cpUri, Blob.class);
-                        if(blob != null && mimeTypes.contains(
-                            blob.getMimeType().toLowerCase())){
+                        if(mimeTypes.contains(blob.getMimeType().toLowerCase())){
                             return Collections.singletonMap(cpUri, blob)
                                     .entrySet().iterator().next();
                         } // else no match
-                    } // else no more parts
-                } catch (NoSuchPartException e) {/* ignore*/}
+                    } catch (ClassCastException e) {
+                        // not a Blob -> ignore!
+                    }
+                } catch (NoSuchPartException e) {
+                    cpUri = null; // no more parts
+                }
             } while(cpUri != null);
         } finally {
             ci.getLock().readLock().unlock();
         }
         return null; // not found
     }
+    /**
+     * Returns a Map with the current content parts of the parsed type. future 
+     * changes to the contentParts of the content item will NOT be reflected
+     * within the returned map. The ordering of the {@link Iterator}s over the 
+     * returned map is consistent with the ordering of the contentPart within the
+     * {@link ContentItem}. <p> When parsing {@link Object} as class the number
+     * of the element will be equals to the index of that content part.<p>
+     * In contrast to the contentPart related methods of the {@link ContentItem}
+     * this method does NOT throw {@link NoSuchPartException}.
+     * @param ci the content item
+     * @param clazz the class of the content part
+     * @return the Map with the {@link UriRef id}s and the content as entries.
+     */
+    public static <T> LinkedHashMap<UriRef,T> getContentParts(ContentItem ci, Class<T> clazz){
+        if(ci == null){
+            throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
+        }
+        LinkedHashMap<UriRef,T> blobs = new LinkedHashMap<UriRef,T>();
+        UriRef cpUri = null;
+        int index = 0;
+        ci.getLock().readLock().lock();
+        try {
+            do {
+                try {
+                    cpUri = ci.getPartUri(index);
+                    index++;
+                    try {
+                        blobs.put(cpUri, ci.getPart(cpUri, clazz));
+                    } catch (ClassCastException e) {
+                        //not of type T -> skip
+                    }
+                } catch (NoSuchPartException e) {
+                    cpUri = null; // no more parts
+                }
+            } while(cpUri != null);
+        } finally {
+            ci.getLock().readLock().unlock();
+        }        
+        return blobs;
+    }
+
     /**
      * Getter for the Text of an {@link Blob}. This method respects the
      * "charset" if present in the {@link Blob#getParameter() parameter} of the
@@ -285,4 +335,20 @@ public class ContentItemHelper {
         String charset = blob.getParameter().get("charset");
         return IOUtils.toString(blob.getStream(), charset != null ? charset : UTF8);
     }
+    /**
+     * Creates the "{type}/{subtime}; [{param}={value}]+" mime type representation
+     * for the {@link Blob#getMimeType()} and {@link Blob#getParameter()} values
+     * @param blob the Blob
+     * @return the mime type with parameters (e.g. <code>
+     * text/plain;charset=UTF-8</code>)
+     */
+    public static String getMimeTypeWithParameters(Blob blob) {
+        StringBuilder mimeType = new StringBuilder(blob.getMimeType());
+        //ensure parameters are preserved
+        for(Entry<String,String> param : blob.getParameter().entrySet()){
+           mimeType.append("; ").append(param.getKey()).append('=').append(param.getValue()); 
+        }
+        return mimeType.toString();
+    }
+
 }
