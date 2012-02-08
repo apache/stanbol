@@ -1004,7 +1004,16 @@
         <artifactId>commons-httpclient</artifactId>
         <version>3.1</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore-osgi</artifactId>
+        <version>4.1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpmime</artifactId>
+        <version>4.1.2</version>
+      </dependency>
 
       <!-- Joda Time -->
       <dependency>
@@ -1091,13 +1100,6 @@
         <version>${jersey-version}</version>
       </dependency>
 
-<!--  jersey-multipart now uses a different library allowing streaming of
-      binary data (see http://mimepull.java.net/)
-     <dependency>
-          <groupId>javax.mail</groupId>
-          <artifactId>mail</artifactId>
-          <version>1.4</version>
-                </dependency>  -->
 
       <!-- JAX-RS JSR311 -->
       <!-- NOTE that JAX-RS is included and exported by jersey-core
