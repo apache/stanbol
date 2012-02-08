@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.refactor;
 
-import java.io.BufferedReader;
+    import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,19 +36,20 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.enhancer.engines.refactor.dereferencer.Dereferencer;
 import org.apache.stanbol.enhancer.engines.refactor.dereferencer.IDereferencer;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
@@ -66,6 +67,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntol
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
+import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.Rule;
@@ -73,6 +75,7 @@ import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
 import org.apache.stanbol.rules.refactor.api.RefactoringException;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
@@ -100,25 +103,49 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-@Component(name = "org.apache.stanbol.enhancer.engines.refactor.RefactorEnhancementEngine.description", configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, specVersion = "1.1", metatype = true, immediate = true)
-@Service(EnhancementEngine.class)
-@Properties(value = {
-                     @Property(name = RefactorEnhancementEngineConf.SCOPE, value = "seo", description = "engine.refactor.scope.description"),
-                     @Property(name = RefactorEnhancementEngineConf.RECIPE_LOCATION, value = "", description = "engine.refactor.recipe.description"),
-                     @Property(name = RefactorEnhancementEngineConf.RECIPE_ID, value = "google_rich_snippet_rules", description = "engine.refactor.recipe.description"),
-                     @Property(name = RefactorEnhancementEngineConf.SCOPE_CORE_ONTOLOGY, cardinality = 1000, description = "engine.refactor.scope.core.ontology.description", value = {
-                                                                                                                                                                                       "http://ontologydesignpatterns.org/ont/iks/kres/dbpedia_demo.owl",
-                                                                                                                                                                                       ""}),
-                     @Property(name = RefactorEnhancementEngineConf.APPEND_OTHER_ENHANCEMENT_GRAPHS, boolValue = true, description = "engine.refactor.append.graphs.description"),
-                     @Property(name = RefactorEnhancementEngineConf.USE_ENTITY_HUB, boolValue = true, description = "engine.refactor.entityhub.description")
-
+@Component(
+        configurationFactory=true,
+        policy=ConfigurationPolicy.REQUIRE,
+        specVersion="1.1",
+        metatype = true,
+        immediate = true,
+        inherit = true
+        )
+@Service
+@Properties(value={
+		@Property(name=EnhancementEngine.PROPERTY_NAME, value="seo_refactoring")
+        
 })
-public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProperties {
+public class RefactorEnhancementEngine extends AbstractEnhancementEngine<RuntimeException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 
     /*
      * TODO This are the scope and recipe IDs to be used by this implementation In future implementation this
      * will be configurable
      */
+	@Property(value="seo")
+	public static final String SCOPE = "engine.refactor.scope";
+ 
+	@Property(value="")
+	public static final String RECIPE_LOCATION = "engine.refactor.recipe.location";
+ 
+	@Property(value="google_rich_snippet_rules")
+	public static final String RECIPE_ID = "engine.refactor.recipe.id";
+	
+	@Property(	cardinality = 1000, 
+            	value={
+                   "http://ontologydesignpatterns.org/ont/iks/kres/dbpedia_demo.owl", 
+                   ""
+            	}
+			)
+	public static final String SCOPE_CORE_ONTOLOGY = "engine.refactor.scope.core.ontology";
+ 
+	@Property(boolValue=true)
+	public static final String APPEND_OTHER_ENHANCEMENT_GRAPHS = "engine.refactor.append.graphs";
+
+	@Property(boolValue=true)
+	public static final String USE_ENTITY_HUB  = "engine.refactor.entityhub";
+	
+	
 
     @Reference
     ONManager onManager;
@@ -136,21 +163,22 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
     Refactorer refactorer;
 
     private RefactorEnhancementEngineConf engineConfiguration;
-
+    
     private ComponentInstance refactorEngineComponentInstance;
-
+    
     private OntologyScope scope;
-
+    
     private final Logger log = LoggerFactory.getLogger(getClass());
-
+    
     private final Object lock = new Object();
 
     private ComponentContext context;
-
+    
+    
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
         /*
-         * Dulcifier can enhance only content items that are previously enhanced by other enhancement engines,
+         * The Refactor can enhance only content items that are previously enhanced by other enhancement engines,
          * as it must be the last engine in the chain.
          * 
          * Works only if some enhancement has been produced.
@@ -179,8 +207,8 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
         /*
          * Now we prepare the OntoNet environment. First we create the OntoNet session in which run the whole
          */
-        // String sessionID = null;
-
+        //String sessionID = null;
+        
         Session tmpSession = null;
         try {
             tmpSession = sessionManager.createSession();
@@ -188,18 +216,21 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
+        
+        
 
-        if (tmpSession != null) {
-
+        if(tmpSession != null){
+            
             final Session session = tmpSession;
-
-            // final String sessionIdentifier = sessionID;
-
+        
+            //final String sessionIdentifier = sessionID;
+            
             /*
              * We retrieve the session space
              */
-            // OntologySpace sessionSpace = scope.getSessionSpace(sessionIdentifier);
-
+            //OntologySpace sessionSpace = scope.getSessionSpace(sessionIdentifier);
+    
+            
             log.debug("The session space is " + session);
             while (tripleIt.hasNext()) {
                 Triple triple = tripleIt.next();
@@ -207,23 +238,22 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
                 /*
                  * the entity uri
                  */
-                final String entityReferenceString = entityReference.toString().replace("<", "")
-                        .replace(">", "");
+                final String entityReferenceString = entityReference.toString().replace("<", "").replace(">", "");
                 log.debug("Trying to resolve entity " + entityReferenceString);
                 /**
                  * We fetch the entity in the OntologyInputSource object
                  */
                 try {
-
+    
                     final IRI fetchedIri = IRI.create(entityReferenceString);
-
+    
                     /*
-                     * The RDF graph of an entity is fetched via the EntityHub. The getEntityOntology is a
-                     * method the do the job of asking the entity to the EntityHub and wrap the RDF graph into
-                     * an OWLOntology.
+                     * The RDF graph of an entity is fetched via the EntityHub. The getEntityOntology is a method
+                     * the do the job of asking the entity to the EntityHub and wrap the RDF graph into an
+                     * OWLOntology.
                      */
                     OWLOntology fetched = null;
-
+    
                     if (engineConfiguration.isEntityHubUsed()) {
                         fetched = getEntityOntology(entityReferenceString);
                     } else {
@@ -235,35 +265,34 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
                             log.error("An error occurred while trying to create the ontology related to the entity "
                                       + entityReferenceString);
                         } catch (FileNotFoundException e) {
-                            log.error("The entity " + entityReferenceString
-                                      + " does not exist or is unreachable");
+                            log.error("The entity " + entityReferenceString + " does not exist or is unreachable");
                         }
                     }
-
+    
                     if (fetched != null) {
                         final OWLOntology fetchedFinal = fetched;
                         OntologyInputSource ontologySource = new OntologyInputSource() {
-
+    
                             @Override
                             public boolean hasRootOntology() {
                                 return (fetchedFinal != null);
                             }
-
+    
                             @Override
                             public boolean hasPhysicalIRI() {
                                 return true;
                             }
-
+    
                             @Override
                             public OWLOntology getRootOntology() {
                                 return fetchedFinal;
                             }
-
+    
                             @Override
                             public IRI getPhysicalIRI() {
                                 return fetchedIri;
                             }
-
+    
                             @Override
                             public Set<OWLOntology> getImports(boolean direct) {
                                 // TODO Auto-generated method stub
@@ -281,41 +310,41 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
                                 // TODO Auto-generated method stub
                                 return null;
                             }
-
+    
                         };
                         session.addOntology(ontologySource);
                     }
-
+    
                     log.debug("Added " + entityReferenceString + " to the session space of scope "
                               + engineConfiguration.getScope(), this);
-
+    
                 } catch (UnmodifiableOntologyCollectorException e) {
                     log.error("Cannot load the entity", e);
                 }
-
+    
             }
-
+    
             /*
              * Now we merge the RDF from the T-box - the ontologies - and the A-box - the RDF data fetched
              */
-
+    
             final OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-
+    
             OWLOntologySetProvider provider = new OWLOntologySetProvider() {
-
+    
                 @Override
                 public Set<OWLOntology> getOntologies() {
-
+    
                     Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
                     ontologies.addAll(session.getOntologies(true));
-
+    
                     /*
                      * We add to the set the graph containing the metadata generated by previous enhancement
                      * engines. It is important becaus we want to menage during the refactoring also some
-                     * information fron that graph. As the graph is provided as a Clerezza MGraph, we first
-                     * need to convert it to an OWLAPI OWLOntology. There is no chance that the mGraph could
-                     * be null as it was previously controlled by the JobManager through the canEnhance method
-                     * and the computeEnhancement is always called iff the former returns true.
+                     * information fron that graph. As the graph is provided as a Clerezza MGraph, we first need
+                     * to convert it to an OWLAPI OWLOntology. There is no chance that the mGraph could be null as
+                     * it was previously controlled by the JobManager through the canEnhance method and the
+                     * computeEnhancement is always called iff the former returns true.
                      */
                     OWLOntology fiseMetadataOntology = OWLAPIToClerezzaConverter
                             .clerezzaGraphToOWLOntology(mGraph);
@@ -323,52 +352,49 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
                     return ontologies;
                 }
             };
-
+    
             /*
-             * We merge all the ontologies from the session space of the scope into a single ontology that
-             * will be used for the refactoring.
+             * We merge all the ontologies from the session space of the scope into a single ontology that will be
+             * used for the refactoring.
              */
             OWLOntologyMerger merger = new OWLOntologyMerger(provider);
-
+    
             OWLOntology ontology;
             try {
                 ontology = merger.createMergedOntology(man,
                     IRI.create("http://fise.iks-project.eu/dulcifier/integrity-check"));
-
+    
                 /*
-                 * To perform the refactoring of the ontology to a given vocabulary we use the Stanbol
-                 * Refactor.
+                 * To perform the refactoring of the ontology to a given vocabulary we use the Stanbol Refactor.
                  */
-
+    
                 log.debug("Refactoring recipe IRI is : " + engineConfiguration.getRecipeId());
-
+    
                 /*
                  * We pass the ontology and the recipe IRI to the Refactor that returns the refactored graph
                  * expressed by using the given vocabulary.
                  */
                 try {
-
+    
                     Recipe recipe = ruleStore.getRecipe(IRI.create(engineConfiguration.getRecipeId()));
-
+    
                     log.debug("Rules in the recipe are : " + recipe.getkReSRuleList().size(), this);
-
+    
                     log.debug("The ontology to be refactor is : " + ontology, this);
-
-                    ontology = refactorer.ontologyRefactoring(ontology,
-                        IRI.create(engineConfiguration.getRecipeId()));
-
+    
+                    ontology = refactorer.ontologyRefactoring(ontology, IRI.create(engineConfiguration.getRecipeId()));
+    
                 } catch (RefactoringException e) {
                     log.error("The refactoring engine failed the execution.", e);
                 } catch (NoSuchRecipeException e) {
-                    log.error("The recipe with ID " + engineConfiguration.getRecipeId() + " does not exists",
-                        e);
+                    log.error("The recipe with ID " + engineConfiguration.getRecipeId() + " does not exists", e);
                 }
-
+    
                 log.debug("Merged ontologies in " + ontology);
-
+    
                 /*
-                 * The new generated ontology is converted to Clarezza format and than added os substitued to
-                 * the old mGraph.
+                 * The new generated ontology is converted to Clarezza format and than added os substitued to the
+                 * old mGraph.
                  */
                 if (engineConfiguration.isInGraphAppendMode()) {
                     mGraph.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples(ontology));
@@ -378,12 +404,13 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
                     mGraph.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples(ontology));
                     log.debug("Metadata of the content is appended to the existent one", this);
                 }
-
+    
                 /*
                  * The session needs to be destroyed, as it is no more useful.
                  */
                 sessionManager.destroySession(session.getID());
-
+                
+                
             } catch (OWLOntologyCreationException e) {
                 log.error("Cannot create the ontology for the refactoring", e);
             }
@@ -497,28 +524,33 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
      * 
      * @param context
      */
-    protected void activate(final ComponentContext context) {
-
+    @SuppressWarnings("unchecked")
+    @Activate
+    protected void activate(final ComponentContext context) throws ConfigurationException {
+    	super.activate(context);
+		
         this.context = context;
-
+        
         Map<String,Object> config = new HashMap<String,Object>();
-        Dictionary<String,Object> properties = (Dictionary<String,Object>) context.getProperties();
-        // copy the properties to a map
-        for (Enumeration<String> e = properties.keys(); e.hasMoreElements();) {
+        Dictionary<String,Object> properties = (Dictionary<String,Object>)context.getProperties();
+        //copy the properties to a map
+        
+        for(Enumeration<String> e = properties.keys();e.hasMoreElements();){
             String key = e.nextElement();
             config.put(key, properties.get(key));
+            log.info("Configuration property: " + key + " :- " + properties.get(key));
         }
-
-        engineConfiguration = new DefaultRefactorEnhancementEngineConf(config);
-
+        
+        engineConfiguration = new DefaultRefactorEnhancementEngineConf(properties);
+        
         initEngine(engineConfiguration);
-
+        
         log.info("Activated Refactor Enhancement Engine");
 
     }
-
-    private void initEngine(RefactorEnhancementEngineConf engineConfiguration) {
-
+    
+    private void initEngine(RefactorEnhancementEngineConf engineConfiguration){
+        
         /*
          * Get the Scope Factory from the ONM of KReS that allows to create new scopes
          */
@@ -532,9 +564,15 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
         // Step 1
         String[] coreScopeOntologySet = engineConfiguration.getScopeCoreOntology();
         /*
-         * String[] coreScopeOntologySet; if (obj instanceof String[]) { coreScopeOntologySet = (String[])
-         * obj; } else { String[] aux = new String[1]; aux[0] = (String) obj; coreScopeOntologySet = aux; }
-         */
+        String[] coreScopeOntologySet;
+        if (obj instanceof String[]) {
+            coreScopeOntologySet = (String[]) obj;
+        } else {
+            String[] aux = new String[1];
+            aux[0] = (String) obj;
+            coreScopeOntologySet = aux;
+        }
+        */
         // Step 2
         OntologyInputSource oisbase = new OntologyInputSource() {
 
@@ -662,7 +700,8 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
                     .getResourceAsStream("/META-INF/default/seo_rules.sem");
             log.debug("Loaded default recipe.", this);
         }
-
+        
+        
         if (recipeStream != null) {
 
             recipeString = "";
@@ -679,8 +718,8 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
                 e.printStackTrace();
             }
         }
-
-        log.debug("Recipe: " + recipeString, this);
+        
+        log.debug("Recipe: "+recipeString, this);
 
         /*
          * step 3
@@ -693,15 +732,15 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
             log.error("The recipe does not exists: ", e);
         }
     }
-
+    
+    
     @SuppressWarnings("unchecked")
-    protected void createRefactorEngineComponent(ComponentFactory factory) {
-        // both create*** methods sync on the searcherAndDereferencerLock to avoid
-        // multiple component instances because of concurrent calls
-        synchronized (this.lock) {
-            if (refactorEngineComponentInstance == null) {
-                this.refactorEngineComponentInstance = factory.newInstance(OsgiUtils.copyConfig(context
-                        .getProperties()));
+    protected void createRefactorEngineComponent(ComponentFactory factory){
+        //both create*** methods sync on the searcherAndDereferencerLock to avoid
+        //multiple component instances because of concurrent calls
+        synchronized (this.lock ) {
+            if(refactorEngineComponentInstance == null){
+                this.refactorEngineComponentInstance = factory.newInstance(OsgiUtils.copyConfig(context.getProperties()));
             }
         }
     }
@@ -712,14 +751,15 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
          * Deactivating the dulcifier. The procedure require: 1) get all the rules from the recipe 2) remove
          * the recipe. 3) remove the single rule. 4) tear down the scope ontologySpace and the scope itself.
          */
+        
+        
 
         try {
             /*
              * step 1: get all the rule
              */
             log.debug("Removing recipe " + engineConfiguration.getRecipeId() + " from RuleStore.", this);
-            RuleList recipeRuleList = ruleStore.getRecipe(IRI.create(engineConfiguration.getRecipeId()))
-                    .getkReSRuleList();
+            RuleList recipeRuleList = ruleStore.getRecipe(IRI.create(engineConfiguration.getRecipeId())).getkReSRuleList();
 
             /*
              * step 2: remove the recipe
@@ -806,11 +846,6 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
         return fetchedOntology;
 
     }
-
-    @Override
-    public String getName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    
 
 }

@@ -17,6 +17,7 @@
 
 package org.apache.stanbol.enhancer.engines.refactor;
 
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,15 +32,15 @@ import java.util.Map;
  */
 public class DefaultRefactorEnhancementEngineConf implements RefactorEnhancementEngineConf {
 
-	private Map<String, Object> conf;
+	private Dictionary<String, Object> conf;
 	
+	/*
 	public DefaultRefactorEnhancementEngineConf() {
-		this.conf = new HashMap<String, Object>();
+		
 	}
-	
-	public DefaultRefactorEnhancementEngineConf(Map<String, Object> map) {
-		this();
-		this.conf.putAll(map);
+	*/
+	public DefaultRefactorEnhancementEngineConf(Dictionary<String, Object> map) {
+		this.conf = map;
 	}
 	
 	@Override
