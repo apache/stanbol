@@ -18,9 +18,11 @@ package org.apache.stanbol.contenthub.servicesapi.ldpath;
 
 import java.io.Reader;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
 
 /**
  * This interface provides create, retrieve, delete operations for LDPath programs to be managed in the scope
@@ -96,6 +98,9 @@ public interface SemanticIndexManager {
      * 
      * @param programName
      *            name of the program to be executed
+     * @param concexts
+     *            a {@link List} of {@link UriRef} that are used as starting nodes to execute LDPath program
+     *            specified by {@code programName} on the given {@code program}
      * @param graph
      *            a Clerezza graph on which the specified program will be executed
      * @return the {@link Map} containing the results obtained by executing the given program on the given
@@ -103,6 +108,6 @@ public interface SemanticIndexManager {
      *         to results obtained for the field specified in the key.
      * @throws LDPathException
      */
-    public Map<String,Collection<?>> executeProgram(String programName, MGraph graph) throws LDPathException;
+    public Map<String,Collection<?>> executeProgram(String programName, List<UriRef> contexts, MGraph graph) throws LDPathException;
 
 }

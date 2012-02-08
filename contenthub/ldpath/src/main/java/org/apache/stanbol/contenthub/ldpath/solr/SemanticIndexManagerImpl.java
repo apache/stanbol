@@ -22,13 +22,13 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -42,7 +42,6 @@ import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
-import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -215,14 +214,13 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     }
 
     @Override
-    public Map<String,Collection<?>> executeProgram(String programName, MGraph graph) throws LDPathException {
+    public Map<String,Collection<?>> executeProgram(String programName, List<UriRef> contexts, MGraph graph) throws LDPathException {
         Map<String,Collection<?>> results = new HashMap<String,Collection<?>>();
         LDPath<Resource> ldpath = new LDPath<Resource>(new ClerezzaBackend(graph));
         String ldPathProgram = getProgramByName(programName);
-        Iterator<Triple> it = graph.filter(null, Properties.ENHANCER_ENTITY_REFERENCE, null);
-        while (it.hasNext()) {
+        for (UriRef context : contexts) {
             try {
-                Map<String,Collection<?>> entityResults = ldpath.programQuery(it.next().getObject(),
+                Map<String,Collection<?>> entityResults = ldpath.programQuery(context,
                     LDPathUtils.constructReader(ldPathProgram));
                 for (Entry<String,Collection<?>> entry : entityResults.entrySet()) {
                     if (results.containsKey(entry.getKey())) {
