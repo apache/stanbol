@@ -107,11 +107,6 @@
       <version>1.0</version>
     </bundle>
     <bundle>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpcore-osgi</artifactId>
-      <version>4.0.1</version>
-    </bundle>
-    <bundle>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <version>1.5</version>
@@ -121,6 +116,17 @@
       <artifactId>commons-fileupload</artifactId>
       <version>1.2.2</version>
     </bundle>
+    <bundle>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore-osgi</artifactId>
+      <version>4.1.4</version>
+    </bundle>
+<!-- not a bundle (need to be embedded)
+    <bundle>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+      <version>4.1.2</version>
+    </bundle>  -->
     <bundle> <!-- only used by the Entityhub -->
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
