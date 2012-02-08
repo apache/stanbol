@@ -35,25 +35,21 @@ public interface RefactorEnhancementEngineConf {
     /**
      * The OntoNet scope that the engine should use.
      */
-    @Property(value="schema.org")
     String SCOPE = "engine.refactor.scope";
     
     /**
      * The location from which the recipe is loaded.
      */
-    @Property(value="")
-    String RECIPE_LOCATION = "engine.refactor.recipe";
+    String RECIPE_LOCATION = "engine.refactor.recipe.location";
     
     /**
      * The ID used for identifying the recipe in the RuleStore.
      */
-    @Property(value="")
     String RECIPE_ID = "engine.refactor.recipe.id";
     
     /**
      * The set of ontology URIs that should be loaded in the core space of the scope.
      */
-    @Property(value={"http://ontologydesignpatterns.org/ont/iks/kres/dbpedia_demo.owl", ""})
     String SCOPE_CORE_ONTOLOGY = "engine.refactor.scope.core.ontology";
     
     /**
@@ -61,7 +57,6 @@ public interface RefactorEnhancementEngineConf {
      * If false: the new one is appended to the old RDF. 
      * Possible value in the configuration: true or false.
      */
-    @Property(boolValue=true, description="If true: the previously generated RDF is deleted and substituted with the new one. If false: the new one is appended to the old RDF. Possible value: true or false.")
     String APPEND_OTHER_ENHANCEMENT_GRAPHS = "engine.refactor.append.graphs";
     
     /**
@@ -69,7 +64,6 @@ public interface RefactorEnhancementEngineConf {
      * If false: entities are fetched on-line. 
      * Possible value in the configuration: true or false.
      */
-    @Property(boolValue=true, description="If true: entities are fetched via the EntityHub. If false: entities are fetched on-line. Possible value: true or false.")
     String USE_ENTITY_HUB  = "engine.refactor.entityhub";
     
     
