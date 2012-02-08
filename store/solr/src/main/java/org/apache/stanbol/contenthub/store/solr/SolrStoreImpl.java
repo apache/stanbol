@@ -332,8 +332,17 @@ public class SolrStoreImpl implements SolrStore {
     private void addSolrSpecificFields(SolrContentItem sci, SolrInputDocument doc, String ldProgramName) {
         doc.addField(SolrFieldName.TITLE.toString(), sci.getTitle());
         try {
-            Map<String,Collection<?>> results = ldProgramManager.executeProgram(ldProgramName,
-                sci.getMetadata());
+            MGraph ciMetadata = sci.getMetadata();
+            Iterator<Triple> it = ciMetadata.filter(null, Properties.ENHANCER_ENTITY_REFERENCE, null);
+            List<UriRef> contexts = new ArrayList<UriRef>();
+            while (it.hasNext()) {
+                Resource r = it.next().getObject();
+                if (r instanceof UriRef) {
+                    contexts.add((UriRef) r);
+                }
+            }
+            Map<String,Collection<?>> results = ldProgramManager.executeProgram(ldProgramName, contexts,
+                ciMetadata);
             for (Entry<String,Collection<?>> entry : results.entrySet()) {
                 doc.addField(entry.getKey(), entry.getValue());
             }
