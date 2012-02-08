@@ -138,11 +138,17 @@ public abstract class ContentItemImpl implements ContentItem {
 	public <T> T getPart(UriRef uri, Class<T> clazz) throws NoSuchPartException {
         readLock.lock();
         try {
-            if(parts.containsKey(uri)){
-                return (T) parts.get(uri);
+            Object part = parts.get(uri);
+            if(part == null){
+                throw new NoSuchPartException(uri);
+            }
+            if(clazz.isAssignableFrom(part.getClass())){
+                return (T)part;
             } else {
-    		    throw new NoSuchPartException(uri);
-    		}
+                throw new ClassCastException("The part '"+part+"'(class: "
+                        + part.getClass()+") is not compatiple to the requested"
+                        + "type "+clazz);
+            }
         }finally {
             readLock.unlock();
         }
