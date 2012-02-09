@@ -281,7 +281,7 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         String mimeType = d.getContentStreamMimeType();
         Map<String,List<Object>> constraints = getConstraintsFromDocument(d);
         id = (id == null || id.equals("")) ? d.getId() : id;
-        SolrContentItem sci = solrStore.create(content, d.getName(), d.getId(), mimeType, constraints);
+        SolrContentItem sci = solrStore.create(content, d.getId(), d.getName(), mimeType, constraints);
         try {
 			solrStore.enhanceAndPut(sci);
 		} catch (StoreException e) {

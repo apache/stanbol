@@ -198,10 +198,10 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
     @Override
     public void deleteContentItemByID(String contentItemID) {
         try {
-			solrStore.deleteById(contentItemID);
-		} catch (StoreException e) {
-			log.error(e.getMessage(), e);
-		}
+            solrStore.deleteById(contentItemID);
+        } catch (StoreException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -210,10 +210,10 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
         try {
             n = getNodeByPath(contentItemPath);
             try {
-				solrStore.deleteById(n.getIdentifier());
-			} catch (StoreException e) {
-				log.error(e.getMessage(), e);
-			}
+                solrStore.deleteById(n.getIdentifier());
+            } catch (StoreException e) {
+                log.error(e.getMessage(), e);
+            }
         } catch (RepositoryException e) {
             log.warn("Failed to obtain the item specified by the path: {}", contentItemPath, e);
         }
@@ -226,10 +226,10 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
             nodes = getNodesUnderPath(rootPath);
             for (Node n : nodes) {
                 try {
-					solrStore.deleteById(n.getIdentifier());
-				} catch (StoreException e) {
-					log.error(e.getMessage(), e);
-				}
+                    solrStore.deleteById(n.getIdentifier());
+                } catch (StoreException e) {
+                    log.error(e.getMessage(), e);
+                }
             }
         } catch (RepositoryException e) {
             log.warn("Failed to obtain the item specified by the path: {}", rootPath, e);
@@ -260,13 +260,13 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
             log.debug("There is no constraint for the node having id: {}", id);
         }
 
-        SolrContentItem sci = solrStore.create(contentContext.getContent(), contentContext.getNodeName(), id, 
+        SolrContentItem sci = solrStore.create(contentContext.getContent(), id, contentContext.getNodeName(),
             contentContext.getContentType(), constraints);
         try {
-			solrStore.enhanceAndPut(sci);
-		} catch (StoreException e) {
-			log.error(e.getMessage(), e);
-		}
+            solrStore.enhanceAndPut(sci);
+        } catch (StoreException e) {
+            log.error(e.getMessage(), e);
+        }
         log.info("Document submitted to Contenthub.");
         log.info("Id: {}", sci.getUri().getUnicodeString());
         log.info("Mime type: {}", sci.getMimeType());
