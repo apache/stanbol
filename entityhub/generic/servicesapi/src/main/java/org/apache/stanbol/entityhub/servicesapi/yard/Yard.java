@@ -180,7 +180,7 @@ public interface Yard {
     /**
      * Updates the store with the new state of the parsed representation
      *
-     * @param represnetation the representation
+     * @param representation the representation
      * @return the representation as stored
      * @throws NullPointerException If <code>null</code> is parsed as representation
      * @throws IllegalArgumentException if the parsed representation is not present 
@@ -188,7 +188,7 @@ public interface Yard {
      * really throw only a {@link RuntimeException}.
      * @throws YardException On any error related to the Yard
      */
-    Representation update(Representation represnetation) throws YardException, IllegalArgumentException;
+    Representation update(Representation representation) throws YardException, IllegalArgumentException;
 
     /**
      * Updates the store with the new state of the parsed representations. This
