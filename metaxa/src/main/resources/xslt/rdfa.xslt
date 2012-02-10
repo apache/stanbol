@@ -287,14 +287,17 @@
 
   <!-- get root location from URL -->
   <template name="get-root">
-    <param name="url" />
-	<choose>
-		<when test="contains($url,'//')">
-			<value-of select="concat(substring-before($url,'//'),'//',substring-before(substring-after($url,'//'),'/'),'/')"/>
-		</when>
-		<otherwise>UNKNOWN ROOT</otherwise>
-	</choose>    
-  </template>
+		<param name="url" />
+		<choose>
+			<when test="contains($url,'//')">
+				<value-of
+					select="concat(substring-before($url,'//'),'//',substring-before(substring-after($url,'//'),'/'),'/')" />
+			</when>
+			<otherwise>
+				<value-of select="concat($url,'/')" />
+			</otherwise>
+		</choose>
+	</template>
 
   <!-- return namespace of a qname -->
   <template name="return-ns" >
@@ -561,7 +564,7 @@
 	         	  <value-of select="normalize-space(string($object))" />
 	            </when>
 	         	<otherwise> <!-- content is in the element and may include some tags -->
-	         	 <attribute name="rdf:datatype"><value-of select="$datatype" /></attribute>
+<!--	         	 <attribute name="rdf:datatype"><value-of select="$datatype" /></attribute> -->
 	         	 <attribute name="rdf:parseType"><value-of select="'Literal'" /></attribute>
 				 <for-each select="$object/node()"> 
 					<call-template name="recursive-copy" />
