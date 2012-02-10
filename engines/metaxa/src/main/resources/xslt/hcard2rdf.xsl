@@ -689,58 +689,41 @@
     </xsl:call-template>
   </xsl:variable>
 
-  <xsl:choose>
-    <xsl:when test="$use-camel-case != 0">
-      <!-- translate property name to camel case -->
-      <xsl:variable name="propCC">
-	<xsl:call-template name="camel-case">
-	  <xsl:with-param name="name" select="$prop"/>
-	</xsl:call-template>
-      </xsl:variable>
+	<!--  check for value-title form -->  
+  <xsl:variable name="value">
+  	<xsl:choose>
+  		<xsl:when test="*/@title">
+  			<xsl:value-of select="*/@title"/>
+  		</xsl:when>
+  		<xsl:otherwise>
+  			<xsl:value-of select="normalize-space(.)"/>
+  		</xsl:otherwise>
+  	</xsl:choose>
+  </xsl:variable>
 
-      <!--
-      <xsl:message>
-	<xsl:text>f: </xsl:text>
-	<xsl:value-of select="$f"/>
-	<xsl:text>; field: </xsl:text>
-	<xsl:value-of select="$field"/>
-	<xsl:text>; c: </xsl:text>
-	<xsl:value-of select="@class"/>
-	<xsl:text>; prop: </xsl:text>
-	<xsl:value-of select="$prop"/>
-	<xsl:text>; cc: </xsl:text>
-	<xsl:value-of select="$propCC"/>
-      </xsl:message>
-      -->
+	<xsl:choose>
+		<xsl:when test="$use-camel-case != 0">
+			<!-- translate property name to camel case -->
+			<xsl:variable name="propCC">
+				<xsl:call-template name="camel-case">
+					<xsl:with-param name="name" select="$prop" />
+				</xsl:call-template>
+			</xsl:variable>
 
-      <xsl:if test="$f != 0">
-      <!--  Hier scheint das Problem zu sein! -->
-	<xsl:element name="{$propCC}" namespace="http://www.w3.org/2006/vcard/ns#">
-	  <xsl:value-of select="."/>
-	</xsl:element>
-      </xsl:if>
-    </xsl:when>
-    <xsl:otherwise>
-      <!--
-      <xsl:message>
-	<xsl:text>f: </xsl:text>
-	<xsl:value-of select="$f"/>
-	<xsl:text>; field: </xsl:text>
-	<xsl:value-of select="$field"/>
-	<xsl:text>; c: </xsl:text>
-	<xsl:value-of select="@class"/>
-	<xsl:text>; prop: </xsl:text>
-	<xsl:value-of select="$prop"/>
-      </xsl:message>
-      -->
-
-      <xsl:if test="$f != 0">
-	<xsl:element name="{$prop}" namespace="http://www.w3.org/2006/vcard/ns#">
-	  <xsl:value-of select="."/>
-	</xsl:element>
-      </xsl:if>
-    </xsl:otherwise>
-  </xsl:choose>
+			<xsl:if test="$f != 0">
+				<xsl:element name="{$propCC}" namespace="http://www.w3.org/2006/vcard/ns#">
+					<xsl:value-of select="$value" />
+				</xsl:element>
+			</xsl:if>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:if test="$f != 0">
+				<xsl:element name="{$prop}" namespace="http://www.w3.org/2006/vcard/ns#">
+					<xsl:value-of select="$value" />
+				</xsl:element>
+			</xsl:if>
+		</xsl:otherwise>
+	</xsl:choose>
 
   <xsl:apply-templates select="*" mode="extract-field">
     <xsl:with-param name="field" select="$field"/>
