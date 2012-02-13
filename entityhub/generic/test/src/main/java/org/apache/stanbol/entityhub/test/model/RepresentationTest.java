@@ -574,9 +574,12 @@ public abstract class RepresentationTest {
         URL url = new URL("http://www.test.org/urlTest");
         ValueFactory vf = getValueFactory();
         Representation rep = createRepresentation(null);
+        // test empty reference
+        Iterator<Reference> refs = rep.getReferences(field);
+        assertFalse(refs.hasNext());
         // test conversion
         rep.add(field, url);
-        Iterator<Reference> refs = rep.getReferences(field);
+        refs = rep.getReferences(field);
         assertTrue(refs.hasNext());
         assertEquals(refs.next().getReference(), url.toString());
         assertFalse(refs.hasNext());

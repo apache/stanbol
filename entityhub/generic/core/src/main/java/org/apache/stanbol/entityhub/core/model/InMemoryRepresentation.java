@@ -26,11 +26,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.stanbol.entityhub.core.utils.TextIterator;
-import org.apache.stanbol.entityhub.core.utils.TypeSaveIterator;
+import org.apache.stanbol.entityhub.core.utils.TypeSafeIterator;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
@@ -159,7 +159,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @Override
     public <T> Iterator<T> get(String field, Class<T> type) throws UnsupportedTypeException {
         Collection<Object> values = getValuesAsCollection(field);
-        return new TypeSaveIterator<T>(values.iterator(), type);
+        return new TypeSafeIterator<T>(values.iterator(), type);
     }
 
     @Override
@@ -389,7 +389,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @Override
     public Iterator<Reference> getReferences(String field) {
         Collection<Object> values = getValuesAsCollection(field);
-        return new TypeSaveIterator<Reference>(values.iterator(), Reference.class);
+        return new TypeSafeIterator<Reference>(values.iterator(), Reference.class);
     }
     protected static String getNaturalLanguageValue(Object check,Set<String> langSet,boolean isNullLanguage){
         if(check instanceof Text){

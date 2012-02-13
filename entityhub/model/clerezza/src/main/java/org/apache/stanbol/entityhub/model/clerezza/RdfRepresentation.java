@@ -30,7 +30,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.core.utils.FilteringIterator;
-import org.apache.stanbol.entityhub.core.utils.TypeSaveIterator;
+import org.apache.stanbol.entityhub.core.utils.TypeSafeIterator;
 import org.apache.stanbol.entityhub.model.clerezza.impl.Literal2TextAdapter;
 import org.apache.stanbol.entityhub.model.clerezza.impl.LiteralAdapter;
 import org.apache.stanbol.entityhub.model.clerezza.impl.NaturalTextFilter;
@@ -42,7 +42,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.UnsupportedTypeException;
-import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,7 +167,7 @@ public class RdfRepresentation implements Representation{
         }
         UriRef fieldUriRef = new UriRef(field);
         if(Resource.class.isAssignableFrom(type)){ //native support for Clerezza types
-            return new TypeSaveIterator<T>(graphNode.getObjects(fieldUriRef), type);
+            return new TypeSafeIterator<T>(graphNode.getObjects(fieldUriRef), type);
 // NOTE: (Rupert Westenthaler 12.01.2011)
 //     Converting everything to String is not an intended functionality. When
 //     someone parsed String.class he rather assumes that he gets only string
