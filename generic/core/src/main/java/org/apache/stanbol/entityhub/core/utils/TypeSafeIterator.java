@@ -24,7 +24,7 @@ import java.util.Iterator;
  *
  * @param <T> the type of elements returned by this iterator
  */
-public class TypeSaveIterator<T> extends AdaptingIterator<Object,T> implements Iterator<T> {
+public class TypeSafeIterator<T> extends AdaptingIterator<Object,T> implements Iterator<T> {
 
     /**
      * Constructs an iterator that selects only elements of the parsed iterator
@@ -33,7 +33,7 @@ public class TypeSaveIterator<T> extends AdaptingIterator<Object,T> implements I
      * @param type the type all elements of this Iterator need to be assignable to.
      */
     @SuppressWarnings("unchecked")
-    public TypeSaveIterator(Iterator<?> it,Class<T> type){
+    public TypeSafeIterator(Iterator<?> it,Class<T> type){
         super((Iterator<Object>)it,new AssignableFormAdapter<T>(),type);
     }
 
