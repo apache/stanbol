@@ -402,8 +402,9 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- License provided in src/test/resources/README -->
+            <!-- AL20 licensed files. See src/main/resources/README -->
             <exclude>src/main/resources/indexing/config/dbpedia/conf/spellings.txt</exclude>
+            <!-- AL20 licensed files. See src/test/resources/README -->
             <exclude>src/test/resources/indexing/resources/incoming_links.txt</exclude>
           </excludes>
         </configuration>

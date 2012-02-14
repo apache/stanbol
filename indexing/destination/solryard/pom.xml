@@ -64,7 +64,7 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- License provided in src/test/resources/README -->
+            <!-- AL20 licensed files. See src/test/resources/README -->
             <exclude>src/test/resources/testConfigs/missingDefaultSolrConf/indexing/config/indexFieldConfig.txt</exclude>
             <exclude>src/test/resources/testConfigs/missingDefaultSolrConf/indexing/resources/testEntityScore.txt</exclude>
             <exclude>src/test/resources/testConfigs/missingSolrConf/indexing/config/indexFieldConfig.txt</exclude>
