@@ -75,7 +75,7 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- License provided in src/test/resources/README -->
+            <!-- AL20 licensed files: See src/test/resources/README -->
             <exclude>src/test/resources/en.txt</exclude>
           </excludes>
         </configuration>
