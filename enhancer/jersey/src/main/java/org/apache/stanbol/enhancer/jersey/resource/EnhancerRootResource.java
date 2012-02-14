@@ -20,13 +20,19 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.WILDCARD;
+import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.*;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -38,6 +44,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -48,11 +55,13 @@ import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
+import org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
@@ -81,7 +90,7 @@ import com.sun.jersey.api.view.Viewable;
 @Path("/enhancer")
 public class EnhancerRootResource extends BaseStanbolResource {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    public final Logger log = LoggerFactory.getLogger(getClass());
 
     protected EnhancementJobManager jobManager;
 
@@ -245,7 +254,8 @@ public class EnhancerRootResource extends BaseStanbolResource {
                                     @Context HttpHeaders headers) throws EnhancementException, IOException {
         log.info("enhance from From: " + content);
         ContentItem ci = new InMemoryContentItem(content.getBytes("UTF-8"), TEXT_PLAIN);
-        return enhanceAndBuildResponse(format, headers, ci, false, buildAjaxview);
+//        ci.addPart(ENHANCEMENT_PROPERTIES_URI, Collections.singletonMap(INCLUDE_EXECUTION_METADATA, false));
+        return enhanceAndBuildResponse(format, headers, ci, buildAjaxview);
     }
 
     /**
@@ -261,28 +271,64 @@ public class EnhancerRootResource extends BaseStanbolResource {
      */
     @POST
     @Consumes(WILDCARD)
-    public Response enhanceFromData(byte[] data,
+    public Response enhanceFromData(ContentItem ci,
                                     @QueryParam(value = "uri") String uri,
                                     @QueryParam(value = "executionmetadata") boolean inclExecMetadata,
+                                    @QueryParam(value = "outputContent") Set<String> mediaTypes,
+                                    @QueryParam(value = "omitParsed") boolean omitParsed,
+                                    @QueryParam(value = "outputContentPart") Set<String> contentParts,
+                                    @QueryParam(value = "omitMetadata") boolean omitMetadata,
+                                    @QueryParam(value = "rdfFormat") String rdfFormat,
                                     @Context HttpHeaders headers) throws EnhancementException, IOException {
-        String format = TEXT_PLAIN;
-        if (headers.getMediaType() != null) {
-            format = headers.getMediaType().toString();
+        Map<String,Object> enhancementProperties = getEnhancementProperties(ci);
+        enhancementProperties.put(INCLUDE_EXECUTION_METADATA, inclExecMetadata);
+        if(mediaTypes != null && !mediaTypes.isEmpty()){
+            enhancementProperties.put(OUTPUT_CONTENT, mediaTypes);
         }
-        if (uri != null && uri.isEmpty()) {
-            // let the store build an internal URI based on the content
-            uri = null;
+        enhancementProperties.put(OMIT_PARSED_CONTENT, omitParsed);
+        if(contentParts != null && !contentParts.isEmpty()){
+            Set<UriRef> outputContentParts = new HashSet<UriRef>();
+            for(String contentPartUri : contentParts){
+                if(contentPartUri != null && !contentPartUri.isEmpty()){
+                    if("*".equals(contentPartUri)){
+                        outputContentParts.add(null); //indicated wildcard
+                    } else {
+                        outputContentParts.add(new UriRef(contentPartUri));
+                    }
+                }
+            }
+            enhancementProperties.put(OUTPUT_CONTENT_PART, outputContentParts);
         }
-        ContentItem ci = new InMemoryContentItem(uri, data, format);
-        return enhanceAndBuildResponse(null, headers, ci, inclExecMetadata, false);
+        enhancementProperties.put(OMIT_METADATA, omitMetadata);
+        if(rdfFormat != null && !rdfFormat.isEmpty()){
+            try {
+                enhancementProperties.put(RDF_FORMAT,MediaType.valueOf(rdfFormat).toString());
+            } catch (IllegalArgumentException e) {
+                throw new WebApplicationException(e, 
+                    Response.status(Response.Status.BAD_REQUEST)
+                    .entity(String.format("Unable to parse MediaType form parameter" +
+                    		"rdfFormat=%s",rdfFormat))
+                    .build());
+            }
+        }
+//        String format = TEXT_PLAIN;
+//        if (headers.getMediaType() != null) {
+//            format = headers.getMediaType().toString();
+//        }
+//        if (uri != null && uri.isEmpty()) {
+//            // let the store build an internal URI based on the content
+//            uri = null;
+//        }
+//        ContentItem ci = new InMemoryContentItem(uri, data, format);
+        return enhanceAndBuildResponse(null, headers, ci, false);
     }
 
     protected Response enhanceAndBuildResponse(String format,
                                                HttpHeaders headers,
                                                ContentItem ci,
-                                               boolean inclExecMetadata,
                                                boolean buildAjaxview) throws EnhancementException,
                                                                      IOException {
+        Map<String,Object> enhancementPropertis = EnhancementPropertiesHelper.getEnhancementProperties(ci);
         if (jobManager != null) {
             jobManager.enhanceContent(ci, chain);
         }
@@ -299,14 +345,15 @@ public class EnhancerRootResource extends BaseStanbolResource {
         }
 
         MGraph graph = ci.getMetadata();
-        if (inclExecMetadata) {
+        Boolean includeExecutionMetadata = (Boolean)enhancementPropertis.get(INCLUDE_EXECUTION_METADATA);
+        if (includeExecutionMetadata != null && includeExecutionMetadata.booleanValue()) {
             try {
                 graph.addAll(ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, MGraph.class));
             } catch (NoSuchPartException e) {
                 // no executionMetadata available
             }
         }
-        ResponseBuilder rb = Response.ok(graph);
+        ResponseBuilder rb = Response.ok(ci);
         // List<String> accepted = headers.getRequestHeader(HttpHeaders.ACCEPT);
         MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
         // This can be used to create a customised WebExection. Jersey will sent

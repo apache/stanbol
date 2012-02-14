@@ -32,12 +32,14 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.apache.stanbol.enhancer.jersey.reader.ContentItemReader;
 import org.apache.stanbol.enhancer.jersey.resource.ChainsRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnginesRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnhancementEngineResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnhancementEnginesRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnhancerRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnhancementChainResource;
+import org.apache.stanbol.enhancer.jersey.writers.ContentItemWriter;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -90,6 +92,9 @@ public class EnhancerWebFragment implements WebFragment {
         classes.add(ChainsRootResource.class);
         classes.add(EnhancementEnginesRootResource.class);
         classes.add(EnhancementEngineResource.class);
+        //Reader/Writer for ContentItems
+        classes.add(ContentItemReader.class);
+        classes.add(ContentItemWriter.class);
         return classes;
     }
 
