@@ -53,7 +53,8 @@
     <module>entitytagging</module>
     <module>keywordextraction</module>
     <module>taxonomylinking</module>
-    <!-- RICK based enhancement engine(s) -->
+
+    <!-- Entityhub based enhancement engine(s) -->
     <module>opencalais</module>
     <module>zemanta</module>
 
