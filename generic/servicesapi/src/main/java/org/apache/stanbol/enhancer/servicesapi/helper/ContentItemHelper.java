@@ -216,9 +216,9 @@ public class ContentItemHelper {
             int nameValueSeparator = parameter.indexOf('=');
             if(nameValueSeparator>0 && parameter.length() > nameValueSeparator+2){
                 //keys are case insensitive (we use lower case)
-                String key = parameter.substring(0,nameValueSeparator).toLowerCase();
+                String key = parameter.substring(0,nameValueSeparator).toLowerCase().trim();
                 if(!parsed.containsKey(key)){ //do not override existing keys
-                    parsed.put(key,parameter.substring(nameValueSeparator+1));
+                    parsed.put(key,parameter.substring(nameValueSeparator+1).trim());
                 }
             }
         }
