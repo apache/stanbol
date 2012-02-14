@@ -45,19 +45,5 @@
     <module>bundlelist</module>
     <module>ldpath</module>
   </modules>
-  <build>
-    <plugins>
-        <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <!-- Exclude test resources manually until it is included in the build process of contenthub -->
-            <exclude>test/.*</exclude>
-            <exclude>test/.*/*</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+
 </project>
