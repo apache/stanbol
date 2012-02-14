@@ -104,7 +104,7 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- License provided in src/main/webapp/WEB-INF/README -->
+            <!-- AL20 licensed files. See src/main/webapp/WEB-INF/README -->
             <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.sling.commons.log.LogManager.factory.config-solrlogconfig.config</exclude>
             <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.stanbol.commons.solr.managed.impl.ManagedSolrServerImpl-default.config</exclude>
             <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.stanbol.commons.solr.web.impl.SolrDispatchFilterComponent-default.config</exclude>

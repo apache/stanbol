@@ -104,7 +104,7 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- License provided in src/main/resources/README -->
+            <!-- AL20 licensed files. See src/main/resources/README -->
             <exclude>src/main/resources/resources/config/org.apache.sling.commons.log.LogManager.factory.config-solrlogconfig.config</exclude>
             <exclude>src/main/resources/resources/config/org.apache.stanbol.commons.solr.managed.impl.ManagedSolrServerImpl-default.config</exclude>
             <exclude>src/main/resources/resources/config/org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine-local.config</exclude>
