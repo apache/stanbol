@@ -74,7 +74,7 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- OpenLayers License provided in openlayers-2.9/license.txt  -->
+            <!-- OpenLayers License provided in src/main/resources/org/apache/stanbol/enhancer/jersey/static/openlayers-2.9/license.txt  -->
             <exclude>src/main/resources/org/apache/stanbol/enhancer/jersey/static/openlayers-2.9/**</exclude>
           </excludes>
         </configuration>
