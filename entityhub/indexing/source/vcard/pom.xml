@@ -30,10 +30,13 @@
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.indexing.source.vcard</artifactId>
   <packaging>bundle</packaging>
+
   <name>Apache Stanbol Entityhub IndexingSource for vCard</name>
+
   <description>
     Reads vCard files and converts them to Representations.
   </description>
+
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/rdf/vcard
@@ -43,6 +46,7 @@
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
+
   <build>
     <plugins>
       <plugin>
@@ -57,16 +61,9 @@
           </instructions>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <configuration>
-          <excludes>
-          </excludes>
-        </configuration>
-      </plugin>      
     </plugins>
   </build>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -93,22 +90,22 @@
       <artifactId>ical4j-vcard</artifactId>
       <version>0.9.4</version>
     </dependency>
-	<dependency>
-	  <groupId>org.mnode.ical4j</groupId>
-	  <artifactId>ical4j</artifactId>
-      <version>1.0.2</version>
-	</dependency>
-	<dependency>
-	  <groupId>backport-util-concurrent</groupId>
-	  <artifactId>backport-util-concurrent</artifactId>
-	  <version>3.1</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.ccil.cowan.tagsoup</groupId>
-	  <artifactId>tagsoup</artifactId>
-      <version>1.2.1</version>
-	</dependency>
-	<!-- logging framework -->
+    <dependency>
+      <groupId>org.mnode.ical4j</groupId>
+      <artifactId>ical4j</artifactId>
+        <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>backport-util-concurrent</groupId>
+      <artifactId>backport-util-concurrent</artifactId>
+      <version>3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ccil.cowan.tagsoup</groupId>
+      <artifactId>tagsoup</artifactId>
+        <version>1.2.1</version>
+    </dependency>
+    <!-- logging framework -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>

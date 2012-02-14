@@ -69,7 +69,7 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- License provided in src/test/resources/README -->
+            <!-- AÖ20 licensed files. See src/test/resources/README -->
             <exclude>src/test/resources/resourceLoaderTest/testFolder/otherFileInFolder.txt</exclude>
             <exclude>src/test/resources/resourceLoaderTest/testFolder/ignoreFileInFolder.txt</exclude>
             <exclude>src/test/resources/resourceLoaderTest/testFolder/errorFileInFolder.txt</exclude>
