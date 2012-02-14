@@ -147,7 +147,9 @@ public class RequestExecutor {
      */
     public RequestExecutor assertStatus(int expected) {
         assertNotNull(this.toString(), response);
-        assertEquals(this + ": expecting status " + expected, expected, response.getStatusLine().getStatusCode());
+        int status = response.getStatusLine().getStatusCode();
+        assertEquals(this + ": expecting status " + expected 
+            + " (content: "+content+")", expected, status);
         return this;
     }
 
