@@ -70,8 +70,15 @@ public class JsonLdSerializerProvider implements SerializingProvider {
 
     @Override
     public void serialize(OutputStream serializedGraph, TripleCollection tc, String formatIdentifier) {
-        if (!formatIdentifier.equals(SUPPORTED_FORMAT)) {
-            logger.info("serialize() the format '" + formatIdentifier + "' is not supported by this implementation");
+        String deParameterizedIdentifier;
+        int semicolonPos = formatIdentifier.indexOf(';');
+        if (semicolonPos > -1) {
+            deParameterizedIdentifier = formatIdentifier.substring(0, semicolonPos);
+        } else {
+            deParameterizedIdentifier = formatIdentifier;
+        }
+        if (!deParameterizedIdentifier.equalsIgnoreCase(SUPPORTED_FORMAT)) {
+            logger.info("serialize() the format '" + deParameterizedIdentifier + "' is not supported by this implementation");
             return;
         }
 
