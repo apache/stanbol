@@ -95,7 +95,7 @@
         <finalName>stanbol-stack-${project.version}</finalName>  
       </build>
       <modules>
-        <module>commons/web/webvie</module>
+        <module>demos/webvie</module>
 
         <module>enhancer/engines</module>
 
@@ -176,7 +176,10 @@
                 <exclude>**/.*/**/*</exclude>
 
                 <!-- exclude generated files -->
-                <exclude>*/**/target/**</exclude>
+                <exclude>**/target/**</exclude>
+                <exclude>**/*.log</exclude>
+                <exclude>launchers/full/sling/**</exclude>
+                <exclude>launchers/full/factstore/**</exclude>
               </excludes>
             </configuration>
           </plugin>
