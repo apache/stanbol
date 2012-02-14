@@ -75,7 +75,7 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- Testing resources -->
+            <!-- AL20 licensed files. See src/test/resources/README -->
             <exclude>src/test/resources/classifier/topics_abstracts_snippet.tsv</exclude>
           </excludes>
         </configuration>

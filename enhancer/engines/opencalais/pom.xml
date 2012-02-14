@@ -80,7 +80,7 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>de>
-            <!-- License provided in src/main/resources/README -->
+            <!-- AL20 licensed files. See src/main/resources/README -->
             <exclude>src/main/resources/calaisTypeMap.txt</exclude>
           </excludes>
         </configuration>

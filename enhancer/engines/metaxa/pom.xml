@@ -123,7 +123,7 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- License provided in src/test/resources/README -->
+            <!-- AL20 licensed files. See src/test/resources/README -->
             <exclude>src/test/resources/rdfa-res.txt</exclude>
             <exclude>src/test/resources/html-res.txt</exclude>
             <exclude>src/test/resources/pdf-res.txt</exclude>
