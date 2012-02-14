@@ -14,16 +14,10 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache.stanbol</groupId>
-    <artifactId>org.apache.stanbol.contenthub.parent</artifactId>
-    <version>0.9.0-incubating-SNAPSHOT</version>
-    <relativePath>../parent</relativePath>
-  </parent>
-
+  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.contenthub.search.reactor</artifactId>
+  <version>0.9.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <version>${search-version}</version>
 
   <name>Apache Stanbol Search Reactor</name>
   <description>
@@ -34,10 +28,10 @@
 
   <scm>
     <connection>
-				  scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/search
+			scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/search
     </connection>
     <developerConnection>
-				  scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/search
+			scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/search
     </developerConnection>
   </scm>
 
