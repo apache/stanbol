@@ -86,11 +86,11 @@
               <artifactId>apache-rat-plugin</artifactId>
               <configuration>
                 <excludes>
-                  <!-- License provided in src/main/resources/examples/README -->
+                  <!-- AL20 licensed files. See src/main/resources/examples/README -->
                   <exclude>src/main/resources/examples/jamaica.txt</exclude>
                   <exclude>src/main/resources/examples/default.txt</exclude>
                   <exclude>src/main/resources/examples/LIST.txt</exclude>
-                  <!-- License provided in src/test/resources/README -->
+                  <!-- AL20 licensed files. See src/test/resources/README -->
                   <exclude>src/test/resources/benchmarks/benchmark1.txt</exclude>
                 </excludes>
               </configuration>
