@@ -85,6 +85,23 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>add-third-party</goal>
+            </goals>
+            <configuration>
+              <groupByLicense>true</groupByLicense>
+              <useMissingFile>true</useMissingFile>
+              <outputDirectory>${project.build.directory}/maven-shared-archive-resources/META-INF</outputDirectory>
+              <thirdPartyFilename>DEPENDENCIES-BY-LICENSE</thirdPartyFilename>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>      
+      <plugin>
         <!-- Compile for Java 6, source is Java 6 -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -265,7 +282,7 @@
           <configuration>
             <lifecycleMappingMetadata>
               <pluginExecutions>
-		<pluginExecution>
+            		<pluginExecution>
                   <pluginExecutionFilter>
                     <groupId>org.apache.servicemix.tooling</groupId>
                     <artifactId>depends-maven-plugin</artifactId>
@@ -278,7 +295,7 @@
                     <execute />
                   </action>
                 </pluginExecution>
-		<pluginExecution>
+            		<pluginExecution>
                   <pluginExecutionFilter>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
@@ -289,8 +306,8 @@
                   </pluginExecutionFilter>
                   <action>
                     <!-- <execute /> -->
-	<!-- ignore as it cause error in eclipse when imported -->
-					<ignore />
+                    <!-- ignore as it cause error in eclipse when imported -->
+                    <ignore />
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -347,8 +364,8 @@
                     <ignore />
                   </action>
                 </pluginExecution>
-		<!-- compilation errors when eclipse open -->
-		<pluginExecution>
+	              <!-- compilation errors when eclipse open -->
+	              <pluginExecution>
                   <pluginExecutionFilter>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
@@ -358,14 +375,49 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-<!--                     <execute /> -->
-	<!-- ignore as it cause error in eclipse when imported -->
-					<ignore />
+                    <!--  <execute /> -->
+                    <!-- ignore as it cause error in eclipse when imported -->
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
             </lifecycleMappingMetadata>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <version>0.8</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>1.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-remote-resources-plugin</artifactId>
+          <executions>
+            <execution>
+              <goals>
+                <goal>process</goal>
+              </goals>
+              <configuration>
+                <properties>
+                  <preDepListText>
+// ------------------------------------------------------------------
+// Transitive dependencies of this project determined from the
+// Apache Maven POM organized by organization.
+//
+// For a list of transitive depencies of this project determined
+// from the Apache Maven POM organized by licenses see the
+// DEPENDENCIES-BY-LICENSE file.
+// ------------------------------------------------------------------
+                  </preDepListText>
+                </properties>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -1721,7 +1773,6 @@
           <plugin>
             <groupId>org.apache.rat</groupId>
             <artifactId>apache-rat-plugin</artifactId>
-            <version>0.8</version>
             <executions>
               <execution>
                 <phase>verify</phase>
@@ -1769,7 +1820,25 @@
                   <familyName>MIT License</familyName>
                 </licenseFamily>
               </licenseFamilies>
+              <excludes>
+                <exclude>src/license/THIRD-PARTY.properties</exclude>
+              </excludes>
             </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>add-third-party</goal>
+                </goals>
+                <configuration>
+                  <failIfWarning>true</failIfWarning>
+                  <useMissingFile>true</useMissingFile>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
