@@ -89,6 +89,7 @@
         <artifactId>license-maven-plugin</artifactId>
         <executions>
           <execution>
+            <phase>compile</phase>
             <goals>
               <goal>add-third-party</goal>
             </goals>
@@ -99,7 +100,7 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>      
+      </plugin>
       <plugin>
         <!-- Compile for Java 6, source is Java 6 -->
         <groupId>org.apache.maven.plugins</groupId>
@@ -244,7 +245,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-eclipse-plugin</artifactId>
-          <version>2.8</version>
+          <version>2.9</version>
+          <configuration>
+            <sourceExcludes>
+              <sourceExclude>DEPENDENCIES-BY-LICENSE</sourceExclude>
+            </sourceExcludes>
+          </configuration>          
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -398,9 +404,6 @@
           <artifactId>maven-remote-resources-plugin</artifactId>
           <executions>
             <execution>
-              <goals>
-                <goal>process</goal>
-              </goals>
               <configuration>
                 <properties>
                   <preDepListText>
