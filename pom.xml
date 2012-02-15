@@ -94,7 +94,6 @@
             </goals>
             <configuration>
               <groupByLicense>true</groupByLicense>
-              <useMissingFile>true</useMissingFile>
               <outputDirectory>${project.build.directory}/maven-shared-archive-resources/META-INF</outputDirectory>
               <thirdPartyFilename>DEPENDENCIES-BY-LICENSE</thirdPartyFilename>
             </configuration>
