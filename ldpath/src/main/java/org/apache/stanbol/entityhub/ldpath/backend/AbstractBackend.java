@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
@@ -110,7 +111,8 @@ public abstract class AbstractBackend implements RDFBackend<Object> {
         } else {
             this.valueConverter = valueConverter;
         }
-    }    protected abstract ValueFactory getValueFactory();
+    }    
+    protected abstract ValueFactory getValueFactory();
     
     protected abstract Representation getRepresentation(String id) throws EntityhubException;
     
@@ -119,16 +121,21 @@ public abstract class AbstractBackend implements RDFBackend<Object> {
     protected abstract FieldQuery createQuery();
 
     @Override
-    public String createLiteral(String content) {
-        return content;
+    public boolean supportsThreading() {
+        return false;
+    }
+    @Override
+    public ThreadPoolExecutor getThreadPool() {
+        return null;
+    }
+    @Override
+    public Object createLiteral(String content) {
+        return getValueFactory().createText(content);
     }
 
     @Override
     public Object createLiteral(String content, Locale language, URI type) {
         DataTypeEnum dataType = type == null ? null : DataTypeEnum.getDataType(type.toString());
-        if(language == null && type == null){
-            return content;
-        }
         if(language != null){
             if(type != null && !(DataTypeEnum.String == dataType || DataTypeEnum.Text == dataType)){
                 throw new IllegalArgumentException("Literals with a Lanugage MUST not have NULL,"+
@@ -150,7 +157,7 @@ public abstract class AbstractBackend implements RDFBackend<Object> {
                 }
             }
         } else { //language is null and type is null
-            return content;
+            return getValueFactory().createText(content);
         }
     }
 
