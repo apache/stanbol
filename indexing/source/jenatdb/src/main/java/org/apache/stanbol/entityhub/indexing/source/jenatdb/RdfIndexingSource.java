@@ -530,7 +530,9 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
             while(!next && resultSet.hasNext()){
                 Binding binding = resultSet.nextBinding();
                 Node entityNode = binding.get(entityVar);
-                if(entityNode.isURI()){
+                if(entityNode.isURI() && 
+                        // it's unbelievable, but Jena URIs might be empty!
+                        !entityNode.toString().isEmpty()){
                     if(!entityNode.equals(currentEntity)){
                         //start of next Entity
                         this.nextEntity = entityNode; //store the node for the next entity
@@ -541,7 +543,7 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
                         processSolution(binding);
                     }
                 } else {
-                    log.warn(String.format("Current Entity %s is not a URI Node -> ignored",entityNode));
+                    log.warn(String.format("Current Entity '%s' is not a valid URI Node -> skiped",entityNode));
                 }
             }
             if(!next){ // exit the loop but still no new entity ... that means
