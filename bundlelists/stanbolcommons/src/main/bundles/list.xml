@@ -373,12 +373,12 @@
     <bundle> <!-- LD Path -->
       <groupId>at.newmedialab.ldpath</groupId>
       <artifactId>ldpath-api</artifactId>
-      <version>0.9.4-SNAPSHOT</version>
+      <version>0.9.5-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>at.newmedialab.ldpath</groupId>
       <artifactId>ldpath-core-bundle</artifactId>
-      <version>0.9.4-SNAPSHOT</version>
+      <version>0.9.5-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
