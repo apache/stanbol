@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -42,19 +43,23 @@ import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
 import org.apache.stanbol.entityhub.core.model.EntityImpl;
+import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
+import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.site.EntityDereferencer;
 import org.apache.stanbol.entityhub.servicesapi.site.EntitySearcher;
+import org.apache.stanbol.entityhub.servicesapi.site.License;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
@@ -239,6 +244,11 @@ public class ReferencedSiteImpl implements ReferencedSite {
     private ServiceTracker cacheTracker;
     
     private SiteConfiguration siteConfiguration;
+    /**
+     * Stores keys -> values to be added to the metadata of {@link Entity Entities}
+     * created by this site.
+     */
+    private Map<String,Object> siteMetadata;
     
     /**
      * The {@link OfflineMode} is used by Stanbol to indicate that no external
@@ -284,7 +294,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     for(Representation result : representations){
                         Entity entity = new EntityImpl(getId(),result,null);
                         results.add(entity);
-                        entity.getMetadata().set(RdfResourceEnum.isChached.getUri(), Boolean.TRUE);
+                        initEntityMetadata(entity,true);
                     }
                     return new QueryResultListImpl<Entity>(query, results, Entity.class);
                 } catch (YardException e) {
@@ -461,7 +471,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 Representation rep = cache.getRepresentation(id);
                 if(rep != null){
                    entity = new EntityImpl(getId(), rep, null);
-                   entity.getMetadata().set(RdfResourceEnum.isChached.getUri(), Boolean.TRUE);
+                   initEntityMetadata(entity, true);
                 } else if(siteConfiguration.getCacheStrategy() == CacheStrategy.all){
                     return null; //do no remote lokkups on CacheStrategy.all!!
                 }
@@ -513,13 +523,29 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     }
                 }
                 entity = new EntityImpl(getId(), rep, null);
-                entity.getMetadata().set(RdfResourceEnum.isChached.getUri(), cachedVersion);
+                initEntityMetadata(entity, cachedVersion);
             }
         } else {
             log.debug("  - loaded Representation {} from Cache in {} ms",
                     id, (System.currentTimeMillis() - start));
         }
         return entity;
+    }
+    /**
+     * Initialises the {@link Entity#getMetadata()} with the properties
+     * configured for this site (attribution and license information)
+     * @param entity the entity
+     * @param of this Entity is locally cached or not. If <code>null</code>
+     * this information is not set in the metadata.
+     */
+    private void initEntityMetadata(Entity entity, Boolean isChached) {
+        Representation metadata = entity.getMetadata();
+        if(isChached != null){
+            metadata.set(RdfResourceEnum.isChached.getUri(), isChached);
+        }
+        for(Entry<String,Object> entry : siteMetadata.entrySet()){
+            metadata.add(entry.getKey(), entry.getValue());
+        }
     }
     @Override
     public SiteConfiguration getConfiguration() {
@@ -630,6 +656,35 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 PROHIBITED_SITE_IDS));
         }
         log.info(" > initialise Referenced Site {}",siteConfiguration.getName());
+        siteMetadata = new HashMap<String,Object>();
+        ValueFactory vf = InMemoryValueFactory.getInstance();
+        if(siteConfiguration.getAttribution() != null){
+            siteMetadata.put(NamespaceEnum.cc.getNamespace()+"attributionName", 
+                vf.createText(siteConfiguration.getAttribution()));
+        }
+        if(siteConfiguration.getAttributionUrl() != null){
+            siteMetadata.put(NamespaceEnum.cc.getNamespace()+"attributionURL", 
+                vf.createReference(siteConfiguration.getAttributionUrl()));
+        }
+        //add the licenses
+        if(siteConfiguration.getLicenses() != null){
+            for(License license : siteConfiguration.getLicenses()){
+                if(license.getUrl() != null){
+                    siteMetadata.put(NamespaceEnum.cc.getNamespace()+"license", 
+                        vf.createReference(license.getUrl()));
+                } else if(license.getText() != null){
+                    siteMetadata.put(NamespaceEnum.cc.getNamespace()+"license", 
+                        vf.createText(license.getText()));
+                }
+                //if defined add the name to dc:license
+                if(license.getName() != null){
+                    siteMetadata.put(NamespaceEnum.dcTerms.getNamespace()+"license", 
+                        vf.createText(license.getName()));
+                }
+                //link to the license via cc:license
+            }
+        }
+        
         //if the accessUri is the same as the queryUri and both the dereferencer and
         //the entitySearcher uses the same component, than we need only one component
         //for both dependencies.
