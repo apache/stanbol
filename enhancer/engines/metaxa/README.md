@@ -35,7 +35,7 @@ to describe various types of metadata. An overview will be given below.
 
 The general structure of the Metaxa annotations consists of two levels of annotations illustrated in the following example:
 
-#### The top-level document metadata, referenced from the <tt>TextAnnotation</tt> instance via the *extracted-from* property:
+#### The top-level document metadata:
 
     <http://localhost:8080/store/content/mf_example.htm>
          a       <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#HtmlDocument> ;
