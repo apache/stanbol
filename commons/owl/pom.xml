@@ -90,6 +90,9 @@
       <artifactId>apache-rat-plugin</artifactId>
       <configuration>
         <excludes>
+          <!-- AL20 License -->
+          <exclude>src/license/THIRD-PARTY.properties</exclude>
+
           <!-- See src/main/resources/maven/repo/README file -->
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/maven-metadata-local.xml</exclude>
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.3/owlapi-3.2.3.pom</exclude>
