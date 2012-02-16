@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.Language;
@@ -337,5 +338,14 @@ public class ClerezzaBackend implements RDFBackend<Resource> {
         } else {
             throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
         }
+    }
+    
+    @Override
+    public boolean supportsThreading() {
+        return false;
+    }
+    @Override
+    public ThreadPoolExecutor getThreadPool() {
+        return null;
     }
 }
