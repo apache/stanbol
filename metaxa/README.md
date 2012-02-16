@@ -33,22 +33,7 @@ Metaxa are ascribed directly to the content item/document since they represent
 document properties and not text annotations. Various ontologies are employed
 to describe various types of metadata. An overview will be given below.
 
-The general structure of the Metaxa annotations consists of three levels of annotations illustrated in the following example:
-
-#### The top-level <tt>TextAnnotation</tt> instance
-
-    <urn:enhancement-03c9e85e-2681-21b7-a5af-6da62d67ef6b>
-         a       <http://fise.iks-project.eu/ontology/TextAnnotation> ,
-		         <http://fise.iks-project.eu/ontology/Enhancement> ;
-                 <http://fise.iks-project.eu/ontology/confidence>
-                     "1.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-         <http://fise.iks-project.eu/ontology/extracted-from>
-                 <http://localhost:8080/store/content/mf_example.htm> ;
-         <http://purl.org/dc/terms/created>
-                 "2010-09-22T09:06:53.056+02:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
-         <http://purl.org/dc/terms/creator>
-                  "org.apache.enhancer.engines.metaxa.MetaxaEngine"^^<http://www.w3.org/2001/XMLSchema#string> .
-
+The general structure of the Metaxa annotations consists of two levels of annotations illustrated in the following example:
 
 #### The top-level document metadata, referenced from the <tt>TextAnnotation</tt> instance via the *extracted-from* property:
 
@@ -159,9 +144,9 @@ following set of document formats:
   
 ### Textual Content
 
-Metaxa represents the plain text content of a document in the content item's metadata as the value of the property:
+The plain text content of a document in the content is stored in as a Blob. To retrieve it, use
 
-    http://www.semanticdesktop.org/ontologies/2007/01/19/nie#plainTextContent
+    String text = ContentItemHelper.getText(ContentItemHelper.getBlob(contentItem, java.util.Collections.singleton("text/plain")));
 
 ### Vocabularies
 
