@@ -554,12 +554,17 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             }
         }
         // EXIT nodes.
-        Set<OWLIndividual> ronts = new HashSet<OWLIndividual>();
+        Set<OWLIndividual> ironts = new HashSet<OWLIndividual>();
         for (OWLOntology o : registries)
-            ronts.addAll(ind.getObjectPropertyValues(hasOntology, o));
-        for (OWLIndividual iont : ronts) {
-            if (iont.isNamed()) lib.addChild(populateOntology(iont.asOWLNamedIndividual(), registries));
-        }
+            ironts.addAll(ind.getObjectPropertyValues(hasOntology, o));
+        for (OWLIndividual iront : ironts)
+            if (iront.isNamed()) {
+                IRI childId = iront.asOWLNamedIndividual().getIRI();
+                RegistryItem ront = population.get(childId);
+                if (ront != null) lib.addChild(ront);
+                else if (lib.getChild(childId) == null) lib.addChild(populateOntology(
+                    iront.asOWLNamedIndividual(), registries));
+            }
         return (Library) lib;
     }
 
@@ -585,9 +590,14 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         Set<OWLIndividual> libs = new HashSet<OWLIndividual>();
         for (OWLOntology o : registries)
             libs.addAll(ind.getObjectPropertyValues(isOntologyOf, o));
-        for (OWLIndividual ilib : libs) {
-            if (ilib.isNamed()) ront.addParent(populateLibrary(ilib.asOWLNamedIndividual(), registries));
-        }
+        for (OWLIndividual ilib : libs)
+            if (ilib.isNamed()) {
+                IRI parentId = ilib.asOWLNamedIndividual().getIRI();
+                RegistryItem rlib = population.get(parentId);
+                if (rlib != null) ront.addParent(rlib);
+                else if (ront.getParent(parentId) == null) ront.addParent(populateLibrary(
+                    ilib.asOWLNamedIndividual(), registries));
+            }
         return (RegistryOntology) ront;
     }
 
