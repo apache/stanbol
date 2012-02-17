@@ -137,6 +137,8 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * @return
      */
     int getOntologyCount(boolean withClosure);
+    
+    int getOntologyCount();
 
     /**
      * Determines if the ontology identified by the supplied <i>logical</i> IRI has been loaded in this space.<br>

@@ -573,6 +573,11 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
                 "Closure support not implemented efficiently yet. Please call getOntologyCount(false).");
         return managedOntologies.size();
     }
+    
+    @Override
+    public int getOntologyCount() {
+        return getOntologyCount(false);
+    }
 
     @Override
     public Set<Class<?>> getSupportedOntologyTypes() {

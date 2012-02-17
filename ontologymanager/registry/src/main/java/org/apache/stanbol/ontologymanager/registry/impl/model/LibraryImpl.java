@@ -20,13 +20,9 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
-import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.IllegalRegistryCycleException;
@@ -131,16 +127,24 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
 
     @Override
     public OWLOntology getOntology(IRI id) throws RegistryContentException {
-        Object store = cache.getStore();
-        if (store instanceof WeightedTcProvider) {
-            WeightedTcProvider wtcp = (WeightedTcProvider) store;
-            TripleCollection tc = wtcp.getTriples(new UriRef(id.toString()));
-            return OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tc);
-        } else if (store instanceof OWLOntologyManager) {
-            OWLOntologyManager omgr = (OWLOntologyManager) store;
-            return omgr.getOntology(id);
-        } else throw new IllegalStateException(
-                "Library implementation was assigned an unsupported cache type.");
+        /*
+         * Note that this implementation is not synchronized. Listeners may indefinitely be notified before or
+         * after the rest of this method is executed. If listeners call loadOntologies(), they could still get
+         * a RegistryContentException, which however they can catch by calling loadOntologies() and
+         * getOntologies() in sequence.
+         */
+        fireContentRequested(this);
+        // If no listener has saved the day by loading the ontologies by now, an exception will be thrown.
+        if (!loaded) throw new LibraryContentNotLoadedException(this);
+
+        OWLOntology ontology = null;
+
+        RegistryItem child = getChild(id);
+        if (child instanceof RegistryOntology) {
+            ontology = (OWLOntology) getCache().getStoredOntology(((RegistryOntology) child).getIRI(),
+                OWLOntology.class);
+        }
+        return ontology;
     }
 
     @Override

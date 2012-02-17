@@ -315,6 +315,11 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
             return set.size();
         }
     }
+    
+    @Override
+    public int getOntologyCount() {
+        return getOntologyCount(true);
+    }
 
     @Override
     public Set<Class<?>> getSupportedOntologyTypes() {

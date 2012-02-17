@@ -39,7 +39,7 @@
      </#list>
     </ul>
     
-    <p class="note">Administrators can enable, disable and deploy reasoning services using the <a href="/system/console/components" target="_blank">OSGi console</a>.</p>
+    <p class="note">Administrators can add, remove and load ontology registries using the <a href="/system/console/components" target="_blank">OSGi console</a>.</p>
    </div>
    
   </div> 

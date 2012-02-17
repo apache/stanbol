@@ -39,6 +39,9 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
+import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
+import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -60,11 +63,18 @@ public class StoredOntologyResource extends BaseStanbolResource {
      */
     protected OntologyProvider<?> ontologyProvider;
 
+    /*
+     * Placeholder for the OntologyProvider to be fetched from the servlet context.
+     */
+    protected RegistryManager registryManager;
+
     public StoredOntologyResource(@PathParam(value = "ontologyId") String ontologyId,
                                   @Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.ontologyProvider = (OntologyProvider<?>) ContextHelper.getServiceFromContext(
             OntologyProvider.class, servletContext);
+        this.registryManager = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
+            servletContext);
     }
 
     /**
@@ -87,35 +97,61 @@ public class StoredOntologyResource extends BaseStanbolResource {
                                        @Context UriInfo uriInfo,
                                        @Context HttpHeaders headers) {
         if (ontologyId == null) return Response.status(Status.BAD_REQUEST).build();
+        IRI iri = IRI.create(ontologyId);
+        log.debug("Will try to retrieve ontology {} from provider.", iri);
+        // TODO replace OWLOntology with Graph.
+        OWLOntology o = null;
         try {
-            IRI iri = IRI.create(ontologyId);
-            OWLOntology o = (OWLOntology) ontologyProvider.getStoredOntology(iri, OWLOntology.class, merged);
-            if (o == null) return Response.status(NOT_FOUND).build();
-
-            // Rewrite imports
-            String uri = uriInfo.getRequestUri().toString();
-            URI base = URI.create(uri.substring(0, uri.lastIndexOf(ontologyId) - 1));
-
-            // Rewrite import statements
-            List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-            OWLDataFactory df = o.getOWLOntologyManager().getOWLDataFactory();
-            /*
-             * TODO manage import rewrites better once the container ID is fully configurable (i.e. instead of
-             * going upOne() add "session" or "ontology" if needed).
-             */
-            for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
-                changes.add(new RemoveImport(o, oldImp));
-                String s = oldImp.getIRI().toString();
-                s = s.substring(s.indexOf("::") + 2, s.length());
-                IRI target = IRI.create(base + "/" + s);
-                changes.add(new AddImport(o, df.getOWLImportsDeclaration(target)));
-            }
-            o.getOWLOntologyManager().applyChanges(changes);
-
-            return Response.ok(o).build();
+            o = (OWLOntology) ontologyProvider.getStoredOntology(iri, OWLOntology.class, merged);
         } catch (Exception ex) {
-            return Response.status(Status.BAD_REQUEST).build();
+            log.warn("Retrieval of ontology with ID " + iri + " failed.", ex);
         }
+
+        if (o == null) {
+            log.debug("Ontology {} missing from provider. Trying libraries...", iri);
+            // See if we can touch a library. TODO: replace with event model on the ontology provider.
+            int minSize = -1;
+            IRI smallest = null;
+            for (Library lib : registryManager.getLibraries(iri)) {
+                int size = lib.getChildren().length;
+                if (minSize < 1 || size < minSize) {
+                    smallest = lib.getIRI();
+                    minSize = size;
+                }
+            }
+            log.debug("Selected library for ontology {} is {} .", iri, smallest);
+            try {
+                o = registryManager.getLibrary(smallest).getOntology(iri);
+            } catch (RegistryContentException e) {
+                log.warn("The content of library " + smallest + " could not be accessed.", e);
+            }
+        }
+        log.debug("Ontology {} not found in any ontology provider or library.", iri);
+        if (o == null) return Response.status(NOT_FOUND).build();
+
+        log.debug("Retrieved ontology {} .", iri);
+
+        // Rewrite imports
+        String uri = uriInfo.getRequestUri().toString();
+        URI base = URI.create(uri.substring(0, uri.lastIndexOf(ontologyId) - 1));
+
+        // Rewrite import statements
+        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+        OWLDataFactory df = o.getOWLOntologyManager().getOWLDataFactory();
+        /*
+         * TODO manage import rewrites better once the container ID is fully configurable (i.e. instead of
+         * going upOne() add "session" or "ontology" if needed).
+         */
+        for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
+            changes.add(new RemoveImport(o, oldImp));
+            String s = oldImp.getIRI().toString();
+            s = s.substring(s.indexOf("::") + 2, s.length());
+            IRI target = IRI.create(base + "/" + s);
+            changes.add(new AddImport(o, df.getOWLImportsDeclaration(target)));
+        }
+        o.getOWLOntologyManager().applyChanges(changes);
+
+        return Response.ok(o).build();
 
     }
 

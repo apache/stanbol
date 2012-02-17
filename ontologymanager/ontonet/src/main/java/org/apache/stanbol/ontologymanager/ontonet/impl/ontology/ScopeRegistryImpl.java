@@ -130,11 +130,6 @@ public class ScopeRegistryImpl implements ScopeRegistry {
             l.scopeRegistered(scope);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.ScopeRegistry#getActiveScopes()
-     */
     @Override
     public Set<OntologyScope> getActiveScopes() {
         Set<OntologyScope> scopes = new HashSet<OntologyScope>();
@@ -143,67 +138,32 @@ public class ScopeRegistryImpl implements ScopeRegistry {
         return scopes;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.ScopeRegistry#getRegisteredScopes()
-     */
     @Override
     public synchronized Set<OntologyScope> getRegisteredScopes() {
         return new HashSet<OntologyScope>(scopeMap.values());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.ScopeRegistry#getScope(org.semanticweb.owlapi.model.IRI)
-     */
     @Override
     public OntologyScope getScope(String scopeID) {
         return scopeMap.get(scopeID);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.ScopeRegistry#getScopeRegistrationListeners()
-     */
     @Override
     public Set<ScopeEventListener> getScopeRegistrationListeners() {
         return scopeListeners;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.iksproject.kres.api.manager.ontology.ScopeRegistry#isScopeActive(org.semanticweb.owlapi.model.IRI)
-     */
     @Override
     public boolean isScopeActive(String scopeID) {
         if (!containsScope(scopeID)) throw new NoSuchScopeException(scopeID);
         return activeScopeIRIs.contains(scopeID);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.iksproject.kres.api.manager.ontology.ScopeRegistry#registerScope(eu.iksproject.kres.api.manager.
-     * ontology.OntologyScope)
-     */
     @Override
     public synchronized void registerScope(OntologyScope scope) {
         registerScope(scope, false);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.iksproject.kres.api.manager.ontology.ScopeRegistry#registerScope(eu.iksproject.kres.api.manager.
-     * ontology.OntologyScope, boolean)
-     */
     @Override
     public synchronized void registerScope(OntologyScope scope, boolean activate) {
         scopeMap.put(scope.getID(), scope);
@@ -211,25 +171,11 @@ public class ScopeRegistryImpl implements ScopeRegistry {
         fireScopeRegistered(scope);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.iksproject.kres.api.manager.ontology.ScopeRegistry#removeScopeRegistrationListener(eu.iksproject
-     * .kres.api.manager.ontology.ScopeEventListener)
-     */
     @Override
     public void removeScopeRegistrationListener(ScopeEventListener listener) {
         scopeListeners.remove(listener);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.iksproject.kres.api.manager.ontology.ScopeRegistry#setScopeActive(org.semanticweb.owlapi.model.IRI,
-     * boolean)
-     */
     @Override
     public void setScopeActive(String scopeID, boolean active) {
         if (!containsScope(scopeID)) throw new NoSuchScopeException(scopeID);

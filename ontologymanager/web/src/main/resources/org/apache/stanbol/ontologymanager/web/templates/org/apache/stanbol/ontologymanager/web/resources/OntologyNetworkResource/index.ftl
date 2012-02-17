@@ -18,15 +18,62 @@
 <#import "/imports/ontonetDescription.ftl" as ontonetDescription>
 
 <#escape x as x?html>
-  <@common.page title="Apache Stanbol OntoNet scope manager" hasrestapi=false>
+  <@common.page title="Apache Stanbol OntoNet scope manager" hasrestapi=true>
 		
     <div class="panel" id="webview">
+      <#assign scopes = it.scopes>
       <p>This is the start page of the ontology scope manager.</p>
-    </div>
+      
+      <div class="storeContents">
+      	<table id="allScopes">
+		  <div>
+		    <tr>
+		  	  <th></th>
+		      <th>Name</th>
+              <th>Status</th>
+		      <th>Comment <#--TODO: fix image path  <img src="${it.staticRootUrl}/contenthub/images/rdf.png" alt="Format: RDF"/> --></th>
+			  <th>&#35;Ontologies</th>
+		    </tr>
+		    <#list it.scopes as scope>
+		      <tr>
+			    <td>
+                  <img src="${it.staticRootUrl}/contenthub/images/edit_icon_16.png" title="Edit this item" />
+                  <img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="Delete this item" />
+                </td>
+                <td><a href="${scope.ID}" title="${scope.ID}">${scope.ID}</a></td>
+                <td>${scope.locked?string("locked", "modifiable")}</td>
+                <td></td>
+                <td>${scope.coreSpace.ontologyCount + scope.customSpace.ontologyCount}</td>
+		      </tr>
+		    </#list>
+		  </div>
+	    </table> <!-- allScopes -->
+      </div>
+      
+      <!-- Collapsible version -->
+      <div class="enginelisting">
+        <p class="collapseheader">Ontology Scopes: 
+        </p>
+        <div class="collapsable">
+          <ul>
+            <#list it.scopes as scope>
+            <li>
+              <b>${scope.ID}</b> 
+            </li>
+            </#list>
+          </ul>
+        </div> <!-- collapsible-->
+      </div> <!-- scope listing -->
+    </div> <!-- web view -->
     
-    <hr>
+    <div class="panel" id="restapi" style="display: none;">
+
+    <h3>Service Endpoints</h3>
     <#include "/imports/inc_scopemgr.ftl">
     <#include "/imports/inc_scope.ftl">
+
+    </div>
+
 
   </@common.page>
 </#escape>

@@ -104,9 +104,9 @@ public class OntologyNetworkResource extends BaseStanbolResource {
     @GET
     @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
                        KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
-    public Response getScopes(@DefaultValue("false") @QueryParam("with-inactive") boolean inactive,
-                              @Context HttpHeaders headers,
-                              @Context ServletContext servletContext) {
+    public Response getScopeModel(@DefaultValue("false") @QueryParam("with-inactive") boolean inactive,
+                                  @Context HttpHeaders headers,
+                                  @Context ServletContext servletContext) {
 
         ScopeRegistry reg = onm.getScopeRegistry();
 
@@ -115,6 +115,14 @@ public class OntologyNetworkResource extends BaseStanbolResource {
         OWLOntology ontology = ScopeSetRenderer.getScopes(scopes);
 
         return Response.ok(ontology).build();
+    }
+
+    public Set<OntologyScope> getScopes() {
+        return onm.getScopeRegistry().getRegisteredScopes();
+    }
+    
+    public Set<OntologyScope> getActiveScopes() {
+        return onm.getScopeRegistry().getActiveScopes();
     }
 
     @GET

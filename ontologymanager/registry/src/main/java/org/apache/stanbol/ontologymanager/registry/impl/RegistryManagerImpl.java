@@ -126,7 +126,10 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
     @Reference
     private OfflineConfiguration offline;
 
-    /* Maps libraries to ontologies */
+    /*
+     * Maps libraries (values) to ontologies (keys). This does not keep track of the loading status of each
+     * library, as it is handled by the library itelf.
+     */
     private Map<IRI,Set<IRI>> ontologyIndex = new HashMap<IRI,Set<IRI>>();
 
     private Map<IRI,RegistryItem> population = new TreeMap<IRI,RegistryItem>();
@@ -536,13 +539,13 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
     }
 
     protected Library populateLibrary(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
-        IRI id = ind.getIRI();
+        IRI libId = ind.getIRI();
         RegistryItem lib = null;
-        if (population.containsKey(id)) {
+        if (population.containsKey(libId)) {
             // We are not allowing multityping either.
-            lib = population.get(id);
+            lib = population.get(libId);
             if (!(lib instanceof Library)) throw new RegistryContentException(
-                    "Inconsistent multityping: for item " + id + " : {" + Library.class + ", "
+                    "Inconsistent multityping: for item " + libId + " : {" + Library.class + ", "
                             + lib.getClass() + "}");
         } else {
             lib = riFactory.createLibrary(ind.asOWLNamedIndividual());
@@ -560,22 +563,25 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         for (OWLIndividual iront : ironts)
             if (iront.isNamed()) {
                 IRI childId = iront.asOWLNamedIndividual().getIRI();
+                // If some populate*() method has created it, it will be there.
                 RegistryItem ront = population.get(childId);
-                if (ront != null) lib.addChild(ront);
-                else if (lib.getChild(childId) == null) lib.addChild(populateOntology(
-                    iront.asOWLNamedIndividual(), registries));
+                // Otherwise populating it will also put it in population.
+                if (ront == null) ront = populateOntology(iront.asOWLNamedIndividual(), registries);
+                lib.addChild(ront);
+                if (ontologyIndex.get(childId) == null) ontologyIndex.put(childId, new HashSet<IRI>());
+                ontologyIndex.get(childId).add(libId);
             }
         return (Library) lib;
     }
 
     protected RegistryOntology populateOntology(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
-        IRI id = ind.getIRI();
+        IRI ontId = ind.getIRI();
         RegistryItem ront = null;
-        if (population.containsKey(id)) {
+        if (population.containsKey(ontId)) {
             // We are not allowing multityping either.
-            ront = population.get(id);
+            ront = population.get(ontId);
             if (!(ront instanceof RegistryOntology)) throw new RegistryContentException(
-                    "Inconsistent multityping: for item " + id + " : {" + RegistryOntology.class + ", "
+                    "Inconsistent multityping: for item " + ontId + " : {" + RegistryOntology.class + ", "
                             + ront.getClass() + "}");
         } else {
             ront = riFactory.createRegistryOntology(ind);
@@ -593,10 +599,13 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         for (OWLIndividual ilib : libs)
             if (ilib.isNamed()) {
                 IRI parentId = ilib.asOWLNamedIndividual().getIRI();
+                // If some populate*() method has created it, it will be there.
                 RegistryItem rlib = population.get(parentId);
-                if (rlib != null) ront.addParent(rlib);
-                else if (ront.getParent(parentId) == null) ront.addParent(populateLibrary(
-                    ilib.asOWLNamedIndividual(), registries));
+                // Otherwise populating it will also put it in population.
+                if (rlib == null) rlib = populateLibrary(ilib.asOWLNamedIndividual(), registries);
+                ront.addParent(rlib);
+                if (ontologyIndex.get(ontId) == null) ontologyIndex.put(ontId, new HashSet<IRI>());
+                ontologyIndex.get(ontId).add(parentId);
             }
         return (RegistryOntology) ront;
     }

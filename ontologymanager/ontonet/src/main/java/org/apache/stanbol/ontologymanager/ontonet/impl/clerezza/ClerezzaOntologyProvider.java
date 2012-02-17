@@ -318,12 +318,16 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
     @Override
     public <O> O getStoredOntology(IRI reference, Class<O> returnType) {
-        return getStoredOntology(getKey(reference), returnType);
+        return getStoredOntology(reference, returnType, false);
     }
 
     @Override
     public <O> O getStoredOntology(IRI reference, Class<O> returnType, boolean forceMerge) {
-        return getStoredOntology(getKey(reference), returnType, forceMerge);
+        String key = getKey(reference);
+        if (key == null || key.isEmpty()) {
+            log.warn("No key found for IRI {}", reference);
+            return null;
+        } else return getStoredOntology(key, returnType, forceMerge);
     }
 
     @Override
@@ -337,11 +341,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     @SuppressWarnings("unchecked")
     @Override
     public <O> O getStoredOntology(String identifier, Class<O> returnType, boolean forceMerge) {
-        if (identifier == null) throw new IllegalArgumentException("Identifier cannot be null");
+        if (identifier == null || identifier.isEmpty()) throw new IllegalArgumentException(
+                "Identifier cannot be null or empty.");
         if (returnType == null) {
             // Defaults to OWLOntology
             returnType = (Class<O>) OWLOntology.class;
-            log.warn("No return type given for ontologies. Will return a {}", returnType);
+            log.warn("No return type given for the ontology. Will return a {}", returnType.getCanonicalName());
         }
         boolean canDo = false;
         for (Class<?> clazz : getSupportedReturnTypes())
@@ -350,11 +355,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
                 break;
             }
         if (!canDo) throw new UnsupportedOperationException(
-                "Return type " + returnType
+                "Return type " + returnType.getCanonicalName()
                         + " is not allowed in this implementation. Only allowed return types are "
                         + supported);
 
         TripleCollection tc = store.getTriples(new UriRef(identifier));
+        if (tc == null) return null;
 
         if (MGraph.class.isAssignableFrom(returnType)) {
             return returnType.cast(tc);
@@ -362,7 +368,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             try {
                 return (O) toOWLOntology(new UriRef(identifier), forceMerge);
             } catch (OWLOntologyCreationException e) {
-                log.error("Failed to return stored ontology " + identifier + " as type " + returnType, e);
+                log.error(
+                    "Failed to return stored ontology " + identifier + " as type "
+                            + returnType.getCanonicalName(), e);
             }
         }
 

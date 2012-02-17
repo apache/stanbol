@@ -124,7 +124,7 @@ public class OntonetFragment implements WebFragment {
     @Override
     public List<LinkResource> getLinkResources() {
         List<LinkResource> resources = new ArrayList<LinkResource>();
-        resources.add(new LinkResource("stylesheet", "css/ontonet.css", this, 10));
+        resources.add(new LinkResource("stylesheet", "style/ontonet.css", this, 10));
         return resources;
     }
 
@@ -143,7 +143,7 @@ public class OntonetFragment implements WebFragment {
     @Override
     public List<ScriptResource> getScriptResources() {
         List<ScriptResource> resources = new ArrayList<ScriptResource>();
-        resources.add(new ScriptResource("text/javascript", "actions/actions.js", this, 10));
+        resources.add(new ScriptResource("text/javascript", "scripts/actions.js", this, 10));
         return resources;
     }
 

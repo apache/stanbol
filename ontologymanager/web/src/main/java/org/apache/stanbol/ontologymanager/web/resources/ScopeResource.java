@@ -234,7 +234,7 @@ public class ScopeResource extends BaseStanbolResource {
                                   @QueryParam("coreont") String coreOntology,
                                   @QueryParam("customreg") String customRegistry,
                                   @QueryParam("customont") String customOntology,
-                                  @DefaultValue("false") @QueryParam("activate") String activate,
+                                  @DefaultValue("false") @QueryParam("activate") boolean activate,
                                   @Context UriInfo uriInfo,
                                   @Context HttpHeaders headers,
                                   @Context ServletContext servletContext) {
@@ -303,11 +303,7 @@ public class ScopeResource extends BaseStanbolResource {
             // still be open for modification.
             scope.setUp();
             reg.registerScope(scope);
-            boolean activateBool = true;
-            if (activate != null && !activate.equals("")) {
-                activateBool = Boolean.valueOf(activate);
-            }
-            reg.setScopeActive(scopeid, activateBool);
+            reg.setScopeActive(scopeid, activate);
         } catch (DuplicateIDException e) {
             throw new WebApplicationException(e, CONFLICT);
         } catch (Exception ex) {
