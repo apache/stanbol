@@ -212,7 +212,7 @@ of the Stanbol Enhancer. (see also
 Stanbol homepage. -->
 
 <ul>
-<li><code>outputContentType=[mediaType]</code>: Allows to specify the Mimetypes
+<li><code>outputContent=[mediaType]</code>: Allows to specify the Mimetypes
 of content included within the Response of the Stanbol Enhancer. This parameter
 supports wild cards (e.g. '*' ... all, 'text/*'' ... all text versions, 
 'text/plain' ... only the plain text version). This parameter can be used
@@ -224,9 +224,9 @@ compatible to <code>multipart/from-data</code> it is assumed as a #
 be included in a content part with the name "content" and the Mimetype 
 <code>multipart/alternate</code>.</li>
 <li><code>omitParsed=[true/false]</code>: Makes only sense in combination with 
-the <code>outputContentType</code> parameter. This allows to exclude all
+the <code>outputContent</code> parameter. This allows to exclude all
 content included in the request from the response. A typical combination is
-<code>outputContentType=*/*&omitParsed=true</code>. The default value of this
+<code>outputContent=*/*&omitParsed=true</code>. The default value of this
 parameter is <code>false</code></li>
 <li><code>outputContentPart=[uri/'*']</code>: This parameter allows to
 explicitly include content parts with a specific URI in the response. Currently
