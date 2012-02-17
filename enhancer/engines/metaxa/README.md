@@ -147,6 +147,10 @@ following set of document formats:
 The plain text content of a document in the content is stored in as a Blob. To retrieve it, use
 
     String text = ContentItemHelper.getText(ContentItemHelper.getBlob(contentItem, java.util.Collections.singleton("text/plain")));
+    
+An alternative is to have extracted plain text content included directly into the metadata by setting the property <pre><code>org.apache.stanbol.enhancer.engines.metaxa.includeText</pre></code> to true. Extracted text then is available as value of the property
+
+		http://www.semanticdesktop.org/ontologies/2007/01/19/nie#plainTextContent
 
 ### Vocabularies
 
@@ -273,6 +277,14 @@ The alternative configuration files then can be set as values of the properties
 
 * <pre><code>org.apache.stanbol.enhancer.engines.metaxa.htmlextractors</pre></code>
 
+Other configuration options:
+
+* <pre><code>org.apache.stanbol.enhancer.engines.metaxa.includeText</pre></code> provides an option to include extracted plain text directly into the metadata as value of the property
+
+		http://www.semanticdesktop.org/ontologies/2007/01/19/nie#plainTextContent
+		
+* <pre><code>org.apache.stanbol.enhancer.engines.metaxa.ignoreMimeTypes</pre></code> allows to specify a set of mime types that Metaxa should ignore. By default, plain text documents are ignored.
+
 ## Usage
 
 Assuming that the Stanbol endpoint with the full launcher is running at
@@ -283,7 +295,7 @@ and the engine is activated, from the command line commands like this can be use
 
 * stateless interface
 
-    curl -i -X POST -H "Content-Type:text/html" -T testpage.html http://localhost:8080/engines
+    curl -i -X POST -H "Content-Type:text/html" -T testpage.html http://localhost:8080/enhancer
 
 * stateful interface
 
