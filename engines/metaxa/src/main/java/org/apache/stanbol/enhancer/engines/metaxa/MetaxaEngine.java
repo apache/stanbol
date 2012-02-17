@@ -103,7 +103,7 @@ public class MetaxaEngine
     public static final Integer defaultOrder = ORDERING_PRE_PROCESSING;
 
     /**
-     * name of a file defining the available docuemnt extractors for Metaxa. By defualt, the builtin file 'extractionregistry.xml' is used.
+     * name of a file defining the available docuemnt extractors for Metaxa. By default, the builtin file 'extractionregistry.xml' is used.
      */
     @Property(value=MetaxaEngine.DEFAULT_EXTRACTION_REGISTRY)
     public static final String GLOBAL_EXTRACTOR_REGISTRY = "org.apache.stanbol.enhancer.engines.metaxa.extractionregistry";
@@ -116,6 +116,12 @@ public class MetaxaEngine
 
     @Property(value={"text/plain"},cardinality=1000)
     public static final String IGNORE_MIME_TYPES = "org.apache.stanbol.enhancer.engines.metaxa.ignoreMimeTypes";
+
+    /**
+     * a boolean option whether extracted text should be included in the metadata as value of the NIE.plainTextContent property
+     */
+    @Property(boolValue=false)
+    public static final String INCLUDE_TEXT_IN_METADATA = "org.apache.stanbol.enhancer.engines.metaxa.includeText";
     private MetaxaCore extractor;
     
     BundleContext bundleContext;
@@ -124,6 +130,7 @@ public class MetaxaEngine
     public static final String DEFAULT_HTML_EXTRACTOR_REGISTRY = "htmlextractors.xml";
     
     private Set<String> ignoredMimeTypes;
+    private boolean includeText = false;
 
     /**
      * The activate method.
@@ -167,6 +174,11 @@ public class MetaxaEngine
             ignoredMimeTypes = Collections.singleton(value.toString());
         } else {
             ignoredMimeTypes = Collections.singleton("text/plain");
+        }
+        value = ce.getProperties().get(INCLUDE_TEXT_IN_METADATA);
+        if (value instanceof Boolean) {
+          includeText = ((Boolean)value).booleanValue();
+          log.info("Include Text set to: {}",value);
         }
     }
 
@@ -234,6 +246,12 @@ public class MetaxaEngine
                     if(oneStmt.getSubject().equals(docId) && 
                             oneStmt.getPredicate().equals(NIE_PLAINTEXT_PROPERTY)){
                         out.write(oneStmt.getObject().toString());
+                        if (includeText) {
+                          NonLiteral subject = (NonLiteral) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
+                          UriRef predicate = (UriRef) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
+                          Resource object = asClerezzaResource(oneStmt.getObject(), blankNodeMap);
+                          g.add(new TripleImpl(subject, predicate, object));
+                        }
                     } else { //add metadata to the metadata of the contentItem
                         NonLiteral subject = (NonLiteral) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
                         UriRef predicate = (UriRef) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
