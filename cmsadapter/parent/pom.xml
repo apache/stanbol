@@ -19,6 +19,7 @@
     <version>0.9.0-incubating-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
+
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
   <packaging>pom</packaging>
@@ -33,88 +34,6 @@
   <developers>
     <!-- TBD -->
   </developers>
-
-  <dependencyManagement>
-    <dependencies>
-      <!-- CMS Adapter -->
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.core</artifactId>
-        <version>0.9.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.rest.client</artifactId>
-        <version>0.9.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.jcr</artifactId>
-        <version>0.9.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.cmis</artifactId>
-        <version>0.9.0-incubating-SNAPSHOT</version>
-      </dependency>
-
-      <!-- CMIS -->
-      <dependency>
-        <groupId>org.apache.chemistry.opencmis</groupId>
-        <artifactId>chemistry-opencmis-client-api</artifactId>
-        <version>0.4.0</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.chemistry.opencmis</groupId>
-        <artifactId>chemistry-opencmis-client-impl</artifactId>
-        <version>0.4.0</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!-- JCR -->
-      <dependency>
-        <groupId>javax.jcr</groupId>
-        <artifactId>jcr</artifactId>
-        <version>2.0</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.jackrabbit</groupId>
-        <artifactId>jackrabbit-jcr-rmi</artifactId>
-        <version>2.2.5</version>
-        <scope>provided</scope>
-        <exclusions>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.jackrabbit</groupId>
-        <artifactId>jackrabbit-jcr-commons</artifactId>
-        <version>2.2.5</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!-- Jersey -->
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-client</artifactId>
-        <version>1.7</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!-- Clerezza -->
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.jena.facade</artifactId>
-        <version>0.12-incubating-SNAPSHOT</version>
-        <scope>provided</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <profiles>
     <profile>
@@ -137,7 +56,4 @@
     </profile>
   </profiles>
 
-  <properties>
-    <chemistryVersion>0.4.0</chemistryVersion>
-  </properties>
 </project>
