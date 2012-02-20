@@ -190,47 +190,47 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
-      <version>0.12-incubating-SNAPSHOT</version>
+      <version>0.12-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.utils</artifactId>
-      <version>0.13-incubating-SNAPSHOT</version>
+      <version>0.13-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>utils</artifactId>
-      <version>0.1-incubating-SNAPSHOT</version>
+      <version>0.1-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.ontologies</artifactId>
-      <version>0.11-incubating-SNAPSHOT</version>
+      <version>0.11-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.sparql</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
+      <version>0.5-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.commons</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
+      <version>0.5-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.facade</artifactId>
-      <version>0.12-incubating-SNAPSHOT</version>
+      <version>0.12-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza.ext</groupId>
       <artifactId>com.hp.hpl.jena.tdb</artifactId>
-      <version>0.3-incubating-SNAPSHOT</version>
+      <version>0.3-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza.ext</groupId>
       <artifactId>javax.mail</artifactId>
-      <version>0.4-incubating-SNAPSHOT</version>
+      <version>0.4-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.wymiwyg</groupId>
@@ -240,37 +240,37 @@
     <bundle>
       <groupId>org.apache.clerezza.ext</groupId>
       <artifactId>com.ibm.icu</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
+      <version>0.5-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.storage</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
+      <version>0.5-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.tdb.storage</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
+      <version>0.5-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.serializer</artifactId>
-      <version>0.9-incubating-SNAPSHOT</version>
+      <version>0.9-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.parser</artifactId>
-      <version>0.10-incubating-SNAPSHOT</version>
+      <version>0.10-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.rdfjson</artifactId>
-      <version>0.3-incubating-SNAPSHOT</version>
+      <version>0.3-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza.ext</groupId>
       <artifactId>org.json.simple</artifactId>
-      <version>0.3-incubating-SNAPSHOT</version>
+      <version>0.3-incubating</version>
     </bundle>
     <!-- 
       Add support for fast index based in-memory models
