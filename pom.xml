@@ -763,13 +763,6 @@
         <!-- <type>jar</type>
         <scope>compile</scope> -->
       </dependency>
-
-      <!-- CMS Adapter -->      
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
-        <version>0.9.0-incubating-SNAPSHOT</version>
-      </dependency>
       
       <dependency>
         <groupId>org.apache.stanbol</groupId>
@@ -786,11 +779,81 @@
         <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
+
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.configadmin</artifactId>
         <version>1.2.8</version>
       </dependency>
+
+      <!-- CMS Adapter -->      
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.cmsadapter.core</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.cmsadapter.rest.client</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.cmsadapter.jcr</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.cmsadapter.cmis</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+
+
+      <!-- CMIS -->
+      <dependency>
+        <groupId>org.apache.chemistry.opencmis</groupId>
+        <artifactId>chemistry-opencmis-client-api</artifactId>
+        <version>0.4.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.chemistry.opencmis</groupId>
+        <artifactId>chemistry-opencmis-client-impl</artifactId>
+        <version>0.4.0</version>
+      </dependency>
+
+      <!-- JCR -->
+      <dependency>
+        <groupId>javax.jcr</groupId>
+        <artifactId>jcr</artifactId>
+        <version>2.0</version>
+      </dependency>      
+      <dependency>
+        <groupId>org.apache.jackrabbit</groupId>
+        <artifactId>jackrabbit-jcr-rmi</artifactId>
+        <version>2.2.5</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.jackrabbit</groupId>
+        <artifactId>jackrabbit-jcr-commons</artifactId>
+        <version>2.2.5</version>
+      </dependency>
+
 
       <!-- Partial bundle list dependencies -->
       <dependency>
@@ -906,7 +969,7 @@
       <dependency>
         <groupId>org.apache.clerezza.ext</groupId>
         <artifactId>com.ibm.icu</artifactId>
-        <version>0.5-incubating-SNAPSHOT</version>
+        <version>0.5-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.wymiwyg</groupId>
@@ -916,78 +979,89 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>utils</artifactId>
-        <version>0.1-incubating-SNAPSHOT</version>
+        <version>0.1-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core</artifactId>
-        <version>0.12-incubating-SNAPSHOT</version>
+        <version>0.12-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.utils</artifactId>
-        <version>0.13-incubating-SNAPSHOT</version>
+        <version>0.13-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.metadata</artifactId>
-        <version>0.1-incubating-SNAPSHOT</version>
+        <version>0.1-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.ontologies</artifactId>
-        <version>0.11-incubating-SNAPSHOT</version>
+        <version>0.11-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.serializer</artifactId>
-        <version>0.9-incubating-SNAPSHOT</version>
+        <version>0.9-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.parser</artifactId>
-        <version>0.10-incubating-SNAPSHOT</version>
+        <version>0.10-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.sparql</artifactId>
-        <version>0.5-incubating-SNAPSHOT</version>
+        <version>0.5-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.rdfjson</artifactId>
-        <version>0.3-incubating-SNAPSHOT</version>
+        <version>0.3-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>platform.content</artifactId>
-        <version>0.13-incubating-SNAPSHOT</version>
+        <version>0.13-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>platform.graphprovider.content</artifactId>
-        <version>0.6-incubating-SNAPSHOT</version>
+        <version>0.6-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>platform.typerendering.scalaserverpages</artifactId>
-        <version>0.3-incubating-SNAPSHOT</version>
+        <version>0.3-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>jaxrs.rdf.providers</artifactId>
-        <version>0.13-incubating-SNAPSHOT</version>
+        <version>0.13-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.simple.storage</artifactId>
-        <version>0.7-incubating-SNAPSHOT</version>
+        <version>0.7-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.facade</artifactId>
-        <version>0.12-incubating-SNAPSHOT</version>
+        <version>0.12-incubating</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.ontologies</artifactId>
+        <version>0.11-incubating</version>
+      </dependency>      
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.core.test</artifactId>
+        <version>0.13-incubating</version>
+      </dependency>
+
 
       <!-- Commons -->
       <dependency>
