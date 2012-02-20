@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -29,14 +30,12 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
+import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
@@ -54,9 +53,11 @@ import org.semanticweb.owlapi.util.AutoIRIMapper;
  */
 public class TestOntologyRegistry {
 
-    private String scopeIri = "Scope";
-    private static ONManager onm;
     private static RegistryManager regman;
+
+    /*
+     * This ontology manager will be empty on every test, except that it will have mappings to test resources.
+     */
     private OWLOntologyManager virginOntologyManager;
 
     /**
@@ -71,8 +72,6 @@ public class TestOntologyRegistry {
         // The registry manager can be updated via calls to createModel()
         regman = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(new SimpleTcProvider(),
                 offline, new Parser()), config);
-        // An ONManager with no storage support and same offline settings as the registry manager.
-        onm = new ONManagerImpl(null, null, offline, config);
     }
 
     /**
@@ -83,6 +82,7 @@ public class TestOntologyRegistry {
     @Before
     public void setupSources() throws Exception {
         virginOntologyManager = OWLManager.createOWLOntologyManager();
+        // Add mappings for any ontologies found in ontologies/registry
         URL url = getClass().getResource("/ontologies/registry");
         assertNotNull(url);
         virginOntologyManager.addIRIMapper(new AutoIRIMapper(new File(url.toURI()), true));
@@ -109,9 +109,35 @@ public class TestOntologyRegistry {
         // The nonexistent library should also be included, if using the more powerful algorithm.
         int count = 3; // set to 2 if using the less powerful algorithm.
         assertEquals(count, r.getChildren().length);
-        // There are no libreries without ontologies in the test registry.
+        // There are no libraries without ontologies in the test registry.
         for (RegistryItem ri : r.getChildren())
             assertTrue(ri.hasChildren());
+    }
+
+    @Test
+    public void testLoopInLibrary() throws Exception {
+        // Create the model from the looping registry.
+        OWLOntology oReg = virginOntologyManager.loadOntology(Locations._REGISTRY_TEST_LOOP);
+        Set<Registry> rs = regman.createModel(Collections.singleton(oReg));
+
+        // There has to be a single registry, with the expected number of children (one).
+        assertEquals(1, rs.size());
+        Registry r = rs.iterator().next();
+        assertTrue(r.hasChildren());
+        int count = 1;
+        assertEquals(count, r.getChildren().length);
+        // There are no libreries without ontologies in the test registry.
+        for (RegistryItem child : r.getChildren()) {
+            assertTrue(child instanceof Library);
+            // Check both parent-child relations.
+            assertTrue(child.hasChildren());
+            for (RegistryItem grandchild : child.getChildren()) {
+                assertTrue(grandchild instanceof RegistryOntology);
+                assertTrue(grandchild.hasParents());
+                assertTrue(Arrays.asList(grandchild.getParents()).contains(child));
+            }
+        }
+
     }
 
     /**
@@ -152,46 +178,5 @@ public class TestOntologyRegistry {
             }
         }
     }
-
-    // /**
-    // * Verifies that the addition of a null or valid registry source to a session space works.
-    // */
-    // @Test
-    // public void testAddRegistryToSessionSpace() throws Exception {
-    // SessionOntologySpace space = null;
-    // space = onm.getOntologySpaceFactory().createSessionOntologySpace(scopeIri);
-    // space.setUp();
-    // // space.addOntology(new
-    // // OntologyRegistryIRISource(testRegistryIri,onm.getOwlCacheManager(),onm.getRegistryLoader()));
-    // space.addOntology(ontologySource);
-    // // FIXME : no longer use the top ontology?
-    // assertTrue(space.asOWLOntology() != null);
-    // assertTrue(space.getOntologies(true).contains(space.asOWLOntology()));
-    // }
-    //
-    // /**
-    // * Verifies that an ontology scope with a null or valid registry source is created correctly.
-    // */
-    // @Test
-    // public void testScopeCreationWithRegistry() throws Exception {
-    // OntologyScope scope = null;
-    // // The input source instantiation automatically loads the entire content of a registry, no need to
-    // // test loading methods individually.
-    // scope = onm.getOntologyScopeFactory().createOntologyScope(scopeIri, ontologySource);
-    // assertTrue(scope != null && scope.getCoreSpace().asOWLOntology() != null);
-    // }
-    //
-    // /**
-    // * Verifies that an ontology space with a null or valid registry source is created correctly.
-    // */
-    // @Test
-    // public void testSpaceCreationWithRegistry() throws Exception {
-    // // setupOfflineMapper();
-    // CoreOntologySpace space = null;
-    // // The input source instantiation automatically loads the entire content of a registry, no need to
-    // // test loading methods individually.
-    // space = onm.getOntologySpaceFactory().createCoreOntologySpace(scopeIri, ontologySource);
-    // assertTrue(space != null && space.asOWLOntology() != null);
-    // }
 
 }

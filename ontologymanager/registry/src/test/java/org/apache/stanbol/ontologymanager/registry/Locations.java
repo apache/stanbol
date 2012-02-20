@@ -40,6 +40,12 @@ public class Locations {
                                                                   + "registries/onmtest_additions.owl");
 
     /**
+     * Default physical location of the ontology registry for testing.
+     */
+    public static final IRI _REGISTRY_TEST_LOOP = IRI.create(__STANBOL_ONT_NAMESPACE
+                                                             + "registries/onmtest_inversepair.owl");
+
+    /**
      * An ontology in test library 1 but not in test library 2.
      */
     public static final IRI CHAR_ACTIVE = IRI.create(__STANBOL_ONT_NAMESPACE + "pcomics/characters_all.owl");

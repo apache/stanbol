@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:meta="http://www.ontologydesignpatterns.org/schemas/meta.owl#"
+    xmlns="http://stanbol.apache.org/ontologies/registries/onmtest.owl#"
+    xml:base="http://stanbol.apache.org/ontologies/registries/onmtest_inversepair.owl">
+    <owl:Ontology rdf:about="">
+        <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1.0</owl:versionInfo>
+        <owl:versionInfo xml:lang="en">Created by Alessandro Adamou</owl:versionInfo>
+        <owl:versionInfo xml:lang="en">Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+        </owl:versionInfo>
+        <rdfs:comment>A registry that introduces a materialization of the pair (hasOntology,isOntologyof). It is used to test if this causes loops when building the model, and to verify its equivalence with having only one predicate.</rdfs:comment>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/meta.owl"/>
+    </owl:Ontology>
+  
+    <!-- For testing additions to other libraries -->
+    <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/testloop.owl">
+        <meta:isOntologyOf rdf:resource="http://stanbol.apache.org/ontologies/registries/onmtest.owl#Library1"/>
+        <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+    </rdf:Description>
+    
+    <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/registries/onmtest.owl#Library1">
+        <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary"/>
+        <meta:hasOntology rdf:resource="http://stanbol.apache.org/ontologies/testloop.owl"/>
+    </rdf:Description>
+    
+</rdf:RDF>
