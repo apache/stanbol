@@ -85,23 +85,6 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>compile</phase>
-            <goals>
-              <goal>add-third-party</goal>
-            </goals>
-            <configuration>
-              <groupByLicense>true</groupByLicense>
-              <outputDirectory>${project.build.directory}/maven-shared-archive-resources/META-INF</outputDirectory>
-              <thirdPartyFilename>DEPENDENCIES-BY-LICENSE</thirdPartyFilename>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <!-- Compile for Java 6, source is Java 6 -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -1837,8 +1820,11 @@
                   <goal>add-third-party</goal>
                 </goals>
                 <configuration>
+                  <groupByLicense>true</groupByLicense>
                   <failIfWarning>true</failIfWarning>
                   <useMissingFile>true</useMissingFile>
+                  <outputDirectory>${project.build.directory}/maven-shared-archive-resources/META-INF</outputDirectory>
+                  <thirdPartyFilename>DEPENDENCIES-BY-LICENSE</thirdPartyFilename>
                 </configuration>
               </execution>
             </executions>
@@ -1868,7 +1854,25 @@
               </dependency>
             </dependencies>
           </plugin>
-        </plugins>	
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>add-third-party</goal>
+                </goals>
+                <configuration>
+                  <groupByLicense>true</groupByLicense>
+                  <failIfWarning>true</failIfWarning>
+                  <useMissingFile>true</useMissingFile>
+                  <outputDirectory>${project.build.directory}/maven-shared-archive-resources/META-INF</outputDirectory>
+                  <thirdPartyFilename>DEPENDENCIES-BY-LICENSE</thirdPartyFilename>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>          
+        </plugins>
       </build>
     </profile>
   </profiles>
