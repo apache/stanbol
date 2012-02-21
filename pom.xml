@@ -155,6 +155,7 @@
                 <exclude>**/test/**/*.nt</exclude>
 
                 <!-- approved licenses, see modules' POMs for details -->
+                <exclude>**/src/license/THIRD-PARTY.properties</exclude>
                 <exclude>contenthub/web/src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jit.js</exclude>
                 <exclude>enhancer/jersey/src/main/resources/org/apache/stanbol/enhancer/jersey/static/openlayers-2.9/**</exclude>
                 <exclude>commons/owl/**</exclude>
@@ -192,6 +193,10 @@
                   <goal>aggregate-add-third-party</goal>
                 </goals>
                 <configuration>
+                  <groupByLicense>true</groupByLicense>
+                  <failIfWarning>true</failIfWarning>
+                  <useMissingFile>true</useMissingFile>
+
                   <licenseMerges>
                     <licenseMerge>Apache Software License|AL|Apache Software Licenses|Apache License</licenseMerge>
                     <licenseMerge>Apache Software License, Version 1.1|AL 1.1|Apache Software License, Version 1.1</licenseMerge>
@@ -202,7 +207,7 @@
                     <licenseMerge>Common Public License, Version 1.0|CPL 1.0|Common Public License Version 1.0</licenseMerge>
                     <licenseMerge>Eclipse Public License, Version 1.0|Eclipse Public License - Version 1.0|Eclipse Public License - v 1.0</licenseMerge>
                     <licenseMerge>GNU General Public License (GPL), Version 2 with classpath exception|GPLv2 with classpath exception|GPL2 w/ CPE</licenseMerge>
-                    <licenseMerge>GNU Lesser General Public License (LGPL)|LGPL</licenseMerge>
+                    <licenseMerge>GNU Lesser General Public License (LGPL)|GNU Lesser General Public License|LGPL</licenseMerge>
                     <licenseMerge>GNU Lesser General Public License (LGPL), Version 2.1|The GNU Lesser General Public License, Version 2.1|LGPL 2.1</licenseMerge>
                     <licenseMerge>MIT License|MIT|The MIT License|MIT license</licenseMerge>
                     <licenseMerge>Public Domain License|public domain|Public Domain</licenseMerge>
