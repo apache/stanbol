@@ -166,6 +166,8 @@
                 <exclude>enhancer/data/text-examples/**</exclude>
                 <exclude>enhancer/query-rendering/**</exclude>
                 <exclude>enhancer/stores/**</exclude>
+                <exclude>enhancer/autotagging/**</exclude>
+                <exclude>enhancer/engines/autotagging/**</exclude>
                 <exclude>demos/**</exclude>
                 <exclude>launchers/kres/**</exclude>
                 <exclude>reasoners/**</exclude>

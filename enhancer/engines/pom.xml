@@ -42,9 +42,6 @@
   </scm>
 
   <modules>
-    <module>../autotagging</module>
-
-    <module>autotagging</module>
     <module>opennlp-ner</module>
     <module>langid</module>
     <module>topic</module>
@@ -52,12 +49,9 @@
     <module>geonames</module>
     <module>entitytagging</module>
     <module>keywordextraction</module>
-    <module>taxonomylinking</module>
 
     <!-- Entityhub based enhancement engine(s) -->
     <module>opencalais</module>
     <module>zemanta</module>
-
-    <module>../SemiAutomaticContentEnhancer</module>
   </modules>
 </project>
