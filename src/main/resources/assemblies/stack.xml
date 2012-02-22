@@ -30,8 +30,11 @@
         <include>*/**</include>
       </includes>
       <excludes>
+        <exclude>PLAYGROUND.txt</exclude>
+
         <!-- unstable/old stuff in enhancer -->
         <exclude>enhancer/autotagging/**</exclude>
+        <exclude>enhancer/engines/autotagging/**</exclude>
         <exclude>enhancer/dereferencing/**</exclude>
         <exclude>enhancer/query-rendering/**</exclude>
         <exclude>enhancer/SemiAutomaticContentEnhancer/**</exclude>
@@ -46,7 +49,10 @@
         <exclude>reengineering/**</exclude>
         <exclude>explanation/**</exclude>
         <exclude>launchers/kres/**</exclude>
-        
+
+        <!-- SCM files -->
+        <exclude>.gitignore</exclude>
+
         <!-- build output -->
         <exclude>%regex[(?!((?!${project.build.directory}/)[^/]+/)*src/).*${project.build.directory}.*]</exclude>
         
