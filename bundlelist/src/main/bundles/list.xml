@@ -116,10 +116,6 @@
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <!--
-      The geonames.org LocationEnhancement Engines needs two additional bundles 1) jettyjson 2) commons-io.
-      Both of them are already present in the bundle list.
-    -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
@@ -131,12 +127,6 @@
       <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <!-- Taxonomy Linking Engine (depends on the Entityhub) Deprecated
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.engine.taxonomy</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle> -->
     <!-- Keyword Extraction Engine (depends on the Entityhub) -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
