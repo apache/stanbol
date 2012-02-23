@@ -21,7 +21,7 @@ import java.util.Set;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLNamedObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
@@ -44,7 +44,7 @@ public interface RegistryItemFactory {
      *            the named individual to extract the library model from.
      * @return the library model.
      */
-    Library createLibrary(OWLNamedIndividual ind);
+    Library createLibrary(OWLNamedObject ind);
 
     /**
      * Creates a new {@link Registry} object named after the ID of the supplied ontology.
@@ -63,6 +63,6 @@ public interface RegistryItemFactory {
      *            the named individual to extract the ontology model from.
      * @return the ontology model.
      */
-    RegistryOntology createRegistryOntology(OWLNamedIndividual ind);
+    RegistryOntology createRegistryOntology(OWLNamedObject ind);
 
 }

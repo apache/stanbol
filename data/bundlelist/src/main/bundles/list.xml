@@ -29,6 +29,13 @@
       <version>1.0.1-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
+    <startLevel level="20">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.registries.default</artifactId>
+      <version>1.0.1-incubating-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
   <startLevel level="30">
     <bundle>
       <groupId>org.apache.stanbol</groupId>

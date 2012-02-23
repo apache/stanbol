@@ -55,6 +55,7 @@
         <module>sites/dbpedia</module>
         <module>opennlp/lang/en</module>
         <module>opennlp/ner/en</module>
+        <module>registries/default</module>
       </modules>
     </profile>
     <profile>

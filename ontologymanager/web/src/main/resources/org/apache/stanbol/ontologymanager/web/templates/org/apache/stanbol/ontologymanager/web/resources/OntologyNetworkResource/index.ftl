@@ -37,10 +37,10 @@
 		    <#list it.scopes as scope>
 		      <tr>
 			    <td>
-                  <img src="${it.staticRootUrl}/contenthub/images/edit_icon_16.png" title="Edit this item" />
-                  <img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="Delete this item" />
+                  <img src="${it.staticRootUrl}/contenthub/images/edit_icon_16.png" title="(not available yet) Edit this item" />
+                  <img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="(not available yet) Delete this item" />
                 </td>
-                <td><a href="${scope.ID}" title="${scope.ID}">${scope.ID}</a></td>
+                <td><a href="${scope.namespace}${scope.ID}" title="${scope.ID}">${scope.ID}</a></td>
                 <td>${scope.locked?string("locked", "modifiable")}</td>
                 <td></td>
                 <td>${scope.coreSpace.ontologyCount + scope.customSpace.ontologyCount}</td>
@@ -49,21 +49,6 @@
 		  </div>
 	    </table> <!-- allScopes -->
       </div>
-      
-      <!-- Collapsible version -->
-      <div class="enginelisting">
-        <p class="collapseheader">Ontology Scopes: 
-        </p>
-        <div class="collapsable">
-          <ul>
-            <#list it.scopes as scope>
-            <li>
-              <b>${scope.ID}</b> 
-            </li>
-            </#list>
-          </ul>
-        </div> <!-- collapsible-->
-      </div> <!-- scope listing -->
     </div> <!-- web view -->
     
     <div class="panel" id="restapi" style="display: none;">

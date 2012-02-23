@@ -119,11 +119,13 @@ public class StoredOntologyResource extends BaseStanbolResource {
                     minSize = size;
                 }
             }
-            log.debug("Selected library for ontology {} is {} .", iri, smallest);
-            try {
-                o = registryManager.getLibrary(smallest).getOntology(iri);
-            } catch (RegistryContentException e) {
-                log.warn("The content of library " + smallest + " could not be accessed.", e);
+            if (smallest != null) {
+                log.debug("Selected library for ontology {} is {} .", iri, smallest);
+                try {
+                    o = registryManager.getLibrary(smallest).getOntology(iri);
+                } catch (RegistryContentException e) {
+                    log.warn("The content of library " + smallest + " could not be accessed.", e);
+                }
             }
         }
         log.debug("Ontology {} not found in any ontology provider or library.", iri);

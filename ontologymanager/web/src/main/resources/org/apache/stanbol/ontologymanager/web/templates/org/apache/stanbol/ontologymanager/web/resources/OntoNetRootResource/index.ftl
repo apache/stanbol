@@ -19,7 +19,12 @@
 
 <#escape x as x?html>
   <@common.page title="Apache Stanbol OntoNet" hasrestapi=true>
-		
+	<span style="font-style:italic">From here you can reach the following sub-endpoints:</span>
+	<ul>
+	  <li><a href="${it.publicBaseUri}ontonet/ontology" title="Apache Stanbol OntoNet Scope Manager">Scope Manager</a></li>
+	  <li><a href="${it.publicBaseUri}ontonet/session" title="Apache Stanbol OntoNet Session Manager">Session Manager</a></li>
+	</ul>
+	
     <div class="panel" id="webview"> 
       <#include "webview.ftl">
     </div>

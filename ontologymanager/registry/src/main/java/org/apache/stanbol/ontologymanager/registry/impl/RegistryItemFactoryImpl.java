@@ -24,7 +24,7 @@ import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
 import org.apache.stanbol.ontologymanager.registry.impl.model.LibraryImpl;
 import org.apache.stanbol.ontologymanager.registry.impl.model.RegistryImpl;
 import org.apache.stanbol.ontologymanager.registry.impl.model.RegistryOntologyImpl;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLNamedObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
@@ -44,7 +44,7 @@ public class RegistryItemFactoryImpl implements RegistryItemFactory {
     }
 
     @Override
-    public Library createLibrary(OWLNamedIndividual ind) {
+    public Library createLibrary(OWLNamedObject ind) {
         return new LibraryImpl(ind.getIRI(), ind.getIRI().getFragment(), cache);
     }
 
@@ -55,7 +55,7 @@ public class RegistryItemFactoryImpl implements RegistryItemFactory {
     }
 
     @Override
-    public RegistryOntology createRegistryOntology(OWLNamedIndividual ind) {
+    public RegistryOntology createRegistryOntology(OWLNamedObject ind) {
         return new RegistryOntologyImpl(ind.getIRI(), ind.getIRI().getFragment());
     }
 

@@ -35,6 +35,7 @@ import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
+import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
@@ -52,7 +53,13 @@ import org.apache.stanbol.ontologymanager.registry.impl.util.RegistryUtils;
 import org.apache.stanbol.ontologymanager.registry.xd.vocabulary.CODOVocabulary;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.IRIDocumentSource;
+import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
+import org.semanticweb.owlapi.io.StreamDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLAnnotationValue;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLAxiomVisitor;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -60,13 +67,15 @@ import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLNamedObject;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyLoaderConfiguration;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 import org.slf4j.Logger;
@@ -86,18 +95,22 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
 
     private static final boolean _LAZY_LOADING_DEFAULT = true;
 
+    private static final boolean _RETAIN_INCOMPLETE_DEFAULT = true;
+
     private static final OWLClass cRegistryLibrary, cOntology;
 
-    private static final OWLObjectProperty hasPart, hasOntology, isPartOf, isOntologyOf;
+    private static final OWLAnnotationProperty hasOntologyAnn, isOntologyOfAnn;
+
+    private static final OWLObjectProperty hasOntology, isOntologyOf;
 
     static {
         OWLDataFactory factory = OWLManager.getOWLDataFactory();
         cOntology = factory.getOWLClass(IRI.create(CODOVocabulary.CODK_Ontology));
         cRegistryLibrary = factory.getOWLClass(IRI.create(CODOVocabulary.CODD_OntologyLibrary));
-        isPartOf = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.PARTOF_IsPartOf));
         isOntologyOf = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.ODPM_IsOntologyOf));
-        hasPart = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.PARTOF_HasPart));
         hasOntology = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.ODPM_HasOntology));
+        hasOntologyAnn = factory.getOWLAnnotationProperty(IRI.create(CODOVocabulary.ODPM_HasOntology));
+        isOntologyOfAnn = factory.getOWLAnnotationProperty(IRI.create(CODOVocabulary.ODPM_IsOntologyOf));
     }
 
     @Reference
@@ -112,13 +125,16 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
                                                                                         + ".option.centralised", name = "CENTRALISED")}, value = "CENTRALISED")
     private String cachingPolicyString;
 
+    @Reference
+    private DataFileProvider dataFileProvider;
+
     @Property(name = RegistryManager.LAZY_LOADING, boolValue = _LAZY_LOADING_DEFAULT)
     private boolean lazyLoading = _LAZY_LOADING_DEFAULT;
 
     /* Maps registries to libraries */
     private Map<IRI,Set<IRI>> libraryIndex = new HashMap<IRI,Set<IRI>>();
 
-    @Property(name = RegistryManager.REGISTRY_LOCATIONS, cardinality = 1000, value = {"http://www.ontologydesignpatterns.org/registry/iksnetwork-standalone.owl"})
+    @Property(name = RegistryManager.REGISTRY_LOCATIONS, cardinality = 1000, value = {"stanbol_network.owl"})
     private String[] locations;
 
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -136,6 +152,9 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
 
     private Set<IRI> registries = new HashSet<IRI>();
 
+    @Property(name = RegistryManager.RETAIN_INCOMPLETE, boolValue = _RETAIN_INCOMPLETE_DEFAULT)
+    private boolean retainIncomplete = _RETAIN_INCOMPLETE_DEFAULT;
+
     private RegistryItemFactory riFactory;
 
     /**
@@ -143,8 +162,9 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
      * Component Runtime support.
      * <p>
      * DO NOT USE to manually create instances - the RegistryManagerImpl instances do need to be configured!
-     * YOU NEED TO USE {@link #RegistryManagerImpl(Dictionary)} or its overloads, to parse the configuration
-     * and then initialise the rule store if running outside an OSGI environment.
+     * YOU NEED TO USE {@link #RegistryManagerImpl(OfflineConfiguration, OntologyProvider, Dictionary))} or
+     * its overloads, to parse the configuration and then initialise the rule store if running outside an OSGI
+     * environment.
      */
     public RegistryManagerImpl() {}
 
@@ -180,10 +200,15 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         } catch (Exception ex) {
             lazyLoading = _LAZY_LOADING_DEFAULT;
         }
+        try {
+            retainIncomplete = (Boolean) (configuration.get(RegistryManager.RETAIN_INCOMPLETE));
+        } catch (Exception ex) {
+            retainIncomplete = _RETAIN_INCOMPLETE_DEFAULT;
+        }
         Object obj = configuration.get(RegistryManager.REGISTRY_LOCATIONS);
         if (obj instanceof String[]) locations = (String[]) obj;
         else if (obj instanceof String) locations = new String[] {(String) obj};
-        if (locations == null) locations = new String[] {"http://www.ontologydesignpatterns.org/registry/iksnetwork-standalone.owl"};
+        if (locations == null) locations = new String[] {"stanbol_network.owl"};
         Object cachingPolicy = configuration.get(RegistryManager.CACHING_POLICY);
         if (cachingPolicy == null) {
             this.cachingPolicyString = _CACHING_POLICY_DEFAULT.name();
@@ -203,11 +228,27 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
 
         // Used only for creating the registry model, do not use for caching.
         OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources);
+        OWLOntologyLoaderConfiguration conf = new OWLOntologyLoaderConfiguration();
+        // If we are retaining incomplete registries, do not throw exceptions if imports fail.
+        conf.setSilentMissingImportsHandling(retainIncomplete);
         // Load registries
         Set<OWLOntology> regOnts = new HashSet<OWLOntology>();
         for (String loc : locations) {
             try {
-                regOnts.add(mgr.loadOntology(IRI.create(loc)));
+                IRI iri = IRI.create(loc);
+                OWLOntologyDocumentSource src = null;
+                OWLOntology o = null;
+                if (iri.isAbsolute()) src = new IRIDocumentSource(iri);
+                else {
+                    // Relative IRI : use data file provider
+                    log.debug("Found relative IRI {} . Will try to retrieve from data file providers.", iri);
+                    Map<String,String> info = new HashMap<String,String>();
+                    if (dataFileProvider.isAvailable(null, loc, info)) src = new StreamDocumentSource(
+                            dataFileProvider.getInputStream(null, loc, info));
+                }
+                o = mgr.loadOntologyFromOntologyDocument(src, conf);
+                if (o != null) regOnts.add(o);
+                else log.warn("Failed to obtain OWL ontology from resource {}", loc);
             } catch (OWLOntologyAlreadyExistsException e) {
                 log.info("Skipping cached ontology {}.", e.getOntologyID());
                 continue;
@@ -357,6 +398,46 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             }
 
             @Override
+            public void visit(OWLAnnotationAssertionAxiom axiom) {
+                /*
+                 * Works like object property assertions, in case hasOntology and isOntologyOf are not
+                 * detected to be object properties (e.g. due to a failure to load codolight or the registry
+                 * metamodel).
+                 */
+                OWLAnnotationProperty prop = axiom.getProperty();
+
+                if (hasOntologyAnn.equals(prop)) {
+                    IRI iri;
+                    // The axiom subject gets a +1 in its library score.
+                    OWLObject ind = axiom.getSubject();
+                    if (ind instanceof IRI) {
+                        iri = (IRI) ind;
+                        checkScores(iri)[0]++;
+                    }
+                    // The axiom object gets a +1 in its ontology score.
+                    ind = axiom.getValue();
+                    if (ind instanceof IRI) {
+                        iri = (IRI) ind;
+                        checkScores(iri)[1]++;
+                    }
+                } else if (isOntologyOfAnn.equals(prop)) {
+                    IRI iri;
+                    // The axiom subject gets a +1 in its ontology score.
+                    OWLObject ind = axiom.getSubject();
+                    if (ind instanceof IRI) {
+                        iri = (IRI) ind;
+                        checkScores(iri)[1]++;
+                    }
+                    // The axiom object gets a +1 in its library score.
+                    ind = axiom.getValue();
+                    if (ind instanceof IRI) {
+                        iri = (IRI) ind;
+                        checkScores(iri)[0]++;
+                    }
+                }
+            }
+
+            @Override
             public void visit(OWLClassAssertionAxiom axiom) {
                 OWLIndividual ind = axiom.getIndividual();
                 // Do not accept anonymous registry items.
@@ -377,7 +458,6 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             @Override
             public void visit(OWLObjectPropertyAssertionAxiom axiom) {
                 OWLObjectPropertyExpression prop = axiom.getProperty();
-
                 if (hasOntology.equals(prop)) {
                     IRI iri;
                     // The axiom subject gets a +1 in its library score.
@@ -472,7 +552,8 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
     @Override
     public Set<Library> getLibraries(IRI ontologyID) {
         Set<Library> results = new HashSet<Library>();
-        for (RegistryItem item : population.get(ontologyID).getParents())
+        RegistryItem ri = population.get(ontologyID);
+        if (ri != null) for (RegistryItem item : ri.getParents())
             if (item instanceof Library) results.add((Library) item);
         return results;
     }
@@ -538,7 +619,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         }
     }
 
-    protected Library populateLibrary(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
+    protected Library populateLibrary(OWLNamedObject ind, Set<OWLOntology> registries) throws RegistryContentException {
         IRI libId = ind.getIRI();
         RegistryItem lib = null;
         if (population.containsKey(libId)) {
@@ -548,7 +629,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
                     "Inconsistent multityping: for item " + libId + " : {" + Library.class + ", "
                             + lib.getClass() + "}");
         } else {
-            lib = riFactory.createLibrary(ind.asOWLNamedIndividual());
+            lib = riFactory.createLibrary(ind);
             try {
                 population.put(lib.getIRI(), lib);
             } catch (Exception e) {
@@ -557,24 +638,36 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             }
         }
         // EXIT nodes.
-        Set<OWLIndividual> ironts = new HashSet<OWLIndividual>();
-        for (OWLOntology o : registries)
-            ironts.addAll(ind.getObjectPropertyValues(hasOntology, o));
-        for (OWLIndividual iront : ironts)
-            if (iront.isNamed()) {
-                IRI childId = iront.asOWLNamedIndividual().getIRI();
-                // If some populate*() method has created it, it will be there.
-                RegistryItem ront = population.get(childId);
-                // Otherwise populating it will also put it in population.
-                if (ront == null) ront = populateOntology(iront.asOWLNamedIndividual(), registries);
-                lib.addChild(ront);
-                if (ontologyIndex.get(childId) == null) ontologyIndex.put(childId, new HashSet<IRI>());
-                ontologyIndex.get(childId).add(libId);
+        Set<OWLNamedObject> ironts = new HashSet<OWLNamedObject>();
+        OWLDataFactory df = OWLManager.getOWLDataFactory();
+        for (OWLOntology o : registries) {
+            if (ind instanceof OWLIndividual) {
+                // Get usages of hasOntology as an object property
+                for (OWLIndividual value : ((OWLIndividual) ind).getObjectPropertyValues(hasOntology, o))
+                    if (value.isNamed()) ironts.add(value.asOWLNamedIndividual());
+                // Get usages of hasOntology as an annotation property
+                for (OWLAnnotationAssertionAxiom ann : o.getAnnotationAssertionAxioms(ind.getIRI()))
+                    if (hasOntologyAnn.equals(ann.getProperty())) {
+                        OWLAnnotationValue value = ann.getValue();
+                        if (value instanceof OWLNamedObject) ironts.add((OWLNamedObject) value);
+                        else if (value instanceof IRI) ironts.add(df.getOWLNamedIndividual((IRI) value));
+                    }
             }
+        }
+        for (OWLNamedObject iront : ironts) {
+            IRI childId = iront.getIRI();
+            // If some populate*() method has created it, it will be there.
+            RegistryItem ront = population.get(childId);
+            // Otherwise populating it will also put it in population.
+            if (ront == null) ront = populateOntology(iront, registries);
+            lib.addChild(ront);
+            if (ontologyIndex.get(childId) == null) ontologyIndex.put(childId, new HashSet<IRI>());
+            ontologyIndex.get(childId).add(libId);
+        }
         return (Library) lib;
     }
 
-    protected RegistryOntology populateOntology(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
+    protected RegistryOntology populateOntology(OWLNamedObject ind, Set<OWLOntology> registries) throws RegistryContentException {
         IRI ontId = ind.getIRI();
         RegistryItem ront = null;
         if (population.containsKey(ontId)) {
@@ -593,20 +686,32 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             }
         }
         // EXIT nodes.
-        Set<OWLIndividual> libs = new HashSet<OWLIndividual>();
-        for (OWLOntology o : registries)
-            libs.addAll(ind.getObjectPropertyValues(isOntologyOf, o));
-        for (OWLIndividual ilib : libs)
-            if (ilib.isNamed()) {
-                IRI parentId = ilib.asOWLNamedIndividual().getIRI();
-                // If some populate*() method has created it, it will be there.
-                RegistryItem rlib = population.get(parentId);
-                // Otherwise populating it will also put it in population.
-                if (rlib == null) rlib = populateLibrary(ilib.asOWLNamedIndividual(), registries);
-                ront.addParent(rlib);
-                if (ontologyIndex.get(ontId) == null) ontologyIndex.put(ontId, new HashSet<IRI>());
-                ontologyIndex.get(ontId).add(parentId);
+        Set<OWLNamedObject> libs = new HashSet<OWLNamedObject>();
+        OWLDataFactory df = OWLManager.getOWLDataFactory();
+        for (OWLOntology o : registries) {
+            if (ind instanceof OWLIndividual) {
+                // Get usages of isOntologyOf as an object property
+                for (OWLIndividual value : ((OWLIndividual) ind).getObjectPropertyValues(isOntologyOf, o))
+                    if (value.isNamed()) libs.add(value.asOWLNamedIndividual());
+                // Get usages of isOntologyOf as an annotation property
+                for (OWLAnnotationAssertionAxiom ann : o.getAnnotationAssertionAxioms(ind.getIRI()))
+                    if (isOntologyOfAnn.equals(ann.getProperty())) {
+                        OWLAnnotationValue value = ann.getValue();
+                        if (value instanceof OWLNamedObject) libs.add((OWLNamedObject) value);
+                        else if (value instanceof IRI) libs.add(df.getOWLNamedIndividual((IRI) value));
+                    }
             }
+        }
+        for (OWLNamedObject ilib : libs) {
+            IRI parentId = ilib.getIRI();
+            // If some populate*() method has created it, it will be there.
+            RegistryItem rlib = population.get(parentId);
+            // Otherwise populating it will also put it in population.
+            if (rlib == null) rlib = populateLibrary(ilib, registries);
+            ront.addParent(rlib);
+            if (ontologyIndex.get(ontId) == null) ontologyIndex.put(ontId, new HashSet<IRI>());
+            ontologyIndex.get(ontId).add(parentId);
+        }
         return (RegistryOntology) ront;
     }
 

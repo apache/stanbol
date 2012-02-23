@@ -44,6 +44,11 @@ public interface RegistryManager extends RegistryItemIndex {
     public String LAZY_LOADING = "org.apache.stanbol.ontologymanager.registry.laziness";
 
     /**
+     * The key used to configure the retention policy for incomplete registries.
+     */
+    public String RETAIN_INCOMPLETE = "org.apache.stanbol.ontologymanager.registry.retainIncomplete";
+
+    /**
      * The key used to configure the locations of the registries to be scanned by the registry manager.
      */
     public String REGISTRY_LOCATIONS = "org.apache.stanbol.ontologymanager.registry.locations";
