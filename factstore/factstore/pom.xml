@@ -69,6 +69,19 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 License -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+            
+            <!-- Public Domain License  -->
+            <exclude>src/main/resources/org/apache/stanbol/factstore/web/static/scripts/json2.js</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
     </plugins>
   </build>
 
