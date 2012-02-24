@@ -161,7 +161,8 @@ in the format specified in the <code>Accept</code> header:</p>
    
 <pre>
 curl -X POST -H "Accept: text/turtle" -H "Content-type: text/plain" \
-     --data "John Smith was born in London." ${it.serviceUrl}
+     --data "The Stanbol enhancer can detect famous cities such as \
+             Paris and people such as Bob Marley." ${it.serviceUrl}
 </pre> 
 
 <p>The list of mimetypes accepted as inputs depends on the deployed engines. By default only
@@ -199,7 +200,8 @@ response.</p>
 
 <pre>
 curl -X POST -H "Accept: text/turtle" -H "Content-type: text/plain" \
-     --data "John Smith was born in London." \
+     --data "The Stanbol enhancer can detect famous cities such as \
+             Paris and people such as Bob Marley." \
      "${it.serviceUrl}?uri=urn:fise-example-content-item&executionmetadata=true"
 </pre> 
 
@@ -272,8 +274,10 @@ not URLEncoded.</p>
 <pre>
 curl -v -X POST -H "Accept: multipart/from-data" \
     -H "Content-type: text/html; charset=UTF-8"  \
-    --data "&lt;html&gt;&lt;body&gt;&lt;p&gt;John Smith was born in London.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;" \
-    "${it.serviceUrl}?outputContent=*/*&omitParsed=true&rdfFormat=application/rdf+xml"
+    --data "&lt;html&gt;&lt;body&gt;&lt;p&gt;The Stanbol enhancer \
+           can detect famous cities such as Paris and people such \
+           as Bob Marley..&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;" \
+    "${it.serviceUrl}?outputContent=*/*&omitParsed=true&rdfFormat=application/rdf%2Bxml"
 </pre> 
 <p>This will result in an Response with the mime type 
 <code>"Content-Type: multipart/from-data; charset=UTF-8; boundary=contentItem"</code>
@@ -310,7 +314,9 @@ as content.</p>
 <pre>
 curl -v -X POST -H "Accept: text/plain" \
     -H "Content-type: text/html; charset=UTF-8" \
-    --data "&lt;html&gt;&lt;body&gt;&lt;p&gt;John Smith was born in London.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;" \
+    --data "&lt;html&gt;&lt;body&gt;&lt;p&gt;The Stanbol enhancer \
+           can detect famous cities such as Paris and people such \
+           as Bob Marley.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;" \
     "${it.serviceUrl}?omitMetadata=true"
 </pre> 
 <p>The response will be of type <code>text/plain</code> and return the string
