@@ -1875,6 +1875,7 @@
               </execution>
             </executions>
             <configuration>
+              <!--
               <licenses>
                 <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
                   <licenseFamilyCategory>PublicDomain</licenseFamilyCategory>
@@ -1913,6 +1914,7 @@
                   <familyName>MIT License</familyName>
                 </licenseFamily>
               </licenseFamilies>
+              -->
               <excludes>
                 <exclude>src/license/THIRD-PARTY.properties</exclude>
               </excludes>
