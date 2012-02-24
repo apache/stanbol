@@ -37,8 +37,13 @@ public enum NamespaceEnum {
     /**
      * Namespace for the Stanbol Enhancer Execution Metadata ontology
      */
-    em("http://stanbol.apache.org/ontology/enhancer/executionMetadata#");
-
+    em("http://stanbol.apache.org/ontology/enhancer/executionMetadata#"),
+    /**
+     * The FISE namespace (1st version of the Enhancement Structure).
+     * Currently the same as {@link NamespaceEnum#enhancer}
+     */
+    fise("http://fise.iks-project.eu/ontology/");
+    
     String ns;
     String prefix;
 
