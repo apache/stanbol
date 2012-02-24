@@ -63,6 +63,20 @@
           </instructions>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 License -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+            
+            <!-- MIT License  -->
+            <exclude>src/main/resources/org/apache/stanbol/ontologymanager/web/static/scripts/jquery-1.6.1</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
+
     </plugins>
   </build>
 
