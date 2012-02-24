@@ -1,6 +1,6 @@
 package org.apache.stanbol.enhancer.ldpath.function;
 
-import static at.newmedialab.ldpath.util.Collections.iterator;
+import static at.newmedialab.ldpath.util.Collections.concat;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper.parseMimeType;
 
 import java.io.IOException;
@@ -63,7 +63,7 @@ public class ContentFunction extends ContentItemFunction implements SelectorFunc
 //                    contexts = java.util.Collections.singleton((Resource)ci.getUri());
 //                }
             mimeTypes = new HashSet<String>();
-            for(Iterator<Resource> params = iterator(args);params.hasNext();){
+            for(Iterator<Resource> params = concat(args).iterator();params.hasNext();){
                 Resource param = params.next();
                 String mediaTypeString = backend.stringValue(param);
                 try {
