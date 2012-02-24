@@ -28,7 +28,6 @@ import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.event.RemoveEvent;
 import org.apache.clerezza.rdf.core.impl.AbstractTripleCollection;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 

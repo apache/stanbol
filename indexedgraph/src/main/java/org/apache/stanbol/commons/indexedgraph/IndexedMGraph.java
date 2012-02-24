@@ -22,7 +22,6 @@ import java.util.Iterator;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.impl.SimpleGraph;
 
 public class IndexedMGraph extends IndexedTripleCollection implements MGraph {
 
