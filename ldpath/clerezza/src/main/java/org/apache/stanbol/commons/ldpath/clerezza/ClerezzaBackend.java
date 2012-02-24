@@ -45,6 +45,7 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.SimpleLiteralFactory;
 import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.util.W3CDateFormat;
 import org.apache.commons.collections.BidiMap;
@@ -53,15 +54,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.newmedialab.ldpath.api.backend.RDFBackend;
+import at.newmedialab.ldpath.model.backend.AbstractBackend;
 
 /**
  * Clerezza based implementation of {@link RDFBackend} interface. This implementation uses the
- * {@link Resource} objects of Clerezza as processing unit RDFBackend.
+ * {@link Resource} objects of Clerezza as processing unit RDFBackend.<p>
+ * 
+ * For type conversions of {@link TypedLiteral}s the {@link LiteralFactory}
+ * of Clerezza is used. In case parsed nodes are not {@link TypedLiteral} the
+ * super implementations of {@link AbstractBackend} are called as such also
+ * support converting values based on the string representation.
  * 
  * @author anil.sinaci
- * 
+ * @author Rupert Westenthaler
  */
-public class ClerezzaBackend implements RDFBackend<Resource> {
+public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBackend<Resource> {
 
     private static final Logger logger = LoggerFactory.getLogger(ClerezzaBackend.class);
 
@@ -172,7 +179,7 @@ public class ClerezzaBackend implements RDFBackend<Resource> {
         if (resource instanceof TypedLiteral) {
             return LiteralFactory.getInstance().createObject(Double.class, (TypedLiteral) resource);
         } else {
-            throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
+            return super.doubleValue(resource);
         }
     }
 
@@ -247,7 +254,7 @@ public class ClerezzaBackend implements RDFBackend<Resource> {
         if (resource instanceof TypedLiteral) {
             return lf.createObject(Long.class, (TypedLiteral) resource);
         } else {
-            throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
+            return super.longValue(resource);
         }
     }
 
@@ -267,7 +274,7 @@ public class ClerezzaBackend implements RDFBackend<Resource> {
         if (resource instanceof TypedLiteral) {
             return lf.createObject(Boolean.class, (TypedLiteral) resource);
         } else {
-            throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
+            return super.booleanValue(resource);
         }
     }
 
@@ -276,7 +283,7 @@ public class ClerezzaBackend implements RDFBackend<Resource> {
         if (resource instanceof TypedLiteral) {
             return lf.createObject(Date.class, (TypedLiteral) resource);
         } else {
-            throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
+            return super.dateTimeValue(resource);
         }
     }
 
@@ -285,7 +292,7 @@ public class ClerezzaBackend implements RDFBackend<Resource> {
         if (resource instanceof TypedLiteral) {
             return lf.createObject(Date.class, (TypedLiteral) resource);
         } else {
-            throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
+            return super.dateValue(resource);
         }
     }
 
@@ -294,7 +301,7 @@ public class ClerezzaBackend implements RDFBackend<Resource> {
         if (resource instanceof TypedLiteral) {
             return lf.createObject(Date.class, (TypedLiteral) resource);
         } else {
-            throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
+            return super.timeValue(resource);
         }
     }
 
@@ -303,7 +310,7 @@ public class ClerezzaBackend implements RDFBackend<Resource> {
         if (resource instanceof TypedLiteral) {
             return lf.createObject(Float.class, (TypedLiteral) resource);
         } else {
-            throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
+            return super.floatValue(resource);
         }
     }
 
@@ -312,7 +319,7 @@ public class ClerezzaBackend implements RDFBackend<Resource> {
         if (resource instanceof TypedLiteral) {
             return lf.createObject(Integer.class, (TypedLiteral) resource);
         } else {
-            throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
+            return super.intValue(resource);
         }
     }
 
@@ -321,23 +328,16 @@ public class ClerezzaBackend implements RDFBackend<Resource> {
         if (resource instanceof TypedLiteral) {
             return lf.createObject(BigInteger.class, (TypedLiteral) resource);
         } else {
-            throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
+            return super.integerValue(resource);
         }
     }
 
     @Override
     public BigDecimal decimalValue(Resource resource) {
-        if (resource instanceof TypedLiteral) {
-            try {
-                return lf.createObject(BigDecimal.class, (TypedLiteral) resource);
-            } catch (NoConvertorException e) {
-                //currently there is no converter for BigDecimal in clerezza
-                //so as a workaround use the lexical form
-                return new BigDecimal(((TypedLiteral)resource).getLexicalForm());
-            }
-        } else {
-            throw new IllegalArgumentException("Resource " + resource.toString() + " is not a TypedLiteral");
-        }
+        //currently there is no converter for BigDecimal in clerezza
+        //so as a workaround use the lexical form (as provided by the super
+        //implementation
+        return super.decimalValue(resource);
     }
     
     @Override
