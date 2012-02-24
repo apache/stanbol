@@ -381,6 +381,33 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>license-maven-plugin</artifactId>
           <version>1.0</version>
+          <executions>
+            <execution>
+              <configuration>
+                <groupByLicense>true</groupByLicense>
+                <failIfWarning>true</failIfWarning>
+                <useMissingFile>true</useMissingFile>
+                <outputDirectory>${project.build.directory}/maven-shared-archive-resources/META-INF</outputDirectory>
+                <thirdPartyFilename>DEPENDENCIES-BY-LICENSE</thirdPartyFilename>
+
+                <licenseMerges>
+                  <licenseMerge>Apache Software License|AL|Apache Software Licenses|Apache License</licenseMerge>
+                  <licenseMerge>Apache Software License, Version 1.1|AL 1.1|Apache Software License, Version 1.1</licenseMerge>
+                  <licenseMerge>Apache Software License, Version 2.0|AL 2.0|ALv2|The Apache Software License, Version 2.0|Apache Software License - Version 2.0|Apache License, Version 2.0|Apache License 2.0|Apache License Version 2|Apache License Version 2.0|Apache 2</licenseMerge>
+                  <licenseMerge>BSD License|BSD license|BSD|The BSD License|BSD-style license|BSD-like</licenseMerge>
+                  <licenseMerge>Common Development And Distribution License (CDDL), Version 1.0|CDDL 1.0|CDDL License|Common Development And Distribution License (CDDL) Version 1.0|COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0|Common Development and Distribution License (CDDL) v1.0|Dual license consisting of the CDDL v1.0 and GPL v2</licenseMerge>
+                  <licenseMerge>Common Development And Distribution License (CDDL), Version 1.1|CDDL 1.1|Common Public License Version 1.1</licenseMerge>
+                  <licenseMerge>Common Public License, Version 1.0|CPL 1.0|Common Public License Version 1.0</licenseMerge>
+                  <licenseMerge>Eclipse Public License, Version 1.0|Eclipse Public License - Version 1.0|Eclipse Public License - v 1.0</licenseMerge>
+                  <licenseMerge>GNU General Public License (GPL), Version 2 with classpath exception|GPLv2 with classpath exception|GPL2 w/ CPE</licenseMerge>
+                  <licenseMerge>GNU Lesser General Public License (LGPL)|GNU Lesser General Public License|LGPL</licenseMerge>
+                  <licenseMerge>GNU Lesser General Public License (LGPL), Version 2.1|The GNU Lesser General Public License, Version 2.1|LGPL 2.1</licenseMerge>
+                  <licenseMerge>MIT License|MIT|The MIT License|MIT license</licenseMerge>
+                  <licenseMerge>Public Domain License|public domain|Public Domain</licenseMerge>
+                </licenseMerges>
+              </configuration> 
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -1899,13 +1926,6 @@
                 <goals>
                   <goal>add-third-party</goal>
                 </goals>
-                <configuration>
-                  <groupByLicense>true</groupByLicense>
-                  <failIfWarning>true</failIfWarning>
-                  <useMissingFile>true</useMissingFile>
-                  <outputDirectory>${project.build.directory}/maven-shared-archive-resources/META-INF</outputDirectory>
-                  <thirdPartyFilename>DEPENDENCIES-BY-LICENSE</thirdPartyFilename>
-                </configuration>
               </execution>
             </executions>
           </plugin>
@@ -1942,13 +1962,6 @@
                 <goals>
                   <goal>add-third-party</goal>
                 </goals>
-                <configuration>
-                  <groupByLicense>true</groupByLicense>
-                  <failIfWarning>true</failIfWarning>
-                  <useMissingFile>true</useMissingFile>
-                  <outputDirectory>${project.build.directory}/maven-shared-archive-resources/META-INF</outputDirectory>
-                  <thirdPartyFilename>DEPENDENCIES-BY-LICENSE</thirdPartyFilename>
-                </configuration>
               </execution>
             </executions>
           </plugin>          
