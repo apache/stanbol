@@ -1933,73 +1933,26 @@
   </profiles>
 
   <repositories>
+    <!-- For LDPath - will move to Maven central - see STANBOL-507 -->
     <repository>
-      <!-- needed because of Clerezza dependency -->
-      <id>apache</id>
-      <name>Apache Repository</name>
-      <snapshots>
-        <updatePolicy>always</updatePolicy>
-        <checksumPolicy>warn</checksumPolicy>
-      </snapshots>
-      <releases>
-        <updatePolicy>interval:60</updatePolicy>
-        <checksumPolicy>warn</checksumPolicy>
-      </releases>
-      <url>http://repository.apache.org/snapshots/</url>
-      <layout>default</layout>
-    </repository>
-
-    <repository>
-      <id>java.net</id>
-      <name>Java.net Repository</name>
-      <releases>
-        <updatePolicy>interval:60</updatePolicy>
-        <checksumPolicy>warn</checksumPolicy>
-      </releases>
-      <url>http://download.java.net/maven/2</url>
-      <layout>default</layout>
-    </repository>
-
-    <repository>
-      <id>repository-codehaus</id>
-      <name>Codehaus Repository</name>
-      <url>http://repository.codehaus.org</url>
-    </repository>
-
-    <repository>
-      <!-- needed for the default model data while we decide where to put IKS artifacts
-        -->
-      <id>nuxeo-vendor-release</id>
-      <name>NUXEO Vendor Release Repository</name>
-      <url>https://maven.nuxeo.org/nexus/content/repositories/vendor-releases</url>
-    </repository>
-
-    <repository>
-      <!-- this is where OpenNLP lives -->
-      <id>clojars.org</id>
-      <name>Clojars Maven Repository</name>
-      <url>http://clojars.org/repo</url>
-    </repository>
-    
-    <repository>
-      <!-- this is where the jdom bundle lives -->
-      <id>com.springsource.repository.bundles.external</id> 
-      <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name> 
-      <url>http://repository.springsource.com/maven/bundles/external</url>
-    </repository>     
-    
-    <repository>
-      <id>kiwi-project_SNAPSHOTS</id> <!-- Hosts LDPath SNAPSHOT bundles for now -->
+      <id>kiwi-snapshot-repo</id>
       <name>Kiwi Project SNAPSHOTS Repository</name>
       <url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/snapshots/</url>
     </repository>
     
     <repository>
-      <id>kiwi-project</id> <!-- Hosts LDPath releases bundles for now -->
+      <id>kiwi-release-repo</id>
       <name>Kiwi Project Repository</name>
       <url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/releases/</url>
     </repository>
-    
+
+    <!-- JDom - see STANBOL-508 -->
+    <repository>
+      <id>com.springsource.repository.bundles.external</id> 
+      <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name> 
+      <url>http://repository.springsource.com/maven/bundles/external</url>
+    </repository>
+
   </repositories>
 
 </project>
