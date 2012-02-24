@@ -176,13 +176,13 @@ public class IndexedGraphTest  extends MGraphTest {
     @Test
     public void testPerformance(){
         MGraph sg = new SimpleMGraph();
-        int iterations = 1000;
+        int iterations = 100; //reduced from 1000
         int graphsize = 100000;
         createGraph(sg, graphsize);
         MGraph ig = new IndexedMGraph(sg);
         long start;
         //Simple Graph reference test
-        TestCase testCase = new TestCase(sg, 100, 5, 100);
+        TestCase testCase = new TestCase(sg, 20, 5, 20); //reduced form 100,5,100
         log.info("Filter Performance Test (graph size {} triples, iterations {})",graphsize,iterations);
         log.info(" --- TEST {} with {} triples ---",sg.getClass().getSimpleName(),sg.size());
         start = System.currentTimeMillis();
