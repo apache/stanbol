@@ -48,6 +48,7 @@
     <module>generic/chainmanager</module>
     <module>jobmanager</module>
     <module>jersey</module>
+    <module>ldpath</module>
     <module>benchmark</module>
     <module>engines</module>
     <module>chain/allactive</module>

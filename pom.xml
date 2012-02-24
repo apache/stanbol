@@ -65,6 +65,7 @@
     <module>enhancer/chain/weighted</module>
     <module>enhancer/chain/list</module>
     <module>enhancer/jersey</module>
+    <module>enhancer/ldpath</module>
     <module>enhancer/benchmark</module>
     <module>enhancer/bundlelist</module>
 

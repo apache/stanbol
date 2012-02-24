@@ -1,0 +1,1 @@
+The Stanbol enhancer can detect famous cities such as Paris and people such as Bob Marley.
