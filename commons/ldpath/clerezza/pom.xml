@@ -76,6 +76,10 @@
       <groupId>at.newmedialab.ldpath</groupId>
       <artifactId>ldpath-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-core-bundle</artifactId>
+    </dependency>
     <!-- Commons -->
     <dependency>
       <groupId>commons-collections</groupId>
@@ -103,11 +107,6 @@
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>    
-    <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core-bundle</artifactId>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
