@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.zemanta.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getReferences;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
@@ -48,6 +49,7 @@ import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
@@ -277,27 +279,27 @@ public class ZemantaEnhancementEngine
         Iterator<Triple> recognitions = results.filter(null, RDF_TYPE, ZemantaOntologyEnum.Recognition.getUri());
         while (recognitions.hasNext()) {
             NonLiteral recognition = recognitions.next().getSubject();
-            log.info("process recognition " + recognition);
+            log.debug("process recognition " + recognition);
             //first get everything we need for the textAnnotations
             Double confidence = parseConfidence(results, recognition);
-            log.info(" > confidence :" + confidence);
+            log.debug(" > confidence :" + confidence);
             String anchor = EnhancementEngineHelper.getString(results, recognition, ZemantaOntologyEnum.anchor.getUri());
-            log.info(" > anchor :" + anchor);
+            log.debug(" > anchor :" + anchor);
             Collection<NonLiteral> textAnnotations = processTextAnnotation(enhancements, text, ciId, anchor, confidence);
-            log.info(" > number of textAnnotations :" + textAnnotations.size());
+            log.debug(" > number of textAnnotations :" + textAnnotations.size());
 
             //second we need to create the EntityAnnotation that represent the
             //recognition
             NonLiteral object = EnhancementEngineHelper.getReference(results, recognition, ZemantaOntologyEnum.object.getUri());
-            log.info(" > object :" + object);
+            log.debug(" > object :" + object);
             //The targets represent the linked entities
             //  ... and yes there can be more of them!
             //TODO: can we create an EntityAnnotation with several referred entities?
             //      Should we use the owl:sameAs to decide that!
             Set<UriRef> sameAsSet = new HashSet<UriRef>();
-            for (Iterator<UriRef> sameAs = EnhancementEngineHelper.getReferences(results, object, ZemantaOntologyEnum.owlSameAs.getUri()); sameAs.hasNext(); sameAsSet.add(sameAs.next()))
+            for (Iterator<UriRef> sameAs = getReferences(results, object, ZemantaOntologyEnum.owlSameAs.getUri()); sameAs.hasNext(); sameAsSet.add(sameAs.next()))
                 ;
-            log.info(" > sameAs :" + sameAsSet);
+            log.debug(" > sameAs :" + sameAsSet);
             //now parse the targets and look if there are others than the one
             //merged by using sameAs
             Iterator<UriRef> targets = EnhancementEngineHelper.getReferences(results, object, ZemantaOntologyEnum.target.getUri());
@@ -305,12 +307,12 @@ public class ZemantaEnhancementEngine
             while (targets.hasNext()) {
                 //the entityRef is the URL of the target
                 UriRef entity = targets.next();
-                log.info("    -  target :" + entity);
+                log.debug("    -  target :" + entity);
                 UriRef targetType = EnhancementEngineHelper.getReference(results, entity, ZemantaOntologyEnum.targetType.getUri());
-                log.info("       o type :" + targetType);
+                log.debug("       o type :" + targetType);
                 if (ZemantaOntologyEnum.targetType_RDF.getUri().equals(targetType)) {
                     String targetTitle = EnhancementEngineHelper.getString(results, entity, ZemantaOntologyEnum.title.getUri());
-                    log.info("       o title :" + targetTitle);
+                    log.debug("       o title :" + targetTitle);
                     if (sameAsSet.contains(entity)) {
                         if (title == null) {
                             title = targetTitle;
@@ -342,7 +344,7 @@ public class ZemantaEnhancementEngine
                         new TripleImpl(entityEnhancement, ENHANCER_ENTITY_REFERENCE, entity));
             }
             enhancements.add(
-                    new TripleImpl(entityEnhancement, ENHANCER_ENTITY_LABEL, literalFactory.createTypedLiteral(title)));
+                    new TripleImpl(entityEnhancement, ENHANCER_ENTITY_LABEL, new PlainLiteralImpl(title)));
         }
     }
 
@@ -395,7 +397,7 @@ public class ZemantaEnhancementEngine
     private Collection<NonLiteral> processTextAnnotation(MGraph enhancements, String text, UriRef ciId, String anchor, Double confidence) {
         Collection<NonLiteral> textAnnotations = new ArrayList<NonLiteral>();
         int anchorLength = anchor.length();
-        Literal anchorLiteral = literalFactory.createTypedLiteral(anchor);
+        Literal anchorLiteral = new PlainLiteralImpl(anchor);
         //first search for existing TextAnnotations for the anchor
         Map<Integer, Collection<NonLiteral>> existingTextAnnotationsMap = searchExistingTextAnnotations(enhancements, anchorLiteral);
 

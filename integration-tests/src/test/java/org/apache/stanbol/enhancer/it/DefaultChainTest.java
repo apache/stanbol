@@ -71,13 +71,16 @@ public class DefaultChainTest extends EnhancerTestBase {
         .assertContentRegexp(
                 //check execution metadata
                 "http://stanbol.apache.org/ontology/enhancer/executionMetadata#executionPart",
-                //check execution of metaxa & if executionPlan is incuded
+                //check execution of metaxa & if executionPlan is included
                 "http://stanbol.apache.org/ontology/enhancer/executionplan#engine.*metaxa", 
                 "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
                 "http://purl.org/dc/terms/language.*en",
                 "http://fise.iks-project.eu/ontology/entity-label.*Paris",
                 "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
-                "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley"
+                "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley",
+                //the following two lines test the use of plain literals (see STANBOL-509)
+                "http://fise.iks-project.eu/ontology/selected-text.*\"Bob Marley\"@en",
+                "http://fise.iks-project.eu/ontology/selection-context>.*people such as Bob Marley.\"@en"
                 )
         .generateDocumentation(
                 documentor,
