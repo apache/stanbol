@@ -46,11 +46,13 @@ import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.Span;
 
+import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -172,7 +174,7 @@ public class NEREngineCore implements EnhancementEngine {
                 if(nameFinderModel == null){
                     log.info("No NER Model for {} and language {} available!",typeLabel,language);
                 } else {
-                    findNamedEntities(ci, text, typeUri, typeLabel, nameFinderModel);
+                    findNamedEntities(ci, text, language, typeUri, typeLabel, nameFinderModel);
                 }
             }
         } catch (Exception e) {
@@ -182,6 +184,7 @@ public class NEREngineCore implements EnhancementEngine {
 
     protected void findNamedEntities(final ContentItem ci,
                                      final String text,
+                                     final String lang,
                                      final UriRef typeUri,
                                      final String typeLabel,
                                      final TokenNameFinderModel nameFinderModel) {
@@ -192,6 +195,12 @@ public class NEREngineCore implements EnhancementEngine {
         if (text == null) {
             log.warn("NULL was parsed as text for content item " + ci.getUri().getUnicodeString() + "! -> call ignored");
             return;
+        }
+        final Language language;
+        if(lang != null && !lang.isEmpty()){
+            language = new Language(lang);
+        } else {
+            language = null;
         }
         log.debug("findNamedEntities typeUri={}, type={}, text=", 
                 new Object[]{ typeUri, typeLabel, StringUtils.abbreviate(text, 100) });
@@ -211,10 +220,10 @@ public class NEREngineCore implements EnhancementEngine {
     
                 for (NameOccurrence occurrence : occurrences) {
                     UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
-                    g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, literalFactory
-                            .createTypedLiteral(name)));
-                    g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, literalFactory
-                            .createTypedLiteral(occurrence.context)));
+                    g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, 
+                        new PlainLiteralImpl(name, language)));
+                    g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, 
+                        new PlainLiteralImpl(occurrence.context, language)));
                     g.add(new TripleImpl(textAnnotation, DC_TYPE, typeUri));
                     g.add(new TripleImpl(textAnnotation, ENHANCER_CONFIDENCE, literalFactory
                             .createTypedLiteral(occurrence.confidence)));
