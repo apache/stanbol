@@ -50,6 +50,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
@@ -58,6 +59,7 @@ import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
@@ -317,6 +319,13 @@ public class OpenCalaisEngine
      */
     public void createEnhancements(Collection<CalaisEntityOccurrence> occs, ContentItem ci) {
         LiteralFactory literalFactory = LiteralFactory.getInstance();
+        final Language language; // used for plain literals representing parts fo the content
+        String langString = getMetadataLanguage(ci.getMetadata(), null);
+        if(langString != null && !langString.isEmpty()){
+            language = new Language(langString);
+        } else {
+            language = null;
+        }
         //TODO create TextEnhancement (form, start, end, type?) and EntityAnnotation (id, name, type)
         HashMap<Resource, UriRef> entityAnnotationMap = new HashMap<Resource, UriRef>();
         for (CalaisEntityOccurrence occ : occs) {
@@ -326,14 +335,14 @@ public class OpenCalaisEngine
             model.add(new TripleImpl(textAnnotation, DC_TYPE, occ.type));
             // for autotagger use the name instead of the matched term (that might be a pronoun!)
             if (onlyNERMode) {
-                model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT,literalFactory.createTypedLiteral(occ.name)));
+                model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT,new PlainLiteralImpl(occ.name,language)));
             }
             else {
-                model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, literalFactory.createTypedLiteral(occ.exact)));
+                model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, new PlainLiteralImpl(occ.exact,language)));
             }
             model.add(new TripleImpl(textAnnotation, ENHANCER_START, literalFactory.createTypedLiteral(occ.offset)));
             model.add(new TripleImpl(textAnnotation, ENHANCER_END, literalFactory.createTypedLiteral(occ.offset + occ.length)));
-            model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, literalFactory.createTypedLiteral(occ.context)));
+            model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, new PlainLiteralImpl(occ.context,language)));
             //create EntityAnnotation only once but add a reference to the textAnnotation
             if (entityAnnotationMap.containsKey(occ.id)) {
                 model.add(new TripleImpl(entityAnnotationMap.get(occ.id), DC_RELATION, textAnnotation));

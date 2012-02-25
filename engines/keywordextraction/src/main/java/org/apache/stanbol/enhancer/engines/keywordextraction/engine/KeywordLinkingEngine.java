@@ -387,6 +387,10 @@ public class KeywordLinkingEngine
      * @param language
      */
     private void writeEnhancements(ContentItem ci, Collection<LinkedEntity> linkedEntities, String language) {
+        Language languageObject = null;
+        if(language != null && !language.isEmpty()){
+            languageObject = new Language(language);
+        }
         MGraph metadata = ci.getMetadata();
         for(LinkedEntity linkedEntity : linkedEntities){
             Collection<UriRef> textAnnotations = new ArrayList<UriRef>(linkedEntity.getOccurrences().size());
@@ -402,10 +406,10 @@ public class KeywordLinkingEngine
                     literalFactory.createTypedLiteral(occurrence.getEnd())));
                 metadata.add(new TripleImpl(textAnnotation, 
                     Properties.ENHANCER_SELECTION_CONTEXT, 
-                    literalFactory.createTypedLiteral(occurrence.getContext())));
+                    new PlainLiteralImpl(occurrence.getContext(),languageObject)));
                 metadata.add(new TripleImpl(textAnnotation, 
                     Properties.ENHANCER_SELECTED_TEXT, 
-                    literalFactory.createTypedLiteral(occurrence.getSelectedText())));
+                    new PlainLiteralImpl(occurrence.getSelectedText(),languageObject)));
                 metadata.add(new TripleImpl(textAnnotation, 
                     Properties.ENHANCER_CONFIDENCE, 
                     literalFactory.createTypedLiteral(linkedEntity.getScore())));
