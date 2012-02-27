@@ -79,6 +79,7 @@
     <module>ontologymanager/web</module>
     <module>ontologymanager/bundlelist</module>
     <module>rules</module>
+    <module>reasoners</module>
   </modules>
 
   <profiles>
@@ -182,7 +183,9 @@
                 <exclude>enhancer/engines/taxonomylinking/**</exclude>
                 <exclude>demos/**</exclude>
                 <exclude>launchers/kres/**</exclude>
+                <!--
                 <exclude>reasoners/**</exclude>
+                -->
                 <exclude>reengineer/**</exclude>
 
                 <!-- exclude hidden files -->
