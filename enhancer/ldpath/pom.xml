@@ -74,7 +74,13 @@
           <excludes>
             <!-- AL20 License  -->
             <exclude>src/license/THIRD-PARTY.properties</exclude>
-          </excludes>
+            <!-- AL20 License for test resources (see src/test/resources/README) -->
+            <exclude>src/test/resources/content.html</exclude>
+            <exclude>src/test/resources/content.txt</exclude>
+            <exclude>src/test/resources/example.rdf.zip</exclude>
+            <exclude>src/test/resources/example.txt</exclude>
+            <exclude>src/test/resources/metadata.rdf.zip</exclude>
+              </excludes>
         </configuration>
       </plugin>
     </plugins>
@@ -142,6 +148,7 @@
       <artifactId>rdf.jena.parser</artifactId>
       <scope>test</scope>
     </dependency>
+    
   </dependencies>
 
 </project>

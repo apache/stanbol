@@ -1522,32 +1522,37 @@
     <!-- END Solr/Lucene dependencies -->
 
     <!-- JDom -->
-    <!-- first the ready to use bundle -->
-    <dependency>
-      <groupId>org.jdom</groupId>
-      <artifactId>com.springsource.org.jdom</artifactId> 
-      <version>1.1.0</version> 
-    </dependency>
-    <!-- here are the jar -->
+    <!-- we do not need jaxen. using JDom only with xerxes is just fine -->
     <dependency>
       <groupId>org.jdom</groupId>
       <artifactId>jdom</artifactId>
-      <version>1.1</version>
+      <version>1.1.2</version>
+      <exclusions>
+        <exclusion>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
+
+    <!-- HTML cleaner -->
+    <!-- we need to exclude jaxen and we do not need ant -->
     <dependency>
-      <groupId>org.jdom</groupId>
-      <artifactId>jaxen-core</artifactId>
-      <version>1.0-FCS</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jdom</groupId>
-      <artifactId>jaxen-jdom</artifactId>
-      <version>1.0-FCS</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jdom</groupId>
-      <artifactId>saxpath</artifactId>
-      <version>1.0-FCS</version>
+      <groupId>net.sourceforge.htmlcleaner</groupId>
+      <artifactId>htmlcleaner</artifactId>
+      <version>2.2</version>
+      <type>jar</type>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- OpenNLP -->
@@ -1944,13 +1949,6 @@
       <id>kiwi-release-repo</id>
       <name>Kiwi Project Repository</name>
       <url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/releases/</url>
-    </repository>
-
-    <!-- JDom - see STANBOL-508 -->
-    <repository>
-      <id>com.springsource.repository.bundles.external</id> 
-      <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name> 
-      <url>http://repository.springsource.com/maven/bundles/external</url>
     </repository>
 
   </repositories>
