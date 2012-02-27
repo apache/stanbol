@@ -178,12 +178,14 @@
             <server.ready.path.4>/contenthub:Recently uploaded Content Items</server.ready.path.4>
             <server.ready.path.5>/entityhub:The RESTful API of the Entityhub</server.ready.path.5>
             <server.ready.path.6>/ontonet:Apache Stanbol OntoNet</server.ready.path.6>
-            <!-- server.ready.path.7>/reasoners:Apache Stanbol Reasoners</server.ready.path.7 -->
+            <server.ready.path.7>/reasoners:The Stanbol Reasoners provides</server.ready.path.7>
           </systemPropertyVariables>
           <excludes>
             <!-- TODO: remove before commit -->
             <!-- <exclude>**/enhancer/it/*.java</exclude> -->
+            <!--
             <exclude>**/ontologymanager/web/it/*.java</exclude>
+            -->
           </excludes>
         </configuration>
       </plugin>
