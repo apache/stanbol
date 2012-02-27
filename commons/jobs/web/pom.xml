@@ -48,16 +48,16 @@
            <Export-Package></Export-Package>
            <Import-Package>
             javax.servlet.*, 
-			javax.ws.rs.*, 
-			org.slf4j.*,
-			org.osgi.framework.*,
-			org.osgi.service.*,
-			freemarker.cache.*,
-			com.sun.jersey.api.view.*, 
-			org.apache.commons.io.*,
-			org.apache.stanbol.commons.web.base.*,
-			org.apache.stanbol.commons.jobs.api.*,
-			org.apache.stanbol.commons.jobs.impl.*
+      			javax.ws.rs.*, 
+      			org.slf4j.*,
+      			org.osgi.framework.*,
+      			org.osgi.service.*,
+      			freemarker.cache.*,
+      			com.sun.jersey.api.view.*, 
+      			org.apache.commons.io.*,
+      			org.apache.stanbol.commons.web.base.*,
+      			org.apache.stanbol.commons.jobs.api.*,
+      			org.apache.stanbol.commons.jobs.impl.*
            </Import-Package>
          </instructions>
        </configuration>
@@ -97,9 +97,8 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>freemarker</groupId>
+      <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
-      <version>2.3.9</version>
     </dependency>
     <!-- indirect dependency for freemarker -->
     <dependency>
@@ -139,6 +138,15 @@
 
     <!-- Stanbol deps -->
     <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>jena</artifactId>
       <scope>provided</scope>
@@ -150,41 +158,6 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-    	<groupId>org.apache.stanbol</groupId>
-    	<artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
-	<version>0.9.0-incubating-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-    	<groupId>org.apache.stanbol</groupId>
-    	<artifactId>org.apache.stanbol.commons.web.base</artifactId>
-    </dependency>
   </dependencies>
-
-
-  <repositories>
-    <!-- needed for jersey -->
-    <repository>
-      <id>maven2-repository.dev.java.net</id>
-      <name>Java.net Repository for Maven</name>
-      <url>http://download.java.net/maven/2/</url>
-    </repository>
-    <repository>
-      <id>repository-codehaus</id>
-      <name>Codehaus maven repository</name>
-      <url>http://repository.codehaus.org</url>
-    </repository>
-
-    <!-- needed for clerezza SNAPSHOT only -->
-    <repository>
-      <id>apache repository - snapshot repo</id>
-      <name>apache repository</name>
-      <url>https://repository.apache.org/content/repositories/snapshots</url>
-    </repository>
-    <repository>
-    	<id>stlab-cnr-repo</id>
-        <url>http://stlab.istc.cnr.it/software/maven/repo</url>
-    </repository>
-  </repositories>
 
 </project>
