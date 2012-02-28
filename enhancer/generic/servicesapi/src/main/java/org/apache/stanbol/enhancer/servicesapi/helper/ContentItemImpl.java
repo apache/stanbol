@@ -213,7 +213,42 @@ public abstract class ContentItemImpl implements ContentItem {
 		    writeLock.unlock();
 		}
 	}
-
+	@Override
+	public void removePart(int index) {
+	    if(index < 0) {
+	        throw new IllegalArgumentException("The parsed index MUST NOT be < 0");
+	    }
+	    if(index == 0){
+	        throw new IllegalStateException("The main ContentPart (index == 0) CAN NOT be removed!");
+	    }
+        writeLock.lock();
+        try {
+            UriRef partUri = getPartUri(index);
+            parts.remove(partUri);
+        } finally {
+            writeLock.unlock();
+        }
+	}
+	@Override
+	public void removePart(UriRef uriRef) {
+	    if(uriRef == null){
+	        throw new IllegalArgumentException("The parsed uriRef MUST NOT be NULL!");
+	    }
+        writeLock.lock();
+        try {
+            UriRef mainContentPartUri = parts.keySet().iterator().next();
+            if(uriRef.equals(mainContentPartUri)){
+                throw new IllegalStateException("The main ContentPart (uri '"
+                    + uriRef+"') CAN NOT be removed!");
+            }
+            if(parts.remove(uriRef) == null){
+                throw new NoSuchPartException(uriRef);
+            }
+        } finally {
+            writeLock.unlock();
+        }
+	}
+	
     @Override
 	public UriRef getUri() {
 		return uri;
