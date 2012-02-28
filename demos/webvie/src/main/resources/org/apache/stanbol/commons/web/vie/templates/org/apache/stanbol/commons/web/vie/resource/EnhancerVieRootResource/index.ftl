@@ -64,7 +64,7 @@ article {
         $('#content').annotate({
             vie: z,
             vieServices: ["stanbol"],
-            showTooltip: false,
+            showTooltip: true,
             debug: true,
             decline: function(event, ui){
                 console.info('decline event', event, ui);

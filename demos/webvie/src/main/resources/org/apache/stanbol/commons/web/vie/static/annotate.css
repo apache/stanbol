@@ -1,3 +1,7 @@
+/*
+     (c) 2011 Szaby Gruenwald, IKS Consortium
+     Annotate may be freely distributed under the MIT license
+*/
 .entity, a[typeof][about] {
 	z-index: -1;
 	padding: 0 3px;
@@ -29,4 +33,6 @@ a[typeof][about].organisation {background-color: #eff;}
     top: 10px;
     right: 10px;
 }
-
+.ui-dialog, .ui-tooltip {
+    font-size: 95%;
+}

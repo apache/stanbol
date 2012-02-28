@@ -58,6 +58,36 @@
           </instructions>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>.svnignore</exclude>
+            <exclude>README.md</exclude>
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+            <!-- rdfQuery has MIT licence -->
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/jquery.rdfquery.min.js</exclude>
+            <!--
+                Annotate.js: MIT License
+                underscore.js: MIT license
+                backbone.js: MIT license
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/underscore-min.js</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/annotate.js</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/backbone.js</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/vie/vie-latest.js</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/vie/vie-latest.debug.js</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/backbone-min.js</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/jquery.rdfquery.min.js</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/annotate.coffee</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/annotate.css</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/hallo/format.js</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/hallo/hallo.js</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/test.js</exclude>
+            -->
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

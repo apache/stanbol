@@ -99,7 +99,7 @@ public class EnhancerVieWebFragment implements WebFragment {
     @Override
     public List<ScriptResource> getScriptResources() {
         List<ScriptResource> resources = new ArrayList<ScriptResource>();
-        resources.add(new ScriptResource("text/javascript", "lib/jquery-1.5.1.js", this, 10));
+        resources.add(new ScriptResource("text/javascript", "lib/jquery-1.7.1.js", this, 10));
         resources.add(new ScriptResource("text/javascript", "lib/jquery-ui.1.9m5.js", this, 10));
         resources.add(new ScriptResource("text/javascript", "lib/underscore-min.js", this, 10));
         resources.add(new ScriptResource("text/javascript", "lib/backbone.js", this, 10));
