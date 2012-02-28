@@ -19,14 +19,11 @@ package org.apache.stanbol.commons.indexedgraph;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
-
-import javax.swing.DebugGraphics;
-import javax.xml.soap.Text;
 
 import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.Language;
@@ -175,10 +172,13 @@ public class IndexedGraphTest  extends MGraphTest {
     }
     @Test
     public void testPerformance(){
+        //Reduced values to fix STANBOL-
         MGraph sg = new SimpleMGraph();
         int iterations = 100; //reduced from 1000
         int graphsize = 100000;
-        createGraph(sg, graphsize);
+        Long seed = System.currentTimeMillis();
+        log.info("Test Seed: {}",seed);
+        createGraph(sg, graphsize, seed);
         MGraph ig = new IndexedMGraph(sg);
         long start;
         //Simple Graph reference test
@@ -365,7 +365,11 @@ public class IndexedGraphTest  extends MGraphTest {
         return count;
     }
     
-    private static void createGraph(TripleCollection tc, int triples){
+    private static void createGraph(TripleCollection tc, int triples, Long seed){
+        Random rnd = new Random();
+        if(seed != null){
+             rnd.setSeed(seed);
+        }
         LiteralFactory lf = LiteralFactory.getInstance();
         //randoms are in the range [0..3]
         double l = 1.0; //literal
@@ -396,7 +400,7 @@ public class IndexedGraphTest  extends MGraphTest {
         List<BNode> bNodes = new ArrayList<BNode>();
         bNodes.add(new BNode());
         for (int count = 0; tc.size() < triples; count++) {
-            random = Math.random() * 3;
+            random = rnd.nextDouble() * 3;
             if (random >= 2.5 || count == 0) {
                 if (random <= 2.75) {
                     subject = new UriRef(URI_PREFIX + count);
