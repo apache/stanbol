@@ -17,6 +17,21 @@
 -->
 
 <bundles>
+  <!-- ********************************************************************* 
+    start level 10 TO 19 reserved for required libraries (internal and external) 
+    ********************************************************************* -->
+  <startLevel level="17">
+    <bundle> <!-- Apache Tika core (required by the LangId and TikaEngine) -->
+        <groupId>org.apache.tika</groupId>
+        <artifactId>tika-core</artifactId>
+        <version>1.0</version>
+    </bundle>
+    <bundle> <!-- Apache Tika bundle (required by the TikaEngine) -->
+        <groupId>org.apache.tika</groupId>
+        <artifactId>tika-bundle</artifactId>
+        <version>1.0</version>
+    </bundle>
+  </startLevel>
   <!-- Stanbol Enhancer infrastructure and required libraries -->
   <startLevel level="20">
     <bundle>
@@ -91,46 +106,62 @@
 
   <!-- Stanbol Enhancer plug-ins (the Enhancement Engines) -->
   <startLevel level="25">
-    <bundle>
+
+    <!-- language identification -->
+
+    <bundle> 
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <bundle>
+
+    <!-- Content conversion (2 engines)-->
+
+    <bundle> <!-- Metaxa -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <bundle>
+    <bundle><!-- Apache Tika Engine -->
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.engines.opencalais</artifactId>
+      <artifactId>org.apache.stanbol.enhancer.engines.tika</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.engines.zemanta</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
+
+    <!-- Named Entity Recoqunition (NER)-->
+
+    <bundle> <!-- Open NLP based NER -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <!-- Entity Tagging Engine (depends on the Entityhub) -->
-    <bundle>
+    <!-- Entity Extraction/Linking -->
+    <bundle><!-- NER linking (depends on the Entityhub) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <!-- Keyword Extraction Engine (depends on the Entityhub) -->
-    <bundle>
+    <bundle><!-- Keyword Extraction from Text (depends on the Entityhub) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.keywordextraction</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+
+    <!-- External Service Integration -->
+
+    <bundle> <!-- http://www.opencalais.com/ -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.opencalais</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle> <!-- http://www.zemanta.com/ -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.zemanta</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle> <!-- http://www.geonames.org/ -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>

@@ -28,23 +28,22 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
+  <artifactId>org.apache.stanbol.enhancer.engines.tika</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : Language Identifier</name>
-  <description>identifies a text as: German(de), English(en), French(fr), Spanish(es), Italian(it),
-    Swedish(sv), Polish(pl), Dutch(nl), Norwegian(no), Finnish(fi), Albanian(sq), Slovakian(sk),
-    Slovenian(sl), Danish(da), Hungarian(hu)
+  <name>Apache Stanbol Enhancer Enhancement Engine : Apache Tika </name>
+  <description>Enhancement Engine that uses Apache Tika to convert parsed
+  documents to plain text and xhtml
   </description>
 
-  <inceptionYear>2010</inceptionYear>
+  <inceptionYear>2012</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langid/
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/tika/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langid/
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/tika/
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
@@ -58,10 +57,8 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.enhancer.engines.langid;version=${project.version}
+              org.apache.stanbol.enhancer.engines.tika;version=${project.version}
             </Export-Package>
-            <Embed-Dependency>
-            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>
@@ -74,8 +71,18 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- AL20 licensed files: See src/test/resources/README -->
-            <exclude>src/test/resources/en.txt</exclude>
+            <!-- AL20 License  -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+            <!-- AL20 License for test resources (see src/test/resources/README) -->
+            <exclude>src/test/resources/test.doc</exclude>
+            <exclude>src/test/resources/test.html</exclude>
+            <exclude>src/test/resources/test.xhtml</exclude>
+            <exclude>src/test/resources/test.odt</exclude>
+            <exclude>src/test/resources/test.pages</exclude>
+            <exclude>src/test/resources/test.pdf</exclude>
+            <exclude>src/test/resources/test.rtf</exclude>
+            <exclude>src/test/resources/test2.html</exclude>
+            <exclude>src/test/resources/test2.pdf</exclude>
           </excludes>
         </configuration>
       </plugin>
@@ -90,11 +97,13 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.apache.tika</groupId>
-      <artifactId>tika-core</artifactId>
+      <artifactId>tika-parsers</artifactId>
     </dependency>
 
     <dependency>
