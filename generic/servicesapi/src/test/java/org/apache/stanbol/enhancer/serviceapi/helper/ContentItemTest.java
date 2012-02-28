@@ -97,4 +97,81 @@ public class ContentItemTest {
         UriRef mainPart = ci.getPartUri(0);
         ci.addPart(mainPart, new Date());
     }
+    @Test(expected=IllegalArgumentException.class)
+    public void removeNullPart() {
+        ContentItem ci = new ContentItemImpl(ciUri,blob,new SimpleMGraph()){};
+        ci.removePart(null);
+    }
+    @Test(expected=IllegalArgumentException.class)
+    public void removeNegaitveIndexPart() {
+        ContentItem ci = new ContentItemImpl(ciUri,blob,new SimpleMGraph()){};
+        ci.removePart(-1);
+    }
+    @Test(expected=IllegalStateException.class)
+    public void removeMainContentPartByUri() {
+        ContentItem ci = new ContentItemImpl(ciUri,blob,new SimpleMGraph()){};
+        ci.removePart(ci.getPartUri(0));
+    }
+    @Test(expected=IllegalStateException.class)
+    public void removeMainContentPartByIndex() {
+        ContentItem ci = new ContentItemImpl(ciUri,blob,new SimpleMGraph()){};
+        ci.removePart(0);
+    }
+    @Test(expected=NoSuchPartException.class)
+    public void removeNonExistentPartByUri() {
+        ContentItem ci = new ContentItemImpl(ciUri,blob,new SimpleMGraph()){};
+        ci.removePart(new UriRef("urn:does.not.exist:and.can.not.be.removed"));
+    }
+    @Test(expected=NoSuchPartException.class)
+    public void removeNonExistentPartByIndex() {
+        ContentItem ci = new ContentItemImpl(ciUri,blob,new SimpleMGraph()){};
+        ci.removePart(12345);
+    }
+    @Test
+    public void removeRemoveByUri() {
+        ContentItem ci = new ContentItemImpl(ciUri,blob,new SimpleMGraph()){};
+        UriRef uri = new UriRef("urn:content.part:remove.test");
+        ci.addPart(uri, new Date());
+        try {
+            ci.getPart(uri, Date.class);
+        }catch (NoSuchPartException e) {
+            Assert.assertFalse("The part with the uri "+uri+" was not added correctly",
+                true);
+        }
+        ci.removePart(uri);
+        try {
+            ci.getPart(uri, Date.class);
+            Assert.assertFalse("The part with the uri "+uri+" was not removed correctly",
+                true);
+        }catch (NoSuchPartException e) {
+            // expected
+        }
+    }
+    @Test
+    public void removeRemoveByIndex() {
+        ContentItem ci = new ContentItemImpl(ciUri,blob,new SimpleMGraph()){};
+        UriRef uri = new UriRef("urn:content.part:remove.test");
+        ci.addPart(uri, new Date());
+        int index = -1;
+        try {
+            for(int i=0; index < 0; i++){
+                UriRef partUri = ci.getPartUri(i);
+                if(partUri.equals(uri)){
+                    index = i;
+                }
+            }
+        }catch (NoSuchPartException e) {
+            Assert.assertFalse("The part with the uri "+uri+" was not added correctly",
+                true);
+        }
+        ci.removePart(index);
+        try {
+            ci.getPart(index, Date.class);
+            Assert.assertTrue("The part with the uri "+uri+" was not removed correctly",
+                false);
+        }catch (NoSuchPartException e) {
+            // expected
+        }
+    }
+    
 }
