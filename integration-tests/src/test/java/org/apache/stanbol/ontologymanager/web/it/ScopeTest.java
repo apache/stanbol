@@ -29,27 +29,10 @@ public class ScopeTest extends StanbolTestBase {
 
     private static final String _ROOT_URI = "/ontonet";
 
+    private static final String URI_SCOPE_CLASS = "http://kres.iks-project.eu/ontology/onm/meta.owl#Scope";;
     private static final String BASE_SCOPES_URI = _ROOT_URI + "/ontology";
 
     private static final Logger log = LoggerFactory.getLogger(ScopeTest.class);
-
-    private static final String ONT_FOAF_URI = "http://xmlns.com/foaf/spec/index.rdf";
-
-    private static final String ONT_PIZZA_URI = "http://www.co-ode.org/ontologies/pizza/2007/02/12/pizza.owl";
-
-    private static final String ONT_WINE_URI = "http://www.schemaweb.info/webservices/rest/GetRDFByID.aspx?id=62";
-
-    private static final String REG_TEST_URI = "http://www.ontologydesignpatterns.org/registry/krestest.owl";
-
-    private static final String SCOPE_BIZ_URI = BASE_SCOPES_URI + "/" + "Biz";
-
-    private static final String SCOPE_DRUNK_URI = BASE_SCOPES_URI + "/" + "Drunk";
-
-    private static final String SCOPE_USER_URI = BASE_SCOPES_URI + "/" + "User";
-
-    private static final String SCOPE1_URI = BASE_SCOPES_URI + "/" + "Pippo%20Baudo";
-
-    private static final String SCOPE2_URI = BASE_SCOPES_URI + "/" + "TestScope2";
 
     private String encodeURI(String s) {
         StringBuilder o = new StringBuilder();
@@ -70,7 +53,55 @@ public class ScopeTest extends StanbolTestBase {
 
     @Test
     public void testActive() throws Exception {
+        RequestExecutor request;
 
+        String tempActiveScopeUri = BASE_SCOPES_URI + "/" + getClass().getCanonicalName() + "-testActive-"
+                                    + System.currentTimeMillis() + "-active";
+        String tempInactiveScopeUri = BASE_SCOPES_URI + "/" + getClass().getCanonicalName() + "-testActive-"
+                                      + System.currentTimeMillis() + "-inactive";
+
+        // Scopes should not be there
+        request = executor.execute(builder.buildGetRequest(tempActiveScopeUri).withHeader("Accept",
+            KRFormat.TURTLE));
+        request.assertStatus(404);
+        log.info("Request: " + tempActiveScopeUri + " (should return 404) ... DONE");
+        request = executor.execute(builder.buildGetRequest(tempInactiveScopeUri).withHeader("Accept",
+            KRFormat.TURTLE));
+        request.assertStatus(404);
+        log.info("Request: " + tempInactiveScopeUri + " (should return 404) ... DONE");
+
+        // Create scopes, only activate one
+        executor.execute(builder.buildOtherRequest(new HttpPut(builder.buildUrl(tempActiveScopeUri
+                                                                                + "?activate=true"))));
+        log.info("PUT Request: " + tempActiveScopeUri + " ... DONE");
+        executor.execute(builder.buildOtherRequest(new HttpPut(builder.buildUrl(tempInactiveScopeUri))));
+        log.info("PUT Request: " + tempInactiveScopeUri + " ... DONE");
+
+        // By default, we should only see the active scope
+        executor.execute(builder.buildGetRequest(BASE_SCOPES_URI).withHeader("Accept", KRFormat.TURTLE))
+                .assertStatus(200)
+                .assertContentRegexp(false,
+                    tempInactiveScopeUri + ">\\s+rdf:type\\s+<" + URI_SCOPE_CLASS + ">")
+                .assertContentRegexp(true, tempActiveScopeUri + ">\\s+rdf:type\\s+<" + URI_SCOPE_CLASS + ">");
+        log.info("Request: " + BASE_SCOPES_URI + " ... DONE");
+
+        // Using with-inactive we should see both scopes
+        executor.execute(
+            builder.buildGetRequest(BASE_SCOPES_URI + "?with-inactive=true").withHeader("Accept",
+                KRFormat.TURTLE))
+                .assertStatus(200)
+                .assertContentRegexp(true,
+                    tempInactiveScopeUri + ">\\s+rdf:type\\s+<" + URI_SCOPE_CLASS + ">")
+                .assertContentRegexp(true, tempActiveScopeUri + ">\\s+rdf:type\\s+<" + URI_SCOPE_CLASS + ">");
+        log.info("Request: " + BASE_SCOPES_URI + " ... DONE");
+
+        // Delete scopes
+        executor.execute(builder.buildOtherRequest(new HttpDelete(builder.buildUrl(tempActiveScopeUri))));
+        log.info("DELETE Request: " + tempActiveScopeUri + " ... DONE");
+        executor.execute(builder.buildOtherRequest(new HttpDelete(builder.buildUrl(tempInactiveScopeUri))));
+        log.info("DELETE Request: " + tempInactiveScopeUri + " ... DONE");
+
+        // We won't test here if deletion succeeded.
     }
 
     @Test
@@ -95,11 +126,13 @@ public class ScopeTest extends StanbolTestBase {
         executor.execute(builder.buildOtherRequest(new HttpPut(builder.buildUrl(tempScopeUri))));
         log.info("PUT Request: " + tempScopeUri + " ... DONE");
 
-        // Scope should not be there
+        // Scope should be there now
         request = executor.execute(builder.buildGetRequest(tempScopeUri)
                 .withHeader("Accept", KRFormat.TURTLE));
-        request.assertStatus(200);
+        request.assertStatus(200).assertContentContains(tempScopeUri);
         log.info("Request: " + tempScopeUri + " ... DONE");
+        
+        // TODO the U of CRUD
 
         // Delete scope
         executor.execute(builder.buildOtherRequest(new HttpDelete(builder.buildUrl(tempScopeUri))));
@@ -114,7 +147,7 @@ public class ScopeTest extends StanbolTestBase {
 
     @Test
     public void testLocking() throws Exception {
-
+        // TODO first we need some offline content to POST
     }
 
     @Test

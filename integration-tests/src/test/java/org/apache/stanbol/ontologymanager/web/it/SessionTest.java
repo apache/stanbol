@@ -16,12 +16,11 @@
  */
 package org.apache.stanbol.ontologymanager.web.it;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
-import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.stanbol.commons.testing.http.RequestExecutor;
 import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
+import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,17 +51,75 @@ public class SessionTest extends StanbolTestBase {
     }
 
     @Test
-    public void testSessionCreation() throws ClientProtocolException, IOException {
+    public void testCRUD() throws Exception {
+        RequestExecutor request;
 
-        /*
-         * log.info(executor.execute(
-         * builder.buildPostRequest(SESSION_URI+"?scope="+encodeURI("http://localhost:8080/ontonet/ontology/User"
-         * )) .withHeader("Content-type",MediaType.APPLICATION_FORM_URLENCODED)
-         * .withHeader("Accept",KRFormat.RDF_XML) ).getContent()); //.assertStatus(200);
-         */
+        // The needed Web resources to GET from.
+        executor.execute(builder.buildGetRequest(SESSION_URI).withHeader("Accept", KRFormat.TURTLE))
+                .assertStatus(200);
+        log.info("Request: " + SESSION_URI + " ... DONE");
 
-        assertTrue(true);
+        String tempScopeUri = SESSION_URI + "/" + getClass().getCanonicalName() + "-"
+                              + System.currentTimeMillis();
 
+        // Scope should not be there
+        request = executor.execute(builder.buildGetRequest(tempScopeUri)
+                .withHeader("Accept", KRFormat.TURTLE));
+        request.assertStatus(404);
+        log.info("Request: " + tempScopeUri + " (should return 404) ... DONE");
+
+        // Create scope
+        executor.execute(builder.buildOtherRequest(new HttpPut(builder.buildUrl(tempScopeUri))));
+        log.info("PUT Request: " + tempScopeUri + " ... DONE");
+
+        // Scope should be there now
+        request = executor.execute(builder.buildGetRequest(tempScopeUri)
+                .withHeader("Accept", KRFormat.TURTLE));
+        request.assertStatus(200).assertContentContains(tempScopeUri);
+        log.info("Request: " + tempScopeUri + " ... DONE");
+
+        // TODO the U of CRUD
+
+        // Delete scope
+        executor.execute(builder.buildOtherRequest(new HttpDelete(builder.buildUrl(tempScopeUri))));
+        log.info("DELETE Request: " + tempScopeUri + " ... DONE");
+
+        // Scope should not be there
+        request = executor.execute(builder.buildGetRequest(tempScopeUri)
+                .withHeader("Accept", KRFormat.TURTLE));
+        request.assertStatus(404);
+        log.info("Request: " + tempScopeUri + " (should return 404) ... DONE");
+    }
+
+    @Test
+    public void testLocking() throws Exception {
+        // TODO first we need some offline content to POST
+    }
+
+    @Test
+    public void testSupportedOWLFormats() throws Exception {
+        executor.execute(builder.buildGetRequest(SESSION_URI).withHeader("Accept", KRFormat.OWL_XML))
+                .assertStatus(200);
+        log.info("Request: " + SESSION_URI + " (Accept: " + KRFormat.OWL_XML + ")" + " ... DONE");
+        executor.execute(builder.buildGetRequest(SESSION_URI).withHeader("Accept", KRFormat.MANCHESTER_OWL))
+                .assertStatus(200);
+        log.info("Request: " + SESSION_URI + " (Accept: " + KRFormat.MANCHESTER_OWL + ")" + " ... DONE");
+        executor.execute(builder.buildGetRequest(SESSION_URI).withHeader("Accept", KRFormat.FUNCTIONAL_OWL))
+                .assertStatus(200);
+        log.info("Request: " + SESSION_URI + " (Accept: " + KRFormat.FUNCTIONAL_OWL + ")" + " ... DONE");
+    }
+
+    @Test
+    public void testSupportedRDFFormats() throws Exception {
+        executor.execute(builder.buildGetRequest(SESSION_URI).withHeader("Accept", KRFormat.RDF_XML))
+                .assertStatus(200);
+        log.info("Request: " + SESSION_URI + " (Accept: " + KRFormat.RDF_XML + ")" + " ... DONE");
+        executor.execute(builder.buildGetRequest(SESSION_URI).withHeader("Accept", KRFormat.RDF_JSON))
+                .assertStatus(200);
+        log.info("Request: " + SESSION_URI + " (Accept: " + KRFormat.RDF_JSON + ")" + " ... DONE");
+        executor.execute(builder.buildGetRequest(SESSION_URI).withHeader("Accept", KRFormat.TURTLE))
+                .assertStatus(200);
+        log.info("Request: " + SESSION_URI + " (Accept: " + KRFormat.TURTLE + ")" + " ... DONE");
     }
 
     private char toHex(int ch) {
