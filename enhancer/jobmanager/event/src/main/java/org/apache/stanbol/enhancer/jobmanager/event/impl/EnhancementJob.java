@@ -376,13 +376,14 @@ public class EnhancementJob {
             throw new IllegalArgumentException("The parsed em:Execution instance MUST NOT be NULL!");
         }
         writeLock.lock();
-        log.debug("++ w: {}: {}","setCompleted",getEngine(executionPlan, execution));
+        NonLiteral executionNode = getExecutionNode(execution);
+        log.debug("++ w: {}: {}","setCompleted",getEngine(executionPlan, executionNode));
         try {
-            log.debug(">> w: {}: {}","setCompleted",getEngine(executionPlan, execution));
-            setNodeCompleted(getExecutionNode(execution));
+            log.debug(">> w: {}: {}","setCompleted",getEngine(executionPlan, executionNode));
+            setNodeCompleted(executionNode);
             setExecutionCompleted(executionMetadata, execution, null);
         } finally {
-            log.debug("<< w: {}: {}","setCompleted",getEngine(executionPlan, execution));
+            log.debug("<< w: {}: {}","setCompleted",getEngine(executionPlan, executionNode));
             writeLock.unlock();
         }
     }
@@ -459,28 +460,27 @@ public class EnhancementJob {
         try {
             log.debug(">> w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
             if (completed.contains(executionNode)) {
-                throw new IllegalStateException(
-                        "Unable to set state of ExectionNode '"+ executionNode
-                        + "'(chain '"+chain+ "' | contentItem '"
-                        + contentItem.getUri()+"') to running, because"
-                        + "it is already marked as completed. This indicates "
-                        + "an Bug in the implementation of the JobManager "
-                        + "used to execute the ExecutionPlan (chain state: "
-                        +"completed " + completed + " | running " + running
-                        + ")!");
+                String message = "Unable to set state of ExectionNode '" + executionNode + "'(chain '"
+                                 + chain + "' | contentItem '" + contentItem.getUri()
+                                 + "') to running, because"
+                                 + "it is already marked as completed. This indicates "
+                                 + "an Bug in the implementation of the JobManager "
+                                 + "used to execute the ExecutionPlan (chain state: " + "completed "
+                                 + completed + " | running " + running + ")!";
+                log.error(message);
+                throw new IllegalStateException(message);
             }
             if (!completed.containsAll(dependsOn)) {
                 // TODO maybe define an own Exception for such cases
-                throw new IllegalStateException(
-                        "Unable to set state of ExectionNode '"+ executionNode
-                        + "' (chain '"+chain+ "' | contentItem '"
-                        + contentItem.getUri()+"') to running, because "
-                        + "some of its depended nodes are not marked "
-                        + "completed yet. This indicates an Bug in the "
-                        + "implementation of the JobManager used to execute "
-                        + "the ExecutionPlan (this.dependsOn=" + dependsOn 
-                        + "| chain.completed " + completed
-                        + " | chain.running " + running + ")!");
+                String message = "Unable to set state of ExectionNode '" + executionNode + "' (chain '"
+                                 + chain + "' | contentItem '" + contentItem.getUri()
+                                 + "') to running, because " + "some of its depended nodes are not marked "
+                                 + "completed yet. This indicates an Bug in the "
+                                 + "implementation of the JobManager used to execute "
+                                 + "the ExecutionPlan (this.dependsOn=" + dependsOn + "| chain.completed "
+                                 + completed + " | chain.running " + running + ")!";
+                log.error(message);
+                throw new IllegalStateException(message);
             }
             if (!running.add(executionNode)) {
                 log.warn("Execution of Engine '{}' for ContentItem {} already "
@@ -577,7 +577,7 @@ public class EnhancementJob {
         try {
             return executable;
         } finally {
-            log.debug("<< r: {}","getExecutable");
+            log.debug("<< r: {}:{}","getExecutable",executable);
             readLock.unlock();  
         }
     }

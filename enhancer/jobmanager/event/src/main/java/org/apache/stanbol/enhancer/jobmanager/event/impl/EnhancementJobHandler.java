@@ -142,7 +142,15 @@ public class EnhancementJobHandler implements EventHandler {
         }
         if(init){
             enhancementJob.startProcessing();
-            executeNextNodes(enhancementJob);
+            log.debug("++ w: {}","init execution");
+            enhancementJob.getLock().writeLock().lock();
+            try {
+                log.debug(">> w: {}","init execution");
+                executeNextNodes(enhancementJob);
+            } finally {
+                log.debug("<< w: {}","init execution");
+                enhancementJob.getLock().writeLock().unlock();
+            }
         }
         return o;
     }
@@ -280,12 +288,17 @@ public class EnhancementJobHandler implements EventHandler {
     protected void executeNextNodes(EnhancementJob job) {
         //getExecutable returns an snapshot so we do not need to lock
         for(NonLiteral executable : job.getExecutable()){
+            if(log.isDebugEnabled()){
+                log.debug("PREPARE execution of Engine {}",
+                    getEngine(job.getExecutionPlan(), job.getExecutionNode(executable)));
+            }
             Dictionary<String,Object> properties = new Hashtable<String,Object>();
             properties.put(PROPERTY_JOB_MANAGER, job);
             properties.put(PROPERTY_EXECUTION, executable);
             job.setRunning(executable);
             if(log.isDebugEnabled()){
-                log.debug("SHEDULE execution of Engine {}",ExecutionPlanHelper.getEngine(job.getExecutionPlan(), executable));
+                log.debug("SHEDULE execution of Engine {}",
+                    getEngine(job.getExecutionPlan(), job.getExecutionNode(executable)));
             }
             eventAdmin.postEvent(new Event(TOPIC_JOB_MANAGER,properties));
         }
