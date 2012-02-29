@@ -26,7 +26,7 @@
 				Select an index: <div id="indexDiv"><#--this div will be populated by ajax--></div>
 			</p>
 			<p>
-				Keywords: <input id="keywordIn" class="autoCompleteText" onkeyup="javascript:completePattern();" name="topic" type="text" onkeydown="if (event.keyCode == 13) document.getElementById('submitIn').click()"/><br/>
+				Keywords: <input id="keywordIn" class="autoCompleteText" <#-- onkeyup="javascript:completePattern();" --> name="topic" type="text" onkeydown="if (event.keyCode == 13) document.getElementById('submitIn').click()"/><br/>
 			</p>
 			<p>
 				<!-- Ontology selection combobox-->
@@ -234,7 +234,7 @@
 			
       $.ajax({
         url : "${it.publicBaseUri}contenthub/${it.indexName}/search/featured",
-        type : "POST",
+        type : "GET",
         async: true,
         data: {queryTerm: $("#keywordIn").val(), graph: graph_selected, constraints: JSON.stringify(JSONObject), offset: voffset, limit:vpageSize},
         dataType: "html",

@@ -77,10 +77,9 @@
     
     function deleteProgram(programName){
       $.ajax({
-        url: "${it.publicBaseUri}contenthub/ldpath/program",
+        url: "${it.publicBaseUri}contenthub/ldpath/program/"+programName,
         type: "DELETE",
         async: true,
-        data: { name: programName },
         success: function() {
           $("#submittedPrograms").load("${it.publicBaseUri}contenthub/ldpath #submittedPrograms>table");
         },

@@ -41,7 +41,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +89,6 @@ import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrStore;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
-import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
 import org.apache.stanbol.contenthub.web.util.JSONUtils;
 import org.apache.stanbol.enhancer.jersey.resource.ContentItemResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -103,9 +101,8 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
-
-import eu.medsea.mimeutil.MimeUtil2;
 
 /**
  * Resource to provide a CRU[D] REST API for content items and there related enhancements.
@@ -141,8 +138,6 @@ public class StoreResource extends BaseStanbolResource {
 
     private List<ResultantDocument> recentlyEnhanced;
 
-    private MimeUtil2 mimeIdentifier;
-
     private String indexName;
 
     /**
@@ -177,9 +172,6 @@ public class StoreResource extends BaseStanbolResource {
             log.error("Missing tcManager");
             throw new WebApplicationException(404);
         }
-        this.mimeIdentifier = new MimeUtil2();
-        this.mimeIdentifier.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
-        this.mimeIdentifier.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
     }
 
     /*
@@ -459,7 +451,7 @@ public class StoreResource extends BaseStanbolResource {
         if (jsonCons != null) {
             constraints = JSONUtils.convertToMap(jsonCons);
         }
-        return createContentItemFromForm(content, url, null, null, headers, constraints, title);
+        return createContentItemFromForm(content, url, null, null, null, headers, constraints, title);
     }
 
     /**
@@ -492,6 +484,7 @@ public class StoreResource extends BaseStanbolResource {
     @Consumes(MULTIPART_FORM_DATA)
     public Response createContentItemFromForm(@FormDataParam("file") File file,
                                               @FormDataParam("file") FormDataContentDisposition disposition,
+                                              @FormDataParam("file") FormDataBodyPart body,
                                               @FormDataParam("constraints") String jsonCons,
                                               @FormDataParam("title") String title,
                                               @Context HttpHeaders headers) throws URISyntaxException,
@@ -503,13 +496,14 @@ public class StoreResource extends BaseStanbolResource {
         if (jsonCons != null) {
             constraints = JSONUtils.convertToMap(jsonCons);
         }
-        return createContentItemFromForm(null, null, file, disposition, headers, constraints, title);
+        return createContentItemFromForm(null, null, file, disposition, body, headers, constraints, title);
     }
 
     private Response createContentItemFromForm(String content,
                                                String url,
                                                File file,
                                                FormDataContentDisposition disposition,
+                                               FormDataBodyPart body,
                                                HttpHeaders headers,
                                                Map<String,List<Object>> constraints,
                                                String title) throws URISyntaxException,
@@ -533,10 +527,19 @@ public class StoreResource extends BaseStanbolResource {
                 // feedback
             }
         } else if (file != null) {
-            data = FileUtils.readFileToByteArray(file);
-            // String lowerFilename = disposition.getFileName().toLowerCase();
-            Collection<?> mimeTypes = mimeIdentifier.getMimeTypes(file);
+        	/*MimeUtil2 mimeUtil = new MimeUtil2();
+        	mimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
+        	mimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
+            Collection<?> mimeTypes = mimeUtil.getMimeTypes(file);
             mt = MediaType.valueOf(MimeUtil2.getMostSpecificMimeType(mimeTypes).toString());
+            mimeUtil.unregisterMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
+            mimeUtil.unregisterMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
+            */
+            mt = body.getMediaType();
+            data = FileUtils.readFileToByteArray(file);
+            if(title == null || title.isEmpty()) {
+            	title = disposition.getFileName();
+            }
         }
 
         if (data != null && mt != null) {
@@ -574,8 +577,8 @@ public class StoreResource extends BaseStanbolResource {
         }
     }
 
-    private URI makeRedirectionURI(String localId) throws URISyntaxException {
-        return new URI(uriInfo.getBaseUri() + "contenthub/" + indexName + "/store/content/" + localId);
+    private URI makeRedirectionURI(String contentURI) throws URISyntaxException {
+        return new URI(uriInfo.getBaseUri() + "contenthub/" + indexName + "/store/content/" + contentURI);
     }
 
     /**
@@ -659,6 +662,7 @@ public class StoreResource extends BaseStanbolResource {
     public Response updateContentItemFromForm(@FormDataParam("uri") String contentURI,
                                               @FormDataParam("file") File file,
                                               @FormDataParam("file") FormDataContentDisposition disposition,
+                                              @FormDataParam("file") FormDataBodyPart body,
                                               @FormDataParam("constraints") String jsonCons,
                                               @FormDataParam("title") String title,
                                               @Context HttpHeaders headers) throws URISyntaxException,
@@ -669,7 +673,7 @@ public class StoreResource extends BaseStanbolResource {
         if (contentURI != null && !contentURI.isEmpty()) {
             deleteContentItem(contentURI);
         }
-        return createContentItemFromForm(file, disposition, jsonCons, title, headers);
+        return createContentItemFromForm(file, disposition, body, jsonCons, title, headers);
     }
 
     /**
@@ -735,15 +739,15 @@ public class StoreResource extends BaseStanbolResource {
         return new Viewable("index", this);
     }
 
-    @Path("/page/{localId:.+}")
+    @Path("/page/{uri:.+}")
     @Produces(TEXT_HTML)
-    public ContentItemResource getContentItemView(@PathParam(value = "localId") String localId) throws IOException,
+    public ContentItemResource getContentItemView(@PathParam(value = "uri") String contentURI) throws IOException,
                                                                                                StoreException {
-        ContentItem ci = solrStore.get(localId, indexName);
+        ContentItem ci = solrStore.get(contentURI, indexName);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-        return new ContentItemResource(localId, ci, uriInfo, "/contenthub/" + indexName + "/store/download",
+        return new ContentItemResource(contentURI, ci, uriInfo, "/contenthub/" + indexName + "/store/download",
                 tcManager, serializer, servletContext);
     }
 

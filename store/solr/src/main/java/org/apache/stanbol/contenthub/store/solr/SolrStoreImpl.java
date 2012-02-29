@@ -25,10 +25,12 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.MGraph;
@@ -334,11 +336,11 @@ public class SolrStoreImpl implements SolrStore {
         try {
             MGraph ciMetadata = sci.getMetadata();
             Iterator<Triple> it = ciMetadata.filter(null, Properties.ENHANCER_ENTITY_REFERENCE, null);
-            List<UriRef> contexts = new ArrayList<UriRef>();
+            Set<String> contexts = new HashSet<String>();
             while (it.hasNext()) {
                 Resource r = it.next().getObject();
                 if (r instanceof UriRef) {
-                    contexts.add((UriRef) r);
+                    contexts.add(((UriRef) r).getUnicodeString());
                 }
             }
             Map<String,Collection<?>> results = ldProgramManager.executeProgram(ldProgramName, contexts,
@@ -480,7 +482,7 @@ public class SolrStoreImpl implements SolrStore {
         MGraph metadata = new SimpleMGraph();
         while (resultSet.hasNext()) {
             SolutionMapping mapping = resultSet.next();
-            UriRef ref = (UriRef) mapping.get("enhancement");
+            UriRef ref = (UriRef) mapping.get("enhID");
             Iterator<Triple> tripleItr = this.getEnhancementGraph().filter(ref, null, null);
             while (tripleItr.hasNext()) {
                 Triple triple = tripleItr.next();

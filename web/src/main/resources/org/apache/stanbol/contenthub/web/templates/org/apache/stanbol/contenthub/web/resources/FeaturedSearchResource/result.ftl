@@ -21,25 +21,58 @@
 <#assign limit=4>
 <div id="text">
 </div>
+
 <div id="result" class="result">
 <a href="${it.publicBaseUri}contenthub/${it.indexName}/search/featured">Back to Search</a></br>
-  <div class="keywords">
-  	<#list it.searchResults.relatedKeywords?keys as queryTermToken>
-  	  <#assign queryTerm = queryTermToken?replace("*","_")?replace(" ", "_")?replace("'", "_")>
-      <#assign kwId = "kw_" + queryTerm>
-      <h3 class="keywordItem keywordClickable" id="${kwId}">${queryTermToken}</h3>
-      <div id="allSuggestions_${queryTerm}">
-        <#assign rkwsForSingleToken = it.searchResults.relatedKeywords[queryTermToken]>
-  		<#list rkwsForSingleToken?keys as rkwSource>
-  		  <#assign rkwList = rkwsForSingleToken[rkwSource]>
-  		  <#if rkwList?size &gt; 0>
-  		    <@relatedKeywordMacro.relatedKeywordMacro relatedKeywordId = kwId relatedKeywordList = rkwList source = rkwSource/>
-  		  </#if>
-  		</#list>
-  	  </div>
-    </#list>
+
+  <div class="leftContainer">
+  
+    <div class="keywords">
+      <#list it.searchResults.relatedKeywords?keys as queryTermToken>
+        <#assign queryTerm = queryTermToken?replace("*","_")?replace(" ", "_")?replace("'", "_")>
+        <#assign kwId = "kw_" + queryTerm>
+        <h3 class="keywordItem keywordClickable" id="${kwId}">${queryTermToken}</h3>
+        <div id="allSuggestions_${queryTerm}">
+          <#assign rkwsForSingleToken = it.searchResults.relatedKeywords[queryTermToken]>
+          <#list rkwsForSingleToken?keys as rkwSource>
+            <#assign rkwList = rkwsForSingleToken[rkwSource]>
+            <#if rkwList?size &gt; 0>
+              <@relatedKeywordMacro.relatedKeywordMacro relatedKeywordId = kwId relatedKeywordList = rkwList source = rkwSource/>
+            </#if>
+          </#list>
+        </div>
+      </#list>
+    </div>
+    
+    <#-- chosen facets division --> 
+    <div class="chosenfacets">
+      <#if it.chosenFacets?exists && it.chosenFacets != "{}">
+        <fieldset>
+          <div id="chosenFacets"></div>
+          <div id="chosenFacetsHidden" class="invisible">'${it.chosenFacets?js_string}'</div>
+        </fieldset>
+      </#if>
+    </div>
+  
+    <#-- facets constructed for the retrieved current search results -->
+    <div class="facets" id="facets">
+      <#if it.searchResults.facets?exists && it.searchResults.facets?size != 0>
+        <fieldset>
+          <#list it.searchResults.facets as facet>
+            <#if facet.values?exists>
+              <#if it.chosenFacets?exists>
+                <@facetResultMacro.facetResultMacro facetField=facet consLink=it.chosenFacets/>
+              <#else>
+                <@facetResultMacro.facetResultMacro facetField=facet consLink="{}"/>
+              </#if>
+            </#if>
+          </#list>
+        </fieldset>
+      </#if>
+    </div>
+    
   </div>
-	
+
   <#-- search result division --> 
   <div class="resources">
     <fieldset>
@@ -57,7 +90,7 @@
           </#if>
         </ul>
       </div>
-	</fieldset>
+    </fieldset>
     <ul class="previousNext">
       <#assign consLinkEscaped = it.chosenFacets?url("UTF-8")?js_string/>
       <#if it.moreRecentItems?exists>
@@ -68,31 +101,5 @@
       </#if>
     </ul>
   </div>
-	
-  <#-- chosen facets division --> 
-  <div class="chosenfacets">
-    <#if it.chosenFacets?exists && it.chosenFacets != "{}">
-      <fieldset>
-        <div id="chosenFacets"></div>
-        <div id="chosenFacetsHidden" class="invisible">'${it.chosenFacets?js_string}'</div>			
-      </fieldset>
-	</#if>
-  </div>
-	
-  <#-- facets constructed for the retrieved current search results -->
-  <div class="facets" id="facets">
-    <#if it.searchResults.facets?exists && it.searchResults.facets?size != 0>
-      <fieldset>
-        <#list it.searchResults.facets as facet>
-          <#if facet.values?exists>
-            <#if it.chosenFacets?exists>
-              <@facetResultMacro.facetResultMacro facetField=facet consLink=it.chosenFacets/>
-            <#else>
-              <@facetResultMacro.facetResultMacro facetField=facet consLink="{}"/>
-            </#if>
-          </#if>
-		</#list>
-	  </fieldset>
-	</#if>
-  </div> 
+  
 </div>

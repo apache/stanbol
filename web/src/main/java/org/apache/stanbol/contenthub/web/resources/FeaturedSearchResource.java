@@ -27,11 +27,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -56,7 +53,6 @@ import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearchManager;
-import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
 import org.apache.stanbol.contenthub.web.util.JSONUtils;
 import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -100,60 +96,6 @@ public class FeaturedSearchResource extends BaseStanbolResource {
         this.indexName = indexName;
         featuredSearch = ContextHelper.getServiceFromContext(FeaturedSearch.class, context);
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
-    }
-
-    /**
-     * HTTP POST method to make a featured search over Contenthub. This method directly calls the
-     * corresponding {{@link #get(String, String, String, String, String, int, int, String, HttpHeaders)}
-     * method of this class.
-     * 
-     * @param queryTerm
-     *            A keyword a statement or a set of keywords which can be regarded as the query term.
-     * @param solrQuery
-     *            Solr query string. This is the string format which is accepted by a Solr server. For
-     *            example, {@code q="john doe"&fl=score} is a valid value for this parameter. If this
-     *            parameter exists, search is performed based on this solrQuery and any queryTerms are
-     *            neglected.
-     * @param jsonCons
-     *            Constrainst in JSON format. These constraints are tranformed to corresponding Solr queries
-     *            to enable faceted search. Each constraint is a facet field and values of the constraints
-     *            maps to the values of the facet fields in Solr queries.
-     * @param graphURI
-     *            URI of the ontology in which related keywords will be searched by
-     *            {@link RelatedKeywordSearchManager#getRelatedKeywordsFromOntology(String, String)}
-     * @param offset
-     *            The offset of the document from which the resultant documents will start as the search
-     *            result. {@link offset} and {@link limit} parameters can be used to make a pagination
-     *            mechanism for search results.
-     * @param limit
-     *            Maximum number of resultant documents to be returned as the search result. {@link offset}
-     *            and {@link limit} parameters can be used to make a pagination mechanism for search results.
-     * @param headers
-     *            HTTP headers
-     * @return
-     * @throws IllegalArgumentException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws SolrServerException
-     * @throws SearchException
-     * @throws IOException
-     */
-    @POST
-    @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public final Response post(@FormParam("queryTerm") String queryTerm,
-                               @FormParam("solrQuery") String solrQuery,
-                               @FormParam("constraints") String jsonCons,
-                               @FormParam("graph") String graphURI,
-                               @FormParam("offset") @DefaultValue("0") int offset,
-                               @FormParam("limit") @DefaultValue("10") int limit,
-                               @Context HttpHeaders headers) throws IllegalArgumentException,
-                                                            InstantiationException,
-                                                            IllegalAccessException,
-                                                            SolrServerException,
-                                                            SearchException,
-                                                            IOException {
-        return get(queryTerm, solrQuery, jsonCons, graphURI, offset, limit, null, headers);
     }
 
     /**
