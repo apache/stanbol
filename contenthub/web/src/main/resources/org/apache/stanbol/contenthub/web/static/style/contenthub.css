@@ -33,43 +33,19 @@
   background-position: right;	
 }
 
-div .result{
-  display: block;
-	
-}
-
 .lined{
   display: inline-block;
 	
 }
 
-div .keywords{
-  display: inline-block;
-  position: relative;
-  left: 1%;
+div .leftContainer{
+  overflow: auto;
   width: 30%;
+  float:left;
 }
-
-div .chosenfacets{
-  display: inline-block;
-  position: relative;
-  left: 1%;
-  width: 30%;
-}
-
-div .facets{
-  display: inline-block;
-  position: relative;
-  left: 1%;
-  width: 30%;
-  float: left;
-}
-
 div .resources{
-  display: inline-block;
-  position: relative;
-  width: 69%;
-  float: right;
+  width: 63%;
+  float:left;
 }
 
 div .searchbox {

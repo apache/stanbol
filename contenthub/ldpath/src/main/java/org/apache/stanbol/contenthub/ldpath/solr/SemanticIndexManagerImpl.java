@@ -22,33 +22,41 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.ldpath.clerezza.ClerezzaBackend;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
+import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
+import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
+import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
+import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
+import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.newmedialab.ldpath.LDPath;
 import at.newmedialab.ldpath.exception.LDPathParseException;
+import at.newmedialab.ldpath.model.fields.FieldMapping;
+import at.newmedialab.ldpath.model.programs.Program;
 
 /**
  * Implementation of the LDProgramManager which managed the LDPath Programs submitted to the system. This
@@ -78,6 +86,9 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
 
     @Reference
     private ManagedSolrServer managedSolrServer;
+
+    @Reference
+    private ReferencedSiteManager referencedSiteManager;
 
     @Activate
     public void activator(ComponentContext cc) throws LDPathException, IOException {
@@ -214,36 +225,42 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     }
 
     @Override
-    public Map<String,Collection<?>> executeProgram(String programName, List<UriRef> contexts, MGraph graph) throws LDPathException {
+    public Map<String,Collection<?>> executeProgram(String programName, Set<String> contexts, MGraph graph) throws LDPathException {
         Map<String,Collection<?>> results = new HashMap<String,Collection<?>>();
-        LDPath<Resource> ldpath = new LDPath<Resource>(new ClerezzaBackend(graph));
+        SiteManagerBackend backend = new SiteManagerBackend(referencedSiteManager);
         String ldPathProgram = getProgramByName(programName);
-        for (UriRef context : contexts) {
-            try {
-                Map<String,Collection<?>> entityResults = ldpath.programQuery(context,
-                    LDPathUtils.constructReader(ldPathProgram));
-                for (Entry<String,Collection<?>> entry : entityResults.entrySet()) {
-                    if (results.containsKey(entry.getKey())) {
-                        @SuppressWarnings("unchecked")
-                        Collection<Object> resultCollection = (Collection<Object>) results
-                                .get(entry.getKey());
-                        @SuppressWarnings("unchecked")
-                        Collection<Object> tmpCol = (Collection<Object>) entry.getValue();
-                        for (Object o : tmpCol) {
-                            resultCollection.add(o);
-                        }
-                    } else {
-                        results.put(entry.getKey(), new ArrayList<Object>(entry.getValue()));
-                    }
+        ValueFactory vf = InMemoryValueFactory.getInstance();
+        EntityhubLDPath ldPath = new EntityhubLDPath(backend, vf);
+        Program<Object> program = null;
+        try {
+            program = ldPath.parseProgram(LDPathUtils.constructReader(ldPathProgram));
+        } catch (LDPathParseException e) {
+            logger.error("Should never happen!!!!!", e);
+        }
+
+        Representation representation;
+        for (String context : contexts) {
+            representation = ldPath.execute(vf.createReference(context), program);
+            Iterator<String> fieldNames = representation.getFieldNames();
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                Iterator<Object> valueIterator = representation.get(fieldName);
+                Set<Object> values = new HashSet<Object>();
+                while (valueIterator.hasNext()) {
+                    values.add(valueIterator.next());
                 }
-            } catch (LDPathParseException e) {
-                logger.error("Should never happen!!!!!", e);
-            } catch (ClassCastException e) {
-                logger.error("Cannot cast result collection to Collection<Object>", e);
+                if (results.containsKey(fieldName)) {
+                    @SuppressWarnings("unchecked")
+                    Collection<Object> resultCollection = (Collection<Object>) results.get(fieldName);
+                    Collection<Object> tmpCol = (Collection<Object>) values;
+                    for (Object o : tmpCol) {
+                        resultCollection.add(o);
+                    }
+                } else {
+                    results.put(fieldName, values);
+                }
             }
         }
         return results;
-
     }
-
 }
