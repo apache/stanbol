@@ -53,7 +53,7 @@ public class TestStorage {
     @Test
     public void storageOnScopeCreation() throws Exception {
 
-        assertTrue(ontologyProvider.getStore().listTripleCollections().isEmpty());
+        assertEquals(1,ontologyProvider.getStore().listTripleCollections().size());
         OntologyInputSource ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
             "/ontologies/minorcharacters.owl")));
 

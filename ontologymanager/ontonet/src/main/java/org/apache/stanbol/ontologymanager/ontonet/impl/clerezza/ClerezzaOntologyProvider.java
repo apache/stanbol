@@ -23,12 +23,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -130,7 +128,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
      * Maps ontology IRIs (logical or physical if the ontology is anonymous) to Clerezza storage keys i.e.
      * graph names.
      */
-    private Map<IRI,String> ontologyIdsToKeys;
+    private OntologyToTcMapper keymap = null;
+    // private Map<IRI,String> ontologyIdsToKeys;
 
     @Reference
     private Parser parser;
@@ -162,7 +161,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
      */
     public ClerezzaOntologyProvider() {
         supported = new Class<?>[] {MGraph.class, OWLOntology.class};
-        ontologyIdsToKeys = new HashMap<IRI,String>();
+        // ontologyIdsToKeys = new HashMap<IRI,String>();
     }
 
     public ClerezzaOntologyProvider(TcProvider store, OfflineConfiguration offline, Parser parser) {
@@ -194,6 +193,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
         // Check if the TcManager should be set as the store
         if (store == null) store = tcManager;
+
+        keymap = new OntologyToTcMapper(store);
 
         // Parse configuration.
         prefix = (String) (configuration.get(OntologyProvider.GRAPH_PREFIX));
@@ -302,13 +303,15 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     @Override
     public String getKey(IRI ontologyIri) {
         ontologyIri = URIUtils.sanitizeID(ontologyIri);
-        log.debug("key for {} is {}", ontologyIri, ontologyIdsToKeys.get(ontologyIri));
-        return ontologyIdsToKeys.get(ontologyIri);
+        UriRef ur = keymap.getMapping(ontologyIri);
+        log.debug("key for {} is {}", ontologyIri, ur);
+        return (ur == null) ? null : ur.getUnicodeString();
     }
 
     @Override
     public Set<String> getKeys() {
-        return new HashSet<String>(ontologyIdsToKeys.values());
+        // return new HashSet<String>(ontologyIdsToKeys.values());
+        return keymap.stringValues();
     }
 
     @Override
@@ -524,8 +527,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
          * as the one used by the input source.
          */
         UriRef uriref = new UriRef(s);
+        log.debug("Storing ontology with graph ID {}", uriref);
         // The policy here is to avoid copying the triples from a graph already in the store.
-        // TODO not a good policy for graphs that change
+        // FIXME not a good policy for graphs that change
         if (!getStore().listTripleCollections().contains(uriref) || force) {
             try {
                 graph = store.createMGraph(uriref);
@@ -559,9 +563,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
         if (loaded) {
             // All is already sanitized by the time we get here.
-            ontologyIdsToKeys.put(ontologyIri, s);
-            if (alternateId != null && !alternateId.equals(iri)) ontologyIdsToKeys.put(
-                IRI.create(alternateId), s);
+            UriRef urs = new UriRef(s);
+            // ontologyIdsToKeys.put(ontologyIri, s);
+            keymap.setMapping(ontologyIri, urs);
+            if (alternateId != null && !alternateId.equals(iri))
+            // ontologyIdsToKeys.put(
+            keymap.setMapping(IRI.create(alternateId), urs);
             log.debug("Ontology \n\t\t{}\n\tstored with keys\n\t\t{}",
                 ontologyIri + ((alternateId != null && !alternateId.equals(iri)) ? " , " + alternateId : ""),
                 s);

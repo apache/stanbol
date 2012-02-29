@@ -72,7 +72,7 @@ public class TestClerezzaInputSources {
     @Test
     public void testGraphContentSource() throws Exception {
         // Make sure the tc manager has been reset
-        assertEquals(0, tcManager.listTripleCollections().size());
+        assertEquals(1, tcManager.listTripleCollections().size());
 
         OntologyProvider<TcProvider> provider = new ClerezzaOntologyProvider(tcManager,
                 new OfflineConfigurationImpl(new Hashtable<String,Object>()), parser);
@@ -86,7 +86,7 @@ public class TestClerezzaInputSources {
                 .size());
         for (UriRef name : tcManager.listTripleCollections())
             log.info("-- {} (a {})", name, tcManager.getTriples(name).getClass().getSimpleName());
-        assertEquals(0, tcManager.listTripleCollections().size());
+        assertEquals(1, tcManager.listTripleCollections().size());
         OntologySpace spc = new CoreOntologySpaceImpl(TestClerezzaInputSources.class.getSimpleName(),
                 IRI.create("http://stanbol.apache.org/ontologies/"), provider);
         spc.addOntology(src);
@@ -95,7 +95,7 @@ public class TestClerezzaInputSources {
 
         for (UriRef name : tcManager.listTripleCollections())
             log.info("-- {} (a {})", name, tcManager.getTriples(name).getClass().getSimpleName());
-        assertEquals(1, tcManager.listTripleCollections().size());
+        assertEquals(2, tcManager.listTripleCollections().size());
     
     }
 
@@ -116,8 +116,8 @@ public class TestClerezzaInputSources {
         assertNotNull(gis);
         assertNotNull(gis.getRootOntology());
         Set<TripleCollection> imported = gis.getImports(false);
-        // Number of stored graphs minus the importing one = imported graphs
-        assertEquals(tcManager.listTripleCollections().size() - 1, imported.size());
+        // Number of stored graphs minus the importing one minus the reserved graph = imported graphs
+        assertEquals(tcManager.listTripleCollections().size() - 2, imported.size());
         for (TripleCollection g : imported)
             assertNotNull(g);
     }
