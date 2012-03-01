@@ -50,6 +50,7 @@
     <module>geonames</module>
     <module>entitytagging</module>
     <module>keywordextraction</module>
+    <module>refactor</module>
 
     <module>opencalais</module>
     <module>zemanta</module>
