@@ -99,13 +99,13 @@ import org.slf4j.LoggerFactory;
  * The first implementation is targeted to SEO use case. * It retrieves data by dereferencing the entities, *
  * includes the DBpedia ontology * refactor the data using the google rich snippets vocabulary.
  * 
- * @author andrea.nuzzolese
+ * @author andrea.nuzzolese, alberto.musetti
  * 
  */
 
 @Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, specVersion = "1.1", metatype = true, immediate = true, inherit = true)
 @Service
-@Properties(value = {@Property(name = EnhancementEngine.PROPERTY_NAME, value = "seo_refactoring")
+@Properties(value = {@Property(name = EnhancementEngine.PROPERTY_NAME)
 
 })
 public class RefactorEnhancementEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException>
@@ -115,24 +115,23 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
      * TODO This are the scope and recipe IDs to be used by this implementation In future implementation this
      * will be configurable
      */
-    @Property(value = "seo")
-    public static final String SCOPE = "engine.refactor.scope";
+    @Property()
+    public static final String SCOPE = RefactorEnhancementEngineConf.SCOPE;
 
-    @Property(value = "")
-    public static final String RECIPE_LOCATION = "engine.refactor.recipe.location";
+    @Property()
+    public static final String RECIPE_LOCATION = RefactorEnhancementEngineConf.RECIPE_LOCATION;
 
-    @Property(value = "google_rich_snippet_rules")
-    public static final String RECIPE_ID = "engine.refactor.recipe.id";
+    @Property()
+    public static final String RECIPE_ID = RefactorEnhancementEngineConf.RECIPE_ID;
 
-    @Property(cardinality = 1000, value = {"http://ontologydesignpatterns.org/ont/iks/kres/dbpedia_demo.owl",
-                                           ""})
-    public static final String SCOPE_CORE_ONTOLOGY = "engine.refactor.scope.core.ontology";
+    @Property(cardinality = 1000)
+    public static final String SCOPE_CORE_ONTOLOGY = RefactorEnhancementEngineConf.SCOPE_CORE_ONTOLOGY;
 
-    @Property(boolValue = true)
-    public static final String APPEND_OTHER_ENHANCEMENT_GRAPHS = "engine.refactor.append.graphs";
+    @Property()
+    public static final String APPEND_OTHER_ENHANCEMENT_GRAPHS = RefactorEnhancementEngineConf.APPEND_OTHER_ENHANCEMENT_GRAPHS;
 
-    @Property(boolValue = true)
-    public static final String USE_ENTITY_HUB = "engine.refactor.entityhub";
+    @Property()
+    public static final String USE_ENTITY_HUB = RefactorEnhancementEngineConf.USE_ENTITY_HUB;
 
     @Reference
     ONManager onManager;

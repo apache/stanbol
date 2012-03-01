@@ -35,36 +35,36 @@ public interface RefactorEnhancementEngineConf {
     /**
      * The OntoNet scope that the engine should use.
      */
-    String SCOPE = "engine.refactor.scope";
+    String SCOPE = "org.apache.stanbol.enhancer.engines.refactor.scope";
     
     /**
      * The location from which the recipe is loaded.
      */
-    String RECIPE_LOCATION = "engine.refactor.recipe.location";
+    String RECIPE_LOCATION = "org.apache.stanbol.enhancer.engines.refactor.recipe.location";
     
     /**
      * The ID used for identifying the recipe in the RuleStore.
      */
-    String RECIPE_ID = "engine.refactor.recipe.id";
+    String RECIPE_ID = "org.apache.stanbol.enhancer.engines.refactor.recipe.id";
     
     /**
      * The set of ontology URIs that should be loaded in the core space of the scope.
      */
-    String SCOPE_CORE_ONTOLOGY = "engine.refactor.scope.core.ontology";
+    String SCOPE_CORE_ONTOLOGY = "org.apache.stanbol.enhancer.engines.refactor.scope.core.ontology";
     
     /**
      * If true: the previously generated RDF is deleted and substituted with the new one. 
      * If false: the new one is appended to the old RDF. 
      * Possible value in the configuration: true or false.
      */
-    String APPEND_OTHER_ENHANCEMENT_GRAPHS = "engine.refactor.append.graphs";
+    String APPEND_OTHER_ENHANCEMENT_GRAPHS = "org.apache.stanbol.enhancer.engines.refactor.append.graphs";
     
     /**
      * If true: entities are fetched via the EntityHub. 
      * If false: entities are fetched on-line. 
      * Possible value in the configuration: true or false.
      */
-    String USE_ENTITY_HUB  = "engine.refactor.entityhub";
+    String USE_ENTITY_HUB  = "org.apache.stanbol.enhancer.engines.refactor.entityhub";
     
     
     public String getScope();
