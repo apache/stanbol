@@ -17,6 +17,7 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
@@ -55,7 +57,6 @@ import org.slf4j.LoggerFactory;
 @Path("/ontonet/{ontologyId:.+}")
 public class StoredOntologyResource extends BaseStanbolResource {
 
-    @SuppressWarnings("unused")
     private Logger log = LoggerFactory.getLogger(getClass());
 
     /*
@@ -153,7 +154,9 @@ public class StoredOntologyResource extends BaseStanbolResource {
         }
         o.getOWLOntologyManager().applyChanges(changes);
 
-        return Response.ok(o).build();
+        ResponseBuilder rb = Response.ok(o);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
 
     }
 

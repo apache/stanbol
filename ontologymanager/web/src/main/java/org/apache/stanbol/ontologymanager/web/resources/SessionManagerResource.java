@@ -17,6 +17,7 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,13 +29,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
@@ -50,27 +54,32 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import com.sun.jersey.api.view.Viewable;
 
 @Path("/ontonet/session")
-public class SessionsResource extends BaseStanbolResource {
+public class SessionManagerResource extends BaseStanbolResource {
 
     /*
      * Placeholder for the ONManager to be fetched from the servlet context.
      */
     protected SessionManager sessionManager;
 
-    protected ServletContext servletContext;
-
-    public SessionsResource(@Context ServletContext servletContext) {
+    public SessionManagerResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.sessionManager = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
             servletContext);
     }
 
     @GET
+    @Produces(TEXT_HTML)
+    public Response getHtmlInfo(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok(new Viewable("index", this));
+        rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    @GET
     @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
                        KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response listSessions(@Context UriInfo uriInfo, @Context HttpHeaders headers) {
-
-        // SessionManager sesMgr = onm.getSessionManager();
         OWLOntologyManager ontMgr = OWLManager.createOWLOntologyManager();
         OWLDataFactory df = ontMgr.getOWLDataFactory();
         OWLClass cSession = df.getOWLClass(IRI.create("http://stanbol.apache.org/ontologies/meta/Session"));
@@ -88,13 +97,11 @@ public class SessionsResource extends BaseStanbolResource {
         } catch (OWLOntologyCreationException e) {
             throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
         }
-        return Response.ok(o).build();
-    }
-
-    @GET
-    @Produces(TEXT_HTML)
-    public Response getView() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+        ResponseBuilder rb = Response.ok(o);
+        MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+        if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
 }

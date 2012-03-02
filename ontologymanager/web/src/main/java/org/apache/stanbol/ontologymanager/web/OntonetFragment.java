@@ -36,14 +36,13 @@ import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
-import org.apache.stanbol.ontologymanager.web.resources.DocumentationResource;
 import org.apache.stanbol.ontologymanager.web.resources.OntoNetRootResource;
 import org.apache.stanbol.ontologymanager.web.resources.OntologyNetworkResource;
 import org.apache.stanbol.ontologymanager.web.resources.RegistryManagerResource;
 import org.apache.stanbol.ontologymanager.web.resources.ScopeOntologyResource;
 import org.apache.stanbol.ontologymanager.web.resources.ScopeResource;
-import org.apache.stanbol.ontologymanager.web.resources.SessionByIdResource;
-import org.apache.stanbol.ontologymanager.web.resources.SessionsResource;
+import org.apache.stanbol.ontologymanager.web.resources.SessionResource;
+import org.apache.stanbol.ontologymanager.web.resources.SessionManagerResource;
 import org.apache.stanbol.ontologymanager.web.resources.StoredOntologyResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -98,7 +97,6 @@ public class OntonetFragment implements WebFragment {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         // Temporary resources
         classes.add(OntoNetRootResource.class);
-        classes.add(DocumentationResource.class);
 
         // classes.add(RESTfulResource.class);
         // classes.add(StoredGraphsResource.class);
@@ -108,8 +106,8 @@ public class OntonetFragment implements WebFragment {
         classes.add(ScopeOntologyResource.class);
         classes.add(StoredOntologyResource.class);
 
-        classes.add(SessionsResource.class);
-        classes.add(SessionByIdResource.class);
+        classes.add(SessionManagerResource.class);
+        classes.add(SessionResource.class);
 
         classes.add(RegistryManagerResource.class);
 

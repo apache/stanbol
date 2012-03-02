@@ -17,6 +17,8 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.util.Set;
 
@@ -24,17 +26,21 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
@@ -66,8 +72,6 @@ public class OntologyNetworkResource extends BaseStanbolResource {
      */
     protected ONManager onm;
 
-    protected ServletContext servletContext;
-
     protected TcManager tcManager;
 
     public OntologyNetworkResource(@Context ServletContext servletContext) {
@@ -87,6 +91,19 @@ public class OntologyNetworkResource extends BaseStanbolResource {
             reg.deregisterScope(scope);
         // ...then clear the store.
         // TODO : the other way around?
+    }
+
+    public Set<OntologyScope> getActiveScopes() {
+        return onm.getScopeRegistry().getActiveScopes();
+    }
+
+    @GET
+    @Produces(TEXT_HTML)
+    public Response getHtmlInfo(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok(new Viewable("index", this));
+        rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -114,21 +131,22 @@ public class OntologyNetworkResource extends BaseStanbolResource {
 
         OWLOntology ontology = ScopeSetRenderer.getScopes(scopes);
 
-        return Response.ok(ontology).build();
+        ResponseBuilder rb = Response.ok(ontology);
+        MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+        if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     public Set<OntologyScope> getScopes() {
         return onm.getScopeRegistry().getRegisteredScopes();
     }
-    
-    public Set<OntologyScope> getActiveScopes() {
-        return onm.getScopeRegistry().getActiveScopes();
-    }
 
-    @GET
-    @Produces(TEXT_HTML)
-    public Response getView() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers);
+        return rb.build();
     }
 
 }

@@ -18,11 +18,14 @@ package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -31,6 +34,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
@@ -129,7 +133,16 @@ public class ScopeOntologyResource extends BaseStanbolResource {
             o = spc.getOntology(ontologyIri, Graph.class, merge);
         }
         if (o == null) return Response.status(NOT_FOUND).build();
-        return Response.ok(o).build();
+        ResponseBuilder rb = Response.ok(o);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -141,10 +154,10 @@ public class ScopeOntologyResource extends BaseStanbolResource {
      * @param headers
      */
     @DELETE
-    public void unloadOntology(@PathParam("scopeid") String scopeId,
-                               @PathParam("uri") String ontologyid,
-                               @Context UriInfo uriInfo,
-                               @Context HttpHeaders headers) {
+    public Response unloadOntology(@PathParam("scopeid") String scopeId,
+                                   @PathParam("uri") String ontologyid,
+                                   @Context UriInfo uriInfo,
+                                   @Context HttpHeaders headers) {
 
         if (ontologyid != null && !ontologyid.equals("")) {
             // String scopeURI = uriInfo.getAbsolutePath().toString().replace(ontologyid, "");
@@ -164,6 +177,9 @@ public class ScopeOntologyResource extends BaseStanbolResource {
                 }
             }
         }
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
 }

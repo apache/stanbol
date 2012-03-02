@@ -22,7 +22,8 @@ import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.OK;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE;
@@ -40,6 +41,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -51,6 +53,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
@@ -128,7 +131,9 @@ public class ScopeResource extends BaseStanbolResource {
                                     @Context HttpHeaders headers) {
         if (scope == null) return Response.status(NOT_FOUND).build();
         // Export to Clerezza Graph, which can be rendered as JSON-LD.
-        else return Response.ok(scope.export(Graph.class, merge)).build();
+        ResponseBuilder rb = Response.ok(scope.export(Graph.class, merge));
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     @GET
@@ -138,19 +143,32 @@ public class ScopeResource extends BaseStanbolResource {
                                   @Context HttpHeaders headers) {
         if (scope == null) return Response.status(NOT_FOUND).build();
         // Export to OWLOntology due to the more human-readable rendering.
-        if (merge) return Response.ok(scope.export(Graph.class, merge)).build();
-        else return Response.ok(scope.export(OWLOntology.class, merge)).build();
+        ResponseBuilder rb;
+        if (merge) rb = Response.ok(scope.export(Graph.class, merge));
+        else rb = Response.ok(scope.export(OWLOntology.class, merge));
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     @DELETE
-    public void deregisterScope(@PathParam("scopeid") String scopeid,
-                                @Context UriInfo uriInfo,
-                                @Context HttpHeaders headers,
-                                @Context ServletContext servletContext) {
+    public Response deregisterScope(@PathParam("scopeid") String scopeid,
+                                    @Context UriInfo uriInfo,
+                                    @Context HttpHeaders headers,
+                                    @Context ServletContext servletContext) {
 
         ScopeRegistry reg = onm.getScopeRegistry();
         reg.deregisterScope(scope);
         scope = null;
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -167,7 +185,6 @@ public class ScopeResource extends BaseStanbolResource {
      */
     @POST
     @Consumes(value = {RDF_XML, OWL_XML, N_TRIPLE, TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON})
-    @Produces(MediaType.TEXT_PLAIN)
     public Response manageOntology(InputStream content, @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
         if (scope == null) return Response.status(NOT_FOUND).build();
@@ -181,7 +198,9 @@ public class ScopeResource extends BaseStanbolResource {
         }
         log.debug("POST request for ontology addition completed in {} ms.",
             (System.currentTimeMillis() - before));
-        return Response.status(OK).type(MediaType.TEXT_PLAIN).build();
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -198,8 +217,7 @@ public class ScopeResource extends BaseStanbolResource {
      */
     @POST
     @Consumes(value = MediaType.TEXT_PLAIN)
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response manageOntology(String iri) {
+    public Response manageOntology(String iri, @Context HttpHeaders headers) {
         if (scope == null) return Response.status(NOT_FOUND).build();
         try {
             scope.getCustomSpace().addOntology(new RootOntologyIRISource(IRI.create(iri)));
@@ -208,7 +226,9 @@ public class ScopeResource extends BaseStanbolResource {
         } catch (OWLOntologyCreationException e) {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
-        return Response.status(OK).type(MediaType.TEXT_PLAIN).build();
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -310,7 +330,9 @@ public class ScopeResource extends BaseStanbolResource {
             throw new WebApplicationException(ex, INTERNAL_SERVER_ERROR);
         }
 
-        return Response.ok().build();
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
 }
