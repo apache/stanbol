@@ -18,10 +18,9 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.owlapi;
 
 import java.util.Random;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 

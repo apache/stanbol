@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.ontologymanager.ontonet.conf;
 
-import static org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyConstants.*;
+import static org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyConstants.NS_ONM;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -27,13 +27,12 @@ import java.util.Set;
 
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorModificationException;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLOntologyDocumentTarget;
 import org.semanticweb.owlapi.io.StringDocumentSource;
@@ -315,7 +314,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
             return set.size();
         }
     }
-    
+
     @Override
     public int getOntologyCount() {
         return getOntologyCount(true);

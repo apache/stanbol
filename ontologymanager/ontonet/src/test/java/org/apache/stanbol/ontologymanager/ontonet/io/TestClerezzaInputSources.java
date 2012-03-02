@@ -36,7 +36,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.CoreOntologySpaceImpl;

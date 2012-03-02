@@ -14,25 +14,16 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
-
-import java.util.Collection;
+package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 
 /**
- * Implementations of this interface are able to fire events related to the
- * modification of ontologies within an ontology scope.
+ * A core space represents a minimal set of readonly, immutable ontologies for
+ * modeling a given scope. For example, it may define metamodels or essential
+ * concepts and rules in a domain.
  * 
  * @author alexdma
  * 
  */
-public interface ScopeOntologyListenable {
-
-	void addOntologyScopeListener(ScopeOntologyListener listener);
-
-	void clearOntologyScopeListeners();
-
-	Collection<ScopeOntologyListener> getOntologyScopeListeners();
-
-	void removeOntologyScopeListener(ScopeOntologyListener listener);
+public interface CoreOntologySpace extends OntologySpace {
 
 }

@@ -18,10 +18,10 @@ package org.apache.stanbol.ontologymanager.ontonet.api.session;
 
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.Lockable;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.Lockable;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollector;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 
 /**
  * Note that sessions are possibly disjoint with HTTP sessions or the like.

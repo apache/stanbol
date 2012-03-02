@@ -16,9 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.semanticweb.owlapi.model.IRI;
 
 /**

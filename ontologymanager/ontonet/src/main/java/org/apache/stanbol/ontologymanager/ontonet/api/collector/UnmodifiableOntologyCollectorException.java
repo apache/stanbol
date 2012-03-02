@@ -14,24 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
 /**
- * An object that supports locking mechanisms, thus allowing/preventing modifications of the resources
- * contained therein. Lock management is assumed to occur in methods inherited from implementations.<br>
- * 
- * TODO add public lock handling methods as well?
- * 
- * @author alexdma
- * 
+ * Thrown whenever an attempt to modify the ontology network within a read-only ontology space (e.g. a core or
+ * custom space in a bootstrapped system) is detected and denied.
  */
-public interface Lockable {
+public class UnmodifiableOntologyCollectorException extends OntologyCollectorModificationException {
 
     /**
-     * Determines if it is no longer possible to modify this resource until it is torn down.
+	 * 
+	 */
+    private static final long serialVersionUID = 6747720213098173405L;
+
+    /**
+     * Creates a new instance of UnmodifiableOntologySpaceException.
      * 
-     * @return true if this resource is write-locked, false otherwise.
+     * @param space
+     *            the ontology space whose modification was attempted.
      */
-    boolean isLocked();
+    public UnmodifiableOntologyCollectorException(OntologyCollector collector) {
+        super(collector);
+    }
 
 }

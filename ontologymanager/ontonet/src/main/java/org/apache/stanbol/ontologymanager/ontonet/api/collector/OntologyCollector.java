@@ -14,13 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
 import java.util.Collection;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSourceHandler;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 

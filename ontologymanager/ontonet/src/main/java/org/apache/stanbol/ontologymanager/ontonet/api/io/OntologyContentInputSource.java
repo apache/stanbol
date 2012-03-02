@@ -20,15 +20,22 @@ import java.io.InputStream;
 
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * An input source that parses an in-memory {@link OWLOntology} object from an input stream.
+ * 
+ * @author alexdma
+ * 
+ */
 public class OntologyContentInputSource extends AbstractOWLOntologyInputSource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-    
+
     public OntologyContentInputSource(InputStream content) throws OWLOntologyCreationException {
         this(content, OWLManager.createOWLOntologyManager());
     }
@@ -38,8 +45,7 @@ public class OntologyContentInputSource extends AbstractOWLOntologyInputSource {
         bindPhysicalIri(null);
         bindRootOntology(manager.loadOntologyFromOntologyDocument(content));
         bindTriplesProvider(manager);
-        log.debug("Input source initialization completed in {} ms.",
-            (System.currentTimeMillis() - before));
+        log.debug("Input source initialization completed in {} ms.", (System.currentTimeMillis() - before));
     }
 
     @Override

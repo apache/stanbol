@@ -14,7 +14,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 
 /**
  * Objects that want to listen to the registration of ontology scopes should

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
 import org.semanticweb.owlapi.model.IRI;
 
@@ -42,8 +42,8 @@ public class IrremovableOntologyException extends OntologyCollectorModificationE
      * @param ontologyId
      *            the logical IRI of the ontology whose removal was denied.
      */
-    public IrremovableOntologyException(OntologySpace space, IRI ontologyId) {
-        super(space);
+    public IrremovableOntologyException(OntologyCollector collector, IRI ontologyId) {
+        super(collector);
         this.ontologyId = ontologyId;
     }
 

@@ -16,11 +16,10 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.semanticweb.owlapi.model.IRI;
 
 /**

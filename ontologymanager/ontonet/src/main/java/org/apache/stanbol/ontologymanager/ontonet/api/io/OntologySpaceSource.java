@@ -18,8 +18,8 @@ package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.session;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 
 /**
  * Thrown when attempting to create a {@link Session} by forcing a session ID that is already registered, even

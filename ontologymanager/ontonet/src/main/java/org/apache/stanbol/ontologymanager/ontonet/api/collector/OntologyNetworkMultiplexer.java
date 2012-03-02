@@ -14,29 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.api.collector;
+
+import java.util.Set;
 
 /**
- * Thrown whenever an operation on a scope that has not been registered is thrown.
+ * The object that "knows" the relationships between stored graphs and their usage in ontology spaces or
+ * sessions.
  * 
- * @author alexdma
+ * @author alessandro
  * 
  */
-public class NoSuchScopeException extends RuntimeException {
+public interface OntologyNetworkMultiplexer {
 
-    /**
-	 * 
-	 */
-    private static final long serialVersionUID = 6339531579406287445L;
+    String getOriginator(String ontologyKey);
 
-    private String scopeID = null;
-
-    public NoSuchScopeException(String scopeID) {
-        this.scopeID = scopeID;
-    }
-
-    public String getScopeId() {
-        return scopeID;
-    }
+    Set<String> getHandles(String ontologyKey);
 
 }

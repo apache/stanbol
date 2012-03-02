@@ -21,13 +21,13 @@ import static org.junit.Assert.*;
 
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
-import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScopeFactory;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.CoreOntologySpaceImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.CustomOntologySpaceImpl;

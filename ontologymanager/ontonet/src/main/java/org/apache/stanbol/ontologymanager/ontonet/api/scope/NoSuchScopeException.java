@@ -14,27 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 
 /**
- * Thrown whenever an attempt to modify the ontology network within a read-only ontology space (e.g. a core or
- * custom space in a bootstrapped system) is detected and denied.
+ * Thrown whenever an operation on a scope that has not been registered is thrown.
+ * 
+ * @author alexdma
+ * 
  */
-public class UnmodifiableOntologyCollectorException extends OntologyCollectorModificationException {
+public class NoSuchScopeException extends RuntimeException {
 
     /**
 	 * 
 	 */
-    private static final long serialVersionUID = 6747720213098173405L;
+    private static final long serialVersionUID = 6339531579406287445L;
 
-    /**
-     * Creates a new instance of UnmodifiableOntologySpaceException.
-     * 
-     * @param space
-     *            the ontology space whose modification was attempted.
-     */
-    public UnmodifiableOntologyCollectorException(OntologyCollector collector) {
-        super(collector);
+    private String scopeID = null;
+
+    public NoSuchScopeException(String scopeID) {
+        this.scopeID = scopeID;
+    }
+
+    public String getScopeId() {
+        return scopeID;
     }
 
 }

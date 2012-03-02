@@ -20,7 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AddImport;

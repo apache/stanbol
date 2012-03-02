@@ -14,34 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
-import org.semanticweb.owlapi.model.IRI;
+import java.util.Set;
+
 
 /**
- * Implementations of this interface are able to react to modifications on the ontology network
- * infrastructure.
+ * 
+ * An object that can manipulate {@link OntologyInputSource} objects;
  * 
  * @author alexdma
  * 
  */
-public interface ScopeOntologyListener {
+public interface OntologyInputSourceHandler {
 
     /**
-     * Called whenever an ontology is set to be managed by a scope, space or session.
+     * Gets the the types representing ontologies and RDF graphs that this object is able to manage.
      * 
-     * @param scopeId
-     * @param addedOntology
+     * @return the ontology types that can be handled by this object.
      */
-    void onOntologyAdded(String scopeId, IRI addedOntology);
-
-    /**
-     * Called whenever an ontology is set to no longer be managed by a scope, space or session. This method is
-     * not called if that ontology was not being managed earlier.
-     * 
-     * @param scopeId
-     * @param addedOntology
-     */
-    void onOntologyRemoved(String scopeId, IRI removedOntology);
+    Set<Class<?>> getSupportedOntologyTypes();
 
 }

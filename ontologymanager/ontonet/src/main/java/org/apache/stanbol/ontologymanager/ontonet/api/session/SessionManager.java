@@ -20,7 +20,7 @@ import java.io.OutputStream;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 /**

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api;
+package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
 /**
  * Indicates an attempt to illegally create a resource by assigning it an IRI that already identifies another

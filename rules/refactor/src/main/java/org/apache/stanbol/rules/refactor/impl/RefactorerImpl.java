@@ -43,7 +43,7 @@ import org.apache.stanbol.commons.owl.transformation.JenaToOwlConvert;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.Rule;

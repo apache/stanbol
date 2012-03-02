@@ -21,10 +21,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.NoSuchScopeException;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeEventListener;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.NoSuchScopeException;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeEventListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
 
 /**
  * Default implementation of an ontology scope registry.

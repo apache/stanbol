@@ -29,7 +29,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;

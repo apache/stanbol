@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 
 /**

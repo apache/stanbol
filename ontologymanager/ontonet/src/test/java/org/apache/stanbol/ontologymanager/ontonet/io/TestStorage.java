@@ -30,7 +30,7 @@ import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;

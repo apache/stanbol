@@ -23,11 +23,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologySpaceSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.StringDocumentTarget;

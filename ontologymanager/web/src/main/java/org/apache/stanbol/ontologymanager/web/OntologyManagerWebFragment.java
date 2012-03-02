@@ -57,9 +57,9 @@ import freemarker.cache.TemplateLoader;
  * 
  */
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true, metatype = false)
 @Service(WebFragment.class)
-public class OntonetFragment implements WebFragment {
+public class OntologyManagerWebFragment implements WebFragment {
 
     private static final String NAME = "ontonet";
 

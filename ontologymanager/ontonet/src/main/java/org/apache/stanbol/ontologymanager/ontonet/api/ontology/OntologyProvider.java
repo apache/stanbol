@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.ImportManagementPolicy;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 

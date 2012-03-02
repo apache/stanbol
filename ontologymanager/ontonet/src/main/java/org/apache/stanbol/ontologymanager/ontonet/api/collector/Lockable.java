@@ -14,38 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
-
-import org.semanticweb.owlapi.model.IRI;
+package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
 /**
- * Thrown whenever an attempt to modify an ontology within an ontology space that does not contain it is
- * detected.
+ * An object that supports locking mechanisms, thus allowing/preventing modifications of the resources
+ * contained therein. Lock management is assumed to occur in methods inherited from implementations.<br>
+ * 
+ * TODO add public lock handling methods as well?
  * 
  * @author alexdma
  * 
  */
-public class MissingOntologyException extends OntologyCollectorModificationException {
-
-    public MissingOntologyException(OntologySpace space, IRI ontologyId) {
-        super(space);
-        this.ontologyId = ontologyId;
-    }
+public interface Lockable {
 
     /**
-     * Returns the unique identifier of the ontology whose removal was denied.
+     * Determines if it is no longer possible to modify this resource until it is torn down.
      * 
-     * @return the ID of the ontology that was not removed.
+     * @return true if this resource is write-locked, false otherwise.
      */
-    public IRI getOntologyId() {
-        return ontologyId;
-    }
-
-    protected IRI ontologyId;
-
-    /**
-	 * 
-	 */
-    private static final long serialVersionUID = -3449667155191079302L;
+    boolean isLocked();
 
 }

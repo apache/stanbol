@@ -14,37 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
 import org.semanticweb.owlapi.model.IRI;
 
 /**
- * Objects that react to the addition or removal of ontologies to an ontology collector will implement this
- * interface.
+ * Thrown whenever an attempt to modify an ontology within an ontology space that does not contain it is
+ * detected.
  * 
  * @author alexdma
  * 
  */
-public interface OntologyCollectorListener {
+public class MissingOntologyException extends OntologyCollectorModificationException {
+
+    public MissingOntologyException(OntologyCollector collector, IRI ontologyId) {
+        super(collector);
+        this.ontologyId = ontologyId;
+    }
 
     /**
-     * Fired after an ontology was successfully added to an ontology collector.
+     * Returns the unique identifier of the ontology whose removal was denied.
      * 
-     * @param collectorId
-     *            the ontology collector identifier.
-     * @param addedOntology
-     *            the added ontology identifier.
+     * @return the ID of the ontology that was not removed.
      */
-    void onOntologyAdded(String collectorId, IRI addedOntology);
+    public IRI getOntologyId() {
+        return ontologyId;
+    }
+
+    protected IRI ontologyId;
 
     /**
-     * Fired after an ontology was successfully removed from an ontology collector.
-     * 
-     * @param collectorId
-     *            the ontology collector identifier.
-     * @param removedOntology
-     *            the removed ontology identifier.
-     */
-    void onOntologyRemoved(String collectorId, IRI removedOntology);
+	 * 
+	 */
+    private static final long serialVersionUID = -3449667155191079302L;
 
 }

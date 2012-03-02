@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.stanbol.commons.owl.util.OWLUtils;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ImportManagementPolicy;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.ImportManagementPolicy;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;

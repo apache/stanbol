@@ -14,15 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.api.scope;
+
+import org.semanticweb.owlapi.model.IRI;
 
 /**
- * An ontology space identifies the set of OWL ontologies that should be "active" in a given context, e.g. for
- * a certain user session or a specific reasoning service. Each ontology space has an ID and a top ontology
- * that can be used as a shared resource for mutual exclusion and locking strategies.
+ * Implementations of this interface are able to react to modifications on the ontology network
+ * infrastructure.
  * 
  * @author alexdma
+ * 
  */
-public interface OntologySpace extends OntologyCollector, OWLExportable, Lockable {
+public interface ScopeOntologyListener {
+
+    /**
+     * Called whenever an ontology is set to be managed by a scope, space or session.
+     * 
+     * @param scopeId
+     * @param addedOntology
+     */
+    void onOntologyAdded(String scopeId, IRI addedOntology);
+
+    /**
+     * Called whenever an ontology is set to no longer be managed by a scope, space or session. This method is
+     * not called if that ontology was not being managed earlier.
+     * 
+     * @param scopeId
+     * @param addedOntology
+     */
+    void onOntologyRemoved(String scopeId, IRI removedOntology);
 
 }
