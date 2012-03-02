@@ -37,7 +37,7 @@ import org.apache.stanbol.explanation.api.Configuration;
 import org.apache.stanbol.explanation.api.Schema;
 import org.apache.stanbol.explanation.api.SchemaCatalog;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;

@@ -20,9 +20,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,6 +38,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.contenthub.servicesapi.search.solr.SolrSearch;
 import org.apache.stanbol.contenthub.servicesapi.store.Store;
 import org.apache.stanbol.contentorganizer.model.Category;
@@ -46,14 +49,24 @@ import org.apache.stanbol.contentorganizer.servicesapi.ContentRetrievalException
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
+import org.apache.stanbol.reasoners.owlapi.OWLApiReasoningService;
+import org.apache.stanbol.rules.base.api.RuleStore;
 import org.osgi.service.component.ComponentContext;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.util.InferredAxiomGenerator;
+import org.semanticweb.owlapi.util.InferredClassAssertionAxiomGenerator;
+import org.semanticweb.owlapi.util.InferredPropertyAssertionGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * 
  * @author alexdma
- *
+ * 
  */
 @Component(immediate = true, metatype = false)
 @Service
@@ -66,6 +79,12 @@ public class ContentHubOrganizer implements ContentOrganizer<Store> {
 
     @Reference
     protected Store contentStore;
+    
+    @Reference
+    protected RuleStore ruleStore;
+
+    @Reference
+    protected ONManager onManager;
 
     @Reference
     protected SolrSearch solrSearch;
@@ -75,6 +94,9 @@ public class ContentHubOrganizer implements ContentOrganizer<Store> {
 
     @Reference
     protected Serializer serializer;
+
+    @Reference
+    private OWLApiReasoningService reasoner;
 
     @Reference
     protected ReferencedSiteManager siteMgr;
@@ -139,6 +161,16 @@ public class ContentHubOrganizer implements ContentOrganizer<Store> {
      */
     protected void activate(Dictionary<String,Object> configuration) throws IOException {
 
+        // Setup OntoNet
+        String scopeId = "DBPedia";
+        OntologyScope scope = null;
+        try {
+            scope = onManager.getOntologyScopeFactory().createOntologyScope(scopeId);
+        } catch (DuplicateIDException e) {
+            log.warn("Scope {} already exist, will use that. ", scopeId);
+            scope = onManager.getScopeRegistry().getScope(scopeId);
+        }
+
         connector = new ContentHubConnector(contentStore, solrSearch);
         classifyContent(contentStore);
 
@@ -179,6 +211,7 @@ public class ContentHubOrganizer implements ContentOrganizer<Store> {
 
         File f = null;
         try {
+            // All the content metadata in one file.
             f = new File(contentMetadataDir, "all.rdf");
             serializer.serialize(new FileOutputStream(f), mg, SupportedFormat.RDF_XML);
         } catch (UnsupportedFormatException e) {
@@ -189,6 +222,7 @@ public class ContentHubOrganizer implements ContentOrganizer<Store> {
         }
 
         try {
+            // All the enhancements in another file
             f = new File(contentMetadataDir, "enhancement.rdf");
             serializer.serialize(new FileOutputStream(f), contentStore.getEnhancementGraph(),
                 SupportedFormat.RDF_XML);
@@ -198,6 +232,15 @@ public class ContentHubOrganizer implements ContentOrganizer<Store> {
         } catch (FileNotFoundException e) {
             log.error("Could not obtain file {} for writing. ", f);
         }
+
+//        ruleStore.createRecipe(recipeID, rulesInKReSSyntax)
+        List<InferredAxiomGenerator<? extends OWLAxiom>> gens = new ArrayList<InferredAxiomGenerator<? extends OWLAxiom>>();
+        gens.add(new InferredClassAssertionAxiomGenerator());
+        gens.add(new InferredPropertyAssertionGenerator());
+        OWLOntology o = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(contentStore
+                .getEnhancementGraph());
+
+//        reasoner.run(o, gens);
 
         return null;
     }

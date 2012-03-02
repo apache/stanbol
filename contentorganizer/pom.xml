@@ -57,6 +57,10 @@
 		<!-- Stanbol deps -->
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.owl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
 		</dependency>
 		<dependency>
@@ -73,17 +77,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reasoners.hermit</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.reasoners.manager</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.reasoners.owlapi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.base</artifactId>
 		</dependency>
 
 		<!-- Testing deps -->
@@ -106,7 +108,7 @@
 						<Data-Files>ontologies</Data-Files>
 						<Data-Files-Priority>-100</Data-Files-Priority>
 						<Export-Package>
-							org.apache.stanbol.entitytranslator.*
+							org.apache.stanbol.contentorganizer.*
 						</Export-Package>
 						<Import-Package>
 							org.slf4j.*,
