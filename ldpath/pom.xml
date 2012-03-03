@@ -80,7 +80,7 @@
             <exclude>src/test/resources/example.rdf.zip</exclude>
             <exclude>src/test/resources/example.txt</exclude>
             <exclude>src/test/resources/metadata.rdf.zip</exclude>
-              </excludes>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>

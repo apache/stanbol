@@ -21,11 +21,13 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.stanbol.enhancer.engines.tika.TikaEngine.XHTML;
 import static org.apache.stanbol.enhancer.servicesapi.EnhancementEngine.CANNOT_ENHANCE;
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
 import static org.apache.tika.mime.MediaType.OCTET_STREAM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -33,17 +35,33 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.PlainLiteral;
+import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.ontologies.DC;
+import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.clerezza.rdf.ontologies.XSD;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -241,6 +259,171 @@ public class TikaEngineTest {
             "</body></html>");
     }
     @Test
+    public void testEMail() throws EngineException, IOException {
+        ContentItem ci = createContentItem("test.email.txt", "message/rfc822");
+        assertFalse(engine.canEnhance(ci) == CANNOT_ENHANCE);
+        engine.computeEnhancements(ci);
+        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, 
+            singleton("text/plain"));
+        assertNotNull(contentPart);
+        Blob plainTextBlob = contentPart.getValue();
+        assertNotNull(plainTextBlob);
+        assertContentRegexp(plainTextBlob, 
+            "Julien Nioche commented on TIKA-461:",
+            "I'll have a look at mime4j and try to use it in Tika",
+            "> RFC822 messages not parsed",
+            "Key: TIKA-461",
+            "URL: https://issues.apache.org/jira/browse/TIKA-461");
+        //validate XHTML results
+        contentPart = ContentItemHelper.getBlob(ci, 
+            singleton("application/xhtml+xml"));
+        assertNotNull(contentPart);
+        Blob xhtmlBlob = contentPart.getValue();
+        assertNotNull(xhtmlBlob);
+        assertContentRegexp(xhtmlBlob, 
+            "<html xmlns=\"http://www.w3.org/1999/xhtml\">",
+            "<title></title>",
+            "<body><p>",
+            "Julien Nioche commented on TIKA-461:",
+            "I'll have a look at mime4j and try to use it in Tika",
+            "&gt; RFC822 messages not parsed",
+            "Key: TIKA-461",
+            "URL: https://issues.apache.org/jira/browse/TIKA-461");
+        //no check the extracted metadata!
+        //DC
+        verifyValue(ci, DC.date, XSD.dateTime,"2010-09-06T09:25:34Z");
+        verifyValue(ci, DC.format, null,"message/rfc822");
+        verifyValue(ci, DC.subject, null,"[jira] Commented: (TIKA-461) RFC822 messages not parsed");
+        verifyValue(ci, DC.creator, null,"Julien Nioche (JIRA) <jira@apache.org>");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"created"), XSD.dateTime,"2010-09-06T09:25:34Z");
+        
+        //Media Ontology
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"creationDate"),XSD.dateTime,"2010-09-06T09:25:34Z");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"hasFormat"),null,"message/rfc822");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"hasCreator"),null,"Julien Nioche (JIRA) <jira@apache.org>");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"hasContributor"),null,"Julien Nioche (JIRA) <jira@apache.org>");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"hasKeyword"),null,"[jira] Commented: (TIKA-461) RFC822 messages not parsed");
+
+        
+        //Nepomuk Message
+        String message = "http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#";
+        verifyValue(ci, new UriRef(message+"from"),null,"Julien Nioche (JIRA) <jira@apache.org>");
+        verifyValue(ci, new UriRef(message+"to"),null,"dev@tika.apache.org");
+        
+    }
+    @Test
+    public void testMp3() throws EngineException, IOException {
+        ContentItem ci = createContentItem("testMP3id3v24.mp3", "audio/mpeg");
+        assertFalse(engine.canEnhance(ci) == CANNOT_ENHANCE);
+        engine.computeEnhancements(ci);
+        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, 
+            singleton("text/plain"));
+        assertNotNull(contentPart);
+        Blob plainTextBlob = contentPart.getValue();
+        assertNotNull(plainTextBlob);
+        assertContentRegexp(plainTextBlob, 
+            "Test Title",
+            "Test Artist",
+            "Test Album");
+        //validate XHTML results
+        contentPart = ContentItemHelper.getBlob(ci, 
+            singleton("application/xhtml+xml"));
+        assertNotNull(contentPart);
+        Blob xhtmlBlob = contentPart.getValue();
+        assertNotNull(xhtmlBlob);
+        //Test AudioTrack metadata
+        NonLiteral audioTrack = verifyNonLiteral(ci, new UriRef(NamespaceEnum.media+"hasTrack"));
+        //types
+        verifyValues(ci, audioTrack, RDF.type, 
+            new UriRef(NamespaceEnum.media+"MediaFragment"),
+            new UriRef(NamespaceEnum.media+"Track"),
+            new UriRef(NamespaceEnum.media+"AudioTrack"));
+        //properties
+        verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"hasFormat"), XSD.string, "Stereo");
+        verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"samplingRate"), XSD.int_, "44100");
+        verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"hasCompression"), XSD.string, "MP3");
+    }
+    @Test
+    public void testGEOMetadata() throws EngineException, IOException{
+        //first validate Media Resource Ontology
+        UriRef hasLocation = new UriRef(NamespaceEnum.media+"hasLocation");
+        UriRef locationLatitude = new UriRef(NamespaceEnum.media+"locationLatitude");
+        UriRef locationLongitude = new UriRef(NamespaceEnum.media+"locationLongitude");
+        //UriRef locationAltitude = new UriRef(NamespaceEnum.media+"locationAltitude");
+        ContentItem ci = createContentItem("testJPEG_GEO.jpg", OCTET_STREAM.toString());//"video/x-ms-asf");
+        assertFalse(engine.canEnhance(ci) == CANNOT_ENHANCE);
+        engine.computeEnhancements(ci);
+        Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(),hasLocation, null);
+        assertTrue(it.hasNext());
+        Resource r = it.next().getObject();
+        assertFalse(it.hasNext());
+        assertTrue(r instanceof NonLiteral);
+        NonLiteral location = verifyNonLiteral(ci, hasLocation);
+        //lat
+        verifyValue(ci, location, locationLatitude, XSD.double_, "12.54321");
+        //long
+        verifyValue(ci, location, locationLongitude, XSD.double_, "-54.1234");
+        
+        //second the GEO ont
+        UriRef lat = new UriRef(NamespaceEnum.geo+"lat");
+        UriRef lon = new UriRef(NamespaceEnum.geo+"long");
+        //lat
+        verifyValue(ci, lat, XSD.double_, "12.54321");
+        //long
+        verifyValue(ci, lon, XSD.double_, "-54.1234");
+    }
+    
+
+    
+    public void testMetadata() throws EngineException {
+        ContentItem ci = createContentItem("testMP3id3v24.mp3", "audio/mpeg");
+        assertFalse(engine.canEnhance(ci) == CANNOT_ENHANCE);
+        engine.computeEnhancements(ci);
+        verifyValue(ci,DC.creator,null,"Test Artist");
+        verifyValue(ci, DC.title,null,"Test Album");
+        verifyValue(ci, DC.format,null,"audio/mpeg");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"hasFormat"),null,"audio/mpeg");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"mainOriginalTitle"),null,"Test Album");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"hasContributor"),null,"Test Artist");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"releaseDate"),XSD.string,"2008");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"hasGenre"),null,"Rock");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"hasCreator"),null,"Test Artist");
+    }
+    @Test
+    public void testExifMetadata() throws EngineException {
+        String exif = "http://www.semanticdesktop.org/ontologies/2007/05/10/nexif#";
+        ContentItem ci = createContentItem("testJPEG_EXIF.jpg", "image/jpeg");
+        assertFalse(engine.canEnhance(ci) == CANNOT_ENHANCE);
+        engine.computeEnhancements(ci);
+        verifyValue(ci, new UriRef(exif+"make"),null,"Canon");
+        verifyValue(ci, new UriRef(exif+"software"),null,"Adobe Photoshop CS3 Macintosh");
+        verifyValue(ci, new UriRef(exif+"dateTimeOriginal"),XSD.dateTime,"2009-08-11T07:09:45Z");
+        verifyValue(ci, new UriRef(exif+"relatedImageWidth"),XSD.int_,"100");
+        verifyValue(ci, new UriRef(exif+"fNumber"),XSD.double_,"5.6");
+        verifyValue(ci, new UriRef(exif+"model"),null,"Canon EOS 40D");
+        verifyValue(ci, new UriRef(exif+"isoSpeedRatings"),XSD.int_,"400");
+        verifyValue(ci, new UriRef(exif+"xResolution"),XSD.double_,"240.0");
+        verifyValue(ci, new UriRef(exif+"flash"),XSD.boolean_,"false");
+        verifyValue(ci, new UriRef(exif+"exposureTime"),XSD.double_,"6.25E-4");
+        verifyValue(ci, new UriRef(exif+"yResolution"),XSD.double_,"240.0");
+        verifyValue(ci, new UriRef(exif+"resolutionUnit"),XSD.string,"Inch");
+        verifyValue(ci, new UriRef(exif+"focalLength"),XSD.double_,"194.0");
+        verifyValue(ci, new UriRef(exif+"relatedImageLength"),XSD.int_,"68");
+        verifyValue(ci, new UriRef(exif+"bitsPerSample"),XSD.int_,"8");
+        //also Media Ontology mappings for Exif
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"frameHeight"),XSD.int_,"68");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"frameWidth"),XSD.int_,"100");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"hasFormat"),null,"image/jpeg");
+        verifyValue(ci, new UriRef(NamespaceEnum.media+"creationDate"),XSD.dateTime,"2009-08-11T07:09:45Z");
+        verifyValues(ci, new UriRef(NamespaceEnum.media+"hasKeyword"),null,"serbor","moscow-birds","canon-55-250");
+        //and finally the mapped DC properties
+        verifyValue(ci, DC.format,null,"image/jpeg");
+        verifyValue(ci, DC.date,XSD.dateTime,"2009-08-11T07:09:45Z");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"modified"),XSD.dateTime,"2009-10-02T21:02:49Z");
+        verifyValues(ci, DC.subject, null, "serbor","moscow-birds","canon-55-250");
+    }
+    
+    @Test
     public void testContentTypeDetection() throws EngineException, IOException {
         ContentItem ci = createContentItem("test.pdf", OCTET_STREAM.toString());
         assertFalse(engine.canEnhance(ci) == CANNOT_ENHANCE);
@@ -321,7 +504,7 @@ public class TikaEngineTest {
             throw new IllegalStateException("Unable to read test data!",e);
         }
         closeQuietly(in);
-        UriRef ref = new UriRef("urn:contentItem:content-"+ContentItemHelper.toHexString(data));
+        UriRef ref = new UriRef("urn:contentItem:content-"+randomUUID());
         return new InMemoryContentItem(data,contentType);
     }
     /**
@@ -362,6 +545,84 @@ public class TikaEngineTest {
     public static void shutdownServices() {
         engine.deactivate(context);
         engine = null;
+    }
+
+    /*
+     * Internal helper methods 
+     */
+    private NonLiteral verifyNonLiteral(ContentItem ci, UriRef property){
+        return verifyNonLiteral(ci, ci.getUri(), property);
+    }
+    private static NonLiteral verifyNonLiteral(ContentItem ci, UriRef subject, UriRef property){
+        Iterator<Triple> it = ci.getMetadata().filter(subject,property, null);
+        assertTrue(it.hasNext());
+        Resource r = it.next().getObject();
+        assertFalse(it.hasNext());
+        assertTrue(r instanceof NonLiteral);
+        return (NonLiteral)r;
+    }
+    private static UriRef verifyValue(ContentItem ci, UriRef property, UriRef value){
+        return verifyValue(ci, ci.getUri(), property, value);
+    }
+    private static UriRef verifyValue(ContentItem ci, NonLiteral subject, UriRef property, UriRef value){
+        Iterator<Triple> it = ci.getMetadata().filter(subject,property, null);
+        assertTrue(it.hasNext());
+        Resource r = it.next().getObject();
+        assertFalse(it.hasNext());
+        assertTrue(r instanceof UriRef);
+        assertEquals(value,r);
+        return (UriRef)r;
+   }
+    private static Literal verifyValue(ContentItem ci, UriRef property, UriRef dataType, String lexValue){
+        return verifyValue(ci, ci.getUri(), property, dataType, lexValue);
+    }
+    private static Literal verifyValue(ContentItem ci, NonLiteral subject, UriRef property, UriRef dataType, String lexValue){
+        Iterator<Triple> it = ci.getMetadata().filter(subject,property, null);
+        assertTrue(it.hasNext());
+        Resource r = it.next().getObject();
+        assertFalse(it.hasNext());
+        if(dataType == null){
+            assertTrue(r instanceof PlainLiteral);
+        } else {
+            assertTrue(r instanceof TypedLiteral);
+            assertEquals(dataType, ((TypedLiteral)r).getDataType());
+        }
+        assertEquals(lexValue,((Literal)r).getLexicalForm());
+        return (Literal)r;
+    }
+    private static Set<Literal> verifyValues(ContentItem ci, UriRef property, UriRef dataType, String...lexValues){
+        return verifyValues(ci, ci.getUri(), property, dataType, lexValues);
+    }
+    private static Set<Literal> verifyValues(ContentItem ci, NonLiteral subject, UriRef property, UriRef dataType, String...lexValues){
+        Iterator<Triple> it = ci.getMetadata().filter(subject,property, null);
+        assertTrue(it.hasNext());
+        Set<String> expected = new HashSet<String>(Arrays.asList(lexValues));
+        Set<Literal> found = new HashSet<Literal>(expected.size());
+        while(it.hasNext()){
+            Resource r = it.next().getObject();
+            if(dataType == null){
+                assertTrue(r instanceof PlainLiteral);
+            } else {
+                assertTrue(r instanceof TypedLiteral);
+                assertEquals(dataType, ((TypedLiteral)r).getDataType());
+            }
+            assertTrue(expected.remove(((Literal)r).getLexicalForm()));
+            found.add((Literal)r);
+        }
+        return found;
+    }
+    private static Set<NonLiteral> verifyValues(ContentItem ci, NonLiteral subject, UriRef property, NonLiteral...references){
+        Iterator<Triple> it = ci.getMetadata().filter(subject,property, null);
+        assertTrue(it.hasNext());
+        Set<NonLiteral> expected = new HashSet<NonLiteral>(Arrays.asList(references));
+        Set<NonLiteral> found = new HashSet<NonLiteral>(expected.size());
+        while(it.hasNext()){
+            Resource r = it.next().getObject();
+            assertTrue(r instanceof NonLiteral);
+            assertTrue(expected.remove(r));
+            found.add((NonLiteral)r);
+        }
+        return found;
     }
 
 }
