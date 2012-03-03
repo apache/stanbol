@@ -1080,11 +1080,6 @@
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.ontologies</artifactId>
-        <version>0.11-incubating</version>
-      </dependency>      
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core.test</artifactId>
         <version>0.13-incubating</version>
       </dependency>

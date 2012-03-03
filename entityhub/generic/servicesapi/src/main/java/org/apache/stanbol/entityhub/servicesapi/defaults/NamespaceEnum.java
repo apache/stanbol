@@ -76,6 +76,10 @@ public enum NamespaceEnum {
     cc("http://creativecommons.org/ns#"),
     //Schema.org (see http://schema.org/docs/schemaorg.owl for the Ontology)
     schema("http://schema.org/",true),
+    /**
+     * The W3C Ontology for Media Resources http://www.w3.org/TR/mediaont-10/
+     */
+    media("http://www.w3.org/ns/ma-ont#")
     ;
     /**
      * The logger

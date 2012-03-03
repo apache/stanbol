@@ -42,7 +42,12 @@ public enum NamespaceEnum {
      * The FISE namespace (1st version of the Enhancement Structure).
      * Currently the same as {@link NamespaceEnum#enhancer}
      */
-    fise("http://fise.iks-project.eu/ontology/");
+    fise("http://fise.iks-project.eu/ontology/"),
+    /**
+     * The W3C Ontology for Media Resources http://www.w3.org/TR/mediaont-10/
+     */
+    media("http://www.w3.org/ns/ma-ont#")
+    ;
     
     String ns;
     String prefix;

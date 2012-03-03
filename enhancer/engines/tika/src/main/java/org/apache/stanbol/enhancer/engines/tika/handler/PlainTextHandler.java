@@ -33,10 +33,12 @@ import org.xml.sax.SAXException;
  */
 public class PlainTextHandler extends ToTextContentHandler {
 
+    private static char[] SPACE = new char[]{' '};
     
     
     private final boolean skipWhitespaces;
     private final boolean skipLinebreakes;
+    boolean addedText = false;
     public PlainTextHandler(Writer writer, boolean skipIgnoreableWhitespaces, boolean skipLinebreaksWithinLiterals) {
         super(writer);
         this.skipWhitespaces = skipIgnoreableWhitespaces;
@@ -45,39 +47,38 @@ public class PlainTextHandler extends ToTextContentHandler {
 
     @Override
     public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
-        if(!skipWhitespaces){
-            super.ignorableWhitespace(ch, start, length);
+        if(!skipWhitespaces && addedText){
+            super.characters(ch, start, length);
+            addedText = false;
         } //else ignore
     }
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
-        int in;
         if(skipLinebreakes){
-            //use an in(serte) and an it(erator) index to avoid copying
-            //the data to a new char[].
-            in = start;
-            for(int it = start; it<length;it++){
-                if(ch[it] != '\n'){
-                    ch[in] = ch[it];
-                    in++;
+            int end = start+length;
+            for(int pos = start; pos<end;pos++){
+                if(ch[pos] == '\n'){
+                    if(pos > start){
+                        super.characters(ch, start, pos-start);
+                        super.characters(SPACE, 0, 1);
+                    }
+                    start = pos+1;
+                    length = length-start;
                 } //ignore line breaks
             }
-            if(in == start){ //only line breaks 
-                return; // -> nothing to add
-            }
-        } else {
-            in = length;
         }
-        super.characters(ch, start, in);
+        if(length > 0) {
+            super.characters(ch, start, length);
+        }
+        addedText = true;
     }
     
     @Override
-    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        super.startElement(uri, localName, qName, attributes);
-    }
-    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        // TODO Auto-generated method stub
+//        if(skipLinebreakes & addedText){
+//            characters(LINEBREAK, 0, 1);
+//            addedText = false;
+//        }
         super.endElement(uri, localName, qName);
     }
 }

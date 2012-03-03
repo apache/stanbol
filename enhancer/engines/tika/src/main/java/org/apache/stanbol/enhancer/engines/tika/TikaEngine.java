@@ -16,6 +16,13 @@
 */
 package org.apache.stanbol.enhancer.engines.tika;
 
+import static org.apache.stanbol.enhancer.engines.tika.metadata.OntologyMappings.addDcMappings;
+import static org.apache.stanbol.enhancer.engines.tika.metadata.OntologyMappings.addGeoMappings;
+import static org.apache.stanbol.enhancer.engines.tika.metadata.OntologyMappings.addMediaResourceOntologyMappings;
+import static org.apache.stanbol.enhancer.engines.tika.metadata.OntologyMappings.addNepomukExifMappings;
+import static org.apache.stanbol.enhancer.engines.tika.metadata.OntologyMappings.addNepomukMessageMappings;
+import static org.apache.stanbol.enhancer.engines.tika.metadata.OntologyMappings.addRdfsMappings;
+import static org.apache.stanbol.enhancer.engines.tika.metadata.OntologyMappings.addSkosMappings;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
 import static org.apache.tika.mime.MediaType.TEXT_PLAIN;
 
@@ -23,9 +30,12 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.Map;
 
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -34,6 +44,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.engines.tika.handler.MultiHandler;
 import org.apache.stanbol.enhancer.engines.tika.handler.PlainTextHandler;
+import org.apache.stanbol.enhancer.engines.tika.metadata.OntologyMappings;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -67,12 +78,43 @@ import org.xml.sax.ContentHandler;
 @Component(immediate = true, metatype = true, inherit=true)
 @Service
 @Properties(value={
-    @Property(name=EnhancementEngine.PROPERTY_NAME,value="tika")
+    @Property(name=EnhancementEngine.PROPERTY_NAME,value="tika"),
+    @Property(name=TikaEngine.SKIP_LINEBREAKS_WITHIN_CONTENT, boolValue=TikaEngine.DEFAULT_SKIP_LINEBREAKS),
+    @Property(name=TikaEngine.MAPPING_MEDIA_RESOURCE,boolValue=TikaEngine.DEFAULT_MAPPING_MEDIA_RESOURCE_STATE),
+    @Property(name=TikaEngine.MAPPING_DUBLIN_CORE_TERMS,boolValue=TikaEngine.DEFAULT_MAPPING_DUBLIN_CORE_TERMS_STATE),
+    @Property(name=TikaEngine.MAPPING_NEPOMUK_MESSAGE,boolValue=TikaEngine.DEFAULT_MAPPING_NEPOMUK_MESSAGE_STATE),
+    @Property(name=TikaEngine.MAPPING_NEPOMUK_EXIF,boolValue=TikaEngine.DEFAULT_MAPPING_NEPOMUK_EXIF_STATE),
+    @Property(name=TikaEngine.MAPPING_SKOS,boolValue=TikaEngine.DEFAULT_MAPPING_SKOS_STATE),
+    @Property(name=TikaEngine.MAPPING_RDFS,boolValue=TikaEngine.DEFAULT_MAPPING_RDFS_STATE),
+    @Property(name=TikaEngine.MAPPING_GEO,boolValue=TikaEngine.DEFAULT_MAPPING_GEO_STATE)
 })
 public class TikaEngine 
         extends AbstractEnhancementEngine<RuntimeException,RuntimeException> 
         implements EnhancementEngine, ServiceProperties {
     private final Logger log = LoggerFactory.getLogger(TikaEngine.class);
+    
+    private final LiteralFactory lf = LiteralFactory.getInstance();
+    
+    public static final String SKIP_LINEBREAKS_WITHIN_CONTENT = "stanbol.engines.tika.skipLinebreaks";
+    //Metadata -> Ontology mapping configuration
+    public static final String MAPPING_MEDIA_RESOURCE = "stanbol.engine.tika.mapping.mediaResource";
+    public static final boolean DEFAULT_MAPPING_MEDIA_RESOURCE_STATE = true;
+    public static final String MAPPING_DUBLIN_CORE_TERMS = "stanbol.engine.tika.mapping.dcTerms";
+    public static final boolean DEFAULT_MAPPING_DUBLIN_CORE_TERMS_STATE = true;
+    public static final String MAPPING_NEPOMUK_MESSAGE = "stanbol.engine.tika.mapping.nepomukMessage";
+    public static final boolean DEFAULT_MAPPING_NEPOMUK_MESSAGE_STATE = true;
+    public static final String MAPPING_NEPOMUK_EXIF = "stanbol.engine.tika.mapping.nepomukExif";
+    public static final boolean DEFAULT_MAPPING_NEPOMUK_EXIF_STATE = true;
+    public static final String MAPPING_SKOS = "stanbol.engine.tika.mapping.skos";
+    public static final boolean DEFAULT_MAPPING_SKOS_STATE = false;
+    public static final String MAPPING_RDFS = "stanbol.engine.tika.mapping.rdfs";
+    public static final boolean DEFAULT_MAPPING_RDFS_STATE = false;
+    public static final String MAPPING_GEO = "stanbol.engine.tika.mapping.geo";
+    public static final boolean DEFAULT_MAPPING_GEO_STATE = true;
+    
+    public static final boolean DEFAULT_SKIP_LINEBREAKS = false;
+    
+    private boolean skipLinebreaks = DEFAULT_SKIP_LINEBREAKS;
     /**
      * The default value for the Execution of this Engine. Currently set to
      * {@link ServiceProperties#ORDERING_PRE_PROCESSING}
@@ -84,7 +126,8 @@ public class TikaEngine
     private TikaConfig config;
     private Parser parser;
     private Detector detector;
-
+    private OntologyMappings ontologyMappings;
+    
     private static class MediaTypeAndStream {
         MediaType mediaType;
         InputStream in;
@@ -119,7 +162,7 @@ public class TikaEngine
             metadata.set(Metadata.CONTENT_TYPE, mtas.mediaType.toString());
             final StringWriter writer = new StringWriter();
             final ContentHandler textHandler = new BodyContentHandler( //only the Body
-                new PlainTextHandler(writer, true,false)); //skip ignoreable
+                new PlainTextHandler(writer, false,skipLinebreaks)); //skip ignoreable
             final ToXMLContentHandler xhtmlHandler;
             final ContentHandler mainHandler;
             if(!plainMediaType.equals(XHTML)){ //do not parse XHTML from XHTML
@@ -137,25 +180,40 @@ public class TikaEngine
                         "plain text!",e);
             }
             IOUtils.closeQuietly(in);
-//            log.info("Plain Content: \n{} \n",writer.toString());
+            if(log.isDebugEnabled()){
+                log.debug("Plain Content: \n{}",writer.toString());
+            }
             String random = randomUUID().toString();
             UriRef textBlobUri = new UriRef("urn:tika:text:"+random);
             ci.addPart(textBlobUri, 
                 new InMemoryBlob(writer.toString(), 
                     TEXT_PLAIN.toString())); //string -> no encoding
             if(xhtmlHandler != null){
-//                log.info("XML Content: \n{} \n",xhtmlHandler.toString());
+                if(log.isDebugEnabled()){
+                    log.debug("XML Content: \n{}",xhtmlHandler.toString());
+                }
                 UriRef xhtmlBlobUri = new UriRef("urn:tika:xhtml:"+random);
                 ci.addPart(xhtmlBlobUri, 
                     new InMemoryBlob(xhtmlHandler.toString(),
                         "application/xhtml+xml")); //string -> no encoding
             }
-            //TODO:
-            // * add also the Metadata extracted by Apache Tika
+            //add the extracted metadata
+            if(log.isDebugEnabled()){
+                for(String name : metadata.names()){
+                    log.debug("{}: {}",name,Arrays.toString(metadata.getValues(name)));
+                }
+            }
+            ci.getLock().writeLock().lock();
+            try {
+                ontologyMappings.apply(ci.getMetadata(), ci.getUri(), metadata);
+            }finally{
+                ci.getLock().writeLock().unlock();
+            }
             
         } //else not supported format
 
     }
+
     /**
      * Getter for the contentType. If not set or {@link MediaType#OCTET_STREAM}
      * than the media type is detected.<p>
@@ -204,13 +262,51 @@ public class TikaEngine
         config = TikaConfig.getDefaultConfig();
         this.detector = config.getDetector();
         this.parser = new AutoDetectParser(config);
+        this.skipLinebreaks = getBoolean(ctx.getProperties(), 
+            SKIP_LINEBREAKS_WITHIN_CONTENT, DEFAULT_SKIP_LINEBREAKS);
+        this.ontologyMappings = new OntologyMappings();
+        if(getBoolean(ctx.getProperties(), 
+            MAPPING_MEDIA_RESOURCE, DEFAULT_MAPPING_MEDIA_RESOURCE_STATE)){
+            addMediaResourceOntologyMappings(ontologyMappings);
+        }
+        if(getBoolean(ctx.getProperties(), 
+            MAPPING_DUBLIN_CORE_TERMS, DEFAULT_MAPPING_DUBLIN_CORE_TERMS_STATE)){
+            addDcMappings(ontologyMappings);
+        }
+        if(getBoolean(ctx.getProperties(), 
+            MAPPING_NEPOMUK_MESSAGE, DEFAULT_MAPPING_NEPOMUK_MESSAGE_STATE)){
+            addNepomukMessageMappings(ontologyMappings);
+        }
+        if(getBoolean(ctx.getProperties(), 
+            MAPPING_NEPOMUK_EXIF, DEFAULT_MAPPING_NEPOMUK_EXIF_STATE)){
+            addNepomukExifMappings(ontologyMappings);
+        }
+        if(getBoolean(ctx.getProperties(), 
+            MAPPING_SKOS, DEFAULT_MAPPING_SKOS_STATE)){
+            addSkosMappings(ontologyMappings);
+        }
+        if(getBoolean(ctx.getProperties(), 
+            MAPPING_RDFS, DEFAULT_MAPPING_RDFS_STATE)){
+            addRdfsMappings(ontologyMappings);
+        }
+        if(getBoolean(ctx.getProperties(), 
+            MAPPING_GEO, DEFAULT_MAPPING_GEO_STATE)){
+            addGeoMappings(ontologyMappings);
+        }
     }
     @Override
     protected void deactivate(ComponentContext ctx) throws RuntimeException {
         this.config = null;
         this.parser = null;
         this.detector = null;
+        this.skipLinebreaks = DEFAULT_SKIP_LINEBREAKS;
+        this.ontologyMappings = null;
         super.deactivate(ctx);
+    }
+    private static boolean getBoolean(Dictionary<?,?> properties, String key, boolean defaultState){
+        Object value = properties.get(key);
+        return value instanceof Boolean ? (Boolean)value :
+            value != null ? Boolean.parseBoolean(value.toString()) : defaultState;
     }
 
     public Map<String, Object> getServiceProperties() {
