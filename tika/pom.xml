@@ -75,14 +75,23 @@
             <exclude>src/license/THIRD-PARTY.properties</exclude>
             <!-- AL20 License for test resources (see src/test/resources/README) -->
             <exclude>src/test/resources/test.doc</exclude>
+            <exclude>src/test/resources/test.email.txt</exclude>
             <exclude>src/test/resources/test.html</exclude>
-            <exclude>src/test/resources/test.xhtml</exclude>
             <exclude>src/test/resources/test.odt</exclude>
             <exclude>src/test/resources/test.pages</exclude>
             <exclude>src/test/resources/test.pdf</exclude>
             <exclude>src/test/resources/test.rtf</exclude>
+            <exclude>src/test/resources/test.xhtml</exclude>
             <exclude>src/test/resources/test2.html</exclude>
             <exclude>src/test/resources/test2.pdf</exclude>
+            <exclude>src/test/resources/testASF.asf</exclude>
+            <exclude>src/test/resources/testGIF.gif</exclude>
+            <exclude>src/test/resources/testJPEG_EXIF.jpg</exclude>
+            <exclude>src/test/resources/testJPEG_GEO.jpg</exclude>
+            <exclude>src/test/resources/testMID.mid</exclude>
+            <exclude>src/test/resources/testMP3id3v24.mp3</exclude>
+            <exclude>src/test/resources/testMP3lyrics.mp3</exclude>
+            <exclude>src/test/resources/testTIFF.tif</exclude>
           </excludes>
         </configuration>
       </plugin>
@@ -113,6 +122,10 @@
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
+    </dependency>
+    <dependency> <!-- for metadata mappings -->
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.ontologies</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
