@@ -33,7 +33,6 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.ontologies.DC;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.clerezza.rdf.ontologies.SKOS;
@@ -163,46 +162,46 @@ public class OntologyMappings implements Iterable<Mapping>{
      * @param mappings The ontology mappings to add the DC mappings
      */
     public static void addDcMappings(OntologyMappings mappings) {
-        
+        String dc = NamespaceEnum.dc.getNamespace();
         mappings.addMapping(
-            new PropertyMapping(DC.contributor,
+            new PropertyMapping(dc+"contributor",
                 DublinCore.CONTRIBUTOR,MSOffice.LAST_AUTHOR));
         mappings.addMapping(
-            new PropertyMapping(DC.coverage,DublinCore.COVERAGE));
+            new PropertyMapping(dc+"coverage",DublinCore.COVERAGE));
         mappings.addMappings(
-            new PropertyMapping(DC.creator,
+            new PropertyMapping(dc+"creator",
                 DublinCore.CREATOR,MSOffice.AUTHOR,"initial-creator"));
         mappings.addMappings( 
-            new PropertyMapping(DC.description,DublinCore.DESCRIPTION));
+            new PropertyMapping(dc+"description",DublinCore.DESCRIPTION));
         mappings.addMappings( 
-            new PropertyMapping(DC.format,
+            new PropertyMapping(dc+"format",
                 DublinCore.FORMAT,HttpHeaders.CONTENT_TYPE));
         mappings.addMappings( 
-            new PropertyMapping(DC.identifier,DublinCore.IDENTIFIER));
+            new PropertyMapping(dc+"identifier",DublinCore.IDENTIFIER));
         mappings.addMappings(
-            new PropertyMapping(DC.language,
+            new PropertyMapping(dc+"language",
                 DublinCore.LANGUAGE,HttpHeaders.CONTENT_LANGUAGE));
         mappings.addMappings(
-            new PropertyMapping(NamespaceEnum.dc+"modified",XSD.dateTime,
+            new PropertyMapping(dc+"modified",XSD.dateTime,
                 DublinCore.MODIFIED,"Last-Modified"));
         mappings.addMappings( 
-            new PropertyMapping(DC.publisher,
+            new PropertyMapping(dc+"publisher",
                 DublinCore.PUBLISHER,MSOffice.COMPANY));
         mappings.addMappings( 
-            new PropertyMapping(DC.relation,DublinCore.RELATION));
+            new PropertyMapping(dc+"relation",DublinCore.RELATION));
         mappings.addMappings(
-            new PropertyMapping(DC.rights,DublinCore.RIGHTS));
+            new PropertyMapping(dc+"rights",DublinCore.RIGHTS));
         mappings.addMappings( 
-            new PropertyMapping(DC.source,DublinCore.SOURCE));
+            new PropertyMapping(dc+"source",DublinCore.SOURCE));
         mappings.addMappings( 
-            new PropertyMapping(DC.subject,
+            new PropertyMapping(dc+"subject",
                 DublinCore.SUBJECT,MSOffice.KEYWORDS));
         mappings.addMappings( 
-            new PropertyMapping(DC.title,DublinCore.TITLE));
+            new PropertyMapping(dc+"title",DublinCore.TITLE));
         mappings.addMappings( 
-            new PropertyMapping(DC.type,DublinCore.TYPE));
+            new PropertyMapping(dc+"type",DublinCore.TYPE));
         mappings.addMappings( 
-            new PropertyMapping(DC.date,XSD.dateTime,DublinCore.DATE.getName()));
+            new PropertyMapping(dc+"date",XSD.dateTime,DublinCore.DATE.getName()));
         //MS Office -> DC
         mappings.addMappings(
             new PropertyMapping(NamespaceEnum.dc+"created",XSD.dateTime,
