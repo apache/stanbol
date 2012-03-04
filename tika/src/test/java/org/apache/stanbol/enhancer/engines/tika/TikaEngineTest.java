@@ -55,9 +55,6 @@ import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.clerezza.rdf.core.impl.util.W3CDateFormat;
-import org.apache.clerezza.rdf.ontologies.DC;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.ontologies.XSD;
 import org.apache.commons.io.IOUtils;
@@ -312,10 +309,10 @@ public class TikaEngineTest {
             "URL: https://issues.apache.org/jira/browse/TIKA-461");
         //no check the extracted metadata!
         //DC
-        verifyValue(ci, DC.date, XSD.dateTime,"2010-09-06T09:25:34Z");
-        verifyValue(ci, DC.format, null,"message/rfc822");
-        verifyValue(ci, DC.subject, null,"[jira] Commented: (TIKA-461) RFC822 messages not parsed");
-        verifyValue(ci, DC.creator, null,"Julien Nioche (JIRA) <jira@apache.org>");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"date"), XSD.dateTime,"2010-09-06T09:25:34Z");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"format"), null,"message/rfc822");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"subject"), null,"[jira] Commented: (TIKA-461) RFC822 messages not parsed");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"creator"), null,"Julien Nioche (JIRA) <jira@apache.org>");
         verifyValue(ci, new UriRef(NamespaceEnum.dc+"created"), XSD.dateTime,"2010-09-06T09:25:34Z");
         
         //Media Ontology
@@ -403,9 +400,9 @@ public class TikaEngineTest {
         ContentItem ci = createContentItem("testMP3id3v24.mp3", "audio/mpeg");
         assertFalse(engine.canEnhance(ci) == CANNOT_ENHANCE);
         engine.computeEnhancements(ci);
-        verifyValue(ci,DC.creator,null,"Test Artist");
-        verifyValue(ci, DC.title,null,"Test Album");
-        verifyValue(ci, DC.format,null,"audio/mpeg");
+        verifyValue(ci,new UriRef(NamespaceEnum.dc+"creator"),null,"Test Artist");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"title"),null,"Test Album");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"format"),null,"audio/mpeg");
         verifyValue(ci, new UriRef(NamespaceEnum.media+"hasFormat"),null,"audio/mpeg");
         verifyValue(ci, new UriRef(NamespaceEnum.media+"mainOriginalTitle"),null,"Test Album");
         verifyValue(ci, new UriRef(NamespaceEnum.media+"hasContributor"),null,"Test Artist");
@@ -442,10 +439,10 @@ public class TikaEngineTest {
         verifyValue(ci, new UriRef(NamespaceEnum.media+"creationDate"),XSD.dateTime,"2009-08-11T09:09:45");
         verifyValues(ci, new UriRef(NamespaceEnum.media+"hasKeyword"),null,"serbor","moscow-birds","canon-55-250");
         //and finally the mapped DC properties
-        verifyValue(ci, DC.format,null,"image/jpeg");
-        verifyValue(ci, DC.date,XSD.dateTime,"2009-08-11T09:09:45");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"format"),null,"image/jpeg");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"date"),XSD.dateTime,"2009-08-11T09:09:45");
         verifyValue(ci, new UriRef(NamespaceEnum.dc+"modified"),XSD.dateTime,"2009-10-02T23:02:49");
-        verifyValues(ci, DC.subject, null, "serbor","moscow-birds","canon-55-250");
+        verifyValues(ci, new UriRef(NamespaceEnum.dc+"subject"), null, "serbor","moscow-birds","canon-55-250");
     }
     
     @Test
