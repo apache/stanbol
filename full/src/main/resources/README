@@ -24,5 +24,5 @@ resources/config/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-entityhub.
 resources/config/org.apache.stanbol.enhancer.engines.opennlp.impl.NamedEntityExtractionEnhancementEngine-default.config
 resources/config/org.apache.stanbol.examples.ExampleBootstrapConfig.cfg
 resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-language.config
-resources/config/org.apache.stanbol.enhancer.engines.refactor.RefactorEnhancementEngine.config
+resources/config/org.apache.stanbol.enhancer.engines.refactor.RefactorEnhancementEngine.config_deactivated
 
