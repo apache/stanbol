@@ -43,7 +43,7 @@ public class ContentTranformationTest extends EnhancerTestBase {
     
     public ContentTranformationTest() {
         //for now use the language chain to test transforming
-        super(getChainEndpoint("language"),"metaxa","langid");
+        super(getChainEndpoint("language"),"tika","langid");
     }
     
     @Test

@@ -69,7 +69,7 @@ public class EnhancerTestBase extends StanbolTestBase {
     
     private static final String[] DEFAULT_ASSERT_ENGINES = 
             new String[]{
-                "metaxa","MetaxaEngine",
+                //"metaxa","MetaxaEngine", deactivated see STANBOL-510
                 "langid","LangIdEnhancementEngine",
                 "ner","NamedEntityExtractionEnhancementEngine",
                 "entityhubLinking","NamedEntityTaggingEngine",

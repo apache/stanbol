@@ -178,7 +178,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertContentContains(HTML_CONTENT_LINES) //line by line the HTML content
         .assertContentRegexp(
             "Content-Disposition: form-data; name=\"metadata\"; filename=.*",
-            "Content-Disposition: form-data; name=\"urn:metaxa:plain-text:.*",
+            "Content-Disposition: form-data; name=\"urn:tika:text:.*",
             "Content-Disposition: form-data; name=\"urn:content-item-sha1-.*",
             //and the expected enhancements in the metadata
             "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
@@ -215,7 +215,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertContentContains(TEXT_CONTENT_LINES)
         .assertContentContains(HTML_CONTENT_LINES) //line by line the HTML content
         .assertContentRegexp( //MUST contain
-            "Content-Disposition: form-data; name=\"urn:metaxa:plain-text:.*",
+            "Content-Disposition: form-data; name=\"urn:tika:text:.*",
             "Content-Disposition: form-data; name=\"urn:content-item-sha1-.*")
         .assertContentRegexp(false, //MUST NOT contain
             "Content-Disposition: form-data; name=\"metadata\"; filename=.*",
@@ -253,7 +253,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertContentContains(TEXT_CONTENT_LINES)
         .assertContentRegexp(
             "Content-Disposition: form-data; name=\"metadata\"; filename=.*",
-            "Content-Disposition: form-data; name=\"urn:metaxa:plain-text:.*",
+            "Content-Disposition: form-data; name=\"urn:tika:text:.*",
             //and the expected enhancements in the metadata
             "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
@@ -289,7 +289,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
          .assertContentContains(TEXT_CONTENT_LINES)
          .assertContentRegexp(
              "Content-Disposition: form-data; name=\"metadata\"; filename=.*",
-             "Content-Disposition: form-data; name=\"urn:metaxa:plain-text:.*",
+             "Content-Disposition: form-data; name=\"urn:tika:text:.*",
              //and the expected enhancements in the metadata
              "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
              "http://purl.org/dc/terms/language.*en",
