@@ -24,16 +24,18 @@
 		<version>0.9.0-incubating-SNAPSHOT</version>
 		<relativePath>../parent</relativePath>
 	</parent>
+
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.entityhub.indexing.dblp</artifactId>
-	<version>0.9.0-incubating-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Apache Stanbol Entityhub Indexing for dblp</name>
-	<description>This uses the RDF dump provided by
+	
+    <description>This uses the RDF dump provided by
     http://dblp.l3s.de/dblp.rdf.gz to create a local index of DBLP to be used
     with the Apache Stanbol Entityhub
-  </description>
-	<scm>
+    </description>
+	
+    <scm>
 		<connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/dblp
     </connection>

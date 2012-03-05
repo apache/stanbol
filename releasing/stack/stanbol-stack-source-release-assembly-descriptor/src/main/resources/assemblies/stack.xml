@@ -35,6 +35,7 @@
         <!-- unstable/old stuff in enhancer -->
         <exclude>enhancer/autotagging/**</exclude>
         <exclude>enhancer/engines/autotagging/**</exclude>
+        <exclude>enhancer/engines/metaxa/**</exclude>
         <exclude>enhancer/dereferencing/**</exclude>
         <exclude>enhancer/query-rendering/**</exclude>
         <exclude>enhancer/SemiAutomaticContentEnhancer/**</exclude>

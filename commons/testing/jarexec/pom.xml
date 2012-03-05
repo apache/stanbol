@@ -27,7 +27,6 @@
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.testing.jarexec</artifactId>
-  <version>0.9.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Jar Executor</name>
