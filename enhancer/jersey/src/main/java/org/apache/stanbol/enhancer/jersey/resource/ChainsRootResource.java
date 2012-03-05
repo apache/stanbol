@@ -16,9 +16,19 @@
 */
 package org.apache.stanbol.enhancer.jersey.resource;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveChains;
+import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.buildChainsMap;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Enhancer.ENHANCEMENT_ENGINE;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -40,10 +50,22 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
+import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.clerezza.rdf.ontologies.RDFS;
+import org.apache.clerezza.rdf.ontologies.XSD;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.rdf.Enhancer;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
@@ -64,18 +86,9 @@ public class ChainsRootResource extends BaseStanbolResource {
                 "The required ChainManager Service is not available!"));
         }
         defaultChain = chainManager.getDefault();
-        chains = new HashMap<String,Map.Entry<ServiceReference,Chain>>();
-        for(String chainName : chainManager.getActiveChainNames()){
-            ServiceReference chainRef = chainManager.getReference(chainName);
-            if(chainRef != null){
-                Chain chain = chainManager.getChain(chainRef);
-                if(chain != null){
-                    Map<ServiceReference,Chain> m = Collections.singletonMap(chainRef, chain);
-                    chains.put(chainName, m.entrySet().iterator().next());
-                }
-            }
-        }
+        chains = buildChainsMap(chainManager);
     }
+
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
@@ -90,6 +103,17 @@ public class ChainsRootResource extends BaseStanbolResource {
         addCORSOrigin(servletContext,res, headers);
         return res.build();
     }
+    @GET
+    @Produces(value={APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
+    public Response getEngines(@Context HttpHeaders headers){
+        String rootUrl = uriInfo.getBaseUriBuilder().path(getRootUrl()).build().toString();
+        MGraph graph = new SimpleMGraph();
+        addActiveChains(chains.values(),defaultChain,graph,rootUrl);
+        ResponseBuilder res = Response.ok(graph);
+        addCORSOrigin(servletContext,res, headers);
+        return res.build();
+    }
+
 
     public Collection<Chain> getChains(){
         Set<Chain> chains = new HashSet<Chain>();

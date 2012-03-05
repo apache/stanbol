@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:protege="http://protege.stanford.edu/plugins/owl/protege#"
+    xmlns:ep="http://stanbol.apache.org/ontology/enhancer/executionplan#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns="http://stanbol.apache.org/ontology/enhancer/executionmetadata#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://stanbol.apache.org/ontology/enhancer/executionmetadata">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="http://stanbol.apache.org/ontology/enhancer/executionplan"/>
+    <rdfs:comment xml:lang="en">Allows to describe metadata about an actual execution of an EnhancementChain by the Stanbol Enhancer for a parsed ContentItem</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="ExecutionStatus">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Execution Status</rdfs:label>
+    <rdfs:comment xml:lang="en">Class used to represent the status of an Execution</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Execution">
+    <rdfs:label xml:lang="en">Execution</rdfs:label>
+    <rdfs:comment xml:lang="en">An execution (abstract)</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="ChainExecution">
+    <rdfs:comment xml:lang="en">An execution of an EnhancementChain</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Execution"/>
+    <rdfs:label xml:lang="en">EnhancementEngine Execution</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="EngineExecution">
+    <rdfs:label xml:lang="en">EnhancementEngine Execution</rdfs:label>
+    <rdfs:comment xml:lang="en">An execution of an Enhancement Engine</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Execution"/>
+  </owl:Class>
+  <owl:DatatypeProperty rdf:ID="statusMessage">
+    <rdfs:domain rdf:resource="#Execution"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="en">status message</rdfs:label>
+    <rdfs:comment xml:lang="en">Allows to provide a status message for an execution (may be multi valued)</rdfs:comment>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="started">
+    <rdfs:label xml:lang="en">started</rdfs:label>
+    <rdfs:comment xml:lang="en">Time point when the exection started (also available when skipped)</rdfs:comment>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+    <rdfs:domain rdf:resource="#Execution"/>
+  </owl:DatatypeProperty>
+  <owl:TransitiveProperty rdf:ID="executionPart">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:comment xml:lang="en">Property that links an Execution to its parent ChainExecution (e.g. the Execution of single Engines to the Execution of the EnhancementChain)</rdfs:comment>
+    <rdfs:range rdf:resource="#ChainExecution"/>
+    <rdfs:domain rdf:resource="#Execution"/>
+  </owl:TransitiveProperty>
+  <owl:FunctionalProperty rdf:ID="enhancedBy">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="#ChainExecution"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#InverseFunctionalProperty"/>
+    <rdfs:label xml:lang="en">enhanced by</rdfs:label>
+    <owl:inverseOf>
+      <owl:InverseFunctionalProperty rdf:ID="enhances"/>
+    </owl:inverseOf>
+    <rdfs:comment xml:lang="en">Property that links from the ContentItem to the ChainExecution (defining the root node of the execution metadata)</rdfs:comment>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="executionNode">
+    <rdfs:domain rdf:resource="#EngineExecution"/>
+    <rdfs:range rdf:resource="http://stanbol.apache.org/ontology/enhancer/executionplan#ExecutionNode"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:label xml:lang="en">execution node</rdfs:label>
+    <rdfs:comment xml:lang="en">Property that links from the EngineExecution to the ExecutionNode of the ExecutionPlan</rdfs:comment>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="executionPlan">
+    <rdfs:label xml:lang="en">execution plan</rdfs:label>
+    <rdfs:comment xml:lang="en">Property that links from the ChainExecution to the ExecutionPlan.</rdfs:comment>
+    <rdfs:domain rdf:resource="#ChainExecution"/>
+    <rdfs:range rdf:resource="http://stanbol.apache.org/ontology/enhancer/executionplan#ExecutionPlan"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="status">
+    <rdfs:comment xml:lang="en">The current/final status of an Execution. Allowed values are the instances of ExectionStatus defined by this Ontology</rdfs:comment>
+    <rdfs:label xml:lang="en">status</rdfs:label>
+    <rdfs:range rdf:resource="#ExecutionStatus"/>
+    <rdfs:domain rdf:resource="#Execution"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="isDefaultChain">
+    <rdfs:comment xml:lang="en">if the ChainExecution represents an execution of the default EnhancementChain of the Stanbol Enhancer.</rdfs:comment>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <rdfs:domain rdf:resource="#ChainExecution"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:label xml:lang="en">is default Chain</rdfs:label>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="completed">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:label xml:lang="en">completed</rdfs:label>
+    <rdfs:comment xml:lang="en">time point when the execution completed (succeded, skipped or failed).</rdfs:comment>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+    <rdfs:domain rdf:resource="#Execution"/>
+  </owl:FunctionalProperty>
+  <owl:InverseFunctionalProperty rdf:about="#enhances">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:label xml:lang="en">enhances</rdfs:label>
+    <rdfs:comment xml:lang="en">Property that links from the ChainExecution to the enhanced ContentItem</rdfs:comment>
+    <rdfs:domain rdf:resource="#ChainExecution"/>
+    <owl:inverseOf rdf:resource="#enhancedBy"/>
+  </owl:InverseFunctionalProperty>
+  <ExecutionStatus rdf:ID="StatusInProgress">
+    <rdfs:comment xml:lang="en">ExecutionStatus indicating that the execution is in progress</rdfs:comment>
+    <rdfs:label xml:lang="en">in progress</rdfs:label>
+  </ExecutionStatus>
+  <ExecutionStatus rdf:ID="StatusSkipped">
+    <rdfs:label xml:lang="en">skipped</rdfs:label>
+    <rdfs:comment xml:lang="en">ExecutionStatus indicating that the execution was skipped</rdfs:comment>
+  </ExecutionStatus>
+  <ExecutionStatus rdf:ID="StatusSheduled">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >sheduled</rdfs:label>
+    <rdfs:comment xml:lang="en">ExecutionStatus indicating that the execution is scheduled, but has not yet started</rdfs:comment>
+  </ExecutionStatus>
+  <ExecutionStatus rdf:ID="StatusCompleted">
+    <rdfs:label xml:lang="en">completed</rdfs:label>
+    <rdfs:comment xml:lang="en">ExecutionStatus indicating that the execution has completed successfully</rdfs:comment>
+  </ExecutionStatus>
+  <ExecutionStatus rdf:ID="StatusFailed">
+    <rdfs:comment xml:lang="en">ExecutionStatus indicating that the execution has failed</rdfs:comment>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >failed</rdfs:label>
+  </ExecutionStatus>
+</rdf:RDF>

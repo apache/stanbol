@@ -105,60 +105,63 @@ public class Properties {
      * Refers to the content item the enhancement was extracted form
      */
     public static final UriRef ENHANCER_EXTRACTED_FROM = new UriRef(
-            NamespaceEnum.enhancer + "extracted-from");
+            NamespaceEnum.fise + "extracted-from");
 
     /**
      * the character position of the start of a text selection.
      */
-    public static final UriRef ENHANCER_START = new UriRef(NamespaceEnum.enhancer
+    public static final UriRef ENHANCER_START = new UriRef(NamespaceEnum.fise
             + "start");
 
     /**
      * the character position of the end of a text selection.
      */
-    public static final UriRef ENHANCER_END = new UriRef(NamespaceEnum.enhancer + "end");
+    public static final UriRef ENHANCER_END = new UriRef(NamespaceEnum.fise + "end");
 
     /**
      * The text selected by the text annotation. This is an optional property
      */
     public static final UriRef ENHANCER_SELECTED_TEXT = new UriRef(
-            NamespaceEnum.enhancer + "selected-text");
+            NamespaceEnum.fise + "selected-text");
 
     /**
      * The context (surroundings) of the text selected. (e.g. the sentence
      * containing a person selected by a NLP enhancer)
      */
     public static final UriRef ENHANCER_SELECTION_CONTEXT = new UriRef(
-            NamespaceEnum.enhancer + "selection-context");
+            NamespaceEnum.fise + "selection-context");
 
     /**
      * A positive double value to rank extractions according to the algorithm
      * confidence in the accuracy of the extraction.
      */
-    public static final UriRef ENHANCER_CONFIDENCE = new UriRef(NamespaceEnum.enhancer
+    public static final UriRef ENHANCER_CONFIDENCE = new UriRef(NamespaceEnum.fise
             + "confidence");
 
     /**
      * This refers to the URI identifying the referred named entity
      */
     public static final UriRef ENHANCER_ENTITY_REFERENCE = new UriRef(
-            NamespaceEnum.enhancer + "entity-reference");
+            NamespaceEnum.fise + "entity-reference");
 
     /**
      * This property can be used to specify the type of the entity (Optional)
      */
-    public static final UriRef ENHANCER_ENTITY_TYPE = new UriRef(NamespaceEnum.enhancer
+    public static final UriRef ENHANCER_ENTITY_TYPE = new UriRef(NamespaceEnum.fise
             + "entity-type");
 
     /**
      * The label(s) of the referred entity
      */
     public static final UriRef ENHANCER_ENTITY_LABEL = new UriRef(
-            NamespaceEnum.enhancer + "entity-label");
+            NamespaceEnum.fise + "entity-label");
 
     /**
      * Internet Media Type of a content item.
+     * 
+     * @deprecated dc:FileFormat does not exist
      */
+    @Deprecated
     public static final UriRef DC_FILEFORMAT = new UriRef(NamespaceEnum.dc
             + "FileFormat");
 

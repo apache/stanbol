@@ -70,7 +70,7 @@ public class DefaultChainTest extends EnhancerTestBase {
         .assertStatus(200)
         .assertContentRegexp(
                 //check execution metadata
-                "http://stanbol.apache.org/ontology/enhancer/executionMetadata#executionPart",
+                "http://stanbol.apache.org/ontology/enhancer/executionmetadata#executionPart",
                 //check execution of metaxa & if executionPlan is included
                 "http://stanbol.apache.org/ontology/enhancer/executionplan#engine.*metaxa", 
                 "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",

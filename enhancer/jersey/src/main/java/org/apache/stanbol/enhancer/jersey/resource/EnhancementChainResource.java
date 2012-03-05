@@ -32,17 +32,12 @@ import org.apache.stanbol.enhancer.servicesapi.Chain;
  *
  */
 @Path("/enhancer/chain/{chain}")
-public class EnhancementChainResource extends EnhancerRootResource {
+public final class EnhancementChainResource extends AbstractEnhancerUiResource {
 
-    
     public EnhancementChainResource(@PathParam(value = "chain") String chain,
                                     @Context ServletContext context) {
-        super(context);
+        super(chain,context);
         if(chain == null || chain.isEmpty()){
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
-        }
-        this.chain = chainManager.getChain(chain);
-        if(this.chain == null){
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
     }

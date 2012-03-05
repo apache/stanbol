@@ -302,7 +302,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
     @Test
     public void testOutputContentPart() throws IOException {
         String[] params = new String []{
-                    "outputContentPart","http://stanbol.apache.org/ontology/enhancer/executionMetadata#ChainExecution",
+                    "outputContentPart","http://stanbol.apache.org/ontology/enhancer/executionmetadata#ChainExecution",
                     "omitMetadata","true",
                     "rdfFormat","application/rdf+xml"};
         String content = executor.execute(
@@ -315,12 +315,12 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertContentContains(
              "--contentItem",
              "--contentItem--",
-             "Content-Disposition: form-data; name=\"http://stanbol.apache.org/ontology/enhancer/executionMetadata#ChainExecution\"",
+             "Content-Disposition: form-data; name=\"http://stanbol.apache.org/ontology/enhancer/executionmetadata#ChainExecution\"",
              "Content-Type: application/rdf+xml; charset=UTF-8",
              "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionplan#ExecutionPlan\"/>",
              "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionplan#ExecutionNode\"/>",
-             "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionMetadata#EngineExecution\"/>",
-             "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionMetadata#ChainExecution\"/>")
+             "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionmetadata#EngineExecution\"/>",
+             "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionmetadata#ChainExecution\"/>")
          .getContent();
         log.debug("Content:\n{}\n",content);
     }

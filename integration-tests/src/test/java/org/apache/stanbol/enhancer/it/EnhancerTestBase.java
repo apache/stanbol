@@ -73,7 +73,8 @@ public class EnhancerTestBase extends StanbolTestBase {
                 "langid","LangIdEnhancementEngine",
                 "ner","NamedEntityExtractionEnhancementEngine",
                 "entityhubLinking","NamedEntityTaggingEngine",
-                "dbpediaLinking","NamedEntityTaggingEngine"                    
+                "dbpediaLinking","NamedEntityTaggingEngine",
+                "tika","TikaEngine"                    
             };
     /**
      * Getter for the Endpoint for a specific enhancement chain
