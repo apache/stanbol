@@ -425,7 +425,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
             String topic = String.format("urn:t/%03d", i);
             performanceEstimates = classifier.getPerformanceEstimates(topic);
             assertTrue(performanceEstimates.uptodate);
-            assertGreater(performanceEstimates.precision, 0.5f);
+            assertGreater(performanceEstimates.precision, 0.45f);
             assertNotNull(performanceEstimates.falsePositiveExampleIds);
             assertNotNull(performanceEstimates.falseNegativeExampleIds);
             if (performanceEstimates.precision < 1) {
@@ -434,10 +434,12 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
             if (performanceEstimates.recall < 1) {
                 assertFalse(performanceEstimates.falseNegativeExampleIds.isEmpty());
             }
-            assertGreater(performanceEstimates.recall, 0.5f);
-            assertGreater(performanceEstimates.f1, 0.65f);
-            assertGreater(performanceEstimates.positiveSupport, 10);
-            assertGreater(performanceEstimates.negativeSupport, 10);
+            assertGreater(performanceEstimates.recall, 0.45f);
+            assertGreater(performanceEstimates.f1, 0.55f);
+            // very small support, hence the estimates are unstable, hence we set low min expectations, but we
+            // need this test to run reasonably fast...
+            assertGreater(performanceEstimates.positiveSupport, 4);
+            assertGreater(performanceEstimates.negativeSupport, 4);
             assertNotNull(performanceEstimates.evaluationDate);
         }
 
