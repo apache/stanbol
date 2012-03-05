@@ -864,14 +864,16 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         }
         int updatedTopics = 0;
         int cvFoldCount = 3; // 3-folds CV is hardcoded for now
-
+        int cvIterationCount = 1; // only one 3-folds CV iteration
+ 
         TopicClassificationEngine classifier = new TopicClassificationEngine();
         classifier.setTrainingSet(trainingSet);
         try {
             // TODO: make the temporary folder path configurable with a property
             evaluationFolder = File.createTempFile("stanbol-classifier-evaluation-", "-solr");
-            for (int cvFoldIndex = 0; cvFoldIndex < cvFoldCount; cvFoldIndex++) {
-                updatedTopics = performCVFold(classifier, cvFoldIndex, cvFoldCount, incremental);
+            for (int cvFoldIndex = 0; cvFoldIndex < cvIterationCount; cvFoldIndex++) {
+                updatedTopics = performCVFold(classifier, cvFoldIndex, cvFoldCount, cvIterationCount,
+                    incremental);
             }
         } catch (ConfigurationException e) {
             throw new ClassifierException(e);
@@ -887,12 +889,13 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     protected int performCVFold(final TopicClassificationEngine classifier,
                                 int cvFoldIndex,
                                 int cvFoldCount,
-                                boolean incremental) throws ConfigurationException,
+                                int cvIterations, boolean incremental) throws ConfigurationException,
                                                     TrainingSetException,
                                                     ClassifierException {
 
-        log.info(String.format("Performing evaluation CV iteration %d/%d on classifier %s", cvFoldIndex + 1,
-            cvFoldCount, engineId));
+        cvIterations = cvIterations <= 0 ? cvFoldCount : cvFoldCount;
+        log.info(String.format("Performing evaluation %d-fold CV iteration %d/%d on classifier %s",
+            cvFoldCount, cvFoldIndex + 1, cvIterations, engineId));
         long start = System.currentTimeMillis();
         FileUtils.deleteQuietly(evaluationFolder);
         evaluationFolder.mkdir();
