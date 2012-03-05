@@ -129,6 +129,12 @@ public class StanbolTestBase {
                 final String substring = (s.length > 0 ? s[1] : null);
                 final String url = serverBaseUrl + path;
                 final HttpGet get = new HttpGet(url);
+                for(int i = 2; i+1<s.length;i=i+2){
+                    if(s[i] != null && !s[i].isEmpty() &&
+                            s[i+1] != null && !s[i+1].isEmpty()){
+                        get.setHeader(s[i], s[i+1]);
+                    }
+                }
                 HttpEntity entity = null;
                 try {
                     HttpResponse response = httpClient.execute(get);
