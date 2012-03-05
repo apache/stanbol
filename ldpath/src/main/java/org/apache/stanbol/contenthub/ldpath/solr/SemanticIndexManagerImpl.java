@@ -19,12 +19,10 @@ package org.apache.stanbol.contenthub.ldpath.solr;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,7 +33,6 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
@@ -45,7 +42,6 @@ import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
 import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
-import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
@@ -55,7 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.newmedialab.ldpath.exception.LDPathParseException;
-import at.newmedialab.ldpath.model.fields.FieldMapping;
 import at.newmedialab.ldpath.model.programs.Program;
 
 /**
@@ -93,7 +88,7 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     @Activate
     public void activator(ComponentContext cc) throws LDPathException, IOException {
         bundle = cc.getBundleContext().getBundle();
-        ldPathUtils = new LDPathUtils(bundle);
+        ldPathUtils = new LDPathUtils(bundle, referencedSiteManager);
 
         String slingHome = cc.getBundleContext().getProperty("sling.home");
         if (!slingHome.endsWith(File.separator)) slingHome += File.separator;

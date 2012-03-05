@@ -40,9 +40,6 @@ import nu.xom.ParsingException;
 import nu.xom.Serializer;
 import nu.xom.ValidityException;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -51,9 +48,10 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.commons.ldpath.clerezza.ClerezzaBackend;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
+import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
+import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,6 +125,8 @@ public class LDPathUtils {
     }
 
     private Bundle bundle;
+    
+    private ReferencedSiteManager referencedSiteManager;
 
     /**
      * Constructor taking a {@link Bundle} parameter. This bundle is used when obtaining Solr schema template.
@@ -134,8 +134,9 @@ public class LDPathUtils {
      * @param bundle
      *            From which the template Solr schema is obtained.
      */
-    public LDPathUtils(Bundle bundle) {
+    public LDPathUtils(Bundle bundle, ReferencedSiteManager referencedSiteManager) {
         this.bundle = bundle;
+        this.referencedSiteManager = referencedSiteManager;
     }
 
     /**
@@ -176,17 +177,16 @@ public class LDPathUtils {
         }
     }
 
-    private Program<Resource> getLDPathProgram(String ldPathProgram) throws LDPathException {
+    private Program<Object> getLDPathProgram(String ldPathProgram) throws LDPathException {
         if (ldPathProgram == null || ldPathProgram.isEmpty()) {
             String msg = "LDPath Program cannot be null.";
             logger.error(msg);
             throw new LDPathException(msg);
         }
-        MGraph mGraph = new SimpleMGraph();
-        RDFBackend<Resource> rdfBackend = new ClerezzaBackend(mGraph);
-        RdfPathParser<Resource> LDparser = new RdfPathParser<Resource>(rdfBackend,
+        RDFBackend<Object> rdfBackend = new SiteManagerBackend(referencedSiteManager);
+        RdfPathParser<Object> LDparser = new RdfPathParser<Object>(rdfBackend,
                 constructReader(ldPathProgram));
-        Program<Resource> program = null;
+        Program<Object> program = null;
         try {
             program = LDparser.parseProgram();
         } catch (ParseException e) {
@@ -308,7 +308,7 @@ public class LDPathUtils {
      * @return created template in an array of bytes.
      * @throws LDPathException
      */
-    private byte[] createSchemaXML(Program<Resource> program, byte[] template) throws LDPathException {
+    private byte[] createSchemaXML(Program<Object> program, byte[] template) throws LDPathException {
 
         Builder xmlParser = new Builder();
         ByteArrayInputStream is = new ByteArrayInputStream(template);
@@ -334,7 +334,7 @@ public class LDPathUtils {
         Element fieldsNode = (Element) fieldsNodes.get(0);
         Element schemaNode = (Element) fieldsNode.getParent();
 
-        for (FieldMapping<?,Resource> fieldMapping : program.getFields()) {
+        for (FieldMapping<?,Object> fieldMapping : program.getFields()) {
             String fieldName = fieldMapping.getFieldName();
             String solrType = getSolrFieldType(fieldMapping.getFieldType());
 
