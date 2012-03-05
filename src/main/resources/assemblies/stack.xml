@@ -46,7 +46,6 @@
 
         <!-- exclude components of KReS profile -->
         <exclude>ontologymanager/store/**</exclude>
-        <exclude>reasoners/**</exclude>
         <exclude>reengineering/**</exclude>
         <exclude>explanation/**</exclude>
         <exclude>launchers/kres/**</exclude>
