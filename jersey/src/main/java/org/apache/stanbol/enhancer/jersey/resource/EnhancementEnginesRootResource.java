@@ -16,9 +16,19 @@
 */
 package org.apache.stanbol.enhancer.jersey.resource;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveEngines;
+import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.buildEnginesMap;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Enhancer.ENHANCEMENT_ENGINE;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -37,18 +47,30 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
+import org.apache.stanbol.enhancer.servicesapi.rdf.Enhancer;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
@@ -67,18 +89,9 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
             throw new WebApplicationException(new IllegalStateException(
                 "The required EnhancementEngineManager Service is not available!"));
         }
-        engines = new HashMap<String,Map.Entry<ServiceReference,EnhancementEngine>>();
-        for(String chainName : engineManager.getActiveEngineNames()){
-            ServiceReference engineRef = engineManager.getReference(chainName);
-            if(engineRef != null){
-                EnhancementEngine engine = engineManager.getEngine(engineRef);
-                if(engine != null){
-                    Map<ServiceReference,EnhancementEngine> m = Collections.singletonMap(engineRef, engine);
-                    engines.put(chainName, m.entrySet().iterator().next());
-                }
-            }
-        }
+        engines = buildEnginesMap(engineManager);
     }
+
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
@@ -90,6 +103,17 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
     @Produces(TEXT_HTML)
     public Response get(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok(new Viewable("index", this),TEXT_HTML);
+        addCORSOrigin(servletContext,res, headers);
+        return res.build();
+    }
+
+    @GET
+    @Produces(value={APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
+    public Response getEngines(@Context HttpHeaders headers){
+        String rootUrl = uriInfo.getBaseUriBuilder().path(getRootUrl()).build().toString();
+        MGraph graph = new SimpleMGraph();
+        addActiveEngines(engines.values(), graph, rootUrl);
+        ResponseBuilder res = Response.ok(graph);
         addCORSOrigin(servletContext,res, headers);
         return res.build();
     }

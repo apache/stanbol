@@ -30,21 +30,21 @@ public class TechnicalClasses {
      * Type used for all enhancement created by Stanbol Enhancer
      */
     public static final UriRef ENHANCER_ENHANCEMENT = new UriRef(
-            NamespaceEnum.enhancer+"Enhancement");
+            NamespaceEnum.fise+"Enhancement");
 
     /**
      * Type used for annotations on Text created by Stanbol Enhancer. This type is intended
      * to be used in combination with ENHANCER_ENHANCEMENT
      */
     public static final UriRef ENHANCER_TEXTANNOTATION = new UriRef(
-            NamespaceEnum.enhancer+"TextAnnotation");
+            NamespaceEnum.fise+"TextAnnotation");
 
     /**
      * Type used for annotations of named entities. This type is intended
      * to be used in combination with ENHANCER_ENHANCEMENT
      */
     public static final UriRef ENHANCER_ENTITYANNOTATION = new UriRef(
-            NamespaceEnum.enhancer+"EntityAnnotation");
+            NamespaceEnum.fise+"EntityAnnotation");
     
     /**
      * Type used for annotations documents. This type is intended
@@ -58,7 +58,7 @@ public class TechnicalClasses {
      * in the document (like a traditional entity occurrence would).
      */
     public static final UriRef ENHANCER_TOPICANNOTATION = new UriRef(
-            NamespaceEnum.enhancer+"TopicAnnotation");
+            NamespaceEnum.fise+"TopicAnnotation");
 
     /**
      * To be used as a type pour any semantic knowledge extraction
@@ -89,7 +89,7 @@ public class TechnicalClasses {
      * Mapping of Categories</a> for more Information)
      */
     public static final UriRef ENHANCER_CATEGORY = new UriRef(
-            NamespaceEnum.enhancer + "Category");
+            NamespaceEnum.fise + "Category");
 
     private TechnicalClasses() {
     }

@@ -14,26 +14,17 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.enhancer.jersey.resource;
+package org.apache.stanbol.enhancer.servicesapi.rdf;
 
-import javax.servlet.ServletContext;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
-/**
- * This provides backward compatibility for the "/engines" endpoint that was
- * used to enhance content parsed to the Stanbol Enhancer before the 
- * implementation of the "/enhancer" RESTful interface defined by
- * STANBOL-431.<p>
- * This provides the same interface as for "/enhancer" by sub-classing the
- * {@link EnhancerRootResource}.
- * 
- * @author Rupert Westenthaler
- *
- */
-@Path("/engines")
-public final class EnginesRootResource extends AbstractEnhancerUiResource {
+import org.apache.clerezza.rdf.core.UriRef;
+
+public class Enhancer {
+
+    public static final UriRef ENHANCEMENT_ENGINE = new UriRef(NamespaceEnum.enhancer+"EnhancementEngine");
+    public static final UriRef ENHANCEMENT_CHAIN = new UriRef(NamespaceEnum.enhancer+"EnhancementChain");
+    public static final UriRef ENHANCER = new UriRef(NamespaceEnum.enhancer+"Enhancer");
+    public static final UriRef HAS_ENGINE = new UriRef(NamespaceEnum.enhancer+"hasEngine");
+    public static final UriRef HAS_CHAIN = new UriRef(NamespaceEnum.enhancer+"hasChain");
+    public static final UriRef HAS_DEFAULT_CHAIN = new UriRef(NamespaceEnum.enhancer+"hasDefaultChain");
     
-    public EnginesRootResource(@Context ServletContext context) {
-        super(null,context);
-    }
 }

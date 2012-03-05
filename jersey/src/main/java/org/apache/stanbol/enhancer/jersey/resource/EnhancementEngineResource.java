@@ -44,18 +44,20 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
+import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.SingleEngineChain;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 import com.sun.jersey.api.view.Viewable;
 
 @Path("/enhancer/engine/{engineName}")
-public class EnhancementEngineResource extends BaseStanbolResource {
+public class EnhancementEngineResource extends AbstractEnhancerResource {
 
     
     private final List<EnhancementEngine> engines;
@@ -64,9 +66,10 @@ public class EnhancementEngineResource extends BaseStanbolResource {
     
     public EnhancementEngineResource(@PathParam(value = "engineName") String name,
                                      @Context ServletContext context) {
+        super(context);
         // bind the job manager by looking it up from the servlet request context
-        EnhancementEngineManager engineManager = 
-                ContextHelper.getServiceFromContext(EnhancementEngineManager.class, context);
+//        EnhancementEngineManager engineManager = 
+//                ContextHelper.getServiceFromContext(EnhancementEngineManager.class, context);
         if(engineManager == null){
             throw new WebApplicationException(
                 new IllegalStateException(
@@ -90,6 +93,16 @@ public class EnhancementEngineResource extends BaseStanbolResource {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
     }
+    /**
+     * Wraps the engine with the highest service ranking with a
+     * {@link SingleEngineChain}.
+     * @see org.apache.stanbol.enhancer.jersey.resource.AbstractEnhancerResource#getChain()
+     */
+    @Override
+    protected Chain getChain() {
+        return new SingleEngineChain(engines.get(0));
+    }
+    
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();

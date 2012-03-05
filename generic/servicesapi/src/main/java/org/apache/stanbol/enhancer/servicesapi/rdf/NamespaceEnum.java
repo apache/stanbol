@@ -18,8 +18,12 @@ package org.apache.stanbol.enhancer.servicesapi.rdf;
 
 public enum NamespaceEnum {
 
-    // TODO: change the namespace as soon as STANBOL-3 defines a namespace to be used for stanbol
-    enhancer("http://fise.iks-project.eu/ontology/"),
+    /**
+     * The Stanbol Enhancer namespace defining Enhancer, EnhancementEngine and
+     * EnhancementChain. This is NOT the namespace of the enhancement structure.
+     * As EnhancementStrucutre up to now still the old FISE namespace is used.
+     */
+    enhancer("http://stanbol.apache.org/ontology/enhancer/enhancer#"),
     dbpedia_ont("dbpedia-ont", "http://dbpedia.org/ontology/"),
     rdf("http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
     rdfs("http://www.w3.org/2000/01/rdf-schema#"),
@@ -37,10 +41,11 @@ public enum NamespaceEnum {
     /**
      * Namespace for the Stanbol Enhancer Execution Metadata ontology
      */
-    em("http://stanbol.apache.org/ontology/enhancer/executionMetadata#"),
+    em("http://stanbol.apache.org/ontology/enhancer/executionmetadata#"),
     /**
      * The FISE namespace (1st version of the Enhancement Structure).
-     * Currently the same as {@link NamespaceEnum#enhancer}
+     * Will be replaced by the Stanbol Enhancement Structure by a future
+     * release (see STANBOL-3).
      */
     fise("http://fise.iks-project.eu/ontology/"),
     /**
