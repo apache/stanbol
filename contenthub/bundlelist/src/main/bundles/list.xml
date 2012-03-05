@@ -45,13 +45,13 @@
       <artifactId>org.apache.stanbol.contenthub.web</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
+    <!-- Moving CNN Crawler to demos/  
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.crawler.cnn</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-
-    <!-- LDPath -->
+     -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.ldpath</artifactId>

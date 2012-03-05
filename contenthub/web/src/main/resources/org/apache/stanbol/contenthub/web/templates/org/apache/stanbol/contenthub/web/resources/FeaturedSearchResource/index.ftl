@@ -265,7 +265,7 @@
 		}
 		function setChosenFacet(JSONObject)	{
 			var resultString = "";
-			var chosenCons = $("#chosenFacetsHidden").attr("innerHTML");
+			var chosenCons = "'" + $("#chosenFacetsHidden").attr("value") + "'";
 							
 			if(JSONObject != null) {
 				for(var p in JSONObject) {

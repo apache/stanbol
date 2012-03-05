@@ -49,7 +49,7 @@
       <#if it.chosenFacets?exists && it.chosenFacets != "{}">
         <fieldset>
           <div id="chosenFacets"></div>
-          <div id="chosenFacetsHidden" class="invisible">'${it.chosenFacets?js_string}'</div>
+          <div id="chosenFacetsHidden" class="invisible" value='${it.chosenFacets?js_string}'/>
         </fieldset>
       </#if>
     </div>

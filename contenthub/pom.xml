@@ -40,7 +40,6 @@
     <module>servicesapi</module>
     <module>store</module>
     <module>search</module>
-    <module>crawler/cnn</module>
     <module>web</module>
     <module>bundlelist</module>
     <module>ldpath</module>

@@ -73,8 +73,8 @@
     <module>contenthub</module>
     <module>entityhub</module>
     <module>factstore</module>
-
-    <module>ontologymanager/ontonet</module>
+	
+	<module>ontologymanager/ontonet</module>
     <module>ontologymanager/registry</module>
     <module>ontologymanager/web</module>
     <module>ontologymanager/bundlelist</module>

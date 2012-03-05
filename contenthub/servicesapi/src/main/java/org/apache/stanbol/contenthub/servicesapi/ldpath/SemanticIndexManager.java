@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 
 /**
  * This interface provides create, retrieve, delete operations for LDPath programs to be managed in the scope
