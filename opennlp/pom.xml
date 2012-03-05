@@ -62,20 +62,14 @@
         <configuration>
           <instructions>
             <Export-Package>
-              opennlp.maxent,
-              opennlp.maxent.io,
-              opennlp.model,
-              opennlp.perceptron,
-              opennlp.tools.*,
               org.apache.stanbol.commons.opennlp
             </Export-Package>
             <Private-Package>
               org.apache.stanbol.commons.opennlp.impl.*
             </Private-Package>
-            <Embed-Dependency>opennlp-tools,opennlp-maxent</Embed-Dependency>
+            <Embed-Dependency></Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
-              !net.didion.*,
               *
             </Import-Package>
           </instructions>
