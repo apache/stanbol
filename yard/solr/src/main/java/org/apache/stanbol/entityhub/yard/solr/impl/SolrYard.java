@@ -76,8 +76,10 @@ import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -485,10 +487,6 @@ public class SolrYard extends AbstractYard implements Yard {
         if(_server == null && _registeredServerTracker == null){
             initSolrServer();
         }
-        //for remove servers and when running outside OSGI
-        if(_server != null){
-            server = _server;
-        }
         //when an internally managed Solr server is used by this SolrYard
         //we dynamically return the tracked version
         if(_registeredServerTracker != null){
@@ -504,6 +502,14 @@ public class SolrYard extends AbstractYard implements Yard {
                     } catch (InterruptedException e) {}
                 }
             }
+            if(server == null || !server.equals(this._server)){
+                //reset the fieldMapper so that it is reinitialised for the new one
+                //STANBOL-519
+                _fieldMapper = null; 
+            }
+        } else {
+            //for remove servers and when running outside OSGI
+            server = _server;
         }
         //the server is not available -> throw an exception!
         if(server != null){
@@ -570,7 +576,7 @@ public class SolrYard extends AbstractYard implements Yard {
                 } else { //within OSGI dynamically track the service
                     try {
                         _registeredServerTracker = new RegisteredSolrServerTracker(
-                            context.getBundleContext(), indexReference);
+                            context.getBundleContext(), indexReference, null);
                         _registeredServerTracker.open(); //start tracking
                     } catch (InvalidSyntaxException e) {
                         throw new YardException("Unable to track configured SolrServer'"+
