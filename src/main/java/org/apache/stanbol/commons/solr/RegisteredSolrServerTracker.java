@@ -32,6 +32,9 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks the {@link CoreContainer} of the {@link SolrCore} referenced by the
@@ -42,6 +45,8 @@ import org.osgi.util.tracker.ServiceTracker;
  *
  */
 public class RegisteredSolrServerTracker extends ServiceTracker {
+    
+    private final Logger log = LoggerFactory.getLogger(RegisteredSolrServerTracker.class);
 
     /**
      * In case <code>{@link IndexReference#isPath()} == true</code> than we need
@@ -54,6 +59,9 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
      * needed to create {@link EmbeddedSolrServer} instances
      */
     private final String coreName;
+    
+    private final IndexReference reference;
+    
     /**
      * Creates a new Tracker for the parsed {@link IndexReference}
      * @param context the BundleContext used for tracking
@@ -64,14 +72,35 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
      * <code>null</code>
      */
     public RegisteredSolrServerTracker(BundleContext context, IndexReference reference) throws InvalidSyntaxException{
+        this(context,reference,null);
+    }
+    /**
+     * Creates a new Tracker for the parsed {@link IndexReference}
+     * @param context the BundleContext used for tracking
+     * @param reference the index reference
+     * @param customizer Customizer parsed to the parent instance. Note that 
+     * the {@link ServiceTrackerCustomizer#addingService(ServiceReference)} 
+     * method of this  instance is expected to directly return the 
+     * {@link SolrCore} or {@link CoreContainer} referenced by the parsed 
+     * {@link IndexReference}. Service Objects parsed to the 
+     * {@link ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)}
+     * and {@link ServiceTrackerCustomizer#remove(ServiceReference)} will be
+     * of type {@link EmbeddedSolrServer}.
+     * @throws InvalidSyntaxException if the {@link Filter} could not be
+     * created for the parsed {@link IndexReference}.
+     * @throws IllegalArgumentException if the parsed {@link IndexReference} is 
+     * <code>null</code>
+     */
+    public RegisteredSolrServerTracker(BundleContext context, IndexReference reference,ServiceTrackerCustomizer customizer) throws InvalidSyntaxException {
         super(context,
             reference != null ? 
                     reference.isPath() ? context.createFilter(reference.getIndexFilter()) : 
                         context.createFilter(reference.getIndexFilter()) :
-                            null ,null);
+                            null,customizer);
         if(reference == null){
             throw new IllegalArgumentException("The parsed IndexReference MUST NOT be NULL!");
         }
+        this.reference = reference;
         if(reference.isPath()){
             trackingSolrCore = true;
             coreName = null;
@@ -83,10 +112,17 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
     
     @Override
     public SolrServer addingService(ServiceReference reference) {
+        log.info(" ... in addingService for {} (ref: {})",
+            this.reference,reference);
         String coreName;
         CoreContainer server;
+        Object service = super.addingService(reference);
+        if(service == null){
+            log.warn("addingService({}) returned null -> unable to create " +
+            		"EmbeddedSolrServer for IndexReference {}",reference,this.reference);
+        }
         if(trackingSolrCore){
-            SolrCore core = (SolrCore)context.getService(reference);
+            SolrCore core = (SolrCore)service;
             coreName = core.getName();
             CoreDescriptor descriptior = core.getCoreDescriptor();
             if(descriptior == null){ //core not registered with a container!
@@ -96,12 +132,24 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
                 server = descriptior.getCoreContainer();
             }
         } else {
-            server = (CoreContainer)context.getService(reference);
+            server = (CoreContainer)service;
             coreName = this.coreName;
         }
         return new EmbeddedSolrServer(server, coreName);
     }
 
+    @Override
+    public void modifiedService(ServiceReference reference, Object service) {
+        log.info(" ... in modifiedService for {} (ref: {}, service {})",
+            new Object[]{this.reference,reference,service});
+        super.modifiedService(reference, service);
+    }
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+        log.info(" ... in removedService for {} (ref: {}, service {})",
+            new Object[]{this.reference,reference,service});
+        super.removedService(reference, service);
+    }
     /**
      * Overrides to provides a Array sorted by {@link Constants#SERVICE_RANKING}
      * @see ServiceTracker#getServiceReferences()
