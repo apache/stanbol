@@ -33,7 +33,6 @@
 			    <tr><input type="text" id="searchKeywords" name="searchKeywords" onkeydown="if (event.keyCode == 13) document.getElementById('searchButton').click()" /><input id="searchButton" type="button" value="Search" onClick="javascript:performSearch();" /></tr>
 			    <tr><div><a href="${it.publicBaseUri}contenthub/${it.indexName}/search/featured" />Search Page</a></div></tr>
 			    <br/>
-			    <tr><div><a href="${it.publicBaseUri}contenthub/${it.indexName}/import/cnn">Import News</a></div></tr>
 			    <tr><div><a href="${it.publicBaseUri}contenthub/ldpath">Submit Index</a></div></tr>
 			  </td></table>
 			</div>

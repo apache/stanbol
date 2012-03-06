@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.contenthub.servicesapi;
 
+import org.apache.clerezza.rdf.core.UriRef;
+
 /**
  * Class keeping the constants that are used in various places of Contenthub.
  * 
@@ -50,4 +52,14 @@ public class Constants {
     }
 
     public static final String SEARCH_URI = "http://stanbol.apache.org/contenthub/search/";
+    
+    /**
+     * Represent the RDF type of CMS Object in the content management system
+     */
+    public static final UriRef CMS_OBJECT = new UriRef("http://www.apache.org/stanbol/cms#CMSObject");
+    
+    /**
+     * Represents a reference to name of a CMS Object
+     */
+    public static final UriRef CMS_OBJECT_NAME = new UriRef("http://www.apache.org/stanbol/cms#name");
 }
