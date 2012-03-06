@@ -1139,6 +1139,16 @@
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>4.1</version>
+      </dependency>      
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore-osgi</artifactId>
         <version>4.1.4</version>
       </dependency>
@@ -1232,24 +1242,11 @@
           using Jersey in combination with this one might cause
           incompatibilities
         -->
-        <dependency>
-          <groupId>javax.ws.rs</groupId>
-          <artifactId>jsr311-api</artifactId>
-          <version>1.1.1</version>
-        </dependency>
-
-        <!-- JSON -->
-        <!-- use jettison instead
       <dependency>
-        <groupId>org.json</groupId>
-        <artifactId>json</artifactId>
-        <version>20090211</version>
-              </dependency>
-      <dependency>
-        <groupId>com.googlecode.json-simple</groupId>
-        <artifactId>json-simple</artifactId>
-        <version>1.1</version>
-              </dependency> -->
+        <groupId>javax.ws.rs</groupId>
+        <artifactId>jsr311-api</artifactId>
+        <version>1.1.1</version>
+      </dependency>
 
       <!-- Freemarker -->
       <dependency>
@@ -1442,43 +1439,17 @@
       <artifactId>lucene-icu</artifactId>
       <version>3.2.0</version>
     </dependency>
-<!--    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-icu4j</artifactId>
-      <version>3.2.0</version>
-    </dependency> -->
     <dependency>
       <groupId>com.ibm.icu</groupId>
-	  <artifactId>icu4j</artifactId>
-	  <version>4.8.1.1</version>
+  	  <artifactId>icu4j</artifactId>
+	    <version>4.8.1.1</version>
     </dependency>    
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-xercesImpl</artifactId>
       <version>3.2.0</version>
     </dependency>
-    <!-- other unused Lucene bundes
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-grouping</artifactId>
-        <version>3.2.0</version>
-            </dependency>
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-queryparser</artifactId>
-        <version>3.2.0</version>
-            </dependency>
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-smartcn</artifactId>
-        <version>3.2.0</version>
-            </dependency>
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-stempel</artifactId>
-        <version>3.2.0</version>
-            </dependency>
-    -->
+
     <!-- Other Solr/Lucene dependendies -->
     <!-- StAX Parser (used by Solr/Lucene) -->
     <dependency>
@@ -1593,7 +1564,6 @@
       <version>0.9.0-incubating-SNAPSHOT</version>
     </dependency>
     
-
     <!-- Apache Tika -->
     <dependency>
       <groupId>org.apache.tika</groupId>
@@ -1685,11 +1655,6 @@
       <artifactId>htmlcleaner</artifactId>
       <version>2_1p</version>
     </dependency>
-<!--    <dependency>
-      <groupId>com.ibm.icu</groupId>
-      <artifactId>icu4j</artifactId>
-      <version>3.4.4</version>
-    </dependency> -->
 
     <!-- Sling -->
     <dependency>
@@ -1713,6 +1678,14 @@
       <artifactId>org.apache.sling.installer.core</artifactId>
       <version>3.2.0</version>
     </dependency>
+
+    <!-- Apache James -->
+    <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-mime4j</artifactId>
+      <version>0.6</version>
+    </dependency>    
+
     <!-- Testing Deps -->
     <dependency>
       <groupId>org.slf4j</groupId>
