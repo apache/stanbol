@@ -1063,9 +1063,14 @@
           if (typeof property === "string" && entity.get(property)) {
             labelArr = _.flatten([entity.get(property)]);
             label = _(labelArr).detect(function(label) {
-              if (label.indexOf("@" + lang) > -1) return true;
+              if (typeof label === "string" && label.indexOf("@" + lang) > -1) {
+                true;
+              }
+              if (typeof label === "object" && label["@lang"] === lang) {
+                return true;
+              }
             });
-            if (label) return label.replace(/(^\"*|\"*@..$)/g, "");
+            if (label) return label.toString().replace(/(^\"*|\"*@..$)/g, "");
           } else if (typeof property === "object" && entity.get(property.property)) {
             valueArr = _.flatten([entity.get(property.property)]);
             valueArr = _(valueArr).map(function(termUri) {
@@ -1281,7 +1286,10 @@
     }
 
     TextEnhancement.prototype.getSelectedText = function() {
-      return this._vals("enhancer:selected-text");
+      var res;
+      res = this._vals("enhancer:selected-text");
+      if (typeof res === "string") return res;
+      if (typeof res === "object") return res.toString();
     };
 
     TextEnhancement.prototype.getConfidence = function() {
@@ -1361,7 +1369,7 @@
     }
 
     EntityEnhancement.prototype.getLabel = function() {
-      return this._vals("enhancer:entity-label").replace(/(^\"*|\"*@..$)/g, "");
+      return this._vals("enhancer:entity-label").toString().replace(/(^\"*|\"*@..$)/g, "");
     };
 
     EntityEnhancement.prototype.getUri = function() {
