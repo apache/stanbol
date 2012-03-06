@@ -53,9 +53,30 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- MIT License -->
+            <exclude>src/main/resources/org/apache/stanbol/demos/crawler/web/static/style/jquery-ui-1.8.11.custom.css</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/demos/crawler/web/static/scripts/jquery-ui-1.8.11.custom.min.js</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/demos/crawler/web/static/scripts/jquery-1.5.1.min.js</exclude>
+
+            <!-- BSD License -->
+            <exclude>src/main/resources/org/apache/stanbol/demos/crawler/web/static/scripts/jit.js</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <dependencies>
+
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
@@ -73,14 +94,6 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-    </dependency>
-    <dependency>
       <groupId>net.sourceforge.htmlcleaner</groupId>
       <artifactId>htmlcleaner</artifactId>
     </dependency>
@@ -88,7 +101,7 @@
       <groupId>jtidy</groupId>
       <artifactId>jtidy</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>

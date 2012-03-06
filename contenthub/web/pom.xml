@@ -49,14 +49,6 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Import-Package>
-              javax.ws.rs.*; version="[0,2)",
-              *
-            </Import-Package>
-          </instructions>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.rat</groupId>
@@ -105,17 +97,6 @@
       <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
     </dependency>
 
-    <!-- Clerezza dependencies -->
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
-    </dependency>
-
     <!-- dependencies on other Stanbol modules -->
     <!-- TODO : added to get DefaultQueryFactory at SearchResource, find 
       a solution not to get this dependency -->
@@ -160,11 +141,6 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
-    <dependency>
-      <groupId>eu.medsea.mimeutil</groupId>
-      <artifactId>mime-util</artifactId>
-    </dependency>
-
 
     <!-- OSGi tax -->
     <dependency>

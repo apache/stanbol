@@ -18,7 +18,6 @@ package org.apache.stanbol.contenthub.search.related.ontologyresource;
 
 import java.util.List;
 
-import org.apache.stanbol.cmsadapter.servicesapi.helper.CMSAdapterVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
 
 import com.hp.hpl.jena.ontology.OntClass;
@@ -59,7 +58,7 @@ public class IndexingHelper {
         }
 
         // Add CMS objects
-        Resource cmsObject = ResourceFactory.createResource(CMSAdapterVocabulary.CMS_OBJECT
+        Resource cmsObject = ResourceFactory.createResource(Constants.CMS_OBJECT
                 .getUnicodeString());
         List<Statement> cmsOBjects = model.listStatements(null, RDF.type, cmsObject).toList();
         for (Statement stmt : cmsOBjects) {
@@ -79,7 +78,7 @@ public class IndexingHelper {
 
     public static String getCMSObjectName(Resource subject) {
         String name = "";
-        Property cmsNameProp = ResourceFactory.createProperty(CMSAdapterVocabulary.CMS_OBJECT_NAME
+        Property cmsNameProp = ResourceFactory.createProperty(Constants.CMS_OBJECT_NAME
                 .getUnicodeString());
         if (subject.hasProperty(cmsNameProp)) {
             name = subject.getProperty(cmsNameProp).getString();
