@@ -21,7 +21,7 @@ The following files are provided under the Apache License, Version 2.0:
     org/apache/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.site.referencedSite-dbpedia.config
     org/apache/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-dbpedia.config
 
-The SolrIndex provides at
+The SolrIndex provided at
 
     org/apache/data/site/dbpedia/default/index/dbpedia_43k.solrindex.zip
 
