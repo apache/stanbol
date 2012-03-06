@@ -52,11 +52,22 @@ import com.hp.hpl.jena.tdb.TDBFactory;
  */
 public class CommandLineRunner {
 
-    public static Options makeCommonOptions() {
+    private static final String MODEL_DIRECTORY = "m";
+    private static final String FILENAMES_TO_LOAD = "f";
+    private static final int MAX_FILES = 100;
+
+    private static Options makeCommonOptions() {
         Options options = new Options();
         options.addOption("h", "help", false, "display this help and exit");
         options.addOption("d", "debug", false,
                 "show debug stacktrace upon error");
+        options.addOption(MODEL_DIRECTORY, "modeldirectory", true,
+                "configure output model directory");
+        Option filenamesOption = new Option(FILENAMES_TO_LOAD, "filenames",
+                true, "list of files to load into model");
+        filenamesOption.setValueSeparator(';');
+        filenamesOption.setArgs(MAX_FILES);
+        options.addOption(filenamesOption);
         return options;
     }
 
@@ -65,7 +76,6 @@ public class CommandLineRunner {
         CommandLineParser parser = new PosixParser();
         Options options = makeCommonOptions();
         CommandLine line = parser.parse(options, args);
-        args = line.getArgs();
 
         if (args.length < 2 || line.hasOption("h")) {
             HelpFormatter formatter = new HelpFormatter();
@@ -74,9 +84,23 @@ public class CommandLineRunner {
                     options);
             System.exit(0);
         }
-        String modelPath = args[1];
+
+        String modelPath = "";
+        if (line.hasOption(MODEL_DIRECTORY)) {
+            modelPath = line.getOptionValue(MODEL_DIRECTORY);
+        } else
+            throw new IllegalStateException("please specify model directory " +
+                    "with " + MODEL_DIRECTORY + " option switch");
+
+        String[] filenames;
+        if (line.hasOption(FILENAMES_TO_LOAD)) {
+            filenames = line.getOptionValues(FILENAMES_TO_LOAD);
+        } else throw new IllegalStateException("please specify " +
+                "at least one filename to load using " + FILENAMES_TO_LOAD
+                + " option switch and ';' as separator");
+
         Model model = TDBFactory.createModel(modelPath);
-        for (String filename : Arrays.asList(args).subList(2, args.length)) {
+        for (String filename : filenames) {
             System.out.printf("loading '%s' into model '%s'...", filename,
                     modelPath);
             InputStream is = new FileInputStream(filename);
