@@ -29,7 +29,7 @@
   <artifactId>org.apache.stanbol.reasoners.web</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Reasoners: Web</name>
+  <name>Apache Stanbol Reasoners Web</name>
   <description>Set of rest services to deal with reasoners</description>
  
   <build>
@@ -72,6 +72,19 @@
           </instructions>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 License -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+            
+            <!-- MIT License  -->
+            <exclude>src/main/resources/org/apache/stanbol/reasoners/web/static/jquery/jquery-1.6.1</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
     </plugins>
   </build>
 
