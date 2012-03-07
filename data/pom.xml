@@ -21,7 +21,7 @@
 
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.reactor</artifactId>
-    <version>0.9.0-incubating-SNAPSHOT</version>
+    <version>0.9.0-incubating</version>
     <packaging>pom</packaging>
     
     <name>Apache Stanbol Data reactor</name>

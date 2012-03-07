@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>0.9.0-incubating-SNAPSHOT</version>
+    <version>0.9.0-incubating</version>
     <relativePath>../../parent</relativePath>
   </parent>
 <modelVersion>4.0.0</modelVersion>
@@ -103,12 +103,12 @@
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.9.0-incubating</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.reasoners.owlapi</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.9.0-incubating</version>
 		</dependency>
   </dependencies>
   

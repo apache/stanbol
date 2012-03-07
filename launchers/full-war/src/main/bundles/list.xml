@@ -58,7 +58,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>
 
@@ -72,7 +72,7 @@
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.owl</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.9.0-incubating</version>
 	  </bundle>
   </startLevel>
   
@@ -86,7 +86,7 @@
     <bundle>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.web.vie</artifactId>
-        <version>0.9.0-incubating-SNAPSHOT</version>
+        <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>
 

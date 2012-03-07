@@ -210,22 +210,22 @@
 	<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.9.0-incubating</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.web.home</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.9.0-incubating</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.9.0-incubating</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.jsonld</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.9.0-incubating</version>
 		</bundle>
 	</startLevel>
 	
@@ -233,22 +233,22 @@
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.9.0-incubating</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.web.ontology</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.9.0-incubating</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.store.jena</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.9.0-incubating</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.store.clerezza</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.9.0-incubating</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>

@@ -23,12 +23,12 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.contenthub.parent</artifactId>
-		<version>0.9.0-incubating-SNAPSHOT</version>
+		<version>0.9.0-incubating</version>
 		<relativePath>../parent</relativePath>
 	</parent>
 
     <artifactId>org.apache.stanbol.contenthub.test</artifactId>
-    <version>0.9.0-incubating-SNAPSHOT</version>
+    <version>0.9.0-incubating</version>
     <packaging>bundle</packaging>
 
     <name>Apache Sling Sample Server-Side Tests</name>
