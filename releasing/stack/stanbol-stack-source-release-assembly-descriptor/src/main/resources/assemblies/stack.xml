@@ -42,7 +42,10 @@
         <exclude>enhancer/stores/**</exclude>
 
         <!-- demos have their own release cycle -->
-        <exclude>demos/**</exclude>
+        <exclude>demos/assap/**</exclude>
+        <exclude>demos/crawler/**</exclude>
+        <exclude>demos/integritycheck/**</exclude>
+        <exclude>demos/semanticbookmarks/**</exclude>
 
         <!-- exclude components of KReS profile -->
         <exclude>ontologymanager/store/**</exclude>
@@ -92,6 +95,13 @@
     <fileSet>
       <directory>${project.build.directory}/maven-shared-archive-resources/META-INF</directory>
       <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>*/**</include>
+      </includes>
+      <excludes>
+        <exclude>NOTICE</exclude>
+        <exclude>LICENSE</exclude>
+      </excludes>
     </fileSet>
   </fileSets>
 </component>

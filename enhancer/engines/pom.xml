@@ -45,7 +45,6 @@
     <module>opennlp-ner</module>
     <module>langid</module>
     <module>topic</module>
-    <module>metaxa</module>
     <module>tika</module>
     <module>geonames</module>
     <module>entitytagging</module>

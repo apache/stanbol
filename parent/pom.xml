@@ -1902,6 +1902,9 @@
                 <goals>
                   <goal>add-third-party</goal>
                 </goals>
+                <configuration>
+                  <failIfWarning>false</failIfWarning>
+                </configuration>              
               </execution>
             </executions>
           </plugin>          

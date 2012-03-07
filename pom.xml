@@ -74,7 +74,7 @@
     <module>entityhub</module>
     <module>factstore</module>
 	
-	<module>ontologymanager/ontonet</module>
+  	<module>ontologymanager/ontonet</module>
     <module>ontologymanager/registry</module>
     <module>ontologymanager/web</module>
     <module>ontologymanager/bundlelist</module>
@@ -242,22 +242,6 @@
       </modules>      
     </profile>    
     
-    <!-- One day the KReS profile will disappear -->    
-    <profile>
-      <id>kres</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>ontologymanager/store</module>
-        <module>reasoners</module>
-        <module>reengineer</module>
-        <!--
-        <module>explanation</module>
-        -->
-        <module>launchers/kres</module>
-      </modules>
-    </profile>
   </profiles>
 
 </project>
