@@ -787,7 +787,7 @@ VIE.Util = {
 	                                return this["@value"];
 	                            },
 	                            "@value": rdfQueryLiteral.value.replace(/^"|"$/g, ''),
-	                            "@lang": rdfQueryLiteral.lang
+	                            "@language": rdfQueryLiteral.lang
 	                        };
 	                        return literal;
 	                    }
@@ -1100,6 +1100,13 @@ VIE.Util = {
     }
 };
 
+//     VIE - Vienna IKS Editables
+//     (c) 2011 Henri Bergius, IKS Consortium
+//     (c) 2011 Sebastian Germesin, IKS Consortium
+//     (c) 2011 Szaby Grünwald, IKS Consortium
+//     VIE may be freely distributed under the MIT license.
+//     For all details and documentation:
+//     http://viejs.org/
 VIE.prototype.Entity = function(attrs, opts) {
 
     attrs = (attrs)? attrs : {};
@@ -1479,6 +1486,13 @@ VIE.prototype.Entity = function(attrs, opts) {
 
     return new Model(attrs, opts);
 };
+//     VIE - Vienna IKS Editables
+//     (c) 2011 Henri Bergius, IKS Consortium
+//     (c) 2011 Sebastian Germesin, IKS Consortium
+//     (c) 2011 Szaby Grünwald, IKS Consortium
+//     VIE may be freely distributed under the MIT license.
+//     For all details and documentation:
+//     http://viejs.org/
 VIE.prototype.Collection = Backbone.Collection.extend({
     model: VIE.prototype.Entity,
     
@@ -2921,6 +2935,14 @@ VIE.prototype.Namespaces.prototype.uri = function (curie) {
 //     namespaces.isUri(uri);   // --> true
 //     namespaces.isUri(curie); // --> false
 VIE.prototype.Namespaces.prototype.isUri = VIE.Util.isUri;
+//     VIE - Vienna IKS Editables
+//     (c) 2011 Henri Bergius, IKS Consortium
+//     (c) 2011 Sebastian Germesin, IKS Consortium
+//     (c) 2011 Szaby Grünwald, IKS Consortium
+//     VIE may be freely distributed under the MIT license.
+//     For all details and documentation:
+//     http://viejs.org/
+
 // Classic VIE API bindings to new VIE
 VIE.prototype.ClassicRDFa = function(vie) {
     this.vie = vie;
