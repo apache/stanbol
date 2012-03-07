@@ -43,6 +43,7 @@ import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedIndexState;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -77,8 +78,9 @@ public class ManagedIndexMetadata {
     //    new HashMap<String,int[]>());
     
     private final String serverName;
-    private final ComponentContext context;
+    //private final ComponentContext context;
     private final String pid;
+    private final File configDir;
 
     private Map<ManagedIndexState,Map<String,IndexMetadata>> managed = new EnumMap<ManagedIndexState,Map<String,IndexMetadata>>(ManagedIndexState.class);
 //    private final Map<String,IndexMetadata> uninitialised = new HashMap<String,IndexMetadata>();
@@ -94,11 +96,22 @@ public class ManagedIndexMetadata {
     private ManagedIndexMetadata(String serverName, String pid,ComponentContext context){
         this.serverName = serverName;
         this.pid = pid;
-        this.context = context;
+        //this.context = context;
         //init the Maps for manageing Indexes with the different states
         for(ManagedIndexState state : ManagedIndexState.values()){
             managed.put(state, new HashMap<String,IndexMetadata>());
         }
+        File dir = null;
+        if(context != null){
+            dir = context.getBundleContext().getDataFile(DEFAULT_INDEX_CONFIG_DIR+'/'+pid);
+            //dir might be null if the OSGI environment is missing file system support
+        }
+        if (dir == null) { //outside OSGI or OSGI has no file system support
+            // use config directory relative to the the Managed Solr Directory
+            dir = new File(DEFAULT_INDEX_CONFIG_DIR,pid).getAbsoluteFile();
+        }
+        log.info("SolrYard Config Directory: "+dir);
+        this.configDir = dir;
     }
     /**
      * Constructor to be used outside of an OSGI context
@@ -114,6 +127,8 @@ public class ManagedIndexMetadata {
      * The constructor to be used inside an OSGI environment. 
      * The {@link #serverName} is parsed form the {@link SolrConstants#PROPERTY_SERVER_NAME}.
      * @param context the context of the {@link ManagedSolrServer} implementation
+     * @throws IllegalStateException if the OSGI environment does not have
+     * FileSystem support
      */
     public ManagedIndexMetadata(ComponentContext context) {
         this((String)context.getProperties().get(PROPERTY_SERVER_NAME),
@@ -394,29 +409,20 @@ public class ManagedIndexMetadata {
      * @return the directory
      */
     private File getIndexConfigDirectory(boolean init) {
-        File uninstalledConfigDir;
-        if (context == null) { //outside OSGI
-            // use config directory relative to the the Managed Solr Directory
-            uninstalledConfigDir = new File(DEFAULT_INDEX_CONFIG_DIR,pid).getAbsoluteFile();
-        } else { //whithin an OSGI environment
-            //use the DataFile directory of the bundle
-            uninstalledConfigDir = context.getBundleContext().getDataFile(DEFAULT_INDEX_CONFIG_DIR+'/'+pid);
-        }
-        log.info("SolrYard Config Directory: "+uninstalledConfigDir);
-        if (!uninstalledConfigDir.exists()) {
+        if (!configDir.exists()) {
             if(init) {
-                if (!uninstalledConfigDir.mkdirs()) {
+                if (!configDir.mkdirs()) {
                     throw new IllegalStateException("Unable to create Directory "
                                                     + DEFAULT_INDEX_CONFIG_DIR
                                                     + "for storing information of uninitialised Solr Indexes");
                 }
             }
-        } else if (!uninstalledConfigDir.isDirectory()) {
+        } else if (!configDir.isDirectory()) {
             throw new IllegalStateException("The directory " + DEFAULT_INDEX_CONFIG_DIR
                                             + "for storing uninitialised Solr Indexes Information exists"
                                             + "but is not a directory!");
         } // else -> it exists and is a dir -> nothing todo
-        return uninstalledConfigDir;
+        return configDir;
     }
 
     /**
