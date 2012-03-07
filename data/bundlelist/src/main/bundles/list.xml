@@ -21,26 +21,26 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.1-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.1-incubating</version>
     </bundle>
   </startLevel>
     <startLevel level="20">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.registries.default</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.1-incubating</version>
     </bundle>
   </startLevel>
   <startLevel level="30">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-      <version>1.0.3-incubating-SNAPSHOT</version>
+      <version>1.0.3-incubating</version>
     </bundle>
   </startLevel>
 </bundles>  

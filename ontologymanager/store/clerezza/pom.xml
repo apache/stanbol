@@ -24,12 +24,13 @@
 		<version>0.9.0-incubating</version>
 		<relativePath>../parent</relativePath>
 	</parent>
+
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.ontologymanager.store.clerezza</artifactId>
 	<packaging>bundle</packaging>
-	<name>Apache Stanbol Ontology Manager Store - Clerezza Adaptor </name>
 
+	<name>Apache Stanbol Ontology Manager Store - Clerezza Adaptor</name>
 
 	<build>
 		<plugins>
@@ -70,27 +71,23 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
-			<version>4.1.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- specific deps for this project -->
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<version>4.1.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>jetty</groupId>
 			<artifactId>org.mortbay.jetty</artifactId>
-			<version>5.1.10</version>
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -102,21 +99,18 @@
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.jena.facade</artifactId>
-			<version>0.12-incubating-SNAPSHOT</version>
 			<type>bundle</type>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.core</artifactId>
-			<version>0.12-incubating-SNAPSHOT</version>
 			<type>bundle</type>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>jena</artifactId>
-			<version>2.6.3</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -125,9 +119,5 @@
 			<artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId>
 		</dependency>
 	</dependencies>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jersey-version>1.1.5.1</jersey-version>
-	</properties>
 	
 </project>
