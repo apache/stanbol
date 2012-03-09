@@ -19,24 +19,33 @@ package org.apache.stanbol.commons.installer.provider.bundle.impl;
 import static org.apache.stanbol.commons.installer.provider.bundle.BundleInstallerConstants.BUNDLE_INSTALLER_HEADER;
 import static org.apache.stanbol.commons.installer.provider.bundle.BundleInstallerConstants.PROVIDER_SCHEME;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.sling.installer.api.InstallableResource;
 import org.apache.sling.installer.api.OsgiInstaller;
 import org.apache.sling.installer.api.tasks.ResourceTransformer;
 import org.apache.stanbol.commons.installer.provider.bundle.BundleInstallerConstants;
+import org.osgi.application.Framework;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.SynchronousBundleListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +105,10 @@ public class BundleInstaller implements BundleListener {
      */
     private final OsgiInstaller installer;
     private final BundleContext context;
-
+    /**
+     * The directory used to keep the IDs of registered resources
+     */
+    File configDir;
     /**
      * contains all active bundles as key and the path to the config directory
      * as value. A <code>null</code> value indicates that this bundle needs not
@@ -113,11 +125,35 @@ public class BundleInstaller implements BundleListener {
         }
         this.installer = installer;
         this.context = context;
+        this.configDir = context.getDataFile(".config");
+        if(configDir.exists()) {
+            if(!configDir.isDirectory()){
+                throw new IllegalStateException("The config directory '" 
+                    + configDir.getAbsolutePath()+"' exists but is NOT a directory!");
+            }
+        } else {
+            if(!configDir.mkdirs()){
+                throw new IllegalStateException("Unable to create the config directory '" 
+                        + configDir.getAbsolutePath()+"'!");
+            }
+        }
+        //start with the assumption that the framework is active
         this.context.addBundleListener(this);
         //register the already active bundles
         registerActive(this.context);
+        
     }
-
+    /**
+     * Checks if the state is not {@link BundleEvent#STOPPED}, 
+     * {@link BundleEvent#STOPPING} or {@link BundleEvent#UNINSTALLED}
+     * @return the state
+     */
+    private boolean isFrameworkActive(){
+        return (context.getBundle(0).getState() & 
+            (BundleEvent.STOPPED | BundleEvent.STOPPING | BundleEvent.UNINSTALLED))
+            == 0;
+    }
+    
     /**
      * Uses the parsed bundle context to register the already active (and currently
      * starting) bundles.
@@ -132,22 +168,24 @@ public class BundleInstaller implements BundleListener {
 
     @Override
     public void bundleChanged(BundleEvent event) {
+        log.debug("bundleChanged(bundle:{}|state:{})",event.getBundle().getSymbolicName(),event.getType());
+        Bundle source = event.getBundle();
+        //if(event instanceof Framework)
         switch (event.getType()) {
             case BundleEvent.STARTED:
-                register(event.getBundle());
+                register(source);
                 break;
             //use uninstalled instead of stopped so that unregister is not called
             //when the OSGI environment closes
-            case BundleEvent.UNINSTALLED://STOPPED:
-                unregister(event.getBundle());
+            case BundleEvent.STOPPED:
+                unregister(source);
                 break;
 
             case BundleEvent.UPDATED:
-                unregister(event.getBundle());
-                register(event.getBundle());
+                unregister(source);
+                register(source);
         }
     }
-
     /**
      * Registers the bundle to the {@link #activated} map.
      *
@@ -155,12 +193,18 @@ public class BundleInstaller implements BundleListener {
      */
     @SuppressWarnings("unchecked")
     private void register(Bundle bundle) {
+        log.debug("register request for Bundle {}",bundle.getSymbolicName());
         synchronized (activated) {
+            if(!isFrameworkActive()){
+                log.debug("ignore because Framework is shutting down!");
+                return;
+            }
             if (activated.containsKey(bundle)) {
+                log.debug("  .. already registered ");
                 return;
             }
         }
-        log.debug("Register Bundle {} with BundleInstaller",bundle.getSymbolicName());
+        log.debug("  ... registering");
         Dictionary<String, Object> headers = (Dictionary<String, Object>) bundle.getHeaders();
         //        log.info("With Headers:");
         //        for(Enumeration<String> keys = headers.keys();keys.hasMoreElements();){
@@ -184,6 +228,13 @@ public class BundleInstaller implements BundleListener {
                         }
                     }
                 }
+                try {
+                    storeConfig(bundle, updated);
+                } catch (IOException e) {
+                    throw new IllegalStateException("Unablt to save the IDs of" 
+                    		+ "the resources installed for bundle '"
+                            + bundle.getSymbolicName() + "'!",e);
+                }
                 installer.updateResources(PROVIDER_SCHEME, updated.toArray(new InstallableResource[updated.size()]), new String[]{});
             } else {
                 log.warn(" ... no Entries found in path '{}' configured for Bundle '{}' with Manifest header field '{}'!",
@@ -193,7 +244,55 @@ public class BundleInstaller implements BundleListener {
             log.debug("  ... no Configuration to process");
         }
     }
-
+    /**
+     * Used to stores/overrides the ids of installed resource for a bundle.
+     * @param bundle
+     * @param resources
+     * @throws IOException
+     */
+    private void storeConfig(Bundle bundle,Collection<InstallableResource> resources) throws IOException{
+        synchronized (configDir) {
+            File config = new File(configDir,bundle.getBundleId()+".resources");
+            if(config.exists()){
+                config.delete();
+            }
+            FileOutputStream out = new FileOutputStream(config);
+            List<String> ids = new ArrayList<String>(resources.size());
+            for(InstallableResource resource : resources){
+                ids.add(resource.getId());
+            }
+            try {
+                IOUtils.writeLines(ids, null, out, "UTF-8");
+            } finally {
+                IOUtils.closeQuietly(out);
+            }
+        }
+    }
+    /**
+     * Reads the installed resources for the parsed bundle and deletes the
+     * configuration afterwards.
+     * @param bundle the bundle
+     * @return the list of resources
+     * @throws IOException if the config file was not found or on any other
+     * exception while reading the file
+     */
+    private Collection<String> consumeConfig(Bundle bundle) throws IOException{
+        synchronized (configDir) {
+            File config = new File(configDir,bundle.getBundleId()+".resources");
+            if(!config.exists()){
+                throw new IOException("Configuration File '"+ config.getAbsolutePath()
+                    + "' not found!");
+            }
+            FileInputStream in = new FileInputStream(config);
+            try {
+                return IOUtils.readLines(in, "UTF-8");
+            } finally {
+                IOUtils.closeQuietly(in);
+                config.delete();
+            }
+        }
+    }
+    
     /**
      * Creates an {@link InstallableResource} for {@link URL}s of files within
      * the parsed bundle.
@@ -242,30 +341,42 @@ public class BundleInstaller implements BundleListener {
      */
     private String getInstallableResourceId(String path, URL bundleResource) {
         String id = bundleResource.toString();
-        String relPath = id.substring(id.lastIndexOf(path) + path.length(), id.length());
+        String namespace; //do not search the path within the file name!!
+        int nsIndex = Math.max(id.lastIndexOf(':'), id.lastIndexOf(File.separatorChar));
+        if(nsIndex > 0){
+            namespace = id.substring(0,Math.min(nsIndex+1,id.length()));
+        } else {
+            namespace = id;
+        }
+        String relPath = id.substring(namespace.lastIndexOf(path) + path.length(), id.length());
         return relPath;
     }
 
-    @SuppressWarnings("unchecked")
     private void unregister(Bundle bundle) {
+        log.debug("unregister request for Bundle {}",bundle.getSymbolicName());
         String path;
         synchronized (activated) {
+            if(!isFrameworkActive()){
+                log.debug("ignore because Framework is shutting down!");
+                return;
+            }
             if (!activated.containsKey(bundle)) {
+                log.debug("  .. not registered ");
                 return;
             }
             path = activated.remove(bundle);
         }
         if (path != null) {
-            log.info(" ... remove configurations within path {}", path);
-            ArrayList<String> removedResources = new ArrayList<String>();
-            for (Enumeration<URL> resources = (Enumeration<URL>) bundle.findEntries(path, null, true); resources.hasMoreElements();) {
-                String installableResourceId = getInstallableResourceId(path, resources.nextElement());
-                if (installableResourceId != null) {
-                    log.info("  ... remove Installable Resource {}",installableResourceId);
-                    removedResources.add(installableResourceId);
-                }
+            log.info(" ... remove configurations for Bundle {}", bundle.getSymbolicName());
+            Collection<String> removedResources;
+            try {
+                removedResources = consumeConfig(bundle);
+                installer.updateResources(PROVIDER_SCHEME, null, removedResources.toArray(new String[removedResources.size()]));
+            } catch (IOException e) {
+                log.warn("Unable to remove installed Resources for Bundle '" +
+                		bundle.getSymbolicName()+ "' because an Exeption while" +
+                				"reading the installed ID from the config file",e);
             }
-            installer.updateResources(PROVIDER_SCHEME, null, removedResources.toArray(new String[removedResources.size()]));
         } else {
             log.debug("  ... no Configuration to process");
         }
