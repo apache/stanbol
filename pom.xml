@@ -52,6 +52,7 @@
     <module>solr/managed</module>
     <module>solr/web</module>
     <module>solr/install</module>
+    <module>solr/defaults</module>
     <module>owl</module>
     <module>indexedgraph</module>
     <module>ldpath/clerezza</module>
