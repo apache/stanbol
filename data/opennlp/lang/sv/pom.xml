@@ -27,7 +27,7 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.data.opennlp.lang.se</artifactId>
+  <artifactId>org.apache.stanbol.data.opennlp.lang.sv</artifactId>
   <version>1.0.1-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
@@ -119,6 +119,15 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes><!-- exclude OpenNLP model files -->
+              <exclude>**/*.bin</exclude>
+          </excludes>
+        </configuration>
       </plugin>
     </plugins>
   </build>
