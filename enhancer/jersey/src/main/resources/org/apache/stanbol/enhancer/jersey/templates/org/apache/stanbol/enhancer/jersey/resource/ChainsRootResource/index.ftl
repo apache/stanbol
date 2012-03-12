@@ -50,10 +50,49 @@ Configuration Tab</a> of the OSGi console.</p>
 </div>
 
 <div class="panel" id="restapi" style="display: none;">
-<h3>Enhancement Chains RESTful API</h3>
+<h3>Enhancement Chains Metadata</h3>
 
 <p>This stateless interface allows the caller to query all available
 Enhancement Chains</p>
+<p> GET requests with an accept header of any supported RDF serialisation 
+such as
+<code><pre>
+    curl -H "Accept: application/rdf+xml" ${it.publicBaseUri}enhancer/chain
+</pre></code>
+will return information about the available enhancement chains.</p>
+<h4>Example:</h4>
+<p><a href="#" onclick="getChainConfig(); return false;">clicking here</a> to
+get the metadata for the currently active enhancement chains</p>
+<script language="javascript">
+  function getChainConfig() {
+     var base = window.location.href.replace(/\/$/, "");
+     
+     $("#chainMetadataResult").show();     
+     
+     // submit the form query using Ajax
+     $.ajax({
+       type: "GET",
+       url: base,
+       data: "",
+       dataType: "text",
+       beforeSend: function(req) {
+         req.setRequestHeader("Accept", "application/rdf+xml");
+       },
+       cache: false,
+       success: function(result) {
+         $("#chainMetadata").text(result);
+       },
+       error: function(result) {
+         $("#chainMetadata").text('Error while loading chain config.');
+       }
+     });
+   }
+</script>
+<div id="chainMetadataResult" style="display: none">
+<p><a href="#" onclick="$('#chainMetadataResult').hide(); return false;">Hide results</a>
+<pre id="chainMetadata">... waiting for results ...</pre>
+</div>
+
 
 </div>
 
