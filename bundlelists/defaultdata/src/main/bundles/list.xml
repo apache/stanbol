@@ -18,7 +18,7 @@
 <bundles>
   <!-- The default data expected by the default configuration of Stanbol -->
   <startLevel level="19">
-    <bundle>
+    <bundle> <!-- The English language and NER models are included as default -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
       <version>1.0.1-incubating-SNAPSHOT</version>
@@ -30,14 +30,19 @@
     </bundle>
   </startLevel>
     <startLevel level="20">
-    <bundle>
+    <bundle> <!-- Default ontology registries used by ontonet -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.registries.default</artifactId>
       <version>1.0.1-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
   <startLevel level="30">
-    <bundle>
+    <bundle> <!-- The Apache Stanbol default configuration -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.defaultconfig</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle> <!-- dbpedia is includes as default data set -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
       <version>1.0.3-incubating-SNAPSHOT</version>

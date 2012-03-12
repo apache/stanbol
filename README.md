@@ -17,12 +17,21 @@
 
 # Data files and configurations for Stanbol
 
-This source repository holds artifacts that are used to load 
+## Introduction
 
-* OSGI configurations and/or
-* data files
+This source repository holds artifacts that are used to provide 
 
-to a Stanbol Environment.
+* data files (NER models, Entity data ...)
+* configurations of stanbol components or well known datasets, spefic domains
+* bundlelists as used by the Apache Sling to easily add multiple bunldes to
+    launchers.
+
+This also contains the default configuration used with the default Stanbol
+Launchers.
+Generally this is a good place for users that want to build their own launcher
+to look for examples.
+
+## Management of Data Files 
 
 To avoid loading subversion repository with large binary files this artifacts
 are typically not included but need to be build/precomputed or downloaded
