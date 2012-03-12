@@ -67,6 +67,7 @@
     <module>enhancer/jersey</module>
     <module>enhancer/ldpath</module>
     <module>enhancer/benchmark</module>
+    <module>enhancer/defaults</module>
     <module>enhancer/bundlelist</module>
 
     <module>cmsadapter</module>

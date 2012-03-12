@@ -20,13 +20,6 @@
 	-->
 <bundles>
   <!-- General-purpose libraries -->
-  <startLevel level="10">
-        <bundle> <!-- used by langid -->
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-core</artifactId>
-            <version>0.9</version>
-        </bundle>
-  </startLevel>
 
   <!-- *********************************************************************
           start level 20 TO 24 reserved for Stanbol Framework

@@ -55,6 +55,7 @@
     <module>chain/graph</module>
     <module>chain/list</module>
     <module>chain/weighted</module>
+    <module>defaults</module>
     <module>bundlelist</module>
   </modules>
 </project>

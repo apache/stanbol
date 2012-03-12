@@ -1,7 +1,0 @@
-stanbol.enhancer.engine.name="seo_refactoring"
-org.apache.stanbol.enhancer.engines.refactor.scope="seo"
-org.apache.stanbol.enhancer.engines.refactor.recipe.id="google_rich_snippet_rules"
-org.apache.stanbol.enhancer.engines.refactor.recipe.location=""
-org.apache.stanbol.enhancer.engines.refactor.scope.core.ontology=["http://ontologydesignpatterns.org/ont/iks/kres/dbpedia_demo.owl"]
-org.apache.stanbol.enhancer.engines.refactor.append.graphs=B"true"
-org.apache.stanbol.enhancer.engines.refactor.entityhub=B"true"

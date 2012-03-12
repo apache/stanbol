@@ -72,7 +72,7 @@ public class EnhancerTestBase extends StanbolTestBase {
                 //"metaxa","MetaxaEngine", deactivated see STANBOL-510
                 "langid","LangIdEnhancementEngine",
                 "ner","NamedEntityExtractionEnhancementEngine",
-                "entityhubLinking","NamedEntityTaggingEngine",
+                "entityhubExtraction","NamedEntityExtractionEnhancementEngine",
                 "dbpediaLinking","NamedEntityTaggingEngine",
                 "tika","TikaEngine"                    
             };

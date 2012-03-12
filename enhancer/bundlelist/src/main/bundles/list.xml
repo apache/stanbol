@@ -20,12 +20,19 @@
   <!-- ********************************************************************* 
     start level 10 TO 19 reserved for required libraries (internal and external) 
     ********************************************************************* -->
-  <startLevel level="17">
+
+  <!-- Apache Tika -->
+  <!-- Note: that Tika only inits the Parser correctly if the start level of
+       tika-core is lower than tika-bundle
+   -->  
+  <startLevel level="16">
     <bundle> <!-- Apache Tika core (required by the LangId and TikaEngine) -->
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-core</artifactId>
         <version>1.0</version>
     </bundle>
+  </startLevel>
+  <startLevel level="17">
     <bundle> <!-- Apache Tika bundle (required by the TikaEngine) -->
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-bundle</artifactId>
@@ -173,6 +180,16 @@
     <bundle> <!-- http://www.geonames.org/ -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+  
+  <!-- Default Configuration for the Stanbol Enhancer -->
+  
+  <startLevel level="26">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.defaults</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
