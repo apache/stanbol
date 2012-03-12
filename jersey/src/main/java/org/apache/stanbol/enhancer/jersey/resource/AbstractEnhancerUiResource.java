@@ -133,8 +133,10 @@ public abstract class AbstractEnhancerUiResource extends AbstractEnhancerResourc
         return engineManager.isEngine(name);
     }
 
-    public URI getServiceUrl() {
-        return uriInfo.getAbsolutePath();
+    public String getServiceUrl() {
+        String uri = uriInfo.getAbsolutePath().toString();
+        return uri.charAt(uri.length()-1) == '/' ?
+            uri.substring(0, uri.length()-1) : uri;
     }
 
     /**
