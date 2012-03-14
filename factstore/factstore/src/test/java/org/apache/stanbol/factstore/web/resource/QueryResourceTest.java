@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.stanbol.commons.testing.http.BundleContextMock;
 import org.apache.stanbol.commons.testing.http.ServletContextMock;
 import org.apache.stanbol.factstore.FactStoreMock;
+import org.apache.stanbol.factstore.HttpHeadersMock;
 import org.apache.stanbol.factstore.api.FactStore;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +49,7 @@ public class QueryResourceTest {
         
         String queryString = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\"},\"select\":[\"person\"],\"from\":\"iks:employeeOf\",\"where\":[{\"=\":{\"organization\":{\"@iri\":\"http://upb.de\"}}}]}";
         
-        Response response = qr.query(queryString);
+        Response response = qr.query(queryString, new HttpHeadersMock());
         assertTrue(response.getStatus() == Status.OK.getStatusCode());
     }
 }
