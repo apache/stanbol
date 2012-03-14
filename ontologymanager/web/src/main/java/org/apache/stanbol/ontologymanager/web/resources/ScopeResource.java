@@ -17,6 +17,7 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
@@ -26,11 +27,13 @@ import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -125,7 +128,7 @@ public class ScopeResource extends BaseStanbolResource {
     }
 
     @GET
-    @Produces(value = {APPLICATION_JSON})
+    @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON})
     public Response asOntologyGraph(@PathParam("scopeid") String scopeid,
                                     @DefaultValue("false") @QueryParam("merge") boolean merge,
                                     @Context HttpHeaders headers) {
@@ -137,15 +140,27 @@ public class ScopeResource extends BaseStanbolResource {
     }
 
     @GET
-    @Produces(value = {RDF_XML, OWL_XML, TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON})
+    @Produces(value = {RDF_XML, TURTLE, X_TURTLE})
+    public Response asOntologyMixed(@PathParam("scopeid") String scopeid,
+                                    @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                    @Context HttpHeaders headers) {
+        if (scope == null) return Response.status(NOT_FOUND).build();
+        // Export smaller graphs to OWLOntology due to the more human-readable rendering.
+        ResponseBuilder rb;
+        if (merge) rb = Response.ok(scope.export(Graph.class, merge));
+        else rb = Response.ok(scope.export(OWLOntology.class, merge));
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    @GET
+    @Produces(value = {MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
     public Response asOntologyOWL(@PathParam("scopeid") String scopeid,
                                   @DefaultValue("false") @QueryParam("merge") boolean merge,
                                   @Context HttpHeaders headers) {
         if (scope == null) return Response.status(NOT_FOUND).build();
         // Export to OWLOntology due to the more human-readable rendering.
-        ResponseBuilder rb;
-        if (merge) rb = Response.ok(scope.export(Graph.class, merge));
-        else rb = Response.ok(scope.export(OWLOntology.class, merge));
+        ResponseBuilder rb = Response.ok(scope.export(OWLOntology.class, merge));
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -184,13 +199,20 @@ public class ScopeResource extends BaseStanbolResource {
      *         other reason, {@link Status#INTERNAL_SERVER_ERROR} if some other error occurs.
      */
     @POST
-    @Consumes(value = {RDF_XML, OWL_XML, N_TRIPLE, TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON})
+    @Consumes(value = {RDF_XML, OWL_XML, N_TRIPLE, N3, TURTLE, X_TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL,
+                       RDF_JSON})
     public Response manageOntology(InputStream content, @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
         if (scope == null) return Response.status(NOT_FOUND).build();
         try {
             scope.getCustomSpace().addOntology(
-                new GraphContentInputSource(content, headers.getMediaType().toString())
+            /*
+             * For the time being, REST services operate in-memory (i.e. no TcProvider is supplied to the
+             * input source). This means that only the final processed graph is stored.
+             * 
+             * TODO : we might find a reason to change that in the future.
+             */
+            new GraphContentInputSource(content, headers.getMediaType().toString())
             // new OntologyContentInputSource(content)
                     );
         } catch (UnmodifiableOntologyCollectorException e) {

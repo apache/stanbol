@@ -17,6 +17,7 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
@@ -25,10 +26,13 @@ import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
 import java.io.InputStream;
 
@@ -55,7 +59,6 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.IrremovableOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorModificationException;
@@ -90,8 +93,7 @@ public class SessionResource extends BaseStanbolResource {
 
     protected Session session;
 
-    public SessionResource(@PathParam(value = "id") String sessionId,
-                               @Context ServletContext servletContext) {
+    public SessionResource(@PathParam(value = "id") String sessionId, @Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.sesMgr = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
             servletContext);
@@ -100,12 +102,11 @@ public class SessionResource extends BaseStanbolResource {
     }
 
     @GET
-    @Produces(value = {APPLICATION_JSON})
+    @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON})
     public Response asOntologyGraph(@PathParam("scopeid") String scopeid,
                                     @DefaultValue("false") @QueryParam("merge") boolean merge,
                                     @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
-
         // Export to Clerezza Graph, which can be rendered as JSON-LD.
         ResponseBuilder rb = Response.ok(session.export(Graph.class, merge));
         addCORSOrigin(servletContext, rb, headers);
@@ -113,15 +114,27 @@ public class SessionResource extends BaseStanbolResource {
     }
 
     @GET
-    @Produces(value = {RDF_XML, OWL_XML, TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON})
+    @Produces(value = {RDF_XML, TURTLE, X_TURTLE})
+    public Response asOntologyMixed(@PathParam("scopeid") String scopeid,
+                                    @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                    @Context HttpHeaders headers) {
+        if (session == null) return Response.status(NOT_FOUND).build();
+        ResponseBuilder rb;
+        // Export smaller graphs to OWLOntology due to the more human-readable rendering.
+        if (merge) rb = Response.ok(session.export(Graph.class, merge));
+        else rb = Response.ok(session.export(OWLOntology.class, merge));
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    @GET
+    @Produces(value = {MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
     public Response asOntologyOWL(@PathParam("scopeid") String scopeid,
                                   @DefaultValue("false") @QueryParam("merge") boolean merge,
                                   @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
-        // Export to OWLOntology due to the more human-readable rendering.
-        ResponseBuilder rb;
-        if (merge) rb = Response.ok(session.export(Graph.class, merge));
-        else rb = Response.ok(session.export(OWLOntology.class, merge));
+        // Export to OWLOntology, the only to support OWL formats.
+        ResponseBuilder rb = Response.ok(session.export(OWLOntology.class, merge));
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -189,16 +202,77 @@ public class SessionResource extends BaseStanbolResource {
      */
     @GET
     @Path(value = "/{ontologyId:.+}")
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
-    public Response getManagedOntology(@PathParam("id") String sessionId,
-                                       @PathParam("ontologyId") String ontologyId,
-                                       @DefaultValue("false") @QueryParam("merge") boolean merge,
-                                       @Context UriInfo uriInfo,
-                                       @Context HttpHeaders headers) {
+    @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON})
+    public Response getManagedOntologyGraph(@PathParam("id") String sessionId,
+                                            @PathParam("ontologyId") String ontologyId,
+                                            @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                            @Context UriInfo uriInfo,
+                                            @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
         Graph o = session.getOntology(IRI.create(ontologyId), Graph.class, merge);
-        // OWLOntology o = session.getOntology(IRI.create(ontologyId), merge);
+        if (o == null) return Response.status(NOT_FOUND).build();
+        ResponseBuilder rb = Response.ok(o);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    /**
+     * Gets the ontology with the given identifier in its version managed by the session.
+     * 
+     * @param sessionId
+     *            the session identifier.
+     * @param ontologyId
+     *            the ontology identifier.
+     * @param uriInfo
+     * @param headers
+     * @return the requested managed ontology, or {@link Status#NOT_FOUND} if either the sessionn does not
+     *         exist, or the if the ontology either does not exist or is not managed.
+     */
+    @GET
+    @Path(value = "/{ontologyId:.+}")
+    @Produces(value = {RDF_XML, TURTLE, X_TURTLE})
+    public Response getManagedOntologyMixed(@PathParam("id") String sessionId,
+                                            @PathParam("ontologyId") String ontologyId,
+                                            @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                            @Context UriInfo uriInfo,
+                                            @Context HttpHeaders headers) {
+        ResponseBuilder rb;
+        if (session == null) rb = Response.status(NOT_FOUND);
+        else if (merge) {
+            Graph g = session.getOntology(IRI.create(ontologyId), Graph.class, merge);
+            if (g == null) rb = Response.status(NOT_FOUND);
+            else rb = Response.ok(g);
+        } else {
+            OWLOntology o = session.getOntology(IRI.create(ontologyId), OWLOntology.class, merge);
+            if (o == null) rb = Response.status(NOT_FOUND);
+            else rb = Response.ok(o);
+        }
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    /**
+     * Gets the ontology with the given identifier in its version managed by the session.
+     * 
+     * @param sessionId
+     *            the session identifier.
+     * @param ontologyId
+     *            the ontology identifier.
+     * @param uriInfo
+     * @param headers
+     * @return the requested managed ontology, or {@link Status#NOT_FOUND} if either the sessionn does not
+     *         exist, or the if the ontology either does not exist or is not managed.
+     */
+    @GET
+    @Path(value = "/{ontologyId:.+}")
+    @Produces(value = {MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
+    public Response getManagedOntologyOWL(@PathParam("id") String sessionId,
+                                          @PathParam("ontologyId") String ontologyId,
+                                          @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                          @Context UriInfo uriInfo,
+                                          @Context HttpHeaders headers) {
+        if (session == null) return Response.status(NOT_FOUND).build();
+        OWLOntology o = session.getOntology(IRI.create(ontologyId), OWLOntology.class, merge);
         if (o == null) return Response.status(NOT_FOUND).build();
         ResponseBuilder rb = Response.ok(o);
         addCORSOrigin(servletContext, rb, headers);
@@ -225,8 +299,8 @@ public class SessionResource extends BaseStanbolResource {
      *         other reason, {@link Status#INTERNAL_SERVER_ERROR} if some other error occurs.
      */
     @POST
-    @Consumes(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON, KRFormat.N3, KRFormat.N_TRIPLE})
+    @Consumes(value = {RDF_XML, OWL_XML, N_TRIPLE, N3, TURTLE, X_TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL,
+                       RDF_JSON})
     public Response manageOntology(InputStream content, @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
         if (session == null) return Response.status(NOT_FOUND).build();

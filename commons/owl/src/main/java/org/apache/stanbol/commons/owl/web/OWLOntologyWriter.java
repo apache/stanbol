@@ -16,6 +16,26 @@
  */
 package org.apache.stanbol.commons.owl.web;
 
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL_TYPE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL_TYPE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N3_TYPE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE_TYPE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML_TYPE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON_TYPE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML_TYPE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE_TYPE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE_TYPE;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
@@ -27,15 +47,16 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
+import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.clerezza.rdf.rdfjson.serializer.RdfJsonSerializingProvider;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
-import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -43,14 +64,15 @@ import org.semanticweb.owlapi.io.OWLFunctionalSyntaxOntologyFormat;
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Provider
-@Produces({KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.MANCHESTER_OWL, KRFormat.FUNCTIONAL_OWL,
-           KRFormat.TURTLE, KRFormat.RDF_JSON})
+@Produces({RDF_XML, OWL_XML, MANCHESTER_OWL, FUNCTIONAL_OWL, TURTLE, X_TURTLE, N3, N_TRIPLE, RDF_JSON,
+           TEXT_PLAIN})
 public class OWLOntologyWriter implements MessageBodyWriter<OWLOntology> {
 
     protected Serializer serializer;
@@ -70,7 +92,6 @@ public class OWLOntologyWriter implements MessageBodyWriter<OWLOntology> {
 
     @Override
     public long getSize(OWLOntology arg0, Class<?> arg1, Type arg2, Annotation[] arg3, MediaType arg4) {
-        // TODO Auto-generated method stub
         return -1;
     }
 
@@ -91,46 +112,46 @@ public class OWLOntologyWriter implements MessageBodyWriter<OWLOntology> {
         Logger log = LoggerFactory.getLogger(getClass());
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
-        log.debug("Rendering ontology " + ontology.getOntologyID() + "to KReS format " + mediaType);
+        log.debug("Rendering ontology " + ontology.getOntologyID() + " to knowledge representation format "
+                  + mediaType);
 
-        if (mediaType.toString().equals(KRFormat.RDF_XML)) {
-            try {
-                manager.saveOntology(ontology, new RDFXMLOntologyFormat(), out);
-            } catch (OWLOntologyStorageException e) {
-                log.error("Failed to store ontology for rendering.", e);
-            }
-        } else if (mediaType.toString().equals(KRFormat.OWL_XML)) {
-            try {
-                manager.saveOntology(ontology, new OWLXMLOntologyFormat(), out);
-            } catch (OWLOntologyStorageException e) {
-                log.error("Failed to store ontology for rendering.", e);
-            }
-        } else if (mediaType.toString().equals(KRFormat.MANCHESTER_OWL)) {
-            try {
-                manager.saveOntology(ontology, new ManchesterOWLSyntaxOntologyFormat(), out);
-            } catch (OWLOntologyStorageException e) {
-                log.error("Failed to store ontology for rendering.", e);
-            }
-        } else if (mediaType.toString().equals(KRFormat.FUNCTIONAL_OWL)) {
-            try {
-                manager.saveOntology(ontology, new OWLFunctionalSyntaxOntologyFormat(), out);
-            } catch (OWLOntologyStorageException e) {
-                log.error("Failed to store ontology for rendering.", e);
-            }
-        } else if (mediaType.toString().equals(KRFormat.TURTLE)) {
-            try {
-                manager.saveOntology(ontology, new TurtleOntologyFormat(), out);
-            } catch (OWLOntologyStorageException e) {
-                log.error("Failed to store ontology for rendering.", e);
-            }
-        } else if (mediaType.toString().equals(KRFormat.RDF_JSON)) {
+        // Native formats first
+        if (RDF_XML_TYPE.equals(mediaType) || OWL_XML_TYPE.equals(mediaType)
+            || MANCHESTER_OWL_TYPE.equals(mediaType) || FUNCTIONAL_OWL_TYPE.equals(mediaType)
+            || TURTLE_TYPE.equals(mediaType) || X_TURTLE_TYPE.equals(mediaType)) {
 
-            TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(ontology);
+            OWLOntologyFormat format = null;
+            if (RDF_XML_TYPE.equals(mediaType)) format = new RDFXMLOntologyFormat();
+            else if (OWL_XML_TYPE.equals(mediaType)) format = new OWLXMLOntologyFormat();
+            else if (MANCHESTER_OWL_TYPE.equals(mediaType)) format = new ManchesterOWLSyntaxOntologyFormat();
+            else if (FUNCTIONAL_OWL_TYPE.equals(mediaType)) format = new OWLFunctionalSyntaxOntologyFormat();
+            else if (TURTLE_TYPE.equals(mediaType) || X_TURTLE_TYPE.equals(mediaType)) format = new TurtleOntologyFormat();
 
-            RdfJsonSerializingProvider provider = new RdfJsonSerializingProvider();
-            provider.serialize(out, mGraph, SupportedFormat.RDF_JSON);
+            if (format != null) try {
+                manager.saveOntology(ontology, format, out);
+            } catch (OWLOntologyStorageException e) {
+                log.error("Failed to store ontology for rendering.", e);
+                throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
+            }
+            else throw new IOException();
 
+        } else {
+            // Non-native formats that require a conversion to Clerezza
+            if (RDF_JSON_TYPE.equals(mediaType) || N3_TYPE.equals(mediaType)
+                || TEXT_PLAIN.equals(mediaType.toString()) || N_TRIPLE_TYPE.equals(mediaType)) {
+                TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(ontology);
+                SerializingProvider serializer = null;
+                if (RDF_JSON_TYPE.equals(mediaType)) serializer = new RdfJsonSerializingProvider();
+                else if (N3_TYPE.equals(mediaType) || N_TRIPLE_TYPE.equals(mediaType)
+                         || TEXT_PLAIN.equals(mediaType.toString())) serializer = new JenaSerializerProvider();
+
+                // text/plain is interpreted as N3.
+                if (serializer != null) serializer.serialize(out, mGraph,
+                    TEXT_PLAIN.equals(mediaType.toString()) ? N3 : mediaType.toString());
+            }
         }
+
+        // JSON_LD not supported until both parser and serializer are stable.
 
         out.flush();
     }

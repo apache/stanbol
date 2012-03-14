@@ -98,13 +98,23 @@ public class KRFormat extends MediaType {
     public static final MediaType RDF_XML_TYPE = new MediaType("application", "rdf+xml");
 
     /**
-     * "application/turtle"
+     * "text/turtle"
      */
-    public static final String TURTLE = "application/turtle";
+    public static final String TURTLE = "text/turtle";
 
     /**
-     * "application/turtle"
+     * "text/turtle"
      */
-    public static final MediaType TURTLE_TYPE = new MediaType("application", "turtle");
+    public static final MediaType TURTLE_TYPE = new MediaType("text", "turtle");
+    
+    /**
+     * "application/x-turtle" (pre-registration MIME type for text/turtle)
+     */
+    public static final String X_TURTLE = "application/x-turtle";
+
+    /**
+     * "application/x-turtle" (pre-registration MIME type for text/turtle)
+     */
+    public static final MediaType X_TURTLE_TYPE = new MediaType("application", "x-turtle");
 
 }

@@ -17,7 +17,18 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +43,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
@@ -77,8 +86,8 @@ public class SessionManagerResource extends BaseStanbolResource {
     }
 
     @GET
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    @Produces(value = {RDF_XML, OWL_XML, TURTLE, X_TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON, N3,
+                       N_TRIPLE, TEXT_PLAIN})
     public Response listSessions(@Context UriInfo uriInfo, @Context HttpHeaders headers) {
         OWLOntologyManager ontMgr = OWLManager.createOWLOntologyManager();
         OWLDataFactory df = ontMgr.getOWLDataFactory();
@@ -95,7 +104,7 @@ public class SessionManagerResource extends BaseStanbolResource {
             }
             ontMgr.applyChanges(changes);
         } catch (OWLOntologyCreationException e) {
-            throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
+            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
         ResponseBuilder rb = Response.ok(o);
         MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
