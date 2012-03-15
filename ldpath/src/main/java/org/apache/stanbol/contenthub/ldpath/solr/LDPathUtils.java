@@ -78,6 +78,7 @@ public class LDPathUtils {
     private static final String SOLR_TEMPLATE_ZIP = SOLR_TEMPLATE_NAME + ".zip";
     private static final String SOLR_TEMPLATE_SCHEMA = SOLR_TEMPLATE_NAME + "/conf/schema-template.xml";
     private static final String SOLR_SCHEMA = "/conf/schema.xml";
+    private static final String SOLR_ALLTEXT_FIELD = "stanbolreserved_text_all";
 
     private static final int BUFFER_SIZE = 8024;
 
@@ -298,7 +299,7 @@ public class LDPathUtils {
      * the program is also set if it is included in {@link LDPathUtils#SOLR_FIELD_OPTIONS}. Another
      * configuration about the fields obtained from the program is {@link LDPathUtils#SOLR_COPY_FIELD_OPTION}.
      * If there is a specified configuration about this field, <b>destination</b> of <b>copyField</b> element
-     * is set accordingly. Otherwise, the destination is set as <b>text_all</b>
+     * is set accordingly. Otherwise, the destination is set as <b>stanbolreserved_text_all</b>
      * 
      * @param program
      *            LDPath program of which fields will be obtained
@@ -371,7 +372,7 @@ public class LDPathUtils {
                 } else {
                     Element copyElement = new Element("copyField");
                     copyElement.addAttribute(new Attribute("source", fieldName));
-                    copyElement.addAttribute(new Attribute("dest", "text_all"));
+                    copyElement.addAttribute(new Attribute("dest", SOLR_ALLTEXT_FIELD));
                     schemaNode.appendChild(copyElement);
                 }
 
