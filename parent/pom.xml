@@ -778,17 +778,10 @@
       </dependency>
       
       <!-- Wordnet -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.stanbol</groupId> -->
-<!--         <artifactId>edu.smu.tspell.jaws</artifactId> -->
-<!--         <version>1.2</version> -->
-<!--       </dependency> -->
       <dependency>
         <groupId>edu.smu.tspell</groupId>
         <artifactId>jaws</artifactId>
         <version>1.2</version>
-        <!-- <type>jar</type>
-        <scope>compile</scope> -->
       </dependency>
       
       <dependency>

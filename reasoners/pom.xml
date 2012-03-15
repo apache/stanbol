@@ -39,19 +39,21 @@
     <module>jena</module>
     <module>test</module>
     <!-- module>hermit</module -->
-    <module>owllink</module>
+    <!-- module>owllink</module -->
     <module>web</module>
     <module>bundlelist</module>
   </modules>
+  
   <profiles>
-  <profile>
-    <id>do-tests</id>
-    <activation>
-      <activeByDefault>false</activeByDefault>
-    </activation>
-    <modules>
-	<module>services-tests</module>
-    </modules>
-  </profile>
-</profiles>
+    <profile>
+      <id>do-tests</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+      	<module>services-tests</module>
+      </modules>
+    </profile>
+  </profiles>
+
 </project>

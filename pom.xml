@@ -75,7 +75,7 @@
     <module>entityhub</module>
     <module>factstore</module>
 	
-	<module>ontologymanager/ontonet</module>
+	  <module>ontologymanager/ontonet</module>
     <module>ontologymanager/registry</module>
     <module>ontologymanager/web</module>
     <module>ontologymanager/bundlelist</module>
@@ -156,6 +156,11 @@
                 <exclude>**/*.sem</exclude>
                 <exclude>**/test/**/*.eml</exclude>
                 <exclude>**/test/**/*.nt</exclude>
+                <exclude>**/test/**/*.html</exclude>
+                <exclude>**/test/**/*.xhtml</exclude>
+                <exclude>**/test/**/*.rdf</exclude>
+                <exclude>**/test/**/*.rtf</exclude>
+                <exclude>**/test/**/*.rules</exclude>
 
                 <!-- approved licenses, see modules' POMs for details -->
                 <exclude>**/src/license/THIRD-PARTY.properties</exclude>
@@ -167,6 +172,7 @@
                 <exclude>contenthub/web/src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jquery-1.4.2.js</exclude>
                 <exclude>factstore/factstore/src/main/resources/org/apache/stanbol/factstore/web/static/scripts/json2.js</exclude>
                 <exclude>ontologymanager/web/src/main/resources/org/apache/stanbol/ontologymanager/web/static/scripts/jquery-1.6.1</exclude>
+                <exclude>reasoners/web/src/main/resources/org/apache/stanbol/reasoners/web/static/jquery/jquery-1.6.1</exclude>
                 <exclude>rules/web/src/main/resources/org/apache/stanbol/rules/web/static/jquery/jquery-1.6.1</exclude>
                 <exclude>enhancer/jersey/src/main/resources/org/apache/stanbol/enhancer/jersey/static/openlayers-2.9/**</exclude>
                 <exclude>commons/owl/**</exclude>
@@ -174,6 +180,7 @@
                 <!-- unstable and not release relevant stuff -->
                 <exclude>PLAYGROUND.txt</exclude>
                 <exclude>conventions/**</exclude>
+                <exclude>contrib/**</exclude>
                 <exclude>enhancer/data/text-examples/**</exclude>
                 <exclude>enhancer/query-rendering/**</exclude>
                 <exclude>enhancer/stores/**</exclude>
@@ -183,9 +190,8 @@
                 <exclude>enhancer/engines/taxonomylinking/**</exclude>
                 <exclude>demos/**</exclude>
                 <exclude>launchers/kres/**</exclude>
-                <!--
-                <exclude>reasoners/**</exclude>
-                -->
+                <exclude>reasoners/hermit/**</exclude>
+                <exclude>reasoners/owllink/**</exclude>
                 <exclude>reengineer/**</exclude>
 
                 <!-- exclude hidden files -->
