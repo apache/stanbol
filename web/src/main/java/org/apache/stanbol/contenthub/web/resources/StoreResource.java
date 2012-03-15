@@ -28,11 +28,13 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
-import java.io.BufferedWriter;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -53,6 +55,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -80,10 +83,9 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.search.featured.util.SolrContentItemConverter;
 import org.apache.stanbol.contenthub.search.solr.SolrSearchImpl;
-import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.ResultantDocument;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.search.solr.SolrSearch;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
@@ -136,7 +138,7 @@ public class StoreResource extends BaseStanbolResource {
 
     private int pageSize = 5;
 
-    private List<ResultantDocument> recentlyEnhanced;
+    private List<DocumentResult> recentlyEnhanced;
 
     private String indexName;
 
@@ -174,6 +176,69 @@ public class StoreResource extends BaseStanbolResource {
         }
     }
 
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
+    @OPTIONS
+    @Path("/content/{uri:.+}")
+    public Response handleCorsPreflightContent(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
+    @OPTIONS
+    @Path("/download/{type}/{uri:.+}")
+    public Response handleCorsPreflightDownload(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
+    @OPTIONS
+    @Path("/metadata/{uri:.+}")
+    public Response handleCorsPreflightMetadata(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
+    @OPTIONS
+    @Path("/raw/{uri:.+}")
+    public Response handleCorsPreflightRaw(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
+    @OPTIONS
+    @Path("/edit/{uri:.+}")
+    public Response handleCorsPreflightEdit(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
+    @OPTIONS
+    @Path("/{uri:.+}")
+    public Response handleCorsPreflightURI(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
+    @OPTIONS
+    @Path("/update")
+    public Response handleCorsPreflightUpdate(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
     /*
      * Methods for retrieving various parts e.g raw content, metadata of content items
      */
@@ -201,7 +266,9 @@ public class StoreResource extends BaseStanbolResource {
             if (mt.toString().startsWith(TEXT_HTML)) {
                 URI pageUri = uriInfo.getBaseUriBuilder().path("/contenthub").path(indexName)
                         .path("store/page").path(contentURI).build();
-                return Response.temporaryRedirect(pageUri).build();
+                ResponseBuilder rb = Response.temporaryRedirect(pageUri);
+                addCORSOrigin(servletContext, rb, headers);
+                return rb.build();
             }
         }
 
@@ -210,12 +277,16 @@ public class StoreResource extends BaseStanbolResource {
             if (RDF_MEDIA_TYPES.contains(mt.toString())) {
                 URI metadataUri = uriInfo.getBaseUriBuilder().path("/contenthub").path(indexName)
                         .path("store/metadata").path(contentURI).build();
-                return Response.temporaryRedirect(metadataUri).build();
+                ResponseBuilder rb = Response.temporaryRedirect(metadataUri);
+                addCORSOrigin(servletContext, rb, headers);
+                return rb.build();
             }
         }
         URI rawUri = uriInfo.getBaseUriBuilder().path("/contenthub").path(indexName).path("store/raw")
                 .path(contentURI).build();
-        return Response.temporaryRedirect(rawUri).build();
+        ResponseBuilder rb = Response.temporaryRedirect(rawUri);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -234,47 +305,52 @@ public class StoreResource extends BaseStanbolResource {
     @GET
     @Path("/download/{type}/{uri:.+}")
     public Response downloadContentItem(@PathParam(value = "type") String type,
-                                        @PathParam(value = "uri") String contentURI) throws IOException,
-                                                                                    StoreException {
+                                        @PathParam(value = "uri") String contentURI,
+                                        @Context HttpHeaders headers) throws IOException, StoreException {
 
         ContentItem ci = solrStore.get(contentURI, indexName);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
         if (type.equals("metadata")) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            serializer.serialize(out, ci.getMetadata(), SupportedFormat.RDF_XML);
             String fileName = contentURI + "-metadata";
             File file = new File(fileName);
+            if (file.exists()) {
+                file.delete();
+            }
             boolean success = file.createNewFile();
             if (success) {
-                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileName));
-                bufferedWriter.write(out.toString());
-                bufferedWriter.close();
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                serializer.serialize(bos, ci.getMetadata(), SupportedFormat.RDF_XML);
+                bos.close();
             } else {
-                log.error("File already exists");
+                log.error("Failed to create file: {}", fileName);
             }
 
             ResponseBuilder response = Response.ok((Object) file);
             response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
             response.type("text/plain");
+            addCORSOrigin(servletContext, response, headers);
             return response.build();
         } else if (type.equals("raw")) {
-            // TODO: It is only for text content
             String fileName = contentURI + "-raw";
             File file = new File(fileName);
+            if (file.exists()) {
+                file.delete();
+            }
             boolean success = file.createNewFile();
             if (success) {
-                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileName));
-                bufferedWriter.write(IOUtils.toString(ci.getStream(), Constants.DEFAULT_ENCODING));
-                bufferedWriter.close();
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                bos.write(IOUtils.toByteArray(ci.getStream()));
+                bos.close();
             } else {
-                log.error("File already exists");
+                log.error("Failed to create file: {}", fileName);
             }
 
             ResponseBuilder response = Response.ok((Object) file);
             response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
             response.type(ci.getMimeType());
+            addCORSOrigin(servletContext, response, headers);
             return response.build();
         } else {
             throw new WebApplicationException(404);
@@ -294,8 +370,8 @@ public class StoreResource extends BaseStanbolResource {
      */
     @GET
     @Path("/metadata/{uri:.+}")
-    public Response getContentItemMetaData(@PathParam(value = "uri") String contentURI) throws IOException,
-                                                                                       StoreException {
+    public Response getContentItemMetaData(@PathParam(value = "uri") String contentURI,
+                                           @Context HttpHeaders headers) throws IOException, StoreException {
         ContentItem ci = solrStore.get(contentURI, indexName);
         if (ci == null) {
             throw new WebApplicationException(404);
@@ -303,8 +379,9 @@ public class StoreResource extends BaseStanbolResource {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         serializer.serialize(out, ci.getMetadata(), SupportedFormat.RDF_XML);
-
-        return Response.ok(out.toString(), "text/plain").build();
+        ResponseBuilder rb = Response.ok(out.toString(), "text/plain");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -318,14 +395,15 @@ public class StoreResource extends BaseStanbolResource {
      */
     @GET
     @Path("/raw/{uri:.+}")
-    public Response getRawContent(@PathParam(value = "uri") String contentURI) throws IOException,
-                                                                              StoreException {
+    public Response getRawContent(@PathParam(value = "uri") String contentURI, @Context HttpHeaders headers) throws IOException,
+                                                                                                            StoreException {
         ContentItem ci = solrStore.get(contentURI, indexName);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-
-        return Response.ok(ci.getStream(), ci.getMimeType()).build();
+        ResponseBuilder rb = Response.ok(ci.getStream(), ci.getMimeType());
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -338,7 +416,7 @@ public class StoreResource extends BaseStanbolResource {
      */
     @GET
     @Path("/edit/{uri:.+}")
-    public String editContentItem(@PathParam(value = "uri") String contentURI) throws StoreException {
+    public Response editContentItem(@PathParam(value = "uri") String contentURI, @Context HttpHeaders headers) throws StoreException {
         SolrContentItem sci = (SolrContentItem) solrStore.get(contentURI, indexName);
         if (sci == null) {
             throw new WebApplicationException(404);
@@ -350,13 +428,16 @@ public class StoreResource extends BaseStanbolResource {
         } catch (JSONException e) {
             throw new StoreException(e.getMessage(), e);
         }
-        return jsonString;
+        ResponseBuilder rb = Response.ok(jsonString);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /*
      * Services for content item creation
      */
-    // TODO other parameters like title, ldprogram/index should be considered for this service
+    // TODO other parameters like title, ldprogram/index should be considered
+    // for this service
     /**
      * HTTP POST method to create a content item in Contenthub. This is the very basic method to create the
      * content item. The payload of the POST method should include the raw data of the content item to be
@@ -378,7 +459,7 @@ public class StoreResource extends BaseStanbolResource {
                                                                                 EngineException,
                                                                                 StoreException {
         String contentURI = ContentItemHelper.makeDefaultUrn(data).getUnicodeString();
-        return createEnhanceAndRedirect(data, headers.getMediaType(), contentURI);
+        return createEnhanceAndRedirect(data, headers.getMediaType(), contentURI, headers);
     }
 
     /**
@@ -405,7 +486,7 @@ public class StoreResource extends BaseStanbolResource {
                                             @Context HttpHeaders headers) throws URISyntaxException,
                                                                          EngineException,
                                                                          StoreException {
-        return createEnhanceAndRedirect(data, headers.getMediaType(), contentURI);
+        return createEnhanceAndRedirect(data, headers.getMediaType(), contentURI, headers);
     }
 
     /**
@@ -527,27 +608,30 @@ public class StoreResource extends BaseStanbolResource {
                 // feedback
             }
         } else if (file != null) {
-        	/*MimeUtil2 mimeUtil = new MimeUtil2();
-        	mimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
-        	mimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
-            Collection<?> mimeTypes = mimeUtil.getMimeTypes(file);
-            mt = MediaType.valueOf(MimeUtil2.getMostSpecificMimeType(mimeTypes).toString());
-            mimeUtil.unregisterMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
-            mimeUtil.unregisterMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
-            */
+            /*
+             * MimeUtil2 mimeUtil = new MimeUtil2(); mimeUtil.registerMimeDetector
+             * ("eu.medsea.mimeutil.detector.ExtensionMimeDetector"); mimeUtil.registerMimeDetector
+             * ("eu.medsea.mimeutil.detector.MagicMimeMimeDetector"); Collection<?> mimeTypes =
+             * mimeUtil.getMimeTypes(file); mt = MediaType
+             * .valueOf(MimeUtil2.getMostSpecificMimeType(mimeTypes).toString ());
+             * mimeUtil.unregisterMimeDetector( "eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
+             * mimeUtil.unregisterMimeDetector ("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
+             */
             mt = body.getMediaType();
             data = FileUtils.readFileToByteArray(file);
-            if(title == null || title.isEmpty()) {
-            	title = disposition.getFileName();
+            if (title == null || title.isEmpty()) {
+                title = disposition.getFileName();
             }
         }
 
         if (data != null && mt != null) {
             String uri = ContentItemHelper.makeDefaultUrn(data).getUnicodeString();
-            return createEnhanceAndRedirect(data, mt, uri, true, constraints, title);
+            return createEnhanceAndRedirect(data, mt, uri, true, constraints, title, headers);
         } else {
             // TODO: add user-friendly feedback on empty requests from a form
-            return Response.seeOther(new URI("/contenthub/" + indexName + "/store")).build();
+            ResponseBuilder rb = Response.seeOther(new URI("/contenthub/" + indexName + "/store"));
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         }
     }
 
@@ -561,19 +645,24 @@ public class StoreResource extends BaseStanbolResource {
                                               String contentURI,
                                               boolean useExplicitRedirect,
                                               Map<String,List<Object>> constraints,
-                                              String title) throws EngineException,
-                                                           URISyntaxException,
-                                                           StoreException {
+                                              String title,
+                                              HttpHeaders headers) throws EngineException,
+                                                                  URISyntaxException,
+                                                                  StoreException {
 
         SolrContentItem sci = solrStore.create(content, contentURI, title, mediaType.toString(), constraints);
         solrStore.enhanceAndPut(sci, indexName);
         if (useExplicitRedirect) {
             // use an redirect to point browsers to newly created content
-            return Response.seeOther(makeRedirectionURI(sci.getUri().getUnicodeString())).build();
+            ResponseBuilder rb = Response.seeOther(makeRedirectionURI(sci.getUri().getUnicodeString()));
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         } else {
             // use the correct way of notifying the RESTful client that the
             // resource has been successfully created
-            return Response.created(makeRedirectionURI(sci.getUri().getUnicodeString())).build();
+            ResponseBuilder rb = Response.created(makeRedirectionURI(sci.getUri().getUnicodeString()));
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         }
     }
 
@@ -582,7 +671,7 @@ public class StoreResource extends BaseStanbolResource {
     }
 
     /**
-     * HTTP PUT method to update an existing content item.
+     * HTTP POST method to update an existing content item.
      * 
      * @param contentURI
      *            URI of the content item to be updated.
@@ -624,12 +713,13 @@ public class StoreResource extends BaseStanbolResource {
                                                                            IOException,
                                                                            StoreException {
         if (contentURI != null && !contentURI.isEmpty()) {
-            deleteContentItem(contentURI);
+            deleteContentItem(contentURI, headers);
         }
         return createContentItemFromForm(content, url, jsonCons, title, headers);
     }
 
     /**
+     * HTTP POST method to update an existing content item.
      * 
      * @param contentURI
      *            URI of the content item to be updated.
@@ -671,7 +761,7 @@ public class StoreResource extends BaseStanbolResource {
                                                                            IOException,
                                                                            StoreException {
         if (contentURI != null && !contentURI.isEmpty()) {
-            deleteContentItem(contentURI);
+            deleteContentItem(contentURI, headers);
         }
         return createContentItemFromForm(file, disposition, body, jsonCons, title, headers);
     }
@@ -686,15 +776,21 @@ public class StoreResource extends BaseStanbolResource {
      */
     @DELETE
     @Path("/{uri:.+}")
-    public Response deleteContentItem(@PathParam(value = "uri") String contentURI) throws StoreException {
+    public Response deleteContentItem(@PathParam(value = "uri") String contentURI,
+                                      @Context HttpHeaders headers) throws StoreException {
         solrStore.deleteById(contentURI, indexName);
-        return Response.ok().build();
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
-    private Response createEnhanceAndRedirect(byte[] data, MediaType mediaType, String contentURI) throws EngineException,
-                                                                                                  URISyntaxException,
-                                                                                                  StoreException {
-        return createEnhanceAndRedirect(data, mediaType, contentURI, false, null, null);
+    private Response createEnhanceAndRedirect(byte[] data,
+                                              MediaType mediaType,
+                                              String contentURI,
+                                              HttpHeaders headers) throws EngineException,
+                                                                  URISyntaxException,
+                                                                  StoreException {
+        return createEnhanceAndRedirect(data, mediaType, contentURI, false, null, null, headers);
     }
 
     /*
@@ -709,7 +805,7 @@ public class StoreResource extends BaseStanbolResource {
                                                                                             InvalidSyntaxException {
         this.offset = offset;
         this.pageSize = pageSize;
-        this.recentlyEnhanced = new ArrayList<ResultantDocument>();
+        this.recentlyEnhanced = new ArrayList<DocumentResult>();
 
         if (!(solrSearch instanceof SolrSearchImpl)) {
             throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -742,18 +838,19 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/page/{uri:.+}")
     @Produces(TEXT_HTML)
     public ContentItemResource getContentItemView(@PathParam(value = "uri") String contentURI) throws IOException,
-                                                                                               StoreException {
+                                                                                              StoreException {
         ContentItem ci = solrStore.get(contentURI, indexName);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-        return new ContentItemResource(contentURI, ci, uriInfo, "/contenthub/" + indexName + "/store/download",
-                tcManager, serializer, servletContext);
+        return new ContentItemResource(contentURI, ci, uriInfo, "/contenthub/" + indexName
+                                                                + "/store/download", tcManager, serializer,
+                servletContext);
     }
 
     // Helper methods for HTML view
 
-    public List<ResultantDocument> getRecentlyEnhancedItems() throws ParseException {
+    public List<DocumentResult> getRecentlyEnhancedItems() throws ParseException {
         if (recentlyEnhanced.size() > pageSize) {
             return recentlyEnhanced.subList(0, pageSize);
         } else {
@@ -763,8 +860,8 @@ public class StoreResource extends BaseStanbolResource {
 
     public URI getMoreRecentItemsUri() {
         if (offset >= pageSize) {
-            return uriInfo.getBaseUriBuilder().path("contenthub").path(indexName).path("store").queryParam("offset", offset - pageSize)
-                    .build();
+            return uriInfo.getBaseUriBuilder().path("contenthub").path(indexName).path("store")
+                    .queryParam("offset", offset - pageSize).build();
         } else {
             return null;
         }
@@ -774,12 +871,12 @@ public class StoreResource extends BaseStanbolResource {
         if (recentlyEnhanced.size() <= pageSize) {
             return null;
         } else {
-            return uriInfo.getBaseUriBuilder().path("contenthub").path(indexName).path("store").queryParam("offset", offset + pageSize)
-                    .build();
+            return uriInfo.getBaseUriBuilder().path("contenthub").path(indexName).path("store")
+                    .queryParam("offset", offset + pageSize).build();
         }
     }
-    
+
     public String getIndexName() {
-    	return this.indexName;
+        return this.indexName;
     }
 }

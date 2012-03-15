@@ -17,6 +17,7 @@
 <#setting url_escaping_charset='ISO-8859-1'>
 <#import "/imports/facetResultMacro.ftl" as facetResultMacro>
 <#import "/imports/relatedKeywordMacro.ftl" as relatedKeywordMacro>
+<#escape x as x?html>
 <#-- limit for the more less button -->
 <#assign limit=4>
 <div id="text">
@@ -49,7 +50,7 @@
       <#if it.chosenFacets?exists && it.chosenFacets != "{}">
         <fieldset>
           <div id="chosenFacets"></div>
-          <div id="chosenFacetsHidden" class="invisible" value='${it.chosenFacets?js_string}'/>
+          <div id="chosenFacetsHidden" class="invisible" value="${it.chosenFacets?url("UTF-8")?js_string}"/>
         </fieldset>
       </#if>
     </div>
@@ -61,7 +62,7 @@
           <#list it.searchResults.facets as facet>
             <#if facet.values?exists>
               <#if it.chosenFacets?exists>
-                <@facetResultMacro.facetResultMacro facetField=facet consLink=it.chosenFacets/>
+                <@facetResultMacro.facetResultMacro facetField=facet consLink=it.chosenFacets?url("UTF-8")?js_string/>
               <#else>
                 <@facetResultMacro.facetResultMacro facetField=facet consLink="{}"/>
               </#if>
@@ -103,3 +104,4 @@
   </div>
   
 </div>
+</#escape>

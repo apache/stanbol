@@ -25,7 +25,7 @@ import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSe
 
 /**
  * This interface defines the structure of a unified search result returned by {@link FeaturedSearch} and
- * {@link RelatedKeywordSearchManager} interfaces. The results contain {@link ResultantDocument}s which are
+ * {@link RelatedKeywordSearchManager} interfaces. The results contain {@link DocumentResult}s which are
  * retrieved from underlying Solr cores, {@link RelatedKeyword}s about the search query and {@link FacetField}
  * s for the obtained resultant documents. {@link FacetField}s keep information of possible facet values and
  * corresponding documents counts matching with the facet value. All search results of a search operation are
@@ -42,17 +42,17 @@ public interface SearchResult {
      * resultant documents correspond to content items stored in the underlying Solr cores which are managed
      * by the Contenthub.
      * 
-     * @return {@link List} of {@link ResultantDocument} encapsulated in this search result
+     * @return {@link List} of {@link DocumentResult} encapsulated in this search result
      */
-    List<ResultantDocument> getResultantDocuments();
+    List<DocumentResult> getResultantDocuments();
 
     /**
      * Returns the facets generated as a result of the search operations. Each search result has its own
      * facets.
      * 
-     * @return A map of <code>property:[value1,value2]</code> pairs.
+     * @return A {@link List} of {@link FacetResult}s.
      */
-    List<FacetField> getFacets();
+    List<FacetResult> getFacets();
 
     /**
      * Returns the {@link RelatedKeyword}s for the query term that is specified for the search operation.
@@ -69,14 +69,14 @@ public interface SearchResult {
      * 
      * @param resultantDocuments
      */
-    void setDocuments(List<ResultantDocument> resultantDocuments);
+    void setDocuments(List<DocumentResult> resultantDocuments);
 
     /**
      * Setter for the facets list
      * 
      * @param facets
      */
-    void setFacets(List<FacetField> facets);
+    void setFacets(List<FacetResult> facets);
 
     /**
      * Setter for the related keywords
