@@ -44,17 +44,17 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chainmanager</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.enginemanager</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>
   <!-- EnhancementJobManager implementations -->
@@ -62,12 +62,12 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.eventjobmanager</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.weightedjobmanager</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>
   <!-- Enhancement Chain implementations -->
@@ -75,22 +75,22 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.allactive</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.graph</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.weighted</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.list</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>
   <!-- Web Fragment -->
@@ -98,7 +98,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>
 
@@ -107,7 +107,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.benchmark</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>
 
@@ -119,7 +119,7 @@
     <bundle> 
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
 
     <!-- Content conversion (2 engines)-->
@@ -128,14 +128,14 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     -->
     
     <bundle><!-- Apache Tika Engine -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.tika</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
 
     <!-- Named Entity Recoqunition (NER)-->
@@ -143,18 +143,18 @@
     <bundle> <!-- Open NLP based NER -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <!-- Entity Extraction/Linking -->
     <bundle><!-- NER linking (depends on the Entityhub) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle><!-- Keyword Extraction from Text (depends on the Entityhub) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.keywordextraction</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
 
     <!-- Refactor Enhancement Engine -->
@@ -162,7 +162,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.refactor</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
 
     <!-- External Service Integration -->
@@ -170,17 +170,17 @@
     <bundle> <!-- http://www.opencalais.com/ -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opencalais</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle> <!-- http://www.zemanta.com/ -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.zemanta</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle> <!-- http://www.geonames.org/ -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>
   
@@ -190,7 +190,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.defaults</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>
 </bundles>

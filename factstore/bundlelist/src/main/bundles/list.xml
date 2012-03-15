@@ -29,7 +29,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.factstore</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>
   

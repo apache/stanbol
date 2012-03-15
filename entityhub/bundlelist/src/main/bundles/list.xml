@@ -22,42 +22,42 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.site.linkeddata</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>   
 <!--     <bundle> 
       <groupId>org.jdom</groupId>
@@ -72,7 +72,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>  
   <!-- Default configuration for the Entityhub -->
@@ -80,7 +80,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.defaults</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.9.0-incubating</version>
     </bundle>
   </startLevel>  
 </bundles>  
