@@ -1573,12 +1573,12 @@
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
       <artifactId>ldpath-api</artifactId>
-      <version>0.9.5-SNAPSHOT</version>
+      <version>0.9.5</version>
     </dependency>
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
       <artifactId>ldpath-core-bundle</artifactId>
-      <version>0.9.5-SNAPSHOT</version>
+      <version>0.9.5</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -1931,21 +1931,5 @@
       </build>
     </profile>
   </profiles>
-
-  <repositories>
-    <!-- For LDPath - will move to Maven central - see STANBOL-507 -->
-    <repository>
-      <id>kiwi-snapshot-repo</id>
-      <name>Kiwi Project SNAPSHOTS Repository</name>
-      <url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/snapshots/</url>
-    </repository>
-    
-    <repository>
-      <id>kiwi-release-repo</id>
-      <name>Kiwi Project Repository</name>
-      <url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/releases/</url>
-    </repository>
-
-  </repositories>
 
 </project>
