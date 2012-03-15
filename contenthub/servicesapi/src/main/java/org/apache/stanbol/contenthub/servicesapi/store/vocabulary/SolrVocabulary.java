@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class SolrVocabulary {
 
-    private static final String STANBOLRESERVED_PREFIX = "stanbolreserved_";
+    public static final String STANBOLRESERVED_PREFIX = "stanbolreserved_";
 
     public enum SolrFieldName {
 
@@ -58,11 +58,16 @@ public class SolrVocabulary {
          * Name of the field which holds the title of the content.
          */
         TITLE(STANBOLRESERVED_PREFIX + "title"),
-        
+
         /**
          * Name of the field which holds the actual content.
          */
         CONTENT(STANBOLRESERVED_PREFIX + "content"),
+
+        /**
+         * Name of the field which holds the binary content
+         */
+        BINARYCONTENT(STANBOLRESERVED_PREFIX + "binarycontent"),
 
         /**
          * Name of the field which holds the mime type (content type) of the content.
@@ -180,12 +185,10 @@ public class SolrVocabulary {
         }
 
         public static SolrFieldName[] getSemanticFieldNames() {
-            // Semantic fields start from the 9th enumeration.
-            SolrFieldName[] allFields = values();
-            SolrFieldName[] semanticFieldNames = new SolrFieldName[allFields.length - 9];
-            for (int i = 9; i < allFields.length; i++) {
-                semanticFieldNames[i - 9] = allFields[i];
-            }
+            SolrFieldName[] semanticFieldNames = {COUNTRIES, IMAGECAPTIONS, REGIONS, GOVERNORS, CAPITALS,
+                                                  LARGESTCITIES, LEADERNAMES, GIVENNAMES, KNOWNFORS,
+                                                  BIRTHPLACES, PLACEOFBIRTHS, WORKINSTITUTIONS, CAPTIONS,
+                                                  SHORTDESCRIPTIONS, FIELDS};
             return semanticFieldNames;
         }
 
@@ -195,14 +198,9 @@ public class SolrVocabulary {
         }
 
         public static boolean isNameReserved(String name) {
-            // Reserved keywords start from the 3rd enumeration
-            SolrFieldName[] allFields = values();
-            for (int i = 3; i < allFields.length; i++) {
-                if (allFields[i].toString().equals(name)) return true;
-            }
-            return false;
+            return name.startsWith(STANBOLRESERVED_PREFIX);
         }
-        
+
         public static boolean isAnnotatedEntityFacet(String facetName) {
             for (SolrFieldName sfn : getAnnotatedEntityFieldNames()) {
                 if (sfn.toString().equals(facetName)) {
@@ -215,8 +213,18 @@ public class SolrVocabulary {
 
     /**
      * Ending characters for dynamic fields of {@link String} type.
+     * The type of this field is "string" in the Solr schema.
      */
     public static final String SOLR_DYNAMIC_FIELD_TEXT = "_t";
+
+    /**
+     * Ending characters for dynamic fields of {@link String} type. 
+     * This field is indexed with "text_ws" type to tokenize the values
+     * and enable case insensitive search on the field. 
+     * Although "*_t" are copied to stanbolreserved_text_all, this field
+     * enables the search only on this field through Solr interface.  
+     */
+    public static final String SOLR_DYNAMIC_FIELD_INDEXEDTEXT = "_i";
 
     /**
      * Ending characters for dynamic fields of {@link Long} type.
@@ -232,6 +240,16 @@ public class SolrVocabulary {
      * Ending characters for dynamic fields of {@link Date} type.
      */
     public static final String SOLR_DYNAMIC_FIELD_DATE = "_dt";
+
+    public static final List<String> DYNAMIC_FIELD_EXTENSIONS;
+    static {
+        DYNAMIC_FIELD_EXTENSIONS = new ArrayList<String>();
+        DYNAMIC_FIELD_EXTENSIONS.add(SOLR_DYNAMIC_FIELD_DATE);
+        DYNAMIC_FIELD_EXTENSIONS.add(SOLR_DYNAMIC_FIELD_INDEXEDTEXT);
+        DYNAMIC_FIELD_EXTENSIONS.add(SOLR_DYNAMIC_FIELD_DOUBLE);
+        DYNAMIC_FIELD_EXTENSIONS.add(SOLR_DYNAMIC_FIELD_LONG);
+        DYNAMIC_FIELD_EXTENSIONS.add(SOLR_DYNAMIC_FIELD_TEXT);
+    }
 
     /**
      * "OR" keyword for Solr queries.
@@ -250,8 +268,7 @@ public class SolrVocabulary {
         int underscoreIndex = name.lastIndexOf("_");
         if (underscoreIndex != -1) {
             String extension = name.substring(underscoreIndex);
-            if (extension.equals(SOLR_DYNAMIC_FIELD_DATE) || extension.equals(SOLR_DYNAMIC_FIELD_DOUBLE)
-                || extension.equals(SOLR_DYNAMIC_FIELD_LONG) || extension.equals(SOLR_DYNAMIC_FIELD_TEXT)) {
+            if (DYNAMIC_FIELD_EXTENSIONS.contains(extension)) {
                 name = name.substring(0, underscoreIndex);
             }
         }
@@ -266,8 +283,8 @@ public class SolrVocabulary {
     static {
         excludedFields.add("skos:definition");
         excludedFields.add("rdfs:label");
-        excludedFields.add(SolrFieldName.TITLE.toString());
-        excludedFields.add("text_all");
+//        excludedFields.add(SolrFieldName.TITLE.toString());
+//        excludedFields.add("text_all");
     }
 
     /**

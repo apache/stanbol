@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,6 +71,7 @@ import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary
 import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
 import org.apache.stanbol.contenthub.store.solr.util.ContentItemIDOrganizer;
 import org.apache.stanbol.contenthub.store.solr.util.QueryGenerator;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
@@ -304,7 +306,12 @@ public class SolrStoreImpl implements SolrStore {
 
         String content = null;
         try {
-            content = IOUtils.toString(ci.getStream(), Constants.DEFAULT_ENCODING);
+            Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci,
+                Collections.singleton("text/plain"));
+            if (contentPart == null) {
+                throw new StoreException("There is no textual for the content item");
+            }
+            content = ContentItemHelper.getText(contentPart.getValue());
         } catch (IOException ex) {
             String msg = "Cannot read the stream of the ContentItem.";
             log.error(msg, ex);
@@ -317,6 +324,11 @@ public class SolrStoreImpl implements SolrStore {
 
         doc.addField(SolrFieldName.ID.toString(), ci.getUri().getUnicodeString());
         doc.addField(SolrFieldName.CONTENT.toString(), content);
+        try {
+            doc.addField(SolrFieldName.BINARYCONTENT.toString(), IOUtils.toByteArray(ci.getStream()));
+        } catch (IOException e) {
+            throw new StoreException("Failed to get bytes of conten item stream", e);
+        }
         doc.addField(SolrFieldName.MIMETYPE.toString(), ci.getMimeType());
         doc.addField(SolrFieldName.CREATIONDATE.toString(), creationDate);
 
@@ -331,8 +343,25 @@ public class SolrStoreImpl implements SolrStore {
         doc.addField(SolrFieldName.ENHANCEMENTCOUNT.toString(), enhancementCount);
     }
 
+    private void addConstraints(SolrContentItem sci, SolrInputDocument doc) {
+        if (sci.getConstraints() != null) {
+            for (Entry<String,List<Object>> constraint : sci.getConstraints().entrySet()) {
+                Object[] values = constraint.getValue().toArray();
+                if (values == null || values.length == 0) continue;
+                String fieldName = constraint.getKey();
+                if (!SolrFieldName.isNameReserved(fieldName)) {
+                    fieldName = addSolrDynamicFieldProperties(constraint.getKey(), values);
+                }
+                doc.addField(fieldName, values);
+                // Now add for the text indexing dynamic field
+                addIndexedTextDynamicField(doc, fieldName, values);
+            }
+        }
+    }
+
     private void addSolrSpecificFields(SolrContentItem sci, SolrInputDocument doc, String ldProgramName) {
         doc.addField(SolrFieldName.TITLE.toString(), sci.getTitle());
+        addConstraints(sci, doc);
         try {
             MGraph ciMetadata = sci.getMetadata();
             Iterator<Triple> it = ciMetadata.filter(null, Properties.ENHANCER_ENTITY_REFERENCE, null);
@@ -355,21 +384,10 @@ public class SolrStoreImpl implements SolrStore {
 
     private void addSolrSpecificFields(SolrContentItem sci, SolrInputDocument doc) {
         doc.addField(SolrFieldName.TITLE.toString(), sci.getTitle());
-        if (sci.getConstraints() != null) {
-            for (Entry<String,List<Object>> constraint : sci.getConstraints().entrySet()) {
-                Object[] values = constraint.getValue().toArray();
-                if (values == null || values.length == 0) continue;
-                String fieldName = constraint.getKey();
-                if (!SolrFieldName.isNameReserved(fieldName)) {
-                    fieldName = addSolrDynamicFieldProperties(constraint.getKey(), values);
-                }
-                doc.addField(fieldName, values);
-            }
-        }
-
+        addConstraints(sci, doc);
         if (sci.getMetadata() != null) {
             addSemanticFields(sci, doc);
-            addFacetFields(sci, doc);
+            addAnnotatedEntityFieldNames(sci, doc);
         } else {
             log.debug("There are no enhancements for the content item {}", sci.getUri().getUnicodeString());
         }
@@ -381,7 +399,7 @@ public class SolrStoreImpl implements SolrStore {
         }
     }
 
-    private void addFacetFields(SolrContentItem sci, SolrInputDocument doc) {
+    private void addAnnotatedEntityFieldNames(SolrContentItem sci, SolrInputDocument doc) {
         for (SolrFieldName fn : SolrFieldName.getAnnotatedEntityFieldNames()) {
             addField(sci, doc, fn);
         }
@@ -413,7 +431,21 @@ public class SolrStoreImpl implements SolrStore {
             values.add(value);
         }
         if (!values.isEmpty()) {
-            doc.addField(fieldName.toString(), values.toArray());
+            String fn = fieldName.toString();
+            Object[] valArr = values.toArray();
+            doc.addField(fn, valArr);
+            // Now add for the text indexing dynamic field
+            addIndexedTextDynamicField(doc, fn, valArr);
+        }
+    }
+    
+    private void addIndexedTextDynamicField(SolrInputDocument doc,String fn, Object[] valArr) {
+        if (fn.endsWith(SolrVocabulary.SOLR_DYNAMIC_FIELD_TEXT)) {
+            // replace the last "_t" with "_i"
+            String ifn = SolrVocabulary.STANBOLRESERVED_PREFIX
+                         + fn.substring(0, fn.lastIndexOf(SolrVocabulary.SOLR_DYNAMIC_FIELD_TEXT))
+                         + SolrVocabulary.SOLR_DYNAMIC_FIELD_INDEXEDTEXT;
+            doc.addField(ifn, valArr);
         }
     }
 
@@ -428,7 +460,7 @@ public class SolrStoreImpl implements SolrStore {
         id = ContentItemIDOrganizer.attachBaseURI(id);
         SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(
             ldProgramName);
-        String content = null;
+        byte[] content = null;
         String mimeType = null;
         String title = null;
         Map<String,List<Object>> constraints = new HashMap<String,List<Object>>();
@@ -446,7 +478,7 @@ public class SolrStoreImpl implements SolrStore {
             SolrDocumentList results = response.getResults();
             if (results != null && results.size() > 0) {
                 SolrDocument result = results.get(0);
-                content = (String) result.getFieldValue(SolrFieldName.CONTENT.toString());
+                content = (byte[]) result.getFieldValue(SolrFieldName.BINARYCONTENT.toString());
                 mimeType = (String) result.getFieldValue(SolrFieldName.MIMETYPE.toString());
                 title = (String) result.getFieldValue(SolrFieldName.TITLE.toString());
 
@@ -490,11 +522,7 @@ public class SolrStoreImpl implements SolrStore {
             }
         }
 
-        byte[] contentByte = null;
-        if (content != null) {
-            contentByte = content.getBytes();
-        }
-        return new SolrContentItemImpl(id, title, contentByte, mimeType, metadata, constraints);
+        return new SolrContentItemImpl(id, title, content, mimeType, metadata, constraints);
     }
 
     @Override

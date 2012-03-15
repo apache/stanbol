@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.ResultantDocument;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
 import org.slf4j.Logger;
@@ -29,26 +29,26 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author anil.sinaci
- *
+ * 
  */
 public class RelatedKeywordSearchResult implements SearchResult {
 
-    private static final Logger log = LoggerFactory.getLogger(RelatedKeywordSearchResult.class); 
-    
+    private static final Logger log = LoggerFactory.getLogger(RelatedKeywordSearchResult.class);
+
     private Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords;
-    
+
     public RelatedKeywordSearchResult(Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords) {
         this.relatedKeywords = relatedKeywords;
     }
-    
+
     @Override
-    public List<ResultantDocument> getResultantDocuments() {
+    public List<DocumentResult> getResultantDocuments() {
         log.warn("RelatedKeywordSearchResult does not contain any ResultantDocument");
         return null;
     }
 
     @Override
-    public List<FacetField> getFacets() {
+    public List<FacetResult> getFacets() {
         log.warn("RelatedKeywordSearchResult does not contain any FacetField");
         return null;
     }
@@ -59,14 +59,14 @@ public class RelatedKeywordSearchResult implements SearchResult {
     }
 
     @Override
-    public void setDocuments(List<ResultantDocument> resultantDocuments) {
+    public void setDocuments(List<DocumentResult> resultantDocuments) {
         String msg = "RelatedKeywordSearchResult cannot contain any ResultantDocument";
         log.error(msg);
         throw new NotImplementedException(msg);
     }
 
     @Override
-    public void setFacets(List<FacetField> facets) {
+    public void setFacets(List<FacetResult> facets) {
         String msg = "RelatedKeywordSearchResult cannot contain any FacetField";
         log.error(msg);
         throw new NotImplementedException(msg);

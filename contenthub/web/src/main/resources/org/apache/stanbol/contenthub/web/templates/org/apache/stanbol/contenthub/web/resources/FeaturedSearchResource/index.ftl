@@ -109,6 +109,10 @@
 		}
 
 		function getResults(jsonCons,facetName,facetValue,operation,voffset,vpageSize){
+		  if(operation == "deleteFacet") {
+		    facetName = decodeURIComponent(facetName);
+		    facetValue = decodeURIComponent(facetValue);
+		  }
 			//clears the content of div because it'll be filled by explorer posts
 			var keywordToSearch = $("#keywordIn").val();
 			
@@ -134,8 +138,8 @@
 				}
 				
 				else if(operation == "deleteFacet") {
-					var  values = JSONObject[facetName];
-					
+				  
+					var  values = JSONObject[facetName];	
 					var length=0;
 					var index;
 					for(var value in values) {			
@@ -150,7 +154,6 @@
 					if(length == 1) {
 						delete JSONObject[facetName];
 					} else {
-						<#-- TODO: change -->
 						delete JSONObject[facetName][index];
 					}
 				}
@@ -208,11 +211,11 @@
 				JSONObject[facetName].push(facetValue);
 			}
 			else if(operation == "range"){
-			
+			  var facetHtmlName = getHtmlName(facetName);
 				var JSONObject = JSON.parse(jsonCons);
-				var facetValue = "[" + document.getElementById(facetName+"TextMin").value + " TO " + 
-										document.getElementById(facetName+"TextMax").value + "]";
-										
+				var facetValue = "[" + document.getElementById(facetHtmlName+"TextMin").value + " TO " + 
+										           document.getElementById(facetHtmlName+"TextMax").value + "]";
+									
 				JSONObject[facetName] = new Array();
 				JSONObject[facetName].push(facetValue);
 			}
@@ -265,22 +268,22 @@
 		}
 		function setChosenFacet(JSONObject)	{
 			var resultString = "";
-			var chosenCons = "'" + $("#chosenFacetsHidden").attr("value") + "'";
+			var chosenCons = $("#chosenFacetsHidden").attr("value");
 							
 			if(JSONObject != null) {
 				for(var p in JSONObject) {
 					if(JSONObject.hasOwnProperty(p)) {
 						for(var value in p) {
 							if(p.hasOwnProperty(value) && typeof(JSONObject[p][value]) != "undefined") {
-								var escapedFacetName = encodeURI(p.toString());
-								var escapedFacetValue = encodeURI(JSONObject[p][value]);
-								var startindex = (isReserved(p)) ? p.toString().indexOf("_")+1 : 0;
-								var lastindex = (isReserved(p) || p.toString().lastIndexOf("_") < 0) ? p.length : p.toString().lastIndexOf("_");
-								var href = "<a href=javascript:getResults("; 
-								href += 	encodeURI(chosenCons) + ",\"";
-								href +=		escapedFacetName + "\",\"" + escapedFacetValue + "\",\"deleteFacet\") title='Remove'>";
+								var escapedFacetName = escape(encodeURIComponent(p.toString()));
+								var escapedFacetValue = escape(encodeURIComponent(JSONObject[p][value]));
+								var uriEncodedChosenConstraints = chosenCons;
+								var facetHtmlName = getHtmlName(p.toString());
+								var href = "<a href=javascript:getResults('"; 
+								href += 	uriEncodedChosenConstraints + "','";
+								href +=		escapedFacetName + "','" + escapedFacetValue + "','deleteFacet') title='Remove'>";
 								href +=     "<img src='${it.staticRootUrl}/contenthub/images/delete_icon_16.png'></a>";
-								href +=		p.toString().substring(startindex, lastindex) + " : " + 
+								href +=		facetHtmlName + " : " + 
 											((isReserved(p)) ? JSONObject[p][value].substring(1,11)+" to "+JSONObject[p][value].substring(25,35) : 
 											JSONObject[p][value]) + "<br/>";
 								resultString += href;
@@ -296,9 +299,22 @@
 		}
 				
 		function isReserved(str){
-			return str.indexOf("stanbolreserved") == 0; 
+			return str.indexOf("stanbolreserved_") == 0; 
 		}
 		
+    function getHtmlName(name){
+      if(isReserved(name)){
+        return name.substring(name.indexOf("_")+1);
+      }
+      lastUnderscore = name.lastIndexOf("_");
+      if (lastUnderscore >= 0) {
+        underScoreExtension = name.substring(lastUnderscore);
+        if (underScoreExtension == "_t" || underScoreExtension == "_l" || underScoreExtension == "_d" || underScoreExtension == "_dt") {
+          return name.substring(0, lastUnderscore);
+        }
+      }
+      return name;
+    }
 	</script>
 </@common.page>
 </#escape>

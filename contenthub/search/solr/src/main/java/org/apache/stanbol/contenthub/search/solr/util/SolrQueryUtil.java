@@ -58,38 +58,24 @@ public class SolrQueryUtil {
 
     private static SolrQuery keywordQueryWithFacets(String keyword, Map<String,List<Object>> constraints) {
         SolrQuery query = new SolrQuery();
-        //String queryString = keyword;
         query.setQuery(keyword);
         if (constraints != null) {
             try {
                 for (Entry<String,List<Object>> entry : constraints.entrySet()) {
                     String fieldName = ClientUtils.escapeQueryChars(entry.getKey());
                     for (Object value : entry.getValue()) {
-                    	if(SolrVocabulary.isNameRangeField(fieldName)){
-                    		query.addFilterQuery(fieldName + facetDelimiter + (String) value);
-                    	} else {
-                    		query.addFilterQuery(fieldName + facetDelimiter + quotation + (String) value + quotation);
-                    	}
-                        
-                        /*query.addFacetQuery(fieldName + facetDelimiter + (SolrVocabulary.isNameRangeField(fieldName) ? (String) value
-                                    : ClientUtils.escapeQueryChars(quotation + (String) value
-                                                                   + quotation)));*/
-                        /*queryString = queryString
-                                      + " "
-                                      + and
-                                      + " "
-                                      + fieldName
-                                      + facetDelimiter
-                                      + (SolrVocabulary.isNameRangeField(fieldName) ? (String) value
-                                              : ClientUtils.escapeQueryChars(quotation + (String) value
-                                                                             + quotation));*/
+                        if (SolrVocabulary.isNameRangeField(fieldName)) {
+                            query.addFilterQuery(fieldName + facetDelimiter + (String) value);
+                        } else {
+                            query.addFilterQuery(fieldName + facetDelimiter + quotation + ClientUtils.escapeQueryChars((String) value)
+                                                 + quotation);
+                        }
                     }
                 }
             } catch (Exception e) {
                 log.warn("Facet constraints could not be added to Query", e);
             }
         }
-        //query.setQuery(queryString);
         return query;
     }
 
@@ -157,7 +143,6 @@ public class SolrQueryUtil {
 
     private static void setDefaultQueryParameters(SolrQuery solrQuery, List<String> allAvailableFacetNames) {
         solrQuery.setFields("*", SCORE_FIELD);
-        solrQuery.setSortField(SolrFieldName.CREATIONDATE.toString(), SolrQuery.ORDER.desc);
         solrQuery.setFacet(true);
         solrQuery.setFacetMinCount(1);
         if (allAvailableFacetNames != null) {

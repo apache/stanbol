@@ -18,6 +18,7 @@
 package org.apache.stanbol.contenthub.web.resources;
 
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -94,8 +96,15 @@ public class FeaturedSearchResource extends BaseStanbolResource {
                                   @PathParam(value = "index") String indexName) throws IOException,
                                                                                InvalidSyntaxException {
         this.indexName = indexName;
-        featuredSearch = ContextHelper.getServiceFromContext(FeaturedSearch.class, context);
-        tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
+        this.featuredSearch = ContextHelper.getServiceFromContext(FeaturedSearch.class, context);
+        this.tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
+    }
+    
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
     }
 
     /**

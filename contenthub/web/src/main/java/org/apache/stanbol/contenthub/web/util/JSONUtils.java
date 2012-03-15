@@ -30,7 +30,7 @@ import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.ResultantDocument;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.store.solr.util.ContentItemIDOrganizer;
@@ -115,7 +115,7 @@ public class JSONUtils {
         return jObject.toString();
     }
 
-    private static JSONObject toJSON(ResultantDocument resultantDocument) throws JSONException {
+    private static JSONObject toJSON(DocumentResult resultantDocument) throws JSONException {
         JSONObject jObj = new JSONObject();
         if (resultantDocument != null) {
             jObj.put("uri", resultantDocument.getDereferencableURI());
@@ -131,8 +131,8 @@ public class JSONUtils {
         JSONArray jArr = new JSONArray();
         if (list != null) {
             for (T element : list) {
-                if (ResultantDocument.class.isAssignableFrom(element.getClass())) {
-                    jArr.put(toJSON((ResultantDocument) element));
+                if (DocumentResult.class.isAssignableFrom(element.getClass())) {
+                    jArr.put(toJSON((DocumentResult) element));
                 } else if (FacetField.class.isAssignableFrom(element.getClass())) {
                     jArr.put(toJSON((FacetField) element));
                 } else if (FacetField.Count.class.isAssignableFrom(element.getClass())) {

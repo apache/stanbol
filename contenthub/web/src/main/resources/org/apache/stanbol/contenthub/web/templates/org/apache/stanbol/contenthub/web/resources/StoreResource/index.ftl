@@ -16,7 +16,7 @@
 -->
 <#import "/imports/common.ftl" as common>
 <#escape x as x?html>
-<@common.page title="Content Hub" hasrestapi=true> 
+<@common.page title="Contenthub" hasrestapi=true> 
 
 <div class="panel" id="webview">
 <table>
@@ -97,7 +97,7 @@ on the disk, just in memory.</em>
 	</div>
 	
 	<br/>
-	<label onClick="javascript:addConstraint(null);">
+	<label onClick="javascript:addConstraint();">
 	  <img src="${it.staticRootUrl}/contenthub/images/add_icon_16.png" />  Add a new constraint
   </label>
 </fieldset>
@@ -144,85 +144,79 @@ on the disk, just in memory.</em>
 </div>
 
 <div class="panel" id="restapi" style="display: none;">
-<h3>Uploading new content to the Content Hub</h3>
+<h3>Uploading new content to the Contenthub</h3>
 
-  <p>You can upload content to the Content Hub for analysis with or without providing the content
+  <p>Contenthub lives at the endpoint starting with "contenthub":</p>
+  <code>${it.publicBaseUri}contenthub/</code>
+  <p>This endpoint automatically forwards to:</p>
+  <code>${it.publicBaseUri}contenthub/${it.indexName}/store/</code>
+  <p>The endpoint to which Contenthub automatically forwards includes the name of the default index,
+  whose name is "contenthub". That is the reason for two consecutive "contenthub"s in the endpoint.
+  Lastly, "store" page provides the storage related functionalities of Contenthub such as document submission.</p>
+
+  <p>You can upload content to the Contenthub for analysis with or without providing the content
    id at your option:</p>
-  <ol>
-    <li><code>PUT</code> content to <code>${it.publicBaseUri}contenthub/${it.indexName}/content/<strong>content-id</strong></code>
+  <ul>
+    <li><code>POST</code> content to <code>${it.publicBaseUri}contenthub/${it.indexName}/store/<strong>content-id</strong></code>
      with <code>Content-Type: text/plain</code>.</li>
-    <li><code>GET</code> enhancements from the same URL with
-     header <code>Accept: application/rdf+xml</code>.</li>
-  </ol>
+    <li><code>GET</code> content with its enhancements from the same URL.</li>
+  </ul>
   
-  <p><code><strong>content-id</strong></code> can be any valid path and
-   will be used to fetch your item back later.</p>
+  <p><code><strong>content-id</strong></code> can be any valid URI and
+   will be used to fetch your item back later. <code><strong>content-id</strong></code>s are unique within Contenthub.</p>
 
   <p>On a unix-ish box you can use run the following command from
-   the top-level source directory to populate the Stanbol enhancer service with
-    sample content items:</p>
+   the top-level source directory to populate the Stanbol Contenthub service with
+   sample content items:</p>
 
-<pre>
-for file in enhancer/data/text-examples/*.txt;
-do
-  curl -i -X PUT -H "Content-Type:text/plain" -T $file ${it.publicBaseUri}contenthub/${it.indexName}/content/$(basename $file) ;
-done
-</pre> 
+  <pre>
+  for file in enhancer/data/text-examples/*.txt;
+  do
+    curl -i -X POST -H "Content-Type:text/plain" -T $file ${it.publicBaseUri}contenthub/${it.indexName}/store/$(basename $file);
+  done
+  </pre> 
 
-  Alternatively you can let the Stanbol enhancer automatically build an id base on the SHA1
-  hash of the content by posting it at the root of the Content Hub.
-  <ol>
-    <li><code>POST</code> content to <code>${it.publicBaseUri}contenthub/</code>
+  Alternatively you can let the Stanbol Contenthub automatically build an id base on the SHA1
+  hash of the content by posting it at the root of the Contenthub.
+  <ul>
+    <li><code>POST</code> content to <code>${it.publicBaseUri}contenthub/${it.indexName}/store</code>
      with <code>Content-Type: text/plain</code>.</li>
-    <li><code>GET</code> enhancements from the URL in the response along with
-       header <code>Accept: application/rdf+xml</code>.</li>
-  </ol>
+  </ul>
   
   <p>For instance:</p>
 <pre>
 curl -i -X POST -H "Content-Type:text/plain" \
      --data "The Stanbol enhancer can detect famous cities such as Paris." \
-     ${it.publicBaseUri}contenthub
+     ${it.publicBaseUri}contenthub/${it.indexName}/store
     
 HTTP/1.1 201 Created
-Location: ${it.publicBaseUri}contenthub/${it.indexName}/content/sha1-84854eb6802a601ca2349ba28cc55f0b930ac96d
+Location: ${it.publicBaseUri}contenthub/${it.indexName}/store/content/{<code><strong>content-id</strong><code>}
 Content-Length: 0
 Server: Jetty(6.1.x)
 </pre>
 
+<h3>Fetching back the original content item and the related enhancements from the Contenthub</h3>
 
-<h3>Fetching back the original content item and the related enhancements from the Content Hub</h3>
-
-<p>Once the content is created in the Content Hub, you can fetch back either the original content, a HTML summary view or
-the extracted RDF metadata by dereferencing the URL using the <code>Accept</code> header
-as selection switch:</p>
+<p>Once the content is created in the Contenthub, you can fetch back either the original content, a HTML summary view or
+the extracted RDF metadata by dereferencing the URL:</p>
 
 <pre>
-curl -i <strong>-H "Accept: text/plain"</strong> ${it.publicBaseUri}contenthub/${it.indexName}/content/sha1-84854eb6802a601ca2349ba28cc55f0b930ac96d
+curl -i <strong>-H "Accept: text/plain"</strong> ${it.publicBaseUri}contenthub/${it.indexName}/store/content/{<code><strong>content-id</strong><code>}
 
 HTTP/1.1 307 TEMPORARY_REDIRECT
-Location: ${it.publicBaseUri}contenthub/${it.indexName}/<strong>raw</strong>/sha1-84854eb6802a601ca2349ba28cc55f0b930ac96d
+Location: ${it.publicBaseUri}contenthub/${it.indexName}/store/raw/{<code><strong>content-id</strong><code>}
 Content-Length: 0
 Server: Jetty(6.1.x)
 </pre>
 
-<pre>
-curl -i <strong>-H "Accept: text/html"</strong> ${it.publicBaseUri}contenthub/${it.indexName}/content/sha1-84854eb6802a601ca2349ba28cc55f0b930ac96d
+<p>
+Tutorials on Stanbol Contenthub can be found in the following links:<br/>
+<a href="http://incubator.apache.org/stanbol/docs/trunk/contenthub/">Contenhub - One Minute Tutorial</a><br/>
+<a href="http://incubator.apache.org/stanbol/docs/trunk/contenthub/contenthub5min">Contenthub - Five Minutes Tutorial</a>
+</p>
 
-HTTP/1.1 307 TEMPORARY_REDIRECT
-Location: ${it.publicBaseUri}contenthub/${it.indexName}/<strong>page</strong>/sha1-84854eb6802a601ca2349ba28cc55f0b930ac96d
-Content-Length: 0
-Server: Jetty(6.1.x)
-</pre>
+<h4>The RESTful API of the Contenthub</h4>
 
-<pre>
-curl -i <strong>-H "Accept: application/rdf+xml"</strong> ${it.publicBaseUri}contenthub/${it.indexName}/content/sha1-84854eb6802a601ca2349ba28cc55f0b930ac96d
-
-HTTP/1.1 307 TEMPORARY_REDIRECT
-Location: ${it.publicBaseUri}contenthub/${it.indexName}/<strong>metadata</strong>/sha1-84854eb6802a601ca2349ba28cc55f0b930ac96d
-Content-Length: 0
-Server: Jetty(6.1.x)
-</pre>
 
 </div>
 <script language="javascript">
@@ -259,7 +253,7 @@ Server: Jetty(6.1.x)
         
 		var i;
 		var result = JSON.parse("{}");
-		for(i=1; i<=counter; i++){
+		for(i=0; i<=counter; i++){
 			if (document.getElementById("textDiv" + i)) {
 				var field = jQuery.trim(document.getElementsByName("fieldText"+i)[0].value);
 				var value = jQuery.trim(document.getElementsByName("valueText"+i)[0].value);
@@ -287,8 +281,7 @@ Server: Jetty(6.1.x)
 		return true;
 	}
 	
-	function addConstraint(vfn){
-		counter++;
+	function addConstraint(){
 		var newCons = document.createElement('div');
 		newCons.setAttribute('id','textDiv' + counter);
 		var fieldName = "fieldText"+counter;
@@ -302,6 +295,7 @@ Server: Jetty(6.1.x)
 	 		
 		document.getElementById("constraintsDiv").appendChild(newCons);
 		document.getElementsByName(fieldName)[0].focus();
+    counter++;
 	}
 	
 	function removeConstraint(divNo){
@@ -374,14 +368,11 @@ Server: Jetty(6.1.x)
 					
 					for(var p in contentItem) {
 						if(contentItem.hasOwnProperty(p)) {
-							var fieldName = p.toString();
-							if(fieldName.indexOf("_") != -1) {
-								var lastindex = fieldName.lastIndexOf("_");
-								fieldName = fieldName.substring(0, lastindex);
-							}
-							addConstraint(fieldName);
-							document.getElementsByName("fieldText"+counter)[0].value = fieldName;
-							document.getElementsByName("valueText"+counter)[0].value = contentItem[p].substring(1, contentItem[p].length-1);
+							var fieldHtmlName = getHtmlName(p.toString());
+							addConstraint();
+							var createdConstraintIndex = counter - 1;
+							document.getElementsByName("fieldText"+createdConstraintIndex)[0].value = fieldHtmlName;
+							document.getElementsByName("valueText"+createdConstraintIndex)[0].value = contentItem[p].substring(1, contentItem[p].length-1);
 						}
 					}
 				}	
@@ -415,6 +406,17 @@ Server: Jetty(6.1.x)
 		var lurl = "${it.publicBaseUri}contenthub/${it.indexName}/search/featured?fromStore=\"y\"&queryTerm=" + $("#searchKeywords").val();
 		window.location.replace(lurl);
 	}
+	
+  function getHtmlName(name){
+    lastUnderscore = name.lastIndexOf("_");
+    if (lastUnderscore >= 0) {
+      underScoreExtension = name.substring(lastUnderscore);
+      if (underScoreExtension == "_t" || underScoreExtension == "_l" || underScoreExtension == "_d" || underScoreExtension == "_dt") {
+        return name.substring(0, lastUnderscore);
+      }
+    }
+    return name;
+  }
 	
 </script>
 </@common.page>
