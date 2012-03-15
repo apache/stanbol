@@ -46,8 +46,9 @@ import org.apache.stanbol.contenthub.search.featured.util.SolrContentItemConvert
 import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FeaturedSearch;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.ResultantDocument;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearchManager;
@@ -120,27 +121,47 @@ public class FeaturedSearchImpl implements FeaturedSearch {
         return search(queryTerm, null, null);
     }
 
-    private List<FacetField> bringAnnotatedFacetsForward(List<FacetField> facets) {
-        List<FacetField> annotatedEntityFacets = new ArrayList<FacetField>();
-        List<FacetField> facetsHavingNullValues = new ArrayList<FacetField>();
-        for (FacetField ff : facets) {
+    private List<FacetResult> sortFacets(List<FacetField> facetFields) {
+        List<FacetResult> facets = new ArrayList<FacetResult>();
+        List<FacetResult> orderedFacets = new ArrayList<FacetResult>();
+        for (FacetField facetField : facetFields) {
+            facets.add(new FacetResultImpl(facetField));
+        }
+
+        int annotatedFacetNum = 0;
+        for (FacetResult ff : facets) {
             String facetName = ff.getName();
             if (ff.getValues() == null) {
-                facetsHavingNullValues.add(ff);
+                continue;
             } else if (SolrVocabulary.SolrFieldName.isAnnotatedEntityFacet(facetName)) {
-                annotatedEntityFacets.add(ff);
+                orderedFacets.add(annotatedFacetNum, ff);
+                annotatedFacetNum++;
+            } else {
+                boolean inserted = false;
+                for (int j = annotatedFacetNum; j < orderedFacets.size(); j++) {
+                    if (facetName.compareTo(orderedFacets.get(j).getName()) < 0) {
+                        orderedFacets.add(j, ff);
+                        inserted = true;
+                        break;
+                    }
+                }
+                if (inserted == false) {
+                    orderedFacets.add(ff);
+                }
             }
         }
-        for (FacetField ff : annotatedEntityFacets) {
-            facets.remove(ff);
-        }
-        for (FacetField ff : annotatedEntityFacets) {
-            facets.add(0, ff);
-        }
-        for (FacetField ff : facetsHavingNullValues) {
-            facets.remove(ff);
-        }
-        return facets;
+
+        return orderedFacets;
+    }
+
+    public static void main(String[] args) {
+        String a = "a";
+        String b = "b";
+        String ab = "ab";
+
+        System.out.println(a.compareTo(b));
+        System.out.println(a.compareTo(ab));
+        System.out.println(b.compareTo(ab));
     }
 
     @Override
@@ -153,9 +174,10 @@ public class FeaturedSearchImpl implements FeaturedSearch {
                                 QueryResponse queryResponse,
                                 String ontologyURI,
                                 String ldProgramName) throws SearchException {
-        List<ResultantDocument> resultantDocuments = new ArrayList<ResultantDocument>();
+        List<DocumentResult> resultantDocuments = new ArrayList<DocumentResult>();
         for (SolrDocument solrDocument : queryResponse.getResults()) {
-            resultantDocuments.add(SolrContentItemConverter.solrDocument2solrContentItem(solrDocument, ldProgramName));
+            resultantDocuments.add(SolrContentItemConverter.solrDocument2solrContentItem(solrDocument,
+                ldProgramName));
         }
         Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords = new HashMap<String,Map<String,List<RelatedKeyword>>>();
         List<String> queryTerms = tokenizeEntities(queryTerm);
@@ -164,8 +186,8 @@ public class FeaturedSearchImpl implements FeaturedSearch {
             relatedKeywords.putAll(relatedKeywordSearchManager.getRelatedKeywordsFromAllSources(queryToken,
                 ontologyURI).getRelatedKeywords());
         }
-        return new FeaturedSearchResult(resultantDocuments,
-                bringAnnotatedFacetsForward(queryResponse.getFacetFields()), relatedKeywords);
+        return new FeaturedSearchResult(resultantDocuments, sortFacets(queryResponse.getFacetFields()),
+                relatedKeywords);
     }
 
     @Override

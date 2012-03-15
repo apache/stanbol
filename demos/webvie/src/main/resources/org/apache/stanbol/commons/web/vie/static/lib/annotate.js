@@ -585,9 +585,14 @@
           if (typeof property === "string" && entity.get(property)) {
             labelArr = _.flatten([entity.get(property)]);
             label = _(labelArr).detect(function(label) {
-              if (label.indexOf("@" + lang) > -1) return true;
+              if (typeof label === "string" && label.toString().indexOf("@" + lang) > -1) {
+                true;
+              }
+              if (typeof label === "object" && label["@language"] === lang) {
+                return true;
+              }
             });
-            if (label) return label.replace(/(^\"*|\"*@..$)/g, "");
+            if (label) return label.toString().replace(/(^\"*|\"*@..$)/g, "");
           } else if (typeof property === "object" && entity.get(property.property)) {
             valueArr = _.flatten([entity.get(property.property)]);
             valueArr = _(valueArr).map(function(termUri) {
@@ -1063,10 +1068,10 @@
           if (typeof property === "string" && entity.get(property)) {
             labelArr = _.flatten([entity.get(property)]);
             label = _(labelArr).detect(function(label) {
-              if (typeof label === "string" && label.indexOf("@" + lang) > -1) {
+              if (typeof label === "string" && label.toString().indexOf("@" + lang) > -1) {
                 true;
               }
-              if (typeof label === "object" && label["@lang"] === lang) {
+              if (typeof label === "object" && label["@language"] === lang) {
                 return true;
               }
             });

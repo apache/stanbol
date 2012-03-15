@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.entityhub.indexing.parent</artifactId>
-		<version>0.9.0-incubating</version>
+		<version>0.9.0-incubating-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 

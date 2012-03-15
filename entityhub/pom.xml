@@ -22,7 +22,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.reactor</artifactId>
-  <version>0.9.0-incubating</version>
+  <version>0.9.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Entityhub reactor</name>
@@ -60,6 +60,7 @@
     -->
     <!-- Utils for createing local caches (indexing utils) -->
     <module>indexing</module>
+    <module>defaults</module>
     <module>bundlelist</module>
   </modules>
 </project>

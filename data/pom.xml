@@ -21,7 +21,7 @@
 
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.reactor</artifactId>
-    <version>0.9.0-incubating</version>
+    <version>0.9.0-incubating-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <name>Apache Stanbol Data reactor</name>
@@ -36,7 +36,7 @@
     </scm>
     <modules>
         <module>parent</module>
-        <module>bundlelist</module>
+        <module>defaultconfig</module>
     </modules>
   <profiles>
     <profile>
@@ -56,6 +56,7 @@
         <module>opennlp/lang/en</module>
         <module>opennlp/ner/en</module>
         <module>registries/default</module>
+        <module>bundlelists/defaultdata</module>
       </modules>
     </profile>
     <profile>
@@ -82,7 +83,7 @@
        -->
       <id>opennlp</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
+        <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
         <module>opennlp/lang/da</module>
@@ -94,6 +95,7 @@
         <module>opennlp/ner/en</module>
         <module>opennlp/ner/es</module>
         <module>opennlp/ner/nl</module>
+        <module>bundlelists/opennlp</module>
       </modules>
     </profile>
   </profiles>

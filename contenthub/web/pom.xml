@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.contenthub.parent</artifactId>
-    <version>0.9.0-incubating</version>
+    <version>0.9.0-incubating-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
 
@@ -63,6 +63,9 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
+            <!-- AL20 License -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+
             <!-- MIT License -->
             <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/style/jquery-ui-1.8.11.custom.css</exclude>
             <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jquery-ui-1.8.11.custom.min.js</exclude>

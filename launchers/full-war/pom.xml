@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>0.9.0-incubating</version>
+    <version>0.9.0-incubating-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
@@ -104,16 +104,6 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- AL20 licensed files. See src/main/webapp/WEB-INF/README -->
-            <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.sling.commons.log.LogManager.factory.config-solrlogconfig.config</exclude>
-            <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.stanbol.commons.solr.managed.impl.ManagedSolrServerImpl-default.config</exclude>
-            <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.stanbol.commons.solr.web.impl.SolrDispatchFilterComponent-default.config</exclude>
-            <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine-local.config</exclude>
-            <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.stanbol.entityhub.core.impl.EntityhubConfigurationImpl.config</exclude>
-            <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-entityhub.config</exclude>
-            <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.stanbol.examples.ExampleBootstrapConfig.cfg</exclude>
-            <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.stanbol.enhancer.engines.opennlp.impl.NamedEntityExtractionEnhancementEngine-default.config</exclude>
-            <exclude>src/main/webapp/WEB-INF/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-language.config</exclude>
           </excludes>
         </configuration>
       </plugin>
@@ -161,7 +151,7 @@
     <!-- Stanbol Data Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.data.bundlelist</artifactId>
+      <artifactId>org.apache.stanbol.data.bundlelists.defaultdata</artifactId>
       <type>partialbundlelist</type>
     </dependency>
 

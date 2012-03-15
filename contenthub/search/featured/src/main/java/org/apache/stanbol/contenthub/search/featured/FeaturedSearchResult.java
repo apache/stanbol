@@ -19,19 +19,19 @@ package org.apache.stanbol.contenthub.search.featured;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.ResultantDocument;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
 
 public class FeaturedSearchResult implements SearchResult {
 
-    private List<ResultantDocument> resultantDocuments;
-    private List<FacetField> facets;
+    private List<DocumentResult> resultantDocuments;
+    private List<FacetResult> facets;
     private Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords;
-    
-    public FeaturedSearchResult(List<ResultantDocument> resultantDocuments,
-                                List<FacetField> facets,
+
+    public FeaturedSearchResult(List<DocumentResult> resultantDocuments,
+                                List<FacetResult> facets,
                                 Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords) {
         this.resultantDocuments = resultantDocuments;
         this.facets = facets;
@@ -39,27 +39,27 @@ public class FeaturedSearchResult implements SearchResult {
     }
 
     @Override
-    public List<ResultantDocument> getResultantDocuments() {
+    public List<DocumentResult> getResultantDocuments() {
         return this.resultantDocuments;
     }
 
     @Override
-    public List<FacetField> getFacets() {
+    public List<FacetResult> getFacets() {
         return this.facets;
     }
-    
+
     @Override
     public Map<String,Map<String,List<RelatedKeyword>>> getRelatedKeywords() {
         return this.relatedKeywords;
     }
 
     @Override
-    public void setDocuments(List<ResultantDocument> resultantDocuments) {
+    public void setDocuments(List<DocumentResult> resultantDocuments) {
         this.resultantDocuments = resultantDocuments;
     }
 
     @Override
-    public void setFacets(List<FacetField> facets) {
+    public void setFacets(List<FacetResult> facets) {
         this.facets = facets;
     }
 

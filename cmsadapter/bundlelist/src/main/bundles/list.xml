@@ -70,32 +70,32 @@
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
-			<version>0.9.0-incubating</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.core</artifactId>
-			<version>0.9.0-incubating</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.web</artifactId>
-			<version>0.9.0-incubating</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.jcr</artifactId>
-			<version>0.9.0-incubating</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.cmis</artifactId>
-			<version>0.9.0-incubating</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.rest.client</artifactId>
-			<version>0.9.0-incubating</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
 </bundles>

@@ -16,12 +16,26 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.DefaultValue;
@@ -37,8 +51,13 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.ontologies.OWL;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
@@ -65,6 +84,16 @@ public class StoredOntologyResource extends BaseStanbolResource {
     protected OntologyProvider<?> ontologyProvider;
 
     /*
+     * TODO before implementing removal, we need OWL dependency checks.
+     */
+    // @DELETE
+    public Response remove(@PathParam("ontologyId") String ontologyid, @Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    /*
      * Placeholder for the OntologyProvider to be fetched from the servlet context.
      */
     protected RegistryManager registryManager;
@@ -76,6 +105,64 @@ public class StoredOntologyResource extends BaseStanbolResource {
             OntologyProvider.class, servletContext);
         this.registryManager = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
             servletContext);
+    }
+
+    @GET
+    @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON})
+    public Response getManagedGraph(@PathParam("ontologyId") String ontologyId,
+                                    @DefaultValue("false") @QueryParam("merge") boolean merged,
+                                    @Context UriInfo uriInfo,
+                                    @Context HttpHeaders headers) {
+        if (ontologyId == null) return Response.status(Status.BAD_REQUEST).build();
+        IRI iri = IRI.create(ontologyId);
+        log.debug("Will try to retrieve ontology {} from provider.", iri);
+        /*
+         * Export directly to MGraph since the OWLOntologyWriter uses (de-)serializing converters for the
+         * other formats.
+         */
+        MGraph o = null;
+        try {
+            o = new IndexedMGraph((MGraph) ontologyProvider.getStoredOntology(iri, MGraph.class, merged));
+        } catch (Exception ex) {
+            log.warn("Retrieval of ontology with ID " + iri + " failed.", ex);
+        }
+
+        if (o == null) {
+            log.debug(
+                "Ontology {} not found in any ontology provider (and Clerezza triple collections are not yet supported by the registry manager).",
+                iri);
+            return Response.status(NOT_FOUND).build();
+        }
+
+        log.debug("Retrieved ontology {} .", iri);
+
+        // Rewrite imports
+        String uri = uriInfo.getRequestUri().toString();
+        URI base = URI.create(uri.substring(0, uri.lastIndexOf(ontologyId) - 1));
+
+        // Rewrite import statements
+        /*
+         * TODO manage import rewrites better once the container ID is fully configurable (i.e. instead of
+         * going upOne() add "session" or "ontology" if needed).
+         */
+        Iterator<Triple> imports = o.filter(null, OWL.imports, null);
+        Set<Triple> oldImports = new HashSet<Triple>();
+        while (imports.hasNext())
+            oldImports.add(imports.next());
+        for (Triple t : oldImports) {
+            // construct new statement
+            String s = ((UriRef) t.getObject()).getUnicodeString();
+            if (s.contains("::")) s = s.substring(s.indexOf("::") + 2, s.length());
+            UriRef target = new UriRef(base + "/" + s);
+            o.add(new TripleImpl(t.getSubject(), OWL.imports, target));
+            // remove old statement
+            o.remove(t);
+        }
+
+        ResponseBuilder rb = Response.ok(o);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+
     }
 
     /**
@@ -91,8 +178,7 @@ public class StoredOntologyResource extends BaseStanbolResource {
      *         exist, or the if the ontology either does not exist or is not managed.
      */
     @GET
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    @Produces(value = {RDF_XML, TURTLE, X_TURTLE, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
     public Response getManagedOntology(@PathParam("ontologyId") String ontologyId,
                                        @DefaultValue("false") @QueryParam("merge") boolean merged,
                                        @Context UriInfo uriInfo,
@@ -100,7 +186,7 @@ public class StoredOntologyResource extends BaseStanbolResource {
         if (ontologyId == null) return Response.status(Status.BAD_REQUEST).build();
         IRI iri = IRI.create(ontologyId);
         log.debug("Will try to retrieve ontology {} from provider.", iri);
-        // TODO replace OWLOntology with Graph.
+        // TODO be selective: if the ontology is small enough, use OWLOntology otherwise export to Graph.
         OWLOntology o = null;
         try {
             o = (OWLOntology) ontologyProvider.getStoredOntology(iri, OWLOntology.class, merged);
@@ -129,8 +215,11 @@ public class StoredOntologyResource extends BaseStanbolResource {
                 }
             }
         }
-        log.debug("Ontology {} not found in any ontology provider or library.", iri);
-        if (o == null) return Response.status(NOT_FOUND).build();
+
+        if (o == null) {
+            log.debug("Ontology {} not found in any ontology provider or library.", iri);
+            return Response.status(NOT_FOUND).build();
+        }
 
         log.debug("Retrieved ontology {} .", iri);
 
@@ -148,7 +237,7 @@ public class StoredOntologyResource extends BaseStanbolResource {
         for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
             changes.add(new RemoveImport(o, oldImp));
             String s = oldImp.getIRI().toString();
-            s = s.substring(s.indexOf("::") + 2, s.length());
+            if (s.contains("::")) s = s.substring(s.indexOf("::") + 2, s.length());
             IRI target = IRI.create(base + "/" + s);
             changes.add(new AddImport(o, df.getOWLImportsDeclaration(target)));
         }

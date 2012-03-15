@@ -22,7 +22,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.reactor</artifactId>
-  <version>0.9.0-incubating</version>
+  <version>0.9.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Enhancer Engines Reactor</name>
@@ -45,6 +45,7 @@
     <module>opennlp-ner</module>
     <module>langid</module>
     <module>topic</module>
+    <module>metaxa</module>
     <module>tika</module>
     <module>geonames</module>
     <module>entitytagging</module>

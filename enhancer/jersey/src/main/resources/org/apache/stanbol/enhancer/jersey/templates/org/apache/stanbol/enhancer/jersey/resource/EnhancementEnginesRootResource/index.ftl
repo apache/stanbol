@@ -41,11 +41,49 @@ Stanbol Enhancer.</p>
 </div>
 
 <div class="panel" id="restapi" style="display: none;">
-<h3>Enhancement Engines RESTful API</h3>
+<h3>Enhancement Engine Metadata</h3>
 
 <p>This stateless interface allows the caller to query all available
 Enhancement Engines</p>
+<p> GET requests with an accept header of any supported RDF serialisation 
+such as
+<code><pre>
+    curl -H "Accept: application/rdf+xml" ${it.publicBaseUri}enhancer/engine
+</pre></code>
+will return information about the available enhancement engines.</p>
 
+<h4>Example:</h4>
+<p><a href="#" onclick="getChainConfig(); return false;">clicking here</a> to
+get the metadata for the currently active enhancement engines</p>
+<script language="javascript">
+  function getChainConfig() {
+     var base = window.location.href.replace(/\/$/, "");
+     
+     $("#engineMetadataResult").show();     
+     
+     // submit the form query using Ajax
+     $.ajax({
+       type: "GET",
+       url: base,
+       data: "",
+       dataType: "text",
+       beforeSend: function(req) {
+         req.setRequestHeader("Accept", "application/rdf+xml");
+       },
+       cache: false,
+       success: function(result) {
+         $("#engineMetadata").text(result);
+       },
+       error: function(result) {
+         $("#engineMetadata").text('Error while loading chain config.');
+       }
+     });
+   }
+</script>
+<div id="engineMetadataResult" style="display: none">
+<p><a href="#" onclick="$('#engineMetadataResult').hide(); return false;">Hide results</a>
+<pre id="engineMetadata">... waiting for results ...</pre>
+</div>
 
 </div>
 

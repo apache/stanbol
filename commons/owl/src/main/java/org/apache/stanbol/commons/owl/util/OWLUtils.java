@@ -27,6 +27,7 @@ import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,8 @@ public class OWLUtils {
     public static final String NS_STANBOL = "http://stanbol.apache.org/";
 
     public static UriRef guessOntologyIdentifier(Object g) {
-        if (g instanceof TripleCollection) return guessOntologyIdentifier((TripleCollection) g);
+        if (g instanceof TripleCollection) return URIUtils.createUriRef(guessOWLOntologyID(
+            (TripleCollection) g).getOntologyIRI());
         else if (g instanceof OWLOntology) return URIUtils
                 .createUriRef(guessOntologyIdentifier((OWLOntology) g));
         else throw new IllegalArgumentException("Cannot guess ontology identifier for objects of type "
@@ -86,7 +88,27 @@ public class OWLUtils {
         return new UriRef(NS_STANBOL + System.currentTimeMillis());
     }
 
+    public static OWLOntologyID guessOWLOntologyID(TripleCollection g) {
+        IRI ontologyIri = null, versionIri = null;
+        Iterator<Triple> it = g.filter(null, RDF.type, OWL.Ontology);
+        if (it.hasNext()) {
+            NonLiteral subj = it.next().getSubject();
+            if (it.hasNext()) log.warn(
+                "RDF Graph {} has multiple OWL ontology definitions! Ignoring all but {}", g, subj);
+            if (subj instanceof UriRef) {
+                ontologyIri = IRI.create(((UriRef) subj).getUnicodeString());
+                Iterator<Triple> it2 = g.filter((UriRef) subj, new UriRef(OWL2Constants.OWL_VERSION_IRI),
+                    null);
+                if (it2.hasNext()) versionIri = IRI.create(((UriRef) it2.next().getObject())
+                        .getUnicodeString());
+            }
+        }
+        if (ontologyIri == null) ontologyIri = IRI.create(NS_STANBOL + System.currentTimeMillis());
+        if (versionIri == null) return new OWLOntologyID(ontologyIri);
+        else return new OWLOntologyID(ontologyIri, versionIri);
+    }
+
     public static IRI guessOntologyIdentifier(UriRef key, TcProvider store) {
-        return IRI.create(guessOntologyIdentifier(store.getTriples(key)).getUnicodeString());
+        return guessOWLOntologyID(store.getTriples(key)).getOntologyIRI();
     }
 }

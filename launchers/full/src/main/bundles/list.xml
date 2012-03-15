@@ -31,11 +31,6 @@
 <!-- 			<artifactId>mime-util</artifactId> -->
 <!-- 			<version>2.1.3</version> -->
 <!-- 		</bundle> -->
-		<bundle> <!-- used by langid -->
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-core</artifactId>
-			<version>0.9</version>
-		</bundle>
   </startLevel>
 
   <!-- Jersey -->
@@ -53,7 +48,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
 
@@ -65,11 +60,6 @@
   <!-- Stanbol OWL now part of commons -->
   <!--
   <startLevel level="22">
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owl</artifactId>
-			<version>0.9.0-incubating</version>
-	  </bundle>
   </startLevel>
   -->
   
@@ -83,7 +73,7 @@
     <bundle>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.web.vie</artifactId>
-        <version>0.9.0-incubating</version>
+        <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
 

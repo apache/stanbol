@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>0.9.0-incubating</version>
+    <version>0.9.0-incubating-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
@@ -67,24 +67,24 @@
       <artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
     </dependency>
     <dependency>
-		  <groupId>org.apache.james</groupId>
-		  <artifactId>apache-mime4j</artifactId>
-		  <scope>provided</scope>
+      <groupId>org.apache.james</groupId>
+	  <artifactId>apache-mime4j</artifactId>
+	  <scope>provided</scope>
     </dependency>
     <dependency>
-  		<groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-  		<scope>provided</scope>
+  	  <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient-osgi</artifactId>
+  	  <scope>provided</scope>
     </dependency>
     <dependency>
-		  <groupId>org.apache.httpcomponents</groupId>
-		  <artifactId>httpcore</artifactId>
-  		<scope>provided</scope>
+	  <groupId>org.apache.httpcomponents</groupId>
+	  <artifactId>httpcore-osgi</artifactId>
+  	  <scope>provided</scope>
     </dependency>
   	<dependency>
-		  <groupId>org.apache.httpcomponents</groupId>
-		  <artifactId>httpmime</artifactId>
-		  <scope>provided</scope>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
     

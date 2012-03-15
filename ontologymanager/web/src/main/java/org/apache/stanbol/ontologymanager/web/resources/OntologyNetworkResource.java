@@ -17,8 +17,18 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
 import java.util.Set;
 
@@ -38,7 +48,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -119,8 +128,8 @@ public class OntologyNetworkResource extends BaseStanbolResource {
      * @return a string representation of the requested scope set, in a format acceptable by the client.
      */
     @GET
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    @Produces(value = {RDF_XML, OWL_XML, TURTLE, X_TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON, N3,
+                       N_TRIPLE, TEXT_PLAIN})
     public Response getScopeModel(@DefaultValue("false") @QueryParam("with-inactive") boolean inactive,
                                   @Context HttpHeaders headers,
                                   @Context ServletContext servletContext) {

@@ -137,7 +137,7 @@ public class ClerezzaBackendTest {
             assertTrue(concept instanceof UriRef);
             assertTrue(expected.remove(concept));
         }
-        assertTrue(expected.isEmpty());
+        assertTrue("missing: "+expected,expected.isEmpty());
     }
     @Test
     public void testStringTransformer() throws LDPathParseException {

@@ -25,6 +25,7 @@ import org.apache.stanbol.commons.testing.http.BundleContextMock;
 import org.apache.stanbol.commons.testing.http.ServletContextMock;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.factstore.FactStoreMock;
+import org.apache.stanbol.factstore.HttpHeadersMock;
 import org.apache.stanbol.factstore.UriInfoMock;
 import org.apache.stanbol.factstore.api.FactStore;
 import org.apache.stanbol.factstore.web.resource.FactsResource;
@@ -50,7 +51,7 @@ public class FactsResourceTest {
     @Test
     public void testGet() {
         FactsResource fr = new FactsResourceWrapper(this.servletContext, this.uriInfoMock);
-        Response response = fr.get();
+        Response response = fr.get(new HttpHeadersMock());
         assertTrue(response.getStatus() == Status.OK.getStatusCode());
     }
 
@@ -58,7 +59,7 @@ public class FactsResourceTest {
     public void testPutFactSchemaNoSchemaURI() {
         FactsResource fr = new FactsResourceWrapper(this.servletContext, this.uriInfoMock);
 
-        Response response = fr.putFactSchema("", null);
+        Response response = fr.putFactSchema("", null, new HttpHeadersMock());
         assertTrue(response.getStatus() == Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -66,7 +67,7 @@ public class FactsResourceTest {
     public void testPutFactSchemaNoJSON() {
         FactsResource fr = new FactsResourceWrapper(this.servletContext, this.uriInfoMock);
 
-        Response response = fr.putFactSchema("no JSON-LD string", "test2");
+        Response response = fr.putFactSchema("no JSON-LD string", "test2", new HttpHeadersMock());
         assertTrue(response.getStatus() == Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -74,7 +75,7 @@ public class FactsResourceTest {
     public void testPutFactSchemaNoJSONSchema() {
         FactsResource fr = new FactsResourceWrapper(this.servletContext, this.uriInfoMock);
 
-        Response response = fr.putFactSchema("{}", "test2");
+        Response response = fr.putFactSchema("{}", "test2", new HttpHeadersMock());
         assertTrue(response.getStatus() == Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -85,7 +86,8 @@ public class FactsResourceTest {
         Response response = fr
                 .putFactSchema(
                     "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}",
-                    "http://www.test.de/this/urn/is/a/bit/too/long/to/be/used/in/this/fact/store/implementation/with/derby");
+                    "http://www.test.de/this/urn/is/a/bit/too/long/to/be/used/in/this/fact/store/implementation/with/derby",
+                    new HttpHeadersMock());
         assertTrue(response.getStatus() == Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -96,7 +98,7 @@ public class FactsResourceTest {
         Response response = fr
                 .putFactSchema(
                     "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}",
-                    "test2");
+                    "test2", new HttpHeadersMock());
         assertTrue(response.getStatus() == Status.CREATED.getStatusCode());
     }
 
@@ -105,7 +107,9 @@ public class FactsResourceTest {
         FactsResource fr = new FactsResourceWrapper(this.servletContext, this.uriInfoMock);
 
         Response response = fr
-                .postFacts("{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}");
+                .postFacts(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}",
+                    new HttpHeadersMock());
 
         assertTrue(response.getStatus() == Status.OK.getStatusCode());
         System.out.println(response.getMetadata().get("Location").get(0));
@@ -117,7 +121,9 @@ public class FactsResourceTest {
         FactsResource fr = new FactsResourceWrapper(this.servletContext, this.uriInfoMock);
 
         Response response = fr
-                .postFacts("{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"@subject\":[{\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"person\":{\"@iri\":\"upb:fchrist\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}]}");
+                .postFacts(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"@subject\":[{\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"person\":{\"@iri\":\"upb:fchrist\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}]}",
+                    new HttpHeadersMock());
 
         assertTrue(response.getStatus() == Status.OK.getStatusCode());
         assertNull(response.getEntity());
@@ -128,7 +134,9 @@ public class FactsResourceTest {
         FactsResource fr = new FactsResourceWrapper(this.servletContext, this.uriInfoMock);
 
         Response response = fr
-                .postFacts("{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@subject\":[{\"@profile\":\"iks:employeeOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"@profile\":\"iks:friendOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"friend\":{\"@iri\":\"upb:fchrist\"}}]}");
+                .postFacts(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@subject\":[{\"@profile\":\"iks:employeeOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"@profile\":\"iks:friendOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"friend\":{\"@iri\":\"upb:fchrist\"}}]}",
+                    new HttpHeadersMock());
 
         assertTrue(response.getStatus() == Status.OK.getStatusCode());
     }

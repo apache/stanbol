@@ -16,19 +16,25 @@
  */
 package org.apache.stanbol.cmsadapter.web.resources;
 
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+
 import java.util.Hashtable;
 import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.cmsadapter.core.helper.TcManagerClient;
@@ -77,10 +83,18 @@ public class ObjectTypesResource extends BaseStanbolResource {
         }
     }
 
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
     @SuppressWarnings("unchecked")
     @POST
     public Response liftObjectTypes(@PathParam("ontologyURI") String ontologyURI,
-                                    @FormParam("objectTypeDefinitions") ObjectTypeDefinitions objectTypeDefinitions) {
+                                    @FormParam("objectTypeDefinitions") ObjectTypeDefinitions objectTypeDefinitions,
+                                    @Context HttpHeaders headers) {
 
         List<ObjectTypeDefinition> createdObjectList = objectTypeDefinitions.getObjectTypeDefinition();
 
@@ -93,13 +107,17 @@ public class ObjectTypesResource extends BaseStanbolResource {
         conf.setObjects((List<Object>) (List<?>) createdObjectList);
         conf.setAdapterMode(AdapterMode.STRICT_OFFLINE);
         engine.createModel(conf);
-        return Response.ok().build();
+
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     @SuppressWarnings("unchecked")
     @PUT
     public Response updateClassificationObjects(@PathParam("ontologyURI") String ontologyURI,
-                                                @FormParam("objectTypeDefinitions") ObjectTypeDefinitions objectTypeDefinitions) {
+                                                @FormParam("objectTypeDefinitions") ObjectTypeDefinitions objectTypeDefinitions,
+                                                @Context HttpHeaders headers) {
 
         List<ObjectTypeDefinition> createdObjectList = objectTypeDefinitions.getObjectTypeDefinition();
         TcManagerClient tcManagerClient = new TcManagerClient(tcManager);
@@ -111,13 +129,17 @@ public class ObjectTypesResource extends BaseStanbolResource {
         conf.setObjects((List<Object>) (List<?>) createdObjectList);
         conf.setAdapterMode(AdapterMode.STRICT_OFFLINE);
         engine.updateModel(conf);
-        return Response.ok().build();
+
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     @SuppressWarnings("unchecked")
     @DELETE
     public Response deleteClassificationObjects(@PathParam("ontologyURI") String ontologyURI,
-                                                @FormParam("objectTypeDefinitions") ObjectTypeDefinitions objectTypeDefinitions) {
+                                                @FormParam("objectTypeDefinitions") ObjectTypeDefinitions objectTypeDefinitions,
+                                                @Context HttpHeaders headers) {
 
         List<ObjectTypeDefinition> createdObjectList = objectTypeDefinitions.getObjectTypeDefinition();
         TcManagerClient tcManagerClient = new TcManagerClient(tcManager);
@@ -129,6 +151,9 @@ public class ObjectTypesResource extends BaseStanbolResource {
         conf.setObjects((List<Object>) (List<?>) createdObjectList);
         conf.setAdapterMode(AdapterMode.STRICT_OFFLINE);
         engine.deleteModel(conf);
-        return Response.ok().build();
+
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 }

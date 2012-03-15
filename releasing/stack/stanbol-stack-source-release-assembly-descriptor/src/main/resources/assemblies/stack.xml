@@ -32,20 +32,21 @@
       <excludes>
         <exclude>PLAYGROUND.txt</exclude>
 
+        <!-- license issues -->
+        <exclude>enhancer/engines/metaxa/**</exclude>
+        <exclude>reasoners/hermit/**</exclude>
+        <exclude>reasoners/owllink/**</exclude>
+
         <!-- unstable/old stuff in enhancer -->
         <exclude>enhancer/autotagging/**</exclude>
         <exclude>enhancer/engines/autotagging/**</exclude>
-        <exclude>enhancer/engines/metaxa/**</exclude>
         <exclude>enhancer/dereferencing/**</exclude>
         <exclude>enhancer/query-rendering/**</exclude>
         <exclude>enhancer/SemiAutomaticContentEnhancer/**</exclude>
         <exclude>enhancer/stores/**</exclude>
 
         <!-- demos have their own release cycle -->
-        <exclude>demos/assap/**</exclude>
-        <exclude>demos/crawler/**</exclude>
-        <exclude>demos/integritycheck/**</exclude>
-        <exclude>demos/semanticbookmarks/**</exclude>
+        <exclude>demos/**</exclude>
 
         <!-- exclude components of KReS profile -->
         <exclude>ontologymanager/store/**</exclude>
@@ -95,13 +96,6 @@
     <fileSet>
       <directory>${project.build.directory}/maven-shared-archive-resources/META-INF</directory>
       <outputDirectory>/</outputDirectory>
-      <includes>
-        <include>*/**</include>
-      </includes>
-      <excludes>
-        <exclude>NOTICE</exclude>
-        <exclude>LICENSE</exclude>
-      </excludes>
     </fileSet>
   </fileSets>
 </component>

@@ -76,7 +76,6 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
         }
     }
 
-    // copied from SiteManagerRootResource
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();

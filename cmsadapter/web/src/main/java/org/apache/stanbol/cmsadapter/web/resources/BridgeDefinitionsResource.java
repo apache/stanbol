@@ -16,17 +16,23 @@
  */
 package org.apache.stanbol.cmsadapter.web.resources;
 
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+
 import java.util.Hashtable;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.cmsadapter.core.mapping.MappingConfigurationImpl;
@@ -52,13 +58,13 @@ public class BridgeDefinitionsResource extends BaseStanbolResource {
 
     private MappingEngine engine;
 
-    @SuppressWarnings("rawtypes")
     public BridgeDefinitionsResource(@Context ServletContext context) {
         try {
             BundleContext bundleContext = (BundleContext) context.getAttribute(BundleContext.class.getName());
             ServiceReference serviceReference = bundleContext.getServiceReferences(null,
                 MAPPING_ENGINE_COMPONENT_FACTORY_FILTER)[0];
             ComponentFactory componentFactory = (ComponentFactory) bundleContext.getService(serviceReference);
+            @SuppressWarnings("rawtypes")
             ComponentInstance componentInstance = componentFactory.newInstance(new Hashtable());
             this.engine = (MappingEngine) componentInstance.getInstance();
 
@@ -68,6 +74,13 @@ public class BridgeDefinitionsResource extends BaseStanbolResource {
         }
     }
 
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+    
     /**
      * Takes connection information to access the content managament system and executes the bridge
      * definitions. After completing processing of bridges, generated ontology is stored through <b>Store</b>
@@ -82,7 +95,8 @@ public class BridgeDefinitionsResource extends BaseStanbolResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response registeBridgeDefinitions(@FormParam("connectionInfo") ConnectionInfo connectionInfo,
-                                             @FormParam("bridgeDefinitions") BridgeDefinitions bridgeDefinitions) {
+                                             @FormParam("bridgeDefinitions") BridgeDefinitions bridgeDefinitions,
+                                             @Context HttpHeaders headers) {
 
         if(connectionInfo == null) {
             logger.warn("No specified connection info");
@@ -105,6 +119,8 @@ public class BridgeDefinitionsResource extends BaseStanbolResource {
             logger.warn("Cannot access to repository", e);
         }
 
-        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        ResponseBuilder rb = Response.status(Status.INTERNAL_SERVER_ERROR);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 }

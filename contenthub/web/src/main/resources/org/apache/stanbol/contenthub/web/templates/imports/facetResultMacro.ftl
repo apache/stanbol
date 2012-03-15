@@ -14,51 +14,46 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+<#escape x as x?html>
 <#macro facetResultMacro facetField consLink>
 	<#assign limit=4 />
 	<#if facetField?exists>
 		<#if facetField.values?exists && facetField.values?size != 0>
+      <#assign consLinkEscaped = consLink/>
+      <#assign facetNameEscaped = facetField.name?url("UTF-8")?js_string/>
+      
 			<#if facetField.name == "stanbolreserved_creationdate">
-				<#assign facetName=facetField.name?substring(facetField.name?index_of("_")+1,facetField.name?length)/>
-				${facetName}
+				<#assign facetHtmlName=facetField.htmlName />
+				${facetHtmlName}
 				<br/>
 				<#assign orderedList = facetField.values?sort_by("name") />
 				<ul><li>
 					<input id="dateFrom" class="facetText" type="text" value="${orderedList[0].name?substring(0,10)}" readonly="true"/> 
 					to <input id="dateTo" class="facetText" type="text" value="${orderedList[orderedList?size-1].name?substring(0,10)}" readonly="true"/>
-				  <#assign consLinkEscaped = consLink?url("UTF-8")?js_string/>
 					<a href="javascript:getResults('${consLinkEscaped}','stanbolreserved_creationdate','','date')"><input type="button" value=">" /></a>
 				</li></ul>
 			<#else>
-				<#if facetField.name?last_index_of("_") &gt; 0>
-					<#assign facetName=facetField.name?substring(0,facetField.name?last_index_of("_"))/>
-				<#else>
-					<#assign facetName=facetField.name />
-				</#if>
-				${facetName}
-				<ul id="${facetName}list">
+				<#assign facetHtmlName=facetField.htmlName />
+				${facetHtmlName}
+				<ul id="${facetHtmlName}list">
 					<#if facetField.name?ends_with("_l")>
 						<li>
-							<input id="${facetField.name}TextMin" class="facetText" type="text"/> 
-							to <input id="${facetField.name}TextMax" class="facetText" type="text"/>
-							<#assign facetNameEscaped = facetField.name?url("UTF-8")?js_string/>
-							<#assign consLinkEscaped = consLink?url("UTF-8")?js_string/>
+							<input id="${facetHtmlName}TextMin" class="facetText" type="text"/> 
+							to <input id="${facetHtmlName}TextMax" class="facetText" type="text"/>
 							<a href="javascript:getResults('${consLinkEscaped}','${facetNameEscaped}','','range')"><input type="button" value=">" /></a>
 						</li>
 					</#if>
 					
 					<#assign x=0 />
 					<#list facetField.values as count>
-						<#assign facetNameEscaped = facetField.name?url("UTF-8")?js_string/>
 						<#assign countNameEscaped = count.name?url("UTF-8")?js_string/>
-						<#assign consLinkEscaped = consLink?url("UTF-8")?js_string/>
 						<#if x = limit><#break/></#if>
-						<li><a href=javascript:getResults('${consLinkEscaped}','${facetNameEscaped}','${countNameEscaped}','addFacet')>${count.name} ( ${count.count} )</a></li>
+						<li><a href="javascript:getResults('${consLinkEscaped}','${facetNameEscaped}','${countNameEscaped}','addFacet')">${count.name} ( ${count.count} )</a></li>
 						<#assign x=x+1 />
 					</#list>
 				</ul>						
 				<#if facetField.values?size &gt; limit>
-					<a id="${facetName?replace(':','_')}" href="">more</a><br>
+					<a id="${facetHtmlName?replace(':','_')}" href="">more</a><br>
 				</#if>
 			</#if>
 		</#if>
@@ -70,30 +65,28 @@
 	
 	
 	function init() {
-	
-		$(document).ready(function(){
 			$("#dateFrom").datepicker({ dateFormat: 'yy-mm-dd' });
 			$("#dateTo").datepicker({ dateFormat: 'yy-mm-dd' });
-		});
 	
-	   $("#${facetName?replace(':','_')}", this).click(function(e) {
+	   $("#${facetHtmlName?replace(':','_')}", this).click(function(e) {
 	     // disable regular form click
 	     e.preventDefault();
-	     if(document.getElementById("${facetName?replace(':','_')}").innerHTML == "more")
+	     if(document.getElementById("${facetHtmlName?replace(':','_')}").innerHTML == "more")
 	     {
 	     	 var a="<#list facetField.values as count><#assign consLinkEscaped = consLink?url("UTF-8")?js_string/><#assign countNameEscaped = count.name?url("UTF-8")?js_string/><#assign facetNameEscaped = facetField.name?url("UTF-8")?js_string/><li><a href=javascript:getResults('${consLinkEscaped}','${facetNameEscaped}','${countNameEscaped}','addFacet')>${count.name} ( ${count.count} )</a></li></#list>";
-	       document.getElementById("${facetName}list").innerHTML=a;
-	       $(this).attr({ 'innerHTML': 'less' });
+	       document.getElementById("${facetHtmlName}list").innerHTML=a;
+	       document.getElementById("${facetHtmlName?replace(':','_')}").innerHTML = "less";
   		 }
   		 else
   		 {
   		 	 var a="<#assign x=0 /><#list facetField.values as count><#if x = limit><#break/></#if><li><a href=javascript:getResults('${consLinkEscaped}','${facetNameEscaped}','${countNameEscaped}','addFacet')>${count.name} ( ${count.count} )</a></li><#assign x=x+1 /></#list>";
-  		 	 document.getElementById("${facetName}list").innerHTML=a;
-  		 	 $(this).attr({ 'innerHTML': 'more' });		 	
+  		 	 document.getElementById("${facetHtmlName}list").innerHTML=a;
+  		 	 document.getElementById("${facetHtmlName?replace(':','_')}").innerHTML = "more";		 	
   		 }    
      });
 	 }
-	 
+
 	 $(document).ready(init);
 </script>
 </#macro>
+</#escape>
