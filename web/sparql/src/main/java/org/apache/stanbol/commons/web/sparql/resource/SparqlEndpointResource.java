@@ -1,31 +1,34 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.commons.web.sparql.resource;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
@@ -43,6 +46,8 @@ import com.sun.jersey.api.view.Viewable;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 /**
  * Implementation of a SPARQL endpoint as defined by the W3C:
@@ -66,11 +71,18 @@ public class SparqlEndpointResource extends BaseStanbolResource {
         store = ContextHelper.getServiceFromContext(Store.class, ctx);
     }
 
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
     @GET
     @Consumes(APPLICATION_FORM_URLENCODED)
     @Produces({TEXT_HTML + ";qs=2", "application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
-    public Object sparql(@QueryParam(value = "query") String sparqlQuery) throws SparqlQueryEngineException,
-                                                                         ParseException {
+    public Response sparql(@QueryParam(value = "query") String sparqlQuery, @Context HttpHeaders headers) throws SparqlQueryEngineException,
+                                                                                                         ParseException {
         if (sparqlQuery == null) {
             return Response.ok(new Viewable("index", this), TEXT_HTML).build();
         }
@@ -82,15 +94,17 @@ public class SparqlEndpointResource extends BaseStanbolResource {
         // TODO: remove dependency on the "store" service and make it possible to select the default graph
         // instead
         Object result = tcManager.executeSparqlQuery(query, store.getEnhancementGraph());
-        return Response.ok(result, mediaType).build();
+        ResponseBuilder rb = Response.ok(result, mediaType);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     @POST
     @Consumes(APPLICATION_FORM_URLENCODED)
     @Produces({"application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
-    public Object postSparql(@FormParam("query") String sparqlQuery) throws SparqlQueryEngineException,
-                                                                    ParseException {
-        return sparql(sparqlQuery);
+    public Response postSparql(@FormParam("query") String sparqlQuery, @Context HttpHeaders headers) throws SparqlQueryEngineException,
+                                                                                                    ParseException {
+        return sparql(sparqlQuery, headers);
     }
 
 }
