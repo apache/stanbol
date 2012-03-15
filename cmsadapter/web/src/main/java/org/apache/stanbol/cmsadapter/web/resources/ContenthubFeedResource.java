@@ -17,6 +17,8 @@
 package org.apache.stanbol.cmsadapter.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +29,15 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.cmsadapter.core.mapping.ContenthubFeederManager;
@@ -63,10 +68,19 @@ public class ContenthubFeedResource extends BaseStanbolResource {
         feederManager = ContextHelper.getServiceFromContext(ContenthubFeederManager.class, context);
     }
 
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
     @GET
     @Produces(TEXT_HTML)
-    public Response get() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+    public Response get(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok(new Viewable("index", this), TEXT_HTML);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -115,8 +129,9 @@ public class ContenthubFeedResource extends BaseStanbolResource {
                                               @FormParam("id") String id,
                                               @FormParam("path") String path,
                                               @FormParam("recursive") @DefaultValue("false") boolean recursive,
-                                              @FormParam("contentProperties") @DefaultValue("skos:definition,content") String contentProperties) throws RepositoryAccessException,
-                                                                                                                                                ContenthubFeederException {
+                                              @FormParam("contentProperties") @DefaultValue("skos:definition,content") String contentProperties,
+                                              @Context HttpHeaders headers) throws RepositoryAccessException,
+                                                                           ContenthubFeederException {
 
         sessionKey = RestUtil.nullify(sessionKey);
         id = RestUtil.nullify(id);
@@ -144,7 +159,9 @@ public class ContenthubFeedResource extends BaseStanbolResource {
                     .entity("There is no parameter specified to select content repository objects\n").build();
         }
 
-        return Response.ok().build();
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -179,8 +196,9 @@ public class ContenthubFeedResource extends BaseStanbolResource {
     public Response deleteObjectsFromContenthub(@FormParam("sessionKey") String sessionKey,
                                                 @FormParam("id") String id,
                                                 @FormParam("path") String path,
-                                                @FormParam("recursive") @DefaultValue("false") boolean recursive) throws RepositoryAccessException,
-                                                                                                                 ContenthubFeederException {
+                                                @FormParam("recursive") @DefaultValue("false") boolean recursive,
+                                                @Context HttpHeaders headers) throws RepositoryAccessException,
+                                                                             ContenthubFeederException {
 
         sessionKey = RestUtil.nullify(sessionKey);
         id = RestUtil.nullify(id);
@@ -205,7 +223,9 @@ public class ContenthubFeedResource extends BaseStanbolResource {
                     .entity("There is no parameter specified to select content repository objects\n").build();
         }
 
-        return Response.ok().build();
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     private List<String> parseContentProperties(String contentProperties) {

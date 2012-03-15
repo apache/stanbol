@@ -17,6 +17,8 @@
 package org.apache.stanbol.cmsadapter.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -31,13 +33,16 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.Graph;
@@ -78,10 +83,35 @@ public class RDFMapperResource extends BaseStanbolResource {
         bridgeManager = ContextHelper.getServiceFromContext(RDFBridgeManager.class, context);
     }
 
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
+    @OPTIONS
+    @Path("/rdf")
+    public Response handleCorsPreflightRDF(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
+    @OPTIONS
+    @Path("/cms")
+    public Response handleCorsPreflightCMS(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
     @GET
     @Produces(TEXT_HTML)
-    public Response get() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+    public Response get(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok(new Viewable("index", this), TEXT_HTML);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -110,7 +140,8 @@ public class RDFMapperResource extends BaseStanbolResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response mapRawRDFToRepository(@FormParam("sessionKey") String sessionKey,
                                           @FormParam("serializedGraph") String serializedGraph,
-                                          @FormParam("url") String url) throws MalformedURLException,
+                                          @FormParam("url") String url,
+                                          @Context HttpHeaders headers) throws MalformedURLException,
                                                                        IOException {
 
         sessionKey = RestUtil.nullify(sessionKey);
@@ -133,7 +164,7 @@ public class RDFMapperResource extends BaseStanbolResource {
                     .build();
         }
 
-        Response r = mapRDF(g, sessionKey);
+        Response r = mapRDF(g, sessionKey, headers);
         logger.info("RDF mapping finished in: {} seconds", ((System.currentTimeMillis() - start) / 1000));
         return r;
     }
@@ -156,8 +187,9 @@ public class RDFMapperResource extends BaseStanbolResource {
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response mapRDFToRepositoryFromFile(@QueryParam("sessionKey") String sessionKey,
-                                   @FormDataParam("rdfFile") File rdfFile,
-                                   @FormDataParam("rdfFile") FormDataContentDisposition rdfFileInfo) throws IOException {
+                                               @FormDataParam("rdfFile") File rdfFile,
+                                               @FormDataParam("rdfFile") FormDataContentDisposition rdfFileInfo,
+                                               @Context HttpHeaders headers) throws IOException {
 
         sessionKey = RestUtil.nullify(sessionKey);
         if (sessionKey == null) {
@@ -175,12 +207,12 @@ public class RDFMapperResource extends BaseStanbolResource {
             return Response.status(Status.BAD_REQUEST).entity("There is no RDF file specified").build();
         }
 
-        Response r = mapRDF(g, sessionKey);
+        Response r = mapRDF(g, sessionKey, headers);
         logger.info("RDF mapping finished in: {} seconds", ((System.currentTimeMillis() - start) / 1000));
         return r;
     }
 
-    private Response mapRDF(Graph g, String sessionKey) {
+    private Response mapRDF(Graph g, String sessionKey, HttpHeaders headers) {
         try {
             bridgeManager.storeRDFToRepository(sessionKey, g);
         } catch (RepositoryAccessException e) {
@@ -192,7 +224,9 @@ public class RDFMapperResource extends BaseStanbolResource {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        return Response.ok().entity("RDF data has been mapped to the content repository").build();
+        ResponseBuilder rb = Response.ok().entity("RDF data has been mapped to the content repository");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -226,9 +260,10 @@ public class RDFMapperResource extends BaseStanbolResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(SupportedFormat.RDF_XML)
     public Response mapRepositoryToRDF(@FormParam("sessionKey") String sessionKey,
-                           @FormParam("baseURI") String baseURI,
-                           @FormParam("store") boolean store,
-                           @FormParam("update") @DefaultValue("true") boolean update) {
+                                       @FormParam("baseURI") String baseURI,
+                                       @FormParam("store") boolean store,
+                                       @FormParam("update") @DefaultValue("true") boolean update,
+                                       @Context HttpHeaders headers) {
 
         sessionKey = RestUtil.nullify(sessionKey);
         if (sessionKey == null) {
@@ -241,7 +276,9 @@ public class RDFMapperResource extends BaseStanbolResource {
             MGraph generatedGraph = bridgeManager.generateRDFFromRepository(baseURI, sessionKey, store,
                 update);
             logger.info("CMS mapping finished in: {} seconds", ((System.currentTimeMillis() - start) / 1000));
-            return Response.ok(generatedGraph, SupportedFormat.RDF_XML).build();
+            ResponseBuilder rb = Response.ok(generatedGraph, SupportedFormat.RDF_XML);
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         } catch (RepositoryAccessException e) {
             String message = e.getMessage();
             logger.warn(message, e);

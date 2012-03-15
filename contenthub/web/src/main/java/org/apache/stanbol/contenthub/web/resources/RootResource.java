@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.contenthub.web.resources;
 
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.net.URI;
@@ -35,7 +36,7 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
  * Base resource which automatically redirects to "contenthub/contenthub/store"
  * 
  * @author anil.sinaci
- *
+ * 
  */
 @Path("/contenthub")
 public class RootResource extends BaseStanbolResource {
@@ -46,9 +47,12 @@ public class RootResource extends BaseStanbolResource {
         enableCORS(servletContext, res, headers);
         return res.build();
     }
-    
+
     @GET
-    public Response getView() throws URISyntaxException {
-        return Response.seeOther(new URI(uriInfo.getBaseUri() + "contenthub/contenthub/store/")).build();
+    public Response getView(@Context HttpHeaders headers) throws URISyntaxException {
+        ResponseBuilder rb = Response
+                .seeOther(new URI(uriInfo.getBaseUri() + "contenthub/contenthub/store/"));
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 }

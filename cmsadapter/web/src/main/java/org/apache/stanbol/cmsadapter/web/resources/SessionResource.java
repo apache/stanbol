@@ -18,14 +18,19 @@ package org.apache.stanbol.cmsadapter.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.cmsadapter.core.repository.SessionManager;
@@ -48,10 +53,19 @@ public class SessionResource extends BaseStanbolResource {
         sessionManager = ContextHelper.getServiceFromContext(SessionManager.class, context);
     }
 
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
     @GET
     @Produces(TEXT_HTML)
-    public Response get() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+    public Response get(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok(new Viewable("index", this), TEXT_HTML);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -82,7 +96,8 @@ public class SessionResource extends BaseStanbolResource {
                                         @QueryParam("workspaceName") String workspaceName,
                                         @QueryParam("username") String username,
                                         @QueryParam("password") String password,
-                                        @QueryParam("connectionType") String connectionType) throws RepositoryAccessException {
+                                        @QueryParam("connectionType") String connectionType,
+                                        @Context HttpHeaders headers) throws RepositoryAccessException {
 
         repositoryURL = RestUtil.nullify(repositoryURL);
         workspaceName = RestUtil.nullify(workspaceName);
@@ -100,6 +115,8 @@ public class SessionResource extends BaseStanbolResource {
 
         String sessionKey = sessionManager.createSessionKey(repositoryURL, workspaceName, username, password,
             connectionType);
-        return Response.status(Status.CREATED).entity(sessionKey).build();
+        ResponseBuilder rb = Response.status(Status.CREATED).entity(sessionKey);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 }

@@ -16,6 +16,9 @@
  */
 package org.apache.stanbol.cmsadapter.web.resources;
 
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+
 import java.util.Hashtable;
 import java.util.List;
 
@@ -23,6 +26,7 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -30,7 +34,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.cmsadapter.core.helper.TcManagerClient;
@@ -80,12 +86,20 @@ public class NotifyResource extends BaseStanbolResource {
         }
     }
 
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
     @SuppressWarnings("unchecked")
     @POST
     public Response notifyCreate(@PathParam("ontologyURI") String ontologyURI,
                                  @FormParam("createdObjects") CMSObjects cmsObjects,
                                  @QueryParam("adapterMode") AdapterMode adapterMode,
-                                 @DefaultValue("true") @QueryParam("considerBridges") boolean considerBridges) {
+                                 @DefaultValue("true") @QueryParam("considerBridges") boolean considerBridges,
+                                 @Context HttpHeaders headers) {
 
         List<CMSObject> createdObjectList = cmsObjects.getClassificationObjectOrContentObject();
         TcManagerClient tcManagerClient = new TcManagerClient(tcManager);
@@ -100,7 +114,10 @@ public class NotifyResource extends BaseStanbolResource {
             conf.setBridgeDefinitions(OntologyResourceHelper.getBridgeDefinitions(model));
         }
         engine.createModel(conf);
-        return Response.ok().build();
+
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -116,7 +133,8 @@ public class NotifyResource extends BaseStanbolResource {
     public Response notifyUpdate(@PathParam("ontologyURI") String ontologyURI,
                                  @FormParam("updatedObjects") CMSObjects cmsObjects,
                                  @QueryParam("adapterMode") AdapterMode adapterMode,
-                                 @QueryParam("considerBridges") @DefaultValue("true") Boolean considerBridges) {
+                                 @QueryParam("considerBridges") @DefaultValue("true") Boolean considerBridges,
+                                 @Context HttpHeaders headers) {
         List<CMSObject> updatedObjectList = cmsObjects.getClassificationObjectOrContentObject();
         TcManagerClient tcManagerClient = new TcManagerClient(tcManager);
         OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM,
@@ -130,7 +148,10 @@ public class NotifyResource extends BaseStanbolResource {
             conf.setBridgeDefinitions(OntologyResourceHelper.getBridgeDefinitions(model));
         }
         engine.updateModel(conf);
-        return Response.ok().build();
+
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
@@ -144,7 +165,8 @@ public class NotifyResource extends BaseStanbolResource {
     @DELETE
     public Response notifyDelete(@PathParam("ontologyURI") String ontologyURI,
                                  @FormParam("deletedObjects") CMSObjects cmsObjects,
-                                 @QueryParam("considerBridges") @DefaultValue("true") Boolean considerBridges) {
+                                 @QueryParam("considerBridges") @DefaultValue("true") Boolean considerBridges,
+                                 @Context HttpHeaders headers) {
         List<CMSObject> deletedObjectList = cmsObjects.getClassificationObjectOrContentObject();
         TcManagerClient tcManagerClient = new TcManagerClient(tcManager);
         OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM,
@@ -159,6 +181,9 @@ public class NotifyResource extends BaseStanbolResource {
             conf.setBridgeDefinitions(OntologyResourceHelper.getBridgeDefinitions(model));
         }
         engine.deleteModel(conf);
-        return Response.ok().build();
+
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 }

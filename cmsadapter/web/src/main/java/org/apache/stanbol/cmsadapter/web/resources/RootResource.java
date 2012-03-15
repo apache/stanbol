@@ -17,11 +17,17 @@
 package org.apache.stanbol.cmsadapter.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
@@ -30,10 +36,19 @@ import com.sun.jersey.api.view.Viewable;
 @Path("/cmsadapter")
 public class RootResource extends BaseStanbolResource {
 
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
     @GET
     @Produces(TEXT_HTML)
-    public Response get() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+    public Response get(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok(new Viewable("index", this), TEXT_HTML);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
 }
