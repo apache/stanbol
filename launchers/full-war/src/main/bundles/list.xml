@@ -70,15 +70,6 @@
           start level 25 TO 29 reserved for Stanbol plug-ins
           (currently the Enhancement Engines)
        ********************************************************************* -->
-  
-  <startLevel level="26">
-    <!-- The Content-Editable based UI for Enhancing Text written on a Webpage -->
-    <bundle>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.web.vie</artifactId>
-        <version>0.9.0-incubating</version>
-    </bundle>
-  </startLevel>
 
   <!-- *********************************************************************
           start level >= 30 are unused
