@@ -74,6 +74,11 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractOntologyCollectorImpl implements OntologyCollector, Lockable,
         OntologyInputSourceHandler, OWLExportable {
 
+    @Override
+    public Set<IRI> listManagedOntologies() {
+        return managedOntologies;
+    }
+    
     protected String _id = null;
 
     /**

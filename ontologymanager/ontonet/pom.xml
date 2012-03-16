@@ -107,11 +107,15 @@
 		<!-- Stanbol deps -->
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
+			<artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
+		</dependency>
+ 		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.owl</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.owl</artifactId>
+			<artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
 		</dependency>
 
 		<!-- Persistence deps -->

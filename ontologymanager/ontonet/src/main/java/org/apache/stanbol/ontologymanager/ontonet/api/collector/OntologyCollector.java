@@ -138,7 +138,7 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * @return
      */
     int getOntologyCount(boolean withClosure);
-    
+
     int getOntologyCount();
 
     /**
@@ -186,4 +186,11 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * removing the writelock).
      */
     void tearDown();
+
+    /**
+     * TODO replace with Ontology IDs
+     * 
+     * @return
+     */
+    Set<IRI> listManagedOntologies();
 }
