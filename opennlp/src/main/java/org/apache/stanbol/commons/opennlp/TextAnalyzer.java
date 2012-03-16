@@ -52,6 +52,7 @@ public class TextAnalyzer {
     
     public static final class TextAnalyzerConfig {
         protected boolean forceSimpleTokenizer = false; //default to false
+        protected boolean forceKeywordTokenizer = false; //default to false
         protected boolean enablePosTagger = true;
         protected boolean enableChunker = true;
         protected boolean enableSentenceDetector = true;
@@ -67,6 +68,19 @@ public class TextAnalyzer {
     
         public final void forceSimpleTokenizer(boolean useSimpleTokenizer) {
             this.forceSimpleTokenizer = useSimpleTokenizer;
+            if(useSimpleTokenizer){
+                this.forceKeywordTokenizer = false;
+            }
+        }
+        public final boolean isKeywordTokenizerForced() {
+            return forceKeywordTokenizer;
+        }
+    
+        public final void forceKeywordTokenizer(boolean useKeywordTokenizer) {
+            this.forceKeywordTokenizer = useKeywordTokenizer;
+            if(useKeywordTokenizer){
+                this.forceSimpleTokenizer = false;
+            }
         }
     
         public final boolean isPosTaggerEnable() {
@@ -237,6 +251,8 @@ public class TextAnalyzer {
         if(tokenizer == null){
             if(config.forceSimpleTokenizer){
                 tokenizer = SimpleTokenizer.INSTANCE;
+            } else if(config.forceKeywordTokenizer){
+                tokenizer = KeywordTokenizer.INSTANCE;
             } else {
                 tokenizer = openNLP.getTokenizer(language);
                 if(tokenizer == null){
