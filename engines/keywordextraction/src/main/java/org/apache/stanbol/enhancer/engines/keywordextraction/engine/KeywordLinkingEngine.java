@@ -19,6 +19,8 @@ package org.apache.stanbol.enhancer.engines.keywordextraction.engine;
 import static org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum.getFullName;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,6 +79,7 @@ import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
@@ -98,6 +101,7 @@ import org.slf4j.LoggerFactory;
     @Property(name=EnhancementEngine.PROPERTY_NAME),
     @Property(name=KeywordLinkingEngine.REFERENCED_SITE_ID),
     @Property(name=KeywordLinkingEngine.NAME_FIELD,value=EntityLinkerConfig.DEFAULT_NAME_FIELD),
+    @Property(name=KeywordLinkingEngine.CASE_SENSITIVE,boolValue=EntityLinkerConfig.DEFAULT_CASE_SENSITIVE_MATCHING_STATE),
     @Property(name=KeywordLinkingEngine.TYPE_FIELD,value=EntityLinkerConfig.DEFAULT_TYPE_FIELD),
     @Property(name=KeywordLinkingEngine.REDIRECT_FIELD,value=EntityLinkerConfig.DEFAULT_REDIRECT_FIELD),
     @Property(name=KeywordLinkingEngine.REDIRECT_PROCESSING_MODE,options={
@@ -113,10 +117,12 @@ import org.slf4j.LoggerFactory;
         },value="IGNORE"),
     @Property(name=KeywordLinkingEngine.MIN_SEARCH_TOKEN_LENGTH,
         intValue=EntityLinkerConfig.DEFAULT_MIN_SEARCH_TOKEN_LENGTH),
+    @Property(name=KeywordLinkingEngine.KEYWORD_TOKENIZER,boolValue=false),
     @Property(name=KeywordLinkingEngine.MAX_SUGGESTIONS,
         intValue=EntityLinkerConfig.DEFAULT_SUGGESTIONS),
     @Property(name=KeywordLinkingEngine.PROCESSED_LANGUAGES,value=""),
     @Property(name=KeywordLinkingEngine.DEFAULT_MATCHING_LANGUAGE,value=""),
+    @Property(name=KeywordLinkingEngine.TYPE_MAPPINGS,cardinality=1000),
     @Property(name=KeywordLinkingEngine.DEREFERENCE_ENTITIES,
         boolValue=KeywordLinkingEngine.DEFAULT_DEREFERENCE_ENTITIES_STATE),
     @Property(name=Constants.SERVICE_RANKING,intValue=0)
@@ -147,6 +153,7 @@ public class KeywordLinkingEngine
     public static final String REFERENCED_SITE_ID = "org.apache.stanbol.enhancer.engines.keywordextraction.referencedSiteId";
     public static final String NAME_FIELD = "org.apache.stanbol.enhancer.engines.keywordextraction.nameField";
     public static final String TYPE_FIELD = "org.apache.stanbol.enhancer.engines.keywordextraction.typeField";
+    public static final String CASE_SENSITIVE = "org.apache.stanbol.enhancer.engines.keywordextraction.caseSensitive";
     public static final String REDIRECT_FIELD = "org.apache.stanbol.enhancer.engines.keywordextraction.redirectField";
     public static final String REDIRECT_PROCESSING_MODE = "org.apache.stanbol.enhancer.engines.keywordextraction.redirectMode";
     public static final String MIN_SEARCH_TOKEN_LENGTH = "org.apache.stanbol.enhancer.engines.keywordextraction.minSearchTokenLength";
@@ -155,7 +162,8 @@ public class KeywordLinkingEngine
     public static final String MIN_FOUND_TOKENS= "org.apache.stanbol.enhancer.engines.keywordextraction.minFoundTokens";
     public static final String DEFAULT_MATCHING_LANGUAGE = "org.apache.stanbol.enhancer.engines.keywordextraction.defaultMatchingLanguage";
     public static final String MIN_POS_TAG_PROBABILITY = "org.apache.stanbol.enhancer.engines.keywordextraction.minPosTagProbability";
-//  public static final String SIMPLE_TOKENIZER = "org.apache.stanbol.enhancer.engines.keywordextraction.simpleTokenizer";
+    public static final String TYPE_MAPPINGS = "org.apache.stanbol.enhancer.engines.keywordextraction.typeMappings";
+    public static final String KEYWORD_TOKENIZER = "org.apache.stanbol.enhancer.engines.keywordextraction.keywordTokenizer";
 //  public static final String ENABLE_CHUNKER = "org.apache.stanbol.enhancer.engines.keywordextraction.enableChunker";
     /**
      * Adds the dereference feature (STANBOL-333) also to this engine.
@@ -590,6 +598,13 @@ public class KeywordLinkingEngine
                 "The configured min POS tag probability MUST BE in the range [0..1] " +
                 "or < 0 to deactivate this feature (parsed value "+value+")!");
         }
+        value = configuration.get(KEYWORD_TOKENIZER);
+        //the keyword tokenizer config
+        if(value instanceof Boolean){
+            nlpConfig.forceKeywordTokenizer((Boolean)value);
+        } else if(value != null && !value.toString().isEmpty()){
+            nlpConfig.forceKeywordTokenizer(Boolean.valueOf(value.toString()));
+        }
         nlpConfig.setMinPosTagProbability(minPosTagProb);
         analysedContentFactory = OpenNlpAnalysedContentFactory.getInstance(openNLP,nlpConfig);
     }
@@ -626,6 +641,13 @@ public class KeywordLinkingEngine
             }
             linkerConfig.setNameField(value.toString());
         }
+        //init case sensitivity
+        value = configuration.get(CASE_SENSITIVE);
+        if(value instanceof Boolean){
+            linkerConfig.setCaseSensitiveMatchingState((Boolean)value);
+        } else if(value != null && !value.toString().isEmpty()){
+            linkerConfig.setCaseSensitiveMatchingState(Boolean.valueOf(value.toString()));
+        } //if NULL or empty use default
         //init TYPE_FIELD
         value = configuration.get(TYPE_FIELD);
         if(value != null){
@@ -724,6 +746,66 @@ public class KeywordLinkingEngine
             } else {
                 linkerConfig.setDefaultLanguage(defaultLang);
             }
+        }
+        //init type mappings
+        value = configuration.get(TYPE_MAPPINGS);
+        if(value instanceof String[]){ //support array
+            value = Arrays.asList((String[])value);
+        } else if(value instanceof String) { //single value
+            value = Collections.singleton(value);
+        }
+        if(value instanceof Collection<?>){ //and collection
+            log.info("Init Type Mappings");
+            configs :
+            for(Object o : (Iterable<?>)value){
+                if(o != null){
+                    StringBuilder usage = new StringBuilder("useages: ");
+                    usage.append("a: '{uri}' short for {uri} > {uri} | ");
+                    usage.append("b: '{source1};{source2};..;{sourceN} > {target}'");
+                    String[] config = o.toString().split(">");
+                    if(config[0].isEmpty()){
+                        log.warn("Invalid Type Mapping Config '{}': Missing Source Type ({}) -> ignore this config",
+                            o,usage);
+                        continue configs;
+                    }
+                    String[] sourceTypes = config[0].split(";");
+                    if(sourceTypes.length > 1 && (config.length < 2 || config[1].isEmpty())){
+                        log.warn("Invalid Type Mapping Config '{}': Missing Target Type '{}' ({}) -> ignore this config",
+                            o,usage);
+                        continue configs;
+                    }
+                    String targetType = config.length < 2 ? sourceTypes[0] : config[1];
+                    targetType = getFullName(targetType.trim()); //support for ns:localName
+                    try { //validate
+                        new URI(targetType);
+                    } catch (URISyntaxException e) {
+                        log.warn("Invalid URI '{}' in Type Mapping Config '{}' -> ignore this config",
+                            sourceTypes[0],o);
+                        continue configs;
+                    }
+                    UriRef targetUri = new UriRef(targetType);
+                    for(String sourceType : sourceTypes){
+                        if(!sourceType.isEmpty()){
+                            sourceType = getFullName(sourceType.trim()); //support for ns:localName
+                            try { //validate
+                                new URI(sourceType);
+                                UriRef old = linkerConfig.setTypeMapping(sourceType, targetUri);
+                                if(old == null){
+                                    log.info(" > add type mapping {} > {}", sourceType,targetType);
+                                } else {
+                                    log.info(" > set type mapping {} > {} (old: {})", 
+                                        new Object[]{sourceType,targetType,old.getUnicodeString()});
+                                }
+                            } catch (URISyntaxException e) {
+                                log.warn("Invalid URI '{}' in Type Mapping Config '{}' -> ignore this source type",
+                                    sourceTypes[0],o);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            log.debug("No Type mappings configured");
         }
     }
 

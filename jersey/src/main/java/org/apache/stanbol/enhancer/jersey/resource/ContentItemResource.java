@@ -47,10 +47,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
@@ -80,6 +82,7 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
@@ -232,7 +235,40 @@ public class ContentItemResource extends BaseStanbolResource {
     public URI getMetadataHref() {
         return metadataHref;
     }
-
+    /**
+     * Checks if there are Occurrences
+     */
+    public boolean hasOccurrences(){
+        for(Map<String,EntityExtractionSummary> occ : extractionsByTypeMap.values()){
+            if(!occ.isEmpty()){
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * Used to print occurrences with other types than the natively supported
+     */
+    public Collection<UriRef> getOtherOccurrencyTypes(){
+        Set<UriRef>  types = new HashSet<UriRef>(extractionsByTypeMap.keySet());
+        types.remove(DBPEDIA_PERSON);
+        types.remove(DBPEDIA_ORGANISATION);
+        types.remove(DBPEDIA_PLACE);
+        types.remove(SKOS_CONCEPT);
+        types.remove(null); //other
+        return types;
+    }
+    public String extractLabel(UriRef uri){
+        String fullUri = uri.getUnicodeString();
+        int index = Math.max(fullUri.lastIndexOf('#'),fullUri.lastIndexOf('/'));
+        index = Math.max(index, fullUri.lastIndexOf(':'));
+        //do not convert if the parsed uri does not contain a local name
+        if(index > 0 && index+1 < fullUri.length()){
+            return StringUtils.capitalize(fullUri.substring(index+1).replaceAll("[\\-_]", " "));
+        } else {
+            return uri.getUnicodeString();
+        }
+    }
     public Collection<EntityExtractionSummary> getOccurrences(UriRef type){
         Map<String,EntityExtractionSummary> typeMap = extractionsByTypeMap.get(type);
         Collection<EntityExtractionSummary> typeOccurrences;
@@ -401,13 +437,17 @@ public class ContentItemResource extends BaseStanbolResource {
 
         public String getThumbnailSrc() {
             if (suggestions.isEmpty()) {
-                return defaultThumbnails.get(type);
+                return getMissingThumbnailSrc();
             }
             return suggestions.get(0).getThumbnailSrc();
         }
 
         public String getMissingThumbnailSrc() {
-            return defaultThumbnails.get(type);
+            String source = defaultThumbnails.get(type);
+            if(source == null){
+                source = defaultThumbnails.get(null);//default
+            }
+            return source;
         }
 
         public EntitySuggestion getBestGuess() {
@@ -512,11 +552,15 @@ public class ContentItemResource extends BaseStanbolResource {
                     return ((UriRef) object).getUnicodeString();
                 }
             }
-            return defaultThumbnails.get(type);
+            return getMissingThumbnailSrc();
         }
 
         public String getMissingThumbnailSrc() {
-            return defaultThumbnails.get(type);
+            String source = defaultThumbnails.get(type);
+            if(source == null){
+                source = defaultThumbnails.get(null);
+            }
+            return source;
         }
 
         public String getSummary() {

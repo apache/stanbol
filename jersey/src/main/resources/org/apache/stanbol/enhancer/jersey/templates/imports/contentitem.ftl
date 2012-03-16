@@ -18,10 +18,10 @@
 <#macro view>
 
 <div class="entitylistings">
-<#if it.personOccurrences?size != 0 || it.organizationOccurrences?size != 0 ||  it.placeOccurrences?size != 0 || it.conceptOccurrences?size != 0 || it.otherOccurrences?size != 0>
+<#if it.hasOccurrences()>
 <h3>Extracted entities</h3>
 </#if>
-
+<#-- First print the predefined types -->
 <div class="entitylisting">
 <#if it.personOccurrences?size != 0>
 <h3>People</h3>
@@ -50,6 +50,15 @@
 </#if>
 </div>
 
+<#-- add Occurrences with other types -->
+<#list it.otherOccurrencyTypes as type>
+  <div class="entitylisting">
+  <h3>${it.extractLabel(type)}</h3>
+  <@entities.listing entities=it.getOccurrences(type) />
+  </div>
+</#list>
+
+<#-- add Occurrences with no type -->
 <div class="entitylisting">
 <#if it.otherOccurrences?size != 0>
 <h3>Others</h3>

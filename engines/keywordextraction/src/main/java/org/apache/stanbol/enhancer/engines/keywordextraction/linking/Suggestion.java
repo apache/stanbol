@@ -212,10 +212,12 @@ public class Suggestion implements Comparable<Suggestion>{
      * @return the best match or {@link Suggestion#getMatchedLabel()} if non is found
      */
     public Text getBestLabel(String nameField, String language){
-        Representation rep = getRepresentation(); 
+        Representation rep = getRepresentation();
+        //start with the matched label -> so if we do not find a better one
+        //we will use the matched!
+        Text label = this.label;
         // 1. check if the returned Entity does has a label -> if not return null
         // add labels (set only a single label. Use "en" if available!
-        Text label = null;
         Iterator<Text> labels = rep.getText(nameField);
         boolean matchFound = false;
         while (labels.hasNext() && !matchFound) {
