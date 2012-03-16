@@ -72,12 +72,12 @@ public class DefaultRefactorEnhancementEngineConf implements RefactorEnhancement
     }
 
     @Override
-    public String[] getScopeCoreOntology() {
+    public String[] getScopeCoreOntologies() {
         return (String[]) conf.get(SCOPE_CORE_ONTOLOGY);
     }
 
     @Override
-    public void setScopeCoreOntology(String[] coreOntologyURI) {
+    public void setScopeCoreOntologies(String[] coreOntologyURI) {
         conf.put(SCOPE_CORE_ONTOLOGY, coreOntologyURI);
     }
 

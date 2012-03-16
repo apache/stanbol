@@ -74,9 +74,9 @@ public interface RefactorEnhancementEngineConf {
 
     public void setRecipeId(String recipeId);
 
-    public String[] getScopeCoreOntology();
+    public String[] getScopeCoreOntologies();
 
-    public void setScopeCoreOntology(String[] coreOntologyIRI);
+    public void setScopeCoreOntologies(String[] coreOntologyIRI);
 
     public boolean isInGraphAppendMode();
 
