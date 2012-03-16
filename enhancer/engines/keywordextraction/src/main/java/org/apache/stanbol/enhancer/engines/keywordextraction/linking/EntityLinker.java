@@ -353,7 +353,10 @@ public class EntityLinker {
      * @param label
      */
     private void matchLabel(Suggestion match, Text label) {
-        String text = label.getText().toLowerCase();
+        String text = label.getText();
+        if(!config.isCaseSensitiveMatching()){
+            text = text.toLowerCase(); //TODO use language of label for Locale
+        }
         //Tokenize the label and remove remove tokens without alpha numerical chars
         String[] unprocessedLabelTokens = content.tokenize(text);
         int offset = 0;
@@ -396,7 +399,10 @@ public class EntityLinker {
                 && search ;currentIndex++){
             currentToken = state.getSentence().getTokens().get(currentIndex);
             if(currentToken.hasAplhaNumericChar()){
-                currentTokenText = currentToken.getText().toLowerCase();
+                currentTokenText = currentToken.getText();
+                if(!config.isCaseSensitiveMatching()){
+                    currentTokenText = currentTokenText.toLowerCase();
+                }
                 currentTokenLength = currentTokenText.length();
                 boolean isProcessable = isProcessableToken(currentToken);
                 boolean found = false;
@@ -460,7 +466,10 @@ public class EntityLinker {
             String labelTokenText = labelTokens[labelIndex];
             if(labelTokenSet.remove(labelTokenText)){ //still not matched
                 currentToken = state.getSentence().getTokens().get(currentIndex);
-                currentTokenText = currentToken.getText().toLowerCase();
+                currentTokenText = currentToken.getText();
+                if(!config.isCaseSensitiveMatching()){
+                    currentTokenText = currentTokenText.toLowerCase();
+                }
                 currentTokenLength = currentTokenText.length();
                 boolean found = false;
                 float matchFactor = 0f;
@@ -503,7 +512,7 @@ public class EntityLinker {
         //   match (this will be very rare
         if(foundProcessableTokens > 0 && match.getMatchCount() <= foundProcessableTokens) {
             String currentText = state.getTokenText(firstFoundIndex,coveredTokens);
-            if(currentText.equalsIgnoreCase(text)){ 
+            if(config.isCaseSensitiveMatching() ? currentText.equals(text) : currentText.equalsIgnoreCase(text)){ 
                 labelMatch = MATCH.EXACT;
                 //set found to covered: May be lower because only
                 //processable tokens are counted, but Exact also checks
