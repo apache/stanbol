@@ -88,6 +88,10 @@ public class EntityLinkerConfig {
      */
     public static final String DEFAULT_LANGUAGE = null;
     /**
+     * The default for case sensitive matching is set to <code>false</code>
+     */
+    public static final boolean DEFAULT_CASE_SENSITIVE_MATCHING_STATE = false;
+    /**
      * Default mapping for Concept types to dc:type values added for
      * TextAnnotations.
      */
@@ -98,6 +102,7 @@ public class EntityLinkerConfig {
         mappings.put(OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString(), OntologicalClasses.DBPEDIA_ORGANISATION);
         mappings.put(NamespaceEnum.dbpediaOnt+"Newspaper", OntologicalClasses.DBPEDIA_ORGANISATION);
         mappings.put(NamespaceEnum.schema+"Organization", OntologicalClasses.DBPEDIA_ORGANISATION);
+//        mappings.put(NamespaceEnum.dailymed+"organization",OntologicalClasses.DBPEDIA_ORGANISATION);
         
         mappings.put(OntologicalClasses.DBPEDIA_PERSON.getUnicodeString(), OntologicalClasses.DBPEDIA_PERSON);
         mappings.put(NamespaceEnum.foaf+"Person", OntologicalClasses.DBPEDIA_PERSON);
@@ -108,6 +113,25 @@ public class EntityLinkerConfig {
         mappings.put(NamespaceEnum.gml+"_Feature", OntologicalClasses.DBPEDIA_PLACE);
 
         mappings.put(OntologicalClasses.SKOS_CONCEPT.getUnicodeString(), OntologicalClasses.SKOS_CONCEPT);
+
+//        UriRef DRUG = new UriRef(NamespaceEnum.drugbank+"drugs");
+//        mappings.put(DRUG.getUnicodeString(), DRUG);
+//        mappings.put(NamespaceEnum.dbpediaOnt+"Drug", DRUG);
+//        mappings.put(NamespaceEnum.dailymed+"drugs", DRUG);
+//        mappings.put(NamespaceEnum.sider+"drugs", DRUG);
+//        mappings.put(NamespaceEnum.tcm+"Medicine", DRUG);
+//        
+//        UriRef DISEASE = new UriRef(NamespaceEnum.diseasome+"diseases");
+//        mappings.put(DISEASE.getUnicodeString(), DISEASE);
+//        mappings.put(NamespaceEnum.linkedct+"condition", DISEASE);
+//        mappings.put(NamespaceEnum.tcm+"Disease", DISEASE);
+//
+//        UriRef SIDE_EFFECT = new UriRef(NamespaceEnum.sider+"side_effects");
+//        mappings.put(SIDE_EFFECT.getUnicodeString(), SIDE_EFFECT);
+//        
+//        UriRef INGREDIENT = new UriRef(NamespaceEnum.dailymed+"ingredients");
+//        mappings.put(INGREDIENT.getUnicodeString(), INGREDIENT);
+                
         DEFAULT_ENTITY_TYPE_MAPPINGS = Collections.unmodifiableMap(mappings);
     }
     /**
@@ -162,6 +186,8 @@ public class EntityLinkerConfig {
      * more mapped to the actual label of an result.
      */
     private int maxSearchTokens = DEFAULT_MAX_SEARCH_TOKENS;
+    
+    private boolean caseSensitiveMatchingState = DEFAULT_CASE_SENSITIVE_MATCHING_STATE;
     /**
      * Holds the mappings of rdf:type used by concepts to dc:type values used
      * by TextAnnotations. 
@@ -354,6 +380,20 @@ public class EntityLinkerConfig {
      */
     public final void setMaxSearchTokens(int maxSearchTokens) {
         this.maxSearchTokens = maxSearchTokens;
+    }
+    /**
+     * Getter for the case sensitive matching state
+     * @return the state
+     */
+    public boolean isCaseSensitiveMatching() {
+        return caseSensitiveMatchingState;
+    }
+    /**
+     * Setter for the case sensitive matching state
+     * @param caseSensitiveMatchingState the state
+     */
+    public void setCaseSensitiveMatchingState(boolean state) {
+        this.caseSensitiveMatchingState = state;
     }
     /**
      * Removes the mapping for the parsed concept type
