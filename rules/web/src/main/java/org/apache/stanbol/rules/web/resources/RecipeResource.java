@@ -21,6 +21,9 @@
 
 package org.apache.stanbol.rules.web.resources;
 
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,6 +37,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -41,13 +45,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.manager.changes.GetRecipe;
@@ -71,7 +78,7 @@ import com.sun.jersey.multipart.FormDataParam;
 
 /**
  * 
- * @author elvio, andrea.nuzzolese
+ * @author elvio, andrea.nuzzolese, alberto.musetti
  */
 @Path("/recipe")
 // /{uri:.+}")
@@ -107,7 +114,8 @@ public class RecipeResource extends BaseStanbolResource {
     @GET
     @Path("/{uri:.+}")
     @Produces(value = {KRFormat.RDF_XML, KRFormat.RDF_JSON, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,KRFormat.MANCHESTER_OWL, KRFormat.TURTLE})
-    public Response getRecipe(@PathParam("uri") String uri) throws OWLOntologyCreationException {
+    public Response getRecipe(@PathParam("uri") String uri,
+                              @Context HttpHeaders headers) throws OWLOntologyCreationException {
         try {
         
             GetRecipe rule = new GetRecipe(ruleStore);;    
@@ -118,7 +126,11 @@ public class RecipeResource extends BaseStanbolResource {
                 Vector<IRI> recipe = rule.getGeneralRecipes();
                 if (recipe == null) {
                     // The recipe does not exists in the manager
-                    return Response.status(Status.NOT_FOUND).build();
+                    ResponseBuilder rb = Response.status(Status.NOT_FOUND);
+                    MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+                    if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+                    addCORSOrigin(servletContext, rb, headers);
+                    return rb.build();
                 } else {
 
                     // The recipe is retrieved (import declarations point to
@@ -157,7 +169,11 @@ public class RecipeResource extends BaseStanbolResource {
                     // // TODO Auto-generated catch block
                     // e.printStackTrace();
                     // }
-                    return Response.ok(newmodel).build();
+                    ResponseBuilder rb = Response.ok(newmodel);
+                    MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+                    if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+                    addCORSOrigin(servletContext, rb, headers);
+                    return rb.build();
                 }
 
             } else {
@@ -166,7 +182,11 @@ public class RecipeResource extends BaseStanbolResource {
 
                 if (recipe == null) {
                     // The recipe deos not exists in the manager
-                    return Response.status(Status.NOT_FOUND).build();
+                    ResponseBuilder rb = Response.status(Status.NOT_FOUND);
+                    MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+                    if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+                    addCORSOrigin(servletContext, rb, headers);
+                    return rb.build();
                 } else {
                     // The recipe is retrieved (import declarations point to
                     // KReS Services)
@@ -217,7 +237,11 @@ public class RecipeResource extends BaseStanbolResource {
                     // e.printStackTrace();
                     // }
 
-                    return Response.ok(newmodel).build();
+                    ResponseBuilder rb = Response.ok(newmodel);
+                    MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+                    if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+                    addCORSOrigin(servletContext, rb, headers);
+                    return rb.build();
                 }
             }
         } catch (Exception e) {
@@ -242,17 +266,27 @@ public class RecipeResource extends BaseStanbolResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
-    public Response addRecipe(@FormParam(value = "recipe") String recipe, @FormParam(value = "description") String description) {
+    public Response addRecipe(@FormParam(value = "recipe") String recipe, 
+                              @FormParam(value = "description") String description,
+                              @Context HttpHeaders headers) {
 
         try {
 
         	boolean added = ruleStore.addRecipe(IRI.create(recipe), description);
         	
         	if(added){
-        		return Response.status(Status.OK).build();
+        		ResponseBuilder rb = Response.ok();
+                MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+                if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+                addCORSOrigin(servletContext, rb, headers);
+                return rb.build();
         	}
         	else{
-        		return Response.status(Status.CONFLICT).build();
+        		ResponseBuilder rb = Response.status(Status.CONFLICT);
+                MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+                if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+                addCORSOrigin(servletContext, rb, headers);
+                return rb.build();
         	}
         	
         	/*
@@ -297,7 +331,9 @@ public class RecipeResource extends BaseStanbolResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(value = {KRFormat.TEXT_PLAIN, KRFormat.RDF_JSON})
     @Path("/{recipeID:.+}")
-    public Response addRulesToRecipe(@PathParam(value = "recipeID") String recipeID, @FormDataParam(value = "recipeText") InputStream rules) {
+    public Response addRulesToRecipe(@PathParam(value = "recipeID") String recipeID, 
+                                     @FormDataParam(value = "recipeText") InputStream rules,
+                                     @Context HttpHeaders headers) {
 
         try {
 
@@ -306,10 +342,18 @@ public class RecipeResource extends BaseStanbolResource {
         	Recipe recipe = ruleStore.addRuleToRecipe(recipeID, rules);
         	
         	if(recipe != null){
-        		return Response.ok().build();
+        		ResponseBuilder rb = Response.ok();
+                MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+                if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+                addCORSOrigin(servletContext, rb, headers);
+                return rb.build();
         	}
         	else{
-        		return Response.status(Status.NO_CONTENT).build();	
+        		ResponseBuilder rb = Response.status(Status.NO_CONTENT);
+                MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+                if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+                addCORSOrigin(servletContext, rb, headers);
+                return rb.build();
         	}
         	
             
@@ -332,8 +376,9 @@ public class RecipeResource extends BaseStanbolResource {
      */
     @DELETE
     // @Consumes(MediaType.TEXT_PLAIN)
-    @Produces("text/plain")
-    public Response removeRecipe(@QueryParam(value = "recipe") String recipe) {
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response removeRecipe(@QueryParam(value = "recipe") String recipe,
+                                 @Context HttpHeaders headers) {
 
         try {
 
@@ -345,15 +390,29 @@ public class RecipeResource extends BaseStanbolResource {
             boolean ok = instance.removeRecipe(IRI.create(recipe));
 
             if (!ok) {
-                return Response.status(Status.CONFLICT).build();
+                //return Response.status(Status.CONFLICT).build();
+                ResponseBuilder rb = Response.status(Status.CONFLICT);
+                rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
+                addCORSOrigin(servletContext, rb, headers);
+                return rb.build();
             } else {
                 ruleStore.saveOntology();
-                return Response.ok().build();
+                ResponseBuilder rb = Response.ok();
+                rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
+                addCORSOrigin(servletContext, rb, headers);
+                return rb.build();
             }
 
         } catch (Exception e) {
             throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
         }
+    }
+    
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers);
+        return rb.build();
     }
 
 }

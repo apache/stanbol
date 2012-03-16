@@ -44,6 +44,8 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class will store a set of rules and recipes, describe in a file, to the KReSRuleStore used as input.<br/>
@@ -79,6 +81,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  *
  */
 public class LoadRuleFile {
+    
+   private Logger log = LoggerFactory.getLogger(getClass());
 
    private OWLOntology owlmodel;
    private OWLClass ontocls;
@@ -141,7 +145,7 @@ public class LoadRuleFile {
                             dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(dataprop, ontoind,seq.toString().replace("[","").replace("]",""));
                             owlmanager.addAxiom(owlmodel,dataPropAssertion);
                         }else{
-                            System.err.println("There isn't the istance to which you are trying to add the property. Pleas check that "+ontoind.getIRI()+" exists.");
+                            log.error("There isn't the istance to which you are trying to add the property. Pleas check that "+ontoind.getIRI()+" exists.");
                             this.owlmodel = null;
                         break;
                         }
@@ -153,7 +157,7 @@ public class LoadRuleFile {
                    if(owlmodel.containsClassInSignature(IRI.create(owlIDrmi+cls))){
                         ontocls = factory.getOWLClass(IRI.create(owlIDrmi+cls));
                    }else{
-                       System.err.println("The file contains a wrong class name. Pleas check the name: "+IRI.create(owlIDrmi+cls));
+                       log.error("The file contains a wrong class name. Pleas check the name: "+IRI.create(owlIDrmi+cls));
                        this.owlmodel = null;
                        break;
                    }
@@ -168,7 +172,7 @@ public class LoadRuleFile {
                         classAssertion = factory.getOWLClassAssertionAxiom(ontocls,ontoind);
                         owlmanager.addAxiom(owlmodel, classAssertion);
                    }else{
-                      System.err.println("The file contains a repeated istance name. The istance is already inside the ontology. Pleas check the name: "+input);
+                      log.error("The file contains a repeated istance name. The istance is already inside the ontology. Pleas check the name: "+input);
                       this.owlmodel = null;
                       break;
                    }
@@ -182,7 +186,7 @@ public class LoadRuleFile {
                         dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(dataprop, ontoind, descrp);
                         owlmanager.addAxiom(owlmodel, dataPropAssertion);
                    }else{
-                      System.err.println("There isn't the istance to which you are trying to add the property. Pleas check that "+ontoind.getIRI()+" exists.");
+                      log.error("There isn't the istance to which you are trying to add the property. Pleas check that "+ontoind.getIRI()+" exists.");
                       this.owlmodel = null;
                        break;
                    }
@@ -197,7 +201,7 @@ public class LoadRuleFile {
                         dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(dataprop, ontoind, text);
                         owlmanager.addAxiom(owlmodel,dataPropAssertion);
                    }else{
-                      System.err.println("There isn't the istance to which you are trying to add the property. Pleas check that "+ontoind.getIRI()+" exists.");
+                      log.error("There isn't the istance to which you are trying to add the property. Pleas check that "+ontoind.getIRI()+" exists.");
                       this.owlmodel = null;
                        break;
                    }
@@ -241,7 +245,7 @@ public class LoadRuleFile {
                         }
 
                    }else{
-                      System.err.println("There isn't the istance to which you are trying to add the property. Pleas check that "+ontoind.getIRI()+" and/or "+ID+text+" are already inside the ontology.");
+                      log.error("There isn't the istance to which you are trying to add the property. Pleas check that "+ontoind.getIRI()+" and/or "+ID+text+" are already inside the ontology.");
                       this.owlmodel = null;
                       break;
                    }
@@ -262,7 +266,7 @@ public class LoadRuleFile {
                dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(dataprop, ontoind,seq.toString().replace("[","").replace("]",""));
                owlmanager.addAxiom(owlmodel,dataPropAssertion);
          }else{
-               System.err.println("There isn't the istance to which you are trying to add the property. Pleas check that "+ontoind.getIRI()+" exists.");
+               log.error("There isn't the istance to which you are trying to add the property. Pleas check that "+ontoind.getIRI()+" exists.");
                this.owlmodel = null;
              }
        }

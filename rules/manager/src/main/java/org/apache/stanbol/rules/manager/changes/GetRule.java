@@ -46,12 +46,16 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLEntityRemover;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author elvio
  */
 public class GetRule {
+    
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     private OWLOntology owlmodel;
     private String owlID;
@@ -92,7 +96,7 @@ public class GetRule {
             rule.put(indrule.getIRI(),value.iterator().next().getLiteral());
     
         }else{
-            System.err.println("The rule with name "+rulename+" doesn't exist.");
+            log.error("The rule with name "+rulename+" doesn't exist.");
             return(null);
         }
 
@@ -118,7 +122,7 @@ public class GetRule {
             rule.put(indrule.getIRI(),value.iterator().next().getLiteral());
 
         }else{
-            System.err.println("The rule with name "+rulename+" doesn't exist.");
+            log.error("The rule with name "+rulename+" doesn't exist.");
             return(null);
         }
 
@@ -165,13 +169,13 @@ public class GetRule {
 
 
 
-		System.out.println("RECIPE IRI : "+recipeIRI.toString());
+		log.debug("RECIPE IRI : "+recipeIRI.toString());
 
 		if(ontlogy != null){
 	        OWLIndividual ind = factory.getOWLNamedIndividual(recipeIRI);
 	        Set<OWLIndividual> rules = ind.getObjectPropertyValues(prop, owlmodel);
 
-	        System.out.println("Rules length : "+rules.size());
+	        log.debug("Rules length : "+rules.size());
 	        for(OWLIndividual rule : rules){
 	        	OWLAxiom axiom = factory.getOWLObjectPropertyAssertionAxiom(prop, ind, rule);
 	        	owlmanager.addAxiom(ontlogy, axiom);
@@ -232,7 +236,7 @@ public class GetRule {
 
             return(ruleusage);
         }else{
-           System.err.println("The rule with name "+ruleName+" is not inside the ontology. Pleas check the name.");
+           log.error("The rule with name "+ruleName+" is not inside the ontology. Pleas check the name.");
            return(null);
         }
     }

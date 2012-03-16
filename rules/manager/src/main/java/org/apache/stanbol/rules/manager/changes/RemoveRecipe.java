@@ -43,6 +43,8 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLEntityRemover;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class will remove a recipe from the KReSRuleStore used as input.<br/>
@@ -51,7 +53,7 @@ import org.semanticweb.owlapi.util.OWLEntityRemover;
  *
  */
 public class RemoveRecipe {
-
+   private Logger log = LoggerFactory.getLogger(getClass());
 
    private OWLOntology owlmodel;
    private OWLOntologyManager owlmanager;
@@ -185,7 +187,7 @@ public class RemoveRecipe {
             remover.reset();
 
            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))){
-               System.err.println("Some error occurs during deletion.");
+               log.error("Some error occurs during deletion.");
                ok = false;
                return(ok);
            }else{
@@ -199,7 +201,7 @@ public class RemoveRecipe {
                         if(!owlmodel.containsAxiom(objectPropAssertion)){
                             ok = true;
                         }else{
-                            System.err.println("Some error occurs during deletion.");
+                            log.error("Some error occurs during deletion.");
                             ok = false;
                             return(ok);
                         }
@@ -208,7 +210,7 @@ public class RemoveRecipe {
            }
 
        }else{
-           System.err.println("The rule with name "+recipeName+" is not inside the ontology. Pleas check the name.");
+           log.error("The rule with name "+recipeName+" is not inside the ontology. Pleas check the name.");
            ok =false;
            return(ok);
        }
@@ -262,7 +264,7 @@ public class RemoveRecipe {
             remover.reset();
 
            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))){
-               System.err.println("Some error occurs during deletion.");
+               log.error("Some error occurs during deletion.");
                ok = false;
                return(ok);
            }else{
@@ -277,7 +279,7 @@ public class RemoveRecipe {
                         if(!owlmodel.containsAxiom(objectPropAssertion)){
                             ok = true;
                         }else{
-                            System.err.println("Some error occurs during deletion.");
+                            log.error("Some error occurs during deletion.");
                             ok = false;
                             return(ok);
                         }
@@ -289,7 +291,7 @@ public class RemoveRecipe {
            }
 
        }else{
-           System.err.println("The rule with name "+recipeName+" is not inside the ontology. Pleas check the name.");
+           log.error("The rule with name "+recipeName+" is not inside the ontology. Pleas check the name.");
            ok =false;
            return(ok);
        }

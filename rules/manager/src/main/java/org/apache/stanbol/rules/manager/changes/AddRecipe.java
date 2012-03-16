@@ -44,6 +44,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class will add new recipe to the KReSRuleStore used as input.<br/>
@@ -59,6 +61,8 @@ public class AddRecipe {
    private String owlIDrmi;
    private String owlID;
    private RuleStore storeaux;
+   
+   private Logger log = LoggerFactory.getLogger(getClass());
 
    /**
      * To create a list of imported ontlogy to be added as import declarations
@@ -183,7 +187,7 @@ public class AddRecipe {
                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
                    ok = true;
                } else {
-                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                    ok = false;
                    return (ok);
                }
@@ -194,7 +198,7 @@ public class AddRecipe {
                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
                    ok = true;
                } else {
-                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                    ok = false;
                    return (ok);
 
@@ -227,12 +231,12 @@ public class AddRecipe {
                            owlmanager.addAxiom(owlmodel, objectPropAssertion);
                            ok = true;
                        } else {
-                           System.err.println("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                           log.error("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                            ok = false;
                            return (ok);
                        }
                    } else {
-                       System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                       log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                        ok = false;
                        return (ok);
                    }
@@ -246,19 +250,19 @@ public class AddRecipe {
                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
                    ok = true;
                } else {
-                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                    ok = false;
                    return (ok);
                }
 
            } else {
-               System.err.println("The recipe with name " + recipeName + " already exists. Pleas check the name.");
+               log.error("The recipe with name " + recipeName + " already exists. Pleas check the name.");
                ok = false;
                return (ok);
            }
 
        } else {
-           System.err.println("The recipe with name and the set of rules cannot be empity or null.");
+           log.error("The recipe with name and the set of rules cannot be empity or null.");
            ok = false;
            return (ok);
        }
@@ -308,13 +312,13 @@ public class AddRecipe {
                     ok = true;
 
             } else {
-                System.err.println("The recipe with name " + recipeName + " already exists. Pleas check the name.");
+                log.error("The recipe with name " + recipeName + " already exists. Pleas check the name.");
                 ok = false;
                 return (ok);
             }
 
         } else {
-            System.err.println("The recipe with name and the set of rules cannot be empity or null.");
+            log.error("The recipe with name and the set of rules cannot be empity or null.");
             ok = false;
             return (ok);
         }
@@ -360,13 +364,13 @@ public class AddRecipe {
                 ok = true;
 
             } else {
-                System.err.println("The recipe with name " + recipeIRI + " already exists. Pleas check the name.");
+                log.error("The recipe with name " + recipeIRI + " already exists. Pleas check the name.");
                 ok = false;
                 return (ok);
             }
 
         } else {
-            System.err.println("The recipe with name and the set of rules cannot be empity or null.");
+            log.error("The recipe with name and the set of rules cannot be empity or null.");
             ok = false;
             return (ok);
         }
@@ -415,7 +419,7 @@ public class AddRecipe {
                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
                    ok = true;
                } else {
-                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                    ok = false;
                    return (ok);
                }
@@ -426,7 +430,7 @@ public class AddRecipe {
                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
                    ok = true;
                } else {
-                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                    ok = false;
                    return (ok);
                }
@@ -467,12 +471,12 @@ public class AddRecipe {
                            owlmanager.addAxiom(owlmodel, objectPropAssertion);
                            ok = true;
                        } else {
-                           System.err.println("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                           log.error("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                            ok = false;
                            return (ok);
                        }
                    } else {
-                       System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                       log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                        ok = false;
                        return (ok);
                    }
@@ -486,19 +490,19 @@ public class AddRecipe {
                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
                    ok = true;
                } else {
-                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                    ok = false;
                    return (ok);
                }
 
            } else {
-               System.err.println("The recipe with name " + recipeName + " already exists. Pleas check the name.");
+               log.error("The recipe with name " + recipeName + " already exists. Pleas check the name.");
                ok = false;
                return (ok);
            }
 
        } else {
-           System.err.println("The recipe with name and the set of rules cannot be empity or null.");
+           log.error("The recipe with name and the set of rules cannot be empity or null.");
            ok = false;
            return (ok);
        }
@@ -563,7 +567,7 @@ public class AddRecipe {
                         owlmanager.addAxiom(owlmodel, objectPropAssertion);
                         ok = true;
                     } else {
-                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                         ok = false;
                         return (ok);
                     }
@@ -574,7 +578,7 @@ public class AddRecipe {
                         owlmanager.addAxiom(owlmodel, objectPropAssertion);
                         ok = true;
                     } else {
-                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                         ok = false;
                         return (ok);
                     }
@@ -607,12 +611,12 @@ public class AddRecipe {
                                 owlmanager.addAxiom(owlmodel, objectPropAssertion);
                                 ok = true;
                             } else {
-                                System.err.println("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                                log.error("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                                 ok = false;
                                 return (ok);
                             }
                         } else {
-                            System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                            log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                             ok = false;
                             return (ok);
                         }
@@ -627,19 +631,19 @@ public class AddRecipe {
                         owlmanager.addAxiom(owlmodel, objectPropAssertion);
                         ok = true;
                     } else {
-                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                         ok = false;
                         return (ok);
                     }
 
                 } else {
-                    System.err.println("The recipe with name " + recipeName + " already exists. Pleas check the name.");
+                    log.error("The recipe with name " + recipeName + " already exists. Pleas check the name.");
                     ok = false;
                     return (ok);
                 }
 
             } else {
-                System.err.println("The recipe with name and the set of rules cannot be empity or null.");
+                log.error("The recipe with name and the set of rules cannot be empity or null.");
                 ok = false;
                 return (ok);
             }
@@ -705,7 +709,7 @@ public class AddRecipe {
                         owlmanager.addAxiom(owlmodel, objectPropAssertion);
                         ok = true;
                     } else {
-                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                         ok = false;
                         return (ok);
                     }
@@ -716,7 +720,7 @@ public class AddRecipe {
                         owlmanager.addAxiom(owlmodel, objectPropAssertion);
                         ok = true;
                     } else {
-                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                         ok = false;
                         return (ok);
                     }
@@ -749,12 +753,12 @@ public class AddRecipe {
                                 owlmanager.addAxiom(owlmodel, objectPropAssertion);
                                 ok = true;
                             } else {
-                                System.err.println("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                                log.error("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                                 ok = false;
                                 return (ok);
                             }
                         } else {
-                            System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                            log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                             ok = false;
                             return (ok);
                         }
@@ -768,19 +772,19 @@ public class AddRecipe {
                         owlmanager.addAxiom(owlmodel, objectPropAssertion);
                         ok = true;
                     } else {
-                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        log.error("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
                         ok = false;
                         return (ok);
                     }
 
                 } else {
-                    System.err.println("The recipe with name " + recipeName + " already exists. Pleas check the name.");
+                    log.error("The recipe with name " + recipeName + " already exists. Pleas check the name.");
                     ok = false;
                     return (ok);
                 }
 
             } else {
-                System.err.println("The recipe with name and the set of rules cannot be empity or null.");
+                log.error("The recipe with name and the set of rules cannot be empity or null.");
                 ok = false;
                 return (ok);
             }

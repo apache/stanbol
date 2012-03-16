@@ -22,14 +22,16 @@ import org.apache.stanbol.rules.base.api.SPARQLObject;
 import org.apache.stanbol.rules.manager.SPARQLFunction;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.SWRLAtom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 
 public class CreateLabelAtom extends StringFunctionAtom {
 
+    private Logger log = LoggerFactory.getLogger(getClass());
 	
 	private StringFunctionAtom stringFunctionAtom;
 	
@@ -46,7 +48,7 @@ public class CreateLabelAtom extends StringFunctionAtom {
 	@Override
 	public SPARQLObject toSPARQL() {
 		
-		System.out.println("Argument instance of "+stringFunctionAtom.getClass().getCanonicalName());
+		log.debug("Argument instance of "+stringFunctionAtom.getClass().getCanonicalName());
 		
 		String argument = stringFunctionAtom.toSPARQL().getObject();
 		

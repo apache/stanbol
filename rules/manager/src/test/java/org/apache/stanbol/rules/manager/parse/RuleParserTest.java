@@ -21,6 +21,8 @@ import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.manager.KB;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -31,6 +33,8 @@ import org.junit.Test;
 public class RuleParserTest {
 
 	private static String kReSRule;
+	
+	private Logger log = LoggerFactory.getLogger(getClass());
 	
 	@BeforeClass
 	public static void setup() {
@@ -47,13 +51,13 @@ public class RuleParserTest {
 				RuleList kReSRuleList = kReSKB.getkReSRuleList();
 				if(kReSRuleList != null){
 					for(Rule kReSRule : kReSRuleList){
-						System.out.println("RULE : "+kReSRule.toString());
+					    log.debug("RULE : "+kReSRule.toString());
 					}
 				}
-				System.out.println("RULE LIST IS NULL");
+				log.debug("RULE LIST IS NULL");
 			}
 			else{
-				System.out.println("KB IS NULL");
+			    log.debug("KB IS NULL");
 			}
 		}catch (Exception e) {
 			e.printStackTrace();

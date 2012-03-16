@@ -23,7 +23,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 public interface RuleAtom {
-
+    
 	Resource toSWRL(Model model);
 	SPARQLObject toSPARQL();
 	SWRLAtom toSWRL(OWLDataFactory factory);

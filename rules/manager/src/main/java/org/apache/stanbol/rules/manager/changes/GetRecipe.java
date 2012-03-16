@@ -36,12 +36,16 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author elvio
  */
 public class GetRecipe {
+    
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     private OWLOntology owlmodel;
     private String owlID;
@@ -86,7 +90,7 @@ public class GetRecipe {
             }
 
         }else{
-            System.err.println("The recipe with name "+recipename+" doesn't exist.");
+            log.error("The recipe with name "+recipename+" doesn't exist.");
             return(null);
         }
 
@@ -115,7 +119,7 @@ public class GetRecipe {
             }
 
         }else{
-            System.err.println("The recipe with name "+recipename+" doesn't exist.");
+           log.error("The recipe with name "+recipename+" doesn't exist.");
             return(null);
         }
 

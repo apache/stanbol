@@ -41,6 +41,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 import com.hp.hpl.jena.reasoner.rulesys.Rule;
@@ -52,6 +54,8 @@ import com.hp.hpl.jena.reasoner.rulesys.Rule;
  *
  */
 public class AddRule {
+    
+   private Logger log = LoggerFactory.getLogger(getClass());
 
    private OWLOntology owlmodel;
    private OWLOntologyManager owlmanager;
@@ -182,14 +186,14 @@ public class AddRule {
 		        ok = true;
     	   }
     	   else{
-	           System.err.println("The rule with name "+ruleName+" already exists. Pleas check the name.");
+	           log.error("The rule with name "+ruleName+" already exists. Pleas check the name.");
 	           ok = false;
 	           return(ok);
     	   }
 
        }
        else{
-	       System.err.println("The rule with name and the body-head string cannot be empity or null.");
+	       log.error("The rule with name and the body-head string cannot be empity or null.");
 	       ok=false;
 	       return(ok);
        }
@@ -216,7 +220,6 @@ public class AddRule {
        OWLDataProperty bodyhead = factory.getOWLDataProperty(IRI.create(owlIDrmi+"hasBodyAndHead"));
        
        if(((ruleName!=null)&&!ruleName.toString().isEmpty())&&((ruleBodyHead!=null)&&!ruleBodyHead.isEmpty())){
-    	   System.out.println("entriamo "+ruleName);
     	   if(!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))){
 	     
 	            //Add the rule istance
@@ -236,14 +239,14 @@ public class AddRule {
             ok = true;
 	       }
 	       else{
-	           System.err.println("The rule with name "+ruleName+" already exists. Pleas check the name.");
+	           log.error("The rule with name "+ruleName+" already exists. Pleas check the name.");
 	           ok = false;
 	           return(ok);
 	       }
 
        }
        else{
-	       System.err.println("The rule with name and the body-head string cannot be empity or null.");
+	       log.error("The rule with name and the body-head string cannot be empity or null.");
 	       ok=false;
 	       return(ok);
        }
@@ -302,13 +305,13 @@ public class AddRule {
 
            ok = true;
        }else{
-           System.err.println("The rule with name "+ruleName+" already exists. Pleas check the name.");
+           log.error("The rule with name "+ruleName+" already exists. Pleas check the name.");
            ok = false;
            return(ok);
        }
 
     }else{
-       System.err.println("The rule with name and the body-head string cannot be empity or null.");
+       log.error("The rule with name and the body-head string cannot be empity or null.");
        ok=false;
        return(ok);
     }
@@ -368,13 +371,13 @@ public class AddRule {
 
             ok= true;
        }else{
-           System.err.println("The rule with name "+ruleName+" already exists. Pleas check the name.");
+           log.error("The rule with name "+ruleName+" already exists. Pleas check the name.");
            ok = false;
            return(ok);
        }
 
     }else{
-       System.err.println("The rule with name and the body-head string cannot be empity or null.");
+       log.error("The rule with name and the body-head string cannot be empity or null.");
        ok=false;
        return(ok);
     }

@@ -29,9 +29,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.manager.changes.LoadRuleFile;
 import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
@@ -54,12 +51,16 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
  * @author elvio
  */
 public class LoadRuleFileTest {
+    
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     public LoadRuleFileTest() {}
 
@@ -98,7 +99,9 @@ public class LoadRuleFileTest {
         OWLOntology owlmodel = newstore.getOntology();
         OWLDataFactory factory = owlmanager.getOWLDataFactory();
         String ID = owlmodel.getOntologyID().toString().replace("<", "").replace(">", "") + "#";
-        System.out.println(ID);
+        
+        log.debug(ID);
+        
         // KReSRule
         OWLClass ontocls = factory.getOWLClass(IRI.create(ID + "KReSRule"));
 
@@ -333,7 +336,7 @@ public class LoadRuleFileTest {
                 OWLAxiom ax = axiom.next();
                 if (expaxiom.contains(ax)) num++;
             }
-            System.out.println(numexp + " " + numres + " " + num + " " + numres);
+            log.debug(numexp + " " + numres + " " + num + " " + numres);
             assertEquals(numexp - numres, num - numres);
             // assertEquals(numexp,(numres+12));
             // TODO review the generated test code and remove the default call to fail.
