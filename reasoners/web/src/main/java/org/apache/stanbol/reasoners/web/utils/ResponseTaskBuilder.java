@@ -17,6 +17,7 @@
 package org.apache.stanbol.reasoners.web.utils;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -30,6 +31,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.commons.web.base.format.KRFormat;
@@ -74,7 +76,10 @@ public class ResponseTaskBuilder {
     }
     
     private Response build(){
-        return Response.ok().build();
+        //return Response.ok().build();
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(context, rb, headers);
+        return rb.build();
     }
     
     /**
@@ -87,13 +92,27 @@ public class ResponseTaskBuilder {
     private Response build(Object object){
         if (isHTML()) {
             OutputStream out = stream(object);
-            return Response.ok(
+            
+            ResponseBuilder rb = Response.ok( 
+                   new Viewable("result",
+                       new ReasoningPrettyResultResource(
+                           context, info, out)
+                       )
+                    );
+            
+            rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+            addCORSOrigin(context, rb, headers);
+            return rb.build();
+        /*    return Response.ok(
                     new Viewable("result",
                             new ReasoningPrettyResultResource(
                                     context, info, out)),
-                    TEXT_HTML).build();
+                    TEXT_HTML).build();*/
         } else {
-            return Response.ok(object).build();
+            //return Response.ok(object).build();
+            ResponseBuilder rb = Response.ok( object );
+            addCORSOrigin(context, rb, headers);
+            return rb.build();
         }
     }
     
@@ -170,29 +189,55 @@ public class ResponseTaskBuilder {
         if (isHTML()) {
             if (isConsistent) {
                 log.debug("The input is consistent");
-                return Response.ok(
+                
+                ResponseBuilder rb = Response.ok( 
+                    new Viewable("result",
+                        new ReasoningPrettyResultResource(
+                            context, info, "The input is consistent :)")
+                        )
+                     );
+             
+                rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+                addCORSOrigin(context, rb, headers);
+                return rb.build();
+             
+               /*return Response.ok(
                         new Viewable("result",
                                 new ReasoningPrettyResultResource(
                                         context, info,
                                         "The input is consistent :)")),
-                        TEXT_HTML).build();
+                        TEXT_HTML).build();*/
             } else {
                 log.debug("The input is not consistent");
-                return Response
+                ResponseBuilder rb = Response.status(Status.CONFLICT);
+                rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+                addCORSOrigin(context, rb, headers);
+                rb.entity(new Viewable("result", new ReasoningPrettyResultResource(context, info,
+                        "The input is NOT consistent :(")));
+                return rb.build();
+                
+                /*return Response
                         .status(Status.CONFLICT)
                         .entity(new Viewable("result",
                                 new ReasoningPrettyResultResource(
                                         context, info,
                                         "The input is NOT consistent :(")))
-                        .type(TEXT_HTML).build();
+                        .type(TEXT_HTML).build();*/
             }
         } else {
             if (isConsistent) {
                 log.debug("The input is consistent");
-                return Response.ok("The input is consistent :)").build();
+                //return Response.ok("The input is consistent :)").build();
+                ResponseBuilder rb = Response.ok("The input is consistent :)");
+                addCORSOrigin(context, rb, headers);
+                return rb.build();
             } else {
                 log.debug("The input is not consistent");
-                return Response.status(Status.CONFLICT).build();
+                //return Response.status(Status.CONFLICT).build();
+                
+                ResponseBuilder rb = Response.status(Status.CONFLICT);
+                addCORSOrigin(context, rb, headers);
+                return rb.build();
             }
         }
     }

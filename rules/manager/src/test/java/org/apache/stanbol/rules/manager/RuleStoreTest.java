@@ -102,7 +102,7 @@ public class RuleStoreTest {
     @Test
     public void testKReSRuleStore_2() throws Exception {
         OWLOntology owlmodel = blankStore.getOntology();
-        System.out.println("Path for default store config is " + blankStore.getFilePath());
+        log.debug("Path for default store config is " + blankStore.getFilePath());
         assertNotNull(owlmodel);
         assertTrue(!owlmodel.isEmpty());
     }

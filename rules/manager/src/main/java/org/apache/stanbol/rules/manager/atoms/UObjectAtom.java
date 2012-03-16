@@ -51,7 +51,6 @@ public class UObjectAtom extends StringFunctionAtom {
 			actualType = 1;
 		}
 		
-		System.out.println("UObject : " + argument);
 	}
 	
 	@Override

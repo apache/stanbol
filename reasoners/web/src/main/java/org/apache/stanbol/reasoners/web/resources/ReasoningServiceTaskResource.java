@@ -19,6 +19,7 @@ package org.apache.stanbol.reasoners.web.resources;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.jobs.api.JobManager;
@@ -299,7 +301,11 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         // If all parameters are missing we produce the service/task welcome
         // page
         if (this.parameters.isEmpty()) {
-            return Response.ok(new Viewable("index", this)).build();
+            //return Response.ok(new Viewable("index", this)).build();
+            ResponseBuilder rb = Response.ok(new Viewable("index", this));
+            rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         }
         try {
             String target = getTarget();

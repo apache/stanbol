@@ -16,27 +16,33 @@
  */
 package org.apache.stanbol.rules.web.resources;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.io.InputStream;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.util.RuleList;
@@ -94,7 +100,8 @@ public class RefactorResource extends BaseStanbolResource {
     @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
                        KRFormat.OWL_XML, KRFormat.RDF_JSON})
     public Response applyRefactoring(@FormDataParam("recipe") String recipe,
-                                     @FormDataParam("input") InputStream input) {
+                                     @FormDataParam("input") InputStream input,
+                                     @Context HttpHeaders headers) {
 
         OWLOntology output = null;
         try {
@@ -104,8 +111,16 @@ public class RefactorResource extends BaseStanbolResource {
         } catch (RefactoringException e1) {
             throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
         }
-        if (output == null) return Response.status(NOT_FOUND).build();
-        return Response.ok(output).build();
+        if (output == null){ 
+            ResponseBuilder rb = Response.status(NOT_FOUND);
+            rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
+        }
+        ResponseBuilder rb = Response.ok(output);
+        rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
 
     }
 
@@ -125,7 +140,8 @@ public class RefactorResource extends BaseStanbolResource {
     @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
                        KRFormat.OWL_XML, KRFormat.RDF_JSON})
     public Response applyRefactoringFromRuleFile(@FormDataParam("recipe") InputStream recipeStream,
-                                                 @FormDataParam("input") InputStream input) {
+                                                 @FormDataParam("input") InputStream input,
+                                                 @Context HttpHeaders headers) {
 
         OWLOntology output = null;
         try {
@@ -135,8 +151,16 @@ public class RefactorResource extends BaseStanbolResource {
         } catch (RefactoringException e1) {
             throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
         }
-        if (output == null) return Response.status(NOT_FOUND).build();
-        return Response.ok(output).build();
+        if (output == null){ 
+            ResponseBuilder rb = Response.status(NOT_FOUND);
+            rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
+        }
+        ResponseBuilder rb = Response.ok(output);
+        rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
 
     }
 
@@ -164,12 +188,13 @@ public class RefactorResource extends BaseStanbolResource {
         return refactorer.ontologyRefactoring(inputOntology, actualRecipe);
     }
 
-        @POST
+    @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
                        KRFormat.OWL_XML, KRFormat.RDF_JSON})
     public Response performRefactoring(@FormDataParam("recipe") String recipe,
-                                       @FormDataParam("input") InputStream input) {
+                                       @FormDataParam("input") InputStream input,
+                                       @Context HttpHeaders headers) {
 
         // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
@@ -188,9 +213,17 @@ public class RefactorResource extends BaseStanbolResource {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             } catch (NoSuchRecipeException e) {
                 // missing recipes result in a status 404
-                return Response.status(NOT_FOUND).build();
+                ResponseBuilder rb = Response.status(Status.NOT_FOUND);
+                MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+                if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+                addCORSOrigin(servletContext, rb, headers);
+                return rb.build();
             }
-            return Response.ok(outputOntology).build();
+            ResponseBuilder rb = Response.ok(outputOntology);
+            MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+            if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         } catch (OWLOntologyCreationException e) {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
@@ -200,7 +233,8 @@ public class RefactorResource extends BaseStanbolResource {
     @GET
     public Response performRefactoringLazyCreateGraph(@QueryParam("recipe") String recipe,
                                                       @QueryParam("input-graph") String inputGraph,
-                                                      @QueryParam("output-graph") String outputGraph) {
+                                                      @QueryParam("output-graph") String outputGraph,
+                                                      @Context HttpHeaders headers) {
 
         log.info("recipe: {}", recipe);
         log.info("input-graph: {}", inputGraph);
@@ -213,15 +247,30 @@ public class RefactorResource extends BaseStanbolResource {
 
         try {
             refactorer.ontologyRefactoring(outputGraphIRI, inputGraphIRI, recipeIRI);
-            return Response.ok().build();
+            ResponseBuilder rb = Response.ok();
+            MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+            if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         } catch (RefactoringException e) {
             // refactoring exceptions are re-thrown
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         } catch (NoSuchRecipeException e) {
             // missing recipes result in a status 404
-            return Response.status(NOT_FOUND).build();
+            ResponseBuilder rb = Response.status(NOT_FOUND);
+            MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+            if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         }
 
+    }
+    
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers);
+        return rb.build();
     }
 
 }

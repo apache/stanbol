@@ -24,12 +24,16 @@ import org.apache.stanbol.rules.base.api.URIResource;
 import org.apache.stanbol.rules.manager.SPARQLFunction;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.SWRLAtom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 
 public class LetAtom implements RuleAtom {
+    
+    private Logger log = LoggerFactory.getLogger(getClass());
 
 	private URIResource variable;
 	private StringFunctionAtom parameterFunctionAtom;
@@ -47,11 +51,7 @@ public class LetAtom implements RuleAtom {
 
 	@Override
 	public SPARQLObject toSPARQL() {
-		System.out.println();
-		System.out.println();
-		System.out.println("Parameter Function : "+parameterFunctionAtom.toSPARQL().getObject());
-		System.out.println();
-		System.out.println();
+		log.debug("Parameter Function : "+parameterFunctionAtom.toSPARQL().getObject());
 		String variableArgument = variable.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
 		String let = "LET (?" + variableArgument + " := " + parameterFunctionAtom.toSPARQL().getObject() + ")";
 		SPARQLObject sparqlObject = new SPARQLFunction(let);

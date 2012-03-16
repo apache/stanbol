@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.stanbol.rules.base.SWRL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
@@ -36,6 +38,8 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 public class RuleParser {
 
+    private Logger log = LoggerFactory.getLogger(getClass());
+    
 	public static String ruleNS = "http://www.prova.org/rules.rdf#";
 
 	private Model sourceModel;
@@ -83,7 +87,6 @@ public class RuleParser {
 		
 		Resource imp = null;
 		
-		System.out.println("INPUT");
 		//inputOntology.write(System.out);
 		
 		String[] ruleSplit = ruleString.split("->");
@@ -94,8 +97,8 @@ public class RuleParser {
 			//rule divided into body and head
 			String bodyString = ruleSplit[0];
 			String headString = ruleSplit[1];
-			System.out.println("BODY : "+bodyString);
-			System.out.println("HEAD : "+headString);
+			log.debug("BODY : "+bodyString);
+			log.debug("HEAD : "+headString);
 			
 			//RDFList list = createList(bodyString);
 			
@@ -176,7 +179,6 @@ public class RuleParser {
 		}
 		if(!found){
 			variableResource = ruleOntology.createResource(variable, SWRL.Variable);
-			System.out.println("LA CREO");
 		}
 
 		return variableResource;
@@ -186,7 +188,7 @@ public class RuleParser {
 		
 		Resource sameASAtom = ruleOntology.createResource(SWRL.SameIndividualAtom);
 		String argumentString = token.substring(openPar+1, closePar);
-		System.out.println("ARGUMENT STRING : "+argumentString);
+		log.debug("ARGUMENT STRING : "+argumentString);
 		
 		String[] arguments = argumentString.split(",");
 		if(arguments.length == 2){
@@ -194,7 +196,7 @@ public class RuleParser {
 			for(int j=0; j<arguments.length; j++){
 				String argument = arguments[j];
 				argument = argument.replaceAll(" ", "");
-				System.out.println("ARGUMENT : "+argument);
+				log.debug("ARGUMENT : "+argument);
 				RDFNode argRes;
 				if(argument.startsWith("?")){
 					argRes = getSWRLVariable(argument);
@@ -222,7 +224,7 @@ public class RuleParser {
 		
 		Resource differentIndividualAtom = ruleOntology.createResource(SWRL.DifferentIndividualsAtom);
 		String argumentString = token.substring(openPar+1, closePar);
-		System.out.println("ARGUMENT STRING : "+argumentString);
+		log.debug("ARGUMENT STRING : "+argumentString);
 		
 		String[] arguments = argumentString.split(",");
 		if(arguments.length == 2){
@@ -230,7 +232,7 @@ public class RuleParser {
 			for(int j=0; j<arguments.length; j++){
 				String argument = arguments[j];
 				argument = argument.replaceAll(" ", "");
-				System.out.println("ARGUMENT : "+argument);
+				log.debug("ARGUMENT : "+argument);
 				RDFNode argRes;
 				if(argument.startsWith("?")){
 					argRes = getSWRLVariable(argument);
@@ -258,7 +260,7 @@ public class RuleParser {
 		
 		Resource classAtom = ruleOntology.createResource(SWRL.ClassAtom);
 		String argumentString = token.substring(openPar+1, closePar);
-		System.out.println("ARGUMENT STRING : "+argumentString);
+		log.debug("ARGUMENT STRING : "+argumentString);
 		
 		classAtom.addProperty(SWRL.classPredicate, ontResource);
 		
@@ -267,7 +269,7 @@ public class RuleParser {
 		if(arguments.length == 1){
 			String argument = arguments[0];
 			argument = argument.replaceAll(" ", "");
-			System.out.println("ARGUMENT : "+argument);
+			log.debug("ARGUMENT : "+argument);
 			RDFNode argRes;
 			if(argument.startsWith("?")){
 				argRes = getSWRLVariable(argument);
@@ -286,7 +288,7 @@ public class RuleParser {
 	private Resource createIndividualAtom(OntResource ontResource, String token, int openPar, int closePar){
 		Resource individualPropertyAtom = ruleOntology.createResource(SWRL.IndividualPropertyAtom);
 		String argumentString = token.substring(openPar+1, closePar);
-		System.out.println("ARGUMENT STRING INDIVIDUAL PROPERTY ATOM: "+argumentString);
+		log.debug("ARGUMENT STRING INDIVIDUAL PROPERTY ATOM: "+argumentString);
 		
 		individualPropertyAtom.addProperty(SWRL.propertyPredicate, ontResource);
 		
@@ -296,7 +298,7 @@ public class RuleParser {
 			for(int j=0; j<arguments.length; j++){
 				String argument = arguments[j];
 				argument = argument.replaceAll(" ", "");
-				System.out.println("ARGUMENT : "+argument);
+				log.debug("ARGUMENT : "+argument);
 				RDFNode argRes;
 				if(argument.startsWith("?")){
 					argRes = getSWRLVariable(argument);
@@ -324,7 +326,7 @@ public class RuleParser {
 		
 		Resource databaluedPropertyAtom = ruleOntology.createResource(SWRL.DatavaluedPropertyAtom);
 		String argumentString = token.substring(openPar+1, closePar);
-		System.out.println("ARGUMENT STRING : "+argumentString);
+		log.debug("ARGUMENT STRING : "+argumentString);
 		
 		databaluedPropertyAtom.addProperty(SWRL.propertyPredicate, ontResource);
 		
@@ -334,7 +336,7 @@ public class RuleParser {
 			for(int j=0; j<arguments.length; j++){
 				String argument = arguments[j];
 				argument = argument.replaceAll(" ", "");
-				System.out.println("ARGUMENT : "+argument);
+				log.debug("ARGUMENT : "+argument);
 				RDFNode argRes;
 				if(argument.startsWith("?")){
 					argRes = getSWRLVariable(argument);
@@ -363,7 +365,7 @@ public class RuleParser {
 		
 		Resource dataRangeAtom = ruleOntology.createResource(SWRL.DataRangeAtom);
 		String argumentString = token.substring(openPar+1, closePar);
-		System.out.println("ARGUMENT STRING : "+argumentString);
+		log.debug("ARGUMENT STRING : "+argumentString);
 		
 		dataRangeAtom.addProperty(SWRL.propertyPredicate, ontResource);
 		
@@ -373,7 +375,7 @@ public class RuleParser {
 		
 			String argument = arguments[0];
 			argument = argument.replaceAll(" ", "");
-			System.out.println("ARGUMENT : "+argument);
+			log.debug("ARGUMENT : "+argument);
 			RDFNode argRes;
 			if(argument.startsWith("?")){
 				argRes = getSWRLVariable(argument);
@@ -406,7 +408,7 @@ public class RuleParser {
 				int closePar = token.indexOf(")");
 
 				String atom = token.substring(0, openPar);
-				System.out.println("ATOM : "+atom);
+				log.debug("ATOM : "+atom);
 
 				Resource atomResource = null;
 
@@ -425,50 +427,49 @@ public class RuleParser {
 						String atomName = atomComponents[1];
 
 						OntResource ontResource = null;
-						System.out.println("atomNSPrefix : "+atomNSPrefix);
+						log.debug("atomNSPrefix : "+atomNSPrefix);
 						//ruleOntology.write(System.out);
 						String namespaceURI = ruleOntology.getNsPrefixURI(atomNSPrefix);
 
-						System.out.println("SEMION RULE PARSER : ontology "+namespaceURI.replace("#", ""));
+						log.debug("SEMION RULE PARSER : ontology "+namespaceURI.replace("#", ""));
 
 						OntModel ontModelExternal = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);
 						ontModelExternal.read(namespaceURI.replace("#", ""));
 
 						ontResource = ontModelExternal.getOntResource(namespaceURI+atomName);
 
-						System.out.println("NAME ATOOOOM: "+namespaceURI+atomName);
+						log.debug("NAME ATOOOOM: "+namespaceURI+atomName);
 
 						if(ontResource != null){
-							System.out.println("QUIIIIIIIIIIIIIIII");
 							if(ontResource.isClass()){
 								atomResource = createClassAtom(ontResource, token, openPar, closePar);
-								System.out.println(ontResource.getURI()+ " CLASS ");
+								log.debug(ontResource.getURI()+ " CLASS ");
 							}
 							else if(ontResource.isObjectProperty()){
 								atomResource = createIndividualAtom(ontResource, token, openPar, closePar);
-								System.out.println(ontResource.getURI()+ " OBJECT PROPERTY");
+								log.debug(ontResource.getURI()+ " OBJECT PROPERTY");
 							}
 							else if(ontResource.isDatatypeProperty()){
 								atomResource = createDatavaluedPropertyAtom(ontResource, token, openPar, closePar);
-								System.out.println(ontResource.getURI()+ " OBJECT DATATYPE PROPERTY");
+								log.debug(ontResource.getURI()+ " OBJECT DATATYPE PROPERTY");
 							}
 							else if(ontResource.isDataRange()){
 								atomResource = createDataRangeAtom(ontResource, token, openPar, closePar);
-								System.out.println(ontResource.getURI()+ " DATA RANGE");
+								log.debug(ontResource.getURI()+ " DATA RANGE");
 							}
 							else{
 								if(ontResource.isProperty()){
 									atomResource = createIndividualAtom(ontResource, token, openPar, closePar);
-									System.out.println(ontResource.getURI()+ " PROPERTY");
+									log.debug(ontResource.getURI()+ " PROPERTY");
 								}
 								else{
-									System.out.println(ontResource.getURI()+ " nil");
+									log.debug(ontResource.getURI()+ " nil");
 								}
 							}
 
 						}
 						else{
-							System.out.println("SONO UNA MINCHIA");
+							//log.debug("SONO UNA MINCHIA");
 						}
 
 
@@ -478,7 +479,7 @@ public class RuleParser {
 				if(atomResource != null){
 
 					list = list.cons(atomResource);
-					System.out.println("ENTRO QUI "+list.size());
+					log.debug("ENTRO QUI "+list.size());
 
 				}
 

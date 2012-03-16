@@ -17,6 +17,7 @@
 package org.apache.stanbol.reasoners.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +31,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
@@ -69,8 +72,11 @@ public class ReasoningServicesResource extends BaseStanbolResource {
 
     @GET
     @Produces(TEXT_HTML)
-    public Response getDocumentation() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+    public Response getDocumentation(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok(new Viewable("index", this));
+        rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     private ReasoningService<?,?,?> service = null;
@@ -78,14 +84,23 @@ public class ReasoningServicesResource extends BaseStanbolResource {
     @GET
     @Produces(TEXT_HTML)
     @Path("{service}")
-    public Response getServiceDocumentation(@PathParam(value = "service") String serviceID) {
+    public Response getServiceDocumentation(@PathParam(value = "service") String serviceID,
+                                            @Context HttpHeaders headers) {
     	try {
 			this.service = this.getServicesManager().get(serviceID);
 		} catch (UnboundReasoningServiceException e) {
 			log.info("Service {} is not bound", serviceID);
-			return Response.status(Status.NOT_FOUND).build();
+			
+			ResponseBuilder rb = Response.status(Status.NOT_FOUND);
+	        rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+	        addCORSOrigin(servletContext, rb, headers);
+	        return rb.build();
+			
 		}
-        return Response.ok(new Viewable("service", this), TEXT_HTML).build();
+    	 ResponseBuilder rb = Response.ok(new Viewable("service", this));
+         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+         addCORSOrigin(servletContext, rb, headers);
+         return rb.build();
     }
     
     private ReasoningServicesManager getServicesManager() {
