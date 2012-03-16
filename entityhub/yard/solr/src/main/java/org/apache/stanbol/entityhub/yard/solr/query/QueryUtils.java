@@ -41,7 +41,22 @@ public final class QueryUtils {
      * of STR no whitespace is assumed. Therefore spaces need to be replaced with '+' to search for tokens
      * with the exact name. In all other cases the string need not to be converted.
      * 
-     * Note also that text queries are converted to lower case
+     * <del>Note also that text queries are converted to lower case</del>
+     * Note: since 2012-03-14 parsed values are only converted to lower case.
+     * <p>
+     * <b>TODO:</b> Until Solr 3.6 is released and the implementation of
+     * <a href="https://issues.apache.org/jira/browse/">SOLR-2438</a> is
+     * released this needs to still convert wildcard queries to lower case.<br>
+     * Because of that:<ul>
+     * <li> in case <code>escape=true</code>. Non-wildcard queries should support
+     * case sensitive searches. If the searched solr field uses a lowerCase
+     * filter than this will be done by Solr anyway and if not that case
+     * sensitivity might be important!
+     * <li> for <code>escape=false</code> - wild card searches the values are
+     * still converted to lower case to keep compatible with previous versions.
+     * TODO: the caseSensitive parameter of TextConstraints should be used
+     * instead
+     * </ul>
      * 
      * @param value
      *            the index value
@@ -62,13 +77,17 @@ public final class QueryUtils {
             value = SolrUtil.escapeWildCardString(value);
         }
         if (IndexDataTypeEnum.TXT.getIndexType().equals(indexValue.getType())) {
-        	value = value.toLowerCase();
+            if(!escape){ 
+                value = value.toLowerCase();
+            } //rw: 20120314: respect case sensitivity for escaped (non wildcard)
             Collection<String> tokens = new HashSet<String>(
                     Arrays.asList(value.split(" ")));
             tokens.remove("");
             queryConstraints = tokens.toArray(new String[tokens.size()]);
         } else if (IndexDataTypeEnum.STR.getIndexType().equals(indexValue.getType())) {
-            value = value.toLowerCase();
+            if(!escape){ 
+                value = value.toLowerCase();
+            } //rw: 20120314: respect case sensitivity for escaped (non wildcard)
             queryConstraints = new String[] {value.replace(' ', '+')};
         } else {
             queryConstraints = new String[] {value};
