@@ -36,7 +36,6 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcProvider;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -45,6 +44,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.enhancer.engines.refactor.dereferencer.Dereferencer;
 import org.apache.stanbol.enhancer.engines.refactor.dereferencer.DereferencerImpl;
@@ -57,15 +57,14 @@ import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyContentInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
@@ -120,16 +119,10 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
      * @author alexdma
      * 
      */
-    private class OntologyContentSourceWithPhysicalIRI extends OntologyContentInputSource {
+    private class GraphContentSourceWithPhysicalIRI extends GraphContentInputSource {
 
-        public OntologyContentSourceWithPhysicalIRI(InputStream content, IRI physicalIri) throws OWLOntologyCreationException {
-            this(content, physicalIri, OWLManager.createOWLOntologyManager());
-        }
-
-        public OntologyContentSourceWithPhysicalIRI(InputStream content,
-                                                    IRI physicalIri,
-                                                    OWLOntologyManager manager) throws OWLOntologyCreationException {
-            super(content, manager);
+        public GraphContentSourceWithPhysicalIRI(InputStream content, IRI physicalIri) {
+            super(content);
             bindPhysicalIri(physicalIri);
         }
 
@@ -237,14 +230,17 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
             throw new EngineException(
                     "OntoNet session quota reached. The Refactor Engine requires its own new session to execute.");
         }
+        if (session == null) throw new EngineException(
+                "Failed to create OntoNet session. The Refactor Engine requires its own new session to execute.");
+
         log.debug("Refactor enhancement job will run in session '{}'.", session.getID());
 
         // Retrieve and filter the metadata graph for entities recognized by the engines.
-        final MGraph mGraph = ci.getMetadata();
+        final MGraph metadataGraph = ci.getMetadata(), signaturesGraph = new IndexedMGraph();
         // FIXME the Stanbol Enhancer vocabulary should be retrieved from somewhere in the enhancer API.
         final UriRef ENHANCER_ENTITY_REFERENCE = new UriRef(
                 "http://fise.iks-project.eu/ontology/entity-reference");
-        Iterator<Triple> tripleIt = mGraph.filter(null, ENHANCER_ENTITY_REFERENCE, null);
+        Iterator<Triple> tripleIt = metadataGraph.filter(null, ENHANCER_ENTITY_REFERENCE, null);
         while (tripleIt.hasNext()) {
             // Get the entity URI
             Resource obj = tripleIt.next().getObject();
@@ -254,70 +250,55 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
             }
             final String entityReference = ((UriRef) obj).getUnicodeString();
             log.debug("Trying to resolve entity {}", entityReference);
-            // We fetch the entity in the OntologyInputSource object
-            try {
-                /*
-                 * The RDF graph of an entity is fetched via the EntityHub. The getEntityOntology is a method
-                 * the do the job of asking the entity to the EntityHub and wrap the RDF graph into an
-                 * OWLOntology.
-                 */
-                OntologyInputSource<OWLOntology,?> ontologySource;
 
-                if (engineConfiguration.isEntityHubUsed()) {
-                    ontologySource = new RootOntologySource(getEntityOntology(entityReference));
-                } else {
-                    ontologySource = new OntologyContentSourceWithPhysicalIRI(
-                            dereferencer.resolve(entityReference), IRI.create(entityReference));
+            // Populate the entity signatures graph, by querying either the Entity Hub or the dereferencer.
+            if (engineConfiguration.isEntityHubUsed()) {
+                MGraph result = populateWithEntity(entityReference, signaturesGraph);
+                if (result != signaturesGraph && result != null) {
+                    log.warn("Entity Hub query added triples to a new graph instead of populating the supplied one!"
+                             + " New signatures will be discarded.");
                 }
-
-                if (session != null && ontologySource != null) session.addOntology(ontologySource);
-                log.debug("Added " + entityReference + " to the session space of scope "
-                          + engineConfiguration.getScope(), this);
-
-            } catch (UnmodifiableOntologyCollectorException e) {
-                throw new EngineException("Cannot populate locked session '" + session.getID()
-                                          + "'. Aborting.", e);
-            } catch (OWLOntologyCreationException e) {
-                log.error("Failed to obtain ontology for entity " + entityReference + ". Skipping.", e);
-                continue;
+            } else try {
+                OntologyInputSource<TripleCollection,?> source = new GraphContentSourceWithPhysicalIRI(
+                        dereferencer.resolve(entityReference), IRI.create(entityReference));
+                signaturesGraph.addAll(source.getRootOntology());
             } catch (FileNotFoundException e) {
-                log.error("Failed to obtain ontology for entity " + entityReference + ". Skipping.", e);
+                log.error("Failed to dereference entity " + entityReference + ". Skipping.", e);
                 continue;
             }
-
         }
 
         try {
             /*
-             * We add to the set the graph containing the metadata generated by previous enhancement engines.
-             * It is important becaus we want to menage during the refactoring also some information fron that
-             * graph. As the graph is provided as a Clerezza MGraph, we first need to convert it to an OWLAPI
-             * OWLOntology.
+             * The dedicated session for this job will store the following: (1) all the (merged) signatures
+             * for all detected entities; (2) the original content metadata graph returned earlier in the
+             * chain.
              * 
-             * There is no chance that the mGraph could be null as it was previously controlled by the
-             * JobManager through the canEnhance method and the computeEnhancement is always called iff the
-             * former returns true.
+             * There is no chance that (2) could be null, as it was previously controlled by the JobManager
+             * through the canEnhance() method and the computeEnhancement is always called iff the former
+             * returns true.
              */
-            session.addOntology(new RootOntologySource(OWLAPIToClerezzaConverter
-                    .clerezzaGraphToOWLOntology(mGraph)));
+            session.addOntology(new GraphSource(signaturesGraph));
+            session.addOntology(new GraphSource(metadataGraph));
         } catch (UnmodifiableOntologyCollectorException e1) {
             throw new EngineException("Cannot add enhancement graph to OntoNet session for refactoring", e1);
         }
 
-        /*
-         * Export the entire session (incl. entities and enhancement graph) as a single merged ontology.
-         * 
-         * TODO the refactorer should have methods to accommodate an OntologyCollector directly instead.
-         */
-        OWLOntology ontology = session.export(OWLOntology.class, true);
-        log.debug("Refactoring recipe IRI is : " + engineConfiguration.getRecipeId());
-
-        /*
-         * We pass the ontology and the recipe IRI to the Refactor that returns the refactored graph expressed
-         * by using the given vocabulary.
-         */
         try {
-            // To perform the refactoring of the ontology to a given vocabulary we use the Stanbol Refactor.
+            /*
+             * Export the entire session (incl. entities and enhancement graph) as a single merged ontology.
+             * 
+             * TODO the refactorer should have methods to accommodate an OntologyCollector directly instead.
+             */
+            OWLOntology ontology = session.export(OWLOntology.class, true);
+            log.debug("Refactoring recipe IRI is : " + engineConfiguration.getRecipeId());
+
+            /*
+             * We pass the ontology and the recipe IRI to the Refactor that returns the refactored graph
+             * expressed by using the given vocabulary.
+             * 
+             * To perform the refactoring of the ontology to a given vocabulary we use the Stanbol Refactor.
+             */
             Recipe recipe = ruleStore.getRecipe(IRI.create(engineConfiguration.getRecipeId()));
 
             log.debug("Recipe {} contains {} rules.", recipe, recipe.getkReSRuleList().size());
@@ -326,40 +307,47 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
             ontology = refactorer
                     .ontologyRefactoring(ontology, IRI.create(engineConfiguration.getRecipeId()));
 
-        } catch (RefactoringException e) {
-            log.error("The refactoring engine failed the execution.", e);
-        } catch (NoSuchRecipeException e) {
-            log.error("The recipe with ID " + engineConfiguration.getRecipeId() + " does not exists", e);
-        }
-
-        /*
-         * The newly generated ontology is converted to Clarezza format and then added os substitued to the
-         * old mGraph.
-         */
-        if (engineConfiguration.isInGraphAppendMode()) {
-            log.debug("Metadata of the content will replace old ones.", this);
-        } else {
-            mGraph.clear();
-            log.debug("Content metadata will be appended to the existing ones.", this);
-        }
-        mGraph.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples(ontology));
-
-        /*
-         * The session needs to be destroyed, as it is no more useful.
-         * 
-         * clear contents before destroying (FIXME only do this until this is implemented in the
-         * destroySession() method).
-         */
-        for (IRI iri : session.listManagedOntologies()) {
-            try {
-                String key = ontologyProvider.getKey(iri);
-                ontologyProvider.getStore().deleteTripleCollection(new UriRef(key));
-            } catch (Exception ex) {
-                log.error("Failed to delete triple collection " + iri, ex);
-                continue;
+            /*
+             * The newly generated ontology is converted to Clarezza format and then added os substitued to
+             * the old mGraph.
+             */
+            if (engineConfiguration.isInGraphAppendMode()) {
+                log.debug("Metadata of the content will replace old ones.", this);
+            } else {
+                metadataGraph.clear();
+                log.debug("Content metadata will be appended to the existing ones.", this);
             }
+            metadataGraph.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples(ontology));
+
+        } catch (RefactoringException e) {
+            String msg = "Refactor engine execution failed on content item " + ci + ".";
+            log.error(msg, e);
+            throw new EngineException(msg, e);
+        } catch (NoSuchRecipeException e) {
+            String msg = "Refactor engine could not find recipe " + engineConfiguration.getRecipeId()
+                         + " to refactor content item " + ci + ".";
+            log.error(msg, e);
+            throw new EngineException(msg, e);
+        } catch (Exception e) {
+            throw new EngineException("Refactor Engine has failed.", e);
+        } finally {
+            /*
+             * The session needs to be destroyed anyhow.
+             * 
+             * Clear contents before destroying (FIXME only do this until this is implemented in the
+             * destroySession() method).
+             */
+            for (IRI iri : session.listManagedOntologies()) {
+                try {
+                    String key = ontologyProvider.getKey(iri);
+                    ontologyProvider.getStore().deleteTripleCollection(new UriRef(key));
+                } catch (Exception ex) {
+                    log.error("Failed to delete triple collection " + iri, ex);
+                    continue;
+                }
+            }
+            sessionManager.destroySession(session.getID());
         }
-        sessionManager.destroySession(session.getID());
 
     }
 
@@ -378,50 +366,37 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
     @Deactivate
     protected void deactivate(ComponentContext context) {
 
-        /*
-         * Deactivating the dulcifier. The procedure require: 1) get all the rules from the recipe 2) remove
-         * the recipe. 3) remove the single rule. 4) tear down the scope ontologySpace and the scope itself.
-         */
+        // Deactivation clears all the rules and releases OntoNet resources.
 
+        IRI recipeId = IRI.create(engineConfiguration.getRecipeId());
         try {
-            /*
-             * step 1: get all the rule
-             */
-            log.debug("Removing recipe " + engineConfiguration.getRecipeId() + " from RuleStore.", this);
-            RuleList recipeRuleList = ruleStore.getRecipe(IRI.create(engineConfiguration.getRecipeId()))
-                    .getkReSRuleList();
+            // step 1: get all the rules
+            log.debug("Recipe {} and its associated rules will be removed from the rule store.", recipeId);
+            RuleList recipeRuleList = ruleStore.getRecipe(recipeId).getkReSRuleList();
 
-            /*
-             * step 2: remove the recipe
-             */
-            if (ruleStore.removeRecipe(IRI.create(engineConfiguration.getRecipeId()))) {
-                log.debug("The recipe " + engineConfiguration.getRecipeId() + " has been removed correctly");
-            } else {
-                log.error("The recipe " + engineConfiguration.getRecipeId() + " can not be removed");
-            }
+            // step 2: remove the recipe
+            if (ruleStore.removeRecipe(recipeId)) {
+                log.debug(
+                    "Recipe {} has been removed correctly. Note that its rules will be removed separately.",
+                    recipeId);
+                // step 3: remove the rules
+                if (recipeRuleList != null) for (Rule rule : recipeRuleList)
+                    if (ruleStore.removeRule(rule)) log.debug("Rule {} has been removed correctly",
+                        rule.getRuleName());
+                    else log.error("Rule {} cannot be removed", rule.getRuleName());
+            } else log.error("Recipe {} cannot be removed.", recipeId);
 
-            /*
-             * step 3: remove the rules
-             */
-            for (Rule rule : recipeRuleList) {
-                if (ruleStore.removeRule(rule)) {
-                    log.debug("The rule " + rule.getRuleName() + " has been removed correctly");
-                } else {
-                    log.error("The rule " + rule.getRuleName() + " can not be removed");
-                }
-            }
-
-            /*
-             * step 4:
-             */
-            scope.getCoreSpace().tearDown();
-            scope.tearDown();
-            onManager.getScopeRegistry().deregisterScope(scope);
         } catch (NoSuchRecipeException ex) {
             log.error("The recipe " + engineConfiguration.getRecipeId() + " doesn't exist", ex);
         }
 
-        log.info("Deactivated Refactor Enhancement Engine");
+        // step 4: clear OntoNet resources
+        scope.getCoreSpace().tearDown();
+        scope.tearDown();
+        onManager.getScopeRegistry().deregisterScope(scope);
+        log.debug("OntoNet resources released : scope {}", scope);
+
+        log.info("in " + RefactorEnhancementEngine.class + " deactivate with context " + context);
 
     }
 
@@ -433,26 +408,17 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
      *            {@link String}
      * @return the {@link OWLOntology} of the entity
      */
-    private OWLOntology getEntityOntology(String entityURI) {
-        log.debug("Asking entity: " + entityURI);
-        OWLOntology fetchedOntology = null;
-        // Ask the entityhub the fetch the entity.
-        Entity entitySign = referencedSiteManager.getEntity(entityURI);
-        MGraph entityMGraph = null; // The entity graph to be wrapped into an OWLOntology.
-
-        if (entitySign != null) {
-            Representation entityRepresentation = entitySign.getRepresentation();
-            RdfRepresentation entityRdfRepresentation = RdfValueFactory.getInstance().toRdfRepresentation(
-                entityRepresentation);
-            TripleCollection tripleCollection = entityRdfRepresentation.getRdfGraph();
-            entityMGraph = new SimpleMGraph();
-            entityMGraph.addAll(tripleCollection);
+    private MGraph populateWithEntity(String entityURI, MGraph target) {
+        log.debug("Requesting signature of entity {}", entityURI);
+        MGraph graph = target != null ? target : new IndexedMGraph();
+        // Query the Entity Hub
+        Entity signature = referencedSiteManager.getEntity(entityURI);
+        if (signature != null) {
+            RdfRepresentation rdfSignature = RdfValueFactory.getInstance().toRdfRepresentation(
+                signature.getRepresentation());
+            graph.addAll(rdfSignature.getRdfGraph());
         }
-
-        if (entityMGraph != null) fetchedOntology = OWLAPIToClerezzaConverter
-                .clerezzaGraphToOWLOntology(entityMGraph);
-
-        return fetchedOntology;
+        return graph;
     }
 
     @Override
