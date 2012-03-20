@@ -27,14 +27,14 @@ import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
 public class FeaturedSearchResult implements SearchResult {
 
     private List<DocumentResult> resultantDocuments;
-    private List<FacetResult> facets;
+    private List<FacetResult> facetResults;
     private Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords;
 
     public FeaturedSearchResult(List<DocumentResult> resultantDocuments,
-                                List<FacetResult> facets,
+                                List<FacetResult> facetResults,
                                 Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords) {
         this.resultantDocuments = resultantDocuments;
-        this.facets = facets;
+        this.facetResults = facetResults;
         this.relatedKeywords = relatedKeywords;
     }
 
@@ -45,7 +45,7 @@ public class FeaturedSearchResult implements SearchResult {
 
     @Override
     public List<FacetResult> getFacets() {
-        return this.facets;
+        return this.facetResults;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class FeaturedSearchResult implements SearchResult {
 
     @Override
     public void setFacets(List<FacetResult> facets) {
-        this.facets = facets;
+        this.facetResults = facets;
     }
 
     @Override

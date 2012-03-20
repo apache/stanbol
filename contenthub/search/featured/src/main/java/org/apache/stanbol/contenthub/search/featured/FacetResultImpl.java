@@ -16,31 +16,40 @@
  */
 package org.apache.stanbol.contenthub.search.featured;
 
+import static org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.DYNAMIC_FIELD_EXTENSIONS;
 import static org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.STANBOLRESERVED_PREFIX;
 
-import java.util.List;
-
 import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
-import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 
 public class FacetResultImpl implements FacetResult {
 
-    private FacetField facetField;
+	private FacetField facetField;
 
-    public FacetResultImpl(FacetField facetField) {
-        this.facetField = facetField;
-    }
+	private String type;
 
-    @Override
-    public String getName() {
-        return facetField.getName();
-    }
+	public FacetResultImpl(FacetField facetField) {
+		this.facetField = facetField;
+		this.type = "UNKNOWN";
+	}
+	
+	public FacetResultImpl(FacetField facetField, String type) {
+		this.facetField = facetField;
+		this.type = type;
+	}
 
-    @Override
-    public String getHtmlName() {
-        String name = getName();
+	@Override
+	public FacetField getFacetField() {
+		return this.facetField;
+	}
+
+	@Override
+	public String getType() {
+		return this.type;
+	}
+	
+	public String getHtmlName() {
+        String name = getFacetField().getName();
         if (name.startsWith(STANBOLRESERVED_PREFIX)) {
             return name.substring(STANBOLRESERVED_PREFIX.length());
         }
@@ -48,15 +57,11 @@ public class FacetResultImpl implements FacetResult {
         int lastUnderscore = name.lastIndexOf('_');
         if (lastUnderscore != -1) {
             String underScoreExtension = name.substring(lastUnderscore);
-            if (SolrVocabulary.DYNAMIC_FIELD_EXTENSIONS.contains(underScoreExtension)) {
+            if (DYNAMIC_FIELD_EXTENSIONS.contains(underScoreExtension)) {
                 name = name.substring(0, lastUnderscore);
             }
         }
         return name;
     }
 
-    @Override
-    public List<Count> getValues() {
-        return facetField.getValues();
-    }
 }

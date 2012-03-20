@@ -51,43 +51,43 @@
   </fieldset>
   
   <script language="javascript">
-    function submitProgram(){
-      var programName = $.trim($("#programNameText").val());
-      var ldPathProgram = $.trim($("#ldPathProgramTextArea").val());
-      
-      if(programName == "" || ldPathProgram == ""){
-        alert("You should enter an LD Program Name and LD Path Program");
-        return false;
+      function submitProgram() {
+          var programName = $.trim($("#programNameText").val());
+          var ldPathProgram = $.trim($("#ldPathProgramTextArea").val());
+          
+          if(programName == "" || ldPathProgram == "") {
+              alert("You should enter an LD Program Name and LD Path Program");
+              return false;
+          }
+          
+          $.ajax({
+              url: "${it.publicBaseUri}contenthub/ldpath/program",
+              type: "POST",
+              data: { name: programName, program: ldPathProgram },
+              success: function() {
+                  $("#submittedPrograms").load("${it.publicBaseUri}contenthub/ldpath #submittedPrograms>table");
+                  $("#programNameText").attr("value", "");
+                  $("#ldPathProgramTextArea").attr("value", "");
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                  alert(jqXHR.status + " " + errorThrown);
+              }
+          });
       }
       
-      $.ajax({
-        url: "${it.publicBaseUri}contenthub/ldpath/program",
-        type: "POST",
-        data: { name: programName, program: ldPathProgram },
-        success: function() {
-          $("#submittedPrograms").load("${it.publicBaseUri}contenthub/ldpath #submittedPrograms>table");
-          $("#programNameText").attr("value", "");
-          $("#ldPathProgramTextArea").attr("value", "");
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-          alert(jqXHR.status + " " + errorThrown);
-        }
-      });
-    }
-    
-    function deleteProgram(programName){
-      $.ajax({
-        url: "${it.publicBaseUri}contenthub/ldpath/program/"+programName,
-        type: "DELETE",
-        async: true,
-        success: function() {
-          $("#submittedPrograms").load("${it.publicBaseUri}contenthub/ldpath #submittedPrograms>table");
-        },
-        error: function(result) {
-          alert(result.status);
-        }
-      });
-    }
+      function deleteProgram(programName) {
+          $.ajax({
+            url: "${it.publicBaseUri}contenthub/ldpath/program/"+programName,
+            type: "DELETE",
+            async: true,
+            success: function() {
+                $("#submittedPrograms").load("${it.publicBaseUri}contenthub/ldpath #submittedPrograms>table");
+            },
+            error: function(result) {
+                alert(result.status);
+            }
+          });
+      }
   </script>
   
 </@common.page>

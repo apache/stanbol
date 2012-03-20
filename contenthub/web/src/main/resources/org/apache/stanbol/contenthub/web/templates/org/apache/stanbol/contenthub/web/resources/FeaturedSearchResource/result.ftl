@@ -20,14 +20,11 @@
 <#escape x as x?html>
 <#-- limit for the more less button -->
 <#assign limit=4>
-<div id="text">
-</div>
+<div id="text"></div>
 
 <div id="result" class="result">
-<a href="${it.publicBaseUri}contenthub/${it.indexName}/search/featured">Back to Search</a></br>
-
+  <a href="${it.publicBaseUri}contenthub/${it.indexName}/search/featured">Back to Search</a></br>
   <div class="leftContainer">
-  
     <div class="keywords">
       <#list it.searchResults.relatedKeywords?keys as queryTermToken>
         <#assign queryTerm = queryTermToken?replace("*","_")?replace(" ", "_")?replace("'", "_")>
@@ -50,7 +47,7 @@
       <#if it.chosenFacets?exists && it.chosenFacets != "{}">
         <fieldset>
           <div id="chosenFacets"></div>
-          <div id="chosenFacetsHidden" class="invisible" value="${it.chosenFacets?url("UTF-8")?js_string}"/>
+          <input type="hidden" id="chosenFacetsHidden" value="${it.chosenFacets}"/>
         </fieldset>
       </#if>
     </div>
@@ -60,12 +57,8 @@
       <#if it.searchResults.facets?exists && it.searchResults.facets?size != 0>
         <fieldset>
           <#list it.searchResults.facets as facet>
-            <#if facet.values?exists>
-              <#if it.chosenFacets?exists>
-                <@facetResultMacro.facetResultMacro facetField=facet consLink=it.chosenFacets?url("UTF-8")?js_string/>
-              <#else>
-                <@facetResultMacro.facetResultMacro facetField=facet consLink="{}"/>
-              </#if>
+            <#if facet.facetField?exists>
+                <@facetResultMacro.facetResultMacro facetResult=facet/>
             </#if>
           </#list>
         </fieldset>
@@ -93,12 +86,11 @@
       </div>
     </fieldset>
     <ul class="previousNext">
-      <#assign consLinkEscaped = it.chosenFacets?url("UTF-8")?js_string/>
       <#if it.moreRecentItems?exists>
-        <li class="moreRecent"><a id="previousLink" href="javascript:getResults('${consLinkEscaped}', null, null, 'first', ${it.offset - it.pageSize}, ${it.pageSize})">Previous</a></li>
+        <li class="moreRecent"><a id="previousLink" href="javascript:getResults(null, null, 'first', ${it.offset - it.pageSize}, ${it.pageSize})">Previous</a></li>
       </#if>
       <#if it.olderItems?exists>
-        <li class="older"><a id="nextLink" href="javascript:getResults('${consLinkEscaped}', null, null, 'first', ${it.offset + it.pageSize}, ${it.pageSize})">Next</a></li>
+        <li class="older"><a id="nextLink" href="javascript:getResults(null, null, 'first', ${it.offset + it.pageSize}, ${it.pageSize})">Next</a></li>
       </#if>
     </ul>
   </div>
