@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -66,9 +67,6 @@ public class CNNCrawlerResource extends BaseStanbolResource {
 		if (max == null) {
 			max = 10;
 		}
-		if (full == null) {
-			full = false;
-		}
 
 		Map<URI, String> newsInfo = cnnCrawler.importCNNNews(topic, max, full,
 				indexName);
@@ -107,8 +105,8 @@ public class CNNCrawlerResource extends BaseStanbolResource {
 	@POST
 	@Produces(TEXT_HTML)
 	public Response importCNNNewsHTMLPOST(@FormParam("topic") String topic,
-			@FormParam("max") Integer max, @FormParam("full") Boolean full) {
-		this.templateData = importCNNNews(topic, max, full);
+			@FormParam("max") Integer max, @FormParam("full") @DefaultValue("no") String full) {
+		this.templateData = importCNNNews(topic, max, full.equals("checked"));
 		return Response.ok(new Viewable("index", this), TEXT_HTML).build();
 	}
 

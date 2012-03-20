@@ -104,7 +104,7 @@
 		 
 		function redirectIndex(){
 			var index = $("#indexSelect").val();
-			window.location.replace("${it.publicBaseUri}contenthub/" + index + "/import/cnn/");
+			window.location.replace("${it.publicBaseUri}crawler/cnn/" + index);
 		}
 	</script>
 </@common.page>
