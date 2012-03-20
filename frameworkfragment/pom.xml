@@ -33,9 +33,7 @@
 
   <description>
     Fragment bundle that causes additional packages from the JVM
-    environment to be exported.  After starting this bundle, the OSGi
-    console detail view of the system bundle (/system/console/bundles/0)
-    should list two com.example packages as being exported.
+    environment to be exported. 
   </description>
 
   <build>
