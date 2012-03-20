@@ -52,9 +52,11 @@ import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearchManager;
+import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 import org.apache.stanbol.contenthub.web.util.JSONUtils;
 import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -99,7 +101,7 @@ public class FeaturedSearchResource extends BaseStanbolResource {
         this.featuredSearch = ContextHelper.getServiceFromContext(FeaturedSearch.class, context);
         this.tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
     }
-    
+
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
@@ -215,26 +217,29 @@ public class FeaturedSearchResource extends BaseStanbolResource {
         } else if (queryTerm != null) {
             Map<String,List<Object>> constraintsMap = JSONUtils.convertToMap(jsonCons);
             this.chosenFacets = JSONUtils.convertToString(constraintsMap);
-            List<String> allAvailableFacetNames = featuredSearch.getFieldNames(indexName);
+
+            SolrQuery sq;
             if (this.chosenFacets != null) {
-                SolrQuery sq = SolrQueryUtil.prepareFacetedSolrQuery(queryTerm, allAvailableFacetNames,
-                    constraintsMap);
-                sq.setStart(offset);
-                sq.setRows(limit + 1);
-                this.searchResults = featuredSearch.search(sq, ontologyURI, indexName);
+                sq = SolrQueryUtil.prepareFacetedSolrQuery(queryTerm, /* allAvailableFacetNames, */
+                constraintsMap);
             } else {
-                SolrQuery sq = SolrQueryUtil.prepareDefaultSolrQuery(queryTerm, allAvailableFacetNames);
-                sq.setStart(offset);
-                sq.setRows(limit + 1);
-                this.searchResults = featuredSearch.search(sq, ontologyURI, indexName);
+                sq = SolrQueryUtil.prepareDefaultSolrQuery(queryTerm/* , allAvailableFacetNames */);
             }
+            sq.setStart(offset);
+            sq.setRows(limit + 1);
+            this.searchResults = featuredSearch.search(sq, ontologyURI, indexName);
         } else {
             log.error("Should never reach here!!!!");
+            throw new SearchException("Either 'queryTerm' or 'solrQuery' paramater should be set");
         }
 
         ResponseBuilder rb = null;
         if (acceptedMediaType.isCompatible(MediaType.TEXT_HTML_TYPE)) {
             // return HTML document
+            /*
+             * For HTML view, sort facets according to their names 
+             */
+            this.searchResults.setFacets(sortFacetResults(this.searchResults.getFacets()));
             rb = Response.ok(new Viewable("result.ftl", this));
             rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML + "; charset=utf-8");
 
@@ -244,6 +249,33 @@ public class FeaturedSearchResource extends BaseStanbolResource {
             rb.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON + "; charset=utf-8");
         }
         return rb;
+    }
+
+    private List<FacetResult> sortFacetResults(List<FacetResult> facetResults) {
+        List<FacetResult> orderedFacets = new ArrayList<FacetResult>();
+        int annotatedFacetNum = 0;
+        for (FacetResult fr : facetResults) {
+            String facetName = fr.getFacetField().getName();
+            if (fr.getFacetField().getValues() == null) {
+                continue;
+            } else if (SolrVocabulary.SolrFieldName.isAnnotatedEntityFacet(facetName)) {
+                orderedFacets.add(annotatedFacetNum, fr);
+                annotatedFacetNum++;
+            } else {
+                boolean inserted = false;
+                for (int j = annotatedFacetNum; j < orderedFacets.size(); j++) {
+                    if (facetName.compareTo(orderedFacets.get(j).getFacetField().getName()) < 0) {
+                        orderedFacets.add(j, fr);
+                        inserted = true;
+                        break;
+                    }
+                }
+                if (inserted == false) {
+                    orderedFacets.add(fr);
+                }
+            }
+        }
+        return orderedFacets;
     }
 
     /*
@@ -317,8 +349,8 @@ public class FeaturedSearchResource extends BaseStanbolResource {
     public String getChosenFacets() {
         return this.chosenFacets;
     }
-    
+
     public String getIndexName() {
-    	return this.indexName;
+        return this.indexName;
     }
 }

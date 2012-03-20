@@ -16,36 +16,20 @@
  */
 package org.apache.stanbol.contenthub.servicesapi.search.featured;
 
-import java.util.List;
-
-import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.apache.solr.client.solrj.response.FacetField;
 
 /**
  * This interface defines the structure of facets that are obtained from underlying Solr index for the search
  * operation
  * 
  * @author suat
+ * @author sinaci
  * 
  */
 public interface FacetResult {
-    /**
-     * Returns the full name of the facet.
-     * 
-     * @return
-     */
-    String getName();
 
-    /**
-     * Returns the name of the facet to be used in the HTML interface.
-     * 
-     * @return
-     */
-    String getHtmlName();
-
-    /**
-     * Returns values regarding this facet in a {@link List} of {@link Count}s.
-     * 
-     * @return
-     */
-    List<Count> getValues();
+	FacetField getFacetField();
+	
+	String getType();
+	
 }

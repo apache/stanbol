@@ -608,15 +608,6 @@ public class StoreResource extends BaseStanbolResource {
                 // feedback
             }
         } else if (file != null) {
-            /*
-             * MimeUtil2 mimeUtil = new MimeUtil2(); mimeUtil.registerMimeDetector
-             * ("eu.medsea.mimeutil.detector.ExtensionMimeDetector"); mimeUtil.registerMimeDetector
-             * ("eu.medsea.mimeutil.detector.MagicMimeMimeDetector"); Collection<?> mimeTypes =
-             * mimeUtil.getMimeTypes(file); mt = MediaType
-             * .valueOf(MimeUtil2.getMostSpecificMimeType(mimeTypes).toString ());
-             * mimeUtil.unregisterMimeDetector( "eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
-             * mimeUtil.unregisterMimeDetector ("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
-             */
             mt = body.getMediaType();
             data = FileUtils.readFileToByteArray(file);
             if (title == null || title.isEmpty()) {

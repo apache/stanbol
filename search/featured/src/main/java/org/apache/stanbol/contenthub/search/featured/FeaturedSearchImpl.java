@@ -35,12 +35,14 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.NamedList;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.search.featured.util.SolrContentItemConverter;
 import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
@@ -54,7 +56,6 @@ import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearchManager;
 import org.apache.stanbol.contenthub.servicesapi.search.solr.SolrSearch;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
-import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
@@ -121,59 +122,39 @@ public class FeaturedSearchImpl implements FeaturedSearch {
         return search(queryTerm, null, null);
     }
 
-    private List<FacetResult> sortFacets(List<FacetField> facetFields) {
+    private List<FacetResult> convertFacetFields(List<FacetField> facetFields, List<FacetResult> allFacets) {
         List<FacetResult> facets = new ArrayList<FacetResult>();
-        List<FacetResult> orderedFacets = new ArrayList<FacetResult>();
-        for (FacetField facetField : facetFields) {
-            facets.add(new FacetResultImpl(facetField));
-        }
-
-        int annotatedFacetNum = 0;
-        for (FacetResult ff : facets) {
-            String facetName = ff.getName();
-            if (ff.getValues() == null) {
-                continue;
-            } else if (SolrVocabulary.SolrFieldName.isAnnotatedEntityFacet(facetName)) {
-                orderedFacets.add(annotatedFacetNum, ff);
-                annotatedFacetNum++;
-            } else {
-                boolean inserted = false;
-                for (int j = annotatedFacetNum; j < orderedFacets.size(); j++) {
-                    if (facetName.compareTo(orderedFacets.get(j).getName()) < 0) {
-                        orderedFacets.add(j, ff);
-                        inserted = true;
-                        break;
-                    }
+        if (allFacets == null) {
+            for (FacetField facetField : facetFields) {
+                if (facetField.getValues() != null) {
+                    facets.add(new FacetResultImpl(facetField));
                 }
-                if (inserted == false) {
-                    orderedFacets.add(ff);
+            }
+        } else {
+            for (FacetField facetField : facetFields) {
+                if (facetField.getValues() != null) {
+                    for (FacetResult facetResult : allFacets) {
+                        if (facetResult.getFacetField().getName().equals(facetField.getName())) {
+                            facets.add(new FacetResultImpl(facetField, facetResult.getType()));
+                        }
+                    }
                 }
             }
         }
-
-        return orderedFacets;
-    }
-
-    public static void main(String[] args) {
-        String a = "a";
-        String b = "b";
-        String ab = "ab";
-
-        System.out.println(a.compareTo(b));
-        System.out.println(a.compareTo(ab));
-        System.out.println(b.compareTo(ab));
+        return facets;
     }
 
     @Override
     public SearchResult search(String queryTerm, String ontologyURI, String ldProgramName) throws SearchException {
         QueryResponse queryResponse = solrSearch.search(queryTerm, ldProgramName);
-        return search(queryTerm, queryResponse, ontologyURI, ldProgramName);
+        return search(queryTerm, queryResponse, ontologyURI, ldProgramName, null);
     }
 
     private SearchResult search(String queryTerm,
                                 QueryResponse queryResponse,
                                 String ontologyURI,
-                                String ldProgramName) throws SearchException {
+                                String ldProgramName,
+                                List<FacetResult> allFacets) throws SearchException {
         List<DocumentResult> resultantDocuments = new ArrayList<DocumentResult>();
         for (SolrDocument solrDocument : queryResponse.getResults()) {
             resultantDocuments.add(SolrContentItemConverter.solrDocument2solrContentItem(solrDocument,
@@ -186,8 +167,8 @@ public class FeaturedSearchImpl implements FeaturedSearch {
             relatedKeywords.putAll(relatedKeywordSearchManager.getRelatedKeywordsFromAllSources(queryToken,
                 ontologyURI).getRelatedKeywords());
         }
-        return new FeaturedSearchResult(resultantDocuments, sortFacets(queryResponse.getFacetFields()),
-                relatedKeywords);
+        return new FeaturedSearchResult(resultantDocuments, convertFacetFields(
+            queryResponse.getFacetFields(), allFacets), relatedKeywords);
     }
 
     @Override
@@ -196,33 +177,38 @@ public class FeaturedSearchImpl implements FeaturedSearch {
     }
 
     @Override
-    public SearchResult search(SolrParams solrQuery, String ontologyURI, String ldProgramName) throws SearchException {
+    public SearchResult search(SolrParams solrParams, String ontologyURI, String ldProgramName) throws SearchException {
+        /*
+         * RESTful services uses search method with "SolrParams" argument. For those operations
+         */
+        SolrQuery solrQuery = new SolrQuery();
+        solrQuery.add(solrParams);
+        List<FacetResult> allFacets = getAllFacets(ldProgramName);
+        SolrQueryUtil.setDefaultQueryParameters(solrQuery, allFacets);
         QueryResponse queryResponse = solrSearch.search(solrQuery, ldProgramName);
-        String queryTerm = SolrQueryUtil.extractQueryTermFromSolrQuery(solrQuery);
-        return search(queryTerm, queryResponse, ontologyURI, ldProgramName);
+        String queryTerm = SolrQueryUtil.extractQueryTermFromSolrQuery(solrParams);
+        return search(queryTerm, queryResponse, ontologyURI, ldProgramName, allFacets);
     }
 
     @Override
-    public List<String> getFieldNames() throws SearchException {
-        return getFieldNames(null);
+    public List<FacetResult> getAllFacets() throws SearchException {
+        return getAllFacets(null);
     }
 
     @Override
-    public List<String> getFieldNames(String ldProgramName) throws SearchException {
-        SolrServer solrServer = null;
+    public List<FacetResult> getAllFacets(String ldProgramName) throws SearchException {
+        SolrServer solrServer = getSolrServer(ldProgramName);
+        List<FacetResult> facetResults = new ArrayList<FacetResult>();
+        NamedList<Object> fieldsList;
         try {
-            solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(
-                ldProgramName);
-        } catch (StoreException e) {
-            String msg = String
-                    .format("SolrSearchImpl.getFacetNames: Failed to obtain solr server for ldprogram: %s",
-                        ldProgramName);
-            log.error(msg, e);
-            throw new SearchException(msg, e);
-        }
-        List<String> facetNames = null;
-        try {
-            facetNames = SolrQueryUtil.getFacetNames(solrServer);
+            fieldsList = SolrQueryUtil.getAllFacetFields(solrServer);
+            for (int i = 0; i < fieldsList.size(); i++) {
+                String fn = fieldsList.getName(i);
+                @SuppressWarnings("unchecked")
+                NamedList<Object> values = (NamedList<Object>) fieldsList.getVal(i);
+                String type = (String) values.get("type");
+                facetResults.add(new FacetResultImpl(new FacetField(fn), type.trim()));
+            }
         } catch (SolrServerException e) {
             String msg = "SolrSearchImpl.getFacetNames: Failed to execute solr query";
             log.error(msg, e);
@@ -230,7 +216,22 @@ public class FeaturedSearchImpl implements FeaturedSearch {
         } catch (IOException e) {
             throw new SearchException(e.getMessage(), e);
         }
-        return facetNames;
+
+        return facetResults;
+    }
+
+    private SolrServer getSolrServer(String ldProgramName) throws SearchException {
+        try {
+            SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(
+                ldProgramName);
+            return solrServer;
+        } catch (StoreException e) {
+            String msg = String
+                    .format("SolrSearchImpl.getFacetNames: Failed to obtain solr server for ldprogram: %s",
+                        ldProgramName);
+            log.error(msg, e);
+            throw new SearchException(msg, e);
+        }
     }
 
     @Override
