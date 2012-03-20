@@ -36,6 +36,8 @@
         <exclude>enhancer/engines/metaxa/**</exclude>
         <exclude>reasoners/hermit/**</exclude>
         <exclude>reasoners/owllink/**</exclude>
+        <exclude>data/opennlp/lang/**/*.bin</exclude>
+        <exclude>data/opennlp/ner/**/*.bin</exclude>
 
         <!-- unstable/old stuff in enhancer -->
         <exclude>enhancer/autotagging/**</exclude>
@@ -44,6 +46,7 @@
         <exclude>enhancer/query-rendering/**</exclude>
         <exclude>enhancer/SemiAutomaticContentEnhancer/**</exclude>
         <exclude>enhancer/stores/**</exclude>
+
 
         <!-- demos have their own release cycle -->
         <exclude>demos/**</exclude>

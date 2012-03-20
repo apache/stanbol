@@ -156,6 +156,7 @@
                 <exclude>**/test/**/*.nt</exclude>
                 <exclude>**/test/**/*.html</exclude>
                 <exclude>**/test/**/*.xhtml</exclude>
+                <exclude>**/test/**/*.odt</exclude>
                 <exclude>**/test/**/*.rdf</exclude>
                 <exclude>**/test/**/*.rtf</exclude>
                 <exclude>**/test/**/*.rules</exclude>
@@ -202,6 +203,9 @@
                 <exclude>**/*.log</exclude>
                 <exclude>launchers/full/sling/**</exclude>
                 <exclude>launchers/full/factstore/**</exclude>
+                <exclude>data/opennlp/**/*.bin</exclude>
+                <exclude>DEPENDENCIES</exclude>
+                <exclude>DEPENDENCIES-BY-LICENSE</exclude>                
               </excludes>
             </configuration>
           </plugin>
