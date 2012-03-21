@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
@@ -37,6 +38,7 @@ import org.apache.stanbol.entityhub.core.site.AbstractEntitySearcher;
 import org.apache.stanbol.entityhub.query.clerezza.RdfQueryResultList;
 import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQuery;
 import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQueryFactory;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
@@ -62,7 +64,7 @@ public class SparqlSearcher extends AbstractEntitySearcher implements EntitySear
     @Reference
     private Parser parser;
 
-    protected static final String DEFAULT_RDF_CONTENT_TYPE = SupportedFormat.N3;
+    protected static final String DEFAULT_RDF_CONTENT_TYPE = SupportedFormat.RDF_XML;
     protected static final String DEFAULT_SPARQL_RESULT_CONTENT_TYPE = SparqlEndpointUtils.SPARQL_RESULT_JSON;
     @Override
     public final QueryResultList<String> findEntities(FieldQuery parsedQuery)  throws IOException {
@@ -129,7 +131,8 @@ public class SparqlSearcher extends AbstractEntitySearcher implements EntitySear
         log.info("  > QueryTime: "+(queryEnd-initEnd));
         if(in != null){
             MGraph graph;
-            TripleCollection rdfData = parser.parse(in, DEFAULT_RDF_CONTENT_TYPE);
+            TripleCollection rdfData = parser.parse(in, DEFAULT_RDF_CONTENT_TYPE,
+                new UriRef(getBaseUri()));
             if(rdfData instanceof MGraph){
                 graph = (MGraph) rdfData;
             } else {
@@ -142,7 +145,5 @@ public class SparqlSearcher extends AbstractEntitySearcher implements EntitySear
             return null;
         }
     }
-
-
 
 }

@@ -37,12 +37,20 @@ public abstract class AbstractEntitySearcher implements EntitySearcher {
     }
 
     private String queryUri;
+    private String baseUri;
 
     private Dictionary<String,?> config;
     private ComponentContext context;
 
     protected final String getQueryUri() {
         return queryUri;
+    }
+    /**
+     * Getter for the base URI to be used for parsing relative URIs in responses
+     * @return
+     */
+    protected String getBaseUri(){
+        return baseUri;
     }
 
     @SuppressWarnings("unchecked")
@@ -64,17 +72,45 @@ public abstract class AbstractEntitySearcher implements EntitySearcher {
             } else {
                 throw new IllegalArgumentException("The property "+EntitySearcher.QUERY_URI+" must be defined");
             }
+            this.baseUri = extractBaseUri(queryUri);
             this.config = properties;
         } else {
             throw new IllegalArgumentException("The property "+EntitySearcher.QUERY_URI+" must be defined");
         }
 
     }
+    /**
+     * computes the base URL based on service URLs
+     * @param the URL of the remote service
+     * @return the base URL used to parse relative URIs in responses.
+     */
+    protected static String extractBaseUri(String uri) {
+        //extract the namepsace from the query URI to use it fore parsing
+        //responses with relative URIs
+        String baseUri;
+        int index = Math.max(uri.lastIndexOf('#'),uri.lastIndexOf('/'));
+        int protIndex = uri.indexOf("://")+3; //do not convert http://www.example.org
+        if(protIndex < 0){
+            protIndex = 0;
+        }
+        //do not convert if the parsed uri does not contain a local name
+        if(index > protIndex && index+1 < uri.length()){
+            baseUri = uri.substring(0, index+1);
+        } else {
+            if(!(uri.charAt(uri.length()-1) == '/' || uri.charAt(uri.length()-1) == '#')){
+                baseUri = uri+'/'; //add a tailing '/' to Uris like http://www.example.org
+            } else {
+                baseUri = uri;
+            }
+        }
+        return baseUri;
+    }
     @Deactivate
     protected void deactivate(ComponentContext context) {
         log.debug("in "+AbstractEntitySearcher.class.getSimpleName()+" deactivate with context "+context);
         this.config = null;
         this.queryUri = null;
+        this.baseUri = null;
     }
     /**
      * The OSGI configuration as provided by the activate method
