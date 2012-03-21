@@ -42,7 +42,7 @@ if [ ! -f indexing ]
 then
     echo "Copying Indexing Configuration"
     mkdir -p indexing/config
-    cp -R ../../src/main/indexing/config/ indexing/config
+    cp -R ../../src/main/indexing/config/* indexing/config
     # init missing directories and config files
     java -jar org.apache.stanbol.entityhub.indexing.genericrdf-*-jar-with-dependencies.jar init 
 fi
@@ -87,4 +87,4 @@ cd ../..
 java -jar -Xmx1024m -server org.apache.stanbol.entityhub.indexing.genericrdf-*-jar-with-dependencies.jar index
 
 # finally copy the dist to the /target directory
-cp -R indexing/dist/ ./..
+cp -R indexing/dist/* ./..
