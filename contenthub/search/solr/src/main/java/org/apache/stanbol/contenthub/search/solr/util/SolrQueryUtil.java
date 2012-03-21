@@ -57,15 +57,25 @@ public class SolrQueryUtil {
 
     public final static List<Character> queryDelimiters = Arrays.asList(' ', ',');
 
-    private static SolrQuery keywordQueryWithFacets(String keyword, Map<String,List<Object>> constraints) {
+    private static String getFacetFieldType(String fieldName, List<FacetResult> allAvailableFacets) {
+    	for(FacetResult fr : allAvailableFacets) {
+    		if(fieldName.equals(fr.getFacetField().getName())) {
+    			return fr.getType();
+    		}
+    	}
+    	return "";
+    }
+    
+    private static SolrQuery keywordQueryWithFacets(String keyword, List<FacetResult> allAvailableFacets, Map<String,List<Object>> constraints) {
         SolrQuery query = new SolrQuery();
         query.setQuery(keyword);
         if (constraints != null) {
             try {
                 for (Entry<String,List<Object>> entry : constraints.entrySet()) {
                     String fieldName = ClientUtils.escapeQueryChars(entry.getKey());
+                    String type = getFacetFieldType(fieldName, allAvailableFacets);
                     for (Object value : entry.getValue()) {
-                        if (SolrVocabulary.isNameRangeField(fieldName)) {
+                        if (SolrVocabulary.isRangeType(type)) {
                             query.addFilterQuery(fieldName + facetDelimiter + (String) value);
                         } else {
                             query.addFilterQuery(fieldName + facetDelimiter + quotation
@@ -170,8 +180,8 @@ public class SolrQueryUtil {
         return solrQuery;
     }
 
-    public static SolrQuery prepareFacetedSolrQuery(String queryTerm, Map<String,List<Object>> constraints) {
-        SolrQuery solrQuery = keywordQueryWithFacets(queryTerm, constraints);
+    public static SolrQuery prepareFacetedSolrQuery(String queryTerm, List<FacetResult> allAvailableFacets, Map<String,List<Object>> constraints) {
+        SolrQuery solrQuery = keywordQueryWithFacets(queryTerm, allAvailableFacets, constraints);
         return solrQuery;
     }
 

@@ -183,7 +183,7 @@ public class FeaturedSearchImpl implements FeaturedSearch {
          */
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.add(solrParams);
-        List<FacetResult> allFacets = getAllFacets(ldProgramName);
+        List<FacetResult> allFacets = getAllFacetResults(ldProgramName);
         SolrQueryUtil.setDefaultQueryParameters(solrQuery, allFacets);
         QueryResponse queryResponse = solrSearch.search(solrQuery, ldProgramName);
         String queryTerm = SolrQueryUtil.extractQueryTermFromSolrQuery(solrParams);
@@ -191,12 +191,12 @@ public class FeaturedSearchImpl implements FeaturedSearch {
     }
 
     @Override
-    public List<FacetResult> getAllFacets() throws SearchException {
-        return getAllFacets(null);
+    public List<FacetResult> getAllFacetResults() throws SearchException {
+        return getAllFacetResults(null);
     }
 
     @Override
-    public List<FacetResult> getAllFacets(String ldProgramName) throws SearchException {
+    public List<FacetResult> getAllFacetResults(String ldProgramName) throws SearchException {
         SolrServer solrServer = getSolrServer(ldProgramName);
         List<FacetResult> facetResults = new ArrayList<FacetResult>();
         NamedList<Object> fieldsList;

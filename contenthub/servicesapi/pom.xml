@@ -35,8 +35,8 @@
       </plugin>
     </plugins>
   </build>
-  <dependencies>
 
+  <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
@@ -46,12 +46,12 @@
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.core</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-solrj</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-core-bundle</artifactId>
     </dependency>
   </dependencies>
 </project>

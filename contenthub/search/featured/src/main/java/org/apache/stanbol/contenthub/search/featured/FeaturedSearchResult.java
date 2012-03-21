@@ -26,21 +26,21 @@ import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
 
 public class FeaturedSearchResult implements SearchResult {
 
-    private List<DocumentResult> resultantDocuments;
+    private List<DocumentResult> documentResults;
     private List<FacetResult> facetResults;
     private Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords;
 
-    public FeaturedSearchResult(List<DocumentResult> resultantDocuments,
+    public FeaturedSearchResult(List<DocumentResult> documentResults,
                                 List<FacetResult> facetResults,
                                 Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords) {
-        this.resultantDocuments = resultantDocuments;
+        this.documentResults = documentResults;
         this.facetResults = facetResults;
         this.relatedKeywords = relatedKeywords;
     }
 
     @Override
-    public List<DocumentResult> getResultantDocuments() {
-        return this.resultantDocuments;
+    public List<DocumentResult> getDocuments() {
+        return this.documentResults;
     }
 
     @Override
@@ -54,13 +54,13 @@ public class FeaturedSearchResult implements SearchResult {
     }
 
     @Override
-    public void setDocuments(List<DocumentResult> resultantDocuments) {
-        this.resultantDocuments = resultantDocuments;
+    public void setDocuments(List<DocumentResult> documentresults) {
+        this.documentResults = documentresults;
     }
 
     @Override
-    public void setFacets(List<FacetResult> facets) {
-        this.facetResults = facets;
+    public void setFacets(List<FacetResult> facetResults) {
+        this.facetResults = facetResults;
     }
 
     @Override

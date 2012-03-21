@@ -28,23 +28,22 @@
         ${facetHtmlName}
         <br/>
         <#assign orderedList = facetField.values?sort_by("name") />
-        <ul><li>
+        <p>
           <input id="dateFrom" class="facetText" type="text" value="${orderedList[0].name?substring(0,10)}" readonly="true"/> 
           to <input id="dateTo" class="facetText" type="text" value="${orderedList[orderedList?size-1].name?substring(0,10)}" readonly="true"/>
           <a href="javascript:getResults('stanbolreserved_creationdate','','date')"><input type="button" value=">" /></a>
-        </li></ul>
+        </p>
       <#else>
         ${facetHtmlName}
-        <ul id="${facetHtmlName}list">
-          <#assign type = facetResult.type />
-          <#if type=="int" || type=="float" || type=="long" || type=="double">
-            <li>
-              <input id="${facetHtmlName}TextMin" class="facetText" type="text"/> 
-              to <input id="${facetHtmlName}TextMax" class="facetText" type="text"/>
-              <a href="javascript:getResults('${facetNameEscaped}','','range')"><input type="button" value=">" /></a>
-            </li>
-          </#if>
-          
+        <#assign type = facetResult.type />
+        <#if type=="int" || type=="float" || type=="long" || type=="double">
+          <p>
+          <input id="${facetHtmlName}TextMin" class="facetText" type="text"/> 
+            to <input id="${facetHtmlName}TextMax" class="facetText" type="text"/>
+          <a href="javascript:getResults('${facetNameEscaped}','','range')"><input type="button" value=">" /></a>
+          </p>
+        </#if>
+        <ul id="${facetHtmlName}list"> 
           <#assign x=0 />
           <#list facetField.values as count>
             <#assign countNameEscaped = count.name?url("UTF-8")?js_string/>
@@ -61,7 +60,7 @@
   <#else>
     <p>No results found<p>
   </#if>
-  
+  <hr />
   <script type=text/javascript>
   
       function init() {
