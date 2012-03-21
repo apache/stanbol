@@ -251,6 +251,14 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         return listeners;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O> Set<O> getManagedOntologies(Class<O> returnType, boolean withClosure) {
+        if (!OWLOntology.class.isAssignableFrom(returnType)) throw new UnsupportedOperationException(
+                "This implementation can only get objects of type " + OWLOntology.class);
+        return (Set<O>) getOntologies(withClosure);
+    }
+
     @Override
     public IRI getNamespace() {
         return this.namespace;
@@ -260,14 +268,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     public synchronized Set<OWLOntology> getOntologies(boolean withClosure) {
         return withClosure ? ontologyManager.getOntologies() : new HashSet<OWLOntology>(
                 managedOntologies.values());
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <O> Set<O> getManagedOntologies(Class<O> returnType, boolean withClosure) {
-        if (!OWLOntology.class.isAssignableFrom(returnType)) throw new UnsupportedOperationException(
-                "This implementation can only get objects of type " + OWLOntology.class);
-        return (Set<O>) getOntologies(withClosure);
     }
 
     @Override
@@ -303,6 +303,11 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     }
 
     @Override
+    public int getOntologyCount() {
+        return getOntologyCount(true);
+    }
+
+    @Override
     public int getOntologyCount(boolean withClosure) {
         if (!withClosure) return managedOntologies.keySet().size();
         else {
@@ -313,11 +318,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
             }
             return set.size();
         }
-    }
-
-    @Override
-    public int getOntologyCount() {
-        return getOntologyCount(true);
     }
 
     @Override
@@ -333,6 +333,11 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     @Override
     public boolean isLocked() {
         return locked;
+    }
+
+    @Override
+    public Set<IRI> listManagedOntologies() {
+        return managedOntologies.keySet();
     }
 
     private void performAdd(OntologyInputSource<?,?> ontSrc) {

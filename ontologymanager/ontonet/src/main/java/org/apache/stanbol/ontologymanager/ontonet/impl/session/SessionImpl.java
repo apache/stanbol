@@ -128,16 +128,18 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     protected OWLOntology exportToOWLOntology(boolean merge) {
         OWLOntology o = super.exportToOWLOntology(merge);
-        List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
-        OWLOntologyManager ontologyManager = o.getOWLOntologyManager();
-        OWLDataFactory df = ontologyManager.getOWLDataFactory();
-        // Add import declarations for attached scopes.
-        for (String scopeID : attachedScopes.keySet()) {
-            IRI physIRI = attachedScopes.get(scopeID).getDocumentIRI();
-            changes.add(new AddImport(o, df.getOWLImportsDeclaration(physIRI)));
+        if (!attachedScopes.isEmpty()) {
+            List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
+            OWLOntologyManager ontologyManager = o.getOWLOntologyManager();
+            OWLDataFactory df = ontologyManager.getOWLDataFactory();
+            // Add import declarations for attached scopes.
+            for (String scopeID : attachedScopes.keySet()) {
+                IRI physIRI = attachedScopes.get(scopeID).getDocumentIRI();
+                changes.add(new AddImport(o, df.getOWLImportsDeclaration(physIRI)));
+            }
+            // Commit
+            ontologyManager.applyChanges(changes);
         }
-        // Commit
-        ontologyManager.applyChanges(changes);
         return o;
     }
 
