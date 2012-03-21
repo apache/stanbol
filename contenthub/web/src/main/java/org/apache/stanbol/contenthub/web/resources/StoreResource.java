@@ -41,6 +41,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -333,7 +334,8 @@ public class StoreResource extends BaseStanbolResource {
             addCORSOrigin(servletContext, response, headers);
             return response.build();
         } else if (type.equals("raw")) {
-            String fileName = contentURI + "-raw";
+        	//TODO we should return the content directly without the file indirection
+            String fileName = URLEncoder.encode(contentURI, "utf-8") + "-raw";
             File file = new File(fileName);
             if (file.exists()) {
                 file.delete();
