@@ -94,7 +94,8 @@
 *
 * WARNING - this build downloads some OpenNLP files that are *not*
 * licensed under the Apache License, and have more restrictive usage
-* terms than the Apache Stanbol code.
+* terms than the Apache Stanbol code. See STANBOL-545 for more
+* information: https://issues.apache.org/jira/browse/STANBOL-545
 *
                 </echo>
               </tasks>
