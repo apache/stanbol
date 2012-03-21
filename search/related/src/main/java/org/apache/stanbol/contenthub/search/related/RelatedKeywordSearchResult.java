@@ -42,7 +42,7 @@ public class RelatedKeywordSearchResult implements SearchResult {
     }
 
     @Override
-    public List<DocumentResult> getResultantDocuments() {
+    public List<DocumentResult> getDocuments() {
         log.warn("RelatedKeywordSearchResult does not contain any ResultantDocument");
         return null;
     }

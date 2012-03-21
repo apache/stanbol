@@ -194,7 +194,7 @@ public class JSONUtils {
     public static String createJSONString(SearchResult searchResult) throws JSONException {
         JSONObject jObj = new JSONObject();
         if (searchResult != null) {
-            jObj.put("documents", toJSON(searchResult.getResultantDocuments()));
+            jObj.put("documents", toJSON(searchResult.getDocuments()));
             jObj.put("facets", toJSON(searchResult.getFacets()));
             jObj.put("relatedkeywords", toJSON(searchResult.getRelatedKeywords()));
         }

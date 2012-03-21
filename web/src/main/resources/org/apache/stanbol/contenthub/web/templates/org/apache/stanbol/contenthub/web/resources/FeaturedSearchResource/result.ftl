@@ -73,10 +73,10 @@
       <legend><h3>Results for ${it.queryTerm}:</h3></legend>
       <div>
         <ul class="spadded">
-          <#if it.searchResults.resultantDocuments?size == 0>
+          <#if it.searchResults.documents?size == 0>
           Your search did not match any documents
           <#else>
-            <#list it.resultantDocuments as docRes>
+            <#list it.documents as docRes>
               <div class="bordered-bottom">
                 <li class="lined"><a href="${it.publicBaseUri}contenthub/${it.indexName}/store/page/${docRes.localId}">${docRes.title}</a></li>
               </div>  

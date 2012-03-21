@@ -120,7 +120,7 @@ public interface FeaturedSearch {
      * @return {@link List} of field names related index
      * @throws SearchException
      */
-    List<FacetResult> getAllFacets() throws SearchException;
+    List<FacetResult> getAllFacetResults() throws SearchException;
 
     /**
      * This method obtains the available field names of the index, corresponding to the given
@@ -131,7 +131,7 @@ public interface FeaturedSearch {
      * @return {@link List} of field names related index
      * @throws SearchException
      */
-    List<FacetResult> getAllFacets(String indexName) throws SearchException;
+    List<FacetResult> getAllFacetResults(String indexName) throws SearchException;
 
     /**
      * This method tokenizes the given query term with the help of Stanbol Enhancer. The query term is fed to

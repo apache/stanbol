@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
+import at.newmedialab.ldpath.model.programs.Program;
 
 /**
  * This interface provides create, retrieve, delete operations for LDPath
@@ -82,6 +82,17 @@ public interface SemanticIndexManager {
 	 */
 	public String getProgramByName(String programName);
 
+	 /**
+	 * Retrieves the program managed by {@link ProgramManager} with given
+	 name,
+	 * parses it, and returns the {@link Progra}
+	 *
+	 * @param programName
+	 * @return
+	 * @throws LDPathException
+	 */
+	 public Program<Object> getParsedProgramByName(String programName);
+
 	/**
 	 * Deletes both the program and the corresponding Solr Core
 	 * 
@@ -119,6 +130,6 @@ public interface SemanticIndexManager {
 	 * @throws LDPathException
 	 */
 	public Map<String, Collection<?>> executeProgram(String programName,
-			Set<String> contexts, MGraph graph) throws LDPathException;
+			Set<String> contexts) throws LDPathException;
 
 }
