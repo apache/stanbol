@@ -31,6 +31,7 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.slf4j.Logger;
@@ -56,19 +57,29 @@ public class SolrQueryUtil {
 
     public final static List<Character> queryDelimiters = Arrays.asList(' ', ',');
 
-    private static SolrQuery keywordQueryWithFacets(String keyword, Map<String,List<Object>> constraints) {
+    private static String getFacetFieldType(String fieldName, List<FacetResult> allAvailableFacets) {
+    	for(FacetResult fr : allAvailableFacets) {
+    		if(fieldName.equals(fr.getFacetField().getName())) {
+    			return fr.getType();
+    		}
+    	}
+    	return "";
+    }
+    
+    private static SolrQuery keywordQueryWithFacets(String keyword, List<FacetResult> allAvailableFacets, Map<String,List<Object>> constraints) {
         SolrQuery query = new SolrQuery();
         query.setQuery(keyword);
         if (constraints != null) {
             try {
                 for (Entry<String,List<Object>> entry : constraints.entrySet()) {
                     String fieldName = ClientUtils.escapeQueryChars(entry.getKey());
+                    String type = getFacetFieldType(fieldName, allAvailableFacets);
                     for (Object value : entry.getValue()) {
-                        if (SolrVocabulary.isNameRangeField(fieldName)) {
+                        if (SolrVocabulary.isRangeType(type)) {
                             query.addFilterQuery(fieldName + facetDelimiter + (String) value);
                         } else {
-                            query.addFilterQuery(fieldName + facetDelimiter + quotation + ClientUtils.escapeQueryChars((String) value)
-                                                 + quotation);
+                            query.addFilterQuery(fieldName + facetDelimiter + quotation
+                                                 + ClientUtils.escapeQueryChars((String) value) + quotation);
                         }
                     }
                 }
@@ -133,20 +144,20 @@ public class SolrQueryUtil {
         return queryFull.trim();
     }
 
-    public static SolrQuery prepareFacetedSolrQuery(String queryTerm,
-                                                    List<String> allAvailableFacetNames,
-                                                    Map<String,List<Object>> constraints) {
-        SolrQuery solrQuery = keywordQueryWithFacets(queryTerm, constraints);
-        setDefaultQueryParameters(solrQuery, allAvailableFacetNames);
-        return solrQuery;
-    }
-
-    private static void setDefaultQueryParameters(SolrQuery solrQuery, List<String> allAvailableFacetNames) {
+    public static <T> void setDefaultQueryParameters(SolrQuery solrQuery, List<T> allAvailableFacetNames) {
         solrQuery.setFields("*", SCORE_FIELD);
         solrQuery.setFacet(true);
         solrQuery.setFacetMinCount(1);
         if (allAvailableFacetNames != null) {
-            for (String facetName : allAvailableFacetNames) {
+            for (T facet : allAvailableFacetNames) {
+                String facetName;
+                if (facet instanceof String) {
+                    facetName = (String) facet;
+                } else if (facet instanceof FacetResult) {
+                    facetName = ((FacetResult) facet).getFacetField().getName();
+                } else {
+                    facetName = facet.toString();
+                }
                 if (SolrFieldName.CREATIONDATE.toString().equals(facetName)
                     || (!SolrFieldName.isNameReserved(facetName) && !SolrVocabulary.isNameExcluded(facetName))) {
                     solrQuery.addFacetField(facetName);
@@ -159,31 +170,43 @@ public class SolrQueryUtil {
                                                                                             IOException {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setQuery(queryTerm);
-        setDefaultQueryParameters(solrQuery, getFacetNames(solrServer));
+        setDefaultQueryParameters(solrQuery, getAllFacetNames(solrServer));
         return solrQuery;
     }
 
-    public static SolrQuery prepareDefaultSolrQuery(String queryTerm, List<String> allAvailableFacetNames) {
+    public static SolrQuery prepareDefaultSolrQuery(String queryTerm) {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setQuery(queryTerm);
-        setDefaultQueryParameters(solrQuery, allAvailableFacetNames);
         return solrQuery;
     }
 
-    public static List<String> getFacetNames(SolrServer solrServer) throws SolrServerException, IOException {
+    public static SolrQuery prepareFacetedSolrQuery(String queryTerm, List<FacetResult> allAvailableFacets, Map<String,List<Object>> constraints) {
+        SolrQuery solrQuery = keywordQueryWithFacets(queryTerm, allAvailableFacets, constraints);
+        return solrQuery;
+    }
+
+    public static List<String> getAllFacetNames(SolrServer solrServer) throws SolrServerException,
+                                                                      IOException {
         List<String> facetNames = new ArrayList<String>();
+        NamedList<Object> fieldsList = getAllFacetFields(solrServer);
+        for (int i = 0; i < fieldsList.size(); i++) {
+            facetNames.add(fieldsList.getName(i));
+        }
+        return facetNames;
+    }
+
+    public static NamedList<Object> getAllFacetFields(SolrServer solrServer) throws SolrServerException,
+                                                                            IOException {
         LukeRequest qr = new LukeRequest();
         NamedList<Object> qresp = solrServer.request(qr);
         Object fields = qresp.get("fields");
         if (fields instanceof NamedList<?>) {
             @SuppressWarnings("unchecked")
             NamedList<Object> fieldsList = (NamedList<Object>) fields;
-            for (int i = 0; i < fieldsList.size(); i++) {
-                facetNames.add(fieldsList.getName(i));
-            }
+            return fieldsList;
         } else {
-            log.warn("Fields container is not a NamedList, so there is no facet information available");
+            throw new IllegalStateException(
+                    "Fields container is not a NamedList, so there is no facet information available");
         }
-        return facetNames;
     }
 }

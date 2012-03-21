@@ -283,27 +283,31 @@ public class SolrVocabulary {
     static {
         excludedFields.add("skos:definition");
         excludedFields.add("rdfs:label");
-//        excludedFields.add(SolrFieldName.TITLE.toString());
-//        excludedFields.add("text_all");
     }
 
     /**
-     * Checks whether the specified field is range field or not i.e whether the field will be used in range
+     * Checks whether the specified type is a range type or not 
+     * i.e whether the field will be used in range
      * queries or not
      * 
      * @param name
      *            field name
      */
-    public static boolean isNameRangeField(String name) {
-        return rangeFields.contains(name) || name.endsWith(SOLR_DYNAMIC_FIELD_LONG);
+    public static boolean isRangeType(String type) {
+        return rangeFieldTypes.contains(type);
     }
 
     /**
-     * Fields that will be used in range queries and will not be escaped in {@link SolrSearchEngineHelper}
+     * Types that will be used in range queries and will not be escaped in {@link SolrSearchEngineHelper}
      * class
      */
-    private static List<String> rangeFields = new ArrayList<String>();
+    private static List<String> rangeFieldTypes = new ArrayList<String>();
     static {
-        rangeFields.add(SolrFieldName.CREATIONDATE.toString());
+    	rangeFieldTypes.add("int");
+    	rangeFieldTypes.add("float");
+    	rangeFieldTypes.add("long");
+    	rangeFieldTypes.add("double");
+    	rangeFieldTypes.add("date");
+    	rangeFieldTypes.add("tdate");
     }
 }

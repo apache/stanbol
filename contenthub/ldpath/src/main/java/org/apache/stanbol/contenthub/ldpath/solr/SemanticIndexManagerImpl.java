@@ -20,13 +20,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -193,6 +193,25 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
 
         return nameProgramMap.get(programName);
     }
+    
+    @Override
+    public Program<Object> getParsedProgramByName(String programName) {
+        SiteManagerBackend backend = new SiteManagerBackend(referencedSiteManager);
+        String ldPathProgram = getProgramByName(programName);
+        ValueFactory vf = InMemoryValueFactory.getInstance();
+        EntityhubLDPath ldPath = new EntityhubLDPath(backend, vf);
+    	Program<Object> program = null;
+        try {
+            program = ldPath.parseProgram(LDPathUtils.constructReader(ldPathProgram));
+        } catch (LDPathParseException e) {
+        	String msg = "Should never happen!!!!! Cannot parse the already stored LDPath program.";
+            logger.error(msg, e);
+        } catch (LDPathException e) {
+        	String msg = "Should never happen!!!!! Cannot parse the already stored LDPath program.";
+            logger.error(msg, e);
+		}
+        return program;
+    }
 
     @Override
     public void deleteProgram(String programName) {
@@ -220,7 +239,7 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     }
 
     @Override
-    public Map<String,Collection<?>> executeProgram(String programName, Set<String> contexts, MGraph graph) throws LDPathException {
+    public Map<String,Collection<?>> executeProgram(String programName, Set<String> contexts) throws LDPathException {
         Map<String,Collection<?>> results = new HashMap<String,Collection<?>>();
         SiteManagerBackend backend = new SiteManagerBackend(referencedSiteManager);
         String ldPathProgram = getProgramByName(programName);
@@ -231,6 +250,7 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
             program = ldPath.parseProgram(LDPathUtils.constructReader(ldPathProgram));
         } catch (LDPathParseException e) {
             logger.error("Should never happen!!!!!", e);
+            return Collections.emptyMap();
         }
 
         Representation representation;
