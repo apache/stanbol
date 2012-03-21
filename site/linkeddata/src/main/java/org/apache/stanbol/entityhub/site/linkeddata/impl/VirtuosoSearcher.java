@@ -16,12 +16,16 @@
  */
 package org.apache.stanbol.entityhub.site.linkeddata.impl;
 
+import static org.apache.stanbol.entityhub.site.linkeddata.impl.SparqlEndpointUtils.sendSparqlRequest;
+import static org.apache.stanbol.entityhub.site.linkeddata.impl.SparqlSearcher.extractEntitiesFromJsonResult;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.felix.scr.annotations.Component;
@@ -69,7 +73,8 @@ public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySe
         log.info("  > QueryTime: "+(queryEnd-initEnd));
         if(in != null){
             MGraph graph;
-            TripleCollection rdfData = parser.parse(in, SparqlSearcher.DEFAULT_RDF_CONTENT_TYPE);
+            TripleCollection rdfData = parser.parse(in, SparqlSearcher.DEFAULT_RDF_CONTENT_TYPE,
+                new UriRef(getBaseUri()));
             if(rdfData instanceof MGraph){
                 graph = (MGraph) rdfData;
             } else {
@@ -88,9 +93,9 @@ public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySe
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
         query.setEndpointType(EndpointTypeEnum.Virtuoso);
         String sparqlQuery = query.toSparqlSelect(false);
-        InputStream in = SparqlEndpointUtils.sendSparqlRequest(getQueryUri(), sparqlQuery, SparqlSearcher.DEFAULT_SPARQL_RESULT_CONTENT_TYPE);
+        InputStream in = sendSparqlRequest(getQueryUri(), sparqlQuery, SparqlSearcher.DEFAULT_SPARQL_RESULT_CONTENT_TYPE);
         //Move to util class!
-        final List<String> entities = SparqlSearcher.extractEntitiesFromJsonResult(in,query.getRootVariableName());
+        final List<String> entities = extractEntitiesFromJsonResult(in,query.getRootVariableName());
         return new QueryResultListImpl<String>(query, entities.iterator(),String.class);
     }
 

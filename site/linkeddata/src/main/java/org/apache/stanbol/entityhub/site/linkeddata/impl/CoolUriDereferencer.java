@@ -75,7 +75,7 @@ public class CoolUriDereferencer extends AbstractEntityDereferencer implements E
         long queryEnd = System.currentTimeMillis();
         log.info("  > DereferenceTime: "+(queryEnd-start));
         if(in != null){
-            MGraph rdfData = new IndexedMGraph(parser.parse(in, format));
+            MGraph rdfData = new IndexedMGraph(parser.parse(in, format,new UriRef(getBaseUri())));
             long parseEnd = System.currentTimeMillis();
             log.info("  > ParseTime: "+(parseEnd-queryEnd));
             return valueFactory.createRdfRepresentation(new UriRef(uri), rdfData);

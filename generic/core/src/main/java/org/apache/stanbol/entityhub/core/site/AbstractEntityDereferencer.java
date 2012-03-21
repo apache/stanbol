@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.entityhub.core.site;
 
+import static org.apache.stanbol.entityhub.core.site.AbstractEntitySearcher.extractBaseUri;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,6 +44,7 @@ public abstract class AbstractEntityDereferencer implements EntityDereferencer {
         log.info("create instance of " + this.getClass().getName());
     }
 
+    private String accessUri;
     private String baseUri;
 
     private Dictionary<String, ?> config;
@@ -50,6 +53,13 @@ public abstract class AbstractEntityDereferencer implements EntityDereferencer {
 
     @Override
     public final String getAccessUri() {
+        return accessUri;
+    }
+    /**
+     * Getter for the base URI to be used for parsing relative URIs in responses
+     * @return
+     */
+    protected String getBaseUri(){
         return baseUri;
     }
 
@@ -63,12 +73,13 @@ public abstract class AbstractEntityDereferencer implements EntityDereferencer {
             Dictionary<String, ?> properties = context.getProperties();
             Object baseUriObject = properties.get(EntityDereferencer.ACCESS_URI);
             if (baseUriObject != null) {
-                this.baseUri = baseUriObject.toString();
+                this.accessUri = baseUriObject.toString();
                 //now set the new config
                 this.config = properties;
             } else {
                 throw new IllegalArgumentException("The property " + EntityDereferencer.ACCESS_URI + " must be defined");
             }
+            baseUri = extractBaseUri(accessUri);
             //TODO: I am sure, there is some Utility, that supports getting multiple
             //      values from a OSGI Dictionary
             Object prefixObject = properties.get(SiteConfiguration.ENTITY_PREFIX);
@@ -95,6 +106,7 @@ public abstract class AbstractEntityDereferencer implements EntityDereferencer {
         log.info("in " + AbstractEntityDereferencer.class.getSimpleName() + " deactivate with context " + context);
         this.config = null;
         this.prefixes = null;
+        this.accessUri = null;
         this.baseUri = null;
     }
 
