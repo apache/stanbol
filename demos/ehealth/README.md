@@ -68,4 +68,67 @@ After that the you will be able to
 
 ## Backround information about this demo
 
-TODO!!
+### Indexing
+
+The configuration used for indexing can be found at
+
+    ./src/main/indexing/config
+
+It contains of the following parts:
+
+* __indexing.properties__: Core configuration for the Indexing tools TODO: link to docu
+* __mappings.txt__: Configures the indexed fields, data types and property mappings. TODO: link to dock
+* __fieldboost.properties__: configuration for the field boosts. TODO: link to dock
+* __ehealth/__: the SolrCore configuration used for indexing. This is used in this example to customize how Solr indexes labels and ID. See the following section for details.
+
+#### Customizing the Solr Schema used for indexing
+
+The default SolrCore configuration used by the Apache Entityhub is contained in the SolrYard module and can be found [here](http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/solr/src/main/resources/solr/core/default.solrindex.zip). This configuration will be used if no customized configuration is present in "{indexing-root}/indexing/config/{name}" where {name} refers to the value of the property "name" in the "indexing.properties".
+
+Users that want/need to customize the SolrCore configuration should start with the [default configuration](http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/solr/src/main/resources/solr/core/default.solrindex.zip) extract this zip file to "{incexing-root}/indexing/config" and than rename the folder to the "name" configured in the "indexing.properties". After that you can start to customize the configuration of the SolrCore used for the configuration.
+
+THis demo uses this procedure to define two special Solr field types for indexing labels and IDs (see ./src/main/indexing/config/ehealth/conf/schema.xml).
+
+    :::xml
+    <!-- intended to be used for labels of drugs -->
+    <fieldType name="label" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+      <analyzer>
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+        <filter class="solr.WordDelimiterFilterFactory" 
+            catenateWords="1" catenateNumbers="1" catenateAll="1" 
+            generateWordParts="1" generateNumberParts="0"
+            splitOnCaseChange="0" splitOnNumerics="0" stemEnglishPossessive="0" 
+            preserveOriginal="0" />
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <!-- Field Type used for searching Drugs based on their variouse IDs -->
+    <fieldType name="code_field" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+      <analyzer>
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+        <filter class="solr.WordDelimiterFilterFactory" 
+            catenateWords="1" catenateNumbers="1" catenateAll="1" 
+            generateWordParts="1" generateNumberParts="0"
+            splitOnCaseChange="0" splitOnNumerics="0" stemEnglishPossessive="0" 
+            preserveOriginal="0" />
+      </analyzer>
+    </fieldType>
+
+For more information on the tokenizers and filters used by this configuration please see [Analyzers, Tokenizers, and Token Filters](http://wiki.apache.org/solr/AnalyzersTokenizersTokenFilters) documentation.
+
+Such field types are than applied to specific properties with the following configurations
+
+   <!-- fields that store codes -->
+   <field name="@/skos:notation/" type="code_field" indexed="true" stored="true" multiValued="true"/>
+   <field name="@/drugbank:ahfsCode/" type="code_field" indexed="true" stored="true" multiValued="true"/>
+   <field name="@/drugbank:atcCode/" type="code_field" indexed="true" stored="true" multiValued="true"/>
+   [...] 
+   <!-- String fields (e.g. chemical formulars)-->
+   <field name="@/drugbank:smilesStringCanonical/" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="@/drugbank:smilesStringIsomeric/" type="string" indexed="true" stored="true" multiValued="true"/>
+   [...] 
+
+Field

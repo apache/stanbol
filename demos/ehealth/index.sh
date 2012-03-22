@@ -17,6 +17,22 @@
 
 # 1. build the indexing tool and copy it to the /data directory
 
+# Such servers are often down - so use a mirror for now.
+# Try to use those links of you want to get the newest version
+
+# SIDER_DUMP=http://www4.wiwiss.fu-berlin.de/sider/sider_dump.nt.bz2
+# DRUGBANK_DUMP=http://www4.wiwiss.fu-berlin.de/drugbank/drugbank_dump.nt.bz2
+# DAILYMED_DUMP=http://www4.wiwiss.fu-berlin.de/dailymed/dailymed_dump.nt.bz2
+# DISEASOME_DUMP=http://www4.wiwiss.fu-berlin.de/diseasome/diseasome_dump.nt.bz2
+
+# Mirror hosted by the IKS project (http://www.iks-project.org)
+export IKS_MIRROR=http://dev.iks-project.eu/downloads/stanbol-indices/ehealth/source-files/
+export SIDER_DUMP=$IKS_MIRROR"sider_dump.nt.bz2"
+export DRUGBANK_DUMP=$IKS_MIRROR"drugbank_dump.nt.bz2"
+export DAILYMED_DUMP=$IKS_MIRROR"dailymed_dump.nt.bz2"
+export DISEASOME_DUMP=$IKS_MIRROR"diseasome_dump.nt.bz2"
+
+
 if [ ! -f target/indexing ]
 then
     mkdir -p target/indexing
@@ -56,25 +72,25 @@ then
     if [ ! -f sider_dump.nt.bz2 ]
     then
         echo "Downloading SIDER"
-        wget -c http://www4.wiwiss.fu-berlin.de/sider/sider_dump.nt.bz2
+        wget -c $SIDER_DUMP
     fi
 
     if [ ! -f drugbank_dump.nt.bz2 ]
     then
         echo "Downloading DrugBank"
-        wget -c http://www4.wiwiss.fu-berlin.de/drugbank/drugbank_dump.nt.bz2
+        wget -c $DRUGBANK_DUMP
     fi
 
     if [ ! -f dailymed_dump.nt.bz2 ]
     then
         echo "Downloading Dailymed"
-        wget -c http://www4.wiwiss.fu-berlin.de/dailymed/dailymed_dump.nt.bz2
+        wget -c $DAILYMED_DUMP
     fi
 
     if [ ! -f diseasome_dump.nt.bz2 ]
     then
         echo "Downloading Diseasome"
-        wget -c http://www4.wiwiss.fu-berlin.de/diseasome/diseasome_dump.nt.bz2
+        wget -c $DISEASOME_DUMP
     fi
     cd ..
 else
