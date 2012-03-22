@@ -29,7 +29,7 @@ import org.apache.clerezza.rdf.ontologies.RDF;
  * @author alexdma
  * 
  */
-public class ClerezzaUtils {
+public class ClerezzaOWLUtils {
 
     public static MGraph createOntology(String id, TcManager tcm) {
         UriRef name = new UriRef(id);

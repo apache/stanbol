@@ -39,7 +39,6 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
@@ -55,6 +54,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.commons.owl.PhonyIRIMapper;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
@@ -73,6 +73,7 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -108,6 +109,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
             static final String _BASE_VOCAB = "http://stanbol.apache.org/ontology/ontonet/meta#";
 
+            static final String ENTRY = _BASE_VOCAB + "Entry";
+
+            static final String HAS_ONTOLOGY_IRI = _BASE_VOCAB + "hasOntologyIRI";
+
+            static final String HAS_VERSION_IRI = _BASE_VOCAB + "hasVersionIRI";
+
             static final String MAPS_TO_GRAPH = _BASE_VOCAB + "mapsToGraph";
 
         }
@@ -125,17 +132,55 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             }
         }
 
-        void addMapping(IRI ontologyReference, UriRef graphName) {
-            graph.add(new TripleImpl(new UriRef(ontologyReference.toString()), new UriRef(
-                    Vocabulary.MAPS_TO_GRAPH), graphName));
+        void addMapping(OWLOntologyID ontologyReference, UriRef graphName) {
+            if (ontologyReference == null || ontologyReference.isAnonymous()) throw new IllegalArgumentException(
+                    "An anonymous ontology cannot be mapped. A non-anonymous ontology ID must be forged in these cases.");
+            Triple tType, tMaps, tHasOiri = null, tHasViri = null;
+            IRI ontologyIRI = ontologyReference.getOntologyIRI(), versionIri = ontologyReference
+                    .getVersionIRI();
+            UriRef entry = buildResource(ontologyReference);
+            tType = new TripleImpl(entry, RDF.type, new UriRef(Vocabulary.ENTRY));
+            tMaps = new TripleImpl(entry, new UriRef(Vocabulary.MAPS_TO_GRAPH), graphName);
+            tHasOiri = new TripleImpl(entry, new UriRef(Vocabulary.HAS_ONTOLOGY_IRI), new UriRef(
+                    ontologyIRI.toString()));
+            if (versionIri != null) tHasViri = new TripleImpl(entry, new UriRef(Vocabulary.HAS_VERSION_IRI),
+                    new UriRef(versionIri.toString()));
+            graph.add(tType);
+            graph.add(tMaps);
+            if (tHasViri != null) graph.add(tHasViri);
+            graph.add(tHasOiri);
+        }
+
+        private UriRef buildResource(OWLOntologyID ontologyReference) {
+            IRI ontologyIRI = ontologyReference.getOntologyIRI(), versionIri = ontologyReference
+                    .getVersionIRI();
+            UriRef entry = new UriRef(ontologyIRI.toString()
+                                      + ((versionIri == null) ? "" : ("/" + versionIri.toString())));
+            return entry;
+        }
+
+        private OWLOntologyID buildOntologyId(UriRef resource) {
+            IRI oiri = null, viri = null;
+            Iterator<Triple> it = graph.filter(resource, new UriRef(Vocabulary.HAS_ONTOLOGY_IRI), null);
+            if (it.hasNext()) {
+                Resource obj = it.next().getObject();
+                if (obj instanceof UriRef) oiri = IRI.create(((UriRef) obj).getUnicodeString());
+            }
+            it = graph.filter(resource, new UriRef(Vocabulary.HAS_VERSION_IRI), null);
+            if (it.hasNext()) {
+                Resource obj = it.next().getObject();
+                if (obj instanceof UriRef) viri = IRI.create(((UriRef) obj).getUnicodeString());
+            }
+            if (viri == null) return new OWLOntologyID(oiri);
+            else return new OWLOntologyID(oiri, viri);
         }
 
         void clearMappings() {
             graph.clear();
         }
 
-        UriRef getMapping(IRI ontologyReference) {
-            Iterator<Triple> it = graph.filter(new UriRef(ontologyReference.toString()), new UriRef(
+        UriRef getMapping(OWLOntologyID ontologyReference) {
+            Iterator<Triple> it = graph.filter(buildResource(ontologyReference), new UriRef(
                     Vocabulary.MAPS_TO_GRAPH), null);
             while (it.hasNext()) {
                 Resource obj = it.next().getObject();
@@ -144,25 +189,25 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             return null;
         }
 
-        Set<IRI> keys() {
-            Set<IRI> result = new HashSet<IRI>();
+        Set<OWLOntologyID> keys() {
+            Set<OWLOntologyID> result = new HashSet<OWLOntologyID>();
             Iterator<Triple> it = graph.filter(null, new UriRef(Vocabulary.MAPS_TO_GRAPH), null);
             while (it.hasNext()) {
                 NonLiteral subj = it.next().getSubject();
-                if (subj instanceof UriRef) result.add(IRI.create(((UriRef) subj).getUnicodeString()));
+                if (subj instanceof UriRef) result.add(buildOntologyId((UriRef) subj));
             }
             return result;
         }
 
-        void removeMapping(IRI ontologyReference) {
-            Iterator<Triple> it = graph.filter(new UriRef(ontologyReference.toString()), new UriRef(
+        void removeMapping(OWLOntologyID ontologyReference) {
+            Iterator<Triple> it = graph.filter(buildResource(ontologyReference), new UriRef(
                     Vocabulary.MAPS_TO_GRAPH), null);
             // I expect a concurrent modification exception here, but we'll deal with it later.
             while (it.hasNext())
                 graph.remove(it.next());
         }
 
-        void setMapping(IRI ontologyReference, UriRef graphName) {
+        void setMapping(OWLOntologyID ontologyReference, UriRef graphName) {
             removeMapping(ontologyReference);
             addMapping(ontologyReference, graphName);
         }
@@ -391,7 +436,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     @Override
     public String getKey(IRI ontologyIri) {
         ontologyIri = URIUtils.sanitizeID(ontologyIri);
-        UriRef ur = keymap.getMapping(ontologyIri);
+        UriRef ur = keymap.getMapping(new OWLOntologyID(ontologyIri));
         log.debug("key for {} is {}", ontologyIri, ur);
         return (ur == null) ? null : ur.getUnicodeString();
     }
@@ -467,10 +512,21 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Class<?>[] getSupportedReturnTypes() {
         return supported;
+    }
+
+    @Override
+    public boolean hasOntology(OWLOntologyID id) {
+        if (id == null || id.isAnonymous()) throw new IllegalArgumentException(
+                "Cannot check for an anonymous ontology.");
+        return keymap.getMapping(id) != null;
+    }
+
+    @Override
+    public boolean hasOntology(String key) {
+        return store.listTripleCollections().contains(new UriRef(key));
     }
 
     /**
@@ -574,8 +630,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
         long before = System.currentTimeMillis();
 
-        TripleCollection graph;
-        TripleCollection rdfData;
+        TripleCollection graph; // The final graph
+        TripleCollection rdfData; // The supplied ontology converted to TripleCollection
 
         if (ontology instanceof OWLOntology) {
             rdfData = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph((OWLOntology) ontology);
@@ -587,28 +643,34 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
         // Force is ignored for the content, but the imports?
 
-        String s = prefix + "::";
+        String s = prefix + "::"; // This will become the graph name
         IRI ontologyIri = null;
 
-        boolean loaded = false;
+        // FIXME Profile this method. Are we getting rid of rdfData after adding its triples?
 
-        // FIXME are we getting rid of rdfData after adding its triples?
+        // preferredKey should be the "guessed" ontology id
         String iri = preferredKey;
-        String alternateId = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
-        if (iri == null || iri.isEmpty()) iri = alternateId;
-        else try {
-            new UriRef(iri);
+        OWLOntologyID realId = OWLUtils.guessOWLOntologyID(rdfData);
+
+        // String alternateId = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
+        if ((iri == null || iri.isEmpty()) && realId != null) {
+            if (realId.getOntologyIRI() != null) iri = realId.getOntologyIRI().toString();
+            if (realId.getVersionIRI() != null) iri += ":::" + realId.getVersionIRI().toString();
+        } else try {
+            new UriRef(iri); // Can I make a UriRef from it?
         } catch (Exception ex) {
             iri = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
         }
 
         ontologyIri = IRI.create(iri);
+        while (s.endsWith("#"))
+            s = s.substring(0, s.length() - 1);
         ontologyIri = URIUtils.sanitizeID(ontologyIri);
         s += ontologyIri;
         // if (s.endsWith("#")) s = s.substring(0, s.length() - 1);
         /*
-         * rdfData should be a SimpleGraph, so we shouldn't have a problem creating one with the TcProvider
-         * and adding triples there, so that the SimpleGraph is garbage-collected.
+         * rdfData should be an in-memory graph, so we shouldn't have a problem creating one with the
+         * TcProvider and adding triples there, so that the in-memory graph is garbage-collected.
          * 
          * TODO this occupies twice as much space, which should not be necessary if the provider is the same
          * as the one used by the input source.
@@ -625,7 +687,10 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
                 else graph = store.createMGraph(uriref);
             }
             graph.addAll(rdfData);
-        } else graph = store.getTriples(uriref);
+        } else {
+            log.debug("Graph with ID {} already in store. Default action is to skip storage.", uriref);
+            graph = store.getTriples(uriref);
+        }
 
         if (resolveImports) {
             // Scan resources of type owl:Ontology, but only get the first.
@@ -646,20 +711,41 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             }
         }
 
-        loaded = true;
+        // All is already sanitized by the time we get here.
 
-        if (loaded) {
-            // All is already sanitized by the time we get here.
-            UriRef urs = new UriRef(s);
-            keymap.setMapping(ontologyIri, urs);
-            if (alternateId != null && !alternateId.equals(iri)) keymap.setMapping(IRI.create(alternateId),
-                urs);
-            log.debug("Ontology \n\t\t{}\n\tstored with keys\n\t\t{}",
-                ontologyIri + ((alternateId != null && !alternateId.equals(iri)) ? " , " + alternateId : ""),
-                s);
-            log.debug("Time: {} ms", (System.currentTimeMillis() - before));
-            return s;
-        } else return null;
+        // Now do the mappings
+        String mappedIds = "";
+        // Discard unconventional ontology IDs with only the version IRI
+        if (realId != null && realId.getOntologyIRI() != null) {
+            // Versioned or not, the real ID mapping is always added
+            keymap.setMapping(realId, uriref);
+            mappedIds += realId;
+            if (realId.getVersionIRI() != null) {
+                // If the unversioned variant of a versioned ID wasn't mapped, map it too.
+                OWLOntologyID unvId = new OWLOntologyID(realId.getOntologyIRI());
+                if (keymap.getMapping(unvId) == null) {
+                    keymap.setMapping(unvId, uriref);
+                    mappedIds += realId;
+                }
+            }
+        }
+        /*
+         * Make an ontology ID out of the originally supplied IRI (which might be the physical one and differ
+         * from the logical one!)
+         * 
+         * If we find out that it differs from the "real ID", we map this one too.
+         * 
+         * TODO how safe is this if there was a mapping earlier?
+         */
+        OWLOntologyID unv = new OWLOntologyID(ontologyIri);
+        if (!unv.equals(realId)) {
+            keymap.setMapping(unv, uriref);
+            mappedIds += " , " + unv;
+        }
+        log.debug("Ontology \n\t\t{}\n\tstored with key\n\t\t{}", mappedIds, s);
+        log.debug("Time: {} ms", (System.currentTimeMillis() - before));
+        return s;
+
     }
 
     @Override
@@ -737,7 +823,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             }
 
             // FIXME when there's more than one ontology, this way of merging them seems inefficient...
-            TripleCollection tempGraph = new SimpleMGraph();
+            TripleCollection tempGraph = new IndexedMGraph();
             // The set of triples that will be excluded from the merge
             Set<Triple> exclusions = new HashSet<Triple>();
             // Examine all reverse imports
@@ -774,5 +860,10 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             // online.
             return OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tempGraph, mgr);
         }
+    }
+
+    @Override
+    public boolean hasOntology(IRI ontologyIri) {
+        return hasOntology(new OWLOntologyID(ontologyIri));
     }
 }

@@ -29,6 +29,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyDocumentAlreadyExistsException;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,6 +128,16 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
+    public boolean hasOntology(OWLOntologyID id) {
+        return store.contains(id);
+    }
+
+    @Override
+    public boolean hasOntology(String key) {
+        return store.contains(IRI.create(key));
+    }
+
+    @Override
     public String loadInStore(InputStream data, String formatIdentifier, String preferredKey, boolean force) {
         try {
             OWLOntology o = store.loadOntologyFromOntologyDocument(data);
@@ -160,6 +171,11 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     public void setImportManagementPolicy(ImportManagementPolicy policy) {
         if (!ImportManagementPolicy.PRESERVE.equals(policy)) throw new IllegalArgumentException(
                 "The OWL API implementation does not support import policies other than PRESERVE.");
+    }
+
+    @Override
+    public boolean hasOntology(IRI ontologyIri) {
+        return hasOntology(new OWLOntologyID(ontologyIri));
     }
 
 }

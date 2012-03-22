@@ -41,7 +41,10 @@ Unless required by applicable law or agreed to in writing, software distributed 
   <rdf:Description rdf:ID="SocialNetworks">
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Social Network Models</rdfs:label>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary"/>
-    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1</owl:versionInfo>
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.2</owl:versionInfo>
+    <meta:hasOntology rdf:resource="http://xmlns.com/foaf/spec/index.rdf"/>
+    <meta:hasOntology rdf:resource="http://rdfs.org/sioc/ns"/>
+    <meta:hasOntology rdf:resource="http://purl.org/net/provenance/ns"/>
   </rdf:Description>
   
   <rdf:Description rdf:ID="W3C">
@@ -49,13 +52,27 @@ Unless required by applicable law or agreed to in writing, software distributed 
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary"/>
     <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1</owl:versionInfo>
     <meta:hasOntology rdf:resource="http://w3.org/ns/org"/>
+    <meta:hasOntology rdf:resource="http://www.w3.org/2004/02/skos/core"/>
+    <meta:hasOntology rdf:resource="http://www.w3.org/2006/time"/>
+  </rdf:Description>
+  
+  <rdf:Description rdf:ID="Foundational">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Foundational</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary"/>
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1</owl:versionInfo>
   </rdf:Description>
   
   <rdf:Description rdf:ID="GeneralPurposeOntologies">
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">General Purpose Ontologies</rdfs:label>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary"/>
-    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1</owl:versionInfo>
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.2</owl:versionInfo>
     <meta:hasOntology rdf:resource="http://schema.org/docs/schemaorg.owl"/>
+    <meta:hasOntology rdf:resource="http://www.w3.org/2006/time"/>
+    <meta:hasOntology rdf:resource="http://xmlns.com/foaf/spec/index.rdf"/>
+    <meta:hasOntology rdf:resource="http://w3.org/ns/org"/>
+    <meta:hasOntology rdf:resource="http://purl.org/NET/c4dm/event.owl"/>
+    <meta:hasOntology rdf:resource="http://purl.org/dc/terms/"/>   
+    <meta:hasOntology rdf:resource="http://www.w3.org/2004/02/skos/core"/>
   </rdf:Description>
   
   <rdf:Description rdf:ID="Alignments">
@@ -64,20 +81,61 @@ Unless required by applicable law or agreed to in writing, software distributed 
     <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1</owl:versionInfo>
   </rdf:Description>
 
+  <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">DOLCE UltraLite</rdfs:label>
+    <meta:isOntologyOf rdf:resource="#Foundational"/>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+  </rdf:Description>
+
   <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/ont/alignments/schemaorg.owl">
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Alignments to schema.org</rdfs:label>
     <meta:isOntologyOf rdf:resource="#Alignments"/>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
   </rdf:Description>
 
-  <rdf:Description rdf:about="http://xmlns.com/foaf/spec/index.rdf">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Friend-Of-A-Friend</rdfs:label>
-    <meta:isOntologyOf rdf:resource="#SocialNetworks"/>
+  <rdf:Description rdf:about="http://purl.org/dc/elements/1.1/">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Dublin Core metadata schema (legacy)</rdfs:label>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
   </rdf:Description>
 
+  <rdf:Description rdf:about="http://purl.org/dc/terms/">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Dublin Core metadata schema</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="http://xmlns.com/foaf/spec/index.rdf">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Friend-Of-A-Friend</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+  </rdf:Description>
+  
+  <rdf:Description rdf:about="http://rdfs.org/sioc/ns">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Semantically-Interlinked Online Communities</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="http://purl.org/NET/c4dm/event.owl">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Event Ontology</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+  </rdf:Description>
+  
   <rdf:Description rdf:about="http://w3.org/ns/org">
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Organisation Ontology</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Simple Knowledge Organization System (SKOS)</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+    <meta:isOntologyOf rdf:resource="#Foundational"/>
+  </rdf:Description>
+  
+  <rdf:Description rdf:about="http://purl.org/net/provenance/ns">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Provenance Vocabulary Core Ontology (PVCO)</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+  </rdf:Description>
+  
+  <rdf:Description rdf:about="http://www.w3.org/2006/time">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OWL-Time</rdfs:label>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
   </rdf:Description>
   

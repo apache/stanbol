@@ -55,7 +55,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaUtils;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOWLUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.OntologySpaceFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
 import org.junit.AfterClass;
@@ -103,7 +103,7 @@ public class TestClerezzaSpaces {
         ScopeRegistry reg = new ScopeRegistryImpl();
 
         // This one is created from scratch
-        MGraph ont2 = ClerezzaUtils.createOntology(baseIri2.toString());
+        MGraph ont2 = ClerezzaOWLUtils.createOntology(baseIri2.toString());
         minorSrc = new GraphSource(ont2.getGraph());
         dropSrc = getLocalSource("/ontologies/droppedcharacters.owl");
         nonexSrc = getLocalSource("/ontologies/nonexistentcharacters.owl");

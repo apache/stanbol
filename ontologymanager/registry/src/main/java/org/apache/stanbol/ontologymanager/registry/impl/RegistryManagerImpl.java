@@ -243,10 +243,10 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
                     // Relative IRI : use data file provider
                     log.debug("Found relative IRI {} . Will try to retrieve from data file providers.", iri);
                     Map<String,String> info = new HashMap<String,String>();
-                    if (dataFileProvider.isAvailable(null, loc, info)) src = new StreamDocumentSource(
+                    if (dataFileProvider != null && dataFileProvider.isAvailable(null, loc, info)) src = new StreamDocumentSource(
                             dataFileProvider.getInputStream(null, loc, info));
                 }
-                o = mgr.loadOntologyFromOntologyDocument(src, conf);
+                if (src != null) o = mgr.loadOntologyFromOntologyDocument(src, conf);
                 if (o != null) regOnts.add(o);
                 else log.warn("Failed to obtain OWL ontology from resource {}", loc);
             } catch (OWLOntologyAlreadyExistsException e) {

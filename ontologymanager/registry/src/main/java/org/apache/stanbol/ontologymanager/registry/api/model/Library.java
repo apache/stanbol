@@ -21,7 +21,6 @@ import java.util.Set;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
  * An ontology library references one or more ontologies.
@@ -55,9 +54,9 @@ public interface Library extends RegistryItem {
      * @throws RegistryContentException
      *             if the requested ontologies have not been loaded.
      */
-    Set<OWLOntology> getOntologies() throws RegistryContentException;
+    <O> Set<O> getOntologies(Class<O> returnType) throws RegistryContentException;
 
-    OWLOntology getOntology(IRI id) throws RegistryContentException;
+    <O> O getOntology(IRI id, Class<O> returnType) throws RegistryContentException;
 
     /**
      * Determines if the contents of this library have been loaded and are up-to-date.

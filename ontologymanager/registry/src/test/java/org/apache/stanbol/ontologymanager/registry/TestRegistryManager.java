@@ -16,8 +16,14 @@
  */
 package org.apache.stanbol.ontologymanager.registry;
 
-import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.*;
-import static org.junit.Assert.*;
+import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.parser;
+import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.reset;
+import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.tcManager;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -37,6 +43,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
  * Test the correct creation and setup of {@link RegistryManager} implementations.
@@ -126,7 +133,7 @@ public class TestRegistryManager {
         assertNotNull(lib);
 
         // Touch the library. Also test that the listener system works.
-        assertFalse(lib.getOntologies().isEmpty());
+        assertFalse(lib.getOntologies(OWLOntology.class).isEmpty());
     }
 
     /**
@@ -224,7 +231,7 @@ public class TestRegistryManager {
         assertFalse(lib2.isLoaded());
 
         // Touch the library. Also test that the listener system works.
-        assertFalse(lib1.getOntologies().isEmpty());
+        assertFalse(lib1.getOntologies(OWLOntology.class).isEmpty());
         assertTrue(lib1.isLoaded());
         assertFalse(lib2.isLoaded());
     }
