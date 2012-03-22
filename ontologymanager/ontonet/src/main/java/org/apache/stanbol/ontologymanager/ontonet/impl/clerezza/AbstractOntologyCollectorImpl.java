@@ -80,7 +80,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     public Set<IRI> listManagedOntologies() {
         return managedOntologies;
     }
-    
+
     protected String _id = null;
 
     /**
@@ -158,8 +158,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
         // Now for the actual storage. We pass the ontology object directly.
         String key = null;
-        if (ontologyProvider.hasOntology(IRI.create(uri.getUnicodeString())))
-        if (o instanceof MGraph) claimOwnership((MGraph) o);
+        if (ontologyProvider.hasOntology(IRI.create(uri.getUnicodeString()))) if (o instanceof MGraph) claimOwnership((MGraph) o);
         else if (o instanceof OWLOntology) claimOwnership((OWLOntology) o);
         key = ontologyProvider.loadInStore(o, uri.getUnicodeString(), false);
         /*
@@ -545,6 +544,8 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
             for (Triple t : replaceUs) {
                 String s = ((UriRef) (t.getObject())).getUnicodeString();
+                // FIXME note the different import targets in the OWLOntology and TripleColllection objects!
+                // s = s.substring(s.indexOf("::") + 2, s.length());
                 boolean managed = managedOntologies.contains(IRI.create(s));
                 UriRef target = new UriRef((managed ? ns + "/" + tid + "/" : URIUtils.upOne(ns) + "/") + s);
                 o.remove(t);
@@ -604,7 +605,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
             for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
                 changes.add(new RemoveImport(o, oldImp));
                 String s = oldImp.getIRI().toString();
-                // s = s.substring(s.indexOf("::") + 2, s.length());
+                s = s.substring(s.indexOf("::") + 2, s.length());
                 boolean managed = managedOntologies.contains(oldImp.getIRI());
                 // For space, always go up at least one
                 IRI ns = getNamespace();
