@@ -95,7 +95,7 @@
         </sourceReleaseAssemblyDescriptor>
       </properties>
       <build>
-        <finalName>stanbol-stack-${project.version}</finalName>  
+        <finalName>apache-stanbol-${project.version}</finalName>  
       </build>
       <modules>
         <module>demos/webvie</module>
@@ -128,7 +128,7 @@
         </sourceReleaseAssemblyDescriptor>
       </properties>
       <build>
-        <finalName>stanbol-framework-${project.version}</finalName> 
+        <finalName>apache-stanbol-framework-${project.version}</finalName> 
       </build>
       <modules>
         <module>launchers/framework</module>
