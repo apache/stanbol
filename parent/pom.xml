@@ -1509,13 +1509,6 @@
       </exclusions>
     </dependency>
     
-    <!-- DOM parser for Solr schema -->
-    <dependency>
-      <groupId>xom</groupId>
-      <artifactId>xom</artifactId>
-      <version>1.2.5</version>
-    </dependency>
-
     <!-- HTML cleaner -->
     <!-- we need to exclude jaxen and we do not need ant -->
     <dependency>
