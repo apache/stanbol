@@ -400,7 +400,7 @@ public class LDPathUtils {
             logger.error(msg, e);
             throw new LDPathException(msg, e);
         }
-        
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DOMImplementationLS lsImpl = (DOMImplementationLS) registry.getDOMImplementation("LS");
         LSSerializer lsSerializer = lsImpl.createLSSerializer();
