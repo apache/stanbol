@@ -114,6 +114,9 @@ public class ContenthubFeedResource extends BaseStanbolResource {
      *            this parameter is used together with <code>path</code> parameter. Its default value is
      *            <code>false</code>. If it is set as <code>true</code>. All content repository objects under
      *            the specified path are processed.
+     * @param indexName
+     *            Name of the Solr index managed by Contenthub. Specified index will be used to store the
+     *            submitte content items
      * @param contentProperties
      *            this parameter indicates the list of properties that are possibly holding the actual
      *            content. Possible values are passed as comma separated. Its default value is <b>content,
@@ -129,6 +132,7 @@ public class ContenthubFeedResource extends BaseStanbolResource {
                                               @FormParam("id") String id,
                                               @FormParam("path") String path,
                                               @FormParam("recursive") @DefaultValue("false") boolean recursive,
+                                              @FormParam("indexName") String indexName,
                                               @FormParam("contentProperties") @DefaultValue("skos:definition,content") String contentProperties,
                                               @Context HttpHeaders headers) throws RepositoryAccessException,
                                                                            ContenthubFeederException {
@@ -147,12 +151,12 @@ public class ContenthubFeedResource extends BaseStanbolResource {
         ContenthubFeeder feeder = feederManager.getContenthubFeeder(sessionKey, contentFieldList);
 
         if (id != null) {
-            feeder.submitContentItemByID(id);
+            feeder.submitContentItemByID(id, indexName);
         } else if (path != null) {
             if (!recursive) {
-                feeder.submitContentItemByPath(path);
+                feeder.submitContentItemByPath(path, indexName);
             } else {
-                feeder.submitContentItemsUnderPath(path);
+                feeder.submitContentItemsUnderPath(path, indexName);
             }
         } else {
             return Response.status(Status.BAD_REQUEST)
@@ -187,6 +191,9 @@ public class ContenthubFeedResource extends BaseStanbolResource {
      *            this parameter is used together with <code>path</code> parameter. Its default value is
      *            <code>false</code>. If it is set as <code>true</code>. All content repository objects under
      *            the specified path are processed.
+     * @param indexName
+     *            Name of the Solr index managed by Contenthub. Specified index will be used to delete the
+     *            content items from
      * @return
      * @throws RepositoryAccessException
      * @throws ContenthubFeederException
@@ -197,6 +204,7 @@ public class ContenthubFeedResource extends BaseStanbolResource {
                                                 @FormParam("id") String id,
                                                 @FormParam("path") String path,
                                                 @FormParam("recursive") @DefaultValue("false") boolean recursive,
+                                                @FormParam("indexName") String indexName,
                                                 @Context HttpHeaders headers) throws RepositoryAccessException,
                                                                              ContenthubFeederException {
 
@@ -211,12 +219,12 @@ public class ContenthubFeedResource extends BaseStanbolResource {
         ContenthubFeeder feeder = feederManager.getContenthubFeeder(sessionKey, null);
 
         if (id != null) {
-            feeder.deleteContentItemByID(id);
+            feeder.deleteContentItemByID(id, indexName);
         } else if (path != null) {
             if (!recursive) {
-                feeder.deleteContentItemByPath(path);
+                feeder.deleteContentItemByPath(path, indexName);
             } else {
-                feeder.deleteContentItemsUnderPath(path);
+                feeder.deleteContentItemsUnderPath(path, indexName);
             }
         } else {
             return Response.status(Status.BAD_REQUEST)

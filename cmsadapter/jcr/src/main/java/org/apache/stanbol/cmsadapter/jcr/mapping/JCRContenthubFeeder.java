@@ -115,12 +115,17 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
 
     @Override
     public void submitContentItemByCMSObject(Object o, String id) {
+        submitContentItemByCMSObject(o, id, null);
+    }
+
+    @Override
+    public void submitContentItemByCMSObject(Object o, String id, String indexName) {
         Node n = (Node) o;
         String actualNodeId = "";
         try {
             actualNodeId = n.getIdentifier();
             ContentContext contentContext = getContentContextWithBasicInfo(n, id);
-            processContextAndSubmitToContenthub(contentContext);
+            processContextAndSubmitToContenthub(contentContext, indexName);
         } catch (RepositoryException e) {
             log.warn("Failed to get basic information of node having id: {}", actualNodeId);
         }
@@ -128,6 +133,11 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
 
     @Override
     public void submitContentItemByID(String contentItemID) {
+        submitContentItemByID(contentItemID, null);
+    }
+
+    @Override
+    public void submitContentItemByID(String contentItemID, String indexName) {
         Node n;
         try {
             n = getNodeByID(contentItemID);
@@ -138,7 +148,7 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
 
         try {
             ContentContext contentContext = getContentContextWithBasicInfo(n);
-            processContextAndSubmitToContenthub(contentContext);
+            processContextAndSubmitToContenthub(contentContext, indexName);
         } catch (RepositoryException e) {
             log.warn("Failed to get basic information of node having id: {}", contentItemID);
         }
@@ -146,6 +156,11 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
 
     @Override
     public void submitContentItemByPath(String contentItemPath) {
+        submitContentItemByPath(contentItemPath, null);
+    }
+
+    @Override
+    public void submitContentItemByPath(String contentItemPath, String indexName) {
         Node n;
         try {
             n = getNodeByPath(contentItemPath);
@@ -156,7 +171,7 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
 
         try {
             ContentContext contentContext = getContentContextWithBasicInfo(n);
-            processContextAndSubmitToContenthub(contentContext);
+            processContextAndSubmitToContenthub(contentContext, indexName);
         } catch (RepositoryException e) {
             log.warn("Failed to get basic information of node having path: {}", contentItemPath);
         }
@@ -164,6 +179,11 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
 
     @Override
     public void submitContentItemsUnderPath(String rootPath) {
+        submitContentItemsUnderPath(rootPath, null);
+    }
+
+    @Override
+    public void submitContentItemsUnderPath(String rootPath, String indexName) {
         List<Node> nodes;
         try {
             nodes = getNodesUnderPath(rootPath);
@@ -183,7 +203,7 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
 
             try {
                 ContentContext contentContext = getContentContextWithBasicInfo(n);
-                processContextAndSubmitToContenthub(contentContext);
+                processContextAndSubmitToContenthub(contentContext, indexName);
             } catch (RepositoryException e) {
                 log.warn("Failed to get basic information of node having path: {}", path);
             }
@@ -196,9 +216,19 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
     }
 
     @Override
+    public void submitContentItemsByCustomFilter(ContentItemFilter customContentItemFilter, String indexName) {
+        throw new UnsupportedOperationException("This operation is not supported in this implementation");
+    }
+
+    @Override
     public void deleteContentItemByID(String contentItemID) {
+        deleteContentItemByID(contentItemID, null);
+    }
+
+    @Override
+    public void deleteContentItemByID(String contentItemID, String indexName) {
         try {
-            solrStore.deleteById(contentItemID);
+            solrStore.deleteById(contentItemID, indexName);
         } catch (StoreException e) {
             log.error(e.getMessage(), e);
         }
@@ -206,11 +236,16 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
 
     @Override
     public void deleteContentItemByPath(String contentItemPath) {
+        deleteContentItemByPath(contentItemPath, null);
+    }
+
+    @Override
+    public void deleteContentItemByPath(String contentItemPath, String indexName) {
         Node n;
         try {
             n = getNodeByPath(contentItemPath);
             try {
-                solrStore.deleteById(n.getIdentifier());
+                solrStore.deleteById(n.getIdentifier(), indexName);
             } catch (StoreException e) {
                 log.error(e.getMessage(), e);
             }
@@ -221,12 +256,17 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
 
     @Override
     public void deleteContentItemsUnderPath(String rootPath) {
+        deleteContentItemsUnderPath(rootPath, null);
+    }
+
+    @Override
+    public void deleteContentItemsUnderPath(String rootPath, String indexName) {
         List<Node> nodes;
         try {
             nodes = getNodesUnderPath(rootPath);
             for (Node n : nodes) {
                 try {
-                    solrStore.deleteById(n.getIdentifier());
+                    solrStore.deleteById(n.getIdentifier(), indexName);
                 } catch (StoreException e) {
                     log.error(e.getMessage(), e);
                 }
@@ -243,11 +283,16 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
     }
 
     @Override
+    public void deleteContentItemsByCustomFilter(ContentItemFilter customContentItemFilter, String indexName) {
+        throw new UnsupportedOperationException("This operation is not supported in this implementation");
+    }
+
+    @Override
     public boolean canFeedWith(Object session) {
         return session instanceof Session;
     }
 
-    private void processContextAndSubmitToContenthub(ContentContext contentContext) {
+    private void processContextAndSubmitToContenthub(ContentContext contentContext, String indexName) {
         String id = contentContext.getIdentifier();
         populateContentContext(contentContext);
         if (contentContext.getContent() == null || contentContext.getContent().length == 0) {
@@ -263,7 +308,7 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
         SolrContentItem sci = solrStore.create(contentContext.getContent(), id, contentContext.getNodeName(),
             contentContext.getContentType(), constraints);
         try {
-            solrStore.enhanceAndPut(sci);
+            solrStore.enhanceAndPut(sci, indexName);
         } catch (StoreException e) {
             log.error(e.getMessage(), e);
         }
