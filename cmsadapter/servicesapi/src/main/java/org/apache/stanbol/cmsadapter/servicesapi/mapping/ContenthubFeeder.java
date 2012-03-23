@@ -61,6 +61,23 @@ public interface ContenthubFeeder {
     void submitContentItemByCMSObject(Object o, String id);
 
     /**
+     * Creates a content item in Contenthub by leveraging the content repository object itself e.g <b>Node</b>
+     * in JCR, <b>Document</b> in CMIS. If there is an already existing content item in the Contenthub with
+     * the same id, the existing content item should be deleted first.
+     * 
+     * @param o
+     *            Content repository object to be transformed into a content item in Contenthub
+     * @param id
+     *            Optional ID for the content item in Contenthub. If this parameter is specified, it will be
+     *            used as the ID of the content item in Contenthub. Otherwise, the object's own ID in the
+     *            content repository will be used.
+     * @param indexName
+     *            Name of the Solr index managed by Contenthub. Specified index will be used to store the
+     *            submitted content item
+     */
+    void submitContentItemByCMSObject(Object o, String id, String indexName);
+
+    /**
      * Submits content item by its ID to the Contenthub. If there is an already existing content item in the
      * Contenthub with the same id, the existing content item should be deleted first.
      * 
@@ -68,6 +85,18 @@ public interface ContenthubFeeder {
      *            ID of the content item in the repository
      */
     void submitContentItemByID(String contentItemID);
+
+    /**
+     * Submits content item by its ID to the Contenthub. If there is an already existing content item in the
+     * Contenthub with the same id, the existing content item should be deleted first.
+     * 
+     * @param contentItemID
+     *            ID of the content item in the repository
+     * @param indexName
+     *            Name of the Solr index managed by Contenthub. Specified index will be used to store the
+     *            submitted content item
+     */
+    void submitContentItemByID(String contentItemID, String indexName);
 
     /**
      * Submits content item by its path to the Contenthub. If there is an already existing content item in the
@@ -79,6 +108,18 @@ public interface ContenthubFeeder {
     void submitContentItemByPath(String contentItemPath);
 
     /**
+     * Submits content item by its path to the Contenthub. If there is an already existing content item in the
+     * Contenthub with the same id, the existing content item should be deleted first.
+     * 
+     * @param contentItemPath
+     *            path of the content item in the repository
+     * @param indexName
+     *            Name of the Solr index managed by Contenthub. Specified index will be used to store the
+     *            submitted content item
+     */
+    void submitContentItemByPath(String contentItemPath, String indexName);
+
+    /**
      * Submits all of the content items under the specified path to the Contenthub. If there are already
      * existing content items in the Contenthub with same ids of submitted content items, the existing content
      * items should be deleted first.
@@ -87,6 +128,19 @@ public interface ContenthubFeeder {
      *            root path in the content repository
      */
     void submitContentItemsUnderPath(String rootPath);
+
+    /**
+     * Submits all of the content items under the specified path to the Contenthub. If there are already
+     * existing content items in the Contenthub with same ids of submitted content items, the existing content
+     * items should be deleted first.
+     * 
+     * @param rootPath
+     *            root path in the content repository
+     * @param indexName
+     *            Name of the Solr index managed by Contenthub. Specified index will be used to store the
+     *            submitted content items
+     */
+    void submitContentItemsUnderPath(String rootPath, String indexName);
 
     /**
      * Filters content items from content repository via the specific {@link ContentItemFilter} implementation
@@ -100,6 +154,20 @@ public interface ContenthubFeeder {
     void submitContentItemsByCustomFilter(ContentItemFilter customContentItemFilter);
 
     /**
+     * Filters content items from content repository via the specific {@link ContentItemFilter} implementation
+     * passed as a parameter and submits the filtered content items to the Contenthub. If there are already
+     * existing content items in the Contenthub with same ids of submitted content items, the existing content
+     * items should be deleted first.
+     * 
+     * @param customContentItemFilter
+     *            custom {@link ContentItemFilter} implementation
+     * @param indexName
+     *            Name of the Solr index managed by Contenthub. Specified index will be used to store the
+     *            submitted content items
+     */
+    void submitContentItemsByCustomFilter(ContentItemFilter customContentItemFilter, String indexName);
+
+    /**
      * Deletes content item by its ID from the Contenthub. Please note that specified identifier should be the
      * one that identifying the content item in Contenthub.
      * 
@@ -107,6 +175,18 @@ public interface ContenthubFeeder {
      *            ID of the content item in the <b>Contenthub</b>
      */
     void deleteContentItemByID(String contentItemID);
+
+    /**
+     * Deletes content item by its ID from the Contenthub. Please note that specified identifier should be the
+     * one that identifying the content item in Contenthub.
+     * 
+     * @param contentItemID
+     *            ID of the content item in the <b>Contenthub</b>
+     * @param indexName
+     *            Name of the Solr index managed by Contenthub. Specified index will be used to delete the
+     *            submitted content item from.
+     */
+    void deleteContentItemByID(String contentItemID, String indexName);
 
     /**
      * Deletes content item by its path from the Contenthub
@@ -117,12 +197,34 @@ public interface ContenthubFeeder {
     void deleteContentItemByPath(String contentItemPath);
 
     /**
+     * Deletes content item by its path from the Contenthub
+     * 
+     * @param contentItemPath
+     *            path of the content item in the repository
+     * @param indexName
+     *            Name of the Solr index managed by Contenthub. Specified index will be used to delete the
+     *            submitted content item from.
+     */
+    void deleteContentItemByPath(String contentItemPath, String indexName);
+
+    /**
      * Deletes all of the content items under the specified path to Contenthub
      * 
      * @param rootPath
      *            root path in the content repository
      */
     void deleteContentItemsUnderPath(String rootPath);
+
+    /**
+     * Deletes all of the content items under the specified path to Contenthub
+     * 
+     * @param rootPath
+     *            root path in the content repository
+     * @param indexName
+     *            Name of the Solr index managed by Contenthub. Specified index will be used to delete the
+     *            submitted content items from.
+     */
+    void deleteContentItemsUnderPath(String rootPath, String indexName);
 
     /**
      * Filters content items from content repository via the specific {@link ContentItemFilter} implementation
@@ -132,6 +234,18 @@ public interface ContenthubFeeder {
      *            custom {@link ContentItemFilter} implementation
      */
     void deleteContentItemsByCustomFilter(ContentItemFilter customContentItemFilter);
+
+    /**
+     * Filters content items from content repository via the specific {@link ContentItemFilter} implementation
+     * passed as a parameter and deletes the filtered content items from the Contenthub
+     * 
+     * @param customContentItemFilter
+     *            custom {@link ContentItemFilter} implementation
+     * @param indexName
+     *            Name of the Solr index managed by Contenthub. Specified index will be used to delete the
+     *            submitted content items from.
+     */
+    void deleteContentItemsByCustomFilter(ContentItemFilter customContentItemFilter, String indexName);
 
     /**
      * This method is used for identification of {@link ContenthubFeeder}s based on the specified

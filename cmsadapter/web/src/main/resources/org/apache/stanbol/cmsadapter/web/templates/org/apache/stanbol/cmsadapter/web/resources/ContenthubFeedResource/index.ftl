@@ -76,6 +76,13 @@
 			</table>
 		</fieldset>
 	</p>
+	<p>
+		The following index will be used to store content items or delete contents items from. 	
+		<fieldset>
+		    <legend>Select an index</legend>
+		    <div id="indexDiv"><#--this div will be populated by ajax--></div>
+		</fieldset>
+	</p>
 	
 	<a name="Submit_content_items" id="Submit_content_items"></a>
 	<h4>Submit content items</h4>
@@ -161,6 +168,7 @@
 			    		<li>@FormParam path: Content repository path of the content item to be submitted</li>
 			    		<li>@FormParam recursive: This parameter is used together with <code>path</code> parameter. Its default value is 
 			    		<code>false</code>. If it is set as <code>true</code>. All content repository objects under the specified path are processed.</li>
+			    		<li>@FormParam indexName: Name of the Solr index managed by Contenthub. Specified index will be used to submit the content items.</li>
 			    		<li>@FormParam contentProperties: This parameter indicates the list of properties that are possibly holding the actual
      					content. Possible values are passed as comma separated. Its default value is <b>content, skos:definition</b>.</li>
 			    	</ul>
@@ -207,6 +215,8 @@
 			    		<li>@FormParam path: Content repository path of the content item to be submitted</li>
 			    		<li>@FormParam recursive: This parameter is used together with <code>path</code> parameter. Its default value is 
 			    		<code>false</code>. If it is set as <code>true</code>. All content repository objects under the specified path are processed.</li>
+			    		<li>@FormParam indexName: Name of the Solr index managed by Contenthub. Specified index will be used to delete the content items
+			    		from</li>
 			    	</ul>
 			    </td>
 			</tr>
@@ -227,6 +237,19 @@
 </#escape>
 
 <script language="javascript">
+	function init() {
+        $.get("${it.publicBaseUri}contenthub/ldpath", function(indexes) {
+            innerStr = "<select id='indexSelect'>" + "<option value='contenthub'>contenthub</option>";
+            for(var index in indexes) {
+                innerStr += "<option value=" + index + ">" + index + "</option>";
+            }
+            innerStr += "</select>";
+            $("#indexDiv").html(innerStr);
+        });
+    }
+    
+    $(document).ready(init);
+
 //click handlers
 $(function() {
 	$("#submitContentItemsLink").click(function(e) {
@@ -249,6 +272,7 @@ function submitContentItemsToContenthub() {
 	data.id = $("#contentID").val();
 	data.path = $("#contentPath").val();
 	data.recursive = $("#recursiveCheck").is(':checked') ? "true" : "false";
+	data.indexName = $("#indexSelect").val();
 	data.contentProperties = $("#contentProperties").val();
 	$("#submitContentItemsResultText").text("Content items are being submitted...");
 	$("#submitContentItemsResult").show();
@@ -273,6 +297,7 @@ function deleteContentItemsFromContenthub(){
 	data.id = $("#contentID").val();
 	data.path = $("#contentPath").val();
 	data.recursive = $("#recursiveCheck").is(':checked') ? "true" : "false";
+	data.indexName = $("#indexSelect").val();
 	$("#deleteContentItemsResultText").text("Content items are being deleted...");
 	$("#deleteContentItemsResult").show();
 	$.ajax({

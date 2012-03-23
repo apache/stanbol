@@ -111,14 +111,24 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
 
     @Override
     public void submitContentItemByCMSObject(Object o, String id) {
+        submitContentItemByCMSObject(o, id, null);
+    }
+
+    @Override
+    public void submitContentItemByCMSObject(Object o, String id, String indexName) {
         CmisObject cmisObject = (CmisObject) o;
         if (hasType(cmisObject, BaseTypeId.CMIS_DOCUMENT)) {
-            processDocumentAndSubmitToContenthub((Document) cmisObject, id);
+            processDocumentAndSubmitToContenthub((Document) cmisObject, id, indexName);
         }
     }
 
     @Override
     public void submitContentItemByID(String contentItemID) {
+        submitContentItemByID(contentItemID, null);
+    }
+
+    @Override
+    public void submitContentItemByID(String contentItemID, String indexName) {
         CmisObject o;
         try {
             o = session.getObject(CMISObjectId.getObjectId(contentItemID));
@@ -128,12 +138,17 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         }
 
         if (hasType(o, BaseTypeId.CMIS_DOCUMENT)) {
-            processDocumentAndSubmitToContenthub((Document) o);
+            processDocumentAndSubmitToContenthub((Document) o, indexName);
         }
     }
 
     @Override
     public void submitContentItemByPath(String contentItemPath) {
+        submitContentItemByPath(contentItemPath, null);
+    }
+
+    @Override
+    public void submitContentItemByPath(String contentItemPath, String indexName) {
         CmisObject o;
         try {
             o = session.getObjectByPath(contentItemPath);
@@ -143,12 +158,17 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         }
 
         if (hasType(o, BaseTypeId.CMIS_DOCUMENT)) {
-            processDocumentAndSubmitToContenthub((Document) o);
+            processDocumentAndSubmitToContenthub((Document) o, indexName);
         }
     }
 
     @Override
     public void submitContentItemsUnderPath(String rootPath) {
+        submitContentItemsUnderPath(rootPath, null);
+    }
+
+    @Override
+    public void submitContentItemsUnderPath(String rootPath, String indexName) {
         CmisObject o;
         try {
             o = session.getObjectByPath(rootPath);
@@ -158,12 +178,12 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         }
 
         if (hasType(o, BaseTypeId.CMIS_DOCUMENT)) {
-            processDocumentAndSubmitToContenthub((Document) o);
+            processDocumentAndSubmitToContenthub((Document) o, indexName);
         } else {
             List<Document> documents = new ArrayList<Document>();
             getDocumentsUnderFolder((Folder) o, documents);
             for (Document d : documents) {
-                processDocumentAndSubmitToContenthub(d);
+                processDocumentAndSubmitToContenthub(d, indexName);
             }
         }
     }
@@ -174,16 +194,31 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
     }
 
     @Override
+    public void submitContentItemsByCustomFilter(ContentItemFilter customContentItemFilter, String indexName) {
+        throw new UnsupportedOperationException("This operation is not supported in this implementation");
+    }
+
+    @Override
     public void deleteContentItemByID(String contentItemID) {
+        deleteContentItemByID(contentItemID, null);
+    }
+
+    @Override
+    public void deleteContentItemByID(String contentItemID, String indexName) {
         try {
-			solrStore.deleteById(contentItemID);
-		} catch (StoreException e) {
-			log.error(e.getMessage(), e);
-		}
+            solrStore.deleteById(contentItemID, indexName);
+        } catch (StoreException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
     public void deleteContentItemByPath(String contentItemPath) {
+        deleteContentItemByPath(contentItemPath, null);
+    }
+
+    @Override
+    public void deleteContentItemByPath(String contentItemPath, String indexName) {
         CmisObject o;
         try {
             o = session.getObjectByPath(contentItemPath);
@@ -193,14 +228,19 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         }
 
         try {
-			solrStore.deleteById(o.getId());
-		} catch (StoreException e) {
-			log.error(e.getMessage(), e);
-		}
+            solrStore.deleteById(o.getId(), indexName);
+        } catch (StoreException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
     public void deleteContentItemsUnderPath(String rootPath) {
+        deleteContentItemsUnderPath(rootPath, null);
+    }
+
+    @Override
+    public void deleteContentItemsUnderPath(String rootPath, String indexName) {
         CmisObject o;
         try {
             o = session.getObjectByPath(rootPath);
@@ -217,15 +257,20 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         }
         for (Document d : documents) {
             try {
-				solrStore.deleteById(d.getId());
-			} catch (StoreException e) {
-				log.error(e.getMessage(), e);
-			}
+                solrStore.deleteById(d.getId(), indexName);
+            } catch (StoreException e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
     @Override
     public void deleteContentItemsByCustomFilter(ContentItemFilter customContentItemFilter) {
+        throw new UnsupportedOperationException("This operation is not supported in this implementation");
+    }
+
+    @Override
+    public void deleteContentItemsByCustomFilter(ContentItemFilter customContentItemFilter, String indexName) {
         throw new UnsupportedOperationException("This operation is not supported in this implementation");
     }
 
@@ -262,11 +307,11 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         }
     }
 
-    private void processDocumentAndSubmitToContenthub(Document d) {
-        processDocumentAndSubmitToContenthub(d, null);
+    private void processDocumentAndSubmitToContenthub(Document d, String indexName) {
+        processDocumentAndSubmitToContenthub(d, null, indexName);
     }
 
-    private void processDocumentAndSubmitToContenthub(Document d, String id) {
+    private void processDocumentAndSubmitToContenthub(Document d, String id, String indexName) {
         byte[] content;
         try {
             content = IOUtils.toByteArray(d.getContentStream().getStream());
@@ -283,10 +328,10 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         id = (id == null || id.equals("")) ? d.getId() : id;
         SolrContentItem sci = solrStore.create(content, d.getId(), d.getName(), mimeType, constraints);
         try {
-			solrStore.enhanceAndPut(sci);
-		} catch (StoreException e) {
-			log.error(e.getMessage(), e);
-		}
+            solrStore.enhanceAndPut(sci, indexName);
+        } catch (StoreException e) {
+            log.error(e.getMessage(), e);
+        }
         log.info("Document submitted to Contenthub.");
         log.info("Id: {}", sci.getUri().getUnicodeString());
         log.info("Mime type: {}", sci.getMimeType());
