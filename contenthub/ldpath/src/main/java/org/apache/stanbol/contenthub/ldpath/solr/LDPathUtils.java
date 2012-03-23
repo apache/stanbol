@@ -31,14 +31,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import nu.xom.Attribute;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Element;
-import nu.xom.Nodes;
-import nu.xom.ParsingException;
-import nu.xom.Serializer;
-import nu.xom.ValidityException;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -55,6 +49,15 @@ import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
+import org.xml.sax.SAXException;
 
 import at.newmedialab.ldpath.api.backend.RDFBackend;
 import at.newmedialab.ldpath.model.fields.FieldMapping;
@@ -126,7 +129,7 @@ public class LDPathUtils {
     }
 
     private Bundle bundle;
-    
+
     private ReferencedSiteManager referencedSiteManager;
 
     /**
@@ -185,8 +188,7 @@ public class LDPathUtils {
             throw new LDPathException(msg);
         }
         RDFBackend<Object> rdfBackend = new SiteManagerBackend(referencedSiteManager);
-        RdfPathParser<Object> LDparser = new RdfPathParser<Object>(rdfBackend,
-                constructReader(ldPathProgram));
+        RdfPathParser<Object> LDparser = new RdfPathParser<Object>(rdfBackend, constructReader(ldPathProgram));
         Program<Object> program = null;
         try {
             program = LDparser.parseProgram();
@@ -310,30 +312,31 @@ public class LDPathUtils {
      * @throws LDPathException
      */
     private byte[] createSchemaXML(Program<Object> program, byte[] template) throws LDPathException {
-
-        Builder xmlParser = new Builder();
-        ByteArrayInputStream is = new ByteArrayInputStream(template);
-        Document doc = null;
+        Document document;
         try {
-            doc = xmlParser.build(is);
-        } catch (ValidityException e) {
-            String msg = "SOLR schema-template is not a valid XML";
-            logger.error(msg, e);
-            throw new LDPathException(msg, e);
-        } catch (ParsingException e) {
-            String msg = "SOLR schema-template cannot be parsed";
+            document = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                    .parse(new ByteArrayInputStream(template));
+        } catch (SAXException e) {
+            String msg = e.getMessage();
             logger.error(msg, e);
             throw new LDPathException(msg, e);
         } catch (IOException e) {
-            logger.error("", e);
-            throw new LDPathException(e);
+            String msg = e.getMessage();
+            logger.error(msg, e);
+            throw new LDPathException(msg, e);
+        } catch (ParserConfigurationException e) {
+            String msg = e.getMessage();
+            logger.error(msg, e);
+            throw new LDPathException(msg, e);
         }
-        Nodes fieldsNodes = doc.query("/schema/fields");
-        if (fieldsNodes.size() != 1) {
+
+        Element schemaNode = document.getDocumentElement();
+        NodeList fieldsNodeList = schemaNode.getElementsByTagName("fields");
+        if (fieldsNodeList.getLength() != 1) {
             throw new LDPathException("Template is an invalid SOLR schema. It should be a valid a byte array");
         }
-        Element fieldsNode = (Element) fieldsNodes.get(0);
-        Element schemaNode = (Element) fieldsNode.getParent();
+
+        Node fieldsNode = fieldsNodeList.item(0);
 
         for (FieldMapping<?,Object> fieldMapping : program.getFields()) {
             String fieldName = fieldMapping.getFieldName();
@@ -342,20 +345,19 @@ public class LDPathUtils {
             if (solrType == null) {
                 logger.error("field {} has an invalid field type; ignoring field definition", fieldName);
             } else {
-                Element fieldElement = new Element("field");
-                fieldElement.addAttribute(new Attribute("name", fieldName));
-                fieldElement.addAttribute(new Attribute("type", solrType));
-                // Set the default properties
-                fieldElement.addAttribute(new Attribute("stored", "true"));
-                fieldElement.addAttribute(new Attribute("indexed", "true"));
-                fieldElement.addAttribute(new Attribute("multiValued", "true"));
+                Element fieldElement = document.createElement("field");
+                fieldElement.setAttribute("name", fieldName);
+                fieldElement.setAttribute("type", solrType);
+                fieldElement.setAttribute("stored", "true");
+                fieldElement.setAttribute("indexed", "true");
+                fieldElement.setAttribute("multiValued", "true");
 
                 // Handle extra field configuration
                 final Map<String,String> fieldConfig = fieldMapping.getFieldConfig();
                 if (fieldConfig != null) {
                     for (String attr : fieldConfig.keySet()) {
                         if (SOLR_FIELD_OPTIONS.contains(attr)) {
-                            fieldElement.addAttribute(new Attribute(attr, fieldConfig.get(attr)));
+                            fieldElement.setAttribute(attr, fieldConfig.get(attr));
                         }
                     }
                 }
@@ -364,40 +366,50 @@ public class LDPathUtils {
                 if (fieldConfig != null && fieldConfig.keySet().contains(SOLR_COPY_FIELD_OPTION)) {
                     String[] copyFields = fieldConfig.get(SOLR_COPY_FIELD_OPTION).split(",\\s*");
                     for (String copyField : copyFields) {
-                        Element copyElement = new Element("copyField");
-                        copyElement.addAttribute(new Attribute("source", fieldName));
-                        copyElement.addAttribute(new Attribute("dest", copyField));
+                        Element copyElement = document.createElement("copyField");
+                        copyElement.setAttribute("source", fieldName);
+                        copyElement.setAttribute("dest", copyField);
                         schemaNode.appendChild(copyElement);
                     }
                 } else {
-                    Element copyElement = new Element("copyField");
-                    copyElement.addAttribute(new Attribute("source", fieldName));
-                    copyElement.addAttribute(new Attribute("dest", SOLR_ALLTEXT_FIELD));
+                    Element copyElement = document.createElement("copyField");
+                    copyElement.setAttribute("source", fieldName);
+                    copyElement.setAttribute("dest", SOLR_ALLTEXT_FIELD);
                     schemaNode.appendChild(copyElement);
                 }
-
             }
         }
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
-        Serializer serializer = null;
+        DOMImplementationRegistry registry;
         try {
-            serializer = new Serializer(out, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            String msg = "Unsupported encoding exception for UTF-8 while serializing constructed schema.xml for Solr";
+            registry = DOMImplementationRegistry.newInstance();
+        } catch (ClassCastException e) {
+            String msg = e.getMessage();
+            logger.error(msg, e);
+            throw new LDPathException(msg, e);
+        } catch (ClassNotFoundException e) {
+            String msg = e.getMessage();
+            logger.error(msg, e);
+            throw new LDPathException(msg, e);
+        } catch (InstantiationException e) {
+            String msg = e.getMessage();
+            logger.error(msg, e);
+            throw new LDPathException(msg, e);
+        } catch (IllegalAccessException e) {
+            String msg = e.getMessage();
             logger.error(msg, e);
             throw new LDPathException(msg, e);
         }
-        serializer.setIndent(4);
-        try {
-            serializer.write(doc);
-            out.close();
-        } catch (IOException e) {
-            logger.error("", e);
-            throw new LDPathException(e);
-        }
-
-        return out.toByteArray();
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DOMImplementationLS lsImpl = (DOMImplementationLS) registry.getDOMImplementation("LS");
+        LSSerializer lsSerializer = lsImpl.createLSSerializer();
+        LSOutput lsOutput = lsImpl.createLSOutput();
+        lsOutput.setEncoding("UTF-8");
+        lsOutput.setByteStream(baos);
+        lsSerializer.write(document, lsOutput);
+        String schemaStr = new String(baos.toByteArray());
+        return schemaStr.getBytes();
     }
 
 }
