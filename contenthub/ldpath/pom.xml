@@ -38,19 +38,6 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Export-Package>
-              nu.xom.*
-            </Export-Package>
-            <Import-Package>
-              !org.apache.xerces.*,
-              !com.sun.org.apache.xerces.internal.*,
-              !junit.framework.*,
-              *
-            </Import-Package>
-          </instructions>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -111,11 +98,5 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>xom</groupId>
-      <artifactId>xom</artifactId>
-    </dependency>
-
   </dependencies>
 </project>
