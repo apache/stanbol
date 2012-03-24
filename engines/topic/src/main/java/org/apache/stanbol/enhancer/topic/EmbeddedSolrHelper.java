@@ -27,6 +27,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;
+import org.apache.solr.core.CoreDescriptor;
+import org.apache.solr.core.SolrCore;
 import org.xml.sax.SAXException;
 
 /**
@@ -50,7 +52,7 @@ public class EmbeddedSolrHelper {
 
         // solr conf file
         File solrFile = new File(solrFolder, "solr.xml");
-        InputStream is = EmbeddedSolrHelper.class.getResourceAsStream("/" + configName + "/solr.xml");
+        InputStream is = EmbeddedSolrHelper.class.getResourceAsStream("/solr.xml");
         if (is == null) {
             throw new IllegalArgumentException("missing test solr.xml file");
         }
@@ -62,14 +64,14 @@ public class EmbeddedSolrHelper {
         File solrConfFolder = new File(solrCoreFolder, "conf");
         solrConfFolder.mkdir();
         File schemaFile = new File(solrConfFolder, "schema.xml");
-        is = EmbeddedSolrHelper.class.getResourceAsStream("/" + configName + "/schema.xml");
+        is = EmbeddedSolrHelper.class.getResourceAsStream("/" + configName + "/conf/schema.xml");
         if (is == null) {
             throw new IllegalArgumentException("missing test schema.xml file");
         }
         IOUtils.copy(is, new FileOutputStream(schemaFile));
 
         File solrConfigFile = new File(solrConfFolder, "solrconfig.xml");
-        is = EmbeddedSolrHelper.class.getResourceAsStream("/" + configName + "/solrconfig.xml");
+        is = EmbeddedSolrHelper.class.getResourceAsStream("/" + configName + "/conf/solrconfig.xml");
         if (is == null) {
             throw new IllegalArgumentException("missing test solrconfig.xml file");
         }
@@ -77,6 +79,10 @@ public class EmbeddedSolrHelper {
 
         // create the embedded server
         CoreContainer coreContainer = new CoreContainer(solrFolder.getAbsolutePath(), solrFile);
+        CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, coreId,
+                solrCoreFolder.getAbsolutePath());
+        SolrCore core = coreContainer.create(coreDescriptor);
+        coreContainer.register(coreId, core, true);
         return new EmbeddedSolrServer(coreContainer, coreId);
     }
 

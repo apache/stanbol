@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.topic;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -24,14 +25,18 @@ import java.util.List;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
-import org.osgi.framework.InvalidSyntaxException;
+import org.apache.stanbol.commons.solr.managed.IndexMetadata;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.xml.sax.SAXException;
 
 /**
  * Helper class to factorize some common code for Solr Core tracking OSGi component
  */
 public abstract class ConfiguredSolrCoreTracker {
+
+    protected ManagedSolrServer managedSolrServer;
 
     protected String solrCoreId;
 
@@ -41,6 +46,8 @@ public abstract class ConfiguredSolrCoreTracker {
     protected SolrServer solrServer;
 
     protected ComponentContext context;
+
+    protected String indexArchiveName;
 
     abstract public void configure(Dictionary<String,Object> config) throws ConfigurationException;
 
@@ -80,7 +87,8 @@ public abstract class ConfiguredSolrCoreTracker {
     }
 
     /**
-     * @return the manually bound classifierSolrServer instance or the one tracked by the OSGi service tracker.
+     * @return the manually bound classifierSolrServer instance or the one tracked by the OSGi service
+     *         tracker.
      */
     public SolrServer getActiveSolrServer() {
         return solrServer != null ? solrServer : indexTracker.getService();
@@ -99,13 +107,48 @@ public abstract class ConfiguredSolrCoreTracker {
                                 + " the engine without any OSGi context. Got: " + solrCoreId);
             }
             try {
-                indexTracker = new RegisteredSolrServerTracker(context.getBundleContext(),
-                        IndexReference.parse(solrCoreId));
+                IndexReference indexReference = IndexReference.parse(solrCoreId);
+                indexTracker = new RegisteredSolrServerTracker(context.getBundleContext(), indexReference);
                 indexTracker.open();
-            } catch (InvalidSyntaxException e) {
+                this.solrCoreId = solrCoreId;
+
+                // if the solr core is managed, check that the index is properly activated
+                if (managedSolrServer != null
+                    && indexReference.checkServer(managedSolrServer.getServerName())) {
+                    String indexName = indexReference.getIndex();
+                    IndexMetadata indexMetadata = managedSolrServer.getIndexMetadata(indexName);
+                    if (indexMetadata == null) {
+                        managedSolrServer.createSolrIndex(indexName, indexArchiveName, null);
+                        indexMetadata = managedSolrServer.getIndexMetadata(indexName);
+                    }
+                    if (!indexMetadata.isActive()) {
+                        // already managed, but not active yet: do it now
+                        managedSolrServer.activateIndex(indexName);
+                    }
+                }
+            } catch (Exception e) {
                 throw new ConfigurationException(solrCoreProperty, e.getMessage(), e);
             }
         }
     }
 
+    protected void bindManagedSolrServer(ManagedSolrServer managedSolrServer) throws IOException,
+                                                                             SAXException {
+        this.managedSolrServer = managedSolrServer;
+    }
+
+    protected void unbindManagedSolrServer(ManagedSolrServer managedSolrServer) {
+        if (this.managedSolrServer == managedSolrServer || solrCoreId != null) {
+            IndexReference indexReference = IndexReference.parse(solrCoreId);
+            if (!indexReference.checkServer(managedSolrServer.getServerName())) {
+                return;
+            }
+            String indexName = indexReference.getIndex();
+            IndexMetadata indexMetadata = managedSolrServer.getIndexMetadata(indexName);
+            if (indexMetadata != null && indexMetadata.isActive()) {
+                managedSolrServer.deactivateIndex(indexName);
+            }
+            this.managedSolrServer = null;
+        }
+    }
 }

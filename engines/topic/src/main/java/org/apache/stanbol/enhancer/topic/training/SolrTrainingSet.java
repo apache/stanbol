@@ -30,6 +30,10 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -38,6 +42,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.enhancer.topic.Batch;
 import org.apache.stanbol.enhancer.topic.ConfiguredSolrCoreTracker;
 import org.apache.stanbol.enhancer.topic.UTCTimeStamper;
@@ -88,6 +93,11 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
 
     // TODO: make me configurable using an OSGi property
     protected int batchSize = 100;
+
+    protected String indexName = "default-topic-classifier-trainingset";
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, bind = "bindManagedSolrServer", unbind = "unbindManagedSolrServer", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC)
+    protected ManagedSolrServer managedSolrServer;
 
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, InvalidSyntaxException {
@@ -188,6 +198,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
         query.setRows(1);
         query.setFields(exampleIdField);
         try {
+            SolrServer solrServer = getActiveSolrServer();
             return solrServer.query(query).getResults().size() > 0;
         } catch (SolrServerException e) {
             String msg = String.format(

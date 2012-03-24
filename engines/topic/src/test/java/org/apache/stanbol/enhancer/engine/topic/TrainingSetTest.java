@@ -70,10 +70,11 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
         solrHome = File.createTempFile("topicTrainingSetTest_", "_solr_cores");
         solrHome.delete();
         solrHome.mkdir();
-        trainingsetSolrServer = makeEmbeddedSolrServer(solrHome, "trainingsetserver", "trainingset",
-            "trainingset");
+        trainingsetSolrServer = makeEmbeddedSolrServer(solrHome, "trainingsetserver",
+            "default-topic-trainingset", "default-topic-trainingset");
         trainingSet = new SolrTrainingSet();
         trainingSet.configure(getDefaultConfigParams());
+        
     }
 
     @After
