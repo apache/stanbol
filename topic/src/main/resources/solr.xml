@@ -15,13 +15,15 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<solr persistent="false">
 
-  <!--
-  adminPath: RequestHandler path to manage cores.  
-    If 'null' (or absent), cores will not be manageable via request handler
-  -->
-  <cores adminPath="/admin/cores" defaultCoreName="trainingset">
-    <core name="trainingset" instanceDir="trainingset" />
+<!--
+ SolrYard Configuration for the internally managed Embedded SolrServer:
+
+ By default no cores are defined by this configuration because they are added
+ at runtime via the Java API
+-->
+<solr persistent="false">
+  <cores adminPath="/admin/cores">
+    <!-- Cores are added dynamically at runtime -->
   </cores>
 </solr>

@@ -44,6 +44,10 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -57,6 +61,7 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MoreLikeThisParams;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -109,14 +114,16 @@ import org.slf4j.LoggerFactory;
                      @Property(name = TopicClassificationEngine.ORDER, intValue = 100),
                      @Property(name = TopicClassificationEngine.SOLR_CORE),
                      @Property(name = TopicClassificationEngine.LANGUAGES),
-                     @Property(name = TopicClassificationEngine.SIMILARTITY_FIELD),
-                     @Property(name = TopicClassificationEngine.CONCEPT_URI_FIELD),
-                     @Property(name = TopicClassificationEngine.PRIMARY_TOPIC_URI_FIELD),
-                     @Property(name = TopicClassificationEngine.BROADER_FIELD),
+                     @Property(name = TopicClassificationEngine.SIMILARTITY_FIELD, value = "classifier_features"),
+                     @Property(name = TopicClassificationEngine.CONCEPT_URI_FIELD, value = "concept"),
+                     @Property(name = TopicClassificationEngine.PRIMARY_TOPIC_URI_FIELD, value = "primary_topic"),
+                     @Property(name = TopicClassificationEngine.BROADER_FIELD, value = "broader"),
                      @Property(name = TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, value = "last_update_dt"),
                      @Property(name = TopicClassificationEngine.PRECISION_FIELD, value = "precision"),
                      @Property(name = TopicClassificationEngine.RECALL_FIELD, value = "recall"),
+                     @Property(name = TopicClassificationEngine.ENTRY_ID_FIELD, value = "entry_id"),
                      @Property(name = TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, value = "model_entry_id"),
+                     @Property(name = TopicClassificationEngine.ENTRY_TYPE_FIELD, value = "entry_type"),
                      @Property(name = TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, value = "last_evaluation_dt"),
                      @Property(name = TopicClassificationEngine.FALSE_NEGATIVES_FIELD, value = "false_negatives"),
                      @Property(name = TopicClassificationEngine.FALSE_POSITIVES_FIELD, value = "false_positives"),
@@ -244,11 +251,15 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     protected File evaluationFolder;
 
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, bind = "bindManagedSolrServer", unbind = "unbindManagedSolrServer", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC)
+    protected ManagedSolrServer managedSolrServer;
+
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, InvalidSyntaxException {
         @SuppressWarnings("unchecked")
         Dictionary<String,Object> config = context.getProperties();
         this.context = context;
+        this.indexArchiveName = "default-topic-classifier-model";
         configure(config);
     }
 
@@ -293,11 +304,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         } else {
             return CANNOT_ENHANCE;
         }
-        // TODO ogrisel: validate that it is no problem that this does no longer
-        // check that the text is not empty
-        // if (text.trim().length() == 0) {
-        // return CANNOT_ENHANCE;
-        // }
     }
 
     @Override
@@ -418,7 +424,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 Float score = (Float) result.getFirstValue("score");
 
                 // fetch metadata
-                String q = entryTypeField + ":" + METADATA_ENTRY + " AND " + conceptUriField + ":" + ClientUtils.escapeQueryChars(conceptUri);
+                String q = entryTypeField + ":" + METADATA_ENTRY + " AND " + conceptUriField + ":"
+                           + ClientUtils.escapeQueryChars(conceptUri);
                 SolrQuery metadataQuery = new SolrQuery(q);
                 metadataQuery.setFields(conceptUriField, broaderField, primaryTopicUriField);
                 SolrDocument metadata = solrServer.query(metadataQuery).getResults().get(0);
@@ -743,7 +750,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
      *            of the model entry id of the topic
      * @param impactedTopics
      *            the list of impacted topics (e.g. the topic node and direct children)
-     * @param primaryTopicUri 
+     * @param primaryTopicUri
      * @param broaderConcepts
      *            the collection of broader to re-add in the broader field
      */
@@ -865,7 +872,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         int updatedTopics = 0;
         int cvFoldCount = 3; // 3-folds CV is hardcoded for now
         int cvIterationCount = 1; // only one 3-folds CV iteration
- 
+
         TopicClassificationEngine classifier = new TopicClassificationEngine();
         classifier.setTrainingSet(trainingSet);
         try {
@@ -889,7 +896,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     protected int performCVFold(final TopicClassificationEngine classifier,
                                 int cvFoldIndex,
                                 int cvFoldCount,
-                                int cvIterations, boolean incremental) throws ConfigurationException,
+                                int cvIterations,
+                                boolean incremental) throws ConfigurationException,
                                                     TrainingSetException,
                                                     ClassifierException {
 
@@ -901,7 +909,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         evaluationFolder.mkdir();
         try {
             EmbeddedSolrServer evaluationServer = EmbeddedSolrHelper.makeEmbeddedSolrServer(evaluationFolder,
-                "evaluationclassifierserver", "classifier", "classifier");
+                "evaluationclassifierserver", "default-topic-model", "default-topic-model");
             classifier.configure(getCanonicalConfiguration(evaluationServer));
         } catch (Exception e) {
             throw new ClassifierException(e);
