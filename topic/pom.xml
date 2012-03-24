@@ -63,6 +63,9 @@
             <Export-Package>
               org.apache.stanbol.enhancer.engine.topic.*;version=${project.version}
             </Export-Package>
+            <Install-Path>install-config</Install-Path>
+            <Data-Files>data-files</Data-Files>
+            <Data-Files-Priority>-100</Data-Files-Priority>
           </instructions>
         </configuration>
       </plugin>
@@ -93,9 +96,9 @@
             <phase>compile</phase>
             <configuration>
               <target>
-                <property name="build.directory"
+                <property name="resources.dir"
                   value="${project.basedir}/src/main/resources/"/>
-                <ant antfile="${basedir}/build-archives.xml">
+                <ant antfile="${project.basedir}/build-archives.xml">
                   <target name="all"/>
                 </ant>
               </target>

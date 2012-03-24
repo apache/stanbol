@@ -16,19 +16,20 @@
 -->
 <project name="topic-classifier-solr-archives" default="all" basedir=".">
 
-  <property name="build.directory" value="./src/main/resources/" />
+  <property name="resources.dir" value="./src/main/resources/" />
+  <property name="data.dir" value="${resources.dir}data-files/" />
   <target name="all" depends="model,trainingset" />
 
   <target name="model">
-    <zip destfile="${build.directory}default-topic-model.solrindex.zip">
-      <zipfileset dir="${build.directory}default-topic-model"
+    <zip destfile="${data.dir}default-topic-model.solrindex.zip">
+      <zipfileset dir="${resources.dir}default-topic-model"
         prefix="default-topic-model"/>
     </zip>
   </target>
 
   <target name="trainingset">
-    <zip destfile="${build.directory}default-topic-trainingset.solrindex.zip">
-      <zipfileset dir="${build.directory}default-topic-trainingset"
+    <zip destfile="${data.dir}default-topic-trainingset.solrindex.zip">
+      <zipfileset dir="${resources.dir}default-topic-trainingset"
         prefix="default-topic-trainingset"/>
     </zip>
   </target>
