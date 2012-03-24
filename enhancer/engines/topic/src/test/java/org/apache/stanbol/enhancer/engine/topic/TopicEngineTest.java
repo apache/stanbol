@@ -75,12 +75,12 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         solrHome = File.createTempFile("topicEngineTest_", "_solr_cores");
         solrHome.delete();
         solrHome.mkdir();
-        classifierSolrServer = makeEmbeddedSolrServer(solrHome, "classifierserver", "classifier",
-            "classifier");
+        classifierSolrServer = makeEmbeddedSolrServer(solrHome, "classifierserver", "default-topic-model",
+            "default-topic-model");
         classifier = TopicClassificationEngine.fromParameters(getDefaultClassifierConfigParams());
 
-        trainingSetSolrServer = makeEmbeddedSolrServer(solrHome, "trainingsetserver", "trainingset",
-            "trainingset");
+        trainingSetSolrServer = makeEmbeddedSolrServer(solrHome, "trainingsetserver",
+            "default-topic-trainingset", "default-topic-trainingset");
         trainingSet = new SolrTrainingSet();
         trainingSet.configure(getDefaultTrainingSetConfigParams());
     }
