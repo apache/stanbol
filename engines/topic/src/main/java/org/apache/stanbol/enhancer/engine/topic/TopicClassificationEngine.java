@@ -287,7 +287,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         falseNegativesField = getRequiredStringParam(config, FALSE_NEGATIVES_FIELD);
         positiveSupportField = getRequiredStringParam(config, POSITIVE_SUPPORT_FIELD);
         negativeSupportField = getRequiredStringParam(config, NEGATIVE_SUPPORT_FIELD);
-        configureSolrCore(config, SOLR_CORE);
+        configureSolrCore(config, SOLR_CORE, engineId + "-model");
 
         // optional fields, can be null
         broaderField = (String) config.get(BROADER_FIELD);

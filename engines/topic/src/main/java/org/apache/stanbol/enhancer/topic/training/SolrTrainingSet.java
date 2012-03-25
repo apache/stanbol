@@ -94,7 +94,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
     // TODO: make me configurable using an OSGi property
     protected int batchSize = 100;
 
-    protected String indexName = "default-topic-classifier-trainingset";
+    protected String indexName = "default-topic-trainingset";
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, bind = "bindManagedSolrServer", unbind = "unbindManagedSolrServer", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC)
     protected ManagedSolrServer managedSolrServer;
@@ -121,7 +121,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
         exampleTextField = getRequiredStringParam(config, EXAMPLE_TEXT_FIELD);
         topicUrisField = getRequiredStringParam(config, TOPICS_URI_FIELD);
         modificationDateField = getRequiredStringParam(config, MODIFICATION_DATE_FIELD);
-        configureSolrCore(config, SOLR_CORE);
+        configureSolrCore(config, SOLR_CORE, trainingSetId);
     }
 
     public static ConfiguredSolrCoreTracker fromParameters(Dictionary<String,Object> config) throws ConfigurationException {

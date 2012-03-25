@@ -96,13 +96,20 @@ public abstract class ConfiguredSolrCoreTracker {
         return solrServer != null ? solrServer : indexTracker.getService();
     }
 
-    protected void configureSolrCore(Dictionary<String,Object> config, String solrCoreProperty) throws ConfigurationException {
-        if (config.get(solrCoreProperty) instanceof SolrServer) {
+    protected void configureSolrCore(Dictionary<String,Object> config,
+                                     String solrCoreProperty,
+                                     String defaultCoreId) throws ConfigurationException {
+        Object solrCoreInfo = config.get(solrCoreProperty);
+        if (solrCoreInfo instanceof SolrServer) {
             // Bind a fixed Solr server client instead of doing dynamic OSGi lookup using the service tracker.
             // This can be useful both for unit-testing .
             solrServer = (SolrServer) config.get(solrCoreProperty);
         } else {
-            this.solrCoreId = getRequiredStringParam(config, solrCoreProperty);
+            if (solrCoreInfo != null && !solrCoreInfo.toString().trim().isEmpty()) {
+                this.solrCoreId = solrCoreInfo.toString();
+            } else {
+                this.solrCoreId = defaultCoreId;
+            }
             if (context == null) {
                 throw new ConfigurationException(solrCoreProperty,
                         solrCoreProperty + " should be a SolrServer instance for using"
