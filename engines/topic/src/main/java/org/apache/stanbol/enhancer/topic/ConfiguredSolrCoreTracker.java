@@ -17,11 +17,13 @@
 package org.apache.stanbol.enhancer.topic;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.List;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
@@ -100,7 +102,7 @@ public abstract class ConfiguredSolrCoreTracker {
             // This can be useful both for unit-testing .
             solrServer = (SolrServer) config.get(solrCoreProperty);
         } else {
-            String solrCoreId = getRequiredStringParam(config, solrCoreProperty);
+            this.solrCoreId = getRequiredStringParam(config, solrCoreProperty);
             if (context == null) {
                 throw new ConfigurationException(solrCoreProperty,
                         solrCoreProperty + " should be a SolrServer instance for using"
@@ -108,28 +110,39 @@ public abstract class ConfiguredSolrCoreTracker {
             }
             try {
                 IndexReference indexReference = IndexReference.parse(solrCoreId);
+                indexReference = checkInitSolrIndex(indexReference);
+                // track the solr core OSGi updates
                 indexTracker = new RegisteredSolrServerTracker(context.getBundleContext(), indexReference);
                 indexTracker.open();
-                this.solrCoreId = solrCoreId;
-
-                // if the solr core is managed, check that the index is properly activated
-                if (managedSolrServer != null
-                    && indexReference.checkServer(managedSolrServer.getServerName())) {
-                    String indexName = indexReference.getIndex();
-                    IndexMetadata indexMetadata = managedSolrServer.getIndexMetadata(indexName);
-                    if (indexMetadata == null) {
-                        managedSolrServer.createSolrIndex(indexName, indexArchiveName, null);
-                        indexMetadata = managedSolrServer.getIndexMetadata(indexName);
-                    }
-                    if (!indexMetadata.isActive()) {
-                        // already managed, but not active yet: do it now
-                        managedSolrServer.activateIndex(indexName);
-                    }
-                }
             } catch (Exception e) {
                 throw new ConfigurationException(solrCoreProperty, e.getMessage(), e);
             }
         }
+    }
+
+    protected IndexReference checkInitSolrIndex(IndexReference indexReference) throws IOException,
+                                                                              ConfigurationException,
+                                                                              SAXException {
+        // if the solr core is managed, check that the index is properly activated
+        if (managedSolrServer != null && indexReference.checkServer(managedSolrServer.getServerName())
+            && context != null) {
+            String indexName = indexReference.getIndex();
+            IndexMetadata indexMetadata = managedSolrServer.getIndexMetadata(indexName);
+            if (indexMetadata == null) {
+                // TODO: debug the DataFileProvider init race conditions instead
+                // indexMetadata = managedSolrServer.createSolrIndex(indexName, indexArchiveName, null);
+                URL archiveUrl = context.getBundleContext().getBundle()
+                        .getEntry("/data-files/" + indexArchiveName + ".solrindex.zip");
+                if (archiveUrl == null) {
+                    throw new ConfigurationException(solrCoreId, "Could not find index archive for "
+                                                                 + indexArchiveName);
+                }
+                ZipArchiveInputStream zis = new ZipArchiveInputStream(archiveUrl.openStream());
+                indexMetadata = managedSolrServer.updateIndex(indexName, zis, indexArchiveName);
+            }
+            indexReference = indexMetadata.getIndexReference();
+        }
+        return indexReference;
     }
 
     protected void bindManagedSolrServer(ManagedSolrServer managedSolrServer) throws IOException,
