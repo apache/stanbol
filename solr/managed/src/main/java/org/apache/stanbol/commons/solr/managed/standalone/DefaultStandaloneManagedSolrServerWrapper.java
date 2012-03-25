@@ -127,5 +127,11 @@ public class DefaultStandaloneManagedSolrServerWrapper implements ManagedSolrSer
                                                                               SAXException {
         return defaultServer.updateIndex(indexName, ais);
     }
+
+    @Override
+    public IndexMetadata updateIndex(String indexName, ArchiveInputStream ais, String archiveCoreName) throws IOException,
+                                                                                                      SAXException {
+        return defaultServer.updateIndex(indexName, ais, archiveCoreName);
+    }
     
 }
