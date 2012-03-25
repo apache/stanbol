@@ -23,6 +23,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.AbstractOWLOntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologySetInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
@@ -73,8 +74,10 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
      *            the identifier of the ontology library.
      * @param registryManager
      *            the registry manager that should contain the library data. Must not be null.
+     * @throws OWLOntologyCreationException
      */
-    public LibrarySource(IRI libraryID, RegistryManager registryManager) throws RegistryContentException {
+    public LibrarySource(IRI libraryID, RegistryManager registryManager) throws RegistryContentException,
+                                                                        OWLOntologyCreationException {
         this(libraryID, registryManager, checkOntologyManager(registryManager));
     }
 
@@ -113,9 +116,13 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
      * @param ontologyManager
      *            the ontology manager to be used for constructing the import tree. if null, a new one will be
      *            used.
+     * @throws OWLOntologyCreationException
      */
-    public LibrarySource(IRI libraryID, RegistryManager registryManager, OWLOntologyManager ontologyManager) throws RegistryContentException {
-        this(libraryID, registryManager, ontologyManager, null);
+    public LibrarySource(IRI libraryID, RegistryManager registryManager, OWLOntologyManager ontologyManager) throws RegistryContentException,
+                                                                                                            OWLOntologyCreationException {
+        this(libraryID, registryManager, ontologyManager, new RootOntologySource(OWLManager
+                .createOWLOntologyManager().createOntology(libraryID
+                /* IRI.create(libraryID.toString().replace("#", "%23")) */)));
     }
 
     /**

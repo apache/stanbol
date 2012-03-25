@@ -52,10 +52,8 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * @param ontology
      *            the ontology to be added
      * @return the key that can be used for accessing the stored ontology directly
-     * @throws UnmodifiableOntologyCollectorException
-     *             if the ontology space is read-only
      */
-    String addOntology(OntologyInputSource<?,?> ontologySource) throws UnmodifiableOntologyCollectorException;
+    String addOntology(OntologyInputSource<?,?> ontologySource);
 
     /**
      * Removes all ontology space listeners registered with this space.
@@ -184,7 +182,7 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * @param ontologyIri
      *            the identifier of this ontology.
      */
-    void removeOntology(IRI ontologyId) throws OntologyCollectorModificationException;
+    void removeOntology(IRI ontologyId);
 
     /**
      * Bootstraps the ontology space. In some cases (such as with core and custom spaces) this also implies

@@ -22,7 +22,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.session;
  * @author alexdma
  * 
  */
-public class NonReferenceableSessionException extends Exception {
+public class NonReferenceableSessionException extends RuntimeException {
 
     /**
 	 * 

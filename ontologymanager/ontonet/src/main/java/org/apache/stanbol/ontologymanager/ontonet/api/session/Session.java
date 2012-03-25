@@ -71,7 +71,7 @@ public interface Session extends OntologyCollector, OWLExportable, Lockable, Ses
     /**
      * Closes this Session irreversibly. Most likely includes setting the state to ZOMBIE.
      */
-    void close() throws NonReferenceableSessionException;
+    void close();
 
     /**
      * Instructs the session to no longer reference the supplied ontology scope. If a scope with the supplied
@@ -108,7 +108,7 @@ public interface Session extends OntologyCollector, OWLExportable, Lockable, Ses
      * 
      * @throws NonReferenceableSessionException
      */
-    void open() throws NonReferenceableSessionException;
+    void open();
 
     /**
      * Sets the session as ACTIVE if <code>active</code> is true, INACTIVE otherwise. The state set is
@@ -120,6 +120,6 @@ public interface Session extends OntologyCollector, OWLExportable, Lockable, Ses
      *            the desired activity state for this session
      * @return the resulting state of this KReS session
      */
-    State setActive(boolean active) throws NonReferenceableSessionException;
+    State setActive(boolean active);
 
 }

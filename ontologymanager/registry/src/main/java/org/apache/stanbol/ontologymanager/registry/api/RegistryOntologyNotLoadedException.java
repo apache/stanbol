@@ -46,7 +46,7 @@ public class RegistryOntologyNotLoadedException extends RegistryContentException
      *            the ontology that caused the exception.
      */
     public RegistryOntologyNotLoadedException(RegistryOntology ontology) {
-        super(ontology.getName());
+        super(ontology.getIRI().toString());
         this.ontology = ontology;
     }
 

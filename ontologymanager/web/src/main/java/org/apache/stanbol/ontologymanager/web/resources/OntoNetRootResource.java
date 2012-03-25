@@ -16,20 +16,33 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL_TYPE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL_TYPE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N3_TYPE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE_TYPE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML_TYPE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON_TYPE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML_TYPE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE_TYPE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE_TYPE;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -61,6 +74,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
 import com.sun.jersey.api.view.Viewable;
+import com.sun.jersey.multipart.BodyPart;
+import com.sun.jersey.multipart.FormDataBodyPart;
+import com.sun.jersey.multipart.FormDataMultiPart;
 
 /**
  * 
@@ -95,46 +111,99 @@ public class OntoNetRootResource extends BaseStanbolResource {
     }
 
     @POST
-    @Consumes(value = {RDF_XML, TURTLE, X_TURTLE, N3, N_TRIPLE, RDF_JSON})
-    public Response storeGraph(InputStream content, @Context HttpHeaders headers) {
-        long before = System.currentTimeMillis();
+    @Consumes({MULTIPART_FORM_DATA})
+    @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
+    public Response post(FormDataMultiPart data, @Context HttpHeaders headers) {
+
+        log.debug(" post(FormDataMultiPart data)");
         ResponseBuilder rb;
 
+        // In this case we setup the parameter from a multipart request
+        File file = null;
+        String format = null;
+        for (BodyPart bpart : data.getBodyParts()) {
+            log.debug("is a {}", bpart.getClass());
+            if (bpart instanceof FormDataBodyPart) {
+                FormDataBodyPart dbp = (FormDataBodyPart) bpart;
+                if (dbp.getName().equals("file")) file = bpart.getEntityAs(File.class);
+                else if (dbp.getName().equals("format")) format = dbp.getValue();
+            }
+        }
+        // Then add the file
         String key = null;
-        try {
-            key = ontologyProvider.loadInStore(content, headers.getMediaType().toString(), null, true);
-            log.debug("POST request for ontology addition completed in {} ms.",
-                (System.currentTimeMillis() - before));
-        } catch (UnsupportedFormatException e) {
-            log.warn("POST method failed for media type {}. This should not happen (should fail earlier)",
-                headers.getMediaType());
-            rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
-        } catch (IOException e) {
-            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+        if (file != null && file.canRead() && file.exists()) {
+            try {
+                InputStream content = new FileInputStream(file);
+                key = ontologyProvider.loadInStore(content, format, null, true);
+                rb = Response.ok();
+            } catch (UnsupportedFormatException e) {
+                log.warn(
+                    "POST method failed for media type {}. This should not happen (should fail earlier)",
+                    headers.getMediaType());
+                rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
+            } catch (IOException e) {
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            log.error("Bad request");
+            log.error(" file is: {}", file);
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
         // An exception should have been thrown earlier, but just in case.
         if (key == null || key.isEmpty()) rb = Response.status(Status.INTERNAL_SERVER_ERROR);
-
-        rb = Response.ok();
+        // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
+    /**
+     * POSTs an ontology content as application/x-www-form-urlencoded
+     * 
+     * @param content
+     * @param headers
+     * @return
+     */
     @POST
-    @Consumes(value = {OWL_XML, FUNCTIONAL_OWL, MANCHESTER_OWL})
-    public Response storeOWLOntology(InputStream content, @Context HttpHeaders headers) {
+    @Consumes(value = {RDF_XML, TURTLE, X_TURTLE, N3, N_TRIPLE, OWL_XML, FUNCTIONAL_OWL, MANCHESTER_OWL,
+                       RDF_JSON})
+    public Response storeGraph(InputStream content, @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
-        try {
-            OntologyInputSource<OWLOntology,OWLOntologyManager> src = new OntologyContentInputSource(content);
-            ontologyProvider.loadInStore(src.getRootOntology(), null, true);
-        } catch (OWLOntologyCreationException e) {
-            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-        }
-        log.debug("POST request for ontology addition completed in {} ms.",
-            (System.currentTimeMillis() - before));
-        ResponseBuilder rb = Response.ok();
+        ResponseBuilder rb;
+
+        MediaType mt = headers.getMediaType();
+        if (RDF_XML_TYPE.equals(mt) || TURTLE_TYPE.equals(mt) || X_TURTLE_TYPE.equals(mt)
+            || N3_TYPE.equals(mt) || N_TRIPLE_TYPE.equals(mt) || RDF_JSON_TYPE.equals(mt)) {
+            String key = null;
+            try {
+                key = ontologyProvider.loadInStore(content, headers.getMediaType().toString(), null, true);
+                rb = Response.ok();
+            } catch (UnsupportedFormatException e) {
+                log.warn(
+                    "POST method failed for media type {}. This should not happen (should fail earlier)",
+                    headers.getMediaType());
+                rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
+            } catch (IOException e) {
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            }
+            // An exception should have been thrown earlier, but just in case.
+            if (key == null || key.isEmpty()) rb = Response.status(Status.INTERNAL_SERVER_ERROR);
+        } else if (OWL_XML_TYPE.equals(mt) || FUNCTIONAL_OWL_TYPE.equals(mt)
+                   || MANCHESTER_OWL_TYPE.equals(mt)) {
+            try {
+                OntologyInputSource<OWLOntology,OWLOntologyManager> src = new OntologyContentInputSource(
+                        content);
+                ontologyProvider.loadInStore(src.getRootOntology(), null, true);
+                rb = Response.ok();
+            } catch (OWLOntologyCreationException e) {
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            }
+        } else rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
+
         addCORSOrigin(servletContext, rb, headers);
-        return rb.build();
+        Response r = rb.build();
+        log.debug("POST request for ontology addition completed in {} ms with status {}.",
+            (System.currentTimeMillis() - before), r.getStatus());
+        return r;
     }
 
     /*

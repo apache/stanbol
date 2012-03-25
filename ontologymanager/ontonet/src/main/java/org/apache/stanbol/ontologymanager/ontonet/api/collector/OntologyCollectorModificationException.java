@@ -19,7 +19,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 /**
  * Thrown whenever an illegal operation that modifies an ontology space is detected and denied.
  */
-public class OntologyCollectorModificationException extends Exception {
+public class OntologyCollectorModificationException extends RuntimeException {
 
     /**
 	 * 
