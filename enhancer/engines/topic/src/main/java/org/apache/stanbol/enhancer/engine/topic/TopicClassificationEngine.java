@@ -259,7 +259,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         @SuppressWarnings("unchecked")
         Dictionary<String,Object> config = context.getProperties();
         this.context = context;
-        this.indexArchiveName = "default-topic-classifier-model";
+        this.indexArchiveName = "default-topic-model";
         configure(config);
     }
 
@@ -268,6 +268,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         if (indexTracker != null) {
             indexTracker.close();
         }
+        context = null;
     }
 
     public void configure(Dictionary<String,Object> config) throws ConfigurationException {
