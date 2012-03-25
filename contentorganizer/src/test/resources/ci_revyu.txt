@@ -1,0 +1,49 @@
+Exposing Large Datasets with Semantic Sitemaps
+
+A paper written by Giovanni Tummarello, Renaud Delbru, Stefan Decker, Richard Cyganiak and Holger Stenzhorn. It was presented at the ESWC2008
+
+Increasing amounts of RDF data are available on the Web for consumption by Semantic Web browsers and indexing by Semantic Web search engines. Current Semantic Web publishing practices, however, do not directly support efficient discovery and high-performance retrieval by clients and search engines. We propose an extension to the Sitemaps protocol which provides a simple and effective solution: Data publishers create Semantic Sitemaps to announce and describe their data so that clients can choose the most appropriate access method. We show how this protocol enables an extended notion of authoritative information across different access methods.
+
+Expected results
+
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" target="<http://revyu.com/things/eswc-2008-paper-exposing-large-sitemaps>">
+  <head>
+    <variable name="?x"/>
+    <variable name="?r"/>
+    <variable name="?y"/>
+  </head>
+  <results ordered="false" distinct="false">
+    <result>
+      <binding name="?x"></binding>
+      <binding name="?r"><uri>http://purl.org/stuff/rev#hasReview</uri></binding>
+      <binding name="?y"><uri>reviews/bbecea3192d3c3bc5473ca8d9ab38cb143314a8e</uri></binding>
+    </result>
+    <result>
+      <binding name="?x"></binding>
+      <binding name="?r"><uri>http://www.holygoat.co.uk/owl/redwood/0.1/tags/tag</uri></binding>
+      <binding name="?y"><uri>taggings/85fb0f445e3bdba45420443e0060e44a41f78e5c</uri></binding>
+    </result>
+    <result>
+      <binding name="?x"></binding>
+      <binding name="?r"><uri>http://www.holygoat.co.uk/owl/redwood/0.1/tags/tag</uri></binding>
+      <binding name="?y"><uri>taggings/bbecea3192d3c3bc5473ca8d9ab38cb143314a8e</uri></binding>
+    </result>
+    <result>
+      <binding name="?x"></binding>
+      <binding name="?r"><uri>http://www.w3.org/2000/01/rdf-schema#label</uri></binding>
+      <binding name="?y"><literal>Exposing Large Datasets with Semantic Sitemaps (Article)</literal></binding>
+    </result>
+    <result>
+      <binding name="?x"></binding>
+      <binding name="?r"><uri>http://www.w3.org/2000/01/rdf-schema#seeAlso</uri></binding>
+      <binding name="?y"><uri>http://esw.w3.org/topic/TaskForces/CommunityProjects/LinkingOpenData/SemanticWebSearchEngines</uri></binding>
+    </result>
+    <result>
+      <binding name="?x"></binding>
+      <binding name="?r"><uri>http://www.w3.org/2002/07/owl#sameAs</uri></binding>
+      <binding name="?y"><uri>http://sw.deri.org/2007/07/sitemapextension/</uri></binding>
+    </result>
+  </results>
+
+</sparql>

@@ -18,6 +18,7 @@ package org.apache.stanbol.contentorganizer.impl;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
 /**
  * 
  * @author alexdma
- *
+ * 
  */
 public class ContentHubConnector implements ContentConnector {
 
@@ -53,6 +54,11 @@ public class ContentHubConnector implements ContentConnector {
     private Store contentStore;
     private SolrSearch searchUtility;
 
+    public static final UriRef CONTENT_ITEM = new UriRef("http://fise.iks-project.eu/ontology/ContentItem");
+
+    public static final UriRef EXTRACTED_FROM = new UriRef("http://fise.iks-project.eu/ontology/extracted-from");
+
+    
     public ContentHubConnector(Store contentStore, SolrSearch searchUtility) {
         this.contentStore = contentStore;
         this.searchUtility = searchUtility;
@@ -84,34 +90,49 @@ public class ContentHubConnector implements ContentConnector {
     }
 
     private void computeMetadata(Collection<SolrDocument> docs) {
+
         for (SolrDocument doc : docs) {
             String id = (String) doc.getFieldValue(SolrFieldName.ID.toString());
+
             try {
                 ContentItem ci = contentStore.get(id);
 
-                String title = (String) doc.getFieldValue(SolrFieldName.TITLE.toString());
+                synchronized (ci) {
 
-                LockableMGraph mg = ci.getMetadata();
-                Lock writeLock = mg.getLock().writeLock();
+                    String title = (String) doc.getFieldValue(SolrFieldName.TITLE.toString());
 
-                Triple t = new TripleImpl(ci.getUri(), DC.title, ClerezzaBackendStatic.createLiteral(title,
-                    Locale.getDefault(), null));
-                writeLock.lock();
-                mg.add(t);
-                writeLock.unlock();
+                    LockableMGraph mg = ci.getMetadata();
+                    Lock writeLock = mg.getLock().writeLock();
 
-                Object obj = doc.getFieldValue("authors_t");
-                if (obj != null && obj instanceof Collection<?>) {
-                    for (Object s : (Collection<?>) obj) {
-                        t = new TripleImpl(ci.getUri(), new UriRef("http://schema.org/author"), new UriRef(
-                                s.toString()));
-                        writeLock.lock();
-                        mg.add(t);
-                        writeLock.unlock();
+                    Triple t = new TripleImpl(ci.getUri(), DC.title, ClerezzaBackendStatic.createLiteral(
+                        title, Locale.getDefault(), null));
+//                    System.out.println("Trying to add " + t);
+                    writeLock.lock();
+                    mg.add(t);
+                    writeLock.unlock();
+
+                    Object obj = doc.getFieldValue("authors_t");
+                    if (obj != null && obj instanceof Collection<?>) {
+                        for (Object s : (Collection<?>) obj) {
+                            t = new TripleImpl(ci.getUri(), new UriRef("http://schema.org/author"),
+                                    new UriRef(s.toString()));
+//                            System.out.println("Trying to add " + t);
+                            writeLock.lock();
+                            mg.add(t);
+                            writeLock.unlock();
+                        }
                     }
                 }
 
+//                Iterator<Triple> it = ci.getMetadata().filter(null, DC.title, null);
+//                while (it.hasNext())
+//                    System.out.println("dc:title " + it.next());
+//                it = ci.getMetadata().filter(null, new UriRef("http://schema.org/author"), null);
+//                while (it.hasNext())
+//                    System.out.println("schema:author " + it.next());
+
             } catch (StoreException e) {
+                e.printStackTrace();
                 log.error("Must skip content item " + id, e);
                 continue;
             }

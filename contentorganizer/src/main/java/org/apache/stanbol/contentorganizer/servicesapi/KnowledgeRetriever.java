@@ -16,24 +16,22 @@
  */
 package org.apache.stanbol.contentorganizer.servicesapi;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.stanbol.contentorganizer.model.Category;
-import org.apache.stanbol.contentorganizer.model.Criterion;
+import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 
-/**
- * 
- * @author alexdma
- * 
- * @param <S>
- *            the content storage system.
- */
-public interface ContentOrganizer {
+public interface KnowledgeRetriever {
 
-    Set<Criterion> getSuitableCriteria(Collection<ContentItem> contentItems);
+    /**
+     * 
+     * TODO I would prefer to return a {@link Graph}, but since the Clerezza implementation of
+     * {@link MGraph#getGraph()} seems to create a new in-memory mirror image, i have to remain open to
+     * returning {@link MGraph} too.
+     * 
+     * @param ci
+     * @return
+     */
+    TripleCollection aggregateKnowledge(ContentItem ci);
 
-    Map<ContentItem,Set<Category>> classifyContent();
 }
