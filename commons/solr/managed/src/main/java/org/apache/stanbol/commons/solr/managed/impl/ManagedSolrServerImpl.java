@@ -599,6 +599,11 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
 
     @Override
     public IndexMetadata updateIndex(String indexName, ArchiveInputStream ais) throws IOException, SAXException {
+        return updateIndex(indexName, ais, null);
+    }
+    
+    @Override
+    public IndexMetadata updateIndex(String indexName, ArchiveInputStream ais, String archiveCoreName) throws IOException, SAXException {
         if(indexName == null || indexName.isEmpty()){
             throw new IllegalArgumentException("The parsed name for the index MUST NOT" +
             		"be NULL nor empty!");
@@ -610,6 +615,9 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
         metadata.setServerName(serverName);
         metadata.setIndexName(indexName);
         metadata.setSynchronized(false);
+        if (archiveCoreName != null) {
+            metadata.setArchive(archiveCoreName);
+        }
         try {
             updateCore(metadata, ais);
         } finally {

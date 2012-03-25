@@ -212,6 +212,9 @@ public interface ManagedSolrServer {
      * @throws IOException
      */
     IndexMetadata updateIndex(String indexName,String resourceName,Properties properties) throws IOException;
+
+    IndexMetadata updateIndex(String indexName, ArchiveInputStream ais, String archiveCoreName) throws IOException,
+                                                                                               SAXException;
     /**
      * Removes the index with the parsed name and optionally also deletes the
      * data on the file system.
@@ -262,5 +265,4 @@ public interface ManagedSolrServer {
      *             component is currently deactivated) or initialised.
      */
     File getManagedDirectory();
-
 }
