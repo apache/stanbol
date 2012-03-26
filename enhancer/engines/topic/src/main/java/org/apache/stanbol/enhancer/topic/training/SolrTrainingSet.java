@@ -58,15 +58,15 @@ import org.slf4j.LoggerFactory;
  */
 @Component(metatype = true, immediate = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
-@Properties(value = {@Property(name = SolrTrainingSet.TRAINING_SET_ID),
+@Properties(value = {@Property(name = SolrTrainingSet.TRAINING_SET_NAME),
                      @Property(name = SolrTrainingSet.SOLR_CORE),
-                     @Property(name = SolrTrainingSet.EXAMPLE_ID_FIELD),
-                     @Property(name = SolrTrainingSet.EXAMPLE_TEXT_FIELD),
-                     @Property(name = SolrTrainingSet.TOPICS_URI_FIELD),
-                     @Property(name = SolrTrainingSet.MODIFICATION_DATE_FIELD)})
+                     @Property(name = SolrTrainingSet.EXAMPLE_ID_FIELD, value = "id"),
+                     @Property(name = SolrTrainingSet.EXAMPLE_TEXT_FIELD, value = "text"),
+                     @Property(name = SolrTrainingSet.TOPICS_URI_FIELD, value = "topics"),
+                     @Property(name = SolrTrainingSet.MODIFICATION_DATE_FIELD, value = "modification_dt")})
 public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements TrainingSet {
 
-    public static final String TRAINING_SET_ID = "org.apache.stanbol.enhancer.topic.trainingset.id";
+    public static final String TRAINING_SET_NAME = "org.apache.stanbol.enhancer.topic.trainingset.id";
 
     public static final String SOLR_CORE = "org.apache.stanbol.enhancer.engine.topic.solrCore";
 
@@ -93,14 +93,17 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
 
     // TODO: make me configurable using an OSGi property
     protected int batchSize = 100;
-
-    protected String indexName = "default-topic-trainingset";
-
+    
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, bind = "bindManagedSolrServer", unbind = "unbindManagedSolrServer", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC)
     protected ManagedSolrServer managedSolrServer;
 
+    public String getName() {
+        return trainingSetId;
+    }
+    
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, InvalidSyntaxException {
+        indexArchiveName = "default-topic-trainingset";
         @SuppressWarnings("unchecked")
         Dictionary<String,Object> config = context.getProperties();
         this.context = context;
@@ -116,7 +119,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
 
     @Override
     public void configure(Dictionary<String,Object> config) throws ConfigurationException {
-        trainingSetId = getRequiredStringParam(config, TRAINING_SET_ID);
+        trainingSetId = getRequiredStringParam(config, TRAINING_SET_NAME);
         exampleIdField = getRequiredStringParam(config, EXAMPLE_ID_FIELD);
         exampleTextField = getRequiredStringParam(config, EXAMPLE_TEXT_FIELD);
         topicUrisField = getRequiredStringParam(config, TOPICS_URI_FIELD);

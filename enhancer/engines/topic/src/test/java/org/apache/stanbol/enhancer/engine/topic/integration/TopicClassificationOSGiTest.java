@@ -31,6 +31,7 @@ import javax.inject.Inject;
 import junit.framework.TestCase;
 
 import org.apache.stanbol.enhancer.engine.topic.TopicClassificationEngine;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.junit.Before;
 import org.ops4j.pax.exam.Option;
 import org.osgi.framework.BundleContext;
@@ -90,7 +91,7 @@ public class TopicClassificationOSGiTest {
     }
 
     // Disabled integration test because SCR configuration factory init is crashing
-    //@Test
+    // @Test
     public void testTopicClassification() throws Exception {
         System.out.println("Running test on bundle: " + context.getBundle());
         ServiceReference reference = context.getServiceReference(ConfigurationAdmin.class.getName());
@@ -99,7 +100,7 @@ public class TopicClassificationOSGiTest {
         Configuration config = configAdmin.createFactoryConfiguration(TopicClassificationEngine.class
                 .getName());
         Dictionary<String,String> parameters = new Hashtable<String,String>();
-        parameters.put(TopicClassificationEngine.ENGINE_ID, "testclassifier");
+        parameters.put(EnhancementEngine.PROPERTY_NAME, "testclassifier");
         // TODO: put the coreId of the solr server registered in @Before
         config.update(parameters);
 

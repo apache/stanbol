@@ -93,7 +93,15 @@ public abstract class ConfiguredSolrCoreTracker {
      *         tracker.
      */
     public SolrServer getActiveSolrServer() {
-        return solrServer != null ? solrServer : indexTracker.getService();
+        SolrServer result = solrServer != null ? solrServer : indexTracker.getService();
+        if (result == null) {
+            if (solrCoreId != null) {
+                throw new RuntimeException("No Solr Core registered with id: " + solrCoreId);
+            } else {
+                throw new RuntimeException("No Solr Core registered");
+            }
+        }
+        return result;
     }
 
     protected void configureSolrCore(Dictionary<String,Object> config,
@@ -146,6 +154,9 @@ public abstract class ConfiguredSolrCoreTracker {
                 }
                 ZipArchiveInputStream zis = new ZipArchiveInputStream(archiveUrl.openStream());
                 indexMetadata = managedSolrServer.updateIndex(indexName, zis, indexArchiveName);
+            }
+            if (!indexMetadata.isActive()) {
+                managedSolrServer.activateIndex(indexName);
             }
             indexReference = indexMetadata.getIndexReference();
         }

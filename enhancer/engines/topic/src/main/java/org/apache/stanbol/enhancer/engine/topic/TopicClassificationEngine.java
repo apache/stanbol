@@ -64,6 +64,8 @@ import org.apache.solr.common.params.MoreLikeThisParams;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
+import org.apache.stanbol.enhancer.servicesapi.Chain;
+import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -82,12 +84,16 @@ import org.apache.stanbol.enhancer.topic.TopicClassifier;
 import org.apache.stanbol.enhancer.topic.TopicSuggestion;
 import org.apache.stanbol.enhancer.topic.UTCTimeStamper;
 import org.apache.stanbol.enhancer.topic.training.Example;
+import org.apache.stanbol.enhancer.topic.training.SolrTrainingSet;
 import org.apache.stanbol.enhancer.topic.training.TrainingSet;
 import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,7 +116,7 @@ import org.slf4j.LoggerFactory;
 @Component(metatype = true, immediate = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties(value = {
-                     @Property(name = TopicClassificationEngine.ENGINE_ID),
+                     @Property(name = EnhancementEngine.PROPERTY_NAME),
                      @Property(name = TopicClassificationEngine.ORDER, intValue = 100),
                      @Property(name = TopicClassificationEngine.SOLR_CORE),
                      @Property(name = TopicClassificationEngine.LANGUAGES),
@@ -129,6 +135,7 @@ import org.slf4j.LoggerFactory;
                      @Property(name = TopicClassificationEngine.FALSE_POSITIVES_FIELD, value = "false_positives"),
                      @Property(name = TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, value = "positive_support"),
                      @Property(name = TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, value = "negative_support"),
+                     @Property(name = TopicClassificationEngine.TRAINING_SET_ID),
                      @Property(name = Constants.SERVICE_RANKING, intValue = 0)})
 public class TopicClassificationEngine extends ConfiguredSolrCoreTracker implements EnhancementEngine,
         ServiceProperties, TopicClassifier {
@@ -136,8 +143,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     public static final String MODEL_ENTRY = "model";
 
     public static final String METADATA_ENTRY = "metadata";
-
-    public static final String ENGINE_ID = EnhancementEngine.PROPERTY_NAME;
 
     public static final String SOLR_CORE = "org.apache.stanbol.enhancer.engine.topic.solrCore";
 
@@ -175,6 +180,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     public static final String NEGATIVE_SUPPORT_FIELD = "org.apache.stanbol.enhancer.engine.topic.negativeSupportField";
 
+    public static final String TRAINING_SET_ID = "org.apache.stanbol.enhancer.engine.topic.trainingSetId";
+
     private static final Logger log = LoggerFactory.getLogger(TopicClassificationEngine.class);
 
     /**
@@ -201,7 +208,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     public int MAX_SUGGESTIONS = 5; // never suggest more than this: this is expected to be a reasonable
                                     // estimate of the number of topics occuring in each documents
 
-    protected String engineId;
+    protected String engineName;
 
     protected List<String> acceptedLanguages;
 
@@ -223,7 +230,13 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     protected String recallField;
 
+    // without OSGi
     protected TrainingSet trainingSet;
+
+    // with OSGi
+    protected ServiceTracker trainingSetTracker;
+
+    protected String trainingSetId;
 
     // the ENTRY_*_FIELD are basically a hack to use a single Solr core to make documents with partially
     // updateable stored fields: the logical document is splitted into two parts joined by entryIdField. The
@@ -259,8 +272,17 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         @SuppressWarnings("unchecked")
         Dictionary<String,Object> config = context.getProperties();
         this.context = context;
-        this.indexArchiveName = "default-topic-model";
+        indexArchiveName = "default-topic-model";
         configure(config);
+
+        // if training set is not null, track it
+        if (trainingSetId != null) {
+            String filter = String.format("(&(%s=%s)(%s=%s))", Constants.OBJECTCLASS,
+                TrainingSet.class.getName(), SolrTrainingSet.TRAINING_SET_NAME, trainingSetId);
+            trainingSetTracker = new ServiceTracker(context.getBundleContext(), context.getBundleContext()
+                    .createFilter(filter), null);
+            trainingSetTracker.open();
+        }
     }
 
     @Deactivate
@@ -268,11 +290,14 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         if (indexTracker != null) {
             indexTracker.close();
         }
+        if (trainingSetTracker != null) {
+            trainingSetTracker.close();
+        }
         context = null;
     }
 
     public void configure(Dictionary<String,Object> config) throws ConfigurationException {
-        engineId = getRequiredStringParam(config, ENGINE_ID);
+        engineName = getRequiredStringParam(config, EnhancementEngine.PROPERTY_NAME);
         entryIdField = getRequiredStringParam(config, ENTRY_ID_FIELD);
         modelEntryIdField = getRequiredStringParam(config, MODEL_ENTRY_ID_FIELD);
         conceptUriField = getRequiredStringParam(config, CONCEPT_URI_FIELD);
@@ -287,11 +312,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         falseNegativesField = getRequiredStringParam(config, FALSE_NEGATIVES_FIELD);
         positiveSupportField = getRequiredStringParam(config, POSITIVE_SUPPORT_FIELD);
         negativeSupportField = getRequiredStringParam(config, NEGATIVE_SUPPORT_FIELD);
-        configureSolrCore(config, SOLR_CORE, engineId + "-model");
+        configureSolrCore(config, SOLR_CORE, engineName + "-model");
 
         // optional fields, can be null
         broaderField = (String) config.get(BROADER_FIELD);
         primaryTopicUriField = (String) config.get(PRIMARY_TOPIC_URI_FIELD);
+        trainingSetId = (String) config.get(TRAINING_SET_ID);
         Object orderParamValue = config.get(ORDER);
         if (orderParamValue != null) {
             order = (Integer) orderParamValue;
@@ -373,13 +399,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     // classifier API
 
     @Override
-    public String getSchemeId() {
-        return engineId;
-    }
-
-    @Override
     public String getName() {
-        return engineId;
+        return engineName;
     }
 
     @Override
@@ -438,7 +459,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             if ("unknown handler: /mlt".equals(e.getCause().getMessage())) {
                 String message = String.format("SolrServer with id '%s' for topic engine '%s' lacks"
                                                + " configuration for the MoreLikeThisHandler", solrCoreId,
-                    engineId);
+                    engineName);
                 throw new ClassifierException(message, e);
             } else {
                 throw new ClassifierException(e);
@@ -540,7 +561,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             QueryResponse response = solrServer.query(query);
             if (response.getResults().size() >= MAX_ROOTS) {
                 log.warn(String.format("TopicClassifier '%s' has more than %d registered topic roots."
-                                       + " Some roots might be ignored.", engineId, MAX_ROOTS));
+                                       + " Some roots might be ignored.", engineName, MAX_ROOTS));
             }
             for (SolrDocument result : response.getResults()) {
                 rootConcepts.add(result.getFirstValue(conceptUriField).toString());
@@ -644,8 +665,19 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     @Override
+    public TrainingSet getTrainingSet() {
+        if (trainingSet != null) {
+            return trainingSet;
+        }
+        if (trainingSetTracker != null) {
+            return (TrainingSet) trainingSetTracker.getService();
+        }
+        return null;
+    }
+
+    @Override
     public boolean isUpdatable() {
-        return trainingSet != null;
+        return getTrainingSet() != null;
     }
 
     @Override
@@ -720,7 +752,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     if (incr) {
                         Date lastModelUpdate = (Date) result.getFirstValue(modelUpdateDateField);
                         if (lastModelUpdate != null
-                            && !trainingSet.hasChangedSince(impactedTopics, lastModelUpdate)) {
+                            && !getTrainingSet().hasChangedSince(impactedTopics, lastModelUpdate)) {
                             continue;
                         }
                     }
@@ -767,7 +799,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         StringBuffer sb = new StringBuffer();
         int offset = 0;
         do {
-            examples = trainingSet.getPositiveExamples(impactedTopics, examples.nextOffset);
+            examples = getTrainingSet().getPositiveExamples(impactedTopics, examples.nextOffset);
             for (Example example : examples.items) {
                 if ((cvFoldCount != 0) && (offset % cvFoldCount == cvFoldIndex)) {
                     // we are performing a cross validation session and this example belong to the test
@@ -822,10 +854,10 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     protected void checkTrainingSet() throws TrainingSetException {
-        if (trainingSet == null) {
-            throw new TrainingSetException(
-                    String.format("TopicClassificationEngine %s has no registered"
-                                  + " training set hence cannot be updated.", engineId));
+        if (getTrainingSet() == null) {
+            throw new TrainingSetException(String.format("TopicClassificationEngine %s has no registered"
+                                                         + " training set hence cannot be updated.",
+                engineName));
         }
     }
 
@@ -841,7 +873,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     protected Dictionary<String,Object> getCanonicalConfiguration(EmbeddedSolrServer server) {
         Hashtable<String,Object> config = new Hashtable<String,Object>();
-        config.put(TopicClassificationEngine.ENGINE_ID, engineId + "-evaluation");
+        config.put(EnhancementEngine.PROPERTY_NAME, engineName + "-evaluation");
         config.put(TopicClassificationEngine.ENTRY_ID_FIELD, "entry_id");
         config.put(TopicClassificationEngine.ENTRY_TYPE_FIELD, "entry_type");
         config.put(TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, "model_entry_id");
@@ -904,7 +936,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
         cvIterations = cvIterations <= 0 ? cvFoldCount : cvFoldCount;
         log.info(String.format("Performing evaluation %d-fold CV iteration %d/%d on classifier %s",
-            cvFoldCount, cvFoldIndex + 1, cvIterations, engineId));
+            cvFoldCount, cvFoldIndex + 1, cvIterations, engineName));
         long start = System.currentTimeMillis();
         FileUtils.deleteQuietly(evaluationFolder);
         evaluationFolder.mkdir();
@@ -960,7 +992,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     offset = 0;
                     Batch<Example> examples = Batch.emtpyBatch(Example.class);
                     do {
-                        examples = trainingSet.getPositiveExamples(topics, examples.nextOffset);
+                        examples = getTrainingSet().getPositiveExamples(topics, examples.nextOffset);
                         for (Example example : examples.items) {
                             if (!(offset % foldCount == foldIndex)) {
                                 // this example is not part of the test fold, skip it
@@ -994,7 +1026,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     offset = 0;
                     examples = Batch.emtpyBatch(Example.class);
                     do {
-                        examples = trainingSet.getNegativeExamples(topics, examples.nextOffset);
+                        examples = getTrainingSet().getNegativeExamples(topics, examples.nextOffset);
                         for (Example example : examples.items) {
                             if (!(offset % foldCount == foldIndex)) {
                                 // this example is not part of the test fold, skip it
@@ -1042,7 +1074,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         float averageF1 = 0.0f;
         long stop = System.currentTimeMillis();
         log.info(String.format("Finished CV iteration %d/%d on classifier %s in %fs. F1-score = %f",
-            cvFoldIndex + 1, cvFoldCount, engineId, (stop - start) / 1000.0, averageF1));
+            cvFoldIndex + 1, cvFoldCount, engineName, (stop - start) / 1000.0, averageF1));
         return updatedTopics;
     }
 
@@ -1175,5 +1207,21 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             sum += (Integer) v;
         }
         return sum;
+    }
+
+    @Override
+    public List<String> getChainNames() throws InvalidSyntaxException, ChainException {
+        List<String> chainNames = new ArrayList<String>();
+        BundleContext bundleContext = context.getBundleContext();
+        ServiceReference[] references = bundleContext.getServiceReferences(Chain.class.getName(), null);
+        if (references != null) {
+            for (ServiceReference ref : references) {
+                Chain chain = (Chain) bundleContext.getService(ref);
+                if (chain.getEngines().contains(getName())) {
+                    chainNames.add(chain.getName());
+                }
+            }
+        }
+        return chainNames;
     }
 }

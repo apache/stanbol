@@ -268,7 +268,7 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
     protected Hashtable<String,Object> getDefaultConfigParams() {
         Hashtable<String,Object> config = new Hashtable<String,Object>();
         config.put(SolrTrainingSet.SOLR_CORE, trainingsetSolrServer);
-        config.put(SolrTrainingSet.TRAINING_SET_ID, "test-training-set");
+        config.put(SolrTrainingSet.TRAINING_SET_NAME, "test-training-set");
         config.put(SolrTrainingSet.EXAMPLE_ID_FIELD, "id");
         config.put(SolrTrainingSet.EXAMPLE_TEXT_FIELD, "text");
         config.put(SolrTrainingSet.TOPICS_URI_FIELD, "topics");
