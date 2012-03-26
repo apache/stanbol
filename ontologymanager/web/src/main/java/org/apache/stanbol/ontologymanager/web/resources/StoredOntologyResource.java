@@ -119,18 +119,44 @@ public class StoredOntologyResource extends BaseStanbolResource {
         /*
          * Export directly to MGraph since the OWLOntologyWriter uses (de-)serializing converters for the
          * other formats.
+         * 
+         * Use oTemp for the "real" graph and o for the graph that will be exported. This is due to the fact
+         * that in o we want to change import statements, but we do not want these changes to be stored
+         * permanently.
          */
-        MGraph o = null;
+        MGraph o = null, oTemp = null;
         try {
-            o = new IndexedMGraph((MGraph) ontologyProvider.getStoredOntology(iri, MGraph.class, merged));
+            oTemp = ontologyProvider.getStoredOntology(iri, MGraph.class, merged);
         } catch (Exception ex) {
             log.warn("Retrieval of ontology with ID " + iri + " failed.", ex);
         }
 
+        if (oTemp == null) {
+            log.debug("Ontology {} missing from provider. Trying libraries...", iri);
+            // See if we can touch a library. TODO: replace with event model on the ontology provider.
+            int minSize = -1;
+            IRI smallest = null;
+            for (Library lib : registryManager.getLibraries(iri)) {
+                int size = lib.getChildren().length;
+                if (minSize < 1 || size < minSize) {
+                    smallest = lib.getIRI();
+                    minSize = size;
+                }
+            }
+            if (smallest != null) {
+                log.debug("Selected library for ontology {} is {} .", iri, smallest);
+                try {
+                    oTemp = registryManager.getLibrary(smallest).getOntology(iri, MGraph.class);
+                } catch (RegistryContentException e) {
+                    log.warn("The content of library " + smallest + " could not be accessed.", e);
+                }
+            }
+        }
+
+        if (oTemp != null) o = new IndexedMGraph(oTemp);
+
         if (o == null) {
-            log.debug(
-                "Ontology {} not found in any ontology provider (and Clerezza triple collections are not yet supported by the registry manager).",
-                iri);
+            log.debug("Ontology {} not found in any ontology provider or library.", iri);
             return Response.status(NOT_FOUND).build();
         }
 
@@ -209,7 +235,7 @@ public class StoredOntologyResource extends BaseStanbolResource {
             if (smallest != null) {
                 log.debug("Selected library for ontology {} is {} .", iri, smallest);
                 try {
-                    o = registryManager.getLibrary(smallest).getOntology(iri);
+                    o = registryManager.getLibrary(smallest).getOntology(iri, OWLOntology.class);
                 } catch (RegistryContentException e) {
                     log.warn("The content of library " + smallest + " could not be accessed.", e);
                 }

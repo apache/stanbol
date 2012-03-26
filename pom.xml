@@ -75,10 +75,7 @@
     <module>entityhub</module>
     <module>factstore</module>
 	
-	  <module>ontologymanager/ontonet</module>
-    <module>ontologymanager/registry</module>
-    <module>ontologymanager/web</module>
-    <module>ontologymanager/bundlelist</module>
+	<module>ontologymanager</module>
     <module>rules</module>
     <module>reasoners</module>
   </modules>

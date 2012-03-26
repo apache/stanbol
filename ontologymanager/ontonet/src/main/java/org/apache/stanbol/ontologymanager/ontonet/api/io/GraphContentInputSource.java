@@ -27,6 +27,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.slf4j.Logger;
@@ -40,8 +41,6 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
-
-    private UriRef id = null;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -120,11 +119,10 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
         if (tcProvider != null) {
             UriRef name = new UriRef(getClass().getCanonicalName() + "-" + System.currentTimeMillis());
             graph = tcProvider.createMGraph(name);
-        }
+        } else graph = new IndexedMGraph();
         for (String format : formats) {
             try {
-                if (graph != null && graph instanceof MGraph) parser.parse((MGraph) graph, content, format);
-                else graph = parser.parse(content, format);
+                parser.parse((MGraph) graph, content, format);
                 loaded = true;
                 break;
             } catch (UnsupportedFormatException e) {
@@ -137,7 +135,6 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
         }
         if (loaded) {
             bindRootOntology(graph);
-            id = OWLUtils.guessOntologyIdentifier(getRootOntology());
             log.debug("Root ontology is a {}.", getRootOntology().getClass().getCanonicalName());
         }
         log.debug("Input source initialization completed in {} ms.", (System.currentTimeMillis() - before));
@@ -158,7 +155,7 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
 
     @Override
     public String toString() {
-        return "<GRAPH_CONTENT>" + id;
+        return "<GRAPH_CONTENT>" + OWLUtils.guessOntologyIdentifier(getRootOntology());
     }
 
 }

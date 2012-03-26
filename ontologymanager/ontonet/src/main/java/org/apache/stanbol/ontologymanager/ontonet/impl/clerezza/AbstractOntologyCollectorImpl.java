@@ -58,9 +58,11 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologySetProvider;
 import org.semanticweb.owlapi.model.RemoveImport;
+import org.semanticweb.owlapi.model.SetOntologyID;
 import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +80,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     public Set<IRI> listManagedOntologies() {
         return managedOntologies;
     }
-    
+
     protected String _id = null;
 
     /**
@@ -150,11 +152,14 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
             uri = OWLUtils.guessOntologyIdentifier((TripleCollection) o);
         } else if (o instanceof OWLOntology) {
             uri = new UriRef(OWLUtils.guessOntologyIdentifier((OWLOntology) o).toString());
-        } else throw new UnsupportedOperationException("This ontology space implementation cannot handle "
-                                                       + o.getClass() + " objects.");
+        } else throw new UnsupportedOperationException(
+                "This ontology collector implementation cannot handle " + o.getClass().getCanonicalName()
+                        + " objects.");
 
         // Now for the actual storage. We pass the ontology object directly.
         String key = null;
+        if (ontologyProvider.hasOntology(IRI.create(uri.getUnicodeString()))) if (o instanceof MGraph) claimOwnership((MGraph) o);
+        else if (o instanceof OWLOntology) claimOwnership((OWLOntology) o);
         key = ontologyProvider.loadInStore(o, uri.getUnicodeString(), false);
         /*
          * Actually we are not interested in knowing the key here (ontology collectors are not concerned with
@@ -169,6 +174,49 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
             fireOntologyAdded(uri);
         }
         return key;
+    }
+
+    protected void claimOwnership(OWLOntology ontology) {
+        log.info("Checking ownership of {} {}", OWLOntology.class.getSimpleName(), ontology.getOntologyID());
+        OWLOntologyID id = ontology.getOntologyID();
+        if (id.getOntologyIRI() != null) {
+            IRI ontologyIRI = id.getOntologyIRI();
+            IRI versionIri = id.getVersionIRI();
+            if (versionIri == null) {
+                log.info("    No OWL version IRI Found . Will set to own ID. ");
+                versionIri = IRI.create(getNamespace() + getID());
+                OWLOntologyID newId = new OWLOntologyID(ontologyIRI, versionIri);
+                OWLOntologyChange change = new SetOntologyID(ontology, newId);
+                ontology.getOWLOntologyManager().applyChange(change);
+                log.info("    Set OWL version IRI : {} . ", versionIri);
+            } else log.info("    Found OWL version IRI {} . Will not claim ownership. ", versionIri);
+        }
+
+    }
+
+    protected void claimOwnership(MGraph ontology) {
+        UriRef owl_viri = new UriRef("http://www.w3.org/2002/07/owl#versionIRI");
+        UriRef ontologyId = null;
+        UriRef versionIri = new UriRef(getNamespace() + getID());
+        Iterator<Triple> it = ontology.filter(null, RDF.type, OWL.Ontology);
+        if (it.hasNext()) {
+            NonLiteral r = it.next().getSubject();
+            if (r instanceof UriRef) ontologyId = (UriRef) r;
+        }
+        log.info("Checking ownership of {} {}", MGraph.class.getSimpleName(), ontologyId != null ? ontologyId
+                : "(anonymous)");
+        if (ontologyId != null) {
+            it = ontology.filter(ontologyId, owl_viri, OWL.Ontology);
+            if (it.hasNext()) {
+                versionIri = (UriRef) it.next().getObject();
+                log.info("    Found OWL version IRI {} . Will not claim ownership. ", versionIri);
+            } else {
+                log.info("    No OWL version IRI Found . Will set to own ID. ");
+                Triple t = new TripleImpl(ontologyId, owl_viri, versionIri);
+                ontology.add(t);
+                log.info("    Set OWL version IRI : {} . ", versionIri);
+            }
+        }
     }
 
     @Override
@@ -496,6 +544,8 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
             for (Triple t : replaceUs) {
                 String s = ((UriRef) (t.getObject())).getUnicodeString();
+                // FIXME note the different import targets in the OWLOntology and TripleColllection objects!
+                // s = s.substring(s.indexOf("::") + 2, s.length());
                 boolean managed = managedOntologies.contains(IRI.create(s));
                 UriRef target = new UriRef((managed ? ns + "/" + tid + "/" : URIUtils.upOne(ns) + "/") + s);
                 o.remove(t);
@@ -555,7 +605,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
             for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
                 changes.add(new RemoveImport(o, oldImp));
                 String s = oldImp.getIRI().toString();
-                // s = s.substring(s.indexOf("::") + 2, s.length());
+                s = s.substring(s.indexOf("::") + 2, s.length());
                 boolean managed = managedOntologies.contains(oldImp.getIRI());
                 // For space, always go up at least one
                 IRI ns = getNamespace();
@@ -573,15 +623,15 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
+    public int getOntologyCount() {
+        return getOntologyCount(false);
+    }
+
+    @Override
     public int getOntologyCount(boolean withClosure) {
         if (withClosure) throw new UnsupportedOperationException(
                 "Closure support not implemented efficiently yet. Please call getOntologyCount(false).");
         return managedOntologies.size();
-    }
-    
-    @Override
-    public int getOntologyCount() {
-        return getOntologyCount(false);
     }
 
     @Override
@@ -636,7 +686,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         if (namespace.toString().endsWith("#")) throw new IllegalArgumentException(
                 "OntoNet namespaces must not end with a hash ('#') character.");
         if (!namespace.toString().endsWith("/")) {
-            log.warn("Namespace {} does not end with slash character ('/'). It will be added automatically.",
+            log.warn("Namespace {} does not end with a slash ('/') character. It be added automatically.",
                 namespace);
             namespace = IRI.create(namespace + "/");
         }

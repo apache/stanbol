@@ -77,6 +77,15 @@ public class OWLUtils {
         return IRI.create(iri);
     }
 
+    /**
+     * Returns an UriRef wrapper for the first instance of owl:Ontology it detects, and ignores further
+     * instances (which is nonstandard in OWL).
+     * 
+     * If the ontology is anonymous, a timestamped UriRef is created
+     * 
+     * @param g
+     * @return
+     */
     public static UriRef guessOntologyIdentifier(TripleCollection g) {
         Iterator<Triple> it = g.filter(null, RDF.type, OWL.Ontology);
         if (it.hasNext()) {
@@ -85,7 +94,9 @@ public class OWLUtils {
                 "RDF Graph {} has multiple OWL ontology definitions! Ignoring all but {}", g, subj);
             if (subj instanceof UriRef) return (UriRef) subj;
         }
-        return new UriRef(NS_STANBOL + System.currentTimeMillis());
+        String s = NS_STANBOL + System.currentTimeMillis();
+        log.debug("Ontology is anonymous. Returning generated ID <{}> .", s);
+        return new UriRef(s);
     }
 
     public static OWLOntologyID guessOWLOntologyID(TripleCollection g) {

@@ -153,7 +153,7 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
         log.debug("Got library {}, expected {}", lib, libraryID);
         // If the manager is set to
         if (lib != null) {
-            Set<OWLOntology> subtrees = lib.getOntologies();
+            Set<OWLOntology> subtrees = lib.getOntologies(OWLOntology.class);
             this.ontologies = subtrees;
 
             for (OWLOntology o : subtrees)

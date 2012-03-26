@@ -45,7 +45,9 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
     void addListener(OntologyCollectorListener listener);
 
     /**
-     * Adds the given ontology to the ontology space.
+     * Adds the given ontology to the ontology space. If the supplied ontology is not already present in
+     * storage and does not have an OWL version IRI of its own, this ontology collector will 'claim ownership'
+     * of the ontology by setting its own logical ID as the version IRI of the new ontology.
      * 
      * @param ontology
      *            the ontology to be added
@@ -71,6 +73,16 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
     /**
      * Returns the ontologies managed by this ontology space.
      * 
+     * @param withClosure
+     *            if true, also the ontologies imported by those directly managed by this space will be
+     *            included.
+     * @return the set of ontologies in the ontology space
+     */
+    <O> Set<O> getManagedOntologies(Class<O> returnType, boolean withClosure);
+
+    /**
+     * Returns the ontologies managed by this ontology space.
+     * 
      * @deprecated to obtain the set as {@link OWLOntology} objects, please use
      *             <code>#getManagedOntologies(OWLOntology.class, boolean)</code>.
      * 
@@ -82,14 +94,15 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
     Set<OWLOntology> getOntologies(boolean withClosure);
 
     /**
-     * Returns the ontologies managed by this ontology space.
+     * Equivalent to calling <code>getOntology(IRI, false)</code>;
      * 
-     * @param withClosure
-     *            if true, also the ontologies imported by those directly managed by this space will be
-     *            included.
-     * @return the set of ontologies in the ontology space
+     * @deprecated to obtain the {@link OWLOntology} object, cast the result of <code>#getOntology(IRI,
+     *             OWLOntology.class)</code> to OWLOntology.
+     * 
+     * @param ontologyIri
+     * @return
      */
-    <O> Set<O> getManagedOntologies(Class<O> returnType, boolean withClosure);
+    OWLOntology getOntology(IRI ontologyIri);
 
     /**
      * Returns the ontology identified by the supplied <i>logical</i> IRI, if such an ontology has been loaded
@@ -108,16 +121,7 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      */
     OWLOntology getOntology(IRI ontologyIri, boolean merge);
 
-    /**
-     * Equivalent to calling <code>getOntology(IRI, false)</code>;
-     * 
-     * @deprecated to obtain the {@link OWLOntology} object, cast the result of <code>#getOntology(IRI,
-     *             OWLOntology.class)</code> to OWLOntology.
-     * 
-     * @param ontologyIri
-     * @return
-     */
-    OWLOntology getOntology(IRI ontologyIri);
+    <O> O getOntology(IRI ontologyIri, Class<O> returnType);
 
     /**
      * TODO replace merge parameter with integer for merge level (-1 for infinite).
@@ -129,17 +133,17 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      */
     <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge);
 
-    <O> O getOntology(IRI ontologyIri, Class<O> returnType);
+    int getOntologyCount();
 
     /**
      * A shortcut method to avoid computing the ontologies themselves before counting them.
+     * 
+     * TODO deprecate once support for closure is added to {@link #listManagedOntologies()}.
      * 
      * @param withClosure
      * @return
      */
     int getOntologyCount(boolean withClosure);
-
-    int getOntologyCount();
 
     /**
      * Determines if the ontology identified by the supplied <i>logical</i> IRI has been loaded in this space.<br>
@@ -153,6 +157,13 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * @return true if an ontology with this ID has been loaded in this space.
      */
     boolean hasOntology(IRI ontologyIri);
+
+    /**
+     * TODO replace with Ontology IDs
+     * 
+     * @return
+     */
+    Set<IRI> listManagedOntologies();
 
     /**
      * Unregisters the supplied for changes in this ontology space. Has no effect if the same listener was not
@@ -186,11 +197,4 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * removing the writelock).
      */
     void tearDown();
-
-    /**
-     * TODO replace with Ontology IDs
-     * 
-     * @return
-     */
-    Set<IRI> listManagedOntologies();
 }

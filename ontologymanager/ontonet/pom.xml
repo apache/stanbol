@@ -56,22 +56,14 @@
 						</Bundle-Activator>
 						<Export-Package>
 							org.apache.stanbol.ontologymanager.ontonet.*
-	          			</Export-Package>
+						</Export-Package>
 						<Import-Package>
-							com.hp.hpl.jena.ontology,
-							com.hp.hpl.jena.util,
-							com.hp.hpl.jena.rdf.model,
-							javax.xml.namespace,
-							javax.xml.parsers,
-							javax.xml.xpath,
 							org.apache.clerezza.rdf.core.*,
-							org.w3c.dom,
-							org.xml.sax,
 							org.osgi.*,
 							org.semanticweb.owlapi.*,
 							org.slf4j.*,
 							*
-            			</Import-Package>
+						</Import-Package>
 						<_nouses>true</_nouses>
 					</instructions>
 				</configuration>
@@ -84,6 +76,7 @@
 	</build>
 
 	<dependencies>
+
 		<!-- OSGi deps -->
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -98,14 +91,8 @@
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
 		</dependency>
 
-		<!-- OWL deps -->
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>jena</artifactId>
-		</dependency>
-
 		<!-- Stanbol deps -->
-		<dependency>
+		<dependency> <!-- Used instead of simple graphs for in-memory operations -->
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
 		</dependency>

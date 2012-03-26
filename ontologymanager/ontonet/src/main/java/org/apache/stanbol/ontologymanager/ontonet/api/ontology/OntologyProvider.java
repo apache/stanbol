@@ -24,6 +24,7 @@ import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.ImportManagementPolicy;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
@@ -169,7 +170,35 @@ public interface OntologyProvider<S> {
      * 
      * @return the supported ontology return types.
      */
-    <O> Class<O>[] getSupportedReturnTypes();
+    Class<?>[] getSupportedReturnTypes();
+
+    boolean hasOntology(IRI ontologyIri);
+
+    /**
+     * Checks if an ontology with the specified OWL ontology ID is in the ontology provider's store.<br>
+     * <br>
+     * Implementations are typically faster than calling {@link #getStoredOntology(IRI, Class)} and checking
+     * if the returned value is not null.
+     * 
+     * @param id
+     *            the ontology id. If there is both an ontology IRI and a version IRI, both must match the
+     *            ontology provider's records in order to return true. Otherwise, it will return true iff
+     *            <i>any</i> match with the ontology IIR is found, no matter its version IRI.
+     * @return true iff an ontology with the supplied id is in the provider's store.
+     */
+    boolean hasOntology(OWLOntologyID id);
+
+    /**
+     * Checks if an ontology with the specified storage reference is in the ontology provider's store.<br>
+     * <br>
+     * Implementations are typically faster than calling {@link #getStoredOntology(String, Class)} and
+     * checking if the returned value is not null.
+     * 
+     * @param key
+     *            the ontology storage key.
+     * @return true iff an ontology with the supplied key is in the provider's store.
+     */
+    boolean hasOntology(String key);
 
     /**
      * Retrieves an ontology by reading its content from a data stream and stores it using the storage system

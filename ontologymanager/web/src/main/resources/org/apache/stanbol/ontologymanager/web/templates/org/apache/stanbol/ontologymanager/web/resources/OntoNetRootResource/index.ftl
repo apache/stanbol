@@ -23,6 +23,7 @@
 	<ul>
 	  <li><a href="${it.publicBaseUri}ontonet/ontology" title="Apache Stanbol OntoNet Scope Manager">Scope Manager</a></li>
 	  <li><a href="${it.publicBaseUri}ontonet/session" title="Apache Stanbol OntoNet Session Manager">Session Manager</a></li>
+	  <li><a href="${it.publicBaseUri}ontonet/registry" title="Apache Stanbol OntoNet Ontology Libraries">Ontology Libraries</a></li>
 	</ul>
 	
     <div class="panel" id="webview"> 

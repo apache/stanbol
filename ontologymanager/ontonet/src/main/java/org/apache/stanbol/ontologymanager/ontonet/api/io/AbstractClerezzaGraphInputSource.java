@@ -43,12 +43,9 @@ import org.apache.stanbol.commons.owl.util.OWLUtils;
 public abstract class AbstractClerezzaGraphInputSource extends
         AbstractGenericInputSource<TripleCollection,TcProvider> {
 
-    protected UriRef ontologyId = null;
-
     @Override
     protected void bindRootOntology(TripleCollection ontology) {
         super.bindRootOntology(ontology);
-        this.ontologyId = OWLUtils.guessOntologyIdentifier(ontology);
     }
 
     @Override
@@ -58,7 +55,8 @@ public abstract class AbstractClerezzaGraphInputSource extends
 
     protected Set<TripleCollection> getImportedGraphs(TripleCollection g, boolean recursive) {
         Set<TripleCollection> result = new HashSet<TripleCollection>();
-        Iterator<Triple> it = g.filter(OWLUtils.guessOntologyIdentifier((Graph) g), OWL.imports, null);
+        UriRef u = OWLUtils.guessOntologyIdentifier(g);
+        Iterator<Triple> it = g.filter(u, OWL.imports, null);
         while (it.hasNext()) {
             Resource r = it.next().getObject();
             if (r instanceof UriRef) {

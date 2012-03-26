@@ -35,7 +35,6 @@ import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +98,7 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
     }
 
     @Override
-    public Set<OWLOntology> getOntologies() throws RegistryContentException {
+    public <O> Set<O> getOntologies(Class<O> returnType) throws RegistryContentException {
         /*
          * Note that this implementation is not synchronized. Listeners may indefinitely be notified before or
          * after the rest of this method is executed. If listeners call loadOntologies(), they could still get
@@ -109,13 +108,10 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
         fireContentRequested(this);
         // If no listener has saved the day by loading the ontologies by now, an exception will be thrown.
         if (!loaded) throw new LibraryContentNotLoadedException(this);
-        Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
+        Set<O> ontologies = new HashSet<O>();
         for (RegistryItem child : getChildren()) {
             if (child instanceof RegistryOntology) {
-                OWLOntology o = (OWLOntology) getCache().getStoredOntology(
-                    ((RegistryOntology) child).getIRI(), OWLOntology.class);
-
-                // OWLOntology o = ((RegistryOntology) child).getRawOntology(this.getIRI());
+                O o = getCache().getStoredOntology(((RegistryOntology) child).getIRI(), returnType);
                 // Should never be null if the library was loaded correctly (an error should have already been
                 // thrown when loading it), but just in case.
                 if (o != null) ontologies.add(o);
@@ -126,7 +122,7 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
     }
 
     @Override
-    public OWLOntology getOntology(IRI id) throws RegistryContentException {
+    public <O> O getOntology(IRI id, Class<O> returnType) throws RegistryContentException {
         /*
          * Note that this implementation is not synchronized. Listeners may indefinitely be notified before or
          * after the rest of this method is executed. If listeners call loadOntologies(), they could still get
@@ -137,12 +133,11 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
         // If no listener has saved the day by loading the ontologies by now, an exception will be thrown.
         if (!loaded) throw new LibraryContentNotLoadedException(this);
 
-        OWLOntology ontology = null;
+        O ontology = null;
 
         RegistryItem child = getChild(id);
         if (child instanceof RegistryOntology) {
-            ontology = (OWLOntology) getCache().getStoredOntology(((RegistryOntology) child).getIRI(),
-                OWLOntology.class);
+            ontology = getCache().getStoredOntology(((RegistryOntology) child).getIRI(), returnType);
         }
         return ontology;
     }
