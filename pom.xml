@@ -74,8 +74,7 @@
     <module>contenthub</module>
     <module>entityhub</module>
     <module>factstore</module>
-	
-	<module>ontologymanager</module>
+    <module>ontologymanager</module>
     <module>rules</module>
     <module>reasoners</module>
   </modules>
@@ -98,6 +97,7 @@
         <module>demos/webvie</module>
 
         <module>enhancer/engines</module>
+        <module>enhancer/topic-web</module>
 
         <module>launchers/bundlelists/osgiframework</module>
         <module>launchers/bundlelists/stanbolcommons</module>
@@ -140,7 +140,7 @@
         <plugins>
           <plugin>
             <groupId>org.apache.rat</groupId>
-            <artifactId>apache-rat-plugin</artifactId>          
+            <artifactId>apache-rat-plugin</artifactId>
             <configuration>
               <excludeSubProjects>false</excludeSubProjects>
               <excludes>
@@ -211,9 +211,9 @@
               <execution>
                 <goals>
                   <goal>aggregate-add-third-party</goal>
-                </goals>               
+                </goals>
               </execution>
-            </executions>        
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -234,7 +234,7 @@
                   <goal>aggregate-add-third-party</goal>
                 </goals>
               </execution>
-            </executions>        
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -242,10 +242,10 @@
       <modules>
         <module>releasing/framework/stanbol-framework-source-release-assembly-descriptor</module>
         <module>releasing/stack/stanbol-stack-source-release-assembly-descriptor</module>
-      </modules>      
-    </profile>    
-    
-    <!-- One day the KReS profile will disappear -->    
+      </modules>
+    </profile>
+
+    <!-- One day the KReS profile will disappear -->
     <profile>
       <id>kres</id>
       <activation>
