@@ -20,9 +20,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.topic.training.TrainingSet;
 import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
+import org.osgi.framework.InvalidSyntaxException;
 
 /**
  * Service interface for suggesting hierarchical concepts from a specific scheme (a.k.a. taxonomy, thesaurus
@@ -31,10 +33,10 @@ import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
 public interface TopicClassifier {
 
     /**
-     * @return the short id identifying this classifier / scheme: can be used as URL path component to publish
-     *         the service.
+     * The short name of the training set. Can be used as the URI component to identify the training set in
+     * the Web management interface or in RDF descriptions of the service.
      */
-    public String getSchemeId();
+    String getName();
 
     /**
      * @return list of language codes for text that can be automatically classified by the service.
@@ -112,6 +114,12 @@ public interface TopicClassifier {
     void removeConcept(String conceptUri) throws ClassifierException;
 
     /**
+     * @return the training set registered for this classifier (either set explicitly using setTrainingSet or
+     *         configured through OSGi properties).
+     */
+    public TrainingSet getTrainingSet();
+
+    /**
      * Register a training set to use to build the statistical model of the classifier.
      */
     void setTrainingSet(TrainingSet trainingSet);
@@ -152,5 +160,11 @@ public interface TopicClassifier {
      * Get a classification report with various accuracy metrics (precision, recall and f1-score) along with
      * the example ids of some mistakes (false positives or false negatives).
      */
-    ClassificationReport getPerformanceEstimates(String topic) throws ClassifierException;
+    ClassificationReport getPerformanceEstimates(String concept) throws ClassifierException;
+
+    /**
+     * Return the list of names of chains where the classifier is currently registered as an enhancement
+     * engine.
+     */
+    List<String> getChainNames() throws InvalidSyntaxException, ChainException;
 }

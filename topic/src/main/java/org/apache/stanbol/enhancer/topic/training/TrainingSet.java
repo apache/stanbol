@@ -28,6 +28,12 @@ import org.apache.stanbol.enhancer.topic.Batch;
 public interface TrainingSet {
 
     /**
+     * The short name of the training set. Can be used as the URI component to identify the training set in
+     * the Web management interface or in RDF descriptions of the service.
+     */
+    String getName();
+
+    /**
      * @return true if the training set can be updated using the {@code registerExample} API. If false that
      *         means that the component is a view on a remote datasource that has its own API for updates
      *         (e.g. the document repository of a CMS).

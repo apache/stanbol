@@ -43,6 +43,7 @@ import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.topic.ClassificationReport;
 import org.apache.stanbol.enhancer.topic.ClassifierException;
 import org.apache.stanbol.enhancer.topic.EmbeddedSolrHelper;
@@ -121,7 +122,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         Hashtable<String,Object> config = getDefaultClassifierConfigParams();
         TopicClassificationEngine classifier = TopicClassificationEngine.fromParameters(config);
         assertNotNull(classifier);
-        assertEquals(classifier.engineId, "test-engine");
+        assertEquals(classifier.engineName, "test-engine");
         assertEquals(classifier.getActiveSolrServer(), classifierSolrServer);
         assertEquals(classifier.conceptUriField, "concept");
         assertEquals(classifier.similarityField, "classifier_features");
@@ -136,11 +137,11 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
             fail("Should have raised a ConfigurationException");
         } catch (ConfigurationException e) {}
 
-        Hashtable<String,Object> configWithMissingEngineId = new Hashtable<String,Object>();
-        configWithMissingEngineId.putAll(config);
-        configWithMissingEngineId.remove(TopicClassificationEngine.ENGINE_ID);
+        Hashtable<String,Object> configWithMissingEngineName = new Hashtable<String,Object>();
+        configWithMissingEngineName.putAll(config);
+        configWithMissingEngineName.remove(EnhancementEngine.PROPERTY_NAME);
         try {
-            TopicClassificationEngine.fromParameters(configWithMissingEngineId);
+            TopicClassificationEngine.fromParameters(configWithMissingEngineName);
             fail("Should have raised a ConfigurationException");
         } catch (ConfigurationException e) {}
 
@@ -524,7 +525,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
 
     protected Hashtable<String,Object> getDefaultClassifierConfigParams() {
         Hashtable<String,Object> config = new Hashtable<String,Object>();
-        config.put(TopicClassificationEngine.ENGINE_ID, "test-engine");
+        config.put(EnhancementEngine.PROPERTY_NAME, "test-engine");
         config.put(TopicClassificationEngine.ENTRY_ID_FIELD, "entry_id");
         config.put(TopicClassificationEngine.ENTRY_TYPE_FIELD, "entry_type");
         config.put(TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, "model_entry_id");
@@ -547,7 +548,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
     protected Hashtable<String,Object> getDefaultTrainingSetConfigParams() {
         Hashtable<String,Object> config = new Hashtable<String,Object>();
         config.put(SolrTrainingSet.SOLR_CORE, trainingSetSolrServer);
-        config.put(SolrTrainingSet.TRAINING_SET_ID, "test-training-set");
+        config.put(SolrTrainingSet.TRAINING_SET_NAME, "test-training-set");
         config.put(SolrTrainingSet.EXAMPLE_ID_FIELD, "id");
         config.put(SolrTrainingSet.EXAMPLE_TEXT_FIELD, "text");
         config.put(SolrTrainingSet.TOPICS_URI_FIELD, "topics");
