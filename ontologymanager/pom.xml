@@ -36,7 +36,6 @@
     <module>ontonet</module>
     <module>registry</module>
     <module>web</module>
-    <module>store</module>
     <module>bundlelist</module>
   </modules>
 
