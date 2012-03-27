@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.topic.training.TrainingSet;
@@ -167,4 +169,11 @@ public interface TopicClassifier {
      * engine.
      */
     List<String> getChainNames() throws InvalidSyntaxException, ChainException;
+
+    /**
+     * Initialize the concept hierarch of the model using the provided RDF model (e.g. a SKOS taxonomy).
+     * 
+     * @return the number of concepts successfully imported (including roots).
+     */
+    int importConceptsFromGraph(Graph graph, UriRef conceptClass, UriRef broaderProperty) throws ClassifierException;
 }
