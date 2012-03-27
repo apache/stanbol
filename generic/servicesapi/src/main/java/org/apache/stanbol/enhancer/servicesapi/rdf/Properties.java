@@ -101,6 +101,10 @@ public class Properties {
 
     public static final UriRef GEO_LONG = new UriRef(NamespaceEnum.geo + "long");
 
+    public static final UriRef SKOS_BROADER = new UriRef(NamespaceEnum.skos + "broader");
+    
+    public static final UriRef SKOS_NARROWER = new UriRef(NamespaceEnum.skos + "narrower");
+    
     /**
      * Refers to the content item the enhancement was extracted form
      */
