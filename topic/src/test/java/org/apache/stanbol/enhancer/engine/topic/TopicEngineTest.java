@@ -169,8 +169,13 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         int imported = classifier.importConceptsFromGraph(graph, OntologicalClasses.SKOS_CONCEPT,
             Properties.SKOS_BROADER);
         assertEquals(imported, 4);
+        assertEquals(0, classifier.getBroaderConcepts("http://example.com/ns#someconceptscheme/100").size());
+        assertEquals(0, classifier.getBroaderConcepts("http://example.com/ns#someconceptscheme/200").size());
+        assertEquals(1, classifier.getBroaderConcepts("http://example.com/ns#someconceptscheme/010").size());
+        assertEquals(1, classifier.getBroaderConcepts("http://example.com/ns#someconceptscheme/020").size());
+        assertEquals(2, classifier.getRootConcepts().size());
     }
-    
+
     @Test
     public void testProgrammaticThesaurusConstruction() throws Exception {
         // Register the roots of the taxonomy
