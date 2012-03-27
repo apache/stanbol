@@ -25,6 +25,10 @@
   <owl:Ontology rdf:about="">
     <rdfs:comment xml:lang="en">Ontology definig base concepts of the Stanbol Enhancer</rdfs:comment>
   </owl:Ontology>
+  <owl:Class rdf:ID="ContentItem">
+    <rdfs:label xml:lang="en">Content Item</rdfs:label>
+    <rdfs:comment xml:lang="en">The Content Item represents the content parsed to the Stanbol Enhancer.</rdfs:comment>
+  </owl:Class>
   <owl:Class rdf:ID="EnhancementChain">
     <rdfs:label xml:lang="en">Enhancement Chain</rdfs:label>
     <rdfs:comment xml:lang="en">A EnhancementChain is a specific configuration on how parsed Content is enhanced by the Stanbol Enhancer</rdfs:comment>
