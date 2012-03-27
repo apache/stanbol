@@ -1232,6 +1232,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         return chainNames;
     }
 
+    @Override
     public int importConceptsFromGraph(Graph graph, UriRef conceptClass, UriRef broaderProperty) throws ClassifierException {
         int importedCount = 0;
         Iterator<Triple> conceptIterator = graph.filter(null,
