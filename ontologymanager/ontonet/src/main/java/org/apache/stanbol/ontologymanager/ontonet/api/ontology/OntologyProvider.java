@@ -257,8 +257,7 @@ public interface OntologyProvider<S> {
      * @throws UnsupportedFormatException
      *             if no parsers are able to parse the supplied format (or the actual file format).
      */
-    String loadInStore(IRI location, String formatIdentifier, String preferredKey, boolean force) throws IOException,
-                                                                                                 UnsupportedFormatException;
+    String loadInStore(IRI location, String formatIdentifier, String preferredKey, boolean force) throws IOException;
 
     /**
      * Stores an ontology that has already been loaded into an object. If the object is of a non-native yet

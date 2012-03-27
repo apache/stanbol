@@ -21,8 +21,35 @@
   <@common.page title="Apache Stanbol OntoNet session manager" hasrestapi=false>
 		
     <div class="panel" id="webview">
-      <p>This is the start page of the ontology session manager.</p>
-    </div>
+      <#assign sessions = it.sessions>
+      <p>This is the start page of the Session Manager.</p>
+      
+      <div class="storeContents">
+      	<table id="allSessions">
+		  <div>
+		    <tr>
+		  	  <th></th>
+		      <th>Name</th>
+              <th>Status</th>
+		      <th>Comment <#--TODO: fix image path  <img src="${it.staticRootUrl}/contenthub/images/rdf.png" alt="Format: RDF"/> --></th>
+			  <th>&#35;Ontologies</th>
+		    </tr>
+		    <#list sessions as session>
+		      <tr>
+			    <td>
+                  <img src="${it.staticRootUrl}/contenthub/images/edit_icon_16.png" title="(not available yet) Edit this item" />
+                  <img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="(not available yet) Delete this item" />
+                </td>
+                <td><a href="${session.namespace}${session.ID}" title="${session.ID}">${session.ID}</a></td>
+                <td>${session.locked?string("locked", "modifiable")}</td>
+                <td></td>
+                <td>${session.ontologyCount}</td>
+		      </tr>
+		    </#list>
+		  </div>
+	    </table> <!-- allSessions -->
+      </div>
+    </div> <!-- web view -->
     
     <hr>
     <#include "/imports/inc_sessionmgr.ftl">

@@ -16,6 +16,16 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.util;
 
+import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.N_TRIPLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
+
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -225,8 +235,9 @@ public class OntologyUtils {
                  */
                 importIri = o.getOntologyID().getDefaultDocumentIRI();
             } catch (Exception ex) {
-                logger.error("KReS :: Exception caught during tree building. Skipping import of ontology "
-                             + o.getOntologyID(), ex);
+                logger.error(
+                    "Exception caught during tree building. Skipping import of ontology " + o.getOntologyID(),
+                    ex);
             } finally {
                 /*
                  * It is still possible that an imported ontology is anonymous but has no physical document
@@ -235,7 +246,7 @@ public class OntologyUtils {
                  * parent ontology, or else it is lost.
                  */
                 if (o.isAnonymous() && importIri == null) {
-                    logger.warn("KReS :: [NONFATAL] Anonymous import target "
+                    logger.warn("Anonymous import target "
                                 + o.getOntologyID()
                                 + " not mapped to physical IRI. Will add extracted axioms to parent ontology.");
                     for (OWLImportsDeclaration im : o.getImportsDeclarations())
@@ -290,9 +301,8 @@ public class OntologyUtils {
 
     }
 
-    private static String[] preferredFormats = {"application/rdf+xml", "application/rdf+json", "text/turtle",
-                                                "text/rdf+n3", "text/rdf+nt", "text/owl-manchester",
-                                                "application/owl+xml"};
+    private static String[] preferredFormats = {RDF_XML, TURTLE, X_TURTLE, RDF_JSON, N3, N_TRIPLE,
+                                                MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML};
 
     public static List<String> getPreferredSupportedFormats(Collection<String> supported) {
         List<String> result = new ArrayList<String>();

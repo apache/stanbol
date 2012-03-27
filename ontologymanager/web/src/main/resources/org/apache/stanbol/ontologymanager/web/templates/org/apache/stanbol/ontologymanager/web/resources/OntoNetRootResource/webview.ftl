@@ -14,16 +14,15 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<p>
-  Stanbol OntoNet implements the API section for managing OWL and OWL2 ontologies, in order to prepare them for consumption by reasoning services, refactorers, rule engines and the like. Ontology management in ONM is sparse and not connected: once loaded internally from their remote locations, ontologies live and are known within the realm they were loaded in. This allows loose-coupling and (de-)activation of ontologies in order to scale the data sets for reasoners to process and optimize them for efficiency. 
-  
-  <h3>Submit a new ontology</h3>
+
+  <h3>Load an ontology</h3>
   <form method="POST" enctype="multipart/form-data" accept-charset="utf-8">
     <fieldset>
-      <legend>Submit an ontology from a local file</legend>
+      <legend>From a local file</legend>
       <p><b>File:</b> <input type="file" name="file"/> 
         Input format:
         <select name="format">
+          <option value="auto">Auto</option>
           <option value="application/rdf+xml">RDF/XML</option>
           <option value="application/rdf+json">RDF/JSON</option>
           <option value="text/turtle">Turtle</option>
@@ -40,8 +39,39 @@
     </fieldset>
   </form>
   
+  <form method="POST" enctype="multipart/form-data" accept-charset="utf-8">
+    <fieldset>
+      <legend>From a URL</legend>
+      <p>
+        <b>URL:</b> <input type="text" name="url" size="80" value="http://"/> 
+        <input type="submit" value="Fetch"/>
+      </p>
+    </fieldset>
+  </form>
   
-  The following concepts have been introduced with the ONM:
+  Note: OWL import targets will be included. Ontology loading is set to fail on missing imports.
+
+  <h3>Stored ontologies</h3>
+  <#assign ontologies = it.ontologies>
+  <div class="storeContents">
+    <table id="allOntologies">
+      <div>
+        <tr>
+          <th>Name</th>
+        </tr>
+        <#list it.ontologies as ontology>
+          <tr>
+            <td><a href="${it.publicBaseUri}ontonet/${ontology}">${ontology}</a></td>
+          </tr>
+        </#list>
+      </div>
+    </table> <!-- allScopes -->
+  </div>
+  
+  <hr>
+  
+  <p>
+  The following concepts have been introduced along with the Ontology Network Manager:
   <ul>
     <li>
       <u><em>Scope</em></u>: a "logical realm" for all the ontologies that encompass a certain CMS-related set of concepts (such as "User", "ACL", "Event", "Content", "Domain", "Reengineering", "Community", "Travelling" etc.). Scopes never inherit from each other, though they can load the same ontologies if need be.
@@ -53,4 +83,4 @@
       <em><u>Session</u></em>: a collector of volatile semantic data, not intended for persistent storage. Sessions can be used for stateful management of ontology networks. It is not equivalent to an HTTP session (since it can live persistently across multiple HTTP sessions), although its behaviour can reflect the one of the HTTP session that created it, if required by the implementation.
     </li>
   </ul>
-</p>
+  </p>

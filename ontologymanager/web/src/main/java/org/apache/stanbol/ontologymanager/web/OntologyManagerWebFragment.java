@@ -41,9 +41,8 @@ import org.apache.stanbol.ontologymanager.web.resources.OntologyNetworkResource;
 import org.apache.stanbol.ontologymanager.web.resources.RegistryManagerResource;
 import org.apache.stanbol.ontologymanager.web.resources.ScopeOntologyResource;
 import org.apache.stanbol.ontologymanager.web.resources.ScopeResource;
-import org.apache.stanbol.ontologymanager.web.resources.SessionResource;
 import org.apache.stanbol.ontologymanager.web.resources.SessionManagerResource;
-import org.apache.stanbol.ontologymanager.web.resources.StoredOntologyResource;
+import org.apache.stanbol.ontologymanager.web.resources.SessionResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -51,7 +50,7 @@ import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
 
 /**
- * Implementation of WebFragment for the Stanbol Ontonet end-point.
+ * Implementation of WebFragment for the Stanbol Ontology Manager endpoint.
  * 
  * @author alberto musetti
  * 
@@ -95,21 +94,21 @@ public class OntologyManagerWebFragment implements WebFragment {
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        // Temporary resources
+
+        // Core resources
         classes.add(OntoNetRootResource.class);
 
-        // classes.add(RESTfulResource.class);
-        // classes.add(StoredGraphsResource.class);
+        // Registry resources
+        classes.add(RegistryManagerResource.class);
 
+        // Scope resources
         classes.add(OntologyNetworkResource.class);
         classes.add(ScopeResource.class);
         classes.add(ScopeOntologyResource.class);
-        classes.add(StoredOntologyResource.class);
 
+        // Session resources
         classes.add(SessionManagerResource.class);
         classes.add(SessionResource.class);
-
-        classes.add(RegistryManagerResource.class);
 
         return classes;
     }

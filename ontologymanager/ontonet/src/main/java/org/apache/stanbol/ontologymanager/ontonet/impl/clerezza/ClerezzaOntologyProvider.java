@@ -92,9 +92,10 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
     /**
      * Internally, the Clerezza ontology provider uses a reserved graph to store the associations between
-     * ontology IDs/physical IRIs and graph names.
+     * ontology IDs/physical IRIs and graph names. This graph is wrapped into an {@link OntologyToTcMapper}
+     * object.
      * 
-     * @author alessandro
+     * @author alexdma
      * 
      */
     private class OntologyToTcMapper {
@@ -151,7 +152,15 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             graph.add(tHasOiri);
         }
 
+        /**
+         * Creates an {@link UriRef} out of an {@link OWLOntologyID}, so it can be used as a storage key for
+         * the graph.
+         * 
+         * @param ontologyReference
+         * @return
+         */
         private UriRef buildResource(OWLOntologyID ontologyReference) {
+            // The UriRef is of the form ontologyIRI[/versionIRI] (TODO use something less conventional?)
             IRI ontologyIRI = ontologyReference.getOntologyIRI(), versionIri = ontologyReference
                     .getVersionIRI();
             UriRef entry = new UriRef(ontologyIRI.toString()
@@ -159,13 +168,21 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             return entry;
         }
 
+        /**
+         * Creates an {@link OWLOntologyID} object by combining the ontologyIRI and the versionIRI, where
+         * applicable, of the stored graph.
+         * 
+         * @param resource
+         *            the ontology
+         * @return
+         */
         private OWLOntologyID buildOntologyId(UriRef resource) {
             IRI oiri = null, viri = null;
             Iterator<Triple> it = graph.filter(resource, new UriRef(Vocabulary.HAS_ONTOLOGY_IRI), null);
             if (it.hasNext()) {
                 Resource obj = it.next().getObject();
                 if (obj instanceof UriRef) oiri = IRI.create(((UriRef) obj).getUnicodeString());
-            }
+            } else return null; // Anonymous but versioned ontologies are not acceptable.
             it = graph.filter(resource, new UriRef(Vocabulary.HAS_VERSION_IRI), null);
             if (it.hasNext()) {
                 Resource obj = it.next().getObject();
@@ -573,7 +590,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     public String loadInStore(final IRI ontologyIri,
                               String formatIdentifier,
                               String preferredKey,
-                              boolean force) throws IOException, UnsupportedFormatException {
+                              boolean force) throws IOException {
         log.debug("Loading {}", ontologyIri);
         if (ontologyIri == null) throw new IllegalArgumentException("Ontology IRI cannot be null.");
 

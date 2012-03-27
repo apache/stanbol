@@ -19,6 +19,11 @@
 
 <#escape x as x?html>
   <@common.page title="Apache Stanbol OntoNet" hasrestapi=true>
+  
+  <p>
+  Stanbol OntoNet implements the API section for managing OWL/OWL2 ontologies, in order to prepare them for consumption by reasoning services, refactorers, rule engines and the like. Once loaded internally from their remote or local resources, ontologies live and are known within the realm they were loaded in. This allows loose-coupling and (de-)activation of ontologies in order to scale the data sets for reasoners to process and optimize them for efficiency. 
+  </p>
+  
 	<span style="font-style:italic">From here you can reach the following sub-endpoints:</span>
 	<ul>
 	  <li><a href="${it.publicBaseUri}ontonet/ontology" title="Apache Stanbol OntoNet Scope Manager">Scope Manager</a></li>

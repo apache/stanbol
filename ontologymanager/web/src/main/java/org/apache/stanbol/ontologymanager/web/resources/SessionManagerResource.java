@@ -31,7 +31,9 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
@@ -48,6 +50,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
@@ -83,6 +86,13 @@ public class SessionManagerResource extends BaseStanbolResource {
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
+    }
+
+    public Set<Session> getSessions() {
+        Set<Session> result = new HashSet<Session>();
+        for (String id : sessionManager.getRegisteredSessionIDs())
+            result.add(sessionManager.getSession(id));
+        return result;
     }
 
     @GET
