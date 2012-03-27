@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rdf:RDF xmlns="http://example.com/ns#" xmlns:ex="http://example.com/ns#"
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+  <rdf:Description rdf:about="http://example.com/ns#someconceptscheme/">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme" />
+    <skos:HasTopConcept>
+      <rdf:Description rdf:about="http://example.com/ns#someconceptscheme/100">
+        <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+      </rdf:Description>
+    </skos:HasTopConcept>
+
+    <skos:HasTopConcept>
+      <rdf:Description rdf:about="http://example.com/ns#someconceptscheme/200">
+        <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+      </rdf:Description>
+    </skos:HasTopConcept>
+
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/ns#someconceptscheme/100">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+    <skos:prefLabel xml:lang="en-GB">Root Topic 01
+    </skos:prefLabel>
+    <skos:definition xml:lang="en-GB">The first top level
+      topic
+      of the "someconceptscheme" controlled vocabulary.
+    </skos:definition>
+
+  </rdf:Description>
+
+  <rdf:Description rdf:about="http://example.com/ns#someconceptscheme/200">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+    <skos:prefLabel xml:lang="en-GB">Root Topic 02
+    </skos:prefLabel>
+    <skos:definition xml:lang="en-GB">The second top level
+      topic of the "someconceptscheme" controlled vocabulary.
+    </skos:definition>
+
+  </rdf:Description>
+
+  <rdf:Description rdf:about="http://example.com/ns#someconceptscheme/010">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+    <skos:prefLabel xml:lang="en-GB">Nested topic 1
+    </skos:prefLabel>
+    <skos:definition xml:lang="en-GB">A subtopic of the first
+      top level node.
+    </skos:definition>
+
+    <skos:broader>
+      <rdf:Description rdf:about="http://example.com/ns#someconceptscheme/100">
+        <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+      </rdf:Description>
+    </skos:broader>
+
+  </rdf:Description>
+
+  <rdf:Description rdf:about="http://example.com/ns#someconceptscheme/020">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+    <skos:prefLabel xml:lang="en-GB">Nested topic 2
+    </skos:prefLabel>
+    <skos:definition xml:lang="en-GB">Another nested topic.
+    </skos:definition>
+
+    <skos:broader>
+      <rdf:Description rdf:about="http://example.com/ns#someconceptscheme/200">
+        <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+      </rdf:Description>
+    </skos:broader>
+
+  </rdf:Description>
+
+</rdf:RDF>

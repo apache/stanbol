@@ -34,6 +34,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
+import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,6 +48,8 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
+import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.topic.ClassificationReport;
 import org.apache.stanbol.enhancer.topic.ClassifierException;
 import org.apache.stanbol.enhancer.topic.EmbeddedSolrHelper;
@@ -154,6 +160,17 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertEquals(classifier.acceptedLanguages, Arrays.asList("en", "fr"));
     }
 
+    @Test
+    public void testImportModelFromSKOS() throws Exception {
+        Parser parser = Parser.getInstance();
+        parser.bindParsingProvider(new JenaParserProvider());
+        Graph graph = parser.parse(getClass().getResourceAsStream("/sample-scheme.skos.rdf.xml"),
+            SupportedFormat.RDF_XML);
+        int imported = classifier.importConceptsFromGraph(graph, OntologicalClasses.SKOS_CONCEPT,
+            Properties.SKOS_BROADER);
+        assertEquals(imported, 4);
+    }
+    
     @Test
     public void testProgrammaticThesaurusConstruction() throws Exception {
         // Register the roots of the taxonomy
@@ -555,4 +572,5 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         config.put(SolrTrainingSet.MODIFICATION_DATE_FIELD, "modification_dt");
         return config;
     }
+
 }

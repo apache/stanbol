@@ -268,10 +268,18 @@
       <artifactId>rdf.core</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.jena.parser</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-
+    <dependency> <!--  contains the GraphNode -->
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.utils</artifactId>
+    </dependency>
   </dependencies>
 
 </project>
