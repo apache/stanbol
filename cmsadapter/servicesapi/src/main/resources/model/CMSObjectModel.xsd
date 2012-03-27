@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:iksps="web.model.servicesapi.cmsadapter.stanbol.apache.org"
+	targetNamespace="web.model.servicesapi.cmsadapter.stanbol.apache.org"
+	elementFormDefault="qualified" attributeFormDefault="qualified">
+	<!-- enums -->
+	<xsd:simpleType name="propType">
+		<xsd:annotation>
+			<xsd:documentation>Possible property types for JCR and CMIS
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:NMTOKEN">
+			<xsd:enumeration value="STRING" />
+			<xsd:enumeration value="BOOLEAN" />
+			<xsd:enumeration value="DECIMAL" />
+			<xsd:enumeration value="INTEGER" />
+			<xsd:enumeration value="DATE" />
+			<xsd:enumeration value="URI" />
+			<xsd:enumeration value="HTML" />
+			<xsd:enumeration value="REFERENCE" />
+			<xsd:enumeration value="WEAKREFERENCE" />
+			<xsd:enumeration value="LONG" />
+			<xsd:enumeration value="DOUBLE" />
+			<xsd:enumeration value="BINARY" />
+			<xsd:enumeration value="PATH" />
+			<xsd:enumeration value="NAME" />
+			<xsd:enumeration value="UNDEFINED" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="annotationType">
+		<xsd:annotation>
+			<xsd:documentation>Possible annotations types for properties
+				represented in scope of Ontology Generator</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:NMTOKEN">
+			<xsd:enumeration value="subsumption" />
+			<xsd:enumeration value="transitive" />
+			<xsd:enumeration value="inverseFunctional" />
+			<xsd:enumeration value="instanceOf" />
+			<xsd:enumeration value="equivalentClass" />
+			<xsd:enumeration value="disjointWith" />
+			<xsd:enumeration value="functional" />
+			<xsd:enumeration value="symmetric" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- types -->
+	<xsd:element name="objectTypeDefinition">
+		<xsd:annotation>
+			<xsd:documentation>defines a fixed and non-hierarchical set of
+				properties (“schema”) that all objects of that type have
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="iksps:localname" />
+				<xsd:element ref="iksps:namespace" minOccurs="0" />
+				<xsd:element ref="iksps:uniqueRef" />
+				<xsd:element ref="iksps:parentRef" minOccurs="0"
+					maxOccurs="unbounded" />
+				<xsd:sequence>
+					<xsd:element ref="iksps:propertyDefinition" minOccurs="0"
+						maxOccurs="unbounded" />
+				</xsd:sequence>
+				<xsd:sequence>
+					<xsd:element ref="iksps:objectTypeDefinition"
+						minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="propertyDefinition">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="iksps:sourceObjectTypeRef" minOccurs="0" />
+				<xsd:element ref="iksps:localname" />
+				<xsd:element ref="iksps:namespace" minOccurs="0" />
+				<xsd:element ref="iksps:uniqueRef" />
+				<xsd:element ref="iksps:propertyType" />
+				<xsd:element ref="iksps:cardinality" minOccurs="0" />
+				<xsd:element ref="iksps:required" minOccurs="0" />
+				<xsd:sequence>
+					<xsd:element ref="iksps:valueConstraint" minOccurs="0"
+						maxOccurs="unbounded" />
+				</xsd:sequence>
+				<xsd:element ref="iksps:annotation" minOccurs="0" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:complexType name="CMSObject">
+		<xsd:sequence>
+			<xsd:element ref="iksps:uniqueRef" />
+			<xsd:element ref="iksps:localname" />
+			<xsd:element ref="iksps:namespace" minOccurs="0" />
+			<xsd:element ref="iksps:objectTypeRef" />
+			<xsd:element ref="iksps:parentRef" minOccurs="0" />
+			<xsd:element ref="iksps:path" />
+			<xsd:sequence>
+				<xsd:element ref="iksps:property" minOccurs="0"
+					maxOccurs="unbounded" />
+			</xsd:sequence>
+			<xsd:sequence>
+				<xsd:element name="children" type="iksps:CMSObject"
+					minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ClassificationObject">
+		<xsd:complexContent>
+			<xsd:extension base="iksps:CMSObject"></xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="ContentObject">
+		<xsd:complexContent>
+			<xsd:extension base="iksps:CMSObject"></xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:element name="property">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="iksps:localname" />
+				<xsd:element ref="iksps:sourceObjectTypeRef" />
+				<xsd:element ref="iksps:containerObjectRef" minOccurs="0" />
+				<xsd:element ref="iksps:value" maxOccurs="unbounded" />
+				<xsd:element ref="iksps:propertyDefinition" minOccurs="0" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="propertySemantics">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="iksps:propertyAnnotation" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="propertyAnnotation">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="iksps:annotation" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="objectTypeDefinitions">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="iksps:objectTypeDefinition" minOccurs="0"
+					maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="CMSObjects">
+		<xsd:annotation>
+			<xsd:documentation>This element was created to use object types as a
+				list in general, regardless of being a content or classification
+				object.  
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element ref="iksps:classificationObject" />
+					<xsd:element ref="iksps:contentObject" />
+				</xsd:choice>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="connectionInfo">
+		<xsd:annotation>
+			<xsd:documentation>defines repository paramaters</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="iksps:repositoryURL" />
+				<xsd:element ref="iksps:workspaceName" />
+				<xsd:element ref="iksps:username" />
+				<xsd:element ref="iksps:password" />
+				<xsd:element ref="iksps:connectionType" />
+				<xsd:element ref="iksps:ontologyURI" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="localname" type="xsd:string" />
+	<xsd:element name="namespace" type="xsd:string" />
+	<xsd:element name="uniqueRef" type="xsd:string" />
+	<xsd:element name="parentRef" type="xsd:string" />
+	<xsd:element name="path" type="xsd:string" />
+
+	<xsd:element name="annotation" type="iksps:annotationType" />
+	<xsd:element name="contentObject" type="iksps:ContentObject" />
+	<xsd:element name="classificationObject" type="iksps:ClassificationObject" />
+	<xsd:element name="objectTypeRef" type="xsd:string" />
+
+	<xsd:element name="containerObjectRef" type="xsd:string" />
+	<xsd:element name="sourceObjectTypeRef" type="xsd:string" />
+	<xsd:element name="propertyType" type="iksps:propType" />
+	<xsd:element name="valueConstraint" type="xsd:string" />
+	<xsd:element name="value" type="xsd:string" />
+	<xsd:element name="cardinality" type="xsd:integer" />
+	<xsd:element name="required" type="xsd:boolean" />
+	<xsd:attribute name="type" type="iksps:propType" />
+
+	<!-- TODO restrict repositoryURL type -->
+	<xsd:element name="repositoryURL" type="xsd:string" />
+	<xsd:element name="workspaceName" type="xsd:string" />
+	<xsd:element name="username" type="xsd:string" />
+	<xsd:element name="password" type="xsd:string" />
+	<xsd:element name="connectionType" type="xsd:string" />
+	<xsd:element name="ontologyURI" type="xsd:anyURI" />
+</xsd:schema>

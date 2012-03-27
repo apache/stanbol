@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<xsd:schema targetNamespace="mapping.model.servicesapi.cmsadapter.stanbol.apache.org"
+	attributeFormDefault="unqualified" elementFormDefault="qualified"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="mapping.model.servicesapi.cmsadapter.stanbol.apache.org">
+
+	<xsd:element name="BridgeDefinitions">
+		<xsd:complexType>
+			<xsd:choice maxOccurs="unbounded">
+				<xsd:element ref="tns:ConceptBridge" />
+				<xsd:element ref="tns:SubsumptionBridge" />
+				<xsd:element ref="tns:InstanceBridge" />
+			</xsd:choice>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="ConceptBridge">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Query" type="tns:QueryType" />
+				<xsd:element ref="tns:SubsumptionBridge" minOccurs="0"
+					maxOccurs="unbounded" />
+				<xsd:element ref="tns:PropertyBridge" minOccurs="0"
+					maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="SubsumptionBridge">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="PredicateName" type="tns:QueryType" />
+				<xsd:element name="SubjectQuery" type="tns:QueryType"
+					minOccurs="0" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="PropertyBridge">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="PredicateName" type="tns:QueryType" />
+				<xsd:element name="SubjectQuery" type="tns:QueryType"
+					minOccurs="0" />
+				<xsd:element ref="tns:PropertyAnnotation" minOccurs="0" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="InstanceBridge">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Query" type="tns:QueryType" />
+				<xsd:element ref="tns:PropertyBridge" minOccurs="0"
+					maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="PropertyAnnotation">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Annotation" type="tns:AnnotationType" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="NameType">
+		<xsd:choice>
+			<xsd:element name="PropertyName" type="xsd:string" />
+		</xsd:choice>
+	</xsd:complexType>
+
+	<xsd:simpleType name="QueryType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="AnnotationType">
+		<xsd:restriction base="xsd:NMTOKEN">
+			<xsd:enumeration value="subsumption" />
+			<xsd:enumeration value="transitive" />
+			<xsd:enumeration value="inverseFunctional" />
+			<xsd:enumeration value="instanceOf" />
+			<xsd:enumeration value="equivalentClass" />
+			<xsd:enumeration value="disjointWith" />
+			<xsd:enumeration value="functional" />
+			<xsd:enumeration value="symmetric" />
+		</xsd:restriction>
+	</xsd:simpleType>
+</xsd:schema>
