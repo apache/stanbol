@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +34,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -643,7 +648,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     request.add(newEntry);
                 }
             }
-            solrServer.request(request);
+            if (request.getDocuments() != null && request.getDocuments().size() > 0) {
+                solrServer.request(request);
+            }
         } catch (Exception e) {
             String msg = String.format("Error invalidating topics [%s] on Solr Core '%s'",
                 StringUtils.join(conceptIds, ", "), solrCoreId);
@@ -1223,5 +1230,32 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             }
         }
         return chainNames;
+    }
+
+    public int importConceptsFromGraph(Graph graph, UriRef conceptClass, UriRef broaderProperty) throws ClassifierException {
+        int importedCount = 0;
+        Iterator<Triple> conceptIterator = graph.filter(null,
+            org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE, conceptClass);
+        while (conceptIterator.hasNext()) {
+            Triple conceptTriple = conceptIterator.next();
+            if (!(conceptTriple.getSubject() instanceof UriRef)) {
+                continue;
+            }
+            UriRef conceptUri = (UriRef) conceptTriple.getSubject();
+            GraphNode node = new GraphNode(conceptUri, graph);
+            List<String> broaderConcepts = new ArrayList<String>();
+            // TODO: use OWL property inference on sub-properties here instead of explicit
+            // property filter
+            Iterator<GraphNode> broaderIterator = node.getObjectNodes(broaderProperty);
+            while (broaderIterator.hasNext()) {
+                Resource node2 = broaderIterator.next().getNode();
+                if (node2 instanceof UriRef) {
+                    broaderConcepts.add(((UriRef) node2).getUnicodeString());
+                }
+            }
+            addConcept(conceptUri.getUnicodeString(), broaderConcepts);
+            importedCount++;
+        }
+        return importedCount;
     }
 }
