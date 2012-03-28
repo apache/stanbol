@@ -472,9 +472,11 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 Float score = (Float) result.getFirstValue("score");
 
                 // fetch metadata
-                String q = entryTypeField + ":" + METADATA_ENTRY + " AND " + conceptUriField + ":"
-                           + ClientUtils.escapeQueryChars(conceptUri);
-                SolrQuery metadataQuery = new SolrQuery(q);
+                SolrQuery metadataQuery = new SolrQuery("*:*");
+                // use filter queries to leverage the Solr cache explicitly
+                String typeFq = entryTypeField + ":" + METADATA_ENTRY;
+                String conceptFq = conceptUriField + ":" + ClientUtils.escapeQueryChars(conceptUri);
+                metadataQuery.setFilterQueries(typeFq, conceptFq);
                 metadataQuery.setFields(conceptUriField, broaderField, primaryTopicUriField);
                 SolrDocument metadata = solrServer.query(metadataQuery).getResults().get(0);
                 String primaryTopicUri = (String) metadata.getFirstValue(primaryTopicUriField);
