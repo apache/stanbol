@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.search.solr;
+package org.apache.stanbol.contenthub.servicesapi.index.search.solr;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndexManager;
-import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
 
 /**
  * Apache Solr based search interface of Stanbol Contenthub. It makes use of SolrJ API in the provided

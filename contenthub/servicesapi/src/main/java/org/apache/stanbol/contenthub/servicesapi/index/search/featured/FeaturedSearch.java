@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.search.featured;
+package org.apache.stanbol.contenthub.servicesapi.index.search.featured;
 
 import java.util.List;
 
 import org.apache.solr.common.params.SolrParams;
-import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearch;
-import org.apache.stanbol.contenthub.servicesapi.search.solr.SolrSearch;
+import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeywordSearch;
+import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrSearch;
 
 /**
  * This interface provides search functionalities over the submitted content items to the Contenthub. It

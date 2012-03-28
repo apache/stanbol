@@ -14,40 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.search;
+package org.apache.stanbol.contenthub.servicesapi.index.search.featured;
 
-import org.apache.stanbol.contenthub.servicesapi.exception.AbstractContenthubException;
+import org.apache.solr.client.solrj.response.FacetField;
 
 /**
- * Exception to be thrown in search related operations of Contenthub.
+ * This interface defines the structure of facets that are obtained from underlying Solr index for the search
+ * operation
  * 
- * @author anil.sinaci
+ * @author suat
+ * @author sinaci
  * 
  */
-public class SearchException extends AbstractContenthubException {
+public interface FacetResult {
 
-    private static final long serialVersionUID = -8961306574004699946L;
-
-    /**
-     * @param msg
-     */
-    public SearchException(String msg) {
-        super(msg);
-    }
-
-    /**
-     * @param cause
-     */
-    public SearchException(Throwable cause) {
-        super(cause);
-    }
-
-    /**
-     * @param msg
-     * @param cause
-     */
-    public SearchException(String msg, Throwable cause) {
-        super(msg, cause);
-    }
-
+	FacetField getFacetField();
+	
+	String getType();
+	
 }

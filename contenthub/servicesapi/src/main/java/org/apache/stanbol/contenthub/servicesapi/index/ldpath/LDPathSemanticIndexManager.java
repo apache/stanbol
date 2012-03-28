@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.ldpath;
+package org.apache.stanbol.contenthub.servicesapi.index.ldpath;
 
 import java.io.Reader;
 import java.util.Collection;
@@ -30,7 +30,7 @@ import at.newmedialab.ldpath.model.programs.Program;
  * @author anil.sinaci
  * 
  */
-public interface SemanticIndexManager {
+public interface LDPathSemanticIndexManager {
 
 	/**
 	 * Saves LDPath program to persistent storage with given name and
@@ -105,9 +105,9 @@ public interface SemanticIndexManager {
 	 * Used to retrieve names and programs of all currently managed program-core
 	 * pairs
 	 * 
-	 * @return All managed programs as {@link LDProgramCollection}
+	 * @return All managed programs as {@link LDPathProgramCollection}
 	 */
-	public LDProgramCollection retrieveAllPrograms();
+	public LDPathProgramCollection retrieveAllPrograms();
 
 	/**
 	 * This method first tries to obtain the program itself through the given

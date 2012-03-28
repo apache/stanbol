@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.search.featured;
+package org.apache.stanbol.contenthub.servicesapi.index.search.featured;
 
 import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearchManager;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeywordSearchManager;
 
 /**
  * This interface defines the structure of a unified search result returned by {@link FeaturedSearch} and

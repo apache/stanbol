@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.search.featured;
+package org.apache.stanbol.contenthub.servicesapi.index.search.featured;
 
 /**
  * This interface contains "getter" methods for a search result that can be passed in a {@link SearchResult}

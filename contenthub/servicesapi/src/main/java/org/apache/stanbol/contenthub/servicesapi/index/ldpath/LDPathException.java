@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.ldpath;
+package org.apache.stanbol.contenthub.servicesapi.index.ldpath;
 
-import org.apache.stanbol.contenthub.servicesapi.exception.AbstractContenthubException;
+import org.apache.stanbol.contenthub.servicesapi.exception.ContenthubException;
 
 /**
  * Exception to be thrown in LDPath related operations of Contenthub.
@@ -24,7 +24,7 @@ import org.apache.stanbol.contenthub.servicesapi.exception.AbstractContenthubExc
  * @author anil.sinaci
  * 
  */
-public class LDPathException extends AbstractContenthubException {
+public class LDPathException extends ContenthubException {
 
     private static final long serialVersionUID = 4755524861924506181L;
 

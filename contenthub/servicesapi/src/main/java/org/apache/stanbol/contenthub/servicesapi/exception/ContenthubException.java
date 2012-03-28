@@ -14,38 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.ldpath;
+package org.apache.stanbol.contenthub.servicesapi.exception;
 
 /**
- * Simple bean class representing the LDPath programs. Contains the program itself together with its name.
+ * Abstract exception class to be used as a parent in various types of other Contenthub exceptions.
  * 
  * @author anil.sinaci
  * 
  */
-public class LDProgram {
+public abstract class ContenthubException extends Exception {
 
-    private String name;
-    private String ldPathProgram;
+    private static final long serialVersionUID = -2303415622874917355L;
 
-    public LDProgram(String name, String ldPathProgram) {
-        this.name = name;
-        this.ldPathProgram = ldPathProgram;
+    protected ContenthubException(String msg) {
+        super(msg);
     }
 
-    public String getName() {
-        return name;
+    protected ContenthubException(Throwable cause) {
+        super(cause);
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLdPathProgram() {
-        return ldPathProgram;
-    }
-
-    public void setLdPathProgram(String ldPathProgram) {
-        this.ldPathProgram = ldPathProgram;
+    protected ContenthubException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 
 }

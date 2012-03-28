@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.search.related;
+package org.apache.stanbol.contenthub.servicesapi.index.search.related;
 
 import java.util.List;
 import java.util.Map;
 
-import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
 
 /**
  * Related keyword searcher for a given query keyword.

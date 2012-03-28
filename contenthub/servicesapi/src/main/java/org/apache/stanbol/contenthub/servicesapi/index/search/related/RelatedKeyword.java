@@ -14,38 +14,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.store;
-
-import org.apache.stanbol.contenthub.servicesapi.exception.ContenthubException;
+package org.apache.stanbol.contenthub.servicesapi.index.search.related;
 
 /**
- * @author anil.sinaci
- *
+ * This interface defines the structure of a keyword which is related to the query term of a search operation.
+ * 
+ * @author suat
+ * 
  */
-public class StoreException extends ContenthubException {
-
-    private static final long serialVersionUID = 5670121947624979014L;
+public interface RelatedKeyword {
 
     /**
-     * @param msg
+     * @return Lexical value of the related keyword.
      */
-    public StoreException(String msg) {
-        super(msg);
-    }
-    
-    /**
-     * @param cause
-     */
-    public StoreException(Throwable cause) {
-        super(cause);
-    }
+    String getKeyword();
 
     /**
-     * @param msg
-     * @param cause
+     * @return Score of the related keyword
      */
-    public StoreException(String msg, Throwable cause) {
-        super(msg, cause);
+    double getScore();
+
+    /**
+     * @return Source of the related keyword
+     */
+    String getSource();
+
+    /**
+     * To enumerate the source for a related keyword
+     */
+    public enum Source {
+
+        UNKNOWN("Unknown"),
+
+        WORDNET("Wordnet"),
+
+        ONTOLOGY("Ontology");
+
+        private final String name;
+
+        private Source(String n) {
+            this.name = n;
+        }
+
+        @Override
+        public final String toString() {
+            return this.name;
+        }
     }
 
 }

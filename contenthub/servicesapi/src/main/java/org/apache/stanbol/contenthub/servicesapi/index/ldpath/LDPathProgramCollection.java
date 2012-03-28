@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.ldpath;
+package org.apache.stanbol.contenthub.servicesapi.index.ldpath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,29 +27,29 @@ import java.util.Map;
  * @author anil.sinaci
  * 
  */
-public class LDProgramCollection {
+public class LDPathProgramCollection {
 
     private Map<String,String> nameProgramMap;
 
     /**
-     * Creates an {@link LDProgramCollection} based on a provide {@link Map} keeping &lt;name,program> pairs.
+     * Creates an {@link LDPathProgramCollection} based on a provide {@link Map} keeping &lt;name,program> pairs.
      * 
      * @param nameProgramMap
-     *            On which the {@link LDProgramCollection} will be initialized.
+     *            On which the {@link LDPathProgramCollection} will be initialized.
      */
-    public LDProgramCollection(Map<String,String> nameProgramMap) {
+    public LDPathProgramCollection(Map<String,String> nameProgramMap) {
         this.nameProgramMap = nameProgramMap;
     }
 
     /**
      * This method returns the list of LDPath programs stored in the scope of Contenthub.
      * 
-     * @return {@link List} of {@link LDProgram}s.
+     * @return {@link List} of {@link LDPathProgram}s.
      */
-    public List<LDProgram> asList() {
-        List<LDProgram> list = new ArrayList<LDProgram>();
+    public List<LDPathProgram> asList() {
+        List<LDPathProgram> list = new ArrayList<LDPathProgram>();
         for (Map.Entry<String,String> entry : nameProgramMap.entrySet()) {
-            list.add(new LDProgram(entry.getKey(), entry.getValue()));
+            list.add(new LDPathProgram(entry.getKey(), entry.getValue()));
         }
         return list;
     }

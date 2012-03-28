@@ -14,22 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.servicesapi.search.featured;
-
-import org.apache.solr.client.solrj.response.FacetField;
+package org.apache.stanbol.contenthub.servicesapi.index.ldpath;
 
 /**
- * This interface defines the structure of facets that are obtained from underlying Solr index for the search
- * operation
+ * Simple bean class representing the LDPath programs. Contains the program itself together with its name.
  * 
- * @author suat
- * @author sinaci
+ * @author anil.sinaci
  * 
  */
-public interface FacetResult {
+public class LDPathProgram {
 
-	FacetField getFacetField();
-	
-	String getType();
-	
+    private String name;
+    private String ldPathProgram;
+
+    public LDPathProgram(String name, String ldPathProgram) {
+        this.name = name;
+        this.ldPathProgram = ldPathProgram;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLdPathProgram() {
+        return ldPathProgram;
+    }
+
+    public void setLdPathProgram(String ldPathProgram) {
+        this.ldPathProgram = ldPathProgram;
+    }
+
 }
