@@ -81,6 +81,7 @@ import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
+import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.enhancer.topic.Batch;
 import org.apache.stanbol.enhancer.topic.BatchProcessor;
@@ -413,11 +414,18 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         LiteralFactory lf = LiteralFactory.getInstance();
         ci.getLock().writeLock().lock();
         try {
+            // Global text annotation to attach all the topic annotation to it.
+            UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
+            metadata.add(new TripleImpl(textAnnotation,
+                    org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE,
+                    OntologicalClasses.SKOS_CONCEPT));
             for (TopicSuggestion topic : topics) {
                 UriRef enhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this);
                 metadata.add(new TripleImpl(enhancement,
                         org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE,
                         TechnicalClasses.ENHANCER_TOPICANNOTATION));
+                metadata.add(new TripleImpl(enhancement,
+                        org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION, textAnnotation));
 
                 // add link to entity
                 metadata.add(new TripleImpl(enhancement,
