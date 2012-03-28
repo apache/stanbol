@@ -334,7 +334,7 @@ public class StoreResource extends BaseStanbolResource {
             addCORSOrigin(servletContext, response, headers);
             return response.build();
         } else if (type.equals("raw")) {
-        	//TODO we should return the content directly without the file indirection
+            // TODO we should return the content directly without the file indirection
             String fileName = URLEncoder.encode(contentURI, "utf-8") + "-raw";
             File file = new File(fileName);
             if (file.exists()) {
@@ -495,6 +495,8 @@ public class StoreResource extends BaseStanbolResource {
      * HTTP POST method to create a content item in Contenthub. This method requires the content to be
      * text-based.
      * 
+     * @param id
+     *            Optinal id for the content item to be created.
      * @param content
      *            Actual content in text format. If this parameter is supplied, {@link url} is ommitted.
      * @param url
@@ -521,7 +523,8 @@ public class StoreResource extends BaseStanbolResource {
      */
     @POST
     @Consumes(APPLICATION_FORM_URLENCODED)
-    public Response createContentItemFromForm(@FormParam("content") String content,
+    public Response createContentItemFromForm(@FormParam("id") String id,
+                                              @FormParam("content") String content,
                                               @FormParam("url") String url,
                                               @FormParam("constraints") String jsonCons,
                                               @FormParam("title") String title,
@@ -534,7 +537,7 @@ public class StoreResource extends BaseStanbolResource {
         if (jsonCons != null) {
             constraints = JSONUtils.convertToMap(jsonCons);
         }
-        return createContentItemFromForm(content, url, null, null, null, headers, constraints, title);
+        return createContentItemFromForm(id, content, url, null, null, null, headers, constraints, title);
     }
 
     /**
@@ -579,10 +582,12 @@ public class StoreResource extends BaseStanbolResource {
         if (jsonCons != null) {
             constraints = JSONUtils.convertToMap(jsonCons);
         }
-        return createContentItemFromForm(null, null, file, disposition, body, headers, constraints, title);
+        return createContentItemFromForm(file.getName(), null, null, file, disposition, body, headers,
+            constraints, title);
     }
 
-    private Response createContentItemFromForm(String content,
+    private Response createContentItemFromForm(String id,
+                                               String content,
                                                String url,
                                                File file,
                                                FormDataContentDisposition disposition,
@@ -618,8 +623,10 @@ public class StoreResource extends BaseStanbolResource {
         }
 
         if (data != null && mt != null) {
-            String uri = ContentItemHelper.makeDefaultUrn(data).getUnicodeString();
-            return createEnhanceAndRedirect(data, mt, uri, true, constraints, title, headers);
+            if (id == null || id.trim().equals("")) {
+                id = ContentItemHelper.makeDefaultUrn(data).getUnicodeString();
+            }
+            return createEnhanceAndRedirect(data, mt, id, true, constraints, title, headers);
         } else {
             // TODO: add user-friendly feedback on empty requests from a form
             ResponseBuilder rb = Response.seeOther(new URI("/contenthub/" + indexName + "/store"));
@@ -708,7 +715,7 @@ public class StoreResource extends BaseStanbolResource {
         if (contentURI != null && !contentURI.isEmpty()) {
             deleteContentItem(contentURI, headers);
         }
-        return createContentItemFromForm(content, url, jsonCons, title, headers);
+        return createContentItemFromForm(null, content, url, jsonCons, title, headers);
     }
 
     /**
