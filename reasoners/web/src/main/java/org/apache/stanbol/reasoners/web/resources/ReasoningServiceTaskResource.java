@@ -72,6 +72,7 @@ import org.apache.stanbol.reasoners.web.input.provider.impl.UrlInputProvider;
 import org.apache.stanbol.reasoners.web.utils.ReasoningServiceExecutor;
 import org.apache.stanbol.reasoners.web.utils.ReasoningServiceResult;
 import org.apache.stanbol.reasoners.web.utils.ResponseTaskBuilder;
+import org.apache.stanbol.rules.base.api.RuleAdapterManager;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,6 +111,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     private ONManager onm;
     private SessionManager sessionManager;
     private RuleStore ruleStore;
+    private RuleAdapterManager adapterManager;
     private boolean job = false;
     private String jobLocation = "";
 
@@ -154,8 +156,11 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         this.sessionManager = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
             servletContext);
 
-        // Retrieve the ontology network manager
+        // Retrieve the rule store
         this.ruleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
+        
+        // Retrieve the rule adapter manager
+        this.adapterManager = (RuleAdapterManager) ContextHelper.getServiceFromContext(RuleAdapterManager.class, servletContext);
 
         // Check if method is allowed
         // FIXME Supported methods are only GET and POST, but also PUT comes here, why?
@@ -466,7 +471,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
 
             } else if (entry.getKey().equals("recipe")) {
                 if (!entry.getValue().isEmpty()) {
-                    inmgr.addInputProvider(new RecipeInputProvider(ruleStore, entry.getValue().iterator()
+                    inmgr.addInputProvider(new RecipeInputProvider(ruleStore, adapterManager, entry.getValue().iterator()
                             .next()));
                     // We remove it form the additional parameter list
                     this.parameters.remove("url");

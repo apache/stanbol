@@ -22,13 +22,17 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputProvider;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
+import org.apache.stanbol.rules.base.api.RecipeConstructionException;
+import org.apache.stanbol.rules.base.api.RuleAdapter;
+import org.apache.stanbol.rules.base.api.RuleAdapterManager;
+import org.apache.stanbol.rules.base.api.RuleAtomCallExeption;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.base.api.util.RuleList;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
+import org.apache.stanbol.rules.base.api.UnavailableRuleObjectException;
+import org.apache.stanbol.rules.base.api.UnsupportedTypeForExportException;
 import org.semanticweb.owlapi.model.SWRLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +50,7 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
     private final Logger log = LoggerFactory.getLogger(RecipeInputProvider.class);
 
     private RuleStore store;
+    private RuleAdapterManager adapterManager;
     private String recipeId;
 
     /**
@@ -54,12 +59,14 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
      * @param store
      * @param recipeId
      */
-    public RecipeInputProvider(RuleStore store,String recipeId){
+    public RecipeInputProvider(RuleStore store, RuleAdapterManager adapterManager, String recipeId){
         this.store = store;
+        this.adapterManager = adapterManager;
         this.recipeId = recipeId;
     }
     
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public <T> Iterator<T> getInput(Class<T> type) throws IOException {
     	
     	ReasoningProvider reasoningProvider = null;
@@ -87,16 +94,39 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
 	            try {
 	                Recipe recipe = null;
 	                synchronized (store) {
-	                    recipe = store.getRecipe(IRI.create(recipeId));                    
+	                    try {
+							recipe = store.getRecipe(new UriRef(recipeId));
+						} catch (RecipeConstructionException e) {
+							log.error("An error occurred while generating the recipe.", e);
+						}                    
 	                }
 	                log.debug("Recipe is: {}", recipe);
-	                RuleList ruleList = recipe.getkReSRuleList();
+	                
+	                /*
+	                 * We ask to the adapter manager to get the right adapter in order to transform
+	                 * recipes into SWRLRule objects.
+	                 */
+	                RuleAdapter adapter;
+					try {
+						adapter = adapterManager.getAdapter(recipe, SWRLRule.class);
+						rules = (List<SWRLRule>) adapter.adaptTo(recipe, SWRLRule.class);
+					} catch (UnavailableRuleObjectException e) {
+						log.error(e.getMessage(), e);
+					} catch (RuleAtomCallExeption e) {
+						log.error(e.getMessage(), e);
+					} catch (UnsupportedTypeForExportException e) {
+						log.error(e.getMessage(), e);
+					}
+	                
+	                
+	                /*
+	                RuleList ruleList = recipe.getRuleList();
 	                log.debug("RuleList is: {}",ruleList);
 	                for(org.apache.stanbol.rules.base.api.Rule r : ruleList ){
 	                    SWRLRule swrl = r.toSWRL(OWLManager.getOWLDataFactory());
 	                    log.debug("Prepared rule: {}",swrl);
 	                    rules.add(swrl);
-	                }
+	                }*/
 	            } catch (NoSuchRecipeException e) {
 	                log.error("Recipe {} does not exists", recipeId);
 	                throw new IOException(e);
@@ -140,12 +170,36 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
 	            try {
 	                Recipe recipe = null;
 	                synchronized (store) {
-	                    recipe = store.getRecipe(IRI.create(recipeId));                    
+	                    try {
+							recipe = store.getRecipe(new UriRef(recipeId));
+						} catch (RecipeConstructionException e) {
+							log.error("An error occurred while generating the recipe.", e);
+						}                    
 	                }
-	                log.debug("Recipe is: {}", recipe);
 	                
 	                
-	                jenaRules = recipe.toJenaRules();
+	                if(recipe != null){
+		                log.debug("Recipe is: {}", recipe);
+		                
+		                /*
+		                 * We ask to the adapter manager to get the right adapter in order to transform
+		                 * recipes into Jena Rule objects.
+		                 */
+		                RuleAdapter adapter;
+						try {
+							adapter = adapterManager.getAdapter(recipe, Rule.class);
+							jenaRules = (List<Rule>) adapter.adaptTo(recipe, Rule.class);
+						} catch (UnavailableRuleObjectException e) {
+							log.error(e.getMessage(), e);
+						} catch (RuleAtomCallExeption e) {
+							log.error(e.getMessage(), e);
+						} catch (UnsupportedTypeForExportException e) {
+							log.error(e.getMessage(), e);
+						}
+		                
+	                }
+	                
+	                //jenaRules = recipe.toJenaRules();
 	            } catch (NoSuchRecipeException e) {
 	                log.error("Recipe {} does not exists", recipeId);
 	                throw new IOException(e);

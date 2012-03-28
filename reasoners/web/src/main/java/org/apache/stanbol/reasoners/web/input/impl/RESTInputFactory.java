@@ -32,6 +32,7 @@ import org.apache.stanbol.reasoners.web.input.provider.impl.FileInputProvider;
 import org.apache.stanbol.reasoners.web.input.provider.impl.OntonetInputProvider;
 import org.apache.stanbol.reasoners.web.input.provider.impl.RecipeInputProvider;
 import org.apache.stanbol.reasoners.web.input.provider.impl.UrlInputProvider;
+import org.apache.stanbol.rules.base.api.RuleAdapterManager;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,13 +50,15 @@ public class RESTInputFactory implements ReasoningServiceInputFactory {
     ONManager onm;
     SessionManager sessionManager;
     RuleStore rStore;
+    RuleAdapterManager adapterManager;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    public RESTInputFactory(ONManager onm, SessionManager sm, RuleStore rStore) {
+    public RESTInputFactory(ONManager onm, SessionManager sm, RuleStore rStore, RuleAdapterManager adapterManager) {
         this.onm = onm;
         this.sessionManager = sm;
         this.rStore = rStore;
+        this.adapterManager = adapterManager;
     }
 
     @Override
@@ -104,7 +107,7 @@ public class RESTInputFactory implements ReasoningServiceInputFactory {
 
             } else if (entry.getKey().equals("recipe")) {
                 if (!entry.getValue().isEmpty()) {
-                    inmgr.addInputProvider(new RecipeInputProvider(rStore, entry.getValue().iterator().next()));
+                    inmgr.addInputProvider(new RecipeInputProvider(rStore, adapterManager, entry.getValue().iterator().next()));
                 } else {
                     // Parameter exists with no value
                     log.error("Parameter 'recipe' must have a value!");
