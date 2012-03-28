@@ -92,7 +92,7 @@ public class TopicClassifierFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> navList = new ArrayList<NavigationLink>();
-        navList.add(new NavigationLink("topic", "/topic", null, 10));
+        navList.add(new NavigationLink("topic", "/topic", null, 15));
         return navList;
     }
 
