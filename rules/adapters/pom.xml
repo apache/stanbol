@@ -17,11 +17,11 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <modelVersion>4.0.0</modelVersion>
 <groupId>org.apache.stanbol</groupId>
-<artifactId>org.apache.stanbol.rules.reactor</artifactId>
+<artifactId>org.apache.stanbol.rules.adapters.reactor</artifactId>
 <version>0.9.0-incubating-SNAPSHOT</version>
 <packaging>pom</packaging>
 <name>Apache Stanbol Rules reactor</name>
-<description>    Pseudo project to build the complete Apache Stanbol Rules.  </description>
+<description>    Pseudo project to build the complete adapters.  </description>
 <inceptionYear>2011</inceptionYear>
 <modules>
 <module>abstract</module>
