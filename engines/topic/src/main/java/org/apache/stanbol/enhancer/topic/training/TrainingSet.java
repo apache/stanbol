@@ -103,4 +103,9 @@ public interface TrainingSet {
      */
     boolean hasChangedSince(List<String> topics, Date referenceDate) throws TrainingSetException;
 
+    /**
+     * Trigger optimization of the underlying index. 
+     */
+    void optimize() throws TrainingSetException;
+
 }

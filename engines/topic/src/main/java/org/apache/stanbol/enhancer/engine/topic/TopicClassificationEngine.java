@@ -117,6 +117,17 @@ import org.slf4j.LoggerFactory;
  * 
  * The Solr server is expected to be configured with the MoreLikeThisHandler and the matching fields from the
  * engine configuration.
+ * 
+ * This text classifier method sometimes goes by the name of "Rocchio classification" or "Nearest Centroid
+ * classification" in the IR and machine learning literature. It is often slightly less accurate than fitting
+ * penalized linear model such as linear kernel Support Vector Machines or penalized Logistic Regression but
+ * has the advantage to scale to large number of categories (e.g. more that tens of thousands) without having
+ * to load the full statistical model in memory thanks to the use of the inverted index datastructure that
+ * also provides the feature extraction and TF-IDF weighting for free.
+ * 
+ * Furthermore it could be refined by using a "Learning to Rank" approach by training a RankSVM, Gradient
+ * Boosted Trees or Random Forests on the output on the raw output of the Rocchio classifier so as to re-rank
+ * candidate classes more finely. The Learning to Rank refinement is not implemented yet.
  */
 @Component(metatype = true, immediate = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
@@ -202,16 +213,18 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     // TODO: make the following fields configurable
 
-    private int MAX_COLLECTED_EXAMPLES = 100;
+    private int MAX_COLLECTED_EXAMPLES = 1000;
 
-    public int MAX_EVALUATION_SAMPLES = 1000;
+    public int MAX_EVALUATION_SAMPLES = 200;
+
+    public int MIN_EVALUATION_SAMPLES = 10;
 
     public int MAX_CHARS_PER_TOPIC = 100000;
 
     public Integer MAX_ROOTS = 1000;
 
     public int MAX_SUGGESTIONS = 5; // never suggest more than this: this is expected to be a reasonable
-                                    // estimate of the number of topics occuring in each documents
+                                    // estimate of the number of topics occurring in each documents
 
     protected String engineName;
 
@@ -267,15 +280,20 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     protected int cvFoldCount = 0;
 
-    protected File evaluationFolder;
+    protected boolean evaluationRunning = false;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, bind = "bindManagedSolrServer", unbind = "unbindManagedSolrServer", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC)
-    protected ManagedSolrServer managedSolrServer;
+    protected ManagedSolrServer managedSolrServerDummy; // trick to call the super class binders
 
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, InvalidSyntaxException {
         @SuppressWarnings("unchecked")
         Dictionary<String,Object> config = context.getProperties();
+        activate(context, config);
+    }
+
+    protected void activate(ComponentContext context, Dictionary<String,Object> config) throws ConfigurationException,
+                                                                                       InvalidSyntaxException {
         this.context = context;
         indexArchiveName = "default-topic-model";
         configure(config);
@@ -288,6 +306,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     .createFilter(filter), null);
             trainingSetTracker.open();
         }
+        // TODO if training set is null, make it possible to programmatically create a SolrTrainingSet
+        // instance using the same managed solr server and register it under the same name as the engine
+        // it-self.
     }
 
     @Deactivate
@@ -659,14 +680,29 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     @Override
+    public void removeAllConcepts() throws ClassifierException {
+        SolrServer solrServer = getActiveSolrServer();
+        try {
+            solrServer.deleteByQuery("*:*");
+            solrServer.commit();
+        } catch (Exception e) {
+            String msg = String.format("Error deleting concepts from Solr Core '%s'", solrCoreId);
+            throw new ClassifierException(msg, e);
+        }
+    }
+
+    @Override
     public void removeConcept(String conceptId) throws ClassifierException {
+        if (conceptId == null || conceptId.isEmpty()) {
+            throw new ClassifierException("conceptId must not be null or empty");
+        }
         SolrServer solrServer = getActiveSolrServer();
         try {
             solrServer.deleteByQuery(conceptUriField + ":" + ClientUtils.escapeQueryChars(conceptId));
             solrServer.commit();
         } catch (Exception e) {
-            String msg = String.format("Error removing topic with id '%s' on Solr Core '%s'", conceptId,
-                solrCoreId);
+            String msg = String
+                    .format("Error removing concept '%s' on Solr Core '%s'", conceptId, solrCoreId);
             throw new ClassifierException(msg, e);
         }
     }
@@ -878,7 +914,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         cvFoldCount = foldCount;
     }
 
-    protected Dictionary<String,Object> getCanonicalConfiguration(EmbeddedSolrServer server) {
+    protected Dictionary<String,Object> getCanonicalConfiguration(Object server) {
         Hashtable<String,Object> config = new Hashtable<String,Object>();
         config.put(EnhancementEngine.PROPERTY_NAME, engineName + "-evaluation");
         config.put(TopicClassificationEngine.ENTRY_ID_FIELD, "entry_id");
@@ -901,39 +937,50 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     public boolean isEvaluationRunning() {
-        return evaluationFolder != null;
+        return evaluationRunning;
     }
 
-    public int updatePerformanceEstimates(boolean incremental) throws ClassifierException,
-                                                              TrainingSetException {
-        if (evaluationFolder != null) {
+    synchronized public int updatePerformanceEstimates(boolean incremental) throws ClassifierException,
+                                                                           TrainingSetException {
+        checkTrainingSet();
+        if (evaluationRunning) {
             throw new ClassifierException("Another evaluation is already running");
         }
         int updatedTopics = 0;
-        int cvFoldCount = 3; // 3-folds CV is hardcoded for now
-        int cvIterationCount = 1; // only one 3-folds CV iteration
-
-        TopicClassificationEngine classifier = new TopicClassificationEngine();
-        classifier.setTrainingSet(trainingSet);
+        File tmpfolder = null;
         try {
+            tmpfolder = File.createTempFile("stanbol-evaluation-folder-", ".tmp");
+            tmpfolder.delete();
+            tmpfolder.mkdir();
+            evaluationRunning = true;
+            int cvFoldCount = 3; // 3-folds CV is hardcoded for now
+            int cvIterationCount = 1; // only one 3-folds CV iteration
+
+            // We will use the training set quite intensively, ensure that the index is packed and its
+            // statistics are up to date
+            getTrainingSet().optimize();
+
             // TODO: make the temporary folder path configurable with a property
-            evaluationFolder = File.createTempFile("stanbol-classifier-evaluation-", "-solr");
             for (int cvFoldIndex = 0; cvFoldIndex < cvIterationCount; cvFoldIndex++) {
-                updatedTopics = performCVFold(classifier, cvFoldIndex, cvFoldCount, cvIterationCount,
+                updatedTopics = performCVFold(tmpfolder, cvFoldIndex, cvFoldCount, cvIterationCount,
                     incremental);
             }
+            SolrServer solrServer = getActiveSolrServer();
+            solrServer.optimize();
         } catch (ConfigurationException e) {
             throw new ClassifierException(e);
         } catch (IOException e) {
             throw new ClassifierException(e);
+        } catch (SolrServerException e) {
+            throw new ClassifierException(e);
         } finally {
-            FileUtils.deleteQuietly(evaluationFolder);
-            evaluationFolder = null;
+            FileUtils.deleteQuietly(tmpfolder);
+            evaluationRunning = false;
         }
         return updatedTopics;
     }
 
-    protected int performCVFold(final TopicClassificationEngine classifier,
+    protected int performCVFold(File tmpfolder,
                                 int cvFoldIndex,
                                 int cvFoldCount,
                                 int cvIterations,
@@ -945,15 +992,26 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         log.info(String.format("Performing evaluation %d-fold CV iteration %d/%d on classifier %s",
             cvFoldCount, cvFoldIndex + 1, cvIterations, engineName));
         long start = System.currentTimeMillis();
-        FileUtils.deleteQuietly(evaluationFolder);
-        evaluationFolder.mkdir();
+        final TopicClassificationEngine classifier = new TopicClassificationEngine();
         try {
-            EmbeddedSolrServer evaluationServer = EmbeddedSolrHelper.makeEmbeddedSolrServer(evaluationFolder,
-                "evaluationclassifierserver", "default-topic-model", "default-topic-model");
-            classifier.configure(getCanonicalConfiguration(evaluationServer));
+            if (managedSolrServer != null) {
+                // OSGi setup: the evaluation server will be generated automatically using the
+                // managedSolrServer
+                classifier.bindManagedSolrServer(managedSolrServer);
+                classifier.activate(context, getCanonicalConfiguration(engineName + "-evaluation"));
+            } else {
+                // non-OSGi runtime, need to do the setup manually
+                EmbeddedSolrServer evaluationServer = EmbeddedSolrHelper.makeEmbeddedSolrServer(tmpfolder,
+                    "evaluationclassifierserver", "default-topic-model", "default-topic-model");
+                classifier.configure(getCanonicalConfiguration(evaluationServer));
+            }
         } catch (Exception e) {
             throw new ClassifierException(e);
         }
+
+        // clean all previous concepts from the evaluation classifier in case we are reusing an existing solr
+        // index from OSGi.
+        classifier.removeAllConcepts();
 
         // iterate over all the topics to register them in the evaluation classifier
         batchOverTopics(new BatchProcessor<SolrDocument>() {
@@ -978,6 +1036,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
         // build the model on the for the current train CV folds
         classifier.setCrossValidationInfo(cvFoldIndex, cvFoldCount);
+        // bind our new classifier to the same training set at the parent
+        classifier.setTrainingSet(getTrainingSet());
         classifier.updateModel(false);
 
         final int foldCount = cvFoldCount;
@@ -989,6 +1049,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             @Override
             public int process(List<SolrDocument> batch) throws TrainingSetException, ClassifierException {
                 int offset;
+                int updated = 0;
                 for (SolrDocument topicMetadata : batch) {
                     String topic = topicMetadata.getFirstValue(conceptUriField).toString();
                     List<String> topics = Arrays.asList(topic);
@@ -998,8 +1059,15 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     int positiveSupport = 0;
                     offset = 0;
                     Batch<Example> examples = Batch.emtpyBatch(Example.class);
+                    boolean skipTopic = false;
                     do {
                         examples = getTrainingSet().getPositiveExamples(topics, examples.nextOffset);
+                        if (offset == 0 && examples.items.size() < MIN_EVALUATION_SAMPLES) {
+                            // we need a minimum about of examples otherwise it's really not
+                            // worth computing statistics
+                            skipTopic = true;
+                            break;
+                        }
                         for (Example example : examples.items) {
                             if (!(offset % foldCount == foldIndex)) {
                                 // this example is not part of the test fold, skip it
@@ -1025,7 +1093,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                                 }
                             }
                         }
-                    } while (examples.hasMore && offset < MAX_EVALUATION_SAMPLES);
+                    } while (!skipTopic && examples.hasMore && offset < MAX_EVALUATION_SAMPLES);
 
                     List<String> falsePositiveExamples = new ArrayList<String>();
                     int falsePositives = 0;
@@ -1033,6 +1101,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     offset = 0;
                     examples = Batch.emtpyBatch(Example.class);
                     do {
+                        if (skipTopic) {
+                            break;
+                        }
                         examples = getTrainingSet().getNegativeExamples(topics, examples.nextOffset);
                         for (Example example : examples.items) {
                             if (!(offset % foldCount == foldIndex)) {
@@ -1057,31 +1128,39 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                         }
                     } while (examples.hasMore && offset < MAX_EVALUATION_SAMPLES);
 
-                    // compute precision, recall and f1 score for the current test fold and topic
-                    float precision = 0;
-                    if (truePositives != 0 || falsePositives != 0) {
-                        precision = truePositives / (float) (truePositives + falsePositives);
+                    if (skipTopic) {
+                        log.debug("Skipping evaluation of {} because too few positive examples.", topic);
+                    } else {
+                        // compute precision, recall and f1 score for the current test fold and topic
+                        float precision = 0;
+                        if (truePositives != 0 || falsePositives != 0) {
+                            precision = truePositives / (float) (truePositives + falsePositives);
+                        }
+                        float recall = 0;
+                        if (truePositives != 0 || falseNegatives != 0) {
+                            recall = truePositives / (float) (truePositives + falseNegatives);
+                        }
+                        updatePerformanceMetadata(topic, precision, recall, positiveSupport, negativeSupport,
+                            falsePositiveExamples, falseNegativeExamples);
+                        updated += 1;
                     }
-                    float recall = 0;
-                    if (truePositives != 0 || falseNegatives != 0) {
-                        recall = truePositives / (float) (truePositives + falseNegatives);
-                    }
-                    updatePerformanceMetadata(topic, precision, recall, positiveSupport, negativeSupport,
-                        falsePositiveExamples, falseNegativeExamples);
                 }
                 try {
                     getActiveSolrServer().commit();
                 } catch (Exception e) {
                     throw new ClassifierException(e);
                 }
-                return batch.size();
+                return updated;
             }
         });
 
-        float averageF1 = 0.0f;
         long stop = System.currentTimeMillis();
-        log.info(String.format("Finished CV iteration %d/%d on classifier %s in %fs. F1-score = %f",
-            cvFoldIndex + 1, cvFoldCount, engineName, (stop - start) / 1000.0, averageF1));
+        log.info(String.format("Finished CV iteration %d/%d on classifier %s in %fs.", cvFoldIndex + 1,
+            cvFoldCount, engineName, (stop - start) / 1000.0));
+        if (context != null) {
+            // close open trackers
+            classifier.deactivate(context);
+        }
         return updatedTopics;
     }
 
@@ -1120,6 +1199,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 newEntry.setField(modelEvaluationDateField, UTCTimeStamper.nowUtcDate());
                 solrServer.add(newEntry);
             }
+            log.info(String.format("Performance for concept '%s': precision=%f, recall=%f,"
+                                   + " positiveSupport=%d, negativeSupport=%d", conceptId, precision, recall,
+                positiveSupport, negativeSupport));
         } catch (Exception e) {
             String msg = String
                     .format("Error updating performance metadata for topic '%s' on Solr Core '%s'",

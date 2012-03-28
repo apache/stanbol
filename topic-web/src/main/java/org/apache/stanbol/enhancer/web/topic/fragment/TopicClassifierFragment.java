@@ -29,6 +29,7 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.apache.stanbol.commons.web.base.readers.GraphReader;
 import org.apache.stanbol.enhancer.web.topic.resource.TopicClassifierRootResource;
 import org.apache.stanbol.enhancer.web.topic.resource.TopicModelResource;
 import org.osgi.framework.BundleContext;
@@ -64,6 +65,7 @@ public class TopicClassifierFragment implements WebFragment {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(TopicClassifierRootResource.class);
         classes.add(TopicModelResource.class);
+        classes.add(GraphReader.class);
         return classes;
     }
 
