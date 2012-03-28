@@ -35,6 +35,7 @@
   <modules>
     <module>base</module>
     <module>manager</module>
+    <module>adapters</module>
     <module>refactor</module>
     <module>web</module>
     <module>bundlelist</module>
