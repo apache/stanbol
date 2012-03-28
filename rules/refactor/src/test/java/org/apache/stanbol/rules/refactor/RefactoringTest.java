@@ -19,291 +19,232 @@ package org.apache.stanbol.rules.refactor;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Set;
 
+import junit.framework.Assert;
+
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
+import org.apache.stanbol.commons.owl.transformation.JenaToClerezzaConverter;
+import org.apache.stanbol.rules.adapters.impl.RuleAdaptersFactoryImpl;
+import org.apache.stanbol.rules.adapters.impl.RuleAdaptersManagerImpl;
+import org.apache.stanbol.rules.adapters.sparql.ClerezzaAdapter;
+import org.apache.stanbol.rules.base.api.AlreadyExistingRecipeException;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
-import org.apache.stanbol.rules.base.api.Rule;
+import org.apache.stanbol.rules.base.api.RecipeConstructionException;
+import org.apache.stanbol.rules.base.api.RecipeEliminationException;
+import org.apache.stanbol.rules.base.api.RuleAdapterManager;
+import org.apache.stanbol.rules.base.api.RuleAdaptersFactory;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.base.api.util.RecipeList;
-import org.apache.stanbol.rules.base.api.util.RuleList;
-import org.apache.stanbol.rules.manager.KB;
-import org.apache.stanbol.rules.manager.changes.RecipeImpl;
+import org.apache.stanbol.rules.manager.ClerezzaRuleStore;
 import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
 import org.apache.stanbol.rules.refactor.api.RefactoringException;
 import org.apache.stanbol.rules.refactor.impl.RefactorerImpl;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import org.semanticweb.owlapi.util.AutoIRIMapper;
 
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+
+/**
+ * 
+ * @author anuzzolese
+ * 
+ */
 public class RefactoringTest {
 
-    static RuleStore ruleStore;
-    static OWLOntology ontology;
-    static IRI recipeIRI;
+    private static Refactorer refactorer;
+    private static TcManager tcm;
+    private static RuleStore store;
+    private TripleCollection tripleCollection;
+    private String rule;
 
     @BeforeClass
-    public static void setup() throws Exception {
+    public static void setUpClass() throws Exception {
 
-        recipeIRI = IRI.create("http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyTestRecipe");
+        // recipeIRI = IRI.create("http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyTestRecipe");
 
-        InputStream ontologyStream = RefactoringTest.class
-                .getResourceAsStream("/META-INF/test/testKReSOnt.owl");
-        InputStream recipeStream = RefactoringTest.class.getResourceAsStream("/META-INF/test/rmi_config.owl");
-
-        OWLOntologyIRIMapper map1 = new AutoIRIMapper(new File(RefactoringTest.class.getResource(
-            "/META-INF/test/").toURI()), false);
-
-        OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
-        mgr.addIRIMapper(map1);
-
-        final OWLOntology recipeModel = mgr.loadOntologyFromOntologyDocument(recipeStream);
-
-        mgr = OWLManager.createOWLOntologyManager();
-        mgr.addIRIMapper(map1);
-
-        ontology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(ontologyStream);
-
-        ruleStore = new RuleStore() {
-
-            @Override
-            public void setStore(OWLOntology owl) {
-                // TODO Auto-generated method stub
-
+        class SpecialTcManager extends TcManager {
+            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
+                super();
+                bindQueryEngine(qe);
+                bindWeightedTcProvider(wtcp);
             }
+        }
 
-            @Override
-            public void saveOntology() throws OWLOntologyStorageException {
-                // TODO Auto-generated method stub
+        QueryEngine qe = new JenaSparqlEngine();
+        WeightedTcProvider wtcp = new SimpleTcProvider();
+        tcm = new SpecialTcManager(qe, wtcp);
 
-            }
+        Dictionary<String,Object> configuration = new Hashtable<String,Object>();
+        store = new ClerezzaRuleStore(configuration, tcm);
 
-            @Override
-            public RecipeList listRecipes() {
-                // TODO Auto-generated method stub
-                return null;
-            }
+        Dictionary<String,Object> configuration2 = new Hashtable<String,Object>();
 
-            @Override
-            public Set<IRI> listIRIRecipes() {
-                // TODO Auto-generated method stub
-                return null;
-            }
+        RuleAdaptersFactory ruleAdaptersFactory = new RuleAdaptersFactoryImpl();
 
-            @Override
-            public String getRuleStoreNamespace() {
-                // TODO Auto-generated method stub
-                return null;
-            }
+        Dictionary<String,Object> configuration3 = new Hashtable<String,Object>();
+        new ClerezzaAdapter(configuration3, store, ruleAdaptersFactory);
 
-            @Override
-            public Recipe getRecipe(IRI recipeIRI) throws NoSuchRecipeException {
-                Recipe recipe = null;
+        RuleAdapterManager ruleAdapterManager = new RuleAdaptersManagerImpl(configuration2,
+                ruleAdaptersFactory);
 
-                if (recipeIRI != null) {
-                    OWLDataFactory factory = OWLManager.getOWLDataFactory();
-                    OWLIndividual recipeIndividual = factory.getOWLNamedIndividual(recipeIRI);
-                    if (recipeIndividual != null) {
-                        String ruleNS = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
+        Dictionary<String,Object> configuration4 = new Hashtable<String,Object>();
 
-                        /**
-                         * First get the recipe description in the rule/recipe ontology.
-                         */
-                        OWLDataProperty hasDescription = factory.getOWLDataProperty(IRI
-                                .create(ruleNS + "hasDescription"));
+        refactorer = new RefactorerImpl(wtcp, tcm, store, ruleAdapterManager, configuration4);
+    }
 
-                        String recipeDescription = null;
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        store = null;
+        tcm = null;
+        refactorer = null;
+    }
 
-                        Set<OWLLiteral> descriptions = recipeIndividual.getDataPropertyValues(hasDescription,
-                            recipeModel);
-                        for (OWLLiteral description : descriptions) {
-                            recipeDescription = description.getLiteral();
-                        }
+    @Before
+    public void setUp() {
+        String separator = System.getProperty("line.separator");
+        rule = "kres = <http://kres.iks-project.eu/ontology.owl#> . " + separator
+               + "foaf = <http://xmlns.com/foaf/0.1/> . " + separator
+               + "rule1[ is(kres:Person, ?x) . endsWith(str(?x), \"Person\") -> is(foaf:Person, ?x) ]";
 
-                        /**
-                         * Then retrieve the rules associated to the recipe in the rule store.
-                         */
-                        OWLObjectProperty objectProperty = factory.getOWLObjectProperty(IRI
-                                .create(ruleNS + "hasRule"));
-                        Set<OWLIndividual> rules = recipeIndividual.getObjectPropertyValues(objectProperty,
-                            recipeModel);
+        InputStream inputStream = RefactoringTest.class.getResourceAsStream("/META-INF/test/testKReSOnt.owl");
+        Model jenaModel = ModelFactory.createDefaultModel();
+        jenaModel = jenaModel.read(inputStream, null);
 
-                        String kReSRulesInKReSSyntax = "";
+        tripleCollection = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(jenaModel);
 
-                        /**
-                         * Fetch the rule content expressed as a literal in Rule Syntax.
-                         */
-                        OWLDataProperty hasBodyAndHead = factory.getOWLDataProperty(IRI
-                                .create(ruleNS + "hasBodyAndHead"));
-                        for (OWLIndividual rule : rules) {
+        MGraph mGraph = tcm.createMGraph(new UriRef(
+                "http://incubator.apache.com/stanbol/rules/refactor/test/graph"));
+        mGraph.addAll(tripleCollection);
 
-                            Set<OWLLiteral> kReSRuleLiterals = rule.getDataPropertyValues(hasBodyAndHead,
-                                recipeModel);
+        Recipe recipe;
+        try {
+            recipe = store.createRecipe(new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"),
+                "Recipe for testing the Refactor.");
+            recipe = store.addRulesToRecipe(recipe, rule, "Test");
+        } catch (AlreadyExistingRecipeException e) {
+            Assert.fail(e.getMessage());
+        }
 
-                            for (OWLLiteral kReSRuleLiteral : kReSRuleLiterals) {
-                                String ruleTmp = kReSRuleLiteral.getLiteral().replace("&lt;", "<");
-                                ruleTmp = ruleTmp.replace("&gt;", ">");
-                                kReSRulesInKReSSyntax += ruleTmp + System.getProperty("line.separator");
-                            }
-                        }
+    }
 
-                        /**
-                         * Create the Recipe object.
-                         */
+    @After
+    public void tearDown() {
+        tcm.deleteTripleCollection(new UriRef("http://incubator.apache.com/stanbol/rules/refactor/test/graph"));
 
-                        RuleList ruleList = RuleParserImpl.parse(kReSRulesInKReSSyntax).getkReSRuleList();
-                        recipe = new RecipeImpl(recipeIRI, recipeDescription, ruleList);
-                    } else {
-                        throw new NoSuchRecipeException(recipeIRI);
-                    }
-                }
-
-                return recipe;
-            }
-
-            @Override
-            public OWLOntology getOntology() {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public String getFilePath() {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public boolean addRecipe(IRI recipeIRI, String recipeDescription) {
-                // TODO Auto-generated method stub
-                return false;
-            }
-
-            @Override
-            public Recipe addRuleToRecipe(String recipeID, String kReSRuleInKReSSyntax) throws NoSuchRecipeException {
-                return null;
-
-            }
-
-            @Override
-            public Recipe addRuleToRecipe(Recipe recipe, String kReSRuleInKReSSyntax) {
-                return null;
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public void createRecipe(String recipeID, String rulesInKReSSyntax) {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public boolean removeRecipe(Recipe recipe) {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            @Override
-            public boolean removeRecipe(IRI recipeIRI) {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            @Override
-            public boolean removeRule(Rule rule) {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            @Override
-            public Recipe addRuleToRecipe(Recipe recipe, InputStream ruleInKReSSyntax) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public Recipe addRuleToRecipe(String recipeID, InputStream ruleInKReSSyntax) throws NoSuchRecipeException {
-                // TODO Auto-generated method stub
-                return null;
-            }
-        };
-
+        try {
+            store.removeRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
+        } catch (RecipeEliminationException e) {
+            Assert.fail(e.getMessage());
+        }
     }
 
     @Test
     public void refactoringTest() throws Exception {
-        Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
 
-        class SpecialTcManager extends TcManager {
-            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
-                super();
-                bindQueryEngine(qe);
-                bindWeightedTcProvider(wtcp);
-            }
-        }
+        Recipe recipe = store.getRecipe(new UriRef(
+                "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
 
-        QueryEngine qe = new JenaSparqlEngine();
-        WeightedTcProvider wtcp = new SimpleTcProvider();
-        TcManager tcm = new SpecialTcManager(qe, wtcp);
+        TripleCollection tc = refactorer.graphRefactoring(new UriRef(
+                "http://incubator.apache.com/stanbol/rules/refactor/test/graph"), recipe.getRecipeID());
 
+        Assert.assertNotNull(tc);
 
-        Refactorer refactorer = new RefactorerImpl(null, new Serializer(), tcm, ruleStore,
-                emptyConfig);
-        try {
-            refactorer.ontologyRefactoring(ontology, recipeIRI);
-        } catch (RefactoringException e) {
-            fail("Error while refactoring.");
-        } catch (NoSuchRecipeException e) {
-            fail("Error while refactoring: no such recipe");
-        }
     }
 
     @Test
     public void easyRefactoringTest() throws Exception {
-        Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
 
-        class SpecialTcManager extends TcManager {
-            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
-                super();
-                bindQueryEngine(qe);
-                bindWeightedTcProvider(wtcp);
-            }
+        Recipe recipe = store.getRecipe(new UriRef(
+                "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
+        try {
+
+            TripleCollection tc = refactorer.graphRefactoring(tripleCollection, recipe);
+
+            Assert.assertNotNull(tc);
+
+        } catch (RefactoringException e) {
+            fail("Error while refactoring.");
+        }
+    }
+
+    @Test
+    public void refactoringWithNonExistentRecipeTest() throws Exception {
+
+        try {
+
+            refactorer.graphRefactoring(new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/refactoredGraph"), new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/graph"), new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/recipeB"));
+            Assert.fail();
+
+        } catch (NoSuchRecipeException e) {
+            Assert.assertTrue(e.getMessage(), true);
         }
 
-        QueryEngine qe = new JenaSparqlEngine();
-        WeightedTcProvider wtcp = new SimpleTcProvider();
-        TcManager tcm = new SpecialTcManager(qe, wtcp);
+    }
 
-        String recipe = "rule[is(<http://kres.iks-project.eu/ontology.owl#Person>, ?x) -> is(<http://xmlns.com/foaf/0.1/Person>, ?x)]";
+    @Test
+    public void refactoringWithARecipeWithNotSupportedAtoms() {
+        String separator = System.getProperty("line.separator");
 
-        KB kb = RuleParserImpl.parse(recipe);
-        RuleList ruleList = kb.getkReSRuleList();
-        Recipe actualRecipe = new RecipeImpl(null, null, ruleList);
+        // the localname atom is not supported by the clerezza adapter and should throw an exception.
+        String rule = "kres = <http://kres.iks-project.eu/ontology.owl#> . " + separator
+                      + "foaf = <http://xmlns.com/foaf/0.1/> . " + separator
+                      + "rule2[ is(kres:Person, ?x) . same(localname(?y), \"text\") -> is(foaf:Person, ?x) ]";
 
-        Refactorer refactorer = new RefactorerImpl(null, new Serializer(), tcm, ruleStore,
-                emptyConfig);
         try {
-            refactorer.ontologyRefactoring(ontology, actualRecipe);
+            Recipe recipe = store.getRecipe(new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
+
+            recipe = store.addRulesToRecipe(recipe, rule, "Test");
+
+            refactorer.graphRefactoring(new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/refactoredGraph"), new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/graph"), new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
+
+        } catch (NoSuchRecipeException e) {
+            Assert.fail();
+        } catch (RecipeConstructionException e) {
+            Assert.fail();
+        } catch (RefactoringException e) {
+            Assert.assertTrue(e.getMessage(), true);
+        }
+
+    }
+
+    @Test
+    public void persistentRefactoringTest() throws Exception {
+
+        try {
+
+            refactorer.graphRefactoring(new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/refactoredGraph"), new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/graph"), new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
+
+            TripleCollection tc = tcm.getMGraph(new UriRef(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/refactoredGraph"));
+
+            Assert.assertNotNull(tc);
+
         } catch (RefactoringException e) {
             fail("Error while refactoring.");
         }
@@ -311,26 +252,11 @@ public class RefactoringTest {
 
     @Test
     public void brokenRecipeTest() throws Exception {
-        Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
-
-        class SpecialTcManager extends TcManager {
-            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
-                super();
-                bindQueryEngine(qe);
-                bindWeightedTcProvider(wtcp);
-            }
-        }
-
-        QueryEngine qe = new JenaSparqlEngine();
-        WeightedTcProvider wtcp = new SimpleTcProvider();
-        TcManager tcm = new SpecialTcManager(qe, wtcp);
-
         // broken recipe
         String recipe = "rule[is(<http://kres.iks-project.eu/ontology.owl#Person>) -> is(<http://xmlns.com/foaf/0.1/Person>, ?x)]";
 
-        KB kb = null;
         try {
-            kb = RuleParserImpl.parse(recipe);
+            RuleParserImpl.parse("http://kres.iks-project.eu/ontology.owl#", recipe);
         } catch (IllegalStateException e) {
             assertTrue(true);
         }

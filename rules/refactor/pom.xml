@@ -84,7 +84,7 @@
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>jena</artifactId>
 		</dependency>
-
+		
 		<!-- Persistence deps -->
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
@@ -120,11 +120,22 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.rules.manager</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.adapters</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</dependency>
+		
 
 		<!-- Testing deps -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.adapters.sparql.clerezza</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>

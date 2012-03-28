@@ -16,93 +16,52 @@
  */
 package org.apache.stanbol.rules.refactor.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
-import org.apache.clerezza.rdf.core.impl.SimpleGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.sparql.ParseException;
-import org.apache.clerezza.rdf.core.sparql.QueryParser;
+import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.owl.transformation.JenaToClerezzaConverter;
-import org.apache.stanbol.commons.owl.transformation.JenaToOwlConvert;
-import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
-import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
-import org.apache.stanbol.rules.base.api.Rule;
+import org.apache.stanbol.rules.base.api.RecipeConstructionException;
+import org.apache.stanbol.rules.base.api.RuleAdapter;
+import org.apache.stanbol.rules.base.api.RuleAdapterManager;
+import org.apache.stanbol.rules.base.api.RuleAtomCallExeption;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.base.api.util.RuleList;
+import org.apache.stanbol.rules.base.api.UnavailableRuleObjectException;
+import org.apache.stanbol.rules.base.api.UnsupportedTypeForExportException;
 import org.apache.stanbol.rules.manager.arqextention.CreatePropertyURIStringFromLabel;
 import org.apache.stanbol.rules.manager.arqextention.CreateStandardLabel;
 import org.apache.stanbol.rules.manager.arqextention.CreateURI;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
 import org.apache.stanbol.rules.refactor.api.RefactoringException;
-import org.apache.stanbol.rules.refactor.api.util.URIGenerator;
 import org.osgi.service.component.ComponentContext;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.Syntax;
-import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.reasoner.Reasoner;
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
 import com.hp.hpl.jena.sparql.pfunction.PropertyFunctionRegistry;
-import com.hp.hpl.jena.update.UpdateAction;
-
-class ForwardChainingRefactoringGraph {
-
-    private MGraph inputGraph;
-    private Graph outputGraph;
-
-    public ForwardChainingRefactoringGraph(MGraph inputGraph, Graph outputGraph) {
-        this.inputGraph = inputGraph;
-        this.outputGraph = outputGraph;
-    }
-
-    public MGraph getInputGraph() {
-        return inputGraph;
-    }
-
-    public Graph getOutputGraph() {
-        return outputGraph;
-    }
-
-}
 
 /**
- * The RefactorerImpl is the concrete implementation of the Refactorer interface defined in the KReS APIs. A
- * SemionRefacter is able to perform ontology refactorings and mappings.
+ * The RefactorerImpl is the concrete implementation of the Refactorer interface defined in the rule APIs of
+ * Stanbol. A Refacter is able to perform RDF graph refactorings and mappings.
  * 
- * @author andrea.nuzzolese
+ * @author anuzzolese
  * 
  */
 
@@ -110,20 +69,19 @@ class ForwardChainingRefactoringGraph {
 @Service(Refactorer.class)
 public class RefactorerImpl implements Refactorer {
 
-	private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
-	@Reference
-    protected RuleStore ruleStore;
-
-    
     @Reference
-    protected Serializer serializer;
+    protected RuleStore ruleStore;
 
     @Reference
     protected TcManager tcManager;
 
     @Reference
     protected WeightedTcProvider weightedTcProvider;
+
+    @Reference
+    protected RuleAdapterManager ruleAdapterManager;
 
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
@@ -152,15 +110,15 @@ public class RefactorerImpl implements Refactorer {
      * @param configuration
      */
     public RefactorerImpl(WeightedTcProvider weightedTcProvider,
-                          Serializer serializer,
                           TcManager tcManager,
                           RuleStore ruleStore,
+                          RuleAdapterManager ruleAdapterManager,
                           Dictionary<String,Object> configuration) {
         this();
         this.weightedTcProvider = weightedTcProvider;
-        this.serializer = serializer;
         this.tcManager = tcManager;
         this.ruleStore = ruleStore;
+        this.ruleAdapterManager = ruleAdapterManager;
         activate(configuration);
     }
 
@@ -195,18 +153,8 @@ public class RefactorerImpl implements Refactorer {
         log.info("in " + getClass() + " deactivate with context " + context);
 
         this.weightedTcProvider = null;
-        this.serializer = null;
         this.tcManager = null;
         this.ruleStore = null;
-    }
-
-    private ForwardChainingRefactoringGraph forwardChainingOperation(String query, MGraph mGraph) {
-
-        Graph graph = kReSCoreOperation(query, mGraph);
-
-        mGraph.addAll(graph);
-
-        return new ForwardChainingRefactoringGraph(mGraph, graph);
     }
 
     @Override
@@ -215,155 +163,69 @@ public class RefactorerImpl implements Refactorer {
         return weightedTcProvider.getMGraph(uriRef);
     }
 
-    private Graph kReSCoreOperation(String query, MGraph mGraph) {
-
-        /*
-         * 
-         * Graph constructedGraph = null; try { ConstructQuery constructQuery = (ConstructQuery)
-         * QueryParser.getInstance() .parse(query); constructedGraph = tcManager.executeSparqlQuery(
-         * constructQuery, mGraph);
-         * 
-         * } catch (ParseException e) { log.error(e.getMessage()); } catch (NoQueryEngineException e) {
-         * log.error(e.getMessage()); }
-         * 
-         * return constructedGraph;
-         */
-
-        Model model = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph);
-
-        Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
-        QueryExecution qexec = QueryExecutionFactory.create(sparqlQuery, model);
-
-        return JenaToClerezzaConverter.jenaModelToClerezzaMGraph(qexec.execConstruct()).getGraph();
-
-    }
-
     /**
-     * Method borrowed from the old ontonet ClerezzaStorage
+     * Execute a sparql construct on Clerezza.
      * 
      * @param sparql
-     * @param datasetURI
+     * @param datasetID
      * @return
      */
-    private OWLOntology sparqlConstruct(String sparql, String datasetURI) {
+    private Graph sparqlConstruct(ConstructQuery constructQuery, UriRef datasetID) {
 
-        org.apache.clerezza.rdf.core.sparql.query.Query query;
-        MGraph mGraph = new SimpleMGraph();
-        try {
-            query = QueryParser.getInstance().parse(sparql);
-            UriRef datasetUriRef = new UriRef(datasetURI);
-            MGraph dataset = weightedTcProvider.getMGraph(datasetUriRef);
-            mGraph.addAll((SimpleGraph) tcManager.executeSparqlQuery(query, dataset));
-        } catch (ParseException e) {
-            log.error("Unable to execute SPARQL. ", e);
-        }
+        MGraph graph = weightedTcProvider.getMGraph(datasetID);
+        return sparqlConstruct(constructQuery, graph);
 
-        Model om = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph);
-        JenaToOwlConvert converter = new JenaToOwlConvert();
-
-        return converter.ModelJenaToOwlConvert(om, "RDF/XML");
     }
 
+    private Graph sparqlConstruct(ConstructQuery constructQuery, TripleCollection tripleCollection) {
+
+        return tcManager.executeSparqlQuery(constructQuery, tripleCollection);
+
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
-    public void ontologyRefactoring(IRI refactoredOntologyIRI, IRI datasetURI, IRI recipeIRI) throws RefactoringException,
-                                                                                             NoSuchRecipeException {
-
-        OWLOntology refactoredOntology = null;
-
-        // ClerezzaOntologyStorage ontologyStorage = onManager.getOntologyStore();
+    public void graphRefactoring(UriRef refactoredOntologyID, UriRef datasetID, UriRef recipeID) throws RefactoringException,
+                                                                                                NoSuchRecipeException {
 
         Recipe recipe;
         try {
-            recipe = ruleStore.getRecipe(recipeIRI);
-
-            RuleList kReSRuleList = recipe.getkReSRuleList();
-
-            OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-
-            String fingerPrint = "";
-            for (Rule kReSRule : kReSRuleList) {
-                String sparql = kReSRule.toSPARQL();
-                OWLOntology refactoredDataSet = /* ontologyStorage */this.sparqlConstruct(sparql,
-                    datasetURI.toString());
-
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                try {
-                    ontologyManager.saveOntology(refactoredDataSet, new RDFXMLOntologyFormat(), out);
-                    if (refactoredOntologyIRI == null) {
-                        ByteArrayOutputStream fpOut = new ByteArrayOutputStream();
-                        fingerPrint += URIGenerator.createID("", fpOut.toByteArray());
-                    }
-
-                } catch (OWLOntologyStorageException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-                ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-
-                try {
-                    ontologyManager.loadOntologyFromOntologyDocument(in);
-                } catch (OWLOntologyCreationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-            }
-
-            if (refactoredOntologyIRI == null) {
-                refactoredOntologyIRI = IRI.create(URIGenerator.createID("urn://", fingerPrint.getBytes()));
-            }
-            OWLOntologyMerger merger = new OWLOntologyMerger(ontologyManager);
-
             try {
+                recipe = ruleStore.getRecipe(recipeID);
 
-                refactoredOntology = merger.createMergedOntology(ontologyManager, refactoredOntologyIRI);
+                RuleAdapter ruleAdapter = ruleAdapterManager.getAdapter(recipe, ConstructQuery.class);
+                List<ConstructQuery> constructQueries = (List<ConstructQuery>) ruleAdapter.adaptTo(recipe,
+                    ConstructQuery.class);
 
-                /* ontologyStorage. */store(refactoredOntology);
-
-            } catch (OWLOntologyCreationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                MGraph mGraph = tcManager.createMGraph(refactoredOntologyID);
+                for (ConstructQuery constructQuery : constructQueries) {
+                    mGraph.addAll(this.sparqlConstruct(constructQuery, datasetID));
+                }
+            } catch (RecipeConstructionException e) {
+                throw new RefactoringException(
+                        "The cause of the refactoring excpetion is: " + e.getMessage(), e);
+            } catch (UnavailableRuleObjectException e) {
+                throw new RefactoringException(
+                        "The cause of the refactoring excpetion is: " + e.getMessage(), e);
+            } catch (UnsupportedTypeForExportException e) {
+                throw new RefactoringException(
+                        "The cause of the refactoring excpetion is: " + e.getMessage(), e);
+            } catch (RuleAtomCallExeption e) {
+                throw new RefactoringException(
+                        "The cause of the refactoring excpetion is: " + e.getMessage(), e);
             }
 
         } catch (NoSuchRecipeException e1) {
-            log.error("SemionRefactorer : No Such recipe in the KReS Rule Store", e1);
+            log.error("No Such recipe in the Rule Store", e1);
             throw e1;
         }
-
-        if (refactoredOntology == null) {
-            throw new RefactoringException();
-        }
     }
 
-    /**
-     * Method borrowed from the old ontonet ClerezzaStorage
-     * 
-     * @param o
-     */
-    private void store(OWLOntology o) {
-        // // Why was it using two converters earlier?
-        // JenaToOwlConvert converter = new JenaToOwlConvert();
-        // OntModel om = converter.ModelOwlToJenaConvert(o, "RDF/XML");
-        // MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
-        TripleCollection mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
-        MGraph mg2 = null;
-        IRI iri = OWLUtils.guessOntologyIdentifier(o);
-        UriRef ref = new UriRef(iri.toString());
-        try {
-            mg2 = tcManager.createMGraph(ref);
-        } catch (EntityAlreadyExistsException ex) {
-            log.info("Entity " + ref + " already exists in store. Replacing...");
-            mg2 = tcManager.getMGraph(ref);
-        }
-
-        mg2.addAll(mg);
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
-    public OWLOntology ontologyRefactoring(OWLOntology inputOntology, IRI recipeIRI) throws RefactoringException,
-                                                                                    NoSuchRecipeException {
-        OWLOntology refactoredOntology = null;
+    public TripleCollection graphRefactoring(UriRef graphID, UriRef recipeID) throws RefactoringException,
+                                                                             NoSuchRecipeException {
+        MGraph unionMGraph = null;
 
         // JenaToOwlConvert jenaToOwlConvert = new JenaToOwlConvert();
 
@@ -372,148 +234,62 @@ public class RefactorerImpl implements Refactorer {
 
         Recipe recipe;
         try {
-            recipe = ruleStore.getRecipe(recipeIRI);
+            recipe = ruleStore.getRecipe(recipeID);
 
-            RuleList kReSRuleList = recipe.getkReSRuleList();
-            log.info("RULE LIST SIZE : " + kReSRuleList.size());
+            RuleAdapter ruleAdapter = ruleAdapterManager.getAdapter(recipe, ConstructQuery.class);
+
+            List<ConstructQuery> constructQueries = (List<ConstructQuery>) ruleAdapter.adaptTo(recipe,
+                ConstructQuery.class);
+
+            unionMGraph = new SimpleMGraph();
+
+            for (ConstructQuery constructQuery : constructQueries) {
+                unionMGraph.addAll(this.sparqlConstruct(constructQuery, graphID));
+            }
+
+        } catch (NoSuchRecipeException e1) {
+            log.error("Refactor : No Such recipe in the Rule Store", e1);
+            throw e1;
+        } catch (RecipeConstructionException e) {
+            throw new RefactoringException("The cause of the refactoring excpetion is: " + e.getMessage(), e);
+        } catch (UnavailableRuleObjectException e) {
+            throw new RefactoringException("The cause of the refactoring excpetion is: " + e.getMessage(), e);
+        } catch (UnsupportedTypeForExportException e) {
+            throw new RefactoringException("The cause of the refactoring excpetion is: " + e.getMessage(), e);
+        } catch (RuleAtomCallExeption e) {
+            throw new RefactoringException("The cause of the refactoring excpetion is: " + e.getMessage(), e);
+        }
+
+        return unionMGraph.getGraph();
+
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public TripleCollection graphRefactoring(TripleCollection inputGraph, Recipe recipe) throws RefactoringException {
+
+        RuleAdapter ruleAdapter;
+        try {
+            ruleAdapter = ruleAdapterManager.getAdapter(recipe, ConstructQuery.class);
+            List<ConstructQuery> constructQueries = (List<ConstructQuery>) ruleAdapter.adaptTo(recipe,
+                ConstructQuery.class);
+
+            log.info("RULE LIST SIZE : " + constructQueries.size());
 
             MGraph unionMGraph = new SimpleMGraph();
-
-            TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology);
-
-            for (Rule kReSRule : kReSRuleList) {
-                String sparql = kReSRule.toSPARQL();
-                log.info("SPARQL : " + sparql);
-
-                Graph constructedGraph = null;
-
-                switch (kReSRule.getExpressiveness()) {
-                    case KReSCore:
-                        if (mGraph instanceof MGraph) constructedGraph = kReSCoreOperation(sparql,
-                            (MGraph) mGraph);
-                        break;
-                    case ForwardChaining:
-                        if (mGraph instanceof MGraph) {
-                            ForwardChainingRefactoringGraph forwardChainingRefactoringGraph = forwardChainingOperation(
-                                sparql, (MGraph) mGraph);
-                            constructedGraph = forwardChainingRefactoringGraph.getOutputGraph();
-                            mGraph = forwardChainingRefactoringGraph.getInputGraph();
-                        }
-                        break;
-                    case Reflexive:
-                        constructedGraph = kReSCoreOperation(sparql, unionMGraph);
-                        break;
-                    case SPARQLConstruct:
-                        if (mGraph instanceof MGraph) constructedGraph = kReSCoreOperation(sparql,
-                            (MGraph) mGraph);
-                        break;
-                    case SPARQLDelete:
-                        constructedGraph = sparqlUpdateOperation(sparql, unionMGraph);
-                        break;
-                    case SPARQLDeleteData:
-                        constructedGraph = sparqlUpdateOperation(sparql, unionMGraph);
-                        break;
-                    default:
-                        break;
-                }
-
-                if (constructedGraph != null) {
-                    unionMGraph.addAll(constructedGraph);
-                }
-
+            for (ConstructQuery constructQuery : constructQueries) {
+                unionMGraph.addAll(sparqlConstruct(constructQuery, inputGraph));
             }
 
-            refactoredOntology = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(unionMGraph);
-
-        } catch (NoSuchRecipeException e1) {
-            e1.printStackTrace();
-            log.error("SemionRefactorer : No Such recipe in the KReS Rule Store", e1);
-            throw e1;
+            return unionMGraph;
+        } catch (UnavailableRuleObjectException e) {
+            throw new RefactoringException("The cause of the refactoring excpetion is: " + e.getMessage(), e);
+        } catch (UnsupportedTypeForExportException e) {
+            throw new RefactoringException("The cause of the refactoring excpetion is: " + e.getMessage(), e);
+        } catch (RuleAtomCallExeption e) {
+            throw new RefactoringException("The cause of the refactoring excpetion is: " + e.getMessage(), e);
         }
 
-        if (refactoredOntology == null) {
-            throw new RefactoringException();
-        } else {
-            return refactoredOntology;
-        }
-    }
-
-    @Override
-    public OWLOntology ontologyRefactoring(OWLOntology inputOntology, Recipe recipe) throws RefactoringException {
-        OWLOntology refactoredOntology = null;
-
-        // JenaToOwlConvert jenaToOwlConvert = new JenaToOwlConvert();
-
-        // OntModel ontModel =
-        // jenaToOwlConvert.ModelOwlToJenaConvert(inputOntology, "RDF/XML");
-
-        // OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-
-        RuleList ruleList = recipe.getkReSRuleList();
-        log.info("RULE LIST SIZE : " + ruleList.size());
-
-        // OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-        // OWLOntologyManager ontologyManager2 = OWLManager.createOWLOntologyManager();
-
-        MGraph unionMGraph = new SimpleMGraph();
-
-        TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology);
-
-        for (Rule kReSRule : ruleList) {
-            String sparql = kReSRule.toSPARQL();
-            log.info("SPARQL : " + sparql);
-
-            Graph constructedGraph = null;
-
-            switch (kReSRule.getExpressiveness()) {
-                case KReSCore:
-                    if (mGraph instanceof MGraph) constructedGraph = kReSCoreOperation(sparql,
-                        (MGraph) mGraph);
-                    break;
-                case ForwardChaining:
-                    if (mGraph instanceof MGraph) {
-                        ForwardChainingRefactoringGraph forwardChainingRefactoringGraph = forwardChainingOperation(
-                            sparql, (MGraph) mGraph);
-                        constructedGraph = forwardChainingRefactoringGraph.getOutputGraph();
-                        mGraph = forwardChainingRefactoringGraph.getInputGraph();
-                    }
-                    break;
-                case Reflexive:
-                    constructedGraph = kReSCoreOperation(sparql, unionMGraph);
-                    break;
-                case SPARQLConstruct:
-                    if (mGraph instanceof MGraph) constructedGraph = kReSCoreOperation(sparql,
-                        (MGraph) mGraph);
-                    break;
-                case SPARQLDelete:
-                    constructedGraph = sparqlUpdateOperation(sparql, unionMGraph);
-                    break;
-                case SPARQLDeleteData:
-                    constructedGraph = sparqlUpdateOperation(sparql, unionMGraph);
-                    break;
-                default:
-                    break;
-            }
-
-            if (constructedGraph != null) {
-                unionMGraph.addAll(constructedGraph);
-            }
-
-        }
-
-        refactoredOntology = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(unionMGraph);
-
-        if (refactoredOntology == null) {
-            throw new RefactoringException();
-        } else {
-            return refactoredOntology;
-        }
-    }
-
-    private Graph sparqlUpdateOperation(String query, MGraph mGraph) {
-        Model model = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph);
-        UpdateAction.parseExecute(query, model);
-        return JenaToClerezzaConverter.jenaModelToClerezzaMGraph(model).getGraph();
     }
 
 }
