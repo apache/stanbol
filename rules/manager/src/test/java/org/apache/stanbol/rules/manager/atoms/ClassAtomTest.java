@@ -20,7 +20,6 @@ package org.apache.stanbol.rules.manager.atoms;
 import java.net.URI;
 
 import org.apache.stanbol.rules.base.api.RuleAtom;
-import org.apache.stanbol.rules.base.api.URIResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -28,8 +27,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class ClassAtomTest extends AtomTest {
 
-    private URIResource classResource;
-    private URIResource argument1;
+    private IObjectAtom classResource;
+    private IObjectAtom argument1;
 
     @Before
     public void setup() {

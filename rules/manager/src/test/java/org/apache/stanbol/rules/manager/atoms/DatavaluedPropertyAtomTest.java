@@ -21,7 +21,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.stanbol.rules.base.api.RuleAtom;
-import org.apache.stanbol.rules.base.api.URIResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -31,13 +30,13 @@ import com.hp.hpl.jena.vocabulary.XSD;
 
 public class DatavaluedPropertyAtomTest extends AtomTest {
 
-    private URIResource datatypeProperty;
-    private URIResource argument1;
+    private IObjectAtom datatypeProperty;
+    private IObjectAtom argument1;
 
     // argument2
-    private Object variable;
-    private Object literal;
-    private Object typedLiteral;
+    private RuleAtom variable;
+    private RuleAtom literal;
+    private RuleAtom typedLiteral;
 
     @Before
     public void setup() {
@@ -50,10 +49,11 @@ public class DatavaluedPropertyAtomTest extends AtomTest {
 
         variable = new VariableAtom(URI.create("http://kres.iks-project.eu/ontology/meta/variables#x"), false);
 
-        literal = "some text";
+        literal = new StringAtom("some text");
 
         try {
-            typedLiteral = new TypedLiteralAtom(3.0, new ResourceAtom(new URI(XSD.xdouble.getURI())));
+            typedLiteral = new TypedLiteralAtom(new NumberAtom("3.0"), new ResourceAtom(new URI(
+                    XSD.xdouble.getURI())));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

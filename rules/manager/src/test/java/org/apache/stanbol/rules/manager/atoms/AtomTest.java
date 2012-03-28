@@ -19,48 +19,26 @@ package org.apache.stanbol.rules.manager.atoms;
 
 import static org.junit.Assert.fail;
 
-import org.apache.stanbol.rules.base.api.JenaClauseEntry;
-import org.apache.stanbol.rules.base.api.JenaVariableMap;
 import org.apache.stanbol.rules.base.api.RuleAtom;
-import org.apache.stanbol.rules.manager.JenaVariableMapImpl;
 import org.junit.Before;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.SWRLAtom;
 
 public abstract class AtomTest {
 
     protected OWLDataFactory factory;
 
-    protected JenaVariableMap jenaVariableMap;
-
     @Before
     public void init() {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         this.factory = manager.getOWLDataFactory();
-        this.jenaVariableMap = new JenaVariableMapImpl();
     }
 
     protected void execTest(RuleAtom ruleAtom) {
-        String stanbolSyntax = ruleAtom.toKReSSyntax();
+        String stanbolSyntax = ruleAtom.toString();
         if (stanbolSyntax == null) {
-            fail(this.getClass().getCanonicalName() + " does not produce any rule in Stanbo syntax.");
-        }
-
-        String sparql = ruleAtom.toSPARQL().getObject();
-        if (sparql == null) {
-            fail(this.getClass().getCanonicalName() + " does not produce any rule as SPARQL CONSTRUCT.");
-        }
-
-        SWRLAtom swrlAtom = ruleAtom.toSWRL(factory);
-        if (swrlAtom == null) {
-            fail(this.getClass().getCanonicalName() + " does not produce any rule in SWRL.");
-        }
-
-        JenaClauseEntry jenaEntry = ruleAtom.toJenaClauseEntry(jenaVariableMap);
-        if (jenaEntry == null) {
-            fail(this.getClass().getCanonicalName() + " does not produce any rule in JENA.");
+            fail(this.getClass().getCanonicalName() + " does not produce any rule in Stanbol syntax.");
         }
     }
 

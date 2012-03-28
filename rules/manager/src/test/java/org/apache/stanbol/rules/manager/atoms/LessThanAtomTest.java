@@ -30,14 +30,14 @@ import com.hp.hpl.jena.vocabulary.XSD;
 
 public class LessThanAtomTest extends AtomTest {
 
-    private Object variable1;
-    private Object variable2;
+    private ExpressionAtom variable1;
+    private ExpressionAtom variable2;
 
-    private Object literal1;
-    private Object literal2;
+    private ExpressionAtom literal1;
+    private ExpressionAtom literal2;
 
-    private Object typedLiteral1;
-    private Object typedLiteral2;
+    private ExpressionAtom typedLiteral1;
+    private ExpressionAtom typedLiteral2;
 
     @Before
     public void setup() {
@@ -49,12 +49,14 @@ public class LessThanAtomTest extends AtomTest {
         variable2 = new VariableAtom(URI.create("http://kres.iks-project.eu/ontology/meta/variables#y"),
                 false);
 
-        literal1 = "some text";
-        literal2 = "some other text";
+        literal1 = new StringAtom("some text");
+        literal2 = new StringAtom("some other text");
 
         try {
-            typedLiteral1 = new TypedLiteralAtom(3.0, new ResourceAtom(new URI(XSD.xdouble.getURI())));
-            typedLiteral2 = new TypedLiteralAtom(5.0, new ResourceAtom(new URI(XSD.xdouble.getURI())));
+            typedLiteral1 = new TypedLiteralAtom(new NumberAtom("3.0"), new ResourceAtom(new URI(
+                    XSD.xdouble.getURI())));
+            typedLiteral2 = new TypedLiteralAtom(new NumberAtom("5.0"), new ResourceAtom(new URI(
+                    XSD.xdouble.getURI())));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

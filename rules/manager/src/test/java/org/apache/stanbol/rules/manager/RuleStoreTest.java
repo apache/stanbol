@@ -21,35 +21,34 @@
 
 package org.apache.stanbol.rules.manager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.File;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
+import org.apache.clerezza.rdf.core.sparql.QueryEngine;
+import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
+import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
+import org.apache.stanbol.rules.base.api.NoSuchRuleInRecipeException;
+import org.apache.stanbol.rules.base.api.Recipe;
+import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
+import org.apache.stanbol.rules.base.api.util.RecipeList;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.util.AutoIRIMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Set of tests for the validation of the features provided by the RuleStore.
  * 
- * @author elvio
+ * @author anuzzolese
  */
 public class RuleStoreTest {
 
@@ -58,53 +57,209 @@ public class RuleStoreTest {
     public RuleStoreTest() {}
 
     @BeforeClass
-    public static void setUpClass() throws Exception {}
+    public static void setUpClass() throws Exception {
+        class SpecialTcManager extends TcManager {
+            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
+                super();
+                bindQueryEngine(qe);
+                bindWeightedTcProvider(wtcp);
+            }
+        }
+
+        QueryEngine qe = new JenaSparqlEngine();
+        WeightedTcProvider wtcp = new SimpleTcProvider();
+        TcManager tcm = new SpecialTcManager(qe, wtcp);
+
+        Dictionary<String,Object> configuration = new Hashtable<String,Object>();
+        store = new ClerezzaRuleStore(configuration, tcm);
+    }
 
     @AfterClass
-    public static void tearDownClass() throws Exception {}
+    public static void tearDownClass() throws Exception {
+        store = null;
+    }
 
     @Before
     public void setUp() {
-        Dictionary<String,Object> configuration = new Hashtable<String,Object>();
-        store = new RuleStoreImpl(configuration, "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
-        blankStore = new RuleStoreImpl(configuration, "");
+
     }
 
     @After
     public void tearDown() {
-        store = null;
-        blankStore = null;
+
     }
 
-    public RuleStore store = null, blankStore = null;
+    public static RuleStore store = null;
 
     @Test
-    public void testKReSRuleStore() throws Exception {
-        OWLOntology owlmodel = store.getOntology();
-        log.debug("Path for default store config is " + blankStore.getFilePath());
-        assertNotNull(owlmodel);
-        OWLOntologyManager owlmanager = OWLManager.createOWLOntologyManager();
-        owlmanager.addIRIMapper(new AutoIRIMapper(new File("./src/main/resources/RuleOntology/"), false));
-        String src = "";
+    public void createRecipeTest() throws Exception {
+        Recipe recipe = store.createRecipe(new UriRef(
+                "http://incubator.apache.com/stanbol/rules/test/recipeA"), "The text recipe named A.");
+
+        if (recipe == null) {
+            Assert.fail();
+        }
+
+        log.debug("Created recipe with ID " + recipe.getRecipeID().toString());
+
+    }
+
+    @Test
+    public void addRuleToRecipeTest() throws Exception {
+        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+
+        String separator = System.getProperty("line.separator");
+        String rule = "rule1[" + separator + "	is(<http://dbpedia.org/ontology/Person>, ?x) . " + separator
+                      + "	has(<http://dbpedia.org/ontology/playsInTeam>, ?x, ?y) . " + separator
+                      + "	is (<http://dbpedia.org/ontology/FootballTeam>, ?y) " + separator + "		-> "
+                      + separator + "	is(<http://dbpedia.org/ontology/FootballPlayer>, ?x)" + separator
+                      + "] . " + "rule2[" + separator
+                      + "	is(<http://dbpedia.org/ontology/Organisation>, ?x) . " + separator
+                      + "	has(<http://dbpedia.org/ontology/hasProduct>, ?x, ?y)" + separator + "		-> "
+                      + separator + "	is(<http://dbpedia.org/ontology/Company>, ?x)" + separator + "]";
+
+        store.addRulesToRecipe(recipe, rule, "This is a test rule.");
+
+        if (recipe == null) {
+            Assert.fail();
+        }
+
+        log.debug("Got recipe with ID " + recipe.getRecipeID().toString());
+
+    }
+
+    @Test
+    public void getRecipeTest() throws Exception {
+        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+
+        if (recipe == null) {
+            Assert.fail();
+        } else {
+            System.out.println("Recipe: " + recipe.toString());
+        }
+
+        log.debug("Got recipe with ID " + recipe.getRecipeID().toString());
+
+    }
+
+    @Test
+    public void getNotExistingRuleByNameInRecipeTest() throws Exception {
+        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+
         try {
-            src = "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl";
-            assertEquals(owlmodel, owlmanager.loadOntologyFromOntologyDocument(new File(src)));
-        } catch (Exception e) {
-            try {
-                src = "./src/main/resources/RuleOntology/OffLineKReSOntologyRules.owl";
-                assertEquals(owlmodel, owlmanager.loadOntologyFromOntologyDocument(new File(src)));
-            } catch (OWLOntologyCreationException ex) {
-                fail("OWLOntologyCreationException caught when loading from " + src);
-            }
+            recipe.getRule("ruleX");
+            Assert.fail();
+        } catch (NoSuchRuleInRecipeException e) {
+            Assert.assertTrue(true);
+        }
+
+    }
+
+    @Test
+    public void getNotExistingRuleByIdInRecipeTest() throws Exception {
+        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+
+        try {
+            recipe.getRule(new UriRef("http://foo.org/ruleX"));
+            Assert.fail();
+        } catch (NoSuchRuleInRecipeException e) {
+            Assert.assertTrue(true);
+        }
+
+    }
+
+    @Test
+    public void getExistingRuleByIdInRecipeTest() throws Exception {
+        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+
+        try {
+            Rule rule = recipe.getRule(recipe.listRuleIDs().get(0));
+            Assert.assertNotNull(rule);
+        } catch (NoSuchRuleInRecipeException e) {
+            Assert.fail();
+        }
+
+    }
+
+    @Test
+    public void getExistingRuleByNameInRecipeTest() throws Exception {
+        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+
+        try {
+            Rule rule = recipe.getRule(recipe.listRuleNames().get(0));
+            Assert.assertNotNull(rule);
+        } catch (NoSuchRuleInRecipeException e) {
+            Assert.fail();
+        }
+
+    }
+
+    @Test
+    public void findRecipesByDescriptionTest() throws Exception {
+        List<Recipe> recipes = store.findRecipesByDescription("recipe named A");
+        if (recipes.isEmpty()) {
+            Assert.fail();
+        } else {
+            Assert.assertTrue(true);
+        }
+
+    }
+
+    @Test
+    public void findRulesByDescriptionTest() throws Exception {
+        List<Rule> rules = store.findRulesByDescription("a test rule.");
+        if (rules.isEmpty()) {
+            Assert.fail();
+        } else {
+            Assert.assertTrue(true);
         }
     }
 
     @Test
-    public void testKReSRuleStore_2() throws Exception {
-        OWLOntology owlmodel = blankStore.getOntology();
-        log.debug("Path for default store config is " + blankStore.getFilePath());
-        assertNotNull(owlmodel);
-        assertTrue(!owlmodel.isEmpty());
+    public void findRulesByNameTest() throws Exception {
+        List<Rule> rules = store.findRulesByName("1");
+
+        if (rules.isEmpty()) {
+            Assert.fail();
+        } else {
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void removeRuleInRecipeTest() throws Exception {
+        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+
+        String tmp = recipe.toString();
+        Rule rule = recipe.getRule(recipe.listRuleNames().get(0));
+
+        store.removeRule(recipe, rule);
+
+        Recipe recipe2 = store
+                .getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+
+        String tmp2 = recipe2.toString();
+
+        Assert.assertNotSame(tmp, tmp2);
+
+    }
+
+    @Test
+    public void removeRecipeTest() throws Exception {
+
+        RecipeList recipeListInitial = store.listRecipes();
+        Recipe[] initialRecipes = new Recipe[recipeListInitial.size()];
+        initialRecipes = recipeListInitial.toArray(initialRecipes);
+
+        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+        store.removeRecipe(recipe);
+
+        RecipeList recipeListFinal = store.listRecipes();
+        Recipe[] finalRecipes = new Recipe[recipeListInitial.size()];
+        finalRecipes = recipeListFinal.toArray(finalRecipes);
+
+        Assert.assertNotSame(initialRecipes, finalRecipes);
+
     }
 
 }

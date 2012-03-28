@@ -14,84 +14,94 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-/**
- * JavaCC template file created by SF JavaCC plugin 1.5.17+ wizard for JavaCC 1.5.0+
- */
 options
 {
   JDK_VERSION = "1.6";
   static = false;
 }
 
-PARSER_BEGIN(RuleParser)
+PARSER_BEGIN(RuleParserImpl)
 package org.apache.stanbol.rules.manager.parse;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
 
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
-
-
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleAtom;
-import org.apache.stanbol.rules.base.api.URIResource;
 import org.apache.stanbol.rules.base.api.util.AtomList;
 import org.apache.stanbol.rules.manager.KB;
 import org.apache.stanbol.rules.manager.RuleImpl;
 import org.apache.stanbol.rules.manager.atoms.ClassAtom;
 import org.apache.stanbol.rules.manager.atoms.ComparisonAtom;
+import org.apache.stanbol.rules.manager.atoms.ConcatAtom;
+import org.apache.stanbol.rules.manager.atoms.CreateLabelAtom;
 import org.apache.stanbol.rules.manager.atoms.DatavaluedPropertyAtom;
-import org.apache.stanbol.rules.manager.atoms.EndsWithAtom;
-import org.apache.stanbol.rules.manager.atoms.IndividualPropertyAtom;
 import org.apache.stanbol.rules.manager.atoms.DifferentAtom;
-import org.apache.stanbol.rules.manager.atoms.TypedLiteralAtom;
+import org.apache.stanbol.rules.manager.atoms.DivisionAtom;
+import org.apache.stanbol.rules.manager.atoms.EndsWithAtom;
+import org.apache.stanbol.rules.manager.atoms.ExpressionAtom;
+import org.apache.stanbol.rules.manager.atoms.GreaterEqualThanAtom;
+import org.apache.stanbol.rules.manager.atoms.GreaterThanAtom;
+import org.apache.stanbol.rules.manager.atoms.IObjectAtom;
+import org.apache.stanbol.rules.manager.atoms.IndividualPropertyAtom;
+import org.apache.stanbol.rules.manager.atoms.IsBlankAtom;
 import org.apache.stanbol.rules.manager.atoms.LengthAtom;
+import org.apache.stanbol.rules.manager.atoms.LessEqualThanAtom;
+import org.apache.stanbol.rules.manager.atoms.LessThanAtom;
+import org.apache.stanbol.rules.manager.atoms.LetAtom;
+import org.apache.stanbol.rules.manager.atoms.LocalNameAtom;
+import org.apache.stanbol.rules.manager.atoms.LowerCaseAtom;
+import org.apache.stanbol.rules.manager.atoms.MultiplicationAtom;
+import org.apache.stanbol.rules.manager.atoms.NamespaceAtom;
+import org.apache.stanbol.rules.manager.atoms.NewIRIAtom;
+import org.apache.stanbol.rules.manager.atoms.NewLiteralAtom;
 import org.apache.stanbol.rules.manager.atoms.NotAtom;
 import org.apache.stanbol.rules.manager.atoms.NumberAtom;
 import org.apache.stanbol.rules.manager.atoms.NumericFunctionAtom;
-import org.apache.stanbol.rules.manager.atoms.SPARQLddAtom;
-import org.apache.stanbol.rules.manager.atoms.SameAtom;
-import org.apache.stanbol.rules.manager.atoms.LessThanAtom;
-import org.apache.stanbol.rules.manager.atoms.GreaterThanAtom;
+import org.apache.stanbol.rules.manager.atoms.NumericVariableAtom;
+import org.apache.stanbol.rules.manager.atoms.PropStringAtom;
 import org.apache.stanbol.rules.manager.atoms.ResourceAtom;
-import org.apache.stanbol.rules.manager.atoms.VariableAtom;
-import org.apache.stanbol.rules.manager.atoms.LetAtom;
-import org.apache.stanbol.rules.manager.atoms.ConcatAtom;
+import org.apache.stanbol.rules.manager.atoms.RuleBlankNode;
+import org.apache.stanbol.rules.manager.atoms.SameAtom;
+import org.apache.stanbol.rules.manager.atoms.StartsWithAtom;
+import org.apache.stanbol.rules.manager.atoms.StrAtom;
 import org.apache.stanbol.rules.manager.atoms.StringAtom;
 import org.apache.stanbol.rules.manager.atoms.StringFunctionAtom;
+import org.apache.stanbol.rules.manager.atoms.StringVariableAtom;
 import org.apache.stanbol.rules.manager.atoms.SubstringAtom;
 import org.apache.stanbol.rules.manager.atoms.SubtractionAtom;
 import org.apache.stanbol.rules.manager.atoms.SumAtom;
-import org.apache.stanbol.rules.manager.atoms.NewNodeAtom;
-import org.apache.stanbol.rules.manager.atoms.BlankNodeAtom;
-import org.apache.stanbol.rules.manager.atoms.UpperCaseAtom;
-import org.apache.stanbol.rules.manager.atoms.LowerCaseAtom;
-import org.apache.stanbol.rules.manager.atoms.NamespaceAtom;
-import org.apache.stanbol.rules.manager.atoms.LocalNameAtom;
-import org.apache.stanbol.rules.manager.atoms.StrAtom;
+import org.apache.stanbol.rules.manager.atoms.TypedLiteralAtom;
 import org.apache.stanbol.rules.manager.atoms.UnionAtom;
-import org.apache.stanbol.rules.manager.atoms.CreateLabelAtom;
-import org.apache.stanbol.rules.manager.atoms.PropStringAtom;
-import org.apache.stanbol.rules.manager.atoms.IsBlankAtom;
-import org.apache.stanbol.rules.manager.atoms.SPARQLcAtom;
-import org.apache.stanbol.rules.manager.atoms.SPARQLdAtom;
-import org.apache.stanbol.rules.manager.atoms.StartsWithAtom;
-import org.apache.stanbol.rules.base.api.RuleExpressiveness;
+import org.apache.stanbol.rules.manager.atoms.UpperCaseAtom;
+import org.apache.stanbol.rules.manager.atoms.VariableAtom;
 
-public class RuleParser
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Resource;
+
+/**
+*
+* @author anuzzolese 
+* 
+*/
+
+@SuppressWarnings("unused")
+
+public class RuleParserImpl
 {
 
   static KB kb;
   
-  public static KB parse( String inString ) {
+  public static KB parse( String namespace, String inString ) {
   {
-  	kb = new KB();
+  	kb = new KB(namespace);
   	Reader reader = new StringReader( inString ) ;
-    RuleParser parser = new RuleParser(reader);
+    RuleParserImpl parser = new RuleParserImpl(reader);
     StringBuffer buffer = new StringBuffer() ;
 	try {
 		parser.start( ) ; 
@@ -102,6 +112,21 @@ public class RuleParser
 	} 
 	return kb ; }
   }
+  
+  public static KB parse( String namespace, InputStream inStream ) {
+
+		kb = new KB(namespace);
+		Reader reader = new InputStreamReader(inStream);
+		RuleParserImpl parser = new RuleParserImpl(reader);
+		try {
+			parser.start();
+		} catch (TokenMgrError e) {
+			throw new IllegalStateException(e);
+		} catch (ParseException e) {
+			throw new IllegalStateException(e);
+		}
+		return kb;
+	}
 
 
 	private static URI getSWRLArgument(String argument){
@@ -144,10 +169,25 @@ public class RuleParser
         }
 }
 
-PARSER_END(RuleParser)
+PARSER_END(RuleParserImpl)
 
 SKIP : {" "}
 SKIP : {"\r" | "\t" | "\n"}
+SKIP :
+{
+  "/*" : WithinComment
+}
+
+<WithinComment> SKIP :
+{
+  "*/" : DEFAULT
+}
+
+<WithinComment> MORE :
+{
+  <~[]>
+}
+
 
 TOKEN : /* OPERATORS */
 {
@@ -156,13 +196,15 @@ TOKEN : /* OPERATORS */
 | < EQUAL : "=" >
 | < AND : "." >
 | < COMMA : "," >
-| < REFLEXIVE : "+" >
 | < SAME : "same" >
 | < DIFFERENT : "different" >
 | < LESSTHAN : "lt" >
 | < GREATERTHAN : "gt" >
+| < LESSEQUALTHAN : "leq" >
+| < GREATEREQUALTHAN : "geq" >
 | < IS : "is" >
-| < NEW_NODE : "newNode" >
+| < NEW_IRI : "newIRI" >
+| < NEW_LITERAL: "newLiteral" >
 | < LENGTH : "length" >
 | < SUBSTRING : "substring" >
 | < UPPERCASE : "upperCase" >
@@ -176,6 +218,8 @@ TOKEN : /* OPERATORS */
 | < NOTEX : "notex" >
 | < PLUS : "sum" >
 | < MINUS : "sub" >
+| < MULTIPLIED : "mult" >
+| < DIVIDED : "div" >
 | < NOT : "not" >
 | < NAMESPACE : "namespace" >
 | < LOCALNAME : "localname" >
@@ -183,12 +227,8 @@ TOKEN : /* OPERATORS */
 | < APOX : "^" >
 | < UNION : "union" >
 | < CREATE_LABEL : "createLabel" >
-| < SPARQL_C : "sparql-c" >
-| < SPARQL_D : "sparql-d" >
-| < SPARQL_DD : "sparql-dd" >
 | < PROP : "prop" >
 | < IS_BLANK : "isBlank" >
-| < FORWARD_CHAIN : "!" >
 }
 
 TOKEN : /* BLOCKS */
@@ -207,7 +247,6 @@ TOKEN :
 | < VARIABLE : "?" ([ "0"-"9","a"-"z","A"-"Z","-", "_"])+ >
 | < URI : "<" ([ "0"-"9","a"-"z","A"-"Z","-", "_", ".", "#", ":", "/", "(", ")" ])+ ">" >
 | < STRING : "\"" ([ "0"-"9","a"-"z","A"-"Z","-", "_", ".", ":", "/", "#", "\\", "?", " ", "!", "$", "%" ])+ "\"" >
-| < SPARQL_STRING : "%" ([ "0"-"9","a"-"z","A"-"Z","-", "_", ".", ":", "/", "#", "\\", "?", " ", "!", "$", "%", "{", "}", "(", ")", "\"", "<", ">", "=", "+", "\n", "\t", "&", "|", "," ])+ "%" >
 | < BNODE : "_:" ([ "0"-"9","a"-"z","A"-"Z","-", "_", "."])+ >
 }
 
@@ -238,49 +277,22 @@ void prefix() :
   										   kb.addPrefix(nsPrefix, prefixURI);  										    
   										 } 
   							|   obj=rule() { AtomList[] atoms = (AtomList[]) obj;
-  											 String varPrefix = kb.getPrefixURI("var");
-  											 varPrefix = varPrefix.substring(0, varPrefix.length());
+  											 String ruleStorePrefix = kb.getPrefixURI("rmi2");
+											 ruleStorePrefix = ruleStorePrefix.substring(0, ruleStorePrefix.length());
   											 
   											 if(atoms.length == 1){
                                                             AtomList body = atoms[0];
                                                             if(body.size() == 1){
-                                                                    Iterator<RuleAtom> it = body.iterator();
-                                                                    RuleAtom atom = it.next();
-                                                                    if(atom.isSPARQLConstruct()){
-                                                                            rule = new RuleImpl(varPrefix+nsPrefix, atoms[0], null, RuleExpressiveness.SPARQLConstruct);
-                                                                            kb.addRule(rule);
-                                                                    }
-                                                                    else if(atom.isSPARQLDelete()){
-                                                                            rule = new RuleImpl(varPrefix+nsPrefix, atoms[0], null, RuleExpressiveness.SPARQLDelete);
-                                                                            kb.addRule(rule);
-                                                                    }
-                                                                    else if(atom.isSPARQLDeleteData()){
-                                                                            rule = new RuleImpl(varPrefix+nsPrefix, atoms[0], null, RuleExpressiveness.SPARQLDeleteData);
-                                                                            kb.addRule(rule);
-                                                                    }
+                                                                    // FIXME it previously managed SPARQL code injection.
                                                             }
 
                                                      }
                                                  else{
-                                                         rule = new RuleImpl(varPrefix+nsPrefix, atoms[0], atoms[1], RuleExpressiveness.KReSCore);
+                                                         rule = new RuleImpl(new UriRef(ruleStorePrefix+nsPrefix), nsPrefix, atoms[0], atoms[1]);
                                                          kb.addRule(rule);
                                                 }
 	  									}
   						)
-  						
-|
-
-	< FORWARD_CHAIN > nsPrefix=getVariable() obj=rule() { AtomList[] atoms = (AtomList[]) obj;
-  											 String varPrefix = kb.getPrefixURI("var");
-  											 varPrefix = varPrefix.substring(0, varPrefix.length());
-  											 rule = new RuleImpl(varPrefix+nsPrefix, atoms[0], atoms[1], RuleExpressiveness.ForwardChaining);
-  											 kb.addRule(rule); }
-  											 
-|	< REFLEXIVE > nsPrefix=getVariable() obj=rule() {  	AtomList[] kReSAtoms = (AtomList[]) obj;
-														 String pref = kb.getPrefixURI("var");
-                                                         pref = pref.substring(0, pref.length());
-                                                         rule = new RuleImpl(pref+nsPrefix, kReSAtoms[0], kReSAtoms[1], RuleExpressiveness.Reflexive);
-                                                         kb.addRule(rule); }
 }
 
 
@@ -306,33 +318,7 @@ AtomList[] ruleDefinition():
 {
 	body=atomList() <LARROW> head=atomList()
 	{ return new AtomList[]{body, head};}
-	
-|	
-	< SPARQL_C > < LPAR > t = < SPARQL_STRING > < RPAR >
-	{ 
-		RuleAtom sparqlAtom = new SPARQLcAtom(t.image);
-		AtomList atomList = new AtomList();
-		atomList.addToHead(sparqlAtom);
-		return new AtomList[]{atomList};
-	}
-	
-|	
-	< SPARQL_D > < LPAR > t = < SPARQL_STRING > < RPAR >
-	{ 
-		RuleAtom sparqlDAtom = new SPARQLdAtom(t.image);
-        AtomList atomDList = new AtomList();
-        atomDList.addToHead(sparqlDAtom);
-        return new AtomList[]{atomDList};
-	}
-
-|	
-	< SPARQL_DD > < LPAR > t = < SPARQL_STRING > < RPAR >
-	{ 
-		RuleAtom sparqlDDAtom = new SPARQLddAtom(t.image);
-        AtomList atomDDList = new AtomList();
-        atomDDList.addToHead(sparqlDDAtom);
-        return new AtomList[]{atomDDList};
-	} 
+	 
 }
 
 AtomList atomList() :
@@ -365,7 +351,8 @@ RuleAtom atom() :
 |  ruleAtom=individualPropertyAtom() {return ruleAtom;}
 |  ruleAtom=datavaluedPropertyAtom() {return ruleAtom;}
 |  ruleAtom=letAtom() {return ruleAtom;}
-|  ruleAtom=newNodeAtom() {return ruleAtom;}
+|  ruleAtom=newIRIAtom() {return ruleAtom;}
+|  ruleAtom=newLiteralAtom() {return ruleAtom;}
 |  ruleAtom=comparisonAtom() {return ruleAtom;}
 |  ruleAtom=unionAtom() {return ruleAtom;}
 
@@ -427,6 +414,7 @@ StringFunctionAtom stringFunctionAtom() :
 	|   stringFunctionAtom=stringAtom()
 	| 	stringFunctionAtom=propStringAtom()
 	|	stringFunctionAtom=createLabelAtom()
+	|	stringFunctionAtom=stringVariable()
 	)
 
 	{return stringFunctionAtom;}
@@ -434,30 +422,30 @@ StringFunctionAtom stringFunctionAtom() :
 
 
 StrAtom strAtom() : 
-{URIResource uri;}
+{IObjectAtom uri;}
 {
 	< STR > < LPAR > uri = iObject() < RPAR >
 	{return new StrAtom(uri);}
 }
 
 NamespaceAtom namespaceAtom() : 
-{URIResource uri;}
+{IObjectAtom uri;}
 {
 	< NAMESPACE > < LPAR > uri = iObject() < RPAR >
 	{return new NamespaceAtom(uri);}
 }
 
 LocalNameAtom localnameAtom() : 
-{URIResource uri;}
+{IObjectAtom uri;}
 {
 	< LOCALNAME > < LPAR > uri = iObject() < RPAR >
 	{return new LocalNameAtom(uri);}
 }
 
 StringAtom stringAtom() :
-{Object obj; StringFunctionAtom stringFunctionAtom;}
+{String obj;}
 {
-	obj = uObject() { return new StringAtom(obj.toString()); }
+	obj = getStringValue() { return new StringAtom(obj.toString()); }
 }
 
 ConcatAtom concatAtom() : 
@@ -490,6 +478,16 @@ SubstringAtom substringAtom() :
 }
 
 
+ExpressionAtom expressionAtom() :
+{ExpressionAtom expressionAtom;}
+{
+	LOOKAHEAD(2)
+		expressionAtom = stringFunctionAtom()
+	|	expressionAtom = numericFunctionAtom()
+	
+	{return expressionAtom;}
+}
+
 NumericFunctionAtom numericFunctionAtom() : 
 {NumericFunctionAtom numericFunctionAtom;}
 {
@@ -498,6 +496,7 @@ NumericFunctionAtom numericFunctionAtom() :
 	|   numericFunctionAtom = subtractionAtom()
 	|   numericFunctionAtom = lengthAtom()
 	|   numericFunctionAtom = numberAtom()
+	|   numericFunctionAtom = numericVariable()
 	)
 
 	{return numericFunctionAtom;}
@@ -529,12 +528,29 @@ SubtractionAtom subtractionAtom() :
 	{return new SubtractionAtom(numericFunctionAtom1, numericFunctionAtom2);}
 }
 
+MultiplicationAtom multiplicationAtom() : 
+{NumericFunctionAtom numericFunctionAtom1; NumericFunctionAtom numericFunctionAtom2;}
+{
+	
+	< MULTIPLIED > < LPAR > numericFunctionAtom1 = numericFunctionAtom() < COMMA > numericFunctionAtom2 = numericFunctionAtom() < RPAR >
+
+	{return new MultiplicationAtom(numericFunctionAtom1, numericFunctionAtom2);}
+}
+
+DivisionAtom divisionAtom() : 
+{NumericFunctionAtom numericFunctionAtom1; NumericFunctionAtom numericFunctionAtom2;}
+{
+	
+	< DIVIDED > < LPAR > numericFunctionAtom1 = numericFunctionAtom() < COMMA > numericFunctionAtom2 = numericFunctionAtom() < RPAR >
+
+	{return new DivisionAtom(numericFunctionAtom1, numericFunctionAtom2);}
+}
+
 NumericFunctionAtom numberAtom() :
 {Token t;}
 {
 	(
 		t = < NUM >	
-	|	t = < VARIABLE >
 	)
 	{ return new NumberAtom(t.image); }
 
@@ -542,22 +558,30 @@ NumericFunctionAtom numberAtom() :
 
 
 ClassAtom classAtom() :
-{URIResource uri1; URIResource uri2;}
+{IObjectAtom uri1; IObjectAtom uri2;}
 {
 	< IS > < LPAR > uri1=iObject()  < COMMA > uri2=iObject() < RPAR >
 	{ return new ClassAtom(uri1, uri2);}
 }
 
 
-NewNodeAtom newNodeAtom() : 
-{URIResource arg1; Object arg2;}
+NewIRIAtom newIRIAtom() : 
+{IObjectAtom arg1; StringFunctionAtom arg2;}
 {
-	< NEW_NODE > < LPAR > arg1=iObject()  < COMMA > arg2=dObject() < RPAR >
-	{ return new NewNodeAtom(arg1, arg2);}
+	< NEW_IRI > < LPAR > arg1=iObject()  < COMMA > arg2=stringFunctionAtom() < RPAR >
+	{ return new NewIRIAtom(arg1, arg2);}
+}
+
+
+NewLiteralAtom newLiteralAtom() : 
+{IObjectAtom arg1; StringFunctionAtom arg2;}
+{
+	< NEW_LITERAL > < LPAR > arg1=iObject()  < COMMA > arg2=stringFunctionAtom() < RPAR >
+	{ return new NewLiteralAtom(arg1, arg2);}
 }
 
 LetAtom letAtom() : 
-{URIResource uri1; StringFunctionAtom fun;}
+{IObjectAtom uri1; StringFunctionAtom fun;}
 {
 	< LET > < LPAR > uri1=iObject()  < COMMA > fun=stringFunctionAtom() < RPAR >
 	{ return new LetAtom(uri1, fun);}
@@ -565,7 +589,7 @@ LetAtom letAtom() :
 
 
 IndividualPropertyAtom individualPropertyAtom() :
-{URIResource uri1; URIResource uri2; URIResource uri3;}
+{IObjectAtom uri1; IObjectAtom uri2; IObjectAtom uri3;}
 {
 	 < HAS > < LPAR > uri1=iObject() < COMMA > uri2=iObject() <COMMA> uri3=iObject() < RPAR >
 	 {return new IndividualPropertyAtom(uri1, uri2, uri3);}
@@ -573,7 +597,7 @@ IndividualPropertyAtom individualPropertyAtom() :
 
 
 DatavaluedPropertyAtom datavaluedPropertyAtom() :
-{URIResource uri1; URIResource uri2; Object obj;}
+{IObjectAtom uri1; IObjectAtom uri2; RuleAtom obj;}
 {
 	 < VALUES > < LPAR > uri1=iObject() < COMMA > uri2=iObject() <COMMA> obj=dObject() < RPAR >
 	 { return new DatavaluedPropertyAtom(uri1, uri2, obj); }
@@ -581,34 +605,48 @@ DatavaluedPropertyAtom datavaluedPropertyAtom() :
 
 
 SameAtom sameAsAtom() :
-{StringFunctionAtom stringFunctionAtom1; StringFunctionAtom stringFunctionAtom2;}
+{ExpressionAtom expressionAtom1; ExpressionAtom expressionAtom2;}
 {
-	< SAME > < LPAR > stringFunctionAtom1=stringFunctionAtom() < COMMA > stringFunctionAtom2=stringFunctionAtom() < RPAR >
-	{ return new SameAtom(stringFunctionAtom1, stringFunctionAtom2); } 
+	< SAME > < LPAR > expressionAtom1=expressionAtom() < COMMA > expressionAtom2=expressionAtom() < RPAR >
+	{ return new SameAtom(expressionAtom1, expressionAtom2); } 
 }
 
 LessThanAtom lessThanAtom() :
-{Object obj1; Object obj2;}
+{ExpressionAtom obj1; ExpressionAtom obj2;}
 {
-	< LESSTHAN > < LPAR > obj1=dObject() < COMMA > obj2=dObject() < RPAR >
+	< LESSTHAN > < LPAR > obj1=expressionAtom() < COMMA > obj2=expressionAtom() < RPAR >
 	{ return new LessThanAtom(obj1, obj2); } 
 }
 
-GreaterThanAtom greaterThanAtom() :
-{Object obj1; Object obj2;}
+LessEqualThanAtom lessEqualThanAtom() :
+{ExpressionAtom obj1; ExpressionAtom obj2;}
 {
-	< GREATERTHAN > < LPAR > obj1=dObject() < COMMA > obj2=dObject() < RPAR >
+	< LESSEQUALTHAN > < LPAR > obj1=expressionAtom() < COMMA > obj2=expressionAtom() < RPAR >
+	{ return new LessEqualThanAtom(obj1, obj2); } 
+}
+
+GreaterThanAtom greaterThanAtom() :
+{ExpressionAtom obj1; ExpressionAtom obj2;}
+{
+	< GREATERTHAN > < LPAR > obj1=expressionAtom() < COMMA > obj2=expressionAtom() < RPAR >
 	{ return new GreaterThanAtom(obj1, obj2); } 
 }
 
-DifferentAtom differentFromAtom() :
-{StringFunctionAtom stringFunctionAtom1; StringFunctionAtom stringFunctionAtom2;}
+GreaterEqualThanAtom greaterEqualThanAtom() :
+{ExpressionAtom obj1; ExpressionAtom obj2;}
 {
-	< DIFFERENT > < LPAR > stringFunctionAtom1=stringFunctionAtom() < COMMA > stringFunctionAtom2=stringFunctionAtom() < RPAR >
-	{ return new DifferentAtom(stringFunctionAtom1, stringFunctionAtom2); } 
+	< GREATEREQUALTHAN > < LPAR > obj1=expressionAtom() < COMMA > obj2=expressionAtom() < RPAR >
+	{ return new GreaterEqualThanAtom(obj1, obj2); } 
 }
 
-URIResource reference() :
+DifferentAtom differentFromAtom() :
+{ExpressionAtom expressionAtom1; ExpressionAtom expressionAtom2;}
+{
+	< DIFFERENT > < LPAR > expressionAtom1=expressionAtom() < COMMA > expressionAtom2=expressionAtom() < RPAR >
+	{ return new DifferentAtom(expressionAtom1, expressionAtom2); } 
+}
+
+IObjectAtom reference() :
 { String uri1;
   Token colon;
   String uri3; }
@@ -624,7 +662,7 @@ URIResource reference() :
 
 
 
-URIResource varReference() :
+IObjectAtom varReference() :
 { String uri1;
   Token colon;
   String uri3; }
@@ -655,7 +693,7 @@ String getVariable() :
 }
 
 
-String getString() :
+String getStringValue() :
 {
 	Token t;
 }
@@ -663,12 +701,20 @@ String getString() :
 	t = < STRING > { return t.image; }
 }
 
-Integer getInt() :
+StringAtom getString() :
 {
 	Token t;
 }
 {
-	t=< NUM > { return Integer.valueOf(t.image); }
+	t = < STRING > { return new StringAtom(t.image); }
+}
+
+NumberAtom getInt() :
+{
+	Token t;
+}
+{
+	t=< NUM > { return new NumberAtom(t.image); }
 }
 
 
@@ -686,14 +732,14 @@ Object uObject() :
 }
 
 
-URIResource iObject() :
-{ URIResource uri; }
+IObjectAtom iObject() :
+{ IObjectAtom uri; }
 {
 	uri = variable() {return uri;} | uri = reference() {return uri;}
 }
 
-Object dObject() :
-{ Object variable; }
+RuleAtom dObject() :
+{ RuleAtom variable; }
 {
 	
 	(variable=literal() | variable=variable()) {return variable;}	
@@ -701,8 +747,8 @@ Object dObject() :
 
 
 
-Object literal() : 
-{ Object literal; URIResource typedLiteral;}
+ExpressionAtom literal() : 
+{ ExpressionAtom literal; IObjectAtom typedLiteral;}
 {
 	(
 	
@@ -722,8 +768,8 @@ Object literal() :
 	
 }
 
-URIResource typedLiteral() :
-{ URIResource type = null; }
+IObjectAtom typedLiteral() :
+{ IObjectAtom type = null; }
 {
 	(
 			< APOX > < APOX > type = reference()
@@ -732,7 +778,7 @@ URIResource typedLiteral() :
 	{return type;}
 } 
 
-URIResource variable() :
+IObjectAtom variable() :
 { Token t; String var;}
 {
 	< NOTEX > < LPAR > t = < VARIABLE > < RPAR > {var=t.image; var=kb.getPrefixURI("var") + var.substring(1);
@@ -754,6 +800,8 @@ URIResource variable() :
 	{ var=t.image; 	return new RuleBlankNode(var); }
 }
 
+
+
 ComparisonAtom notAtom() :
 { ComparisonAtom comparisonAtom; }
 {
@@ -762,7 +810,7 @@ ComparisonAtom notAtom() :
 }
 
 ComparisonAtom isBlankAtom() :
-{ URIResource uriRes; }
+{ IObjectAtom uriRes; }
 {
 	< IS_BLANK > < LPAR > uriRes = iObject()  < RPAR >
 	{return new IsBlankAtom(uriRes);}	
@@ -785,3 +833,30 @@ ComparisonAtom comparisonAtom() :
 }
 
 
+NumericVariableAtom numericVariable() :
+{ Token t; String var;}
+{
+	t = < VARIABLE >
+	{ var=t.image; var=kb.getPrefixURI("var") + var.substring(1);
+														try{ 
+															return new NumericVariableAtom(new URI(var), false);
+														} catch (URISyntaxException e) {
+															e.printStackTrace();
+															return null;
+														} }
+
+}
+
+StringVariableAtom stringVariable() :
+{ Token t; String var;}
+{
+	t = < VARIABLE >
+	{ var=t.image; var=kb.getPrefixURI("var") + var.substring(1);
+														try{ 
+															return new StringVariableAtom(new URI(var), false);
+														} catch (URISyntaxException e) {
+															e.printStackTrace();
+															return null;
+														} }
+
+}
