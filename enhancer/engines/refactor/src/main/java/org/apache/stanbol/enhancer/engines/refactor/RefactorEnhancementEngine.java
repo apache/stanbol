@@ -72,11 +72,12 @@ import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
+import org.apache.stanbol.rules.base.api.AlreadyExistingRecipeException;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
-import org.apache.stanbol.rules.base.api.Rule;
+import org.apache.stanbol.rules.base.api.RecipeConstructionException;
+import org.apache.stanbol.rules.base.api.RecipeEliminationException;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
 import org.apache.stanbol.rules.refactor.api.RefactoringException;
 import org.osgi.service.cm.ConfigurationException;
@@ -101,7 +102,7 @@ import org.slf4j.LoggerFactory;
  * The first implementation is targeted to SEO use case. * It retrieves data by dereferencing the entities, *
  * includes the DBpedia ontology * refactor the data using the google rich snippets vocabulary.
  * 
- * @author andrea.nuzzolese, alberto.musetti
+ * @author anuzzolese, alberto.musetti
  * 
  */
 @Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, specVersion = "1.1", metatype = true, immediate = true, inherit = true)
@@ -299,14 +300,20 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
              * 
              * To perform the refactoring of the ontology to a given vocabulary we use the Stanbol Refactor.
              */
-            Recipe recipe = ruleStore.getRecipe(IRI.create(engineConfiguration.getRecipeId()));
+            Recipe recipe = ruleStore.getRecipe(new UriRef(engineConfiguration.getRecipeId()));
 
-            log.debug("Recipe {} contains {} rules.", recipe, recipe.getkReSRuleList().size());
+            log.debug("Recipe {} contains {} rules.", recipe, recipe.getRuleList().size());
             log.debug("The ontology to be refactor is {}", ontology);
 
+            TripleCollection tc = refactorer
+            	.graphRefactoring(OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(ontology), recipe);
+            
+            
+            /*
             ontology = refactorer
                     .ontologyRefactoring(ontology, IRI.create(engineConfiguration.getRecipeId()));
 
+			*/
             /*
              * The newly generated ontology is converted to Clarezza format and then added os substitued to
              * the old mGraph.
@@ -317,7 +324,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
                 metadataGraph.clear();
                 log.debug("Content metadata will be appended to the existing ones.", this);
             }
-            metadataGraph.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples(ontology));
+            metadataGraph.addAll(tc);
 
         } catch (RefactoringException e) {
             String msg = "Refactor engine execution failed on content item " + ci + ".";
@@ -368,29 +375,35 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
 
         // Deactivation clears all the rules and releases OntoNet resources.
 
-        IRI recipeId = IRI.create(engineConfiguration.getRecipeId());
+        UriRef recipeId = new UriRef(engineConfiguration.getRecipeId());
         try {
             // step 1: get all the rules
             log.debug("Recipe {} and its associated rules will be removed from the rule store.", recipeId);
-            RuleList recipeRuleList = ruleStore.getRecipe(recipeId).getkReSRuleList();
-
-            // step 2: remove the recipe
-            if (ruleStore.removeRecipe(recipeId)) {
-                log.debug(
-                    "Recipe {} has been removed correctly. Note that its rules will be removed separately.",
-                    recipeId);
-                // step 3: remove the rules
-                if (recipeRuleList != null) for (Rule rule : recipeRuleList)
-                    if (ruleStore.removeRule(rule)) log.debug("Rule {} has been removed correctly",
-                        rule.getRuleName());
-                    else log.error("Rule {} cannot be removed", rule.getRuleName());
-            } else log.error("Recipe {} cannot be removed.", recipeId);
+            Recipe recipe = null;
+			try {
+				recipe = ruleStore.getRecipe(recipeId);
+			} catch (RecipeConstructionException e) {
+				log.error(e.getMessage());
+			}
+			if(recipe != null){
+	            
+				// step 2: remove the recipe
+	            try {
+					if (ruleStore.removeRecipe(recipeId)) {
+					    log.debug(
+					        "Recipe {} has been removed correctly. Note that its rules will be removed separately.",
+					        recipeId);
+					} else log.error("Recipe {} cannot be removed.", recipeId);
+				} catch (RecipeEliminationException e) {
+					log.error(e.getMessage());
+				}
+			}
 
         } catch (NoSuchRecipeException ex) {
             log.error("The recipe " + engineConfiguration.getRecipeId() + " doesn't exist", ex);
         }
 
-        // step 4: clear OntoNet resources
+        // step 3: clear OntoNet resources
         scope.getCoreSpace().tearDown();
         scope.tearDown();
         onManager.getScopeRegistry().deregisterScope(scope);
@@ -493,53 +506,59 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
          * refactor the enhancement graphs.
          */
         String recipeId = engineConfiguration.getRecipeId();
-        ruleStore.addRecipe(IRI.create(recipeId), null);
-        log.debug("Initialised blank recipe with ID {}", recipeId);
-
-        /*
-         * The set of rule to put in the recipe can be provided by the user. A default set of rules is
-         * provided in /META-INF/default/seo_rules.sem. Use the property engine.refactor in the felix console
-         * to pass to the engine your set of rules.
-         */
-        String recipeLocation = engineConfiguration.getRecipeLocation();
-
-        InputStream recipeStream = null;
-        String recipeString = null;
-
-        if (recipeLocation != null && !recipeLocation.isEmpty()) {
-            Dereferencer dereferencer = new DereferencerImpl();
-            try {
-                recipeStream = dereferencer.resolve(recipeLocation);
-                log.debug("Loaded recipe from external source {}", recipeLocation);
-            } catch (FileNotFoundException e) {
-                log.error("Recipe Stream is null.", e);
-            }
-        } else {
-            // TODO remove this part (or manage it better in the @Activate method).
-            String loc = "/META-INF/default/seo_rules.sem";
-            recipeStream = getClass().getResourceAsStream(loc);
-            log.debug("Loaded default recipe in {}.", loc);
-        }
-
-        if (recipeStream != null) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(recipeStream));
-            recipeString = "";
-            String line = null;
-            try {
-                while ((line = reader.readLine()) != null)
-                    recipeString += line;
-            } catch (IOException e) {
-                log.error("Failed to load Refactor Engine recipe from stream. Aborting read. ", e);
-                recipeString = null;
-            }
-        }
-        log.debug("Recipe content follows :\n{}", recipeString);
-        if (recipeString != null) try {
-            ruleStore.addRuleToRecipe(recipeId, recipeString);
-            log.debug("Added rules to recipe {}", recipeId);
-        } catch (NoSuchRecipeException e) {
-            log.error("Failed to add rules to recipe {}. Recipe was not found.", recipeId);
-        }
+        Recipe recipe = null;
+		try {
+			recipe = ruleStore.createRecipe(new UriRef(recipeId), null);
+		} catch (AlreadyExistingRecipeException e1) {
+			log.error("A recipe with ID {} already exists in the store.", recipeId);
+		}
+		
+		if(recipe != null){
+		    log.debug("Initialised blank recipe with ID {}", recipeId);
+		
+		    /*
+		     * The set of rule to put in the recipe can be provided by the user. A default set of rules is
+		     * provided in /META-INF/default/seo_rules.sem. Use the property engine.refactor in the felix console
+		     * to pass to the engine your set of rules.
+		     */
+		    String recipeLocation = engineConfiguration.getRecipeLocation();
+		
+		    InputStream recipeStream = null;
+		    String recipeString = null;
+		
+		    if (recipeLocation != null && !recipeLocation.isEmpty()) {
+		        Dereferencer dereferencer = new DereferencerImpl();
+		        try {
+		            recipeStream = dereferencer.resolve(recipeLocation);
+		            log.debug("Loaded recipe from external source {}", recipeLocation);
+		        } catch (FileNotFoundException e) {
+		            log.error("Recipe Stream is null.", e);
+		        }
+		    } else {
+		        // TODO remove this part (or manage it better in the @Activate method).
+		        String loc = "/META-INF/default/seo_rules.sem";
+		        recipeStream = getClass().getResourceAsStream(loc);
+		        log.debug("Loaded default recipe in {}.", loc);
+		    }
+		
+		    if (recipeStream != null) {
+		        BufferedReader reader = new BufferedReader(new InputStreamReader(recipeStream));
+		        recipeString = "";
+		        String line = null;
+		        try {
+		            while ((line = reader.readLine()) != null)
+		                recipeString += line;
+		        } catch (IOException e) {
+		            log.error("Failed to load Refactor Engine recipe from stream. Aborting read. ", e);
+		            recipeString = null;
+		        }
+		    }
+		    log.debug("Recipe content follows :\n{}", recipeString);
+		    if (recipeString != null){ 
+		    	ruleStore.addRulesToRecipe(recipe, recipeString, null);
+		        log.debug("Added rules to recipe {}", recipeId);
+		    }
+		}
     }
 
 }
