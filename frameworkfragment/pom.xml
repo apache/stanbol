@@ -228,7 +228,8 @@
                  com.sun.xml.internal.ws.wsdl.writer.document,
                  com.sun.xml.internal.ws.wsdl.writer.document.soap,
                  com.sun.xml.internal.ws.wsdl.writer.document.soap12,
-                 com.sun.xml.internal.ws.wsdl.writer.document.xsd
+                 com.sun.xml.internal.ws.wsdl.writer.document.xsd,
+                 org.w3c.dom.traversal
                </Export-Package>
             </manifestEntries>
           </archive>
