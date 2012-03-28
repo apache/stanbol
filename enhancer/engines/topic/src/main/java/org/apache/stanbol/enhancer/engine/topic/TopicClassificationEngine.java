@@ -35,10 +35,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.commons.io.FileUtils;
@@ -78,6 +80,7 @@ import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.enhancer.topic.Batch;
 import org.apache.stanbol.enhancer.topic.BatchProcessor;
@@ -92,6 +95,12 @@ import org.apache.stanbol.enhancer.topic.training.Example;
 import org.apache.stanbol.enhancer.topic.training.SolrTrainingSet;
 import org.apache.stanbol.enhancer.topic.training.TrainingSet;
 import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
+import org.apache.stanbol.entityhub.servicesapi.Entityhub;
+import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.Text;
+import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -203,13 +212,20 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     /**
      * The "text/plain" mime type
      */
-    protected static final String PLAIN_TEXT_MIMETYPE = "text/plain";
+    public static final String PLAIN_TEXT_MIMETYPE = "text/plain";
+
     /**
      * Contains the only supported mime type {@link #PLAIN_TEXT_MIMETYPE}
      */
-    protected static final Set<String> SUPPORTED_MIMETYPES = Collections.singleton(PLAIN_TEXT_MIMETYPE);
+    public static final Set<String> SUPPORTED_MIMETYPES = Collections.singleton(PLAIN_TEXT_MIMETYPE);
 
     public static final String SOLR_NON_EMPTY_FIELD = "[\"\" TO *]";
+
+    @Reference
+    protected Entityhub entityhub;
+
+    @Reference
+    protected ReferencedSiteManager referencedSiteManager;
 
     // TODO: make the following fields configurable
 
@@ -390,6 +406,11 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         } catch (ClassifierException e) {
             throw new EngineException(e);
         }
+        UriRef precision = new UriRef(NamespaceEnum.fise + "classifier/precision");
+        UriRef recall = new UriRef(NamespaceEnum.fise + "classifier/recall");
+        UriRef f1 = new UriRef(NamespaceEnum.fise + "classifier/f1");
+
+        LiteralFactory lf = LiteralFactory.getInstance();
         ci.getLock().writeLock().lock();
         try {
             for (TopicSuggestion topic : topics) {
@@ -402,9 +423,46 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 metadata.add(new TripleImpl(enhancement,
                         org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE,
                         new UriRef(topic.conceptUri)));
-                // TODO: make it possible to dereference and the path to the root the entities according to a
-                // configuration parameter
+
+                // add confidence information
+                metadata.add(new TripleImpl(enhancement,
+                        org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE, lf
+                                .createTypedLiteral(Double.valueOf(topic.score))));
+
+                ClassificationReport perf = getPerformanceEstimates(topic.conceptUri);
+                if (perf.uptodate) {
+                    metadata.add(new TripleImpl(enhancement, precision, lf.createTypedLiteral(Double
+                            .valueOf(perf.precision))));
+                    metadata.add(new TripleImpl(enhancement, recall, lf.createTypedLiteral(Double
+                            .valueOf(perf.recall))));
+                    metadata.add(new TripleImpl(enhancement, f1, lf.createTypedLiteral(Double
+                            .valueOf(perf.f1))));
+                }
+                Entity entity = entityhub.getEntity(topic.conceptUri);
+                if (entity == null) {
+                    entity = referencedSiteManager.getEntity(topic.conceptUri);
+                }
+                if (entity != null) {
+                    Representation representation = entity.getRepresentation();
+                    // TODO: extract all languages based on some configuration instead of hardcoding English
+                    Text label = representation.getFirst(NamespaceEnum.skos + "prefLabel", "en", "en-US",
+                        "en-GB");
+                    if (label == null) {
+                        label = representation.getFirst(NamespaceEnum.rdfs + "label", "en", "en-US", "en-GB");
+                    }
+                    if (label != null) {
+                        metadata.add(new TripleImpl(enhancement,
+                                org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL,
+                                new PlainLiteralImpl(label.getText())));
+                    }
+                }
             }
+        } catch (ClassifierException e) {
+            throw new EngineException(e);
+        } catch (IllegalArgumentException e) {
+            throw new EngineException(e);
+        } catch (EntityhubException e) {
+            throw new EngineException(e);
         } finally {
             ci.getLock().writeLock().unlock();
         }
