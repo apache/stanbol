@@ -139,6 +139,8 @@
             <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.core.site.CacheImpl-dbpedia.config</exclude>
             <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.site.referencedSite-dbpedia.config</exclude>
             <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-dbpedia.config</exclude>
+
+            <!-- Downloaded during the build process, therefore not part of the source tree -->
             <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/index/dbpedia_43k.solrindex.zip</exclude>
           </excludes>
         </configuration>
