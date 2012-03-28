@@ -30,9 +30,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.contenthub.search.related.RelatedKeywordImpl;
-import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearch;
+import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeywordSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

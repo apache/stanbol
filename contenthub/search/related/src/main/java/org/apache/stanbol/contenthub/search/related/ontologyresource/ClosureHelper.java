@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.contenthub.search.related.RelatedKeywordImpl;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

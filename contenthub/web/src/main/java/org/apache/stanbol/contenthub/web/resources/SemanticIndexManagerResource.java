@@ -43,10 +43,10 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgram;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
+import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndexManager;
+import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathException;
+import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathProgram;
+import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathProgramCollection;
 import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +115,7 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
         if (acceptedHeader.isCompatible(MediaType.TEXT_HTML_TYPE)) {
         	return Response.ok(new Viewable("index", this), MediaType.TEXT_HTML).build();
         } else{
-	        LDProgramCollection ldProgramCollection = programManager.retrieveAllPrograms();
+	        LDPathProgramCollection ldProgramCollection = programManager.retrieveAllPrograms();
 	        ResponseBuilder rb = Response.ok(ldProgramCollection, MediaType.APPLICATION_JSON);
 	        addCORSOrigin(servletContext, rb, headers);
 	        return rb.build();
@@ -217,7 +217,7 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     }
 
     // Helper methods for HTML view
-    public List<LDProgram> getLdPrograms() {
+    public List<LDPathProgram> getLdPrograms() {
         return programManager.retrieveAllPrograms().asList();
     }
 

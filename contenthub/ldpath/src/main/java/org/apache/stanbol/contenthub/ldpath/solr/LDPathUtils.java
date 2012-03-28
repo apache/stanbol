@@ -43,7 +43,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
+import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathException;
 import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.osgi.framework.Bundle;

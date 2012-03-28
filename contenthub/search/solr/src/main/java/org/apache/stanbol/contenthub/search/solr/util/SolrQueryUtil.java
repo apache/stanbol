@@ -31,7 +31,7 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.slf4j.Logger;

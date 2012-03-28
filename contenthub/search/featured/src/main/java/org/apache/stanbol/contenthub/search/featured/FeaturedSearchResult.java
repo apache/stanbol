@@ -19,10 +19,10 @@ package org.apache.stanbol.contenthub.search.featured;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.DocumentResult;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FacetResult;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
 
 public class FeaturedSearchResult implements SearchResult {
 

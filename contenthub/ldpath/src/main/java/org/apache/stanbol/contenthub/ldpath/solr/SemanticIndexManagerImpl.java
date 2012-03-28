@@ -34,9 +34,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
+import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndexManager;
+import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathException;
+import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathProgramCollection;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
@@ -234,8 +234,8 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     }
 
     @Override
-    public LDProgramCollection retrieveAllPrograms() {
-        return new LDProgramCollection(nameProgramMap);
+    public LDPathProgramCollection retrieveAllPrograms() {
+        return new LDPathProgramCollection(nameProgramMap);
     }
 
     @Override

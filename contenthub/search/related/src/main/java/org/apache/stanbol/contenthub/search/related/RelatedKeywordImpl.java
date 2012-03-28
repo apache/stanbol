@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.contenthub.search.related;
 
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
 
 public class RelatedKeywordImpl implements RelatedKeyword {
     

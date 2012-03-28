@@ -32,7 +32,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
+import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathProgramCollection;
 import org.apache.stanbol.contenthub.web.util.JSONUtils;
 import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.codehaus.jettison.json.JSONException;
@@ -43,17 +43,17 @@ import org.codehaus.jettison.json.JSONException;
  * 
  */
 @Provider
-public class LDProgramCollectionWriter implements MessageBodyWriter<LDProgramCollection> {
+public class LDProgramCollectionWriter implements MessageBodyWriter<LDPathProgramCollection> {
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         String mediaTypeString = mediaType.getType() + '/' + mediaType.getSubtype();
-        return LDProgramCollection.class.isAssignableFrom(type)
+        return LDPathProgramCollection.class.isAssignableFrom(type)
                && RestUtil.supportedMediaTypes.contains(mediaTypeString);
     }
 
     @Override
-    public long getSize(LDProgramCollection t,
+    public long getSize(LDPathProgramCollection t,
                         Class<?> type,
                         Type genericType,
                         Annotation[] annotations,
@@ -62,7 +62,7 @@ public class LDProgramCollectionWriter implements MessageBodyWriter<LDProgramCol
     }
 
     @Override
-    public void writeTo(LDProgramCollection t,
+    public void writeTo(LDPathProgramCollection t,
                         Class<?> type,
                         Type genericType,
                         Annotation[] annotations,

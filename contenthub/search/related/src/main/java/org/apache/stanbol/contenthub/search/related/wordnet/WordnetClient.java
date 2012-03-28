@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.stanbol.contenthub.search.related.RelatedKeywordImpl;
-import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
+import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
 
 import edu.smu.tspell.wordnet.NounSynset;
 import edu.smu.tspell.wordnet.Synset;

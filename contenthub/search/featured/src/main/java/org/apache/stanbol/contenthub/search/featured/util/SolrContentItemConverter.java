@@ -18,7 +18,7 @@ package org.apache.stanbol.contenthub.search.featured.util;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.stanbol.contenthub.search.featured.DocumentResultImpl;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 
 public class SolrContentItemConverter {

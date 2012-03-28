@@ -30,11 +30,11 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.contenthub.search.related.ontologyresource.OntologyResourceSearch;
 import org.apache.stanbol.contenthub.search.related.referencedsite.ReferencedSiteSearch;
 import org.apache.stanbol.contenthub.search.related.wordnet.WordnetSearch;
-import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearch;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearchManager;
+import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeywordSearch;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeywordSearchManager;
 
 @Component
 @Service

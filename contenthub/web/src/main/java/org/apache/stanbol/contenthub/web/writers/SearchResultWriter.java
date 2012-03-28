@@ -32,7 +32,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.web.util.JSONUtils;
 import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.codehaus.jettison.json.JSONException;

@@ -28,10 +28,10 @@ import java.util.Map.Entry;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
-import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
-import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
+import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathProgramCollection;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.DocumentResult;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
+import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.store.solr.util.ContentItemIDOrganizer;
 import org.codehaus.jettison.json.JSONArray;
@@ -217,7 +217,7 @@ public class JSONUtils {
         return jObj.toString(4);
     }
 
-    public static String createJSONString(LDProgramCollection ldpc) throws JSONException {
+    public static String createJSONString(LDPathProgramCollection ldpc) throws JSONException {
         JSONObject jObj = new JSONObject();
         for (Map.Entry<String,String> entry : ldpc.asMap().entrySet()) {
             jObj.put(entry.getKey(), entry.getValue());

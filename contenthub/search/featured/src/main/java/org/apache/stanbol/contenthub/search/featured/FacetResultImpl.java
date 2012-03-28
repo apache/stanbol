@@ -20,7 +20,7 @@ import static org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVoc
 import static org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.STANBOLRESERVED_PREFIX;
 
 import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FacetResult;
 
 public class FacetResultImpl implements FacetResult {
 

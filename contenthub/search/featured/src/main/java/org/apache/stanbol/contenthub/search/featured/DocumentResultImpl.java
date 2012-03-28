@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.contenthub.search.featured;
 
-import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.store.solr.util.ContentItemIDOrganizer;
 
 public class DocumentResultImpl implements DocumentResult {
