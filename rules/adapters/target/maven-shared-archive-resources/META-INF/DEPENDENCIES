@@ -79,6 +79,8 @@ From: 'The Apache Software Foundation' (http://www.apache.org/)
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Clerezza - SCB Core (http://incubator.apache.org/clerezza/mvn-site/rdf.core/) org.apache.clerezza:rdf.core:bundle:0.12-incubating
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Clerezza - SCB Testutils (http://incubator.apache.org/clerezza/mvn-site/rdf.core.test/) org.apache.clerezza:rdf.core.test:jar:0.13-incubating
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Clerezza - SCB Jena Commons (http://incubator.apache.org/clerezza/mvn-site/rdf.jena.commons/) org.apache.clerezza:rdf.jena.commons:bundle:0.5-incubating
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Clerezza - Jena API on SCB (http://incubator.apache.org/clerezza/mvn-site/rdf.jena.facade/) org.apache.clerezza:rdf.jena.facade:bundle:0.12-incubating
@@ -87,9 +89,17 @@ From: 'The Apache Software Foundation' (http://www.apache.org/)
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Clerezza - SCB Jena based Serializer (http://incubator.apache.org/clerezza/mvn-site/rdf.jena.serializer/) org.apache.clerezza:rdf.jena.serializer:bundle:0.9-incubating
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Clerezza - SCB Jena SPARQL engine (http://incubator.apache.org/clerezza/mvn-site/rdf.jena.sparql/) org.apache.clerezza:rdf.jena.sparql:bundle:0.5-incubating
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Clerezza - SCB Jena Storage Provider (http://incubator.apache.org/clerezza/mvn-site/rdf.jena.storage/) org.apache.clerezza:rdf.jena.storage:bundle:0.5-incubating
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Clerezza - SCB Ontologies (http://incubator.apache.org/clerezza/mvn-site/rdf.ontologies/) org.apache.clerezza:rdf.ontologies:bundle:0.11-incubating
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Clerezza - SCB rdf/json Parser and Serializer (http://incubator.apache.org/clerezza/mvn-site/rdf.rdfjson/) org.apache.clerezza:rdf.rdfjson:bundle:0.3-incubating
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Clerezza - SCB Simple TripleCollection Provider (http://incubator.apache.org/clerezza/mvn-site/rdf.simple.storage/) org.apache.clerezza:rdf.simple.storage:bundle:0.7-incubating
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Clerezza - SCB Utilities (http://incubator.apache.org/clerezza/mvn-site/rdf.utils/) org.apache.clerezza:rdf.utils:bundle:0.13-incubating
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Clerezza - Utilities Project (http://incubator.apache.org/clerezza/mvn-site/utils/) org.apache.clerezza:utils:bundle:0.1-incubating
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -103,13 +113,23 @@ From: 'The Apache Software Foundation' (http://www.apache.org/)
     License: Apache License  (LICENSE.txt)
   - Lucene Core (http://lucene.apache.org/java/lucene-parent/lucene-core) org.apache.lucene:lucene-core:jar:3.2.0
     License: Apache 2  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Apache Stanbol Commons Indexed Clerezza inMemory graph implementation (http://www.apache.org/stanbol-parent/org.apache.stanbol.commons.indexedgraph/) org.apache.stanbol:org.apache.stanbol.commons.indexedgraph:bundle:0.9.0-incubating-SNAPSHOT
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Apache Stanbol JSON-LD API (http://www.apache.org/stanbol-parent/org.apache.stanbol.commons.jsonld/) org.apache.stanbol:org.apache.stanbol.commons.jsonld:bundle:0.9.0-incubating-SNAPSHOT
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Apache Stanbol OWL libraries (http://www.apache.org/stanbol-parent/org.apache.stanbol.commons.owl/) org.apache.stanbol:org.apache.stanbol.commons.owl:bundle:0.9.0-incubating-SNAPSHOT
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Apache Stanbol Offline Utilities (http://www.apache.org/stanbol-parent/org.apache.stanbol.commons.stanboltools.offline/) org.apache.stanbol:org.apache.stanbol.commons.stanboltools.offline:bundle:0.9.0-incubating-SNAPSHOT
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Apache Stanbol Commons Web Base (http://www.apache.org/stanbol-parent/org.apache.stanbol.commons.web.base/) org.apache.stanbol:org.apache.stanbol.commons.web.base:bundle:0.9.0-incubating-SNAPSHOT
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Apache Stanbol Ontology Network Manager (http://www.apache.org/stanbol-parent/org.apache.stanbol.ontologymanager.ontonet/) org.apache.stanbol:org.apache.stanbol.ontologymanager.ontonet:bundle:0.9.0-incubating-SNAPSHOT
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Apache Stanbol Rules - Adapters (http://www.apache.org/stanbol-parent/org.apache.stanbol.rules.adapters/) org.apache.stanbol:org.apache.stanbol.rules.adapters:bundle:0.9.0-incubating-SNAPSHOT
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Apache Stanbol Rules Services API (http://www.apache.org/stanbol-parent/org.apache.stanbol.rules.base/) org.apache.stanbol:org.apache.stanbol.rules.base:bundle:0.9.0-incubating-SNAPSHOT
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Apache Stanbol Rules Manager (http://www.apache.org/stanbol-parent/org.apache.stanbol.rules.manager/) org.apache.stanbol:org.apache.stanbol.rules.manager:bundle:0.9.0-incubating-SNAPSHOT
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 From: 'The Jena Project' (http://www.openjena.org/)
