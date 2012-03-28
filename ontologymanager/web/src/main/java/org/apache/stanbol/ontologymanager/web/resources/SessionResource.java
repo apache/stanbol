@@ -17,6 +17,8 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
@@ -60,6 +62,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.IrremovableOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
@@ -74,6 +77,10 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.multipart.BodyPart;
+import com.sun.jersey.multipart.FormDataBodyPart;
+import com.sun.jersey.multipart.FormDataMultiPart;
 
 /**
  * The REST resource of an OntoNet {@link Session} whose identifier is known.
@@ -91,13 +98,15 @@ public class SessionResource extends BaseStanbolResource {
      */
     protected SessionManager sesMgr;
 
+    protected ONManager onMgr;
+
     protected Session session;
 
     public SessionResource(@PathParam(value = "id") String sessionId, @Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.sesMgr = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
             servletContext);
-        // sesMgr = onm.getSessionManager();
+        this.onMgr = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
         session = sesMgr.getSession(sessionId);
     }
 
@@ -342,6 +351,31 @@ public class SessionResource extends BaseStanbolResource {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
         ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    @POST
+    @Consumes({MULTIPART_FORM_DATA})
+    @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
+    public Response append(FormDataMultiPart data, @Context HttpHeaders headers) {
+        System.out.println(" post(FormDataMultiPart data)");
+        log.debug(" post(FormDataMultiPart data)");
+        ResponseBuilder rb;
+
+        for (BodyPart bpart : data.getBodyParts()) {
+            log.debug("is a {}", bpart.getClass());
+            if (bpart instanceof FormDataBodyPart) {
+                FormDataBodyPart dbp = (FormDataBodyPart) bpart;
+                String name = dbp.getName();
+                if (name.equals("scope")) {
+                    session.attachScope(onMgr.getScopeRegistry().getScope(dbp.getValue()));
+                }
+            }
+        }
+        rb = Response.ok();
+        // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+        // FIXME return an appropriate response e.g. 303
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
