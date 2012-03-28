@@ -137,10 +137,15 @@ public class RecipeWriter implements MessageBodyWriter<Recipe> {
             String descriptionURI = Symbols.description.toString().replace("<", "").replace(">", "");
             IRI descriptionIRI = IRI.create(descriptionURI);
             OWLDataProperty descriptionProperty = factory.getOWLDataProperty(descriptionIRI);
-
-            OWLAxiom axiom = factory.getOWLDataPropertyAssertionAxiom(descriptionProperty, recipeIndividual,
-                recipe.getRecipeDescription());
-            manager.addAxiom(ontology, axiom);
+            
+            OWLAxiom axiom; 
+            
+            String recipeDescription = recipe.getRecipeDescription();
+            if(recipeDescription != null){
+                axiom = factory.getOWLDataPropertyAssertionAxiom(descriptionProperty, recipeIndividual,
+                    recipeDescription);
+                manager.addAxiom(ontology, axiom);
+            }
             
             if(rules != null){
                 for (Rule rule : rules) {
