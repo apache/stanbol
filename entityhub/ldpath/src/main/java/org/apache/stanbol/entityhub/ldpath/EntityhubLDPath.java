@@ -16,6 +16,8 @@
 */
 package org.apache.stanbol.entityhub.ldpath;
 
+import java.util.Collection;
+
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory.AnyUriConverter;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory.ReferenceConverter;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory.TextConverter;
@@ -111,7 +113,10 @@ public class EntityhubLDPath extends LDPath<Object> {
         }
         Representation result = vf.createRepresentation(context.getReference());
         for(FieldMapping<?,Object> mapping : program.getFields()) {
-            result.add(mapping.getFieldName(),mapping.getValues(backend,context));
+            Collection<?> values = mapping.getValues(backend,context);
+            if(values !=null && !values.isEmpty()){
+                result.add(mapping.getFieldName(),values);
+            }
         }
         return result;
         
