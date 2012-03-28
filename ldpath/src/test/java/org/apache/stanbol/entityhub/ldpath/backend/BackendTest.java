@@ -18,6 +18,8 @@ package org.apache.stanbol.entityhub.ldpath.backend;
 
 import static org.apache.stanbol.entityhub.ldpath.LDPathUtils.getReader;
 import static org.junit.Assert.assertNotNull;
+
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +27,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import org.apache.stanbol.entityhub.ldpath.impl.LDPathTestBase;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,5 +171,31 @@ public class BackendTest extends LDPathTestBase {
                 "(entity: %s)",result);
         log.info("Assert LDPath Result for {}:", EXPECTED_HARVARD_ALUMNI);
         assertLDPathResult(result,EXPECTED_HARVARD_ALUMNI);
+    }
+    @Test 
+    public void testSingleRepresentationBackend() throws Exception {
+        Representation paris = yard.getRepresentation("http://dbpedia.org/resource/Paris");
+        assertNotNull(paris);
+        SingleRepresentationBackend backend = new SingleRepresentationBackend();
+        backend.setRepresentation(paris);
+        LDPath<Object> ldPath = new LDPath<Object>(backend);
+        StringBuilder sb = new StringBuilder();
+        sb.append("myTest = .[rdf:type is <http://dbpedia.org/ontology/Place>]/rdfs:label;");
+        Program<Object> program = ldPath.parseProgram(new StringReader(sb.toString()));
+        Map<String,Collection<?>> result = program.execute(backend, yard.getValueFactory().createReference(paris.getId()));
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.containsKey("myTest"));
+        Collection<?> values = result.get("myTest");
+        Assert.assertNotNull(values);
+        Assert.assertFalse(values.isEmpty());
+
+        sb = new StringBuilder();
+        sb.append("myTest = .[rdf:type is <http://dbpedia.org/ontology/Place2>]/rdfs:label;");
+        program = ldPath.parseProgram(new StringReader(sb.toString()));
+        result = program.execute(backend, yard.getValueFactory().createReference(paris.getId()));
+        Assert.assertNotNull(result);
+        values = result.get("myTest");
+        Assert.assertTrue(values == null || values.isEmpty());
+
     }
 }

@@ -328,11 +328,11 @@
 			<artifactId>commons-fileupload</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
+		<!-- already included <dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<scope>runtime</scope>
-		</dependency>
+		</dependency>  -->
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
