@@ -142,7 +142,7 @@
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
-      <version>1.7</version>
+      <version>1.12</version>
     </bundle>
     <bundle>
       <groupId>org.codehaus.jackson</groupId>
@@ -164,13 +164,18 @@
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
-      <version>1.7</version>
+      <version>1.12</version>
+    </bundle>
+    <bundle>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-servlet</artifactId>
+      <version>1.12</version>
     </bundle>
     <!-- needed to read data from mime multipart requests -->
     <bundle>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
-      <version>1.7</version>
+      <version>1.12</version>
     </bundle>
     <!-- dependency of jersey-multipart -->
     <bundle>
