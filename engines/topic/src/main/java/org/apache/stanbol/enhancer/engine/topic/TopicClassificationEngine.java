@@ -431,12 +431,16 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 metadata.add(new TripleImpl(enhancement,
                         org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE,
                         new UriRef(topic.conceptUri)));
+                metadata.add(new TripleImpl(enhancement,
+                        org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_TYPE,
+                        OntologicalClasses.SKOS_CONCEPT));
 
                 // add confidence information
                 metadata.add(new TripleImpl(enhancement,
                         org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE, lf
                                 .createTypedLiteral(Double.valueOf(topic.score))));
 
+                // add performance estimates of the classifier if available
                 ClassificationReport perf = getPerformanceEstimates(topic.conceptUri);
                 if (perf.uptodate) {
                     metadata.add(new TripleImpl(enhancement, precision, lf.createTypedLiteral(Double
@@ -446,6 +450,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     metadata.add(new TripleImpl(enhancement, f1, lf.createTypedLiteral(Double
                             .valueOf(perf.f1))));
                 }
+                // fetch concept label from the entityhub or a referenced site if available
                 Entity entity = entityhub.getEntity(topic.conceptUri);
                 if (entity == null) {
                     entity = referencedSiteManager.getEntity(topic.conceptUri);
