@@ -93,14 +93,14 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
 
     // TODO: make me configurable using an OSGi property
     protected int batchSize = 100;
-    
+
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, bind = "bindManagedSolrServer", unbind = "unbindManagedSolrServer", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC)
     protected ManagedSolrServer managedSolrServer;
 
     public String getName() {
         return trainingSetId;
     }
-    
+
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, InvalidSyntaxException {
         indexArchiveName = "default-topic-trainingset";
@@ -282,6 +282,15 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
     @Override
     public void setBatchSize(int batchSize) {
         this.batchSize = batchSize;
+    }
+
+    @Override
+    public void optimize() throws TrainingSetException {
+        try {
+            getActiveSolrServer().optimize();
+        } catch (Exception e) {
+            throw new TrainingSetException("Error optimizing training dataset " + getName(), e);
+        }
     }
 
 }
