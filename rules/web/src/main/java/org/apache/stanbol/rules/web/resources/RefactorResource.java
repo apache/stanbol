@@ -39,20 +39,24 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
+import org.apache.stanbol.rules.base.api.RecipeConstructionException;
+import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.manager.KB;
-import org.apache.stanbol.rules.manager.changes.RecipeImpl;
+import org.apache.stanbol.rules.manager.RecipeImpl;
 import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
 import org.apache.stanbol.rules.refactor.api.RefactoringException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -64,7 +68,7 @@ import com.sun.jersey.multipart.FormDataParam;
 
 /**
  * 
- * @author andrea.nuzzolese
+ * @author anuzzolese
  * 
  */
 
@@ -75,11 +79,18 @@ public class RefactorResource extends BaseStanbolResource {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     protected Refactorer refactorer;
-    
+    protected RuleStore ruleStore;
+
     public RefactorResource(@Context ServletContext servletContext) {
         refactorer = (Refactorer) ContextHelper.getServiceFromContext(Refactorer.class, servletContext);
         if (refactorer == null) {
-            throw new IllegalStateException("SemionRefactorer missing in ServletContext");
+            throw new IllegalStateException("Refactorer missing in ServletContext");
+        }
+
+        ruleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
+
+        if (ruleStore == null) {
+            throw new IllegalStateException("RuleStore missing in ServletContext");
         }
 
     }
@@ -105,13 +116,14 @@ public class RefactorResource extends BaseStanbolResource {
 
         OWLOntology output = null;
         try {
-            output = doRefactoring(input, RuleParserImpl.parse(recipe));
+            output = doRefactoring(input,
+                RuleParserImpl.parse("http://incubator.apache.com/stanbol/rules/refactor/", recipe));
         } catch (OWLOntologyCreationException e1) {
             throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
         } catch (RefactoringException e1) {
             throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
         }
-        if (output == null){ 
+        if (output == null) {
             ResponseBuilder rb = Response.status(NOT_FOUND);
             rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
             addCORSOrigin(servletContext, rb, headers);
@@ -145,13 +157,14 @@ public class RefactorResource extends BaseStanbolResource {
 
         OWLOntology output = null;
         try {
-            output = doRefactoring(input, RuleParserImpl.parse(recipeStream));
+            output = doRefactoring(input,
+                RuleParserImpl.parse("http://incubator.apache.com/stanbol/rules/refactor/", recipeStream));
         } catch (OWLOntologyCreationException e1) {
             throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
         } catch (RefactoringException e1) {
             throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
         }
-        if (output == null){ 
+        if (output == null) {
             ResponseBuilder rb = Response.status(NOT_FOUND);
             rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
             addCORSOrigin(servletContext, rb, headers);
@@ -176,7 +189,7 @@ public class RefactorResource extends BaseStanbolResource {
     private OWLOntology doRefactoring(InputStream input, KB kb) throws OWLOntologyCreationException,
                                                                RefactoringException {
         if (kb == null) return null;
-        RuleList ruleList = kb.getkReSRuleList();
+        RuleList ruleList = kb.getRuleList();
         if (ruleList == null) return null;
         Recipe actualRecipe = new RecipeImpl(null, null, ruleList);
 
@@ -184,8 +197,10 @@ public class RefactorResource extends BaseStanbolResource {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology inputOntology = manager.loadOntologyFromOntologyDocument(input);
 
+        TripleCollection tripleCollection = refactorer.graphRefactoring(
+            OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology), actualRecipe);
         // Refactor
-        return refactorer.ontologyRefactoring(inputOntology, actualRecipe);
+        return OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tripleCollection);
     }
 
     @POST
@@ -193,39 +208,32 @@ public class RefactorResource extends BaseStanbolResource {
     @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
                        KRFormat.OWL_XML, KRFormat.RDF_JSON})
     public Response performRefactoring(@FormDataParam("recipe") String recipe,
-                                       @FormDataParam("input") InputStream input,
-                                       @Context HttpHeaders headers) {
+                                       @FormDataParam("input") InputStream input) {
 
         // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
-        IRI recipeIRI = IRI.create(recipe);
-
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology inputOntology;
+        UriRef recipeID = new UriRef(recipe);
+        Recipe rcp;
         try {
-            inputOntology = manager.loadOntologyFromOntologyDocument(input);
+            rcp = ruleStore.getRecipe(recipeID);
 
-            OWLOntology outputOntology;
-            try {
-                outputOntology = refactorer.ontologyRefactoring(inputOntology, recipeIRI);
-            } catch (RefactoringException e) {
-                // refactoring exceptions are re-thrown
-                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-            } catch (NoSuchRecipeException e) {
-                // missing recipes result in a status 404
-                ResponseBuilder rb = Response.status(Status.NOT_FOUND);
-                MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
-                if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
-                addCORSOrigin(servletContext, rb, headers);
-                return rb.build();
-            }
-            ResponseBuilder rb = Response.ok(outputOntology);
-            MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
-            if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
-            addCORSOrigin(servletContext, rb, headers);
-            return rb.build();
+            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+            OWLOntology inputOntology = manager.loadOntologyFromOntologyDocument(input);
+            TripleCollection tripleCollection = refactorer.graphRefactoring(
+                OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology), rcp);
+            OWLOntology outputOntology = OWLAPIToClerezzaConverter
+                    .clerezzaGraphToOWLOntology(tripleCollection);
+
+            return Response.ok(outputOntology).build();
+
+        } catch (NoSuchRecipeException e1) {
+            return Response.status(Status.NOT_FOUND).build();
+        } catch (RecipeConstructionException e1) {
+            return Response.status(Status.NO_CONTENT).build();
         } catch (OWLOntologyCreationException e) {
-            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            return Response.status(Status.PRECONDITION_FAILED).build();
+        } catch (RefactoringException e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
 
     }
@@ -239,33 +247,32 @@ public class RefactorResource extends BaseStanbolResource {
         log.info("recipe: {}", recipe);
         log.info("input-graph: {}", inputGraph);
         log.info("output-graph: {}", outputGraph);
-        IRI recipeIRI = IRI.create(recipe);
-        IRI inputGraphIRI = IRI.create(inputGraph);
-        IRI outputGraphIRI = IRI.create(outputGraph);
+        UriRef recipeID = new UriRef(recipe);
+        UriRef inputGraphID = new UriRef(inputGraph);
+        UriRef outputGraphID = new UriRef(outputGraph);
 
         // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
+        ResponseBuilder responseBuilder = null;
+
         try {
-            refactorer.ontologyRefactoring(outputGraphIRI, inputGraphIRI, recipeIRI);
-            ResponseBuilder rb = Response.ok();
-            MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
-            if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
-            addCORSOrigin(servletContext, rb, headers);
-            return rb.build();
+            refactorer.graphRefactoring(outputGraphID, inputGraphID, recipeID);
+            responseBuilder = Response.ok();
         } catch (RefactoringException e) {
             // refactoring exceptions are re-thrown
+            log.error(e.getMessage(), e);
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         } catch (NoSuchRecipeException e) {
-            // missing recipes result in a status 404
-            ResponseBuilder rb = Response.status(NOT_FOUND);
-            MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
-            if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
-            addCORSOrigin(servletContext, rb, headers);
-            return rb.build();
+            log.error(e.getMessage(), e);
+            responseBuilder = Response.status(NOT_FOUND);
         }
 
+        MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+        if (mediaType != null) responseBuilder.header(HttpHeaders.CONTENT_TYPE, mediaType);
+        addCORSOrigin(servletContext, responseBuilder, headers);
+        return responseBuilder.build();
     }
-    
+
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
