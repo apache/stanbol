@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component enabled="true" immediate="true" name="org.apache.stanbol.rules.adapters.impl.RuleAdaptersFactoryImpl" activate="activate" deactivate="deactivate">
+        <implementation class="org.apache.stanbol.rules.adapters.impl.RuleAdaptersFactoryImpl"/>
+        <service servicefactory="false">
+            <provide interface="org.apache.stanbol.rules.base.api.RuleAdaptersFactory"/>
+        </service>
+        <property name="service.vendor" type="String" value="Apache Stanbol (incubating)"/>
+        <property name="service.pid" value="org.apache.stanbol.rules.adapters.impl.RuleAdaptersFactoryImpl"/>
+    </scr:component>
+    <scr:component enabled="true" immediate="true" name="org.apache.stanbol.rules.adapters.impl.RuleAdaptersManagerImpl" activate="activate" deactivate="deactivate">
+        <implementation class="org.apache.stanbol.rules.adapters.impl.RuleAdaptersManagerImpl"/>
+        <service servicefactory="false">
+            <provide interface="org.apache.stanbol.rules.base.api.RuleAdapterManager"/>
+        </service>
+        <property name="service.vendor" type="String" value="Apache Stanbol (incubating)"/>
+        <property name="service.pid" value="org.apache.stanbol.rules.adapters.impl.RuleAdaptersManagerImpl"/>
+        <reference name="ruleAdaptersFactory" interface="org.apache.stanbol.rules.base.api.RuleAdaptersFactory" cardinality="1..1" policy="static" bind="bindRuleAdaptersFactory" unbind="unbindRuleAdaptersFactory"/>
+    </scr:component>
+</components>
