@@ -42,7 +42,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jersey-version>1.7</jersey-version>
+    <jersey-version>1.12</jersey-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
   </properties>
 
@@ -1202,6 +1202,11 @@
       <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
+        <version>${jersey-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-servlet</artifactId>
         <version>${jersey-version}</version>
       </dependency>
       <dependency>
