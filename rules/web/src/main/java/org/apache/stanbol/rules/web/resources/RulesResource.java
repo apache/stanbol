@@ -209,7 +209,7 @@ public class RulesResource extends BaseStanbolResource {
         try {
             recipe = ruleStore.getRecipe(new UriRef(recipeID));
 
-            if (ruleID != null && ruleID.isEmpty()) {
+            if (ruleID != null && !ruleID.isEmpty()) {
                 rule = ruleStore.getRule(recipe, new UriRef(ruleID));
                 RuleList ruleList = new RuleList();
                 ruleList.add(rule);
