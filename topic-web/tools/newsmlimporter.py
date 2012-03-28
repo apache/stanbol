@@ -22,6 +22,7 @@ TODO: port to Python 3 as well if not working by default.
 from __future__ import print_function
 
 import os
+from time import time
 from lxml import html
 from lxml import etree
 from urllib import quote
@@ -61,11 +62,10 @@ def register_newsml_document(text, codes, url):
     url += "?example_id=%s" % id
     for code in codes:
         url += "&concept=%s" % quote(code)
-    print("Calling:", url)
     request = urllib2.Request(url, data=text.encode('utf-8'))
     request.add_header('Content-Type', 'text/plain')
     opener = urllib2.build_opener()
-    print(opener.open(request).read())
+    opener.open(request).read()
 
 
 def print_newsml_summary(text, codes, server_url=None):
@@ -86,6 +86,7 @@ if __name__ == "__main__":
     handle_news = register_newsml_document
 
     count = 0
+    previous = time()
     for dirpath, dirnames, filenames in os.walk(topfolder):
         if count >= max:
             break
@@ -106,3 +107,7 @@ if __name__ == "__main__":
                 continue
             handle_news(text, codes, server_url)
             count += 1
+            if count % 100 == 0:
+                delta, previous = time() - previous, time()
+                print("Processed news %03d/%03d in %06.3fs"
+                      % (count, max, delta))
