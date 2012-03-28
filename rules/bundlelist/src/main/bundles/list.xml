@@ -31,6 +31,31 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.adapters.abstract</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.adapters.jena</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.adapters.sparql</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.adapters.clerezza</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.adapters.swrl</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.rules.refactor</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
