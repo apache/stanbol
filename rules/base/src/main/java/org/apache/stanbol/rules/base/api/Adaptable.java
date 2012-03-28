@@ -14,23 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.stanbol.rules.base.api;
 
-import java.net.URI;
-
-/**
- * This interface represent RDF objects, i.e., non-literal objects identified by an IRI.
- * 
- * @author anuzzolese
- * 
- */
-public interface URIResource {
+public interface Adaptable {
 
     /**
-     * It gets the uri of the resource.
+     * Returns a human-readable description of the adaptable object.
      * 
-     * @return the uri of the resource as a {@link URI} instance.
+     * @return the {@link String} containing the human-readable description of the adaptable object.
      */
-    URI getURI();
-
+    String prettyPrint();
 }

@@ -17,43 +17,28 @@
 package org.apache.stanbol.rules.base.api;
 
 /**
- * A {@link NoSuchRecipeException} is thrown when the recipe requested does not exist in the store.
+ * A {@link UnavailableRuleObjectException} is thown when the rule object requested to be adapted does not
+ * exist.
  * 
  * @author anuzzolese
  * 
  */
-
-public class NoSuchRecipeException extends Exception {
+public class UnavailableRuleObjectException extends Exception {
 
     /**
 	 * 
 	 */
     private static final long serialVersionUID = 1L;
 
-    protected String recipeID;
+    private String message;
 
-    /**
-     * Creates a new instance of OntologySpaceModificationException.
-     * 
-     * @param space
-     *            the ontology space whose modification was attempted.
-     */
-    public NoSuchRecipeException(String recipeID) {
-        this.recipeID = recipeID;
-    }
-
-    /**
-     * Returns the {@link String} of the recipe that threw the exception.
-     * 
-     * @return the recipe {@link String} on which the exception was thrown.
-     */
-    public String getRecipeID() {
-        return recipeID;
+    public UnavailableRuleObjectException(String message) {
+        this.message = message;
     }
 
     @Override
     public String getMessage() {
-        return "The recipe " + recipeID + " does not exist.";
+        return message;
     }
 
 }

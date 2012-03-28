@@ -14,46 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.stanbol.rules.base.api;
 
+import java.util.List;
+
 /**
- * A {@link NoSuchRecipeException} is thrown when the recipe requested does not exist in the store.
+ * The {@link RuleAdapterManager} allows to manage rule adapters.<br/>
+ * A rule adapter is able to adapt a {@link Recipe} to an external representation, e.g., Jena rules, SPARQL,
+ * Clerezza, etc...
  * 
  * @author anuzzolese
  * 
  */
-
-public class NoSuchRecipeException extends Exception {
-
-    /**
-	 * 
-	 */
-    private static final long serialVersionUID = 1L;
-
-    protected String recipeID;
+public interface RuleAdapterManager {
 
     /**
-     * Creates a new instance of OntologySpaceModificationException.
+     * It adapts the {@link Adaptable} object to the class provided as second parameter.
      * 
-     * @param space
-     *            the ontology space whose modification was attempted.
+     * @param <AdaptedTo>
+     * @param adaptable
+     *            {The object that we want to adapt, e.g., a Recipe}
+     * @param adaptedToType
+     *            {The object that we want in output}
+     * @return
+     * @throws UnavailableRuleObjectException
      */
-    public NoSuchRecipeException(String recipeID) {
-        this.recipeID = recipeID;
-    }
+    <AdaptedTo> RuleAdapter getAdapter(Adaptable adaptable, Class<AdaptedTo> adaptedToType) throws UnavailableRuleObjectException;
 
     /**
-     * Returns the {@link String} of the recipe that threw the exception.
+     * It returns the list of available rule adapters.
      * 
-     * @return the recipe {@link String} on which the exception was thrown.
+     * @return the list of available adapters
      */
-    public String getRecipeID() {
-        return recipeID;
-    }
-
-    @Override
-    public String getMessage() {
-        return "The recipe " + recipeID + " does not exist.";
-    }
+    List<RuleAdapter> listRuleAdapters();
 
 }

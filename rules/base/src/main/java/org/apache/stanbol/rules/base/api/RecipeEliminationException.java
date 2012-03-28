@@ -14,46 +14,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.stanbol.rules.base.api;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
+
 /**
- * A {@link NoSuchRecipeException} is thrown when the recipe requested does not exist in the store.
+ * A {@link RecipeEliminationException} is thrown when an error occurs during the elimination of the recipe.
  * 
  * @author anuzzolese
  * 
  */
-
-public class NoSuchRecipeException extends Exception {
+public class RecipeEliminationException extends Exception {
 
     /**
 	 * 
 	 */
     private static final long serialVersionUID = 1L;
 
-    protected String recipeID;
+    private Throwable e;
 
-    /**
-     * Creates a new instance of OntologySpaceModificationException.
-     * 
-     * @param space
-     *            the ontology space whose modification was attempted.
-     */
-    public NoSuchRecipeException(String recipeID) {
-        this.recipeID = recipeID;
-    }
-
-    /**
-     * Returns the {@link String} of the recipe that threw the exception.
-     * 
-     * @return the recipe {@link String} on which the exception was thrown.
-     */
-    public String getRecipeID() {
-        return recipeID;
+    public RecipeEliminationException(Throwable e) {
+        this.e = e;
     }
 
     @Override
     public String getMessage() {
-        return "The recipe " + recipeID + " does not exist.";
+        return "An exception occurred while generating the Recipe.";
+    }
+
+    @Override
+    public void printStackTrace() {
+        e.printStackTrace();
+    }
+
+    @Override
+    public void printStackTrace(PrintStream s) {
+        e.printStackTrace(s);
+    }
+
+    @Override
+    public void printStackTrace(PrintWriter s) {
+        e.printStackTrace(s);
+    }
+
+    @Override
+    public Throwable getCause() {
+        return e;
+    }
+
+    @Override
+    public StackTraceElement[] getStackTrace() {
+        return e.getStackTrace();
     }
 
 }

@@ -16,44 +16,45 @@
  */
 package org.apache.stanbol.rules.base.api;
 
+import org.apache.stanbol.rules.base.api.RuleAtom;
+
 /**
- * A {@link NoSuchRecipeException} is thrown when the recipe requested does not exist in the store.
+ * A {@link RuleAtomCallExeption} is thrown when an adapter is not able to adapt a rule atom of the rule.
  * 
- * @author anuzzolese
+ * @author mac
  * 
  */
-
-public class NoSuchRecipeException extends Exception {
+public class RuleAtomCallExeption extends Exception {
 
     /**
 	 * 
 	 */
     private static final long serialVersionUID = 1L;
 
-    protected String recipeID;
+    protected Class<?> atomClass;
 
     /**
-     * Creates a new instance of OntologySpaceModificationException.
+     * Creates a new instance of RuleAtomCallExeption.
      * 
-     * @param space
-     *            the ontology space whose modification was attempted.
+     * @param the
+     *            {@link RuleAtom} {@link Class}.
      */
-    public NoSuchRecipeException(String recipeID) {
-        this.recipeID = recipeID;
+    public RuleAtomCallExeption(Class<?> atomClass) {
+        this.atomClass = atomClass;
     }
 
     /**
-     * Returns the {@link String} of the recipe that threw the exception.
+     * Returns the {@link Class} of the atom that generated the exeption.
      * 
-     * @return the recipe {@link String} on which the exception was thrown.
+     * @return the atom {@link Class}
      */
-    public String getRecipeID() {
-        return recipeID;
+    public Class<?> getAtomClass() {
+        return atomClass;
     }
 
     @Override
     public String getMessage() {
-        return "The recipe " + recipeID + " does not exist.";
+        return "The adapter does not provide an implementation for the atom: " + atomClass.getCanonicalName()
+               + " ";
     }
-
 }

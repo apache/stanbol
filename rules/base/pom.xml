@@ -76,6 +76,12 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.owl</artifactId>
 		</dependency>
+		
+		<!-- Persistence -->
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.core</artifactId>
+		</dependency>
 
 		<!-- Testing deps -->
 		<dependency>
