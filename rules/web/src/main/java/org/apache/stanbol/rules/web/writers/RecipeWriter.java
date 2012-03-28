@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
 
 @Provider
 @Produces({KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.MANCHESTER_OWL, KRFormat.FUNCTIONAL_OWL,
-           KRFormat.TURTLE, KRFormat.RDF_JSON})
+           KRFormat.TURTLE, KRFormat.RDF_JSON, MediaType.TEXT_PLAIN})
 public class RecipeWriter implements MessageBodyWriter<Recipe> {
 
     protected Serializer serializer;
@@ -119,139 +119,152 @@ public class RecipeWriter implements MessageBodyWriter<Recipe> {
 
         log.debug("Rendering the list of recipes.");
 
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLDataFactory factory = OWLManager.getOWLDataFactory();
-
-        OWLOntology ontology;
-        try {
-            ontology = manager.createOntology();
-
-            RuleList rules = recipe.getRuleList();
-
-            UriRef recipeID = recipe.getRecipeID();
-
-            String recipeURI = recipeID.toString().replace("<", "").replace(">", "");
-            IRI recipeIRI = IRI.create(recipeURI);
-            OWLIndividual recipeIndividual = factory.getOWLNamedIndividual(recipeIRI);
-
-            String descriptionURI = Symbols.description.toString().replace("<", "").replace(">", "");
-            IRI descriptionIRI = IRI.create(descriptionURI);
-            OWLDataProperty descriptionProperty = factory.getOWLDataProperty(descriptionIRI);
+        if(mediaType.toString().equals(MediaType.TEXT_PLAIN)){
+            String recipeString = recipe.toString();
             
-            OWLAxiom axiom; 
+            out.write(recipeString.getBytes());
+        }
+        else if(mediaType.toString().equals(MediaType.TEXT_HTML)){
+            String recipeString = recipe.toString();
             
-            String recipeDescription = recipe.getRecipeDescription();
-            if(recipeDescription != null){
-                axiom = factory.getOWLDataPropertyAssertionAxiom(descriptionProperty, recipeIndividual,
-                    recipeDescription);
-                manager.addAxiom(ontology, axiom);
-            }
-            
-            if(rules != null){
-                for (Rule rule : rules) {
-                    UriRef ruleID = rule.getRuleID();
-                    String ruleName = rule.getRuleName();
-                    String ruleDescription = rule.getDescription();
+            out.write(recipeString.getBytes());
+        }
+        
+        else{
+            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+            OWLDataFactory factory = OWLManager.getOWLDataFactory();
     
-                    String ruleURI = ruleID.toString().replace("<", "").replace(">", "");
+            OWLOntology ontology;
+            try {
+                ontology = manager.createOntology();
     
-                    String ruleNameURI = Symbols.ruleName.toString().replace("<", "").replace(">", "");
+                RuleList rules = recipe.getRuleList();
     
-                    String ruleBodyURI = Symbols.ruleBody.toString().replace("<", "").replace(">", "");
-                    String ruleHeadURI = Symbols.ruleHead.toString().replace("<", "").replace(">", "");
-                    String hasRuleURI = Symbols.hasRule.toString().replace("<", "").replace(">", "");
+                UriRef recipeID = recipe.getRecipeID();
     
-                    String ruleContent = rule.toString();
+                String recipeURI = recipeID.toString().replace("<", "").replace(">", "");
+                IRI recipeIRI = IRI.create(recipeURI);
+                OWLIndividual recipeIndividual = factory.getOWLNamedIndividual(recipeIRI);
     
-                    String[] ruleParts = ruleContent.split("\\->");
-    
-                    IRI ruleIRI = IRI.create(ruleURI);
-    
-                    IRI ruleNameIRI = IRI.create(ruleNameURI);
-                    IRI ruleBodyIRI = IRI.create(ruleBodyURI);
-                    IRI ruleHeadIRI = IRI.create(ruleHeadURI);
-                    IRI hasRuleIRI = IRI.create(hasRuleURI);
-    
-                    OWLIndividual ruleIndividual = factory.getOWLNamedIndividual(ruleIRI);
-    
-                    OWLObjectProperty hasRule = factory.getOWLObjectProperty(hasRuleIRI);
-                    OWLDataProperty nameProperty = factory.getOWLDataProperty(ruleNameIRI);
-                    OWLDataProperty ruleBodyProperty = factory.getOWLDataProperty(ruleBodyIRI);
-                    OWLDataProperty ruleHeadProperty = factory.getOWLDataProperty(ruleHeadIRI);
-    
-                    // add the name to the rule individual
-                    axiom = factory.getOWLDataPropertyAssertionAxiom(nameProperty, ruleIndividual, ruleName);
+                String descriptionURI = Symbols.description.toString().replace("<", "").replace(">", "");
+                IRI descriptionIRI = IRI.create(descriptionURI);
+                OWLDataProperty descriptionProperty = factory.getOWLDataProperty(descriptionIRI);
+                
+                OWLAxiom axiom; 
+                
+                String recipeDescription = recipe.getRecipeDescription();
+                if(recipeDescription != null){
+                    axiom = factory.getOWLDataPropertyAssertionAxiom(descriptionProperty, recipeIndividual,
+                        recipeDescription);
                     manager.addAxiom(ontology, axiom);
-    
-                    // add the description to the rule individual
-                    if(ruleDescription != null){
-                        axiom = factory.getOWLDataPropertyAssertionAxiom(descriptionProperty, ruleIndividual,
-                            ruleDescription);
+                }
+                
+                if(rules != null){
+                    for (Rule rule : rules) {
+                        UriRef ruleID = rule.getRuleID();
+                        String ruleName = rule.getRuleName();
+                        String ruleDescription = rule.getDescription();
+        
+                        String ruleURI = ruleID.toString().replace("<", "").replace(">", "");
+        
+                        String ruleNameURI = Symbols.ruleName.toString().replace("<", "").replace(">", "");
+        
+                        String ruleBodyURI = Symbols.ruleBody.toString().replace("<", "").replace(">", "");
+                        String ruleHeadURI = Symbols.ruleHead.toString().replace("<", "").replace(">", "");
+                        String hasRuleURI = Symbols.hasRule.toString().replace("<", "").replace(">", "");
+        
+                        String ruleContent = rule.toString();
+        
+                        String[] ruleParts = ruleContent.split("\\->");
+        
+                        IRI ruleIRI = IRI.create(ruleURI);
+        
+                        IRI ruleNameIRI = IRI.create(ruleNameURI);
+                        IRI ruleBodyIRI = IRI.create(ruleBodyURI);
+                        IRI ruleHeadIRI = IRI.create(ruleHeadURI);
+                        IRI hasRuleIRI = IRI.create(hasRuleURI);
+        
+                        OWLIndividual ruleIndividual = factory.getOWLNamedIndividual(ruleIRI);
+        
+                        OWLObjectProperty hasRule = factory.getOWLObjectProperty(hasRuleIRI);
+                        OWLDataProperty nameProperty = factory.getOWLDataProperty(ruleNameIRI);
+                        OWLDataProperty ruleBodyProperty = factory.getOWLDataProperty(ruleBodyIRI);
+                        OWLDataProperty ruleHeadProperty = factory.getOWLDataProperty(ruleHeadIRI);
+        
+                        // add the name to the rule individual
+                        axiom = factory.getOWLDataPropertyAssertionAxiom(nameProperty, ruleIndividual, ruleName);
                         manager.addAxiom(ontology, axiom);
+        
+                        // add the description to the rule individual
+                        if(ruleDescription != null){
+                            axiom = factory.getOWLDataPropertyAssertionAxiom(descriptionProperty, ruleIndividual,
+                                ruleDescription);
+                            manager.addAxiom(ontology, axiom);
+                        }
+        
+                        // add the rule body to the rule individual
+                        axiom = factory.getOWLDataPropertyAssertionAxiom(ruleBodyProperty, ruleIndividual,
+                            ruleParts[0]);
+                        manager.addAxiom(ontology, axiom);
+        
+                        // add the rule head to the rule individual
+                        axiom = factory.getOWLDataPropertyAssertionAxiom(ruleHeadProperty, ruleIndividual,
+                            ruleParts[1]);
+                        manager.addAxiom(ontology, axiom);
+        
+                        // bind the rule to the recipe
+                        axiom = factory.getOWLObjectPropertyAssertionAxiom(hasRule, recipeIndividual, ruleIndividual);
+                        manager.addAxiom(ontology, axiom);
+        
                     }
+                }
     
-                    // add the rule body to the rule individual
-                    axiom = factory.getOWLDataPropertyAssertionAxiom(ruleBodyProperty, ruleIndividual,
-                        ruleParts[0]);
-                    manager.addAxiom(ontology, axiom);
+                /*
+                 * Write the ontology with the list of recipes
+                 */
     
-                    // add the rule head to the rule individual
-                    axiom = factory.getOWLDataPropertyAssertionAxiom(ruleHeadProperty, ruleIndividual,
-                        ruleParts[1]);
-                    manager.addAxiom(ontology, axiom);
+                if (mediaType.toString().equals(KRFormat.RDF_XML)) {
     
-                    // bind the rule to the recipe
-                    axiom = factory.getOWLObjectPropertyAssertionAxiom(hasRule, recipeIndividual, ruleIndividual);
-                    manager.addAxiom(ontology, axiom);
+                    try {
+                        manager.saveOntology(ontology, new RDFXMLOntologyFormat(), out);
+                    } catch (OWLOntologyStorageException e) {
+                        log.error("Failed to store ontology for rendering.", e);
+                    }
+                } else if (mediaType.toString().equals(KRFormat.OWL_XML)) {
+                    try {
+                        manager.saveOntology(ontology, new OWLXMLOntologyFormat(), out);
+                    } catch (OWLOntologyStorageException e) {
+                        log.error("Failed to store ontology for rendering.", e);
+                    }
+                } else if (mediaType.toString().equals(KRFormat.MANCHESTER_OWL)) {
+                    try {
+                        manager.saveOntology(ontology, new ManchesterOWLSyntaxOntologyFormat(), out);
+                    } catch (OWLOntologyStorageException e) {
+                        log.error("Failed to store ontology for rendering.", e);
+                    }
+                } else if (mediaType.toString().equals(KRFormat.FUNCTIONAL_OWL)) {
+                    try {
+                        manager.saveOntology(ontology, new OWLFunctionalSyntaxOntologyFormat(), out);
+                    } catch (OWLOntologyStorageException e) {
+                        log.error("Failed to store ontology for rendering.", e);
+                    }
+                } else if (mediaType.toString().equals(KRFormat.TURTLE)) {
+                    try {
+                        manager.saveOntology(ontology, new TurtleOntologyFormat(), out);
+                    } catch (OWLOntologyStorageException e) {
+                        log.error("Failed to store ontology for rendering.", e);
+                    }
+                } else if (mediaType.toString().equals(KRFormat.RDF_JSON)) {
+    
+                    TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(ontology);
+    
+                    RdfJsonSerializingProvider provider = new RdfJsonSerializingProvider();
+                    provider.serialize(out, mGraph, SupportedFormat.RDF_JSON);
     
                 }
+            } catch (OWLOntologyCreationException e1) {
+                log.error("An error occurred.", e1);
             }
-
-            /*
-             * Write the ontology with the list of recipes
-             */
-
-            if (mediaType.toString().equals(KRFormat.RDF_XML)) {
-
-                try {
-                    manager.saveOntology(ontology, new RDFXMLOntologyFormat(), out);
-                } catch (OWLOntologyStorageException e) {
-                    log.error("Failed to store ontology for rendering.", e);
-                }
-            } else if (mediaType.toString().equals(KRFormat.OWL_XML)) {
-                try {
-                    manager.saveOntology(ontology, new OWLXMLOntologyFormat(), out);
-                } catch (OWLOntologyStorageException e) {
-                    log.error("Failed to store ontology for rendering.", e);
-                }
-            } else if (mediaType.toString().equals(KRFormat.MANCHESTER_OWL)) {
-                try {
-                    manager.saveOntology(ontology, new ManchesterOWLSyntaxOntologyFormat(), out);
-                } catch (OWLOntologyStorageException e) {
-                    log.error("Failed to store ontology for rendering.", e);
-                }
-            } else if (mediaType.toString().equals(KRFormat.FUNCTIONAL_OWL)) {
-                try {
-                    manager.saveOntology(ontology, new OWLFunctionalSyntaxOntologyFormat(), out);
-                } catch (OWLOntologyStorageException e) {
-                    log.error("Failed to store ontology for rendering.", e);
-                }
-            } else if (mediaType.toString().equals(KRFormat.TURTLE)) {
-                try {
-                    manager.saveOntology(ontology, new TurtleOntologyFormat(), out);
-                } catch (OWLOntologyStorageException e) {
-                    log.error("Failed to store ontology for rendering.", e);
-                }
-            } else if (mediaType.toString().equals(KRFormat.RDF_JSON)) {
-
-                TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(ontology);
-
-                RdfJsonSerializingProvider provider = new RdfJsonSerializingProvider();
-                provider.serialize(out, mGraph, SupportedFormat.RDF_JSON);
-
-            }
-        } catch (OWLOntologyCreationException e1) {
-            log.error("An error occurred.", e1);
         }
 
         out.flush();

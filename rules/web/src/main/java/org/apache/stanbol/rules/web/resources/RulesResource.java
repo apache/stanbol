@@ -197,7 +197,7 @@ public class RulesResource extends BaseStanbolResource {
     @GET
     @Path("/recipe/{recipe:.+}")
     @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.RDF_JSON,
-                       KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL})
+                       KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, MediaType.TEXT_PLAIN})
     public Response getRule(@PathParam("recipe") String recipeID,
                             @QueryParam("rule") String ruleID,
                             @Context HttpHeaders headers) {
@@ -218,6 +218,45 @@ public class RulesResource extends BaseStanbolResource {
             }
 
             responseBuilder = Response.ok(recipe);
+
+        } catch (NoSuchRecipeException e) {
+            log.error(e.getMessage(), e);
+            responseBuilder = Response.status(Status.NOT_FOUND);
+        } catch (RecipeConstructionException e) {
+            log.error(e.getMessage(), e);
+            responseBuilder = Response.status(Status.NO_CONTENT);
+        } catch (NoSuchRuleInRecipeException e) {
+            log.error(e.getMessage(), e);
+            responseBuilder = Response.status(Status.NOT_FOUND);
+        }
+
+        addCORSOrigin(servletContext, responseBuilder, headers);
+        return responseBuilder.build();
+    }
+    
+    @GET
+    @Path("/recipe/{recipe:.+}")
+    @Produces(value = {MediaType.TEXT_HTML})
+    public Response showRecipe(@PathParam("recipe") String recipeID,
+                            @QueryParam("rule") String ruleID,
+                            @Context HttpHeaders headers) {
+
+        Recipe recipe;
+        Rule rule;
+
+        ResponseBuilder responseBuilder;
+        try {
+            recipe = ruleStore.getRecipe(new UriRef(recipeID));
+
+            if (ruleID != null && !ruleID.isEmpty()) {
+                rule = ruleStore.getRule(recipe, new UriRef(ruleID));
+                RuleList ruleList = new RuleList();
+                ruleList.add(rule);
+
+                recipe = new RecipeImpl(recipe.getRecipeID(), recipe.getRecipeDescription(), ruleList);
+            }
+
+            responseBuilder = Response.ok(new Viewable("rules", recipe.toString()));
 
         } catch (NoSuchRecipeException e) {
             log.error(e.getMessage(), e);
