@@ -38,6 +38,7 @@
         <exclude>reasoners/owllink/**</exclude>
         <exclude>data/opennlp/lang/**/*.bin</exclude>
         <exclude>data/opennlp/ner/**/*.bin</exclude>
+        <exclude>data/sites/dbpedia/**/*.zip</exclude>
 
         <!-- unstable/old stuff in enhancer -->
         <exclude>enhancer/autotagging/**</exclude>
