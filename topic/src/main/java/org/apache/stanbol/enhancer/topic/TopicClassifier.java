@@ -111,9 +111,16 @@ public interface TopicClassifier {
      * drawing examples from the dataset.
      * 
      * @param conceptUri
-     *            if of the topic to remove from the model
+     *            if of the topic to remove from the model, must not be null
      */
     void removeConcept(String conceptUri) throws ClassifierException;
+
+    /**
+     * Remove all the concepts from the current model leaving with an empty model.
+     * 
+     * @throws ClassifierException
+     */
+    void removeAllConcepts() throws ClassifierException;
 
     /**
      * @return the training set registered for this classifier (either set explicitly using setTrainingSet or
@@ -171,7 +178,7 @@ public interface TopicClassifier {
     List<String> getChainNames() throws InvalidSyntaxException, ChainException;
 
     /**
-     * Initialize the concept hierarch of the model using the provided RDF model (e.g. a SKOS taxonomy).
+     * Initialize the concept hierarchy of the model using the provided RDF model (e.g. a SKOS taxonomy).
      * 
      * @return the number of concepts successfully imported (including roots).
      */
