@@ -36,6 +36,7 @@ import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.util.RecipeList;
+import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -196,7 +197,7 @@ public class RuleStoreTest {
 
     @Test
     public void findRecipesByDescriptionTest() throws Exception {
-        List<Recipe> recipes = store.findRecipesByDescription("recipe named A");
+        RecipeList recipes = store.findRecipesByDescription("recipe named A");
         if (recipes.isEmpty()) {
             Assert.fail();
         } else {
@@ -207,7 +208,7 @@ public class RuleStoreTest {
 
     @Test
     public void findRulesByDescriptionTest() throws Exception {
-        List<Rule> rules = store.findRulesByDescription("a test rule.");
+        RuleList rules = store.findRulesByDescription("a test rule.");
         if (rules.isEmpty()) {
             Assert.fail();
         } else {
@@ -217,7 +218,7 @@ public class RuleStoreTest {
 
     @Test
     public void findRulesByNameTest() throws Exception {
-        List<Rule> rules = store.findRulesByName("1");
+        RuleList rules = store.findRulesByName("1");
 
         if (rules.isEmpty()) {
             Assert.fail();
