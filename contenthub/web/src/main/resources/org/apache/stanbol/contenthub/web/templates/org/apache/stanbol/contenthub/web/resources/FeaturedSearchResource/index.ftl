@@ -225,20 +225,24 @@
           //show busy icon
           $("#busyIcon").removeClass("invisible");
 
+		  var urlStr = "${it.publicBaseUri}contenthub/${it.indexName}/search/featured?queryTerm=" + $("#keywordIn").val();
+
           var graph_selected = "";
           var graphInCombo = document.getElementById('graphIn');
           if(graphInCombo != null) {
               var selectedIndex = graphInCombo.selectedIndex;
               if(selectedIndex != 0) {
                   graph_selected = $("#graphIn option:selected").val();
+                  urlStr += "&ontologyURI=" + graph_selected; 
               }
           }
       
+      	    
           $.ajax({
-              url : "${it.publicBaseUri}contenthub/${it.indexName}/search/featured",
+              url : urlStr,
               type : "GET",
               async: true,
-              data: {queryTerm: $("#keywordIn").val(), graph: graph_selected, constraints: JSON.stringify(JSONObject), offset: voffset, limit:vpageSize},
+              data: {queryTerm: $("#keywordIn").val(), ontologyURI: graph_selected, constraints: JSON.stringify(JSONObject), offset: voffset, limit:vpageSize},
               dataType: "html",
               cache: false,
               success: function(result) {

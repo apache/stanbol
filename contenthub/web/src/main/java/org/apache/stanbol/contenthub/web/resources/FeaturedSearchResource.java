@@ -130,7 +130,7 @@ public class FeaturedSearchResource extends BaseStanbolResource {
 	 *            to corresponding Solr queries to enable faceted search. Each
 	 *            constraint is a facet field and values of the constraints maps
 	 *            to the values of the facet fields in Solr queries.
-	 * @param graphURI
+	 * @param ontologyURI
 	 *            URI of the ontology in which related keywords will be searched
 	 *            by
 	 *            {@link RelatedKeywordSearchManager#getRelatedKeywordsFromOntology(String, String)}
@@ -161,7 +161,7 @@ public class FeaturedSearchResource extends BaseStanbolResource {
 	public final Response get(@QueryParam("queryTerm") String queryTerm,
 			@QueryParam("solrQuery") String solrQuery,
 			@QueryParam("constraints") String jsonCons,
-			@QueryParam("graphURI") String graphURI,
+			@QueryParam("ontologyURI") String ontologyURI,
 			@QueryParam("offset") @DefaultValue("0") int offset,
 			@QueryParam("limit") @DefaultValue("10") int limit,
 			@QueryParam("fromStore") String fromStore,
@@ -172,7 +172,7 @@ public class FeaturedSearchResource extends BaseStanbolResource {
 
 		this.queryTerm = queryTerm = RestUtil.nullify(queryTerm);
 		solrQuery = RestUtil.nullify(solrQuery);
-		graphURI = RestUtil.nullify(graphURI);
+		ontologyURI = RestUtil.nullify(ontologyURI);
 		jsonCons = RestUtil.nullify(jsonCons);
 		this.offset = offset;
 		this.pageSize = limit;
@@ -187,17 +187,17 @@ public class FeaturedSearchResource extends BaseStanbolResource {
 				Set<UriRef> mGraphs = tcManager.listMGraphs();
 				Iterator<UriRef> it = mGraphs.iterator();
 				while (it.hasNext()) {
-					graphURI = it.next().getUnicodeString();
-					if (Constants.isGraphReserved(graphURI)) {
+					ontologyURI = it.next().getUnicodeString();
+					if (Constants.isGraphReserved(ontologyURI)) {
 						continue;
 					}
-					this.ontologies.add(graphURI);
+					this.ontologies.add(ontologyURI);
 				}
 				return Response.ok(new Viewable("index", this),
 						MediaType.TEXT_HTML).build();
 			} else {
 				ResponseBuilder rb = performSearch(queryTerm, solrQuery,
-						jsonCons, graphURI, offset, limit,
+						jsonCons, ontologyURI, offset, limit,
 						MediaType.TEXT_HTML_TYPE);
 				addCORSOrigin(servletContext, rb, headers);
 				return rb.build();
@@ -210,7 +210,7 @@ public class FeaturedSearchResource extends BaseStanbolResource {
 						.build();
 			} else {
 				ResponseBuilder rb = performSearch(queryTerm, solrQuery,
-						jsonCons, graphURI, offset, limit,
+						jsonCons, ontologyURI, offset, limit,
 						MediaType.APPLICATION_JSON_TYPE);
 				addCORSOrigin(servletContext, rb, headers);
 				return rb.build();
