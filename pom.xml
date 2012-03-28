@@ -151,6 +151,8 @@
                 <exclude>**/*.txt</exclude>
                 <exclude>**/*.tsv</exclude>
                 <exclude>**/*.sem</exclude>
+                <!-- Open NLP model files. Not in SVN, but downloaded during build -->
+                <exclude>**/*.bin</exclude> 
                 <exclude>**/test/**/*.eml</exclude>
                 <exclude>**/test/**/*.nt</exclude>
                 <exclude>**/test/**/*.html</exclude>
@@ -158,8 +160,11 @@
                 <exclude>**/test/**/*.rdf</exclude>
                 <exclude>**/test/**/*.rtf</exclude>
                 <exclude>**/test/**/*.rules</exclude>
+                <exclude>**/test/**/*.odt</exclude>
 
                 <!-- approved licenses, see modules' POMs for details -->
+                <exclude>DEPENDENCIES</exclude>
+                <exclude>DEPENDENCIES-BY-LICENSE</exclude>
                 <exclude>**/src/license/THIRD-PARTY.properties</exclude>
                 <exclude>commons/web/home/src/main/resources/org/apache/stanbol/commons/web/home/static/scripts/jquery-1.4.2.js</exclude>
                 <exclude>contenthub/web/src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jit.js</exclude>
