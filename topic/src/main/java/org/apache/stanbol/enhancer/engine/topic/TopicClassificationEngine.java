@@ -474,9 +474,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 // fetch metadata
                 SolrQuery metadataQuery = new SolrQuery("*:*");
                 // use filter queries to leverage the Solr cache explicitly
-                String typeFq = entryTypeField + ":" + METADATA_ENTRY;
-                String conceptFq = conceptUriField + ":" + ClientUtils.escapeQueryChars(conceptUri);
-                metadataQuery.setFilterQueries(typeFq, conceptFq);
+                metadataQuery.addFilterQuery(entryTypeField + ":" + METADATA_ENTRY);
+                metadataQuery
+                        .addFilterQuery(conceptUriField + ":" + ClientUtils.escapeQueryChars(conceptUri));
                 metadataQuery.setFields(conceptUriField, broaderField, primaryTopicUriField);
                 SolrDocument metadata = solrServer.query(metadataQuery).getResults().get(0);
                 String primaryTopicUri = (String) metadata.getFirstValue(primaryTopicUriField);
@@ -524,7 +524,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             return narrowerConcepts;
         }
         SolrServer solrServer = getActiveSolrServer();
-        SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY);
+        SolrQuery query = new SolrQuery("*:*");
+        query.addFilterQuery(entryTypeField + ":" + METADATA_ENTRY);
         query.addFilterQuery(broaderField + ":" + ClientUtils.escapeQueryChars(broadTopicId));
         query.addField(conceptUriField);
         query.addSortField(conceptUriField, SolrQuery.ORDER.asc);
@@ -547,7 +548,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             return broaderConcepts;
         }
         SolrServer solrServer = getActiveSolrServer();
-        SolrQuery query = new SolrQuery(conceptUriField + ":" + ClientUtils.escapeQueryChars(id));
+        SolrQuery query = new SolrQuery("*:*");
+        query.addFilterQuery(conceptUriField + ":" + ClientUtils.escapeQueryChars(id));
         query.addField(broaderField);
         try {
             for (SolrDocument result : solrServer.query(query).getResults()) {
@@ -572,18 +574,15 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     public Set<String> getRootConcepts() throws ClassifierException {
         LinkedHashSet<String> rootConcepts = new LinkedHashSet<String>();
         SolrServer solrServer = getActiveSolrServer();
-        SolrQuery query = new SolrQuery();
+        SolrQuery query = new SolrQuery("*:*");
         // TODO: this can be very big on flat thesauri: should we enable a paging API instead?
         query.setRows(MAX_ROOTS);
         query.setFields(conceptUriField);
         query.setSortField(conceptUriField, SolrQuery.ORDER.asc);
+        query.addFilterQuery(entryTypeField + ":" + METADATA_ENTRY);
         if (broaderField != null) {
             // find any topic with an empty broaderField
-            query.setParam("q", entryTypeField + ":" + METADATA_ENTRY + " AND -" + broaderField + ":"
-                                + SOLR_NON_EMPTY_FIELD);
-        } else {
-            // find any topic
-            query.setQuery(entryTypeField + ":" + METADATA_ENTRY);
+            query.addFilterQuery(" -" + broaderField + ":" + SOLR_NON_EMPTY_FIELD);
         }
         try {
             QueryResponse response = solrServer.query(query);
@@ -657,9 +656,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         try {
             UpdateRequest request = new UpdateRequest();
             for (String conceptId : conceptIds) {
-                SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY + " AND "
-                                                + conceptUriField + ":"
-                                                + ClientUtils.escapeQueryChars(conceptId));
+                SolrQuery query = new SolrQuery("*:*");
+                query.addFilterQuery(entryTypeField + ":" + METADATA_ENTRY);
+                query.addFilterQuery(conceptUriField + ":" + ClientUtils.escapeQueryChars(conceptId));
                 for (SolrDocument result : solrServer.query(query).getResults()) {
                     // there should be only one (or none: tolerated)
                     SolrInputDocument newEntry = new SolrInputDocument();
@@ -734,8 +733,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         // TODO: implement incremental update by using the date informations
         int processedCount = 0;
         SolrServer solrServer = getActiveSolrServer();
-        SolrQuery query = new SolrQuery();
-        String q = entryTypeField + ":" + METADATA_ENTRY;
+        SolrQuery query = new SolrQuery("*:*");
+        query.addFilterQuery(entryTypeField + ":" + METADATA_ENTRY);
         String offset = null;
         boolean done = false;
         int batchSize = 1000;
@@ -745,10 +744,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             while (!done) {
                 // batch over all the indexed topics
                 if (offset != null) {
-                    q += " AND " + conceptUriField + ":[" + ClientUtils.escapeQueryChars(offset.toString())
-                         + " TO *]";
+                    query.addFilterQuery(conceptUriField + ":["
+                                         + ClientUtils.escapeQueryChars(offset.toString()) + " TO *]");
                 }
-                query.setQuery(q);
                 QueryResponse response = solrServer.query(query);
                 int count = 0;
                 List<SolrDocument> batchDocuments = new ArrayList<SolrDocument>();
@@ -1179,8 +1177,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                                              List<String> falseNegativeExamples) throws ClassifierException {
         SolrServer solrServer = getActiveSolrServer();
         try {
-            SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY + " AND " + conceptUriField
-                                            + ":" + ClientUtils.escapeQueryChars(conceptId));
+            SolrQuery query = new SolrQuery("*:*");
+            query.addFilterQuery(entryTypeField + ":" + METADATA_ENTRY);
+            query.addFilterQuery(conceptUriField + ":" + ClientUtils.escapeQueryChars(conceptId));
             for (SolrDocument result : solrServer.query(query).getResults()) {
                 // there should be only one (or none: tolerated)
                 // fetch any old values to update (all metadata fields are assumed to be stored)s
@@ -1241,8 +1240,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     public ClassificationReport getPerformanceEstimates(String conceptId) throws ClassifierException {
 
         SolrServer solrServer = getActiveSolrServer();
-        SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY + " AND " + conceptUriField
-                                        + ":" + ClientUtils.escapeQueryChars(conceptId));
+        SolrQuery query = new SolrQuery("*:*");
+        query.addFilterQuery(entryTypeField + ":" + METADATA_ENTRY);
+        query.addFilterQuery(conceptUriField + ":" + ClientUtils.escapeQueryChars(conceptId));
         try {
             SolrDocumentList results = solrServer.query(query).getResults();
             if (results.isEmpty()) {
