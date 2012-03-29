@@ -1,4 +1,4 @@
-package org.apache.sling.whiteboard.fmeschbe.miltondav.impl.resources;
+package org.apache.stanbol.webdav.resources;
 
 import java.util.ArrayList;
 import java.util.Date;

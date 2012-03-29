@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.whiteboard.fmeschbe.miltondav.impl;
+package org.apache.stanbol.webdav;
 
 import javax.servlet.Servlet;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.whiteboard.fmeschbe.miltondav.impl.resources.SlingResourceFactory;
+import org.apache.stanbol.webdav.resources.SlingResourceFactory;
 import org.osgi.framework.Constants;
 
 /**

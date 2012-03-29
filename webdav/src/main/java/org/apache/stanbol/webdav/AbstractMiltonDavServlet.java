@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.whiteboard.fmeschbe.miltondav.impl;
+package org.apache.stanbol.webdav;
 
 import javax.servlet.ServletException;
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.whiteboard.fmeschbe.miltondav.impl;
+package org.apache.stanbol.webdav;
 
 import com.bradmcevoy.http.AuthenticationService;
 import com.bradmcevoy.http.Request;
@@ -36,7 +36,7 @@ import com.bradmcevoy.http.webdav.ResourceTypeHelper;
  */
 public class SlingResponseHandler extends DefaultWebDavResponseHandler {
 
-    static final String NAME = "org.apache.sling.whiteboard.fmeschbe.miltondav.impl.SlingResponseHandler";
+    static final String NAME = "org.apache.stanbol.webdav.SlingResponseHandler";
 
     public SlingResponseHandler() {
         super(new AuthenticationService());

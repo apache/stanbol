@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.whiteboard.fmeschbe.miltondav.impl;
+package org.apache.stanbol.webdav;
 
 import java.io.IOException;
 import java.net.URL;
@@ -33,7 +33,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.sling.whiteboard.fmeschbe.miltondav.impl.resources.SlingResourceFactory;
+import org.apache.stanbol.webdav.resources.SlingResourceFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;

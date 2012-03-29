@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.whiteboard.fmeschbe.miltondav.impl.resources;
+package org.apache.stanbol.webdav.resources;
 
 import com.bradmcevoy.common.Path;
 import com.bradmcevoy.http.Resource;
@@ -24,7 +24,7 @@ import com.bradmcevoy.http.ResourceFactory;
 
 public class SlingResourceFactory implements ResourceFactory {
 		 
-	final public static String NAME = "org.apache.sling.whiteboard.fmeschbe.miltondav.impl.resources.SlingResourceFactory"; //SlingResourceFactory.class.getName();
+	final public static String NAME = "org.apache.stanbol.webdav.resources.SlingResourceFactory"; //SlingResourceFactory.class.getName();
 	
 		public Resource getResource(String host, String strPath) {
 			Path path = Path.path(strPath);

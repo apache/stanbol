@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.whiteboard.fmeschbe.miltondav.impl;
+package org.apache.stanbol.webdav;
 
 import com.bradmcevoy.http.AuthenticationHandler;
 import com.bradmcevoy.http.Request;
@@ -31,7 +31,7 @@ import com.bradmcevoy.http.Resource;
  */
 public class SlingAuthenticationHandler implements AuthenticationHandler {
 
-    static final String NAME = "org.apache.sling.whiteboard.fmeschbe.miltondav.impl.SlingAuthenticationHandler";
+    static final String NAME = "org.apache.stanbol.webdav.SlingAuthenticationHandler";
 
     /**
      * Returns <code>true</code>
