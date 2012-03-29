@@ -63,6 +63,35 @@ dc-elements:type > dc:type
 #also use dc-elements:title as label
 dc-elements:title > rdfs:label
 
+# --- Simple Knowledge Organization System (SKOS) ---
+
+# A common data model for sharing and linking knowledge organization systems 
+# via the Semantic Web. Typically used to encode controlled vocabularies as
+# a thesaurus  
+skos:*
+
+# copy all SKOS labels (preferred, alternative and hidden) over to rdfs:label
+skos:prefLabel > rdfs:label
+skos:altLabel > rdfs:label
+skos:hiddenLabel > rdfs:label
+
+# copy values of **Match relations to the according related, broader and narrower
+skos:relatedMatch > skos:related
+skos:broadMatch > skos:broader
+skos:narrowMatch > skos:skos:narrower
+
+#similar mappings for transitive variants are not contained, because transitive
+#reasoning is not directly supported by the Entityhub.
+
+# Some SKOS thesaurus do use "skos:transitiveBroader" and "skos:transitiveNarrower"
+# however such properties are only intended to be used by reasoners to
+# calculate transitive closures over broader/narrower hierarchies.
+# see http://www.w3.org/TR/skos-reference/#L2413 for details
+# to correct such cases we will copy transitive relations to their counterpart
+skos:narrowerTransitive > skos:narrower
+skos:broaderTransitive > skos:broader
+
+
 # --- E-HEALTH specific ---
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
