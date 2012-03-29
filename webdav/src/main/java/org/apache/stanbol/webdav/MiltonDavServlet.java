@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 public class MiltonDavServlet extends AbstractMiltonDavServlet {
 
     // default location at which the service is registered
-    private static final String DEFAULT_PREFIX = "/dav2";
+    private static final String DEFAULT_PREFIX = "/vfolders";
 
     // name of the configuration parameter providing the servlet path
     @Property(name = "prefix", value = DEFAULT_PREFIX)
