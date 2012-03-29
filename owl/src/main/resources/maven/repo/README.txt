@@ -17,6 +17,7 @@ limitations under the License.
 The following files are distributed under the Apache License 2.0 :
 
 owlapi/owlapi/3.2.3/owlapi-3.2.3.jar
+owlapi/owlapi/3.2.3/owlapi-3.2.3-sources.jar
 owlapi/owlapi/3.2.3/owlapi-3.2.3.pom
 owlapi/owlapi/maven-metadata-local.xml
 

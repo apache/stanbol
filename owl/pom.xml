@@ -96,6 +96,8 @@
           <!-- See src/main/resources/maven/repo/README file -->
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/maven-metadata-local.xml</exclude>
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.3/owlapi-3.2.3.pom</exclude>
+          <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.3/owlapi-3.2.3.jar</exclude>
+          <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.3/owlapi-3.2.3-sources.jar</exclude>
         </excludes>
       </configuration>
     </plugin>
