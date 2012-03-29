@@ -18,10 +18,7 @@
  */
 package org.apache.sling.whiteboard.fmeschbe.miltondav.impl;
 
-import org.apache.sling.auth.core.AuthenticationSupport;
-
 import com.bradmcevoy.http.AuthenticationHandler;
-import com.bradmcevoy.http.MiltonServlet;
 import com.bradmcevoy.http.Request;
 import com.bradmcevoy.http.Resource;
 
@@ -37,26 +34,17 @@ public class SlingAuthenticationHandler implements AuthenticationHandler {
     static final String NAME = "org.apache.sling.whiteboard.fmeschbe.miltondav.impl.SlingAuthenticationHandler";
 
     /**
-     * Returns <code>true</code> if the current request has successfully been
-     * authenticated and the Sling <code>ResourceResolver</code> is available
-     * for request processing. This is generally the case, so we can assume this
-     * method will always return <code>true</code>.
+     * Returns <code>true</code>
      */
     public boolean supports(Resource r, Request request) {
-        return getResourceResolver() != null;
+        return true;
     }
 
     /**
-     * Returns the Sling <code>ResourceResolver</code> created during Sling
-     * request authentication.
-     * <p>
-     * This method will only be called if the
-     * {@link #supports(Resource, Request)} method of this implementation has
-     * already been called and returned <code>true</code> in which case the
-     * result of this method is never <code>null</code>.
+     * Returns a constant string
      */
     public Object authenticate(Resource resource, Request request) {
-        return getResourceResolver();
+        return "good user";
     }
 
     /**
@@ -75,12 +63,4 @@ public class SlingAuthenticationHandler implements AuthenticationHandler {
         return true;
     }
 
-    /**
-     * Returns the Sling <code>ResourceResolver</code> from the request
-     * attribute.
-     */
-    private Object getResourceResolver() {
-        return MiltonServlet.request().getAttribute(
-            AuthenticationSupport.REQUEST_ATTRIBUTE_RESOLVER);
-    }
 }

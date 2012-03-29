@@ -1,26 +1,15 @@
 package org.apache.sling.whiteboard.fmeschbe.miltondav.impl.resources;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-
-import com.bradmcevoy.common.Path;
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.CollectionResource;
 import com.bradmcevoy.http.PropFindableResource;
-import com.bradmcevoy.http.PutableResource;
 import com.bradmcevoy.http.Request;
 import com.bradmcevoy.http.Request.Method;
 import com.bradmcevoy.http.Resource;
-import com.bradmcevoy.http.ResourceFactory;
-import com.bradmcevoy.http.exceptions.BadRequestException;
-import com.bradmcevoy.http.exceptions.ConflictException;
-import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 
 public class RootResource implements PropFindableResource, CollectionResource {
  

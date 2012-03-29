@@ -33,12 +33,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.auth.core.AuthenticationSupport;
-import org.apache.sling.auth.core.spi.AuthenticationHandler;
-import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.whiteboard.fmeschbe.miltondav.impl.resources.SlingResourceFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -78,14 +72,11 @@ public class MiltonDavServlet extends AbstractMiltonDavServlet {
     /** default log */
     private final Logger log = LoggerFactory.getLogger(getClass().getSimpleName());
 
-    @Reference
-    private AuthenticationSupport slingAuthenticator;
 
     @Reference
     private HttpService osgiHttpService;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
-    private MimeTypeService mimeTypeService;
+
 
     // the actual prefix under which the servlet is registered, only non-null
     // if the servlet is actually registered with the Http Service
@@ -110,10 +101,7 @@ public class MiltonDavServlet extends AbstractMiltonDavServlet {
             }
             super.service(servletRequest, servletResponse);
         } finally {
-            Object resolver = servletRequest.getAttribute(AuthenticationSupport.REQUEST_ATTRIBUTE_RESOLVER);
-            if (resolver instanceof ResourceResolver) {
-                ((ResourceResolver) resolver).close();
-            }
+            
         }
     }
 
@@ -152,11 +140,12 @@ public class MiltonDavServlet extends AbstractMiltonDavServlet {
 
             public boolean handleSecurity(HttpServletRequest request,
                     HttpServletResponse response) throws IOException {
-                if (authRequired) {
+                /*if (authRequired) {
                     request.setAttribute(
                         AuthenticationHandler.REQUEST_LOGIN_PARAMETER, "Basic");
                 }
-                return slingAuthenticator.handleSecurity(request, response);
+                return slingAuthenticator.handleSecurity(request, response);*/
+            	return true;
             }
 
             // this context provides no resources, always call the servlet
@@ -165,8 +154,7 @@ public class MiltonDavServlet extends AbstractMiltonDavServlet {
             }
 
             public String getMimeType(String name) {
-                MimeTypeService mts = MiltonDavServlet.this.mimeTypeService;
-                return (mts != null) ? mts.getMimeType(name) : null;
+                return null;
             }
         };
 

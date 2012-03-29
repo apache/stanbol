@@ -19,6 +19,7 @@
 package org.apache.sling.whiteboard.fmeschbe.miltondav.impl;
 
 import javax.servlet.ServletException;
+
 import com.bradmcevoy.http.MiltonServlet;
 
 /**
