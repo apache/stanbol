@@ -24,14 +24,13 @@ import com.bradmcevoy.http.ResourceFactory;
 
 public class SlingResourceFactory implements ResourceFactory {
 		 
-	final public static String NAME = "dks";
+	final public static String NAME = "org.apache.sling.whiteboard.fmeschbe.miltondav.impl.resources.SlingResourceFactory"; //SlingResourceFactory.class.getName();
 	
 		public Resource getResource(String host, String strPath) {
 			Path path = Path.path(strPath);
-	 
 			//STRIP PRECEEDING PATH
-			path = path.getStripFirst().getStripFirst();
-	 
+			//TODO make this depend on what the dav servlet is actually configured to
+			path = path.getStripFirst();
 			if (path.isRoot()) {
 				return new RootResource();
 			} else if (path.getFirst().equals(SlingResource.getFilename())) {

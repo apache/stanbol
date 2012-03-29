@@ -44,6 +44,8 @@ public class AbstractMiltonDavServlet extends MiltonServlet {
     @SuppressWarnings("unchecked")
     @Override
     protected <T> T instantiate(String className) throws ServletException {
+    	//TODO have factories and handler be retrieved from service registry instead of
+    	//getting class from classloader and instantiate
         try {
             Class<?> c = getClass().getClassLoader().loadClass(className);
             T rf = (T) c.newInstance();

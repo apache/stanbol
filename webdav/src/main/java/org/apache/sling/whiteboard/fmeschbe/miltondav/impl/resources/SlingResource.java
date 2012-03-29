@@ -85,7 +85,7 @@ public class SlingResource implements PropFindableResource, GetableResource {
 	}
  
 	public Long getContentLength() {
-		return Long.valueOf(MESSAGE);
+		return Long.valueOf(MESSAGE.length());
 	}
  
 	public void sendContent(OutputStream out, Range range, Map params, String contentType) throws IOException, NotAuthorizedException, BadRequestException {
