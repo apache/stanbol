@@ -76,11 +76,10 @@
             <!-- AL20 License -->
             <exclude>src/license/THIRD-PARTY.properties</exclude>
 
-            <!-- See src/main/resources/maven/repo/README file -->
-            <exclude>src/main/resources/maven/repo/owl-link/owl-link/1.2.0/owl-link-1.2.0.pom.sha1</exclude>
-            <exclude>src/main/resources/maven/repo/owl-link/owl-link/1.2.0/owl-link-1.2.0.pom.md5</exclude>
-            <exclude>src/main/resources/maven/repo/owl-link/owl-link/1.2.0/owl-link-1.2.0.jar.sha1</exclude>
-            <exclude>src/main/resources/maven/repo/owl-link/owl-link/1.2.0/owl-link-1.2.0.pom</exclude>
+            <!-- See src/main/resources/maven/repo/README.txt file -->
+            <exclude>src/main/resources/maven/repo/owl-link/owl-link/1.2.2/owl-link-1.2.2.pom</exclude>
+            <exclude>src/main/resources/maven/repo/owl-link/owl-link/1.2.2/owl-link-1.2.2.jar</exclude>
+            <exclude>src/main/resources/maven/repo/owl-link/owl-link/1.2.2/owl-link-1.2.2-sources.jar</exclude>
           </excludes>
         </configuration>
       </plugin>

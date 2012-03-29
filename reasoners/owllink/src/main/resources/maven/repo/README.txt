@@ -16,7 +16,6 @@ limitations under the License.
 
 The following files are distributed under the Apache License 2.0 :
 
-owl-link/owl-link/1.2.0/owl-link-1.2.0.pom.sha1
-owl-link/owl-link/1.2.0/owl-link-1.2.0.pom.md5
-owl-link/owl-link/1.2.0/owl-link-1.2.0.jar.sha1
-owl-link/owl-link/1.2.0/owl-link-1.2.0.pom
+owl-link/owl-link/1.2.2/owl-link-1.2.2.pom
+owl-link/owl-link/1.2.2/owl-link-1.2.2.jar
+owl-link/owl-link/1.2.2/owl-link-1.2.2-sources.jar
