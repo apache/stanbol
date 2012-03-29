@@ -57,8 +57,10 @@ import org.slf4j.LoggerFactory;
 @Service
 @Property(name=Constants.SERVICE_RANKING, intValue=Integer.MAX_VALUE)
 public class MainDataFileProvider implements DataFileProvider, DataFileProviderLog {
-
-    @Property(value="sling/datafiles")
+    /**
+     * Relative to the "sling.home" or if not present the working directory.
+     */
+    @Property(value="datafiles")
     public static final String DATA_FILES_FOLDER_PROP = "data.files.folder";
 
     @Property(intValue=100)
@@ -78,7 +80,13 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
     
     @Activate
     protected void activate(ComponentContext ctx) throws ConfigurationException {
-        dataFilesFolder = new File(requireProperty(ctx.getProperties(), DATA_FILES_FOLDER_PROP, String.class));
+        String folderName = requireProperty(ctx.getProperties(), DATA_FILES_FOLDER_PROP, String.class);
+        String slingHome = ctx.getBundleContext().getProperty("sling.home");
+        if(slingHome != null){
+            dataFilesFolder = new File(slingHome,folderName);
+        } else {
+            dataFilesFolder = new File(folderName);
+        }
         if(!dataFilesFolder.exists()){
             if(!dataFilesFolder.mkdirs()){
                 throw new ConfigurationException(DATA_FILES_FOLDER_PROP, "Unable to create the configured Directory "+dataFilesFolder);
