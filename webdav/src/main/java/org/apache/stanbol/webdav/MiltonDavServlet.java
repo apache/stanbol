@@ -33,12 +33,14 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.webdav.resources.SlingResourceFactory;
+import org.apache.stanbol.webdav.resources.SimpleResourceFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.bradmcevoy.http.CollectionResource;
 
 /**
  * The <code>MiltonDavServlet</code> is the {@link AbstractMiltonDavServlet}
@@ -55,6 +57,7 @@ import org.slf4j.LoggerFactory;
 @Component(metatype = true, name = "org.apache.sling.miltondav.impl.MiltonDavServlet", label = "%miltondav.name", description = "%miltondav.description")
 public class MiltonDavServlet extends AbstractMiltonDavServlet {
 
+	
     // default location at which the service is registered
     private static final String DEFAULT_PREFIX = "/vfolders";
 
@@ -130,7 +133,7 @@ public class MiltonDavServlet extends AbstractMiltonDavServlet {
         }
 
         java.util.Properties props = new java.util.Properties();
-        props.put("resource.factory.class", SlingResourceFactory.NAME);
+        props.put("resource.factory.class", SimpleResourceFactory.NAME);
         props.put("authentication.handler.classes",
             SlingAuthenticationHandler.NAME);
         props.put("response.handler.class", SlingResponseHandler.NAME);

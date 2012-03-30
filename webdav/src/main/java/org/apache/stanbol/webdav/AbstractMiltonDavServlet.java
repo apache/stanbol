@@ -18,8 +18,20 @@
  */
 package org.apache.stanbol.webdav;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.stanbol.webdav.resources.SimpleResourceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.bradmcevoy.http.ApplicationConfig;
+import com.bradmcevoy.http.CollectionResource;
 import com.bradmcevoy.http.MiltonServlet;
 
 /**
@@ -40,21 +52,33 @@ import com.bradmcevoy.http.MiltonServlet;
  * and to not create a memory hole. The base class unfortunately uses the static
  * <code>Class.forName(String)</code> which is well-known for this problem.
  */
-public class AbstractMiltonDavServlet extends MiltonServlet {
+@Component(componentAbstract=true)
+public abstract class AbstractMiltonDavServlet extends MiltonServlet {
+	
+	private Logger log = LoggerFactory.getLogger( AbstractMiltonDavServlet.class );
+	
+	@Reference
+	private CollectionResource rootResource;
 
+	
+	@Override
+    public void init( ServletConfig config ) throws ServletException {
+        try {
+            //this.config = config;
+            init(new SimpleResourceFactory(rootResource), new SlingResponseHandler(), new ArrayList<String>());
+         } catch( ServletException ex ) {
+            log.error( "Exception starting milton servlet", ex );
+            throw ex;
+        } catch( Throwable ex ) {
+            log.error( "Exception starting milton servlet", ex );
+            throw new RuntimeException( ex );
+        }
+    }
+	
     @SuppressWarnings("unchecked")
     @Override
     protected <T> T instantiate(String className) throws ServletException {
-    	//TODO have factories and handler be retrieved from service registry instead of
-    	//getting class from classloader and instantiate
-        try {
-            Class<?> c = getClass().getClassLoader().loadClass(className);
-            T rf = (T) c.newInstance();
-            return rf;
-        } catch (Throwable ex) {
-            throw new ServletException("Failed to instantiate: " + className,
-                ex);
-        }
+    	throw new RuntimeException("this should not be invoked");
     }
 
 }

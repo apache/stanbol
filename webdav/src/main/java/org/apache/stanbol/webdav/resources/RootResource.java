@@ -13,6 +13,7 @@ import com.bradmcevoy.http.Resource;
 
 public class RootResource implements PropFindableResource, CollectionResource {
  
+	
 	private static final String FOLDERNAME = "root";
  
 	

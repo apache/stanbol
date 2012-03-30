@@ -65,6 +65,7 @@
                             commons-codec,
                             commons-beanutils
                         </Embed-Dependency>
+                        <Export-Package>com.bradmcevoy.http, com.bradmcevoy.http.*, org.apache.stanbol.*</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
