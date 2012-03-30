@@ -26,6 +26,5 @@ public interface SemanticIndex {
     
     Map<String, String> getRESTSearchEndpoints();
 
-    @SuppressWarnings("rawtypes")
-    Map<Class, ServiceReference> getSearchEndPoints();
+    Map<Class<?>, ServiceReference> getSearchEndPoints();
 }

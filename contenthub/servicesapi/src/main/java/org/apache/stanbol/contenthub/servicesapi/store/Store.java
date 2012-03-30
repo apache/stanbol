@@ -18,6 +18,7 @@ package org.apache.stanbol.contenthub.servicesapi.store;
 
 import java.io.InputStream;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 
@@ -28,29 +29,29 @@ import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
  */
 public interface Store {
 
-    /**
-     * Creates a {@link ContentItem} item based on supplied data, using an implementation that suits this
-     * store.
-     * <p>
-     * Calling this method creates an empty data transfer object in memory suitable for later saving using the
-     * {@link Store#put(ContentItem)} method. The Store state is unchanged by the call to the
-     * {@link #create(String, byte[], String)} method.
-     * 
-     * @param id
-     *            The value to use {@link ContentItem#getId}. If <code>null</code> is parsed as id, an id need
-     *            to be computed based on the parsed content ( e.g. calculating the stream digest (see also
-     *            {@link ContentItemHelper#streamDigest(java.io.InputStream, java.io.OutputStream, String)})
-     * @param content
-     *            the binary content
-     * @param contentType
-     *            The Mime-Type of the binary data
-     * @return the {@link ContentItem} that was created
-     */
-    ContentItem create(String id, byte[] content, String contentType) throws StoreException;
+//    /**
+//     * Creates a {@link ContentItem} item based on supplied data, using an implementation that suits this
+//     * store.
+//     * <p>
+//     * Calling this method creates an empty data transfer object in memory suitable for later saving using the
+//     * {@link Store#put(ContentItem)} method. The Store state is unchanged by the call to the
+//     * {@link #create(String, byte[], String)} method.
+//     * 
+//     * @param id
+//     *            The value to use {@link ContentItem#getId}. If <code>null</code> is parsed as id, an id need
+//     *            to be computed based on the parsed content ( e.g. calculating the stream digest (see also
+//     *            {@link ContentItemHelper#streamDigest(java.io.InputStream, java.io.OutputStream, String)})
+//     * @param content
+//     *            the binary content
+//     * @param contentType
+//     *            The Mime-Type of the binary data
+//     * @return the {@link ContentItem} that was created
+//     */
+//    ContentItem create(String id, byte[] content, String contentType) throws StoreException;
+//
+//    ContentItem create(String id, InputStream is, String contentType) throws StoreException;
 
-    ContentItem create(String id, InputStream is, String contentType) throws StoreException;
-
-    ContentItem remove(String id) throws StoreException;
+    ContentItem remove(UriRef id) throws StoreException;
 
     /**
      * Store supplied {@link ContentItem} and return its id, which is assigned by the store if not defined
@@ -58,10 +59,17 @@ public interface Store {
      * 
      * If the {@link ContentItem} already exists, it is overwritten.
      */
-    String put(ContentItem ci) throws StoreException;
+    UriRef put(ContentItem ci) throws StoreException;
 
     /** Get a {@link ContentItem} by id, null if non-existing */
-    ContentItem get(String id) throws StoreException;
-
-    Changes changes(long revision) throws StoreException;
+    ContentItem get(UriRef id) throws StoreException;
+    /**
+     * Requests the next <code>batchSize</code> changes starting from
+     * <code>revision</code>. If there are no more revisions that an
+     * {@link ChangeSet} with an empty {@link ChangeSet#changed()} set.
+     * @param revision the starting revision number for the returned {@link ChangeSet}
+     * @return the {@link ChangeSet} with a maximum of <code>batchSize</code> changes
+     * @throws StoreException on any error while accessing the store.
+     */
+    ChangeSet changes(long revision, int batchSize) throws StoreException;
 }
