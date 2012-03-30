@@ -13,6 +13,7 @@ import org.apache.clerezza.rdf.core.UriRef;
  * The intended usage of this class is
  * <code><pre>
  *     Store store; //the store
+ *     SemanticIndex index; //the index to apply the changes
  *     long revision = Long.MIN_VALUE; //start for scatch
  *     int batchSize = 1000;
  *     ChangeSet cs;
@@ -20,9 +21,14 @@ import org.apache.clerezza.rdf.core.UriRef;
  *         cs = store.changes(revision);
  *         for(UriRef changed : cs.changed()){
  *             ContentItem ci = store.get(changed);
- *             //precess
+ *             if(ci == null){
+ *                 index.remove(changed);
+ *             } else {
+ *                 index.index(ci);
+ *             }
  *         } 
- *     while(!cs.changed().isEmpty()){
+ *     while(!cs.changed().isEmpty());
+ *     index.persist(cs.fromRevision());
  * </pre></code>
  */
 public interface ChangeSet {
