@@ -21,11 +21,11 @@
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <artifactId>org.apache.stanbol.contenthub.store.inmemory</artifactId>
+  <artifactId>org.apache.stanbol.contenthub.store.file</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Contenthub InMemory Store Implementation</name>
-  <description>Persists documents into the InMemory Store (lives in memory)</description>
+  <name>Apache Stanbol Contenthub File Based First Level Storage Implementation</name>
+  <description>Persists documents within the file system</description>
 
   <build>
     <plugins>

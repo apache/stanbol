@@ -49,6 +49,6 @@
 	<modules>
 		<module>solr</module>
 		<module>clerezza</module>
-		<module>inmemory</module>
+		<module>file</module>
 	</modules>
 </project>
