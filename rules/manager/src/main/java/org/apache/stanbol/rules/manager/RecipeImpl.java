@@ -94,21 +94,22 @@ public class RecipeImpl implements Recipe {
 
     @Override
     public String toString() {
-        String ruleSyntax = "";
-
+        StringBuilder sb = new StringBuilder();
+        String separator = System.getProperty("line.separator");
         boolean firstLoop = true;
         if (ruleList != null) {
             for (Rule rule : ruleList) {
                 if (!firstLoop) {
-                    ruleSyntax += " . ";
+                    sb.append(" . ");
+                    sb.append(separator);
                 } else {
                     firstLoop = false;
                 }
-                ruleSyntax += rule.toString();
+                sb.append(rule.toString());
             }
         }
 
-        return ruleSyntax;
+        return sb.toString();
     }
 
     @Override

@@ -44,7 +44,7 @@ public class NewIRIAtom implements RuleAtom {
 
         bindingString = binding.toString();
 
-        return "newNode(" + variable + ", " + bindingString + ")";
+        return "newIRI(" + variable + ", " + bindingString + ")";
     }
 
     @Override

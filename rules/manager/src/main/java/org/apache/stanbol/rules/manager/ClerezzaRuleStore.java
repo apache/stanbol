@@ -193,15 +193,19 @@ public class ClerezzaRuleStore implements RuleStore {
             throw new AlreadyExistingRecipeException(e.getMessage());
         }
 
-        Triple descriptionTriple = new TripleImpl(recipeID, Symbols.description, new PlainLiteralImpl(
-                recipeDescription));
-        tripleCollection.add(descriptionTriple);
-
         Triple recipeTriple = new TripleImpl(recipeID, RDF.type, Symbols.Recipe);
 
         TripleCollection recipeIndexTripleCollection = tcManager.getMGraph(new UriRef(recipeIndexLocation));
         recipeIndexTripleCollection.add(recipeTriple);
-        recipeIndexTripleCollection.add(descriptionTriple);
+        
+        if(recipeDescription != null && !recipeDescription.isEmpty()){
+            Triple descriptionTriple = new TripleImpl(recipeID, Symbols.description, new PlainLiteralImpl(
+                    recipeDescription));
+            tripleCollection.add(descriptionTriple);
+            
+            recipeIndexTripleCollection.add(descriptionTriple);
+        }
+        
 
         // add the recpe ID to the list of known recipes
         recipes.add(recipeID);
@@ -246,8 +250,10 @@ public class ClerezzaRuleStore implements RuleStore {
 
         tripleCollection.add(new TripleImpl(rule.getRuleID(), Symbols.ruleName, new PlainLiteralImpl(rule
                 .getRuleName())));
-        tripleCollection.add(new TripleImpl(rule.getRuleID(), Symbols.description, new PlainLiteralImpl(
-                description)));
+        if(description != null && !description.isEmpty()){
+            tripleCollection.add(new TripleImpl(rule.getRuleID(), Symbols.description, new PlainLiteralImpl(
+                    description)));
+        }
         tripleCollection.add(new TripleImpl(rule.getRuleID(), Symbols.ruleBody, new PlainLiteralImpl(body)));
         tripleCollection.add(new TripleImpl(rule.getRuleID(), Symbols.ruleHead, new PlainLiteralImpl(head)));
 
