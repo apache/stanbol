@@ -47,10 +47,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/taxonomy/
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/enhancer/engines/taxonomy/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/taxonomy/
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/enhancer/engines/taxonomy/
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>

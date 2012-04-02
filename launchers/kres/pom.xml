@@ -16,10 +16,10 @@
 	<description>Runnable jar that runs the KReS configuration</description>
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/kres/
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/launchers/kres/
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/kres/
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/launchers/kres/
         </developerConnection>
         <url>http://incubator.apache.org/stanbol/</url>
     </scm>

@@ -28,10 +28,10 @@
 
   <scm>
     <connection>
-			scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/search
+			scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/contenthub/search
     </connection>
     <developerConnection>
-			scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/search
+			scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/contenthub/search
     </developerConnection>
   </scm>
 

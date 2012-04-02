@@ -32,10 +32,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/parent
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/contenthub/parent
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/parent
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/contenthub/parent
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>

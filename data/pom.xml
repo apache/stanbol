@@ -27,10 +27,10 @@
     <name>Apache Stanbol Data reactor</name>
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/data
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/data
         </developerConnection>
         <url>http://incubator.apache.org/stanbol/</url>
     </scm>

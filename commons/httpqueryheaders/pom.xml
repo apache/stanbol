@@ -34,10 +34,10 @@
   <description>Allows to parse HTTP headers as QueryParameters by prefixing it with "header_{http-header}". This feature allows to bypass the inability of Internet Explorer to set headers for multi domain (CORS) requests. This is a general utility and has no dependencies to Apache Stanbol.</description>
 <!--  <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/httpqueryheaders
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/commons/httpqueryheaders
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/httpqueryheaders
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/commons/httpqueryheaders
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm> -->

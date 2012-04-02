@@ -28,10 +28,10 @@
   <description>This provides the default configuration for the Enhancer. This bundle can be removed by users that want/need to provide their own configuration conflicting with the defaults.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/defaults
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/enhancer/defaults
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/defaults
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/enhancer/defaults
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>

@@ -40,10 +40,10 @@
   </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/rdf/jenatdb
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/entityhub/indexing/rdf/jenatdb
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/rdf/jenatdb
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/entityhub/indexing/rdf/jenatdb
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>

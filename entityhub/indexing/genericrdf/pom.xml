@@ -37,10 +37,10 @@
 	
     <scm>
 		<connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/genericrdf
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/entityhub/indexing/genericrdf
     </connection>
 		<developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/genericrdf
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/entityhub/indexing/genericrdf
     </developerConnection>
 		<url>http://incubator.apache.org/stanbol</url>
 	</scm>

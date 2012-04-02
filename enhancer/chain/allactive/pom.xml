@@ -40,10 +40,10 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/chain/allactive/
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/enhancer/chain/allactive/
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/chain/allactive/
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/enhancer/chain/allactive/
         </developerConnection>
         <url>http://incubator.apache.org/stanbol/</url>
     </scm>

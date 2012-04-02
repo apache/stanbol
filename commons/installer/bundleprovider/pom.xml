@@ -34,10 +34,10 @@
   within Bundles by using the Sling Installer infrastructure </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/installer/bundleprovider
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/commons/installer/bundleprovider
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/installer/bundleprovider
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/commons/installer/bundleprovider
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>

@@ -38,10 +38,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/site/geonames
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/data/site/geonames
     </connection>
     <developerConnection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/site/geonames
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/data/site/geonames
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>

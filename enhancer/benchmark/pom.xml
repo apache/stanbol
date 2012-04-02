@@ -32,10 +32,10 @@
   <name>Apache Stanbol Enhancer Benchmark</name>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/benchmark/
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/enhancer/benchmark/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/benchmark/
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/enhancer/benchmark/
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>

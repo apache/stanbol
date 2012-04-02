@@ -37,10 +37,10 @@
   </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/stanboltools/bundledatafileprovider
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/commons/stanboltools/bundledatafileprovider
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/stanboltools/bundledatafileprovider
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/commons/stanboltools/bundledatafileprovider
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>

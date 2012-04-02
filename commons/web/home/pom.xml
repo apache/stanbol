@@ -34,10 +34,10 @@
   <description>Home page and common stylesheets for documenting HTTP endpoints.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/web/home
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/commons/web/home
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/web/home
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/commons/web/home
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>

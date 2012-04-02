@@ -41,10 +41,10 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jobmanager/weightedjobmanager/
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/enhancer/jobmanager/weightedjobmanager/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jobmanager/weightedjobmanager/
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/enhancer/jobmanager/weightedjobmanager/
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>

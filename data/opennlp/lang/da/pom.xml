@@ -39,10 +39,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/opennlp/lang/da
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/data/opennlp/lang/da
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/opennlp/lang/da
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/data/opennlp/lang/da
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
