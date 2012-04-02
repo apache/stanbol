@@ -66,6 +66,7 @@ import org.apache.stanbol.rules.base.api.UnsupportedTypeForExportException;
 import org.apache.stanbol.rules.base.api.util.RecipeList;
 import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.manager.RecipeImpl;
+import org.apache.stanbol.rules.web.writers.RulesPrettyPrintResource;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -256,7 +257,7 @@ public class RulesResource extends BaseStanbolResource {
                 recipe = new RecipeImpl(recipe.getRecipeID(), recipe.getRecipeDescription(), ruleList);
             }
 
-            responseBuilder = Response.ok(new Viewable("rules", recipe.toString()));
+            responseBuilder = Response.ok(new Viewable("rules", new RulesPrettyPrintResource(servletContext,uriInfo,recipe)));
 
         } catch (NoSuchRecipeException e) {
             log.error(e.getMessage(), e);
@@ -268,7 +269,7 @@ public class RulesResource extends BaseStanbolResource {
             log.error(e.getMessage(), e);
             responseBuilder = Response.status(Status.NOT_FOUND);
         }
-
+        
         addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
     }
