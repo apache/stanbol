@@ -32,7 +32,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -530,7 +532,12 @@ public class IndexingConfig {
             //URLs with jar:file:/{jarPath}!{classPath} can cause problems
             //so try to parse manually by using the substring from the first
             //'/' to (including '!')
-            String urlString = contextUrl.toString();
+            String urlString;
+            try {
+                urlString = URLDecoder.decode(contextUrl.toString(),"UTF-8");
+            } catch (UnsupportedEncodingException e1) {
+                throw new IllegalStateException("Encoding 'UTF-8' is not supported",e);
+            }
             int slashIndex =  urlString.indexOf('/');
             int exclamationIndex = urlString.indexOf('!');
             if(slashIndex >=0 && exclamationIndex > 0){
