@@ -18,26 +18,26 @@ package org.apache.stanbol.ontologymanager.ontonet.api;
 
 import java.io.File;
 
-import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * An Ontology Network Manager holds all references and tools for creating, modifying and deleting the logical
  * realms that store Web Ontologies, as well as offer facilities for handling the ontologies contained
- * therein.
+ * therein.<br>
+ * <br>
+ * Note that since this object is both a {@link ScopeRegistry} and an {@link OntologyScopeFactory}, the call
+ * to {@link ScopeRegistry#registerScope(OntologyScope)} or its overloads after
+ * {@link OntologyScopeFactory#createOntologyScope(String, OntologyInputSource...)} is unnecessary, as the
+ * ONManager automatically registers newly created scopes.
  * 
  * @author alexdma, anuzzolese
  * 
  */
-public interface ONManager {
+public interface ONManager extends ScopeRegistry, OntologyScopeFactory {
 
     /**
      * The key used to configure the path of the ontology network configuration.
@@ -85,54 +85,34 @@ public interface ONManager {
     /**
      * Returns the ontology scope factory that was created along with the manager context.
      * 
+     * @deprecated returns this object, which is also an {@link OntologyScopeFactory}.
      * @return the default ontology scope factory
      */
     OntologyScopeFactory getOntologyScopeFactory();
 
     /**
-     * Returns the ontology space factory that was created along with the manager context.
+     * Returns the ontology space factory that was created along with the manager context. <br>
+     * <br>
+     * Note: Because this can be backend-dependent, this method is not deprecated yet.
      * 
      * @return the default ontology space factory.
      */
     OntologySpaceFactory getOntologySpaceFactory();
 
     /**
-     * Returns an OWL Ontology Manager that is never cleared of its ontologies, so it can be used for caching
-     * ontologies without having to reload them using other managers. It is sufficient to catch
-     * {@link OWLOntologyAlreadyExistsException}s and obtain the ontology with that same ID from this manager.
-     * 
-     * @deprecated the ONManager will soon stop providing a cache manager, as it will gradually be replaced by
-     *             {@link OntologyProvider}. Implementations that need to use an OWLOntologyManager which
-     *             avoids reloading stored ontologies can either call {@link OntologyProvider#getStore()} on
-     *             an {@link OWLOntologyManager}-based implementation, or create a new one by calling
-     *             {@link OWLOntologyManagerFactory#createOWLOntologyManager(IRI[])} or OWL API methods.
-     * @return the OWL Ontology Manager used for caching ontologies.
-     */
-    OWLOntologyManager getOwlCacheManager();
-
-    /**
      * Returns the unique ontology scope registry for this context.
      * 
+     * @deprecated returns this object, which is also a {@link ScopeRegistry}.
      * @return the ontology scope registry.
      */
     ScopeRegistry getScopeRegistry();
 
     /**
-     * Returns the unique session manager for this context.
+     * Sets the IRI that will be the base namespace for all ontology scopes and collectors created by this
+     * object.
      * 
-     * @deprecated {@link SessionManager} is now a standalone component and should be accessed independently
-     *             from the ONManager (e.g. by instantiating a new {@link SessionManagerImpl} or by
-     *             referencing {@link SessionManager} in OSGi components).
-     * 
-     * @return the session manager.
+     * @param namespace
+     *            the base namespace.
      */
-    SessionManager getSessionManager();
-
-    /**
-     * Returns the list of IRIs that identify scopes that should be activated on startup, <i>if they
-     * exist</i>.
-     * 
-     * @return the list of scope IDs to activate.
-     */
-    String[] getUrisToActivate();
+    void setOntologyNetworkNamespace(String namespace);
 }

@@ -150,7 +150,7 @@ public class OntonetInputProvider implements ReasoningServiceInputProvider {
         try {
             OntologyScope scope = null;
             synchronized (onManager) {
-                scope = onManager.getScopeRegistry().getScope(this.scopeId);
+                scope = onManager.getScope(this.scopeId);
             }
             if (scope == null) {
                 log.error("Scope {} cannot be retrieved", this.scopeId);
@@ -160,15 +160,10 @@ public class OntonetInputProvider implements ReasoningServiceInputProvider {
             if (sessionManager != null) synchronized (sessionManager) {
                 session = sessionManager.getSession(sessionId);
             }
-            if (session == null) {
-                log.warn("Session {} cannot be retrieved. Ignoring.", this.sessionId);
-            }
+            if (session == null) log.warn("Session {} cannot be retrieved. Ignoring.", this.sessionId);
             final Set<OWLOntology> set = new HashSet<OWLOntology>();
             set.add(scope.export(OWLOntology.class, true));
-            if (session != null) {
-                set.add(session.export(OWLOntology.class, true));
-            }
-
+            if (session != null) set.add(session.export(OWLOntology.class, true));
             if (set.size() == 1) return set.iterator().next();
             OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologySetProvider() {
                 @Override
@@ -190,8 +185,7 @@ public class OntonetInputProvider implements ReasoningServiceInputProvider {
         // We isolate here the creation of the temporary manager
         // TODO How to behave when resolving owl:imports?
         // We should set the manager to use a service to lookup for ontologies,
-        // instead of trying on the web
-        // directly
+        // instead of trying on the web directly
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
         // FIXME Which is the other way of doing this?

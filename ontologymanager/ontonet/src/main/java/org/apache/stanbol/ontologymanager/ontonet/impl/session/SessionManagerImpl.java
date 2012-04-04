@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,8 +32,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
@@ -104,19 +101,6 @@ public class SessionManagerImpl implements SessionManager {
         super();
         listeners = new HashSet<SessionListener>();
         sessionsByID = new HashMap<String,Session>();
-    }
-
-    /**
-     * @deprecated In non-OSGi+DS environments, please invoke
-     *             {@link #SessionManagerImpl(IRI, OntologyProvider, Dictionary)}. With this constructor,
-     *             baseIri and scopeRegistry are ignored.
-     * 
-     * @param baseIri
-     * @param scopeRegistry
-     * @param ontologyProvider
-     */
-    public SessionManagerImpl(IRI baseIri, ScopeRegistry scopeRegistry, OntologyProvider<?> ontologyProvider) {
-        this(ontologyProvider, new Hashtable<String,Object>());
     }
 
     /**
@@ -277,7 +261,6 @@ public class SessionManagerImpl implements SessionManager {
                       + session.getID(), e1);
             return;
         }
-
     }
 
     protected void fireSessionDestroyed(Session session) {
@@ -291,7 +274,6 @@ public class SessionManagerImpl implements SessionManager {
                       + session.getID(), e1);
             return;
         }
-
     }
 
     @Override
@@ -322,19 +304,6 @@ public class SessionManagerImpl implements SessionManager {
     @Override
     public Collection<SessionListener> getSessionListeners() {
         return listeners;
-    }
-
-    @Override
-    public Set<SessionOntologySpace> getSessionSpaces(String sessionID) throws NonReferenceableSessionException {
-        throw new UnsupportedOperationException(
-                "Session Manager is now agnostic to scopes, and session spaces are deprecated. Please perform CRUD operations on Session objects directly.");
-        // Set<SessionOntologySpace> result = new HashSet<SessionOntologySpace>();
-        // // Brute force search
-        // for (OntologyScope scope : scopeRegistry.getRegisteredScopes()) {
-        // SessionOntologySpace space = scope.getSessionSpace(sessionID);
-        // if (space != null) result.add(space);
-        // }
-        // return result;
     }
 
     protected synchronized void removeSession(Session session) {
@@ -375,18 +344,7 @@ public class SessionManagerImpl implements SessionManager {
     public void storeSession(String sessionID, OutputStream out) throws NonReferenceableSessionException,
                                                                 OWLOntologyStorageException {
         throw new UnsupportedOperationException(
-                "Session content is always stored by default in the current implementation.");
-        /*
-         * For each gession space in the session save all the ontologies contained in the space.
-         */
-        // for (SessionOntologySpace so : getSessionSpaces(sessionID)) {
-        // for (OWLOntology owlOntology : so.getOntologies(true)) {
-        //
-        // // store.store(owlOntology);
-        //
-        // }
-        // }
-
+                "Not necessary. Session content is always stored by default in the current implementation.");
     }
 
 }

@@ -49,13 +49,12 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOWLUtils;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.OntologySpaceFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
 import org.junit.AfterClass;
@@ -115,8 +114,9 @@ public class TestClerezzaSpaces {
         OWLIndividual iLinus = df.getOWLNamedIndividual(IRI.create(baseIri + "/" + Constants.linus));
         linusIsHuman = df.getOWLClassAssertionAxiom(cHuman, iLinus);
 
-        factory = new OntologySpaceFactoryImpl(reg, new ClerezzaOntologyProvider(tcManager, offline, parser),
-                offline, IRI.create("http://stanbol.apache.org/ontology/"));
+        factory = new OntologySpaceFactoryImpl(new ClerezzaOntologyProvider(tcManager, offline, parser),
+                new Hashtable<String,Object>());
+        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/"));
     }
 
     String scopeId = "Comics";
@@ -269,28 +269,6 @@ public class TestClerezzaSpaces {
         assertFalse(space.hasOntology(nonexId));
         // OntologyUtils.printOntology(space.getTopOntology(), System.err);
 
-    }
-
-    // @Test
-    public void testSessionModification() throws Exception {
-        SessionOntologySpace space = factory.createSessionOntologySpace(scopeId);
-        space.setUp();
-        try {
-            // First add an in-memory ontology with a few axioms.
-            space.addOntology(inMemorySrc);
-            // Now add a real online ontology
-            space.addOntology(dropSrc);
-            // The in-memory ontology must be in the space.
-            assertTrue(space.hasOntology(baseIri));
-            // The in-memory ontology must still have its axioms.
-            assertTrue(space.getOntology(baseIri).containsAxiom(linusIsHuman));
-
-            // // The top ontology must still have axioms from in-memory
-            // // ontologies. NO LONGER
-            // assertTrue(space.getTopOntology().containsAxiom(linusIsHuman));
-        } catch (UnmodifiableOntologyCollectorException e) {
-            fail("Modification was denied on unlocked ontology space.");
-        }
     }
 
 }

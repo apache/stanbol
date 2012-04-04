@@ -39,9 +39,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace.SpaceType;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -247,28 +246,6 @@ public class TestOntologySpaces {
         assertFalse(space.hasOntology(nonexId));
         // OntologyUtils.printOntology(space.getTopOntology(), System.err);
 
-    }
-
-    // @Test
-    public void testSessionModification() throws Exception {
-        SessionOntologySpace space = factory.createSessionOntologySpace(scopeId);
-        space.setUp();
-        try {
-            // First add an in-memory ontology with a few axioms.
-            space.addOntology(inMemorySrc);
-            // Now add a real online ontology
-            space.addOntology(dropSrc);
-            // The in-memory ontology must be in the space.
-            assertTrue(space.getOntologies(true).contains(ont));
-            // The in-memory ontology must still have its axioms.
-            assertTrue(space.getOntology(ont.getOntologyID().getOntologyIRI()).containsAxiom(linusIsHuman));
-
-            // // The top ontology must still have axioms from in-memory
-            // // ontologies. NO LONGER
-            // assertTrue(space.getTopOntology().containsAxiom(linusIsHuman));
-        } catch (UnmodifiableOntologyCollectorException e) {
-            fail("Modification was denied on unlocked ontology space.");
-        }
     }
 
 }

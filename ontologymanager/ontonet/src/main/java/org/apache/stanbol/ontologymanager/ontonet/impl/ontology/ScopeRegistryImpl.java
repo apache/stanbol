@@ -46,49 +46,24 @@ public class ScopeRegistryImpl implements ScopeRegistry {
         scopeListeners = new HashSet<ScopeEventListener>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.iksproject.kres.api.manager.ontology.ScopeRegistry#addScopeRegistrationListener(eu.iksproject.kres
-     * .api.manager.ontology.ScopeEventListener)
-     */
     @Override
     public void addScopeRegistrationListener(ScopeEventListener listener) {
         scopeListeners.add(listener);
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.ScopeRegistry#clearScopeRegistrationListeners()
-     */
     @Override
     public void clearScopeRegistrationListeners() {
         scopeListeners.clear();
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.iksproject.kres.api.manager.ontology.ScopeRegistry#containsScope(org.semanticweb.owlapi.model.IRI)
-     */
     @Override
     public boolean containsScope(String scopeID) {
         // containsKey() is not reliable enough
         return scopeMap.get(scopeID) != null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.iksproject.kres.api.manager.ontology.ScopeRegistry#deregisterScope(eu.iksproject.kres.api.manager
-     * .ontology.OntologyScope)
-     */
     @Override
     public synchronized void deregisterScope(OntologyScope scope) {
         String id = scope.getID();

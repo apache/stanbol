@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.ImportManagementPolicy;
@@ -50,6 +51,11 @@ public interface OntologyProvider<S> {
     public String IMPORT_POLICY = "org.apache.stanbol.ontologymanager.ontonet.importPolicy";
 
     /**
+     * The key used to configure the identifier of the meta-level graph
+     */
+    public String META_GRAPH_ID = "org.apache.stanbol.ontologymanager.ontonet.metaGraphId";
+
+    /**
      * The key used to configure the default import resolution policy for this provider.
      */
     public String RESOLVE_IMPORTS = "org.apache.stanbol.ontologymanager.ontonet.resolveImports";
@@ -72,6 +78,14 @@ public interface OntologyProvider<S> {
      * @return the key to access the ontology from the store.
      */
     String getKey(IRI ontologyIRI);
+
+    /**
+     * Returns the graph that stores all the information on stored ontologies
+     * 
+     * @param returnType
+     * @return
+     */
+    <O extends TripleCollection> O getMetaGraph(Class<O> returnType);
 
     /**
      * Gets the set of all the strings that can be used to access the ontologies stored by this provider.
@@ -172,6 +186,14 @@ public interface OntologyProvider<S> {
      */
     Class<?>[] getSupportedReturnTypes();
 
+    /**
+     * A convenience method for checking the availability of an ontology given its (physical or logical) IRI.
+     * It is typically more efficient than calling {@link #getStoredOntology(IRI, Class)} and null-checking
+     * the result.
+     * 
+     * @param ontologyIri
+     * @return
+     */
     boolean hasOntology(IRI ontologyIri);
 
     /**

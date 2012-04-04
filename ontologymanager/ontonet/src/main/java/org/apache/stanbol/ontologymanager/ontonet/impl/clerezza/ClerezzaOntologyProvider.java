@@ -122,7 +122,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
         private MGraph graph;
 
-        private UriRef graphId = new UriRef(OntologyToTcMapper.class.getCanonicalName());
+        private UriRef graphId = new UriRef(metaGraphId);
 
         OntologyToTcMapper() {
             if (store == null) throw new IllegalArgumentException("TcProvider cannot be null");
@@ -153,22 +153,6 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         }
 
         /**
-         * Creates an {@link UriRef} out of an {@link OWLOntologyID}, so it can be used as a storage key for
-         * the graph.
-         * 
-         * @param ontologyReference
-         * @return
-         */
-        private UriRef buildResource(OWLOntologyID ontologyReference) {
-            // The UriRef is of the form ontologyIRI[/versionIRI] (TODO use something less conventional?)
-            IRI ontologyIRI = ontologyReference.getOntologyIRI(), versionIri = ontologyReference
-                    .getVersionIRI();
-            UriRef entry = new UriRef(ontologyIRI.toString()
-                                      + ((versionIri == null) ? "" : ("/" + versionIri.toString())));
-            return entry;
-        }
-
-        /**
          * Creates an {@link OWLOntologyID} object by combining the ontologyIRI and the versionIRI, where
          * applicable, of the stored graph.
          * 
@@ -190,6 +174,22 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             }
             if (viri == null) return new OWLOntologyID(oiri);
             else return new OWLOntologyID(oiri, viri);
+        }
+
+        /**
+         * Creates an {@link UriRef} out of an {@link OWLOntologyID}, so it can be used as a storage key for
+         * the graph.
+         * 
+         * @param ontologyReference
+         * @return
+         */
+        private UriRef buildResource(OWLOntologyID ontologyReference) {
+            // The UriRef is of the form ontologyIRI[/versionIRI] (TODO use something less conventional?)
+            IRI ontologyIRI = ontologyReference.getOntologyIRI(), versionIri = ontologyReference
+                    .getVersionIRI();
+            UriRef entry = new UriRef(ontologyIRI.toString()
+                                      + ((versionIri == null) ? "" : ("/" + versionIri.toString())));
+            return entry;
         }
 
         void clearMappings() {
@@ -244,6 +244,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
     private static final ImportManagementPolicy _IMPORT_POLICY_DEFAULT = ImportManagementPolicy.PRESERVE;
 
+    private static final String _META_GRAPH_ID_DEFAULT = "org.apache.stanbol.ontologymanager.ontonet";
+
     private static final boolean _RESOLVE_IMPORTS_DEFAULT = true;
 
     @Property(name = OntologyProvider.IMPORT_POLICY, options = {
@@ -267,6 +269,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     private List<OWLOntologyIRIMapper> mappers = new ArrayList<OWLOntologyIRIMapper>();
+
+    @Property(name = OntologyProvider.META_GRAPH_ID, value = _META_GRAPH_ID_DEFAULT)
+    protected String metaGraphId = _META_GRAPH_ID_DEFAULT;
 
     @Reference
     private OfflineConfiguration offlineConfig;
@@ -344,6 +349,11 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         // Check if the TcManager should be set as the store
         if (store == null) store = tcManager;
 
+        // Parse configuration.
+        metaGraphId = (String) (configuration.get(OntologyProvider.META_GRAPH_ID));
+        if (metaGraphId == null) metaGraphId = _META_GRAPH_ID_DEFAULT; // Should be already assigned though
+
+        // This call will also create the metadata graph.
         keymap = new OntologyToTcMapper();
 
         // Parse configuration.
@@ -463,6 +473,14 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         return keymap.stringValues();
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O extends TripleCollection> O getMetaGraph(Class<O> returnType) {
+        if (!TripleCollection.class.isAssignableFrom(returnType)) throw new IllegalArgumentException(
+                "Only subtypes of " + TripleCollection.class + " are allowed.");
+        return (O) store.getTriples(new UriRef(metaGraphId));
+    }
+
     @Override
     public TcProvider getStore() {
         return store;
@@ -532,6 +550,11 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     @Override
     public Class<?>[] getSupportedReturnTypes() {
         return supported;
+    }
+
+    @Override
+    public boolean hasOntology(IRI ontologyIri) {
+        return hasOntology(new OWLOntologyID(ontologyIri));
     }
 
     @Override
@@ -879,8 +902,4 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         }
     }
 
-    @Override
-    public boolean hasOntology(IRI ontologyIri) {
-        return hasOntology(new OWLOntologyID(ontologyIri));
-    }
 }

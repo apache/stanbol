@@ -43,9 +43,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDExcep
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScopeFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -113,17 +110,12 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
     @Reference
     ONManager onManager;
-    //
-    // @Reference
-    // SessionManager sessionManager;
 
     @Reference
     ReengineerManager reengineeringManager;
 
     private OntologyScope scope;
     private String scopeID;
-
-    // private IRI spaceIRI;
 
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
@@ -133,9 +125,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
      * TO USE {@link #XMLExtractor(ONManager)} or its overloads, to parse the configuration and then
      * initialise the rule store if running outside a OSGI environment.
      */
-    public XMLExtractor() {
-
-    }
+    public XMLExtractor() {}
 
     public XMLExtractor(ReengineerManager reengineeringManager,
                         ONManager onManager,
@@ -169,21 +159,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
         if (hostPort == null) hostPort = _HOST_NAME_AND_PORT_DEFAULT;
         // TODO: Manage the other properties
 
-        // spaceIRI = IRI.create(XML_REENGINEERING_SESSION_SPACE);
-        // scopeID = IRI.create("http://" + hostPort + "/kres/ontology/" + scopeID);
-
         reengineeringManager.bindReengineer(this);
-
-        // SessionManager kReSSessionManager = onManager.getSessionManager();
-        // Session kReSSession = sessionManager.createSession();
-
-        // sessionId = kReSSession.getID();
-
-        OntologyScopeFactory ontologyScopeFactory = onManager.getOntologyScopeFactory();
-
-        ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
-
-        OntologySpaceFactory ontologySpaceFactory = onManager.getOntologySpaceFactory();
 
         scope = null;
         try {
@@ -199,29 +175,20 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
             OntologyInputSource xmlowlSrc = new RootOntologyIRISource(IRI.create(XML_OWL.URI),
                     OWLOntologyManagerFactory.createOWLOntologyManager(locations));
 
-            scope = ontologyScopeFactory.createOntologyScope(scopeID, xmlowlSrc
+            scope = onManager.createOntologyScope(scopeID, xmlowlSrc
             /* new OntologyInputSourceOXML() */);
             // scope.setUp();
 
-            scopeRegistry.registerScope(scope);
+            onManager.registerScope(scope);
         } catch (DuplicateIDException e) {
             log.info("Will perform XML reengineering in already existing scope {}", scopeID);
-            scope = onManager.getScopeRegistry().getScope(scopeID);
+            scope = onManager.getScope(scopeID);
         } catch (OWLOntologyCreationException e) {
             throw new IllegalStateException("No valid schema was found in ontology " + XML_OWL.URI
                                             + "for reengineer" + XMLExtractor.class, e);
         }
 
-        if (scope != null) {
-            // try {
-            // scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(scopeID),
-            // kReSSession.getID());
-
-            scopeRegistry.setScopeActive(scopeID, true);
-            // } catch (UnmodifiableOntologySpaceException ex) {
-            // log.error("Cannot add session space for " + scopeID + " to unmodifiable scope " + scope, ex);
-            // }
-        }
+        if (scope != null) onManager.setScopeActive(scopeID, true);
 
         log.info("Stanbol XML Reengineer active.");
     }
@@ -370,10 +337,8 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
         OWLOntology ontology = null;
 
         log.info("Starting XML Reengineering");
-        OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
+        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = OWLManager.getOWLDataFactory();
-
-        IRI schemaOntologyIRI = schemaOntology.getOntologyID().getOntologyIRI();
 
         OWLOntology localDataOntology = null;
 
@@ -463,7 +428,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
                                           Document dom,
                                           OWLOntology schemaOntology) throws ReengineeringException {
 
-        OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
+        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
         IRI schemaOntologyIRI = schemaOntology.getOntologyID().getOntologyIRI();
@@ -530,18 +495,6 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
     @Override
     public int getReengineerType() {
         return ReengineerType.XML;
-    }
-
-    private OntologyScope getScope() {
-        OntologyScope ontologyScope = null;
-
-        ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
-
-        if (scopeRegistry.isScopeActive(scopeID)) {
-            ontologyScope = scopeRegistry.getScope(scopeID);
-        }
-
-        return ontologyScope;
     }
 
     private void iterateChildren(String dataNS,
@@ -714,7 +667,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
     @Override
     public OWLOntology schemaReengineering(String graphNS, IRI outputIRI, DataSource dataSource) throws ReengineeringException {
-        XSDExtractor xsdExtractor = new XSDExtractor(onManager);
+        XSDExtractor xsdExtractor = new XSDExtractor();
         return xsdExtractor.getOntologySchema(graphNS, outputIRI, dataSource);
     }
 

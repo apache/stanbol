@@ -20,7 +20,6 @@ import java.io.OutputStream;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 /**
@@ -101,15 +100,6 @@ public interface SessionManager extends NamedResource, SessionListenable {
      * @return the unique session identified by <code>sessionID</code>
      */
     Session getSession(String sessionID);
-
-    /**
-     * Returns the ontology spaces associated with this session.
-     * 
-     * @deprecated as session spaces are obsolete, so is this method. Do no use session spaces.
-     * 
-     * @return the session spaces
-     */
-    Set<SessionOntologySpace> getSessionSpaces(String sessionID) throws NonReferenceableSessionException;
 
     /**
      * Sets the maximum allowed number of active sessions managed by this manager simultaneously. A negative

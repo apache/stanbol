@@ -23,7 +23,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerUriRefGenerator;
@@ -80,13 +79,9 @@ import org.xml.sax.SAXException;
 
 public class XSDExtractor extends ReengineerUriRefGenerator {
 
-    private ONManager onManager;
-
     public final Logger log = LoggerFactory.getLogger(getClass());
 
-    public XSDExtractor(ONManager onManager) {
-        this.onManager = onManager;
-    }
+    public XSDExtractor() {}
 
     private void addComplexType(String schemaNS,
                                 OWLOntologyManager manager,
@@ -553,7 +548,7 @@ public class XSDExtractor extends ReengineerUriRefGenerator {
         PSVIDocumentImpl psviDocumentImpl = new PSVIDocumentImpl();
         XSSimpleTypeDecl m;
 
-        OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
+        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
         log.debug("XSD output IRI : " + outputIRI);

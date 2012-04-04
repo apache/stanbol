@@ -25,10 +25,9 @@ import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace.SpaceType;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,28 +106,9 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
                 return createCoreOntologySpace(scopeId, ontologySources);
             case CUSTOM:
                 return createCustomOntologySpace(scopeId, ontologySources);
-            case SESSION:
-                return createSessionOntologySpace(scopeId, ontologySources);
             default:
                 return null;
         }
-    }
-
-    @Override
-    public SessionOntologySpace createSessionOntologySpace(String scopeId,
-                                                           OntologyInputSource<?,?>... sessionSources) {
-        SessionOntologySpace s = new SessionOntologySpaceImpl(scopeId, namespace, /* storage, */
-        OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations().toArray(
-            new IRI[0])));
-        for (OntologyInputSource<?,?> src : sessionSources)
-            try {
-                s.addOntology(src);
-            } catch (UnmodifiableOntologyCollectorException e) {
-                // Should never happen anyway...
-                continue;
-            }
-        // s.setUp();
-        return s;
     }
 
     @Override

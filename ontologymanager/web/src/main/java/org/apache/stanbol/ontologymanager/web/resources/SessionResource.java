@@ -20,10 +20,12 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
@@ -36,7 +38,15 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -60,6 +70,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -67,17 +78,23 @@ import org.apache.stanbol.ontologymanager.ontonet.api.collector.IrremovableOntol
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
+import org.apache.stanbol.ontologymanager.web.util.OntologyPrettyPrintResource;
+import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.multipart.BodyPart;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
@@ -93,12 +110,12 @@ public class SessionResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    protected ONManager onMgr;
+
     /*
      * Placeholder for the session manager to be fetched from the servlet context.
      */
     protected SessionManager sesMgr;
-
-    protected ONManager onMgr;
 
     protected Session session;
 
@@ -185,7 +202,6 @@ public class SessionResource extends BaseStanbolResource {
      *         session at all.
      */
     @DELETE
-    @Consumes(MediaType.WILDCARD)
     public Response deleteSession(@PathParam("id") String sessionId,
                                   @Context UriInfo uriInfo,
                                   @Context HttpHeaders headers) {
@@ -194,6 +210,58 @@ public class SessionResource extends BaseStanbolResource {
         session = null;
         ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    @GET
+    @Produces(TEXT_HTML)
+    public Response getHtmlInfo(@Context HttpHeaders headers) {
+        ResponseBuilder rb;
+        if (session == null) rb = Response.status(NOT_FOUND);
+        else rb = Response.ok(new Viewable("index", this));
+        rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    public SortedSet<String> getOntologies() {
+        SortedSet<String> result = new TreeSet<String>();
+        for (IRI iri : session.listManagedOntologies())
+            result.add(iri.toString());
+        return result;
+    }
+
+    /*
+     * Needed for freemarker
+     */
+    public Session getSession() {
+        return session;
+    }
+
+    /*
+     * Needed for freemarker
+     */
+    public Set<OntologyScope> getAppendableScopes() {
+        Set<OntologyScope> notAppended = new HashSet<OntologyScope>();
+        for (OntologyScope sc : onMgr.getRegisteredScopes())
+            if (!session.getAttachedScopes().contains(sc.getID())) notAppended.add(sc);
+        return notAppended;
+    }
+
+    /*
+     * Needed for freemarker
+     */
+    public Set<OntologyScope> getAppendedScopes() {
+        Set<OntologyScope> appended = new HashSet<OntologyScope>();
+        for (OntologyScope sc : onMgr.getRegisteredScopes())
+            if (session.getAttachedScopes().contains(sc.getID())) appended.add(sc);
+        return appended;
+    }
+
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -212,7 +280,7 @@ public class SessionResource extends BaseStanbolResource {
     @GET
     @Path(value = "/{ontologyId:.+}")
     @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON})
-    public Response getManagedOntologyGraph(@PathParam("id") String sessionId,
+    public Response managedOntologyGetGraph(@PathParam("id") String sessionId,
                                             @PathParam("ontologyId") String ontologyId,
                                             @DefaultValue("false") @QueryParam("merge") boolean merge,
                                             @Context UriInfo uriInfo,
@@ -240,7 +308,7 @@ public class SessionResource extends BaseStanbolResource {
     @GET
     @Path(value = "/{ontologyId:.+}")
     @Produces(value = {RDF_XML, TURTLE, X_TURTLE})
-    public Response getManagedOntologyMixed(@PathParam("id") String sessionId,
+    public Response managedOntologyGetMixed(@PathParam("id") String sessionId,
                                             @PathParam("ontologyId") String ontologyId,
                                             @DefaultValue("false") @QueryParam("merge") boolean merge,
                                             @Context UriInfo uriInfo,
@@ -275,7 +343,7 @@ public class SessionResource extends BaseStanbolResource {
     @GET
     @Path(value = "/{ontologyId:.+}")
     @Produces(value = {MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
-    public Response getManagedOntologyOWL(@PathParam("id") String sessionId,
+    public Response managedOntologyGetOWL(@PathParam("id") String sessionId,
                                           @PathParam("ontologyId") String ontologyId,
                                           @DefaultValue("false") @QueryParam("merge") boolean merge,
                                           @Context UriInfo uriInfo,
@@ -288,10 +356,67 @@ public class SessionResource extends BaseStanbolResource {
         return rb.build();
     }
 
-    @OPTIONS
-    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+    @GET
+    @Path("/{ontologyId:.+}")
+    @Produces(TEXT_HTML)
+    public Response managedOntologyShow(@PathParam("ontologyId") String ontologyId,
+                                        @Context HttpHeaders headers) {
+        ResponseBuilder rb;
+        if (session == null) rb = Response.status(NOT_FOUND);
+        else if (ontologyId == null || ontologyId.isEmpty()) rb = Response.status(BAD_REQUEST);
+        else {
+            OWLOntology o = session.getOntology(IRI.create(ontologyId), OWLOntology.class, false);
+            if (o == null) rb = Response.status(NOT_FOUND);
+            else try {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                o.getOWLOntologyManager().saveOntology(o, new TurtleOntologyFormat(), out);
+                rb = Response.ok(new Viewable("ontology", new OntologyPrettyPrintResource(servletContext,
+                        uriInfo, out)));
+            } catch (OWLOntologyStorageException e) {
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            }
+        }
+        rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    /**
+     * Tells the session to no longer manage the ontology with the supplied <i>logical</i> identifier. The
+     * ontology will be lost if not stored or not managed by another collector.
+     * 
+     * @param sessionId
+     *            the session identifier.
+     * @param ontologyId
+     *            the ontology identifier.
+     * @param uriInfo
+     * @param headers
+     * @return {@link Status#OK} if the removal was successful, {@link Status#NOT_FOUND} if there is no such
+     *         session at all, {@link Status#FORBIDDEN} if the session or the ontology is locked or cannot
+     *         modified for some other reason, {@link Status#INTERNAL_SERVER_ERROR} if some other error
+     *         occurs.
+     */
+    @DELETE
+    @Path(value = "/{ontologyId:.+}")
+    public Response managedOntologyUnload(@PathParam("id") String sessionId,
+                                          @PathParam("ontologyId") String ontologyId,
+                                          @Context UriInfo uriInfo,
+                                          @Context HttpHeaders headers) {
+        if (session == null) return Response.status(NOT_FOUND).build();
+        IRI iri = IRI.create(ontologyId);
+        OWLOntology o = session.getOntology(iri, OWLOntology.class);
+        if (o == null) return Response.notModified().build();
+        try {
+            session.removeOntology(iri);
+        } catch (IrremovableOntologyException e) {
+            throw new WebApplicationException(e, FORBIDDEN);
+        } catch (UnmodifiableOntologyCollectorException e) {
+            throw new WebApplicationException(e, FORBIDDEN);
+        } catch (OntologyCollectorModificationException e) {
+            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+        }
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers);
+        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -358,64 +483,80 @@ public class SessionResource extends BaseStanbolResource {
     @POST
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
-    public Response append(FormDataMultiPart data, @Context HttpHeaders headers) {
-        System.out.println(" post(FormDataMultiPart data)");
+    public Response postOntology(FormDataMultiPart data, @Context HttpHeaders headers) {
         log.debug(" post(FormDataMultiPart data)");
         ResponseBuilder rb;
+
+        IRI location = null;
+        File file = null; // If found, it takes precedence over location.
+        String format = null;
+        OntologyScope scope = null;
 
         for (BodyPart bpart : data.getBodyParts()) {
             log.debug("is a {}", bpart.getClass());
             if (bpart instanceof FormDataBodyPart) {
                 FormDataBodyPart dbp = (FormDataBodyPart) bpart;
                 String name = dbp.getName();
+                if (name.equals("file")) {
+                    file = bpart.getEntityAs(File.class);
+                } else if (name.equals("format") && !dbp.getValue().equals("auto")) format = dbp.getValue();
+                else if (name.equals("url")) try {
+                    URI.create(dbp.getValue()); // To throw 400 if malformed.
+                    location = IRI.create(dbp.getValue());
+                } catch (Exception ex) {
+                    log.error("Malformed IRI for " + dbp.getValue(), ex);
+                    throw new WebApplicationException(ex, BAD_REQUEST);
+                }
                 if (name.equals("scope")) {
-                    session.attachScope(onMgr.getScopeRegistry().getScope(dbp.getValue()));
+                    scope = onMgr.getScope(dbp.getValue());
                 }
             }
         }
-        rb = Response.ok();
-        // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        // FIXME return an appropriate response e.g. 303
-        addCORSOrigin(servletContext, rb, headers);
-        return rb.build();
-    }
+        boolean fileOk = file != null && file.canRead() && file.exists();
+        if (fileOk || location != null) { // File and location take precedence
+            // Then add the file
+            OntologyInputSource<?,?> src = null;
+            if (fileOk) { // File first
+                try {
+                    InputStream content = new FileInputStream(file);
+                    src = new GraphContentInputSource(content, format);
+                } catch (UnsupportedFormatException e) {
+                    log.warn(
+                        "POST method failed for media type {}. This should not happen (should fail earlier)",
+                        headers.getMediaType());
+                    rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
+                } catch (Exception e) {
+                    throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+                }
+            } else if (location != null) {
+                try {
+                    src = new RootOntologyIRISource(location);
+                } catch (Exception e) {
+                    log.error("Failed to load ontology from " + location, e);
+                    throw new WebApplicationException(e, BAD_REQUEST);
+                }
+            } else {
+                log.error("Bad request");
+                log.error(" file is: {}", file);
+                throw new WebApplicationException(BAD_REQUEST);
+            }
 
-    /**
-     * Tells the session to no longer manage the ontology with the supplied <i>logical</i> identifier. The
-     * ontology will be lost if not stored or not managed by another collector.
-     * 
-     * @param sessionId
-     *            the session identifier.
-     * @param ontologyId
-     *            the ontology identifier.
-     * @param uriInfo
-     * @param headers
-     * @return {@link Status#OK} if the removal was successful, {@link Status#NOT_FOUND} if there is no such
-     *         session at all, {@link Status#FORBIDDEN} if the session or the ontology is locked or cannot
-     *         modified for some other reason, {@link Status#INTERNAL_SERVER_ERROR} if some other error
-     *         occurs.
-     */
-    @DELETE
-    @Path(value = "/{ontologyId:.+}")
-    @Consumes(MediaType.WILDCARD)
-    public Response unmanageOntology(@PathParam("id") String sessionId,
-                                     @PathParam("ontologyId") String ontologyId,
-                                     @Context UriInfo uriInfo,
-                                     @Context HttpHeaders headers) {
-        if (session == null) return Response.status(NOT_FOUND).build();
-        IRI iri = IRI.create(ontologyId);
-        OWLOntology o = session.getOntology(iri, OWLOntology.class);
-        if (o == null) return Response.notModified().build();
-        try {
-            session.removeOntology(iri);
-        } catch (IrremovableOntologyException e) {
-            throw new WebApplicationException(e, FORBIDDEN);
-        } catch (UnmodifiableOntologyCollectorException e) {
-            throw new WebApplicationException(e, FORBIDDEN);
-        } catch (OntologyCollectorModificationException e) {
-            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            if (src != null) {
+                String key = session.addOntology(src);
+                if (key == null || key.isEmpty()) throw new WebApplicationException(INTERNAL_SERVER_ERROR);
+                // FIXME ugly but will have to do for the time being
+                String uri = key.split("::")[1];
+                if (uri != null && !uri.isEmpty()) {
+                    rb = Response.seeOther(URI.create("/ontonet/session/" + session.getID() + "/" + uri));
+                } else rb = Response.ok();
+            } else rb = Response.status(INTERNAL_SERVER_ERROR);
+        } else if (scope != null) { // Scope comes next
+            session.attachScope(scope);
+            rb = Response.seeOther(URI.create("/ontonet/session/" + session.getID()));
+        } else {
+            throw new WebApplicationException(BAD_REQUEST);
         }
-        ResponseBuilder rb = Response.ok();
+        // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }

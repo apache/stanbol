@@ -42,14 +42,7 @@ public interface OntologySpace extends OntologyCollector, OWLExportable, Lockabl
         /**
          * Denotes a custom space (0..1).
          */
-        CUSTOM("custom"),
-
-        /**
-         * Denotes a session space (0..n).
-         * 
-         * @deprecated no session spaces should created anymore.
-         */
-        SESSION("session");
+        CUSTOM("custom");
 
         private String suffix;
 

@@ -19,7 +19,6 @@ package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace.SpaceType;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 
 /**
  * An ontology space factory is responsible for the creation of new, readily specialized ontology spaces from
@@ -73,23 +72,5 @@ public interface OntologySpaceFactory extends NamedResource {
     OntologySpace createOntologySpace(String scopeId,
                                       SpaceType type,
                                       OntologyInputSource<?,?>... ontologySources);
-
-    /**
-     * Creates and sets up a default session ontology space. Equivalent to calling
-     * <code>createOntologySpace(IRI, SpaceTypes.SESSION, OntologyInputSource...)</code>.
-     * 
-     * @deprecated session spaces should no longer exist, as session data should be loaded in {@link Session}
-     *             objects. Therefore, implementations of this method are expected to throw an
-     *             {@link UnsupportedOperationException}.
-     * 
-     * @param scopeId
-     *            the unique identifier of the ontology scope that will reference this space. It can be used
-     *            for generating the identifier for this ontology space.
-     * @param sessionSources
-     *            the sources of the optional ontologies to be immediately loaded upon space creation.
-     * @return the generated ontology space.
-     */
-    SessionOntologySpace createSessionOntologySpace(String scopeId,
-                                                    OntologyInputSource<?,?>... sessionSources);
 
 }

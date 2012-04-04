@@ -32,7 +32,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollecto
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLOntologyDocumentTarget;
 import org.semanticweb.owlapi.io.StringDocumentSource;
@@ -149,8 +148,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         else return null; // No ontology to add
     }
 
-    @Override
-    public OWLOntology asOWLOntology(boolean merge) {
+    protected OWLOntology asOWLOntology(boolean merge) {
         if (merge) throw new UnsupportedOperationException(
                 "Ontology merging not implemented yet. Please set merge parameter to false.");
         OWLOntology root;
@@ -176,7 +174,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         if (root != null) {
             List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
             OWLDataFactory df = ontologyManager.getOWLDataFactory();
-            for (OWLOntology o : getOntologies(false)) {
+            for (OWLOntology o : getManagedOntologies(OWLOntology.class, false)) {
                 if (o == null) continue;
 
                 String base = URIUtils.upOne(IRI.create(namespace + getID())) + "/";
@@ -256,38 +254,13 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     public <O> Set<O> getManagedOntologies(Class<O> returnType, boolean withClosure) {
         if (!OWLOntology.class.isAssignableFrom(returnType)) throw new UnsupportedOperationException(
                 "This implementation can only get objects of type " + OWLOntology.class);
-        return (Set<O>) getOntologies(withClosure);
+        return (Set<O>) (withClosure ? ontologyManager.getOntologies() : new HashSet<OWLOntology>(
+                managedOntologies.values()));
     }
 
     @Override
     public IRI getNamespace() {
         return this.namespace;
-    }
-
-    @Override
-    public synchronized Set<OWLOntology> getOntologies(boolean withClosure) {
-        return withClosure ? ontologyManager.getOntologies() : new HashSet<OWLOntology>(
-                managedOntologies.values());
-    }
-
-    @Override
-    public OWLOntology getOntology(IRI ontologyIri) {
-        log.debug("Requesting ontology {} from space {}", ontologyIri, getNamespace() + getID());
-        OWLOntology o = managedOntologies.get(ontologyIri);
-        // Iterator<OWLOntology> it = managedOntologies.iterator();
-        // while (it.hasNext() && o == null) {
-        // OWLOntology temp = it.next();
-        // if (!temp.isAnonymous() && ontologyIri.equals(temp.getOntologyID().getOntologyIRI())) o = temp;
-        // }
-        // if (o == null) o = ontologyManager.getOntology(ontologyIri);
-        return o;
-    }
-
-    @Override
-    public OWLOntology getOntology(IRI ontologyIri, boolean merge) {
-        if (merge) throw new UnsupportedOperationException(
-                "Merge not implemented yet in OWLAPI version. Just a matter of time...");
-        return getOntology(ontologyIri);
     }
 
     @Override
@@ -298,26 +271,8 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     @SuppressWarnings("unchecked")
     @Override
     public <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge) {
-        if (OWLOntology.class.isAssignableFrom(returnType)) return (O) getOntology(ontologyIri, merge);
+        if (OWLOntology.class.isAssignableFrom(returnType)) return (O) managedOntologies.get(ontologyIri);
         throw new UnsupportedOperationException("Cannot export to " + returnType);
-    }
-
-    @Override
-    public int getOntologyCount() {
-        return getOntologyCount(true);
-    }
-
-    @Override
-    public int getOntologyCount(boolean withClosure) {
-        if (!withClosure) return managedOntologies.keySet().size();
-        else {
-            Set<OWLOntology> set = new HashSet<OWLOntology>();
-            for (OWLOntology o : managedOntologies.values()) {
-                set.add(o);
-                set.addAll(o.getImportsClosure());
-            }
-            return set.size();
-        }
     }
 
     @Override
@@ -327,7 +282,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 
     @Override
     public boolean hasOntology(IRI ontologyIri) {
-        return this.getOntology(ontologyIri) != null;
+        return listManagedOntologies().contains(ontologyIri);
     }
 
     @Override
@@ -351,23 +306,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         OWLOntology newOnt = reload((OWLOntology) ontology, ontologyManager, true, false);
         // if (newOnt!=null)
         managedOntologies.put(OWLUtils.guessOntologyIdentifier(newOnt), newOnt);
-
-        try {
-            // Store the top ontology
-            if (!(this instanceof SessionOntologySpace)) {
-                // No longer storing in OWLAPI implementation!
-                // if (storage == null) log.warn(
-                // "No ontology storage found. Ontology {} will be stored in-memory only.", ontology);
-                // else {
-                // // storage = new ClerezzaOntologyStorage(tcManager, wtcProvider)
-                // storage.store(ontology);
-                // }
-            }
-            // ONManager.get().getOntologyStore().load(rootOntology.getOntologyID().getOntologyIRI());
-        } catch (Exception ex) {
-            log.warn("An error occurred while storing ontology " + ontology
-                     + " . Ontology management will be volatile.", ex);
-        }
 
         fireOntologyAdded(OWLUtils.guessOntologyIdentifier(ontology));
 

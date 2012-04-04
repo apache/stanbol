@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.ImportManagementPolicy;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
@@ -176,6 +177,12 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     @Override
     public boolean hasOntology(IRI ontologyIri) {
         return hasOntology(new OWLOntologyID(ontologyIri));
+    }
+
+    @Override
+    public <O extends TripleCollection> O getMetaGraph(Class<O> returnType) {
+        throw new UnsupportedOperationException(
+                "The OWL API implementation does not use a graph for storing correspondencies");
     }
 
 }

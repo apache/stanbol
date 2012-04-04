@@ -17,12 +17,10 @@
 package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Graph;
@@ -45,7 +43,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeOntologyListener;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -94,11 +91,6 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
 
     protected IRI namespace = null;
 
-    /**
-     * Maps session IDs to ontology space. A single scope has at most one space per session.
-     */
-    protected Map<String,SessionOntologySpace> sessionSpaces;
-
     public OntologyScopeImpl(String id,
                              IRI namespace,
                              OntologySpaceFactory factory,
@@ -123,31 +115,11 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
                 e);
         }
         this.customSpace.addListener(this);
-
-        sessionSpaces = new HashMap<String,SessionOntologySpace>();
     }
 
     @Override
     public void addOntologyScopeListener(ScopeOntologyListener listener) {
         listeners.add(listener);
-    }
-
-    @Override
-    public synchronized void addSessionSpace(OntologySpace sessionSpace, String sessionId) throws UnmodifiableOntologyCollectorException {
-        if (sessionSpace instanceof SessionOntologySpace) {
-            sessionSpaces.put(sessionId, (SessionOntologySpace) sessionSpace);
-            sessionSpace.addListener(this);
-
-            if (this.getCustomSpace() != null) ((SessionOntologySpace) sessionSpace).attachSpace(
-                this.getCustomSpace(), true);
-            else ((SessionOntologySpace) sessionSpace).attachSpace(this.getCoreSpace(), true);
-
-        }
-    }
-
-    @Override
-    public OWLOntology asOWLOntology(boolean merge) {
-        return export(OWLOntology.class, merge);
     }
 
     @Override
@@ -293,13 +265,13 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
                 List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
                 // Add the import statement for the custom space, if existing and not empty
                 OntologySpace spc = getCustomSpace();
-                if (spc != null && spc.getOntologyCount(false) > 0) {
+                if (spc != null && spc.listManagedOntologies().size() > 0) {
                     IRI spaceIri = IRI.create(getNamespace() + spc.getID());
                     additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
                 }
                 // Add the import statement for the core space, if existing and not empty
                 spc = getCoreSpace();
-                if (spc != null && spc.getOntologyCount(false) > 0) {
+                if (spc != null && spc.listManagedOntologies().size() > 0) {
                     IRI spaceIri = IRI.create(getNamespace() + spc.getID());
                     additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
                 }
@@ -350,16 +322,6 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     @Override
     public Collection<ScopeOntologyListener> getOntologyScopeListeners() {
         return listeners;
-    }
-
-    @Override
-    public SessionOntologySpace getSessionSpace(String sessionID) {
-        return sessionSpaces.get(sessionID);
-    }
-
-    @Override
-    public Set<OntologySpace> getSessionSpaces() {
-        return new HashSet<OntologySpace>(sessionSpaces.values());
     }
 
     @Override
@@ -442,11 +404,6 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
             this.customSpace.setUp();
         }
         locked = true;
-    }
-
-    @Override
-    public void synchronizeSpaces() {
-        // TODO Auto-generated method stub
     }
 
     @Override

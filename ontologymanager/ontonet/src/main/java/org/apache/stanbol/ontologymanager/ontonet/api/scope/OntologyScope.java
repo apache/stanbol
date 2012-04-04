@@ -16,13 +16,10 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 
-import java.util.Set;
-
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.Lockable;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 
 /**
  * Represents an ontology network that is used for modelling a given knowledge component or domain, e.g.
@@ -44,18 +41,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 public interface OntologyScope extends NamedResource, Lockable, ScopeOntologyListenable, OWLExportable {
 
     /**
-     * Adds a new ontology space to the list of user session spaces for this scope.
-     * 
-     * @deprecated as session ontology spaces are obsolete, so is this method. Please refer directly to the
-     *             session identified by <code>sessionID</code>.
-     * 
-     * @param sessionSpace
-     *            the ontology space to be added.
-     * @throws UnmodifiableOntologyCollectorException
-     */
-    void addSessionSpace(OntologySpace sessionSpace, String sessionID) throws UnmodifiableOntologyCollectorException;
-
-    /**
      * Returns the core ontology space for this ontology scope. The core space should never be null for any
      * scope.
      * 
@@ -69,29 +54,6 @@ public interface OntologyScope extends NamedResource, Lockable, ScopeOntologyLis
      * @return the custom ontology space, or null if no custom space is registered for this scope.
      */
     OntologySpace getCustomSpace();
-
-    /**
-     * Returns the ontology space for this scope that is identified by the supplied IRI.
-     * 
-     * @deprecated as session ontology spaces are obsolete, so is this method. Please refer directly to the
-     *             session identified by <code>sessionID</code>.
-     * 
-     * @param sessionID
-     *            the unique identifier of the KReS session.
-     * @return the ontology space identified by <code>sessionID</code>, or null if no such space is registered
-     *         for this scope and session.
-     */
-    SessionOntologySpace getSessionSpace(String sessionID);
-
-    /**
-     * Returns all the active ontology spaces for this scope.
-     * 
-     * @deprecated as session ontology spaces are obsolete, so is this method. Please reroute all
-     *             session-related queries to {@link Session} objects directly.
-     * 
-     * @return a set of active ontology spaces for this scope.
-     */
-    Set<OntologySpace> getSessionSpaces();
 
     /**
      * Sets an ontology space as the custom space for this scope.
@@ -111,21 +73,6 @@ public interface OntologyScope extends NamedResource, Lockable, ScopeOntologyLis
      * can be changed in the <code>setUp()</code> method though.
      */
     void setUp();
-
-    /**
-     * Performs whatever operations are required for making sure the custom space of this scope is aware of
-     * changes occurring in its core space, that all session spaces are aware of changes in the custom space,
-     * and so on. Typically, this includes updating all import statements in the top ontologies for each
-     * space.<br>
-     * <br>
-     * This method is not intended for usage by ontology managers. Since its invocation is supposed to be
-     * automatic, it should be invoked by whatever classes are responsible for listening to changes in an
-     * ontology scope/space. In the default implementation, it is the scope itself, yet the method is left
-     * public in order to allow for external controllers.
-     * 
-     * @deprecated synchronization is managed internally, therefore this method has no effect.
-     */
-    void synchronizeSpaces();
 
     /**
      * Performs the operations required for deactivating the ontology scope. In general, this is not

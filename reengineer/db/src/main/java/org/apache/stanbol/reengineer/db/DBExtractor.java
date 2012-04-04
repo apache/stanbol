@@ -16,9 +16,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScopeFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -192,17 +189,6 @@ public class DBExtractor implements Reengineer {
 
         reengineeringManager.bindReengineer(this);
 
-        // SessionManager kReSSessionManager = onManager.getSessionManager();
-        // Session kReSSession = kReSSessionManager.createSession();
-
-        // kReSSessionID = kReSSession.getID();
-
-        OntologyScopeFactory ontologyScopeFactory = onManager.getOntologyScopeFactory();
-
-        ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
-
-        OntologySpaceFactory ontologySpaceFactory = onManager.getOntologySpaceFactory();
-
         scope = null;
         try {
             log.info("Created scope with IRI " + REENGINEERING_SCOPE);
@@ -211,33 +197,21 @@ public class DBExtractor implements Reengineer {
             OWLOntology owlOntology = ontologyManager.createOntology(iri);
             log.info("Ontology {} created.", iri);
 
-            scope = ontologyScopeFactory.createOntologyScope(reengineeringScopeID, new RootOntologyIRISource(
-                    IRI.create(DBS_L1.URI)));
+            scope = onManager.createOntologyScope(reengineeringScopeID,
+                new RootOntologyIRISource(IRI.create(DBS_L1.URI)));
 
             // scope.setUp();
 
-            scopeRegistry.registerScope(scope);
-
         } catch (DuplicateIDException e) {
             log.info("Semion DBExtractor : already existing scope for IRI " + REENGINEERING_SCOPE);
-            scope = scopeRegistry.getScope(reengineeringScopeID);
+            scope = onManager.getScope(reengineeringScopeID);
         } catch (OWLOntologyCreationException e) {
             log.error("Failed to creare ontology " + DBS_L1.URI, e);
         } catch (Exception e) {
             log.error("Semion DBExtractor : No OntologyInputSource for ONManager.");
         }
 
-        if (scope != null) {
-            // try {
-            // scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(this.reengineeringScopeID),
-            // kReSSession.getID());
-            scopeRegistry.setScopeActive(reengineeringScopeID, true);
-            // } catch (UnmodifiableOntologySpaceException ex) {
-            // log.error("Cannot add session space for scope " + reengineeringScopeID +
-            // " to unmodifiable scope "
-            // + scope, ex);
-            // }
-        }
+        if (scope != null) onManager.setScopeActive(reengineeringScopeID, true);
 
         log.info("Activated KReS Semion RDB Reengineer");
     }
@@ -277,7 +251,7 @@ public class DBExtractor implements Reengineer {
                                          DataSource dataSource,
                                          OWLOntology schemaOntology) throws ReengineeringException {
 
-        DBDataTransformer semionDBDataTransformer = new DBDataTransformer(onManager, schemaOntology);
+        DBDataTransformer semionDBDataTransformer = new DBDataTransformer(schemaOntology);
         return semionDBDataTransformer.transformData(graphNS, outputIRI);
 
     }
@@ -294,15 +268,8 @@ public class DBExtractor implements Reengineer {
     }
 
     private OntologyScope getScope() {
-        OntologyScope ontologyScope = null;
-
-        ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
-
-        if (scopeRegistry.isScopeActive(reengineeringScopeID)) {
-            ontologyScope = scopeRegistry.getScope(reengineeringScopeID);
-        }
-
-        return ontologyScope;
+        if (onManager.isScopeActive(reengineeringScopeID)) return onManager.getScope(reengineeringScopeID);
+        return null;
     }
 
     @Override

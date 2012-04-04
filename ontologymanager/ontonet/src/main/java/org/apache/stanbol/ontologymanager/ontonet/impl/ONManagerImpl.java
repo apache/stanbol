@@ -20,13 +20,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
-import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
-import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -40,6 +41,7 @@ import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
@@ -50,12 +52,11 @@ import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeEventListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.conf.OntologyNetworkConfigurationUtils;
-import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.OntologySpaceFactoryImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.io.FileDocumentSource;
@@ -78,7 +79,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true, metatype = true)
 @Service(ONManager.class)
-public class ONManagerImpl implements ONManager {
+public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
 
     /**
      * Utility class to speed up ontology network startup. <br>
@@ -96,7 +97,7 @@ public class ONManagerImpl implements ONManager {
          * @param locationIri
          */
         public synchronized void addToCustomSpace(String scopeID, String[] locationIris) {
-            OntologyScope scope = getScopeRegistry().getScope(scopeID);
+            OntologyScope scope = ONManagerImpl.this.getScope(scopeID);
 
             scope.getCustomSpace().tearDown();
             for (String locationIri : locationIris) {
@@ -135,6 +136,8 @@ public class ONManagerImpl implements ONManager {
 
     private Helper helper = null;
 
+    private Set<ScopeEventListener> listeners = new HashSet<ScopeEventListener>();
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Reference
@@ -154,8 +157,7 @@ public class ONManagerImpl implements ONManager {
     @Reference
     private OntologyProvider<?> ontologyProvider;
 
-    private OntologyScopeFactory ontologyScopeFactory;
-
+    @Reference
     private OntologySpaceFactory ontologySpaceFactory;
 
     @Property(name = ONManager.ID, value = _ID_DEFAULT)
@@ -163,10 +165,6 @@ public class ONManagerImpl implements ONManager {
 
     @Property(name = ONManager.ONTOLOGY_NETWORK_NS, value = _ONTOLOGY_NETWORK_NS_DEFAULT)
     private String ontonetNS;
-
-    private OWLOntologyManager owlCacheManager;
-
-    private ScopeRegistry scopeRegistry;
 
     @Property(name = ONManager.ID_SCOPE_REGISTRY, value = _ID_SCOPE_REGISTRY_DEFAULT)
     private String scopeRegistryId;
@@ -190,8 +188,16 @@ public class ONManagerImpl implements ONManager {
         // All bindings are deferred to the activator
     }
 
+    @Deprecated
     public ONManagerImpl(OntologyProvider<?> ontologyProvider,
                          OfflineConfiguration offline,
+                         Dictionary<String,Object> configuration) {
+        this(ontologyProvider, offline, null, configuration);
+    }
+
+    public ONManagerImpl(OntologyProvider<?> ontologyProvider,
+                         OfflineConfiguration offline,
+                         OntologySpaceFactory spaceFactory,
                          Dictionary<String,Object> configuration) {
         this();
         this.ontologyProvider = ontologyProvider;
@@ -201,47 +207,6 @@ public class ONManagerImpl implements ONManager {
         } catch (IOException e) {
             log.error("Unable to access servlet context.", e);
         }
-    }
-
-    /**
-     * @deprecated use {@link #ONManagerImpl(TcManager, WeightedTcProvider, OfflineConfiguration, Dictionary)}
-     *             instead. Note that if the deprecated method is used instead, its effect will be to copy the
-     *             Dictionary context to a new {@link OfflineConfiguration} object.
-     * @param tcm
-     * @param wtcp
-     * @param configuration
-     */
-    @Deprecated
-    public ONManagerImpl(TcManager tcm, WeightedTcProvider wtcp, Dictionary<String,Object> configuration) {
-        // Copy the same configuration to the ONManagerConfigurationImpl.
-        this(tcm, wtcp, new OfflineConfigurationImpl(configuration), configuration);
-    }
-
-    /**
-     * Constructor to be invoked by non-OSGi environments.
-     * 
-     * @deprecated tcm and wctp are no longer to be supplied directly to the ONManager object. Use
-     *             {@link #ONManagerImpl(OntologyProvider, OfflineConfiguration, Dictionary)} instead.
-     * 
-     * @param tcm
-     *            the triple collection manager to be used for storing ontologies.
-     * @param wtcp
-     *            the triple collection provider to be used for storing ontologies.
-     * @param onmconfig
-     *            the configuration of this ontology network manager.
-     * @param configuration
-     *            additional parameters for the ONManager not included in {@link OfflineConfiguration}.
-     */
-    @Deprecated
-    public ONManagerImpl(TcManager tcm,
-                         WeightedTcProvider wtcp,
-                         OfflineConfiguration offline,
-                         Dictionary<String,Object> configuration) {
-        /*
-         * Assume this.tcm this.wtcp and this.wtcp were not filled in by OSGi-DS. As a matter of fact,
-         * WeightedTcProvider is now ignored as we assume to use those bound with the TcManager.
-         */
-        this(new ClerezzaOntologyProvider(tcm, offline, new Parser()), offline, configuration);
     }
 
     /**
@@ -289,13 +254,6 @@ public class ONManagerImpl implements ONManager {
         } catch (NullPointerException ex) {
             // Ok, go empty
         }
-
-        owlCacheManager = OWLOntologyManagerFactory.createOWLOntologyManager(offline
-                .getOntologySourceLocations().toArray(new IRI[0]));
-
-        // These depend on one another
-        scopeRegistry = new ScopeRegistryImpl();
-        // oIndex = new OntologyIndexImpl(this);
 
         bindResources();
 
@@ -361,15 +319,21 @@ public class ONManagerImpl implements ONManager {
 
     }
 
+    @Override
+    public void addScopeEventListener(ScopeEventListener listener) {
+        listeners.add(listener);
+    }
+
     protected void bindResources() {
-        IRI ns = IRI.create(getOntologyNetworkNamespace());
-        if (ontologyProvider.getStore() instanceof TcProvider) ontologySpaceFactory = new OntologySpaceFactoryImpl(
-                scopeRegistry, (OntologyProvider<TcProvider>) ontologyProvider, offline,
-                IRI.create(ns + scopeRegistryId + "/"));
-        else ontologySpaceFactory = new org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.OntologySpaceFactoryImpl(
-                scopeRegistry, offline, ns);
-        IRI iri = IRI.create(ns + scopeRegistryId + "/");
-        ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry, iri, ontologySpaceFactory);
+        if (ontologySpaceFactory == null) {
+            IRI ns = IRI.create(getOntologyNetworkNamespace());
+            if (ontologyProvider.getStore() instanceof TcProvider) ontologySpaceFactory = new OntologySpaceFactoryImpl(
+                    (OntologyProvider<TcProvider>) ontologyProvider, new Hashtable<String,Object>());
+            else ontologySpaceFactory = new org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.OntologySpaceFactoryImpl(
+                    this, offline, ns);
+        }
+        IRI iri = IRI.create(getOntologyNetworkNamespace() + scopeRegistryId + "/");
+        ontologySpaceFactory.setNamespace(iri);
     }
 
     private void bootstrapOntologyNetwork(OWLOntology configOntology) {
@@ -400,7 +364,7 @@ public class ONManagerImpl implements ONManager {
 
                 // Create the scope
                 OntologyScope sc = null;
-                sc = ontologyScopeFactory.createOntologyScope(scopeIRI, new BlankOntologySource());
+                sc = createOntologyScope(scopeIRI, new BlankOntologySource());
 
                 // Populate the core space
                 if (cores.length > 0) {
@@ -416,7 +380,7 @@ public class ONManagerImpl implements ONManager {
                 }
 
                 sc.setUp();
-                scopeRegistry.registerScope(sc);
+                registerScope(sc);
 
                 // getScopeHelper().createScope(scopeIRI);
                 // getScopeHelper().addToCoreSpace(scopeIRI, cores);
@@ -431,7 +395,7 @@ public class ONManagerImpl implements ONManager {
             for (String scopeID : toActivate) {
                 try {
                     scopeID = scopeID.trim();
-                    scopeRegistry.setScopeActive(scopeID, true);
+                    setScopeActive(scopeID, true);
                     log.info("Ontology scope " + scopeID + " activated.");
                 } catch (NoSuchScopeException ex) {
                     log.warn("Tried to activate unavailable scope " + scopeID + ".");
@@ -444,6 +408,38 @@ public class ONManagerImpl implements ONManager {
         } catch (Throwable e) {
             log.warn("Invalid ONM configuration file found. " + "Starting with blank scope set.", e);
         }
+
+    }
+
+    @Override
+    public void clearScopeEventListeners() {
+        listeners.clear();
+    }
+
+    @Override
+    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?,?>... coreSources) throws DuplicateIDException {
+        if (this.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
+                "Scope registry already contains ontology scope with ID " + scopeID);
+        OntologyScope scope = new OntologyScopeImpl(scopeID, IRI.create(getOntologyNetworkNamespace()
+                                                                        + scopeRegistryId + "/"),
+                getOntologySpaceFactory(), coreSources);
+        if (scope != null) {
+            this.registerScope(scope);
+            fireScopeCreated(scope);
+        }
+        return scope;
+    }
+
+    @Override
+    public synchronized void registerScope(OntologyScope scope) {
+        if (scope == null) throw new IllegalArgumentException("scope cannot be null.");
+        String id = scope.getID();
+        if (this.containsScope(id)) {
+            if (scope != getScope(id)) {
+                log.warn("Overriding different scope with same ID {}", id);
+                super.registerScope(scope);
+            } else log.warn("Ignoring unnecessary call to already registered scope {}", id);
+        } else super.registerScope(scope);
 
     }
 
@@ -476,6 +472,11 @@ public class ONManagerImpl implements ONManager {
         this.offlineMode = mode;
     }
 
+    protected void fireScopeCreated(OntologyScope scope) {
+        for (ScopeEventListener l : listeners)
+            l.scopeCreated(scope);
+    }
+
     @Override
     public OfflineConfiguration getOfflineConfiguration() {
         return offline;
@@ -496,8 +497,9 @@ public class ONManagerImpl implements ONManager {
      * 
      * @return the ontology scope factory
      */
+    @Override
     public OntologyScopeFactory getOntologyScopeFactory() {
-        return ontologyScopeFactory;
+        return this;
     }
 
     /**
@@ -505,12 +507,14 @@ public class ONManagerImpl implements ONManager {
      * 
      * @return the ontology space factory
      */
+    @Override
     public OntologySpaceFactory getOntologySpaceFactory() {
         return ontologySpaceFactory;
     }
 
-    public OWLOntologyManager getOwlCacheManager() {
-        return owlCacheManager;
+    @Override
+    public Collection<ScopeEventListener> getScopeEventListeners() {
+        return listeners;
     }
 
     public Helper getScopeHelper() {
@@ -520,23 +524,9 @@ public class ONManagerImpl implements ONManager {
         return helper;
     }
 
-    /**
-     * Returns the unique ontology scope registry for this context.
-     * 
-     * @return the ontology scope registry
-     */
+    @Override
     public ScopeRegistry getScopeRegistry() {
-        return scopeRegistry;
-    }
-
-    public SessionManager getSessionManager() {
-        throw new UnsupportedOperationException(
-                "ONManager no longer accesses session managers directly. Please create/reference SessionManager objects independently.");
-        // return sessionManager;
-    }
-
-    public String[] getUrisToActivate() {
-        return toActivate;
+        return this;
     }
 
     /**
@@ -546,6 +536,22 @@ public class ONManagerImpl implements ONManager {
      */
     protected final boolean isOfflineMode() {
         return offlineMode != null;
+    }
+
+    @Override
+    public void removeScopeEventListener(ScopeEventListener listener) {
+        listeners.remove(listener);
+    }
+
+    @Override
+    public void setOntologyNetworkNamespace(String namespace) {
+        if (namespace == null || namespace.isEmpty()) throw new IllegalArgumentException(
+                "namespace must be a non-null and non-empty string.");
+        if (!namespace.endsWith("/")) {
+            log.warn("OntoNet namespaces must be slash URIs, adding '/'.");
+            namespace += "/";
+        }
+        this.ontonetNS = namespace;
     }
 
 }

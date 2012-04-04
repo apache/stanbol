@@ -39,7 +39,6 @@ import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.web.resources.OntoNetRootResource;
 import org.apache.stanbol.ontologymanager.web.resources.OntologyNetworkResource;
 import org.apache.stanbol.ontologymanager.web.resources.RegistryManagerResource;
-import org.apache.stanbol.ontologymanager.web.resources.ScopeOntologyResource;
 import org.apache.stanbol.ontologymanager.web.resources.ScopeResource;
 import org.apache.stanbol.ontologymanager.web.resources.SessionManagerResource;
 import org.apache.stanbol.ontologymanager.web.resources.SessionResource;
@@ -104,7 +103,6 @@ public class OntologyManagerWebFragment implements WebFragment {
         // Scope resources
         classes.add(OntologyNetworkResource.class);
         classes.add(ScopeResource.class);
-        classes.add(ScopeOntologyResource.class);
 
         // Session resources
         classes.add(SessionManagerResource.class);

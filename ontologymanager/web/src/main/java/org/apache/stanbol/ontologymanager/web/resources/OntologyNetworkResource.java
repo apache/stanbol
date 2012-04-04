@@ -52,7 +52,6 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.ScopeSetRenderer;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -95,15 +94,14 @@ public class OntologyNetworkResource extends BaseStanbolResource {
     @DELETE
     public void clearOntologies() {
         // First clear the registry...
-        ScopeRegistry reg = onm.getScopeRegistry();
-        for (OntologyScope scope : reg.getRegisteredScopes())
-            reg.deregisterScope(scope);
+        for (OntologyScope scope : onm.getRegisteredScopes())
+            onm.deregisterScope(scope);
         // ...then clear the store.
         // TODO : the other way around?
     }
 
     public Set<OntologyScope> getActiveScopes() {
-        return onm.getScopeRegistry().getActiveScopes();
+        return onm.getActiveScopes();
     }
 
     @GET
@@ -133,10 +131,7 @@ public class OntologyNetworkResource extends BaseStanbolResource {
     public Response getScopeModel(@DefaultValue("false") @QueryParam("with-inactive") boolean inactive,
                                   @Context HttpHeaders headers,
                                   @Context ServletContext servletContext) {
-
-        ScopeRegistry reg = onm.getScopeRegistry();
-
-        Set<OntologyScope> scopes = inactive ? reg.getRegisteredScopes() : reg.getActiveScopes();
+        Set<OntologyScope> scopes = inactive ? onm.getRegisteredScopes() : onm.getActiveScopes();
 
         OWLOntology ontology = ScopeSetRenderer.getScopes(scopes);
 
@@ -148,7 +143,7 @@ public class OntologyNetworkResource extends BaseStanbolResource {
     }
 
     public Set<OntologyScope> getScopes() {
-        return onm.getScopeRegistry().getRegisteredScopes();
+        return onm.getRegisteredScopes();
     }
 
     @OPTIONS

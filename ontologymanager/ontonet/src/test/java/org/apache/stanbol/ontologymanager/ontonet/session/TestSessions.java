@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 package org.apache.stanbol.ontologymanager.ontonet.session;
-
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -71,11 +72,11 @@ public class TestSessions {
     public static void setup() {
         Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
         // An ONManagerImpl with no store and default settings
-        ONManager onm = new ONManagerImpl(null, null, new OfflineConfigurationImpl(onmconf), onmconf);
+        ONManager onm = new ONManagerImpl(ontologyProvider, new OfflineConfigurationImpl(onmconf), spaceFactory, onmconf);
         sesmgr = new SessionManagerImpl(null, onmconf);
-        scopeFactory = onm.getOntologyScopeFactory();
+        scopeFactory = onm;
         spaceFactory = onm.getOntologySpaceFactory();
-        scopeRegistry = onm.getScopeRegistry();
+        scopeRegistry = onm;
         assertNotNull(spaceFactory);
         assertNotNull(scopeFactory);
         OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(null);
@@ -85,23 +86,6 @@ public class TestSessions {
         } catch (OWLOntologyCreationException e) {
             fail("Could not setup ontology with base IRI " + Constants.PEANUTS_MAIN_BASE);
         }
-    }
-
-    @Test
-    public void testCreateSessionSpaceManual() throws Exception {
-        OntologyScope scope = null;
-        try {
-            // we don't register it
-            scope = scopeFactory.createOntologyScope(scopeId1, src1, src2);
-            scope.setUp();
-        } catch (DuplicateIDException e) {
-            fail("Unexpected DuplicateIDException was caught while testing scope " + e.getDuplicateID());
-        }
-        assertNotNull(scope);
-        Session ses = sesmgr.createSession();
-        assertTrue(scope.getSessionSpaces().isEmpty());
-        // scope.addSessionSpace(spaceFactory.createSessionOntologySpace(scopeId1), ses.getID());
-        // assertFalse(scope.getSessionSpaces().isEmpty());
     }
 
     @Test

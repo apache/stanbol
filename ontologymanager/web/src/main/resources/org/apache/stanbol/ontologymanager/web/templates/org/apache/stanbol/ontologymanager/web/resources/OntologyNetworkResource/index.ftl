@@ -24,7 +24,7 @@
       <#assign scopes = it.scopes>
       <p>This is the start page of the ontology scope manager.</p>
       
-      <div class="storeContents">
+      <div id="scopes" class="storeContents">
       	<table id="allScopes">
 		  <div>
 		    <tr>
@@ -37,18 +37,21 @@
 		    <#list it.scopes as scope>
 		      <tr>
 			    <td>
+			    <#--
                   <img src="${it.staticRootUrl}/contenthub/images/edit_icon_16.png" title="(not available yet) Edit this item" />
                   <img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="(not available yet) Delete this item" />
+                -->
                 </td>
                 <td><a href="${scope.namespace}${scope.ID}" title="${scope.ID}">${scope.ID}</a></td>
                 <td>${scope.locked?string("locked", "modifiable")}</td>
                 <td></td>
-                <td>${scope.coreSpace.ontologyCount + scope.customSpace.ontologyCount}</td>
+                <td>${scope.coreSpace.listManagedOntologies()?size + scope.customSpace.listManagedOntologies()?size}</td>
 		      </tr>
 		    </#list>
 		  </div>
 	    </table> <!-- allScopes -->
       </div>
+      
     </div> <!-- web view -->
     
     <div class="panel" id="restapi" style="display: none;">

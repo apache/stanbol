@@ -7,7 +7,6 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import org.apache.stanbol.commons.owl.transformation.JenaToOwlConvert;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerUriRefGenerator;
 import org.apache.stanbol.reengineer.db.connection.DatabaseConnection;
@@ -38,12 +37,10 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 public class DBDataTransformer extends ReengineerUriRefGenerator {
 
-    private ONManager onManager;
     private OWLOntology schemaOntology;
     private DatabaseConnection databaseConnection;
 
-    public DBDataTransformer(ONManager onManager, OWLOntology schemaOntology) {
-        this.onManager = onManager;
+    public DBDataTransformer(OWLOntology schemaOntology) {
         this.schemaOntology = schemaOntology;
         this.databaseConnection = new DatabaseConnection(schemaOntology);
     }
@@ -54,7 +51,7 @@ public class DBDataTransformer extends ReengineerUriRefGenerator {
 
         if (schemaOntology != null) {
 
-            OWLOntologyManager manager = onManager.getOwlCacheManager();
+            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
             OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
             graphNS = graphNS.replace("#", "");

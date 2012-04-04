@@ -220,11 +220,6 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public OWLOntology asOWLOntology(boolean merge) {
-        return export(OWLOntology.class, merge);
-    }
-
-    @Override
     public void clearListeners() {
         listeners.clear();
     }
@@ -362,7 +357,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
                 for (IRI ontologyIri : managedOntologies) {
                     log.debug("Merging {} with {}.", ontologyIri, root);
-                    set.add(getOntology(ontologyIri, true));
+                    set.add(getOntology(ontologyIri, OWLOntology.class, true));
                 }
 
                 OWLOntologySetProvider provider = new OWLOntologySetProvider() {
@@ -468,26 +463,6 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     @Override
     public IRI getNamespace() {
         return namespace;
-    }
-
-    /**
-     * FIXME not including closure yet.
-     * 
-     * @see OntologySpace#getOntologies(boolean)
-     */
-    @Override
-    public Set<OWLOntology> getOntologies(boolean withClosure) {
-        return getManagedOntologies(OWLOntology.class, withClosure);
-    }
-
-    @Override
-    public OWLOntology getOntology(IRI ontologyIri) {
-        return getOntology(ontologyIri, false);
-    }
-
-    @Override
-    public OWLOntology getOntology(IRI ontologyIri, boolean merge) {
-        return getOntology(ontologyIri, OWLOntology.class, merge);
     }
 
     @Override
@@ -620,18 +595,6 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         }
 
         return o;
-    }
-
-    @Override
-    public int getOntologyCount() {
-        return getOntologyCount(false);
-    }
-
-    @Override
-    public int getOntologyCount(boolean withClosure) {
-        if (withClosure) throw new UnsupportedOperationException(
-                "Closure support not implemented efficiently yet. Please call getOntologyCount(false).");
-        return managedOntologies.size();
     }
 
     @Override

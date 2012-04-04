@@ -16,20 +16,24 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
+import java.io.IOException;
+import java.util.Dictionary;
+
 import org.apache.clerezza.rdf.core.access.TcProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace.SpaceType;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
+import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,26 +44,54 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
+@Component(immediate = true, metatype = false)
+@Service(OntologySpaceFactory.class)
 public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     protected IRI namespace;
 
-    protected OfflineConfiguration offline;
+    @Reference
+    private OntologyProvider<TcProvider> ontologyProvider;
 
-    protected ScopeRegistry registry;
+    public OntologySpaceFactoryImpl() {
+        super();
+    };
 
-    protected OntologyProvider<TcProvider> provider;
+    public OntologySpaceFactoryImpl(OntologyProvider<TcProvider> provider,
+                                    Dictionary<String,Object> configuration) {
+        this.ontologyProvider = provider;
+        try {
+            activate(configuration);
+        } catch (IOException e) {
+            log.error("Unable to access servlet context.", e);
+        }
+    }
 
-    public OntologySpaceFactoryImpl(ScopeRegistry registry,
-                                    OntologyProvider<TcProvider> provider,
-                                    OfflineConfiguration offline,
-                                    IRI namespace) {
-        this.registry = registry;
-        this.provider = provider;
-        this.offline = offline;
-        this.namespace = namespace;
+    /**
+     * Used to configure an instance within an OSGi container.
+     * 
+     * @throws IOException
+     */
+    @SuppressWarnings("unchecked")
+    @Activate
+    protected void activate(ComponentContext context) throws IOException {
+        log.info("in " + OntologySpaceFactoryImpl.class + " activate with context " + context);
+        if (context == null) {
+            throw new IllegalStateException("No valid" + ComponentContext.class + " parsed in activate!");
+        }
+        activate((Dictionary<String,Object>) context.getProperties());
+    }
+
+    /**
+     * Called within both OSGi and non-OSGi environments.
+     * 
+     * @param configuration
+     * @throws IOException
+     */
+    protected void activate(Dictionary<String,Object> configuration) throws IOException {
+        log.debug(OntologySpaceFactoryImpl.class + " activated.");
     }
 
     /**
@@ -70,11 +102,11 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
      * @param rootSource
      */
     private void configureSpace(OntologySpace s, String scopeID, OntologyInputSource<?,?>... ontologySources) {
-        // FIXME: ensure that this is not null AND convert to using Strings for scope IDs
-        OntologyScope parentScope = registry.getScope(scopeID);
-
-        if (parentScope != null && parentScope instanceof OntologyCollectorListener) s
-                .addListener((OntologyCollectorListener) parentScope);
+        // // FIXME: ensure that this is not null AND convert to using Strings for scope IDs
+        // OntologyScope parentScope = registry.getScope(scopeID);
+        //
+        // if (parentScope != null && parentScope instanceof OntologyCollectorListener) s
+        // .addListener((OntologyCollectorListener) parentScope);
         // Set the supplied ontology's parent as the root for this space.
         if (ontologySources != null) try {
             for (OntologyInputSource<?,?> src : ontologySources)
@@ -87,7 +119,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     @Override
     public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?,?>... coreSources) {
-        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, namespace, provider);
+        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, namespace, ontologyProvider);
         configureSpace(s, scopeId, coreSources);
         return s;
     }
@@ -95,7 +127,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     @Override
     public CustomOntologySpace createCustomOntologySpace(String scopeId,
                                                          OntologyInputSource<?,?>... customSources) {
-        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, namespace, provider);
+        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, namespace, ontologyProvider);
         configureSpace(s, scopeId, customSources);
         return s;
     }
@@ -109,21 +141,23 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
                 return createCoreOntologySpace(scopeId, ontologySources);
             case CUSTOM:
                 return createCustomOntologySpace(scopeId, ontologySources);
-            case SESSION:
-                // return createSessionOntologySpace(scopeId, ontologySources);
-                throw new IllegalArgumentException("Factory " + getClass()
-                                                   + "cannot create obsolete session spaces.");
             default:
                 return null;
         }
     }
 
+    /**
+     * Deactivation of the ONManagerImpl resets all its resources.
+     */
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
+        namespace = null;
+        log.info("in " + OntologySpaceFactoryImpl.class + " deactivate with context " + context);
+    }
+
     @Override
-    public SessionOntologySpace createSessionOntologySpace(String scopeId,
-                                                           OntologyInputSource<?,?>... sessionSources) {
-        throw new UnsupportedOperationException(
-                "Newer ontology space factory implementations such as " + getClass()
-                        + " no longer allow the creation of session spaces. Please store data in sessions");
+    public String getID() {
+        return this.toString();
     }
 
     @Override
@@ -134,11 +168,6 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     @Override
     public void setNamespace(IRI namespace) {
         this.namespace = namespace;
-    }
-
-    @Override
-    public String getID() {
-        return this.toString();
     }
 
 }

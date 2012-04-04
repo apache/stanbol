@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.io;
 
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.ontologyProvider;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -62,7 +63,7 @@ public class TestOWLAPIInputSources {
     @BeforeClass
     public static void setUp() {
         Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
-        onm = new ONManagerImpl(null, null, new OfflineConfigurationImpl(onmconf), onmconf);
+        onm = new ONManagerImpl(ontologyProvider, new OfflineConfigurationImpl(onmconf), null, onmconf);
         df = OWLManager.getOWLDataFactory();
     }
 

@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 
@@ -30,7 +29,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
  * @author alexdma
  * 
  */
-public interface OntologyScopeFactory extends NamedResource, ScopeEventListenable {
+public interface OntologyScopeFactory extends ScopeEventListenable {
 
     /**
      * Creates and returns a new ontology scope with the core space ontologies obtained from

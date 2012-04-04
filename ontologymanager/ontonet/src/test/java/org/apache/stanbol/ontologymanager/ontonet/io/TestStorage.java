@@ -16,8 +16,13 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.io;
 
-import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
-import static org.junit.Assert.*;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.onManager;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.ontologyProvider;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,23 +46,28 @@ import org.slf4j.LoggerFactory;
 
 public class TestStorage {
 
+    @BeforeClass
+    public static void setup() {
+        reset();
+    }
+
     private Logger log = LoggerFactory.getLogger(getClass());
 
     private String scopeId = "StorageTest";
 
-    @BeforeClass
-    public static void setup() {
+    @After
+    public void cleanup() {
         reset();
     }
 
     @Test
     public void storageOnScopeCreation() throws Exception {
 
-        assertEquals(1,ontologyProvider.getStore().listTripleCollections().size());
+        assertEquals(1, ontologyProvider.getStore().listTripleCollections().size());
         OntologyInputSource ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
             "/ontologies/minorcharacters.owl")));
 
-        OntologyScope sc = onManager.getOntologyScopeFactory().createOntologyScope(scopeId, ois);
+        OntologyScope sc = onManager.createOntologyScope(scopeId, ois);
 
         Set<Triple> triples = new HashSet<Triple>();
 
@@ -85,7 +95,7 @@ public class TestStorage {
         OntologyInputSource<OWLOntology,?> ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
             "/ontologies/nonexistentcharacters.owl")));
         IRI ontologyId = ois.getRootOntology().getOntologyID().getOntologyIRI();
-        OntologyScope scope = onManager.getOntologyScopeFactory().createOntologyScope(ephemeralScopeId);
+        OntologyScope scope = onManager.createOntologyScope(ephemeralScopeId);
         // Initially, the ontology is not there
         assertNull(ontologyProvider.getKey(ontologyId));
         // Once added, the ontology is there
@@ -98,11 +108,6 @@ public class TestStorage {
         // TODO find a more appropriate method to kill scopes?
         scope.tearDown();
         assertNotNull(ontologyProvider.getKey(ontologyId));
-    }
-
-    @After
-    public void cleanup() {
-        reset();
     }
 
 }

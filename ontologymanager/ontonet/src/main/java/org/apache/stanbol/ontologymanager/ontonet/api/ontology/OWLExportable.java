@@ -17,28 +17,14 @@
 package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
- * An object that can be represented as an {@link OWLOntology} instance.
+ * An object that can be represented as an ontology instance.
  * 
  * @author alexdma
  * 
  */
 public interface OWLExportable {
-
-    /**
-     * Returns the OWL ontology form of this object.
-     * 
-     * @deprecated use the method {@link #export(Class, boolean)} instead, with the first argument set as
-     *             {@link OWLOntology.class}.
-     * 
-     * @param merge
-     *            if true, all imported ontologies will be merged and no import statements will appear.
-     * @return the OWL ontology that represents this object.
-     * 
-     */
-    OWLOntology asOWLOntology(boolean merge);
 
     /**
      * Returns an ontological form of this object of the specified return type, if supported. If the supplied
