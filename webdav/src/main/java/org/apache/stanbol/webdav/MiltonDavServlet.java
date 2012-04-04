@@ -133,7 +133,7 @@ public class MiltonDavServlet extends AbstractMiltonDavServlet {
         }
 
         java.util.Properties props = new java.util.Properties();
-        props.put("resource.factory.class", SimpleResourceFactory.NAME);
+        //props.put("resource.factory.class", SimpleResourceFactory.NAME);
         props.put("authentication.handler.classes",
             SlingAuthenticationHandler.NAME);
         props.put("response.handler.class", SlingResponseHandler.NAME);

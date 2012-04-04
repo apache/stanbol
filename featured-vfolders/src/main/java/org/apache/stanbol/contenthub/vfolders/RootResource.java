@@ -13,7 +13,6 @@ import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
 import org.apache.stanbol.webdav.resources.AbstractCollectionResource;
-import org.apache.stanbol.webdav.resources.SlingResource;
 
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.CollectionResource;
@@ -86,8 +85,6 @@ public class RootResource extends AbstractCollectionResource implements PropFind
 			resources.add(new FacetedResource("foo"));
 			resources.add(new FacetedResource("foo2"));
 			resources.add(new FacetedResource("foo3") {});
-			resources.add(new FacetedResource2("bar") {});
-			resources.add(new FacetedResource2("bar2"));
 			//resources.add(new SlingResource());
 			System.out.println("returning: "+resources);
 			return resources;

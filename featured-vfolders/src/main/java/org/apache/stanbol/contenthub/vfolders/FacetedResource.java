@@ -20,38 +20,43 @@ package org.apache.stanbol.contenthub.vfolders;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
+import org.apache.stanbol.webdav.resources.AbstractCollectionResource;
+
 import com.bradmcevoy.http.Auth;
+import com.bradmcevoy.http.CollectionResource;
 import com.bradmcevoy.http.GetableResource;
 import com.bradmcevoy.http.PropFindableResource;
 import com.bradmcevoy.http.Range;
 import com.bradmcevoy.http.Request;
 import com.bradmcevoy.http.Request.Method;
+import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
+import com.bradmcevoy.http.exceptions.NotFoundException;
 
-public class FacetedResource implements PropFindableResource, GetableResource {
+public class FacetedResource extends AbstractCollectionResource implements PropFindableResource, GetableResource, CollectionResource {
 	 
-	private static String name = "scratchpad.txt";
+	private String name = "scratchpad.txt";
 	private static final String MESSAGE = "Hello world";
  
 	public FacetedResource(String name) {
 		this.name = name;
 	}
 
-	public static String getFilename() {
-		return name;
-	}
  
 	public String getUniqueId() {
-		return getFilename();
+		return name;
 	}
  
 
 	public String getName() {
-		return getFilename();
+		return name;
 	}
  
 	public Object authenticate(String user, String password) {
@@ -91,8 +96,24 @@ public class FacetedResource implements PropFindableResource, GetableResource {
 	public Long getContentLength() {
 		return Long.valueOf(MESSAGE.length());
 	}
- 
-	public void sendContent(OutputStream out, Range range, Map params, String contentType) throws IOException, NotAuthorizedException, BadRequestException {
+	
+	@Override
+	public void sendContent(OutputStream out, Range range, Map<String, String>  params, String contentType) throws IOException, NotAuthorizedException, BadRequestException {
 		out.write(MESSAGE.getBytes());
 	}
+
+
+
+	@Override
+	public List<? extends Resource> getChildren()
+			throws NotAuthorizedException, BadRequestException {
+		// TODO Auto-generated method stub
+		List<Resource> resources = new ArrayList<Resource>();
+		resources.add(new FacetedResource("bar1"));
+		resources.add(new FacetedResource("bar2"));
+		resources.add(new FacetedResource("bar3") {});
+		return resources;
+	}
+
+
 }

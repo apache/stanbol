@@ -18,6 +18,9 @@
  */
 package org.apache.stanbol.webdav.resources;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.bradmcevoy.common.Path;
 import com.bradmcevoy.http.CollectionResource;
 import com.bradmcevoy.http.Resource;
@@ -27,8 +30,10 @@ import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 
 public class SimpleResourceFactory implements ResourceFactory {
 
-	final public static String NAME = "org.apache.stanbol.webdav.resources.SlingResourceFactory"; // SlingResourceFactory.class.getName();
+	final static Logger log = LoggerFactory.getLogger(SimpleResourceFactory.class); 
+	
 	private CollectionResource rootResource;
+	
 
 	public SimpleResourceFactory(CollectionResource rootResource) {
 		this.rootResource = rootResource;
@@ -44,10 +49,14 @@ public class SimpleResourceFactory implements ResourceFactory {
 		// TODO make this depend on what the dav servlet is actually configured
 		// to
 		path = path.getStripFirst();
+		return getResourceFromStrippedPath(host, path);
+	}
+	private Resource getResourceFromStrippedPath(String host, Path path) throws NotAuthorizedException, BadRequestException {
+		log.info("Getting resource {}", path);
 		if (path.isRoot()) {
 			return rootResource;
 		} else {
-			CollectionResource parent = (CollectionResource)getResource(host, 
+			CollectionResource parent = (CollectionResource)getResourceFromStrippedPath(host, 
 					path.getParent());
 			return parent.child(path.getName());
 		}
