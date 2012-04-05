@@ -80,11 +80,8 @@ public class RootResource extends AbstractCollectionResource implements PropFind
 			for (FacetResult fr : facetResults) {
 				final String name = fr.getFacetField().getName();
 				System.out.println("name: "+name);
-				resources.add(new FacetedResource(name) {});
+				resources.add(new FacetedResource(fr));
 			}
-			resources.add(new FacetedResource("foo"));
-			resources.add(new FacetedResource("foo2"));
-			resources.add(new FacetedResource("foo3") {});
 			//resources.add(new SlingResource());
 			System.out.println("returning: "+resources);
 			return resources;

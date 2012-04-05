@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.webdav.resources.AbstractCollectionResource;
 
@@ -38,25 +39,25 @@ import com.bradmcevoy.http.Request.Method;
 import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
-import com.bradmcevoy.http.exceptions.NotFoundException;
 
 public class FacetedResource extends AbstractCollectionResource implements PropFindableResource, GetableResource, CollectionResource {
 	 
-	private String name = "scratchpad.txt";
 	private static final String MESSAGE = "Hello world";
+	private FacetResult fr;
  
-	public FacetedResource(String name) {
-		this.name = name;
+ 
+	public FacetedResource(FacetResult fr) {
+		this.fr = fr;
 	}
 
- 
+
 	public String getUniqueId() {
-		return name;
+		return fr.getFacetField().getName();
 	}
  
 
 	public String getName() {
-		return name;
+		return fr.getFacetField().getName();
 	}
  
 	public Object authenticate(String user, String password) {
@@ -109,9 +110,10 @@ public class FacetedResource extends AbstractCollectionResource implements PropF
 			throws NotAuthorizedException, BadRequestException {
 		// TODO Auto-generated method stub
 		List<Resource> resources = new ArrayList<Resource>();
-		resources.add(new FacetedResource("bar1"));
+		List<Count> values = fr.getFacetField().getValues();
+	/*	resources.add(new FacetedResource("bar1"));
 		resources.add(new FacetedResource("bar2"));
-		resources.add(new FacetedResource("bar3") {});
+		resources.add(new FacetedResource("bar3") {});*/
 		return resources;
 	}
 
