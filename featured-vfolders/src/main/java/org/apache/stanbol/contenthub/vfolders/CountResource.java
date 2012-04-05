@@ -1,21 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 package org.apache.stanbol.contenthub.vfolders;
 
 import java.io.IOException;
@@ -26,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.response.FacetField.Count;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.webdav.resources.AbstractCollectionResource;
 
 import com.bradmcevoy.http.Auth;
@@ -40,24 +21,24 @@ import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 
-public class FacetedResource extends AbstractCollectionResource implements PropFindableResource, GetableResource, CollectionResource {
-	 
+public class CountResource extends AbstractCollectionResource implements PropFindableResource, GetableResource, CollectionResource {
+
+
 	private static final String MESSAGE = "Hello world";
-	private FacetResult fr;
- 
- 
-	public FacetedResource(FacetResult fr) {
-		this.fr = fr;
+	private Count value;
+	
+	public CountResource(Count value) {
+		this.value = value;
 	}
 
 
 	public String getUniqueId() {
-		return fr.getFacetField().getName();
+		return value.getName();
 	}
  
 
 	public String getName() {
-		return fr.getFacetField().getName();
+		return value.getName();
 	}
  
 	public Object authenticate(String user, String password) {
@@ -110,15 +91,10 @@ public class FacetedResource extends AbstractCollectionResource implements PropF
 			throws NotAuthorizedException, BadRequestException {
 		// TODO Auto-generated method stub
 		List<Resource> resources = new ArrayList<Resource>();
-		List<Count> values = fr.getFacetField().getValues();
-		for (Count value : values) {
-			resources.add(new CountResource(value));
-		}
-	/*	resources.add(new FacetedResource("bar1"));
-		resources.add(new FacetedResource("bar2"));
-		resources.add(new FacetedResource("bar3") {});*/
+		//TODO here we should add:
+		//- The categories as in root for the categories that have an entry that can reduce the current set of matching documents (but not to the empty set) 
+		//- Add the matching items
 		return resources;
 	}
-
 
 }
