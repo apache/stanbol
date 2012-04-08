@@ -343,7 +343,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.apache.sling</groupId>
                     <artifactId>maven-launchpad-plugin</artifactId>
-                    <versionRange>[2.0.10,)</versionRange>
+                    <versionRange>[2.1.0,)</versionRange>
                     <goals>
                       <goal>prepare-package</goal>
                     </goals>
@@ -444,6 +444,11 @@
       <!-- Stanbol Deps -->
       <dependency>
         <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.launchpad</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
@@ -542,12 +547,18 @@
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.chainmanager</artifactId>
+        <artifactId>org.apache.stanbol.enhancer.core</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.enginemanager</artifactId>
+        <artifactId>org.apache.stanbol.enhancer.test</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.enhancer.rdfentities</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
       <dependency>
@@ -602,6 +613,7 @@
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.entityhub.test</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
@@ -728,6 +740,7 @@
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.reasoners.test</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
@@ -1086,6 +1099,7 @@
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core.test</artifactId>
         <version>0.13-incubating</version>
+        <scope>test</scope>
       </dependency>
 
 
