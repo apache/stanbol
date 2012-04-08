@@ -47,12 +47,12 @@
                             Results:
                         </p>                                                      
                         <div class="collapsable">
-                            <pre>$esc.html($graphFormatter.format($benchmark.getGraph($jobManager), "text/turtle"))</pre>
+                            <pre>$esc.html($graphFormatter.format($benchmark.getGraph($jobManager,$contentItemFactory), "text/turtle"))</pre>
                         </div>
                     </div>                          
                 </div>
                 
-				#foreach($result in $benchmark.execute($jobManager))
+				#foreach($result in $benchmark.execute($jobManager,$contentItemFactory))
 					<div class="result">
 						<div class="description">
 						$result.getTripleMatcherGroup().getDescription()

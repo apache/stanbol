@@ -60,7 +60,7 @@ import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileTracker;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
-import org.apache.stanbol.enhancer.servicesapi.helper.AbstractChain;
+import org.apache.stanbol.enhancer.servicesapi.impl.AbstractChain;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;

@@ -20,8 +20,6 @@ import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHe
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.get;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getEngineOrder;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getString;
-import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.getExecutable;
-import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.writeExecutionNode;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.CHAIN;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.DEPENDS_ON;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.ENGINE;
@@ -31,7 +29,6 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.HAS_EXEC
 import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan.OPTIONAL;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 
-import java.awt.peer.LightweightPeer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -51,15 +48,14 @@ import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.impl.EnginesTracker;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
 
 public final class ExecutionPlanHelper {

@@ -20,6 +20,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 
 public class Enhancer {
 
+    public static final UriRef CONTENT_ITEM = new UriRef(NamespaceEnum.enhancer+"ContentItem");
     public static final UriRef ENHANCEMENT_ENGINE = new UriRef(NamespaceEnum.enhancer+"EnhancementEngine");
     public static final UriRef ENHANCEMENT_CHAIN = new UriRef(NamespaceEnum.enhancer+"EnhancementChain");
     public static final UriRef ENHANCER = new UriRef(NamespaceEnum.enhancer+"Enhancer");

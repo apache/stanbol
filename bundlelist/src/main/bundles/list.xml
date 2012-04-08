@@ -48,12 +48,7 @@
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.chainmanager</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.enginemanager</artifactId>
+      <artifactId>org.apache.stanbol.enhancer.core</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>

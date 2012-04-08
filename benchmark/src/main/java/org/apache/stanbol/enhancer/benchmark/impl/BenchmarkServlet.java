@@ -38,6 +38,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.enhancer.benchmark.BenchmarkParser;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -64,6 +65,9 @@ public class BenchmarkServlet extends HttpServlet {
     
     @Reference
     private EnhancementJobManager jobManager;
+
+    @Reference
+    private ContentItemFactory ciFactory;
     
     @Reference
     private Serializer graphSerializer;
@@ -200,6 +204,7 @@ public class BenchmarkServlet extends HttpServlet {
         
         final Template t = velocity.getTemplate("/velocity/benchmark-results.html");
         final VelocityContext ctx = getVelocityContext(request, "Benchmark Results");
+        ctx.put("contentItemFactory", ciFactory);
         ctx.put("jobManager", jobManager);
         ctx.put("benchmarks", parser.parse(new StringReader(content)));
         ctx.put("graphFormatter", new GraphFormatter(graphSerializer));

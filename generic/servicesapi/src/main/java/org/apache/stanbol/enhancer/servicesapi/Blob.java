@@ -32,6 +32,8 @@ public interface Blob {
 	String getMimeType();
 	
 	/**
+	 * Getter for the data of this blob in form of an {@link InputStream}.
+	 * Multiple calls need to return multiple instances of InputStreams
 	 * @return a stream of the data of this blog
 	 */
 	InputStream getStream();

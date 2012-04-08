@@ -31,7 +31,7 @@ import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
-import org.apache.stanbol.enhancer.servicesapi.helper.EnginesTracker;
+import org.apache.stanbol.enhancer.servicesapi.impl.EnginesTracker;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;

@@ -29,8 +29,10 @@ import java.util.Map;
 
 import opennlp.tools.tokenize.SimpleTokenizer;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.TextAnalyzerConfig;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.ClasspathDataFileProvider;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.TestSearcherImpl;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinker;
@@ -40,7 +42,8 @@ import org.apache.stanbol.enhancer.engines.keywordextraction.linking.LinkedEntit
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.Suggestion;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl.OpenNlpAnalysedContentFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
@@ -66,6 +69,8 @@ public class TestTaxonomyLinker {
     public static final String TEST_TEXT2 = "A CBS televised debate between Australia's " +
     		"candidates for Prime Minister in the upcoming US election has been rescheduled " +
     		"and shortend, to avoid a clash with popular cookery sow MasterChef.";
+    
+    private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
     
     static TestSearcherImpl searcher;
     static ValueFactory factory = InMemoryValueFactory.getInstance();
@@ -124,8 +129,8 @@ public class TestTaxonomyLinker {
     public static void shutdownServices() {
     }
 
-    public static ContentItem getContentItem(final String id, final String text) {
-        return new InMemoryContentItem(id, text, "text/plain");
+    public static ContentItem getContentItem(final String id, final String text) throws IOException {
+        return ciFactory.createContentItem(new UriRef(id),new StringSource(text));
     }
 
     @Test

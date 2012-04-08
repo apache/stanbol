@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.opencalais.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,9 +26,11 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -52,6 +55,7 @@ public class TestOpenCalaisEngine {
 
   private static OpenCalaisEngine calaisExtractor;
 
+  private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
   private static String TEST_LICENSE_KEY = System.getProperty(OpenCalaisEngine.LICENSE_KEY);
   private static String TEST_TEXT = "Israeli PM Netanyahu pulls out of US nuclear summit\nIsraeli PM Benjamin Netanyahu has cancelled a visit to the US where he was to attend a summit on nuclear security, Israeli officials say. Mr Netanyahu made the decision after learning that Egypt and Turkey intended to raise the issue of Israel's presumed nuclear arsenal, the officials said. Mr Obama is due to host dozens of world leaders at the two-day conference, which begins in Washington on Monday. Israel has never confirmed or denied that it possesses atomic weapons. Israel's Intelligence and Atomic Energy Minister Dan Meridor will take Netanyahu's place in the nuclear summit, Israeli radio said. More than 40 countries are expected at the meeting, which will focus on preventing the spread of nuclear weapons to militant groups.";
   
@@ -65,8 +69,8 @@ public class TestOpenCalaisEngine {
     }
   }
 
-  public static ContentItem wrapAsContentItem(final String text) {
-	  return new InMemoryContentItem((UriRef)null, text, "text/plain");
+  public static ContentItem wrapAsContentItem(final String text) throws IOException {
+	  return ciFactory.createContentItem(new StringSource(text));
   }
   
   @Test
@@ -86,7 +90,7 @@ public class TestOpenCalaisEngine {
   }
 
   @Test
-  public void testCalaisConnection() {
+  public void testCalaisConnection() throws IOException {
   	Assume.assumeNotNull(calaisExtractor.getLicenseKey());
   	try {
   	  ContentItem ci = wrapAsContentItem(TEST_TEXT);

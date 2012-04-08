@@ -16,12 +16,9 @@
  */
 package org.apache.stanbol.enhancer.jersey.writers;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static javax.ws.rs.core.MediaType.WILDCARD_TYPE;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.ENHANCEMENT_PROPERTIES_URI;
@@ -33,7 +30,6 @@ import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelp
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.isOmitParsedContent;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper.getBlob;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper.getContentParts;
-import static org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper.getMimeTypeWithParameters;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +44,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,8 +63,6 @@ import javax.ws.rs.ext.Provider;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
-import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.HttpMultipart;
@@ -79,11 +72,9 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.ContentDescriptor;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.writers.JsonLdSerializerProvider;
 import org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -113,7 +104,7 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
      * Lazzy initialisation for the {@link Serializer}
      * @return the {@link Serializer}
      */
-    protected final Serializer getSerializer(){
+    protected Serializer getSerializer(){
         /*
          * Needed because Jersey tries to create an instance
          * during initialisation. At that time the {@link BundleContext} required
@@ -124,9 +115,11 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
             if(context != null){
                 __serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
             } else {
-                __serializer = new Serializer();
-                __serializer.bindSerializingProvider(new JenaSerializerProvider());
-                __serializer.bindSerializingProvider(new JsonLdSerializerProvider());
+                throw new IllegalStateException("ServletContext is NULL!");
+            }
+            if(__serializer == null){
+                throw new IllegalStateException("Clerezza RDF Serializer service is not available(service class:"
+                        + Serializer.class + ")!");
             }
         }
         return __serializer;

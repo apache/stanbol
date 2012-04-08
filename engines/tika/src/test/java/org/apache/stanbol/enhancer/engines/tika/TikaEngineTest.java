@@ -18,10 +18,8 @@ package org.apache.stanbol.enhancer.engines.tika;
 
 import static java.util.Collections.singleton;
 import static org.apache.commons.io.IOUtils.closeQuietly;
-import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.stanbol.enhancer.engines.tika.TikaEngine.XHTML;
 import static org.apache.stanbol.enhancer.servicesapi.EnhancementEngine.CANNOT_ENHANCE;
-import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
 import static org.apache.tika.mime.MediaType.OCTET_STREAM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -59,12 +57,14 @@ import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.ontologies.XSD;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.impl.StreamSource;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -79,6 +79,7 @@ import org.slf4j.LoggerFactory;
 public class TikaEngineTest {
 
     private static final Logger log = LoggerFactory.getLogger(TikaEngineTest.class);
+    private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
     private static TikaEngine engine;
     private static MockComponentContext context;
     private static LiteralFactory lf = LiteralFactory.getInstance();
@@ -97,7 +98,7 @@ public class TikaEngineTest {
     @Before
     public void bindServices() throws ConfigurationException {
         if(engine == null){
-            engine = new TikaEngine();
+            engine = new TikaEngine(ciFactory);
             engine.activate(context);
         }
     }
@@ -395,7 +396,7 @@ public class TikaEngineTest {
     
 
     
-    public void testMetadata() throws EngineException, ParseException {
+    public void testMetadata() throws EngineException, ParseException, IOException{
         log.info(">>> testMetadata <<<");
         ContentItem ci = createContentItem("testMP3id3v24.mp3", "audio/mpeg");
         assertFalse(engine.canEnhance(ci) == CANNOT_ENHANCE);
@@ -411,7 +412,7 @@ public class TikaEngineTest {
         verifyValue(ci, new UriRef(NamespaceEnum.media+"hasCreator"),null,"Test Artist");
     }
     @Test
-    public void testExifMetadata() throws EngineException, ParseException {
+    public void testExifMetadata() throws EngineException, ParseException, IOException {
         log.info(">>> testExifMetadata <<<");
         String exif = "http://www.semanticdesktop.org/ontologies/2007/05/10/nexif#";
         ContentItem ci = createContentItem("testJPEG_EXIF.jpg", "image/jpeg");
@@ -478,12 +479,11 @@ public class TikaEngineTest {
      * Tests that text is not processed
      */
     @Test
-    public void testText() throws EngineException {
+    public void testText() throws EngineException, IOException {
         log.info(">>> testText <<<");
-        byte[] data = ("The Stanbol enhancer can " +
-                "detect famous cities such as Paris and people such as Bob " +
-                "Marley.").getBytes(Charset.forName("UTF-8"));
-        ContentItem ci = new InMemoryContentItem(data,"text/plain; charset=UTF-8");
+        String text = "The Stanbol enhancer can detect famous cities such as " +
+        		"Paris and people such as Bob Marley.";
+        ContentItem ci = ciFactory.createContentItem(new StringSource(text));
         Assert.assertEquals(1, ContentItemHelper.getContentParts(ci, Blob.class).size());
     }
     @Test
@@ -518,18 +518,10 @@ public class TikaEngineTest {
         assertEquals(2, ContentItemHelper.getContentParts(ci, Blob.class).size());
     }
     
-    private ContentItem createContentItem(String resourceName, String contentType){
+    private ContentItem createContentItem(String resourceName, String contentType) throws IOException {
         InputStream in = TikaEngineTest.class.getClassLoader().getResourceAsStream(resourceName);
         assertNotNull(in);
-        byte[] data;
-        try {
-            data = toByteArray(in);
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to read test data!",e);
-        }
-        closeQuietly(in);
-        UriRef ref = new UriRef("urn:contentItem:content-"+randomUUID());
-        return new InMemoryContentItem(data,contentType);
+        return ciFactory.createContentItem(new StreamSource(in,contentType));
     }
     /**
      * Tests if the parsed regex pattern are contained in any line of the parsed

@@ -50,7 +50,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
-import org.apache.stanbol.enhancer.servicesapi.helper.SingleEngineChain;
+import org.apache.stanbol.enhancer.servicesapi.impl.SingleEngineChain;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 

@@ -66,6 +66,7 @@ import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
@@ -87,13 +88,32 @@ public abstract class AbstractEnhancerResource extends BaseStanbolResource {
     protected final EnhancementJobManager jobManager;
     protected final EnhancementEngineManager engineManager;
     protected final ChainManager chainManager;
+    protected final ContentItemFactory ciFactory;
 
     public AbstractEnhancerResource(@Context ServletContext context) {
         super();
         // bind the job manager by looking it up from the servlet request context
+        // also throw exception if not available to make debugging easier!
         jobManager = ContextHelper.getServiceFromContext(EnhancementJobManager.class, context);
+        if(jobManager == null){
+            throw new IllegalStateException("Unable to get "+EnhancementJobManager.class.getSimpleName()
+                + "service via ServletContext!");
+        }
         chainManager = ContextHelper.getServiceFromContext(ChainManager.class, context);
+        if(jobManager == null){
+            throw new IllegalStateException("Unable to get "+ChainManager.class.getSimpleName()
+                + "service via ServletContext!");
+        }
         engineManager = ContextHelper.getServiceFromContext(EnhancementEngineManager.class, context);
+        if(jobManager == null){
+            throw new IllegalStateException("Unable to get "+EnhancementEngineManager.class.getSimpleName()
+                + "service via ServletContext!");
+        }
+        ciFactory = ContextHelper.getServiceFromContext(ContentItemFactory.class, context);
+        if(jobManager == null){
+            throw new IllegalStateException("Unable to get "+ContentItemFactory.class.getSimpleName()
+                + "service via ServletContext!");
+        }
     }
     /**
      * Getter for the Enhancement {@link Chain}
