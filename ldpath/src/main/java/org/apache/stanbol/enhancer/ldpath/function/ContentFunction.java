@@ -56,7 +56,7 @@ public class ContentFunction extends ContentItemFunction implements SelectorFunc
     }
     
     @Override
-    public Collection<Resource> apply(ContentItemBackend backend, Resource context, Collection<Resource>... args) throws IllegalArgumentException {
+    public Collection<Resource> apply(ContentItemBackend backend, Collection<Resource>... args) throws IllegalArgumentException {
         ContentItem ci = ((ContentItemBackend)backend).getContentItem();
 //        Collection<Resource> contexts = args[0];
         Set<String> mimeTypes;

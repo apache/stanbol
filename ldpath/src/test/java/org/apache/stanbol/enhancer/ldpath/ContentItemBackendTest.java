@@ -187,7 +187,7 @@ public class ContentItemBackendTest {
     }
     @Test
     public void testTextAnnotationFunction() throws LDPathParseException {
-        String path = "fn:textAnnotation()/fise:selected-text";
+        String path = "fn:textAnnotation(.)/fise:selected-text";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -203,7 +203,7 @@ public class ContentItemBackendTest {
         //test with a filter for the type
         //same as the 1st example bat rather using an ld-path construct for
         //filtering for TextAnnotations representing persons
-        path = "fn:textAnnotation()[dc:type is dbpedia-ont:Person]/fise:selected-text";
+        path = "fn:textAnnotation(.)[dc:type is dbpedia-ont:Person]/fise:selected-text";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -215,7 +215,7 @@ public class ContentItemBackendTest {
     }
     @Test
     public void testEntityAnnotation() throws LDPathParseException {
-        String path = "fn:entityAnnotation()/fise:entity-reference";
+        String path = "fn:entityAnnotation(.)/fise:entity-reference";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -233,7 +233,7 @@ public class ContentItemBackendTest {
         }
         assertTrue(expectedValues.isEmpty());
         //and with a filter
-        path = "fn:entityAnnotation()[fise:entity-type is dbpedia-ont:Person]/fise:entity-reference";
+        path = "fn:entityAnnotation(.)[fise:entity-type is dbpedia-ont:Person]/fise:entity-reference";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -242,7 +242,7 @@ public class ContentItemBackendTest {
     }
     @Test
     public void testEnhancements() throws LDPathParseException {
-        String path = "fn:enhancement()";
+        String path = "fn:enhancement(.)";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -252,13 +252,13 @@ public class ContentItemBackendTest {
             log.info("Entity: {}",r);
         }
         //and with a filter
-        path = "fn:enhancement()[rdf:type is fise:TextAnnotation]";
+        path = "fn:enhancement(.)[rdf:type is fise:TextAnnotation]";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 3);
 //        assertTrue(result.contains(new UriRef("http://dbpedia.org/resource/Bob_Marley")));
-        path = "fn:enhancement()/dc:language";
+        path = "fn:enhancement(.)/dc:language";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -276,7 +276,7 @@ public class ContentItemBackendTest {
         // Because this test checks first that all three suggestions for Paris
         // are returned and later that a limit of 2 only returns the two top
         // most.
-        String path = "fn:textAnnotation()[dc:type is dbpedia-ont:Place]/fn:suggestion()";
+        String path = "fn:textAnnotation(.)[dc:type is dbpedia-ont:Place]/fn:suggestion(.)";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -296,7 +296,7 @@ public class ContentItemBackendTest {
             }
         }
         assertNotNull(lowestConfidenceSuggestion);
-        path = "fn:textAnnotation()[dc:type is dbpedia-ont:Place]/fn:suggestion(\"2\")";
+        path = "fn:textAnnotation(.)[dc:type is dbpedia-ont:Place]/fn:suggestion(.,\"2\")";
         Collection<Resource> result2 = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result2);
         assertFalse(result2.isEmpty());
@@ -312,7 +312,7 @@ public class ContentItemBackendTest {
         //(1) get the {limit} top rated linked Entities per parsed context
         //    In this example we parse all TextAnnotations
         //NOTE: '.' MUST BE used as first argument in this case
-        String path = "fn:textAnnotation()/fn:suggestedEntity(\"1\")";
+        String path = "fn:textAnnotation(.)/fn:suggestedEntity(.,\"1\")";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -332,7 +332,7 @@ public class ContentItemBackendTest {
         //    as the first argument
         //NOTE: the selector parsing all Annotations MUST BE used as first
         //      argument
-        path = "fn:suggestedEntity(fn:textAnnotation(),\"1\")";
+        path = "fn:suggestedEntity(fn:textAnnotation(.),\"1\")";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
