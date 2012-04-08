@@ -46,7 +46,6 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.search.featured.util.SolrContentItemConverter;
 import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
-import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
@@ -58,9 +57,10 @@ import org.apache.stanbol.contenthub.servicesapi.search.solr.SolrSearch;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -110,6 +110,9 @@ public class FeaturedSearchImpl implements FeaturedSearch {
     @Reference
     private EnhancementJobManager enhancementJobManager;
 
+    @Reference
+    private ContentItemFactory ciFactory;
+    
     private BundleContext bundleContext;
 
     @Activate
@@ -240,13 +243,17 @@ public class FeaturedSearchImpl implements FeaturedSearch {
         ContentItem ci = null;
         boolean error = false;
         try {
-            ci = new InMemoryContentItem(queryTerm.getBytes(Constants.DEFAULT_ENCODING), "text/plain");
+            ci = ciFactory.createContentItem(new StringSource(queryTerm));
             enhancementJobManager.enhanceContent(ci);
         } catch (UnsupportedEncodingException e) {
             log.error("Failed to get bytes of query term: {}", queryTerm, e);
             error = true;
         } catch (EnhancementException e) {
             log.error("Failed to get enmancements for the query term: {}", queryTerm, e);
+            error = true;
+        } catch (IOException e) {
+            log.error("Failed to create a ContentItem by using "
+                    + ciFactory.getClass().getSimpleName()+"!",e);
             error = true;
         }
 

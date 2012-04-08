@@ -20,7 +20,7 @@ import org.apache.clerezza.platform.content.DiscobitsHandler;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.utils.GraphNode;
-import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemImpl;
+import org.apache.stanbol.enhancer.servicesapi.impl.ContentItemImpl;
 
 /**
  *
