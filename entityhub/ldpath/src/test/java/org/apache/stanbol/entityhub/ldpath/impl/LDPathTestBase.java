@@ -46,7 +46,7 @@ public abstract class LDPathTestBase {
     /**
      * The SolrYard used for the tests
      */
-    protected static Yard yard;
+    protected static SolrYard yard;
     protected static YardBackend backend;
     /**
      * The SolrDirectoryManager also tested within this unit test
@@ -76,6 +76,7 @@ public abstract class LDPathTestBase {
     }
     @AfterClass
     public static void cleanup() throws Exception {
+        yard.close();
         yard = null;
     }
     
@@ -91,14 +92,17 @@ public abstract class LDPathTestBase {
      */
     @Test
     public void testSetup() throws Exception {
+        log.info("check Setup");
         for(String context : checkContexts()){
             Representation rep = yard.getRepresentation(context);
+            log.info("  > check Entity {}",rep.getId());
             assertNotNull(rep);
             assertEquals(rep.getId(),context);
-            if(log.isDebugEnabled()){
-                log.debug(ModelUtils.getRepresentationInfo(rep));
+            if(log.isInfoEnabled()){
+                log.info("Data for Entity {}: \n {}",rep.getId(),ModelUtils.getRepresentationInfo(rep));
             }
         }
+        log.info("   ... check completed");
     }
     
     /**
