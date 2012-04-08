@@ -23,7 +23,6 @@ import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelp
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.RDF_FORMAT;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getEnhancementProperties;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getOutputContent;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getOutputContentParts;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getParsedContentURIs;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.initExecutionMetadata;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.initExecutionMetadataContentPart;
@@ -36,12 +35,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -52,23 +49,24 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
+import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.web.base.writers.JsonLdSerializerProvider;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.jersey.reader.ContentItemReader;
-import org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper;
 import org.apache.stanbol.enhancer.jersey.writers.ContentItemWriter;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryBlob;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -84,19 +82,25 @@ public class ContentItemReaderWriterTest {
     private static ContentItem contentItem;
     private static ContentItemWriter ciWriter;
     private static ContentItemReader ciReader;
+
+    private static ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
+    
+    
     /**
      * @return
      */
     @BeforeClass
-    public static void createTestContentItem() {
-        contentItem = new InMemoryContentItem("urn:test",
-            "<html>\n" +
-            "  <body>\n" +
-            "    This is a <b>ContentItem</b> to <i>Mime Multipart</i> test!\n" +
-            "  </body>\n" +
-            "</html>","text/html");
-        contentItem.addPart(new UriRef("run:text:text"), new InMemoryBlob(
-            "This is a ContentItem to Mime Multipart test!", "text/plain"));
+    public static void createTestContentItem() throws IOException {
+        contentItem = ciFactory.createContentItem(new UriRef("urn:test"),
+            new StringSource(
+                "<html>\n" +
+                "  <body>\n" +
+                "    This is a <b>ContentItem</b> to <i>Mime Multipart</i> test!\n" +
+                "  </body>\n" +
+                "</html>","text/html"));
+        contentItem.addPart(new UriRef("run:text:text"), 
+            ciFactory.createBlob(new StringSource(
+            "This is a ContentItem to Mime Multipart test!")));
         contentItem.getMetadata().add(new TripleImpl(
             new UriRef("urn:test"), RDF.type, new UriRef("urn:types:Document")));
         //mark the main content as parsed and also that all 
@@ -110,8 +114,27 @@ public class ContentItemReaderWriterTest {
         NonLiteral ep = createExecutionPlan(em, "testChain");
         writeExecutionNode(em, ep, "testEngine", true, null);
         initExecutionMetadata(em, em, contentItem.getUri(), "testChain", false);
-        ciWriter = new ContentItemWriter(null);
-        ciReader = new ContentItemReader(null);
+        final Serializer serializer = new Serializer();
+        serializer.bindSerializingProvider(new JenaSerializerProvider());
+        serializer.bindSerializingProvider(new JsonLdSerializerProvider());
+        ciWriter = new ContentItemWriter(null) {
+            protected org.apache.clerezza.rdf.core.serializedform.Serializer getSerializer() {
+                return serializer;
+            };
+        };
+
+        final Parser parser = new Parser();
+        parser.bindParsingProvider(new JenaParserProvider());
+        ciReader = new ContentItemReader(null){
+            @Override
+            protected Parser getParser() {
+                return parser;
+            }
+            @Override
+            protected ContentItemFactory getContentItemFactory() {
+                return ciFactory;
+            }
+        };
     }
     /**
      * @param out

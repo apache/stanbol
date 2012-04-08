@@ -19,7 +19,6 @@ package org.apache.stanbol.contenthub.search.related;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
@@ -62,14 +61,14 @@ public class RelatedKeywordSearchResult implements SearchResult {
     public void setDocuments(List<DocumentResult> resultantDocuments) {
         String msg = "RelatedKeywordSearchResult cannot contain any ResultantDocument";
         log.error(msg);
-        throw new NotImplementedException(msg);
+        throw new UnsupportedOperationException(msg);
     }
 
     @Override
     public void setFacets(List<FacetResult> facets) {
         String msg = "RelatedKeywordSearchResult cannot contain any FacetField";
         log.error(msg);
-        throw new NotImplementedException(msg);
+        throw new UnsupportedOperationException(msg);
     }
 
     @Override

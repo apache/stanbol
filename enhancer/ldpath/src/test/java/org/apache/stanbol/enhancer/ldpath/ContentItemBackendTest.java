@@ -35,7 +35,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
@@ -45,10 +44,11 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.ldpath.backend.ContentItemBackend;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryBlob;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -76,7 +76,8 @@ public class ContentItemBackendTest {
     
     private Logger log = LoggerFactory.getLogger(ContentItemBackendTest.class);
     private static final Charset UTF8 = Charset.forName("UTF-8");
-    private static LiteralFactory lf = LiteralFactory.getInstance();
+    //private static LiteralFactory lf = LiteralFactory.getInstance();
+    private static ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
     
     private static String textContent;
     private static String htmlContent;
@@ -109,16 +110,16 @@ public class ContentItemBackendTest {
         assertNotNull("HTML content not found",in);
         byte[] htmlData = IOUtils.toByteArray(in);
         IOUtils.closeQuietly(in);
-        ci = new InMemoryContentItem(contentItemId.getUnicodeString(), 
-            htmlData, "text/html; charset=UTF-8");
+        ci = ciFactory.createContentItem(contentItemId, 
+            new ByteArraySource(htmlData, "text/html; charset=UTF-8"));
         htmlContent = new String(htmlData, UTF8);
         //create a Blob with the text content
         in = getTestResource("content.txt");
         byte[] textData = IOUtils.toByteArray(in);
         IOUtils.closeQuietly(in);
         assertNotNull("Plain text content not found",in);
-        ci.addPart(new UriRef(ci.getUri().getUnicodeString()+"_text"), 
-            new InMemoryBlob(textData, "text/plain; charset=UTF-8"));
+        ci.addPart(new UriRef(ci.getUri().getUnicodeString()+"_text"),
+            ciFactory.createBlob(new ByteArraySource(textData, "text/plain; charset=UTF-8")));
         textContent = new String(textData, UTF8);
         //add the metadata
         ci.getMetadata().addAll(rdfData);
@@ -186,7 +187,7 @@ public class ContentItemBackendTest {
     }
     @Test
     public void testTextAnnotationFunction() throws LDPathParseException {
-        String path = "fn:textAnnotation(.)/fise:selected-text";
+        String path = "fn:textAnnotation()/fise:selected-text";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -202,7 +203,7 @@ public class ContentItemBackendTest {
         //test with a filter for the type
         //same as the 1st example bat rather using an ld-path construct for
         //filtering for TextAnnotations representing persons
-        path = "fn:textAnnotation(.)[dc:type is dbpedia-ont:Person]/fise:selected-text";
+        path = "fn:textAnnotation()[dc:type is dbpedia-ont:Person]/fise:selected-text";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -214,7 +215,7 @@ public class ContentItemBackendTest {
     }
     @Test
     public void testEntityAnnotation() throws LDPathParseException {
-        String path = "fn:entityAnnotation(.)/fise:entity-reference";
+        String path = "fn:entityAnnotation()/fise:entity-reference";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -232,7 +233,7 @@ public class ContentItemBackendTest {
         }
         assertTrue(expectedValues.isEmpty());
         //and with a filter
-        path = "fn:entityAnnotation(.)[fise:entity-type is dbpedia-ont:Person]/fise:entity-reference";
+        path = "fn:entityAnnotation()[fise:entity-type is dbpedia-ont:Person]/fise:entity-reference";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -241,7 +242,7 @@ public class ContentItemBackendTest {
     }
     @Test
     public void testEnhancements() throws LDPathParseException {
-        String path = "fn:enhancement(.)";
+        String path = "fn:enhancement()";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -251,13 +252,13 @@ public class ContentItemBackendTest {
             log.info("Entity: {}",r);
         }
         //and with a filter
-        path = "fn:enhancement(.)[rdf:type is fise:TextAnnotation]";
+        path = "fn:enhancement()[rdf:type is fise:TextAnnotation]";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 3);
 //        assertTrue(result.contains(new UriRef("http://dbpedia.org/resource/Bob_Marley")));
-        path = "fn:enhancement(.)/dc:language";
+        path = "fn:enhancement()/dc:language";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -275,7 +276,7 @@ public class ContentItemBackendTest {
         // Because this test checks first that all three suggestions for Paris
         // are returned and later that a limit of 2 only returns the two top
         // most.
-        String path = "fn:textAnnotation(.)[dc:type is dbpedia-ont:Place]/fn:suggestion(.)";
+        String path = "fn:textAnnotation()[dc:type is dbpedia-ont:Place]/fn:suggestion()";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -295,7 +296,7 @@ public class ContentItemBackendTest {
             }
         }
         assertNotNull(lowestConfidenceSuggestion);
-        path = "fn:textAnnotation(.)[dc:type is dbpedia-ont:Place]/fn:suggestion(.,\"2\")";
+        path = "fn:textAnnotation()[dc:type is dbpedia-ont:Place]/fn:suggestion(\"2\")";
         Collection<Resource> result2 = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result2);
         assertFalse(result2.isEmpty());
@@ -311,7 +312,7 @@ public class ContentItemBackendTest {
         //(1) get the {limit} top rated linked Entities per parsed context
         //    In this example we parse all TextAnnotations
         //NOTE: '.' MUST BE used as first argument in this case
-        String path = "fn:textAnnotation(.)/fn:suggestedEntity(.,\"1\")";
+        String path = "fn:textAnnotation()/fn:suggestedEntity(\"1\")";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -331,7 +332,7 @@ public class ContentItemBackendTest {
         //    as the first argument
         //NOTE: the selector parsing all Annotations MUST BE used as first
         //      argument
-        path = "fn:suggestedEntity(fn:textAnnotation(.),\"1\")";
+        path = "fn:suggestedEntity(fn:textAnnotation(),\"1\")";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());

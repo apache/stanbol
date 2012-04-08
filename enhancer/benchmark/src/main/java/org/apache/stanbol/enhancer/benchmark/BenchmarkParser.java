@@ -25,6 +25,7 @@ public interface BenchmarkParser {
     // Marker strings in the benchmark text input
     String COMMENT_MARKER = "#";
     String FIELD_SEPARATOR = ":";
+    String ENHANCEMENT_CHAIN = "= CHAIN =";
     String INPUT_SECTION_MARKER = "= INPUT =";
     String EXPECT_SECTION_MARKER = "= EXPECT =";
     String COMPLAIN_SECTION_MARKER = "= COMPLAIN =";

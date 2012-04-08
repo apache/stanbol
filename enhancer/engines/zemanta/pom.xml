@@ -84,6 +84,11 @@
 
     <!-- for tests -->
     <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.7</version>

@@ -49,6 +49,8 @@ import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
  */
 public class ContentItemHelper {
 
+    public static final String DEFAULT_CONTENT_ITEM_PREFIX = "urn:content-item-";
+
     public static final String SHA1 = "SHA1";
 
     public static final int MIN_BUF_SIZE = 8 * 1024; // 8 kB
@@ -141,13 +143,13 @@ public class ContentItemHelper {
     }
 
     public static UriRef makeDefaultUrn(Blob blob) {
-        return makeDefaultUri("urn:content-item-", blob.getStream());
+        return makeDefaultUri(DEFAULT_CONTENT_ITEM_PREFIX, blob.getStream());
     }
     public static UriRef makeDefaultUrn(InputStream in) {
-        return makeDefaultUri("urn:content-item-", in);
+        return makeDefaultUri(DEFAULT_CONTENT_ITEM_PREFIX, in);
     }
     public static UriRef makeDefaultUrn(byte[] data){
-        return makeDefaultUri("urn:content-item-", new ByteArrayInputStream(data));
+        return makeDefaultUri(DEFAULT_CONTENT_ITEM_PREFIX, new ByteArrayInputStream(data));
     }
     public static UriRef makeDefaultUri(String baseUri, Blob blob) {
         return makeDefaultUri(baseUri, blob.getStream());

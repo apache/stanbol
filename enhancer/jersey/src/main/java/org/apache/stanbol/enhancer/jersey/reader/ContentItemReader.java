@@ -47,7 +47,6 @@ import javax.ws.rs.ext.Provider;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUpload;
@@ -56,17 +55,13 @@ import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryBlob;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.impl.StreamSource;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.codehaus.jettison.mapped.SimpleConverter;
-import org.mortbay.log.Log;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +72,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
     FileUpload fu = new FileUpload();
     private Parser __parser;
     private ServletContext context;
+    private ContentItemFactory __ciFactory;
     
     public static final MediaType MULTIPART = MediaType.valueOf(MediaType.MULTIPART_FORM_DATA_TYPE.getType()+"/*");
 
@@ -87,7 +83,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
      * Lazy initialisation for the parser.
      * @return teh parser
      */
-    protected final Parser getParser(){
+    protected Parser getParser(){
         /*
          * Needed because Jersey tries to create an instance
          * during initialisation. At that time the {@link BundleContext} required
@@ -97,12 +93,29 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
         if(__parser == null){
             if(context != null){
                 __parser = ContextHelper.getServiceFromContext(Parser.class, context);
-            } else { //mainly for unit tests we want also allow initialisation without context
-                __parser = new Parser();
-                __parser.bindParsingProvider(new JenaParserProvider());
+            } else {
+                throw new IllegalStateException("ServletContext is not NULL!");
+            }
+            if(__parser == null){
+                    throw new IllegalStateException("Clerezza RDF parser service is not available(service class:"
+                        + Parser.class + ")!");
             }
         }
         return __parser;
+    }
+    protected ContentItemFactory getContentItemFactory(){
+        if(__ciFactory == null){
+            if(context != null){
+                __ciFactory = ContextHelper.getServiceFromContext(ContentItemFactory.class, context);
+            } else {
+                throw new IllegalStateException("ServletContext is not NULL!");
+            }
+            if(__ciFactory == null){
+                    throw new IllegalStateException("ContentItemFactory service is not available (service class:"
+                        + ContentItemFactory.class + ")!");
+            }
+        }
+        return __ciFactory;
     }
     
     @Override
@@ -237,8 +250,9 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                 throw new WebApplicationException(e, Response.Status.BAD_REQUEST);
             }
         } else { //normal content
-            contentItem = new InMemoryContentItem(
-                IOUtils.toByteArray(entityStream), mediaType.toString());
+            ContentItemFactory ciFactory = getContentItemFactory();
+            contentItem = ciFactory.createContentItem(
+                new StreamSource(entityStream, mediaType.toString()));
             //add the URI of the main content
             parsedContentIds.add(contentItem.getPartUri(0).getUnicodeString());
         }
@@ -269,6 +283,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
     private ContentItem createContentItem(String id, MGraph metadata, FileItemStream content,Set<String> parsedContentParts) throws IOException, FileUploadException {
         MediaType partContentType = MediaType.valueOf(content.getContentType());
         ContentItem contentItem = null;
+        ContentItemFactory ciFactory = getContentItemFactory();
         if(MULTIPART.isCompatible(partContentType)){
             //multiple contentParts are parsed
             FileItemIterator contentPartIterator = fu.getItemIterator(
@@ -279,11 +294,11 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                 if(contentItem == null){
                     log.debug("create ContentItem {} for content (type:{})",
                         id,content.getContentType());
-                    contentItem = new InMemoryContentItem(id, 
-                        IOUtils.toByteArray(fis.openStream()),
-                        fis.getContentType(), metadata);
+                    contentItem = ciFactory.createContentItem(id != null ? new UriRef(id) : (UriRef)null,
+                        new StreamSource(fis.openStream(),fis.getContentType()), 
+                        metadata);
                 } else {
-                    Blob blob = new InMemoryBlob(fis.openStream(), fis.getContentType());
+                    Blob blob = ciFactory.createBlob(new StreamSource(fis.openStream(), fis.getContentType()));
                     UriRef contentPartId = null;
                     if(fis.getFieldName() != null && !fis.getFieldName().isEmpty()){
                         contentPartId = new UriRef(fis.getFieldName());
@@ -301,9 +316,9 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
         } else {
             log.debug("create ContentItem {} for content (type:{})",
                 id,content.getContentType());
-            contentItem = new InMemoryContentItem(id, 
-                IOUtils.toByteArray(content.openStream()),
-                content.getContentType(), metadata);
+            contentItem = ciFactory.createContentItem(new UriRef(id),
+                new StreamSource(content.openStream(),content.getContentType()), 
+                metadata);
         }
         //add the URI of the main content to the parsed contentParts
         parsedContentParts.add(contentItem.getPartUri(0).getUnicodeString());

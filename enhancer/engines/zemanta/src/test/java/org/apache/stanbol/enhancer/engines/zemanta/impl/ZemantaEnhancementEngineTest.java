@@ -45,11 +45,13 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -78,6 +80,7 @@ public class ZemantaEnhancementEngineTest {
 
     static ZemantaEnhancementEngine zemantaEngine = new ZemantaEnhancementEngine();
 
+    private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
     private static final Logger log = LoggerFactory.getLogger(ZemantaEnhancementEngineTest.class);
 
     /**
@@ -101,10 +104,10 @@ public class ZemantaEnhancementEngineTest {
         zemantaEngine.deactivate(null);
     }
 
-    public static ContentItem wrapAsContentItem(final String text) {
+    public static ContentItem wrapAsContentItem(final String text) throws IOException {
     	String id = "urn:org.apache.stanbol.enhancer:test:engines.zemanta:content-item-"
             + EnhancementEngineHelper.randomUUID().toString();
-    	return new InMemoryContentItem(id, text, "text/plain");
+    	return ciFactory.createContentItem(new UriRef(id), new StringSource(text));
     }
 
     @Test

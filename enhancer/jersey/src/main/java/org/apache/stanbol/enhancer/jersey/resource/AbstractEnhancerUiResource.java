@@ -48,11 +48,12 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,7 @@ public abstract class AbstractEnhancerUiResource extends AbstractEnhancerResourc
     private LinkedHashSet<ExecutionNode> _executionNodes;
     private LinkedHashSet<ExecutionNode> _activeNodes;
     protected final Chain chain;
-
+    
     public AbstractEnhancerUiResource(String chainName,ServletContext context) {
         super(context);
         serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
@@ -110,24 +111,27 @@ public abstract class AbstractEnhancerUiResource extends AbstractEnhancerResourc
      */
     @POST
     @Consumes(APPLICATION_FORM_URLENCODED)
-    public Response enhanceFromForm(@FormParam("content") String content, @FormParam("format") String format, @FormParam("ajax") boolean buildAjaxview, @Context HttpHeaders headers) throws EnhancementException,
-                                                                                      IOException {
-                                                                                        log.info("enhance from From: " + content);
-                                                                                        ContentItem ci = new InMemoryContentItem(content.getBytes("UTF-8"), TEXT_PLAIN);
-                                                                                        if(!buildAjaxview){ //rewrite to a normal EnhancementRequest
-                                                                                            return enhanceFromData(ci, null, false, null, false, null, false, null, headers);
-                                                                                        } else { //enhance and build the AJAX response
-                                                                                            enhance(ci);
-                                                                                            ContentItemResource contentItemResource = new ContentItemResource(null, ci, uriInfo, "",
-                                                                                                    tcManager, serializer, servletContext);
-                                                                                            contentItemResource.setRdfSerializationFormat(format);
-                                                                                            Viewable ajaxView = new Viewable("/ajax/contentitem", contentItemResource);
-                                                                                            ResponseBuilder rb = Response.ok(ajaxView);
-                                                                                            rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=UTF-8");
-                                                                                            addCORSOrigin(servletContext, rb, headers);
-                                                                                            return rb.build();
-                                                                                        }
-                                                                                    }
+    public Response enhanceFromForm(@FormParam("content") String content, 
+                                    @FormParam("format") String format, 
+                                    @FormParam("ajax") boolean buildAjaxview, 
+                                    @Context HttpHeaders headers) throws EnhancementException,
+                                                                         IOException {
+        log.info("enhance from From: " + content);
+        ContentItem ci = ciFactory.createContentItem(new StringSource(content));
+        if(!buildAjaxview){ //rewrite to a normal EnhancementRequest
+            return enhanceFromData(ci, null, false, null, false, null, false, null, headers);
+        } else { //enhance and build the AJAX response
+            enhance(ci);
+            ContentItemResource contentItemResource = new ContentItemResource(null, ci, uriInfo, "",
+                    tcManager, serializer, servletContext);
+            contentItemResource.setRdfSerializationFormat(format);
+            Viewable ajaxView = new Viewable("/ajax/contentitem", contentItemResource);
+            ResponseBuilder rb = Response.ok(ajaxView);
+            rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=UTF-8");
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
+        }
+    }
 
     public boolean isEngineActive(String name) {
         return engineManager.isEngine(name);

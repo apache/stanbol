@@ -53,7 +53,6 @@ import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.DescribeQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
 import org.apache.clerezza.rdf.ontologies.RDF;
-import org.apache.stanbol.enhancer.servicesapi.SparqlQueryEngine.SparqlQueryEngineException;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Enhancer;
 
 import com.sun.jersey.api.view.Viewable;
@@ -100,8 +99,7 @@ public final class EnhancerRootResource extends AbstractEnhancerUiResource {
     @Path("/sparql")
     @Consumes(APPLICATION_FORM_URLENCODED)
     @Produces({TEXT_HTML + ";qs=2", "application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
-    public Object sparql(@QueryParam(value = "query") String sparqlQuery) throws SparqlQueryEngineException,
-                                                                         ParseException {
+    public Object sparql(@QueryParam(value = "query") String sparqlQuery) throws ParseException {
         if (sparqlQuery == null) {
             return Response.ok(new Viewable("sparql", this), TEXT_HTML).build();
         }
@@ -118,8 +116,7 @@ public final class EnhancerRootResource extends AbstractEnhancerUiResource {
     @Path("/sparql")
     @Consumes(APPLICATION_FORM_URLENCODED)
     @Produces({"application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
-    public Object postSparql(@FormParam("query") String sparqlQuery) throws SparqlQueryEngineException,
-                                                                    ParseException {
+    public Object postSparql(@FormParam("query") String sparqlQuery) throws ParseException {
         return sparql(sparqlQuery);
     }
 

@@ -33,10 +33,12 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
+import org.apache.stanbol.enhancer.rdfentities.RdfEntityFactory;
+import org.apache.stanbol.enhancer.rdfentities.fise.TextAnnotation;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.TextAnnotation;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
-import org.apache.stanbol.enhancer.servicesapi.helper.RdfEntityFactory;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -64,6 +66,8 @@ public class TestEntityLinkingEnhancementEngine {
      */
     public static final String PLACE = "New Zealand";
 
+    private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
+    
     static NamedEntityTaggingEngine entityLinkingEngine
             = new NamedEntityTaggingEngine();
 
@@ -83,8 +87,8 @@ public class TestEntityLinkingEnhancementEngine {
     public static void shutdownServices() {
     }
 
-    public static ContentItem getContentItem(final String id, final String text) {
-        return new InMemoryContentItem(id, text, "text/plain");
+    public static ContentItem getContentItem(final String id, final String text) throws IOException {
+        return ciFactory.createContentItem(new UriRef(id),new StringSource(text));
     }
 
     public static void getTextAnnotation(ContentItem ci, String name,String context,UriRef type){

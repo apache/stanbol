@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.benchmark.impl;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,11 +24,12 @@ import org.apache.clerezza.rdf.core.Graph;
 import org.apache.stanbol.enhancer.benchmark.Benchmark;
 import org.apache.stanbol.enhancer.benchmark.BenchmarkResult;
 import org.apache.stanbol.enhancer.benchmark.TripleMatcherGroup;
+import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 
 @SuppressWarnings("serial")
 public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Benchmark {
@@ -35,6 +37,8 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
     private String name;
     private String inputText;
     private Graph graph;
+    private ContentItemFactory ciFactory;
+    private Chain chain;
     
     /** Not public: meant to be constructed by parsing */
     BenchmarkImpl() {
@@ -60,28 +64,49 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
         return inputText;
     }
 
+    /** @inheritDoc */
     @Override
-    public List<BenchmarkResult> execute(EnhancementJobManager jobManager) throws EnhancementException {
+    public Chain getChain(){
+        return chain;
+    }
+    
+    void setChain(Chain chain){
+        this.chain = chain;
+    }
+    
+    @Override
+    public List<BenchmarkResult> execute(EnhancementJobManager jobManager, ContentItemFactory ciFactory) throws EnhancementException {
         if(isEmpty()) {
             return null;
         }
         if(inputText == null || inputText.length() == 0) {
             throw new IllegalStateException("inputText is null or empty, cannot run benchmark");
         }
-        
+      
         final List<BenchmarkResult> result = new LinkedList<BenchmarkResult>();
         for(TripleMatcherGroup g :  this) {
-            result.add(new BenchmarkResultImpl(g, getGraph(jobManager)));
+            result.add(new BenchmarkResultImpl(g, getGraph(jobManager,ciFactory)));
         }
 
         return result;
     }
     
     /** @inheritDoc */
-    public Graph getGraph(EnhancementJobManager jobManager) throws EnhancementException {
+    public Graph getGraph(EnhancementJobManager jobManager, 
+                          ContentItemFactory ciFactory) throws EnhancementException {
         if(graph == null) {
-            final ContentItem ci = new InMemoryContentItem(inputText.getBytes(), "text/plain");
-            jobManager.enhanceContent(ci);
+            ContentItem ci;
+            try {
+                ci = ciFactory.createContentItem(new StringSource(inputText));
+            } catch (IOException e) {
+                throw new IllegalStateException("Unable to create a ContentItem" +
+                		"using '"+ciFactory.getClass().getSimpleName()+"'!",e);
+            }
+            if(chain == null){
+                jobManager.enhanceContent(ci);
+            } else { //parsing null as chain does not work!
+                jobManager.enhanceContent(ci,chain);
+            }
             graph = ci.getMetadata().getGraph();
         }
         return graph;

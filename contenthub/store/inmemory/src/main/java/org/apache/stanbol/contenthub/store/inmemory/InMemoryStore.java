@@ -16,6 +16,7 @@
 */
 package org.apache.stanbol.contenthub.store.inmemory;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -31,9 +32,10 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.contenthub.servicesapi.store.Store;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +51,8 @@ public class InMemoryStore implements Store {
 
     private final Map<String, ContentItem> data = new HashMap<String, ContentItem>();
 
+    private final InMemoryContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
+    
     @Reference
     private WeightedTcProvider tcProvider;
 
@@ -65,7 +69,12 @@ public class InMemoryStore implements Store {
         log.debug("create ContentItem for id " + uri + " on TC Manager= "
                 + tcProvider);
         final MGraph g = new SimpleMGraph();
-        return new InMemoryContentItem(uri.getUnicodeString(), content, mimeType, g);
+        try {
+            return ciFactory.createContentItem(uri, new ByteArraySource(content, mimeType), g);
+        } catch (IOException e) {
+            throw new IllegalStateException("IOException while creation of an in-memory" +
+            		"ContentItem (that should never happen)!",e);
+        }
     }
 
     public ContentItem get(String id) {

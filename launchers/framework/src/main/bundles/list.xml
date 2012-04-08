@@ -71,11 +71,52 @@
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.weightedjobmanager</artifactId>
+      <artifactId>org.apache.stanbol.enhancer.core</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <!-- EnhancementJobManager implementations -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.eventjobmanager</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <!-- Enhancement Chain implementations -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.chain.allactive</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.chain.graph</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.chain.weighted</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.chain.list</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
-
+  <!-- Stanbol Web Fragments -->
+  <startLevel level="21">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <!-- Benchmarks for the Stanbol Enhancer -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.benchmark</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+  
   <!-- FactStore -->
   <startLevel level="20">
     <bundle>
@@ -84,29 +125,12 @@
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
-
-  <!-- Stanbol Web Fragments -->
-  <startLevel level="21">
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
-  <!-- Benchmarks for the Stanbol Enhancer -->
-  <startLevel level="21">
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.benchmark</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
  
   <!-- KReS -->
   <startLevel level="22">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owl</artifactId>
+			<artifactId>org.apache.stanbol.commons.owl</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 	  </bundle>
   </startLevel>

@@ -37,9 +37,12 @@ import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItem;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -59,6 +62,7 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
             + " without any name.\n"
             + "A new paragraph is being written. This paragraph has two sentences.";
 
+    private static ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
     static NEREngineCore nerEngine;
     
     public static final String FAKE_BUNDLE_SYMBOLIC_NAME = "FAKE_BUNDLE_SYMBOLIC_NAME";
@@ -71,8 +75,8 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
     }
 
     public static ContentItem wrapAsContentItem(final String id,
-            final String text) {
-    	return new InMemoryContentItem(id, text, "text/plain");
+            final String text) throws IOException {
+    	return ciFactory.createContentItem(new UriRef(id),new StringSource(text));
     }
 
     @Test
@@ -127,7 +131,7 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
 
     @Test
     public void testComputeEnhancements()
-            throws EngineException {
+            throws EngineException, IOException {
         ContentItem ci = wrapAsContentItem("my doc id", SINGLE_SENTENCE);
         nerEngine.computeEnhancements(ci);
         MGraph g = ci.getMetadata();

@@ -29,29 +29,33 @@ import static org.apache.tika.mime.MediaType.TEXT_PLAIN;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.engines.tika.handler.MultiHandler;
 import org.apache.stanbol.enhancer.engines.tika.handler.PlainTextHandler;
 import org.apache.stanbol.enhancer.engines.tika.metadata.OntologyMappings;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.ContentSink;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
-import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryBlob;
+import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.metadata.Metadata;
@@ -92,9 +96,7 @@ public class TikaEngine
         extends AbstractEnhancementEngine<RuntimeException,RuntimeException> 
         implements EnhancementEngine, ServiceProperties {
     private final Logger log = LoggerFactory.getLogger(TikaEngine.class);
-    
-    private final LiteralFactory lf = LiteralFactory.getInstance();
-    
+        
     public static final String SKIP_LINEBREAKS_WITHIN_CONTENT = "stanbol.engines.tika.skipLinebreaks";
     //Metadata -> Ontology mapping configuration
     public static final String MAPPING_MEDIA_RESOURCE = "stanbol.engine.tika.mapping.mediaResource";
@@ -121,18 +123,37 @@ public class TikaEngine
      */
     public static final Integer defaultOrder = ORDERING_PRE_PROCESSING;
 
-    protected static MediaType XHTML = new MediaType("application", "xhtml+xml");
+    protected static final MediaType XHTML = new MediaType("application", "xhtml+xml");
+    protected static final Charset UTF8 = Charset.forName("UTF-8");
     
     private TikaConfig config;
     private Parser parser;
     private Detector detector;
     private OntologyMappings ontologyMappings;
+    /**
+     * The {@link ContentItemFactory} is used to create {@link Blob}s for the
+     * plain text and XHTML version of the processed ContentItem
+     */
+    @Reference
+    private ContentItemFactory ciFactory;
     
     private static class MediaTypeAndStream {
         MediaType mediaType;
         InputStream in;
     }
-   
+    /**
+     * Default constructor used by OSGI
+     */
+    public TikaEngine() {}
+    /**
+     * Used by the unit tests to init the {@link ContentItemFactory} outside
+     * an OSGI environment.
+     * @param cifactory
+     */
+    TikaEngine(ContentItemFactory cifactory) {
+        this.ciFactory = cifactory;
+    }
+
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
         return ENHANCE_ASYNC;
@@ -160,42 +181,59 @@ public class TikaEngine
             Metadata metadata = new Metadata();
             //set the already parsed contentType
             metadata.set(Metadata.CONTENT_TYPE, mtas.mediaType.toString());
-            final StringWriter writer = new StringWriter();
+            ContentSink plainTextSink;
+            try {
+                plainTextSink = ciFactory.createContentSink(TEXT_PLAIN +"; charset="+UTF8.name());
+            } catch (IOException e) {
+                IOUtils.closeQuietly(in); //close the input stream
+                throw new EngineException("Error while initialising Blob for" +
+                		"writing the text/plain version of the parsed content",e);
+            }
+            final Writer plainTextWriter = new OutputStreamWriter(plainTextSink.getOutputStream(), UTF8);
             final ContentHandler textHandler = new BodyContentHandler( //only the Body
-                new PlainTextHandler(writer, false,skipLinebreaks)); //skip ignoreable
+                new PlainTextHandler(plainTextWriter, false,skipLinebreaks)); //skip ignoreable
             final ToXMLContentHandler xhtmlHandler;
             final ContentHandler mainHandler;
-            if(!plainMediaType.equals(XHTML)){ //do not parse XHTML from XHTML
-                xhtmlHandler = new ToXMLContentHandler();
-                mainHandler = new MultiHandler(textHandler,xhtmlHandler);
-            } else {
-                mainHandler = textHandler;
-                xhtmlHandler = null;
-            }
+            ContentSink xhtmlSink = null;
             try {
-                parser.parse(in, mainHandler, metadata, context);
-            } catch (Exception e) {
-                throw new EngineException("Unable to convert ContentItem "+
-                        ci.getUri()+" with mimeType '"+ci.getMimeType()+"' to "+
-                        "plain text!",e);
-            }
-            IOUtils.closeQuietly(in);
-            if(log.isDebugEnabled()){
-                log.debug("Plain Content: \n{}",writer.toString());
+                if(!plainMediaType.equals(XHTML)){ //do not parse XHTML from XHTML
+                    try {
+                        xhtmlSink = ciFactory.createContentSink(XHTML +"; charset="+UTF8.name());
+                    } catch (IOException e) {
+                        throw new EngineException("Error while initialising Blob for" +
+                                "writing the application/xhtml+xml version of the parsed content",e);
+                    }
+                    try {
+                        xhtmlHandler = new ToXMLContentHandler(xhtmlSink.getOutputStream(),UTF8.name());
+                    } catch (UnsupportedEncodingException e) {
+                        throw new EngineException("This system does not support the encoding "+UTF8,e);
+                    }
+                    mainHandler = new MultiHandler(textHandler,xhtmlHandler);
+                } else {
+                    mainHandler = textHandler;
+                    xhtmlHandler = null;
+                    xhtmlSink = null;
+                }
+                try {
+                    parser.parse(in, mainHandler, metadata, context);
+                } catch (Exception e) {
+                    throw new EngineException("Unable to convert ContentItem "+
+                            ci.getUri()+" with mimeType '"+ci.getMimeType()+"' to "+
+                            "plain text!",e);
+                }
+            } finally { //ensure that the writers are closed correctly
+                IOUtils.closeQuietly(in);
+                IOUtils.closeQuietly(plainTextWriter);
+                if(xhtmlSink != null){
+                    IOUtils.closeQuietly(xhtmlSink.getOutputStream());
+                }
             }
             String random = randomUUID().toString();
             UriRef textBlobUri = new UriRef("urn:tika:text:"+random);
-            ci.addPart(textBlobUri, 
-                new InMemoryBlob(writer.toString(), 
-                    TEXT_PLAIN.toString())); //string -> no encoding
+            ci.addPart(textBlobUri, plainTextSink.getBlob());
             if(xhtmlHandler != null){
-                if(log.isDebugEnabled()){
-                    log.debug("XML Content: \n{}",xhtmlHandler.toString());
-                }
                 UriRef xhtmlBlobUri = new UriRef("urn:tika:xhtml:"+random);
-                ci.addPart(xhtmlBlobUri, 
-                    new InMemoryBlob(xhtmlHandler.toString(),
-                        "application/xhtml+xml")); //string -> no encoding
+                ci.addPart(xhtmlBlobUri,  xhtmlSink.getBlob());
             }
             //add the extracted metadata
             if(log.isDebugEnabled()){
@@ -209,7 +247,6 @@ public class TikaEngine
             }finally{
                 ci.getLock().writeLock().unlock();
             }
-            
         } //else not supported format
 
     }

@@ -23,22 +23,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.benchmark.Benchmark;
 import org.apache.stanbol.enhancer.benchmark.BenchmarkParser;
+import org.apache.stanbol.enhancer.servicesapi.Chain;
+import org.apache.stanbol.enhancer.servicesapi.ChainManager;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 
 /** BenchmarkParser implementation */
 @Component
 @Service
 public class BenchmarkParserImpl implements BenchmarkParser {
 
+    
+    /**
+     * Needed to lookup active enhancement changes as parsed by {@link ChainState}
+     */
+    @Reference
+    private ChainManager chainManager;
+        
     private static class ParserContext {
         List<BenchmarkImpl> benchmarks;
         BenchmarkImpl currentBenchmark;
         TripleMatcherGroupImpl currentGroup;
     }
     
-    private abstract static class State {
+    private abstract class State {
         protected final ParserContext ctx;
         
         State(ParserContext ctx) {
@@ -57,6 +69,8 @@ public class BenchmarkParserImpl implements BenchmarkParser {
                         return new MatcherGroupState(ctx, true);
                     } else if(COMPLAIN_SECTION_MARKER.equals(line)) {
                         return new MatcherGroupState(ctx, false);
+                    } else if (ENHANCEMENT_CHAIN.equals(line)) {
+                        return new ChainState(ctx);
                     } else {
                         return consume(line);
                     }
@@ -68,7 +82,7 @@ public class BenchmarkParserImpl implements BenchmarkParser {
         /** Get field value if current line is in the form "KEY: value here",
          *  null if not.
          */
-        protected static String getField(String line, String fieldName) {
+        protected String getField(String line, String fieldName) {
             String value = null;
             if(line.startsWith(fieldName + FIELD_SEPARATOR)) {
                 value = line.substring(line.indexOf(FIELD_SEPARATOR) + 1).trim();
@@ -82,7 +96,7 @@ public class BenchmarkParserImpl implements BenchmarkParser {
         protected abstract State consume(String line) throws IOException;
     }
 
-    private static class InitState extends State {
+    private class InitState extends State {
         InitState(ParserContext ctx) {
             super(ctx);
         }
@@ -92,7 +106,7 @@ public class BenchmarkParserImpl implements BenchmarkParser {
         }
     }
 
-    private static class InputState extends State {
+    private class InputState extends State {
         InputState(ParserContext ctx) {
             super(ctx);
             ctx.currentBenchmark = new BenchmarkImpl();
@@ -111,8 +125,25 @@ public class BenchmarkParserImpl implements BenchmarkParser {
             return this;
         }
     }
-
-    private static class MatcherGroupState extends State {
+    /* not a static class because its needs the #chainManager !*/
+    private class ChainState extends State {
+        ChainState(ParserContext ctx) {
+            super(ctx);
+        }
+        
+        @Override
+        protected State consume(String line) throws IOException {
+            if(ctx.currentBenchmark.getChain() == null){
+                Chain chain = chainManager.getChain(line);
+                if(chain != null){
+                    ctx.currentBenchmark.setChain(chain);
+                } //defined chain not active
+            } //do not override
+            return this;
+        }
+        
+    }
+    private class MatcherGroupState extends State {
         private final boolean isExpect;
         
         MatcherGroupState(ParserContext ctx, boolean isExpect) {

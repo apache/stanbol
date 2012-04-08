@@ -28,9 +28,9 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.store.solr.util.ContentItemIDOrganizer;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryBlob;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemImpl;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryBlob;
+import org.apache.stanbol.enhancer.servicesapi.impl.ContentItemImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +74,10 @@ public class SolrContentItemImpl extends ContentItemImpl implements SolrContentI
                                MGraph metadata,
                                Map<String,List<Object>> constraints) {
         super(id == null ? ContentItemHelper.makeDefaultUri(CONTENT_ITEM_URI_PREFIX, content) : new UriRef(
-                ContentItemIDOrganizer.attachBaseURI(id)), new InMemoryBlob(content, mimeType),
+                ContentItemIDOrganizer.attachBaseURI(id)), 
+                //using this deprecated constructor is OK as a major change to
+                //this component is done in an other branch (STANBOL-471) 
+                new InMemoryBlob(content, mimeType), 
                 metadata == null ? new SimpleMGraph() : metadata);
 
         if (metadata == null) {

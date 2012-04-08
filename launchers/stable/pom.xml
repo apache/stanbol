@@ -93,11 +93,35 @@
             <manifest>
               <!-- make the generated jar runnable -->
               <addClasspath>true</addClasspath>
-              <mainClass>org.apache.sling.launchpad.app.Main</mainClass>
+              <mainClass>org.apache.stanbol.launchpad.Main</mainClass>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
             </manifest>
           </archive>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+              <!-- Use this to in/exclude only specific dependencies -->
+                <includes>
+                  <include>org.apache.stanbol:org.apache.stanbol.launchpad</include>
+                </includes>
+              </artifactSet>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer" />
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.rat</groupId>
@@ -111,6 +135,11 @@
   </build>
 
   <dependencies>
+    <dependency>
+      <!-- The Apache Stanbol lauchpad -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchpad</artifactId>
+    </dependency>
     <dependency>
       <!-- maven-launchpad-plugin builds on the launchpad.base app -->
       <groupId>org.apache.sling</groupId>

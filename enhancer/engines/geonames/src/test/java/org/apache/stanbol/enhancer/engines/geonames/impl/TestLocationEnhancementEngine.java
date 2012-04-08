@@ -42,11 +42,13 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
+import org.apache.stanbol.enhancer.rdfentities.RdfEntityFactory;
+import org.apache.stanbol.enhancer.rdfentities.fise.TextAnnotation;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
-import org.apache.stanbol.enhancer.servicesapi.TextAnnotation;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
-import org.apache.stanbol.enhancer.servicesapi.helper.RdfEntityFactory;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -80,6 +82,7 @@ public class TestLocationEnhancementEngine {
      */
     public static final String PLACE = "New Zealand";
 
+    private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
 
     static LocationEnhancementEngine locationEnhancementEngine = new LocationEnhancementEngine();
 
@@ -101,8 +104,8 @@ public class TestLocationEnhancementEngine {
     }
 
     public static ContentItem getContentItem(final String id,
-            final String text) {
-    	return new InMemoryContentItem(id, text, "text/plain");
+            final String text) throws IOException {
+    	return ciFactory.createContentItem(new UriRef(id), new StringSource(text));
     }
 
     public static void getTextAnnotation(ContentItem ci, String name, String context, UriRef type) {
@@ -130,7 +133,7 @@ public class TestLocationEnhancementEngine {
     }
 
     @Test
-    public void testLocationEnhancementEngine() {//throws Exception{
+    public void testLocationEnhancementEngine() throws IOException {
         //create a content item
         ContentItem ci = getContentItem("urn:org.apache:stanbol.enhancer:text:content-item:person", CONTEXT);
         //add three text annotations to be consumed by this test

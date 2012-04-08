@@ -34,7 +34,7 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
-import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
