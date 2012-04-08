@@ -44,10 +44,10 @@ public abstract class ContentItemFunction implements SelectorFunction<Resource> 
         }
         this.name = name;
     }
-    @Override
-    public final Collection<Resource> apply(RDFBackend<Resource> backend, Resource context, Collection<Resource>... args) throws IllegalArgumentException {
+    
+    public final Collection<Resource> apply(RDFBackend<Resource> backend, Collection<Resource>... args) throws IllegalArgumentException {
         if(backend instanceof ContentItemBackend){
-            return apply((ContentItemBackend)backend, context, args);
+            return apply((ContentItemBackend)backend, args);
         } else {
             throw new IllegalArgumentException("This ContentFunction can only be " +
                     "used in combination with an RDFBackend of type '"+
@@ -56,7 +56,7 @@ public abstract class ContentItemFunction implements SelectorFunction<Resource> 
         }
     };
 
-    public abstract Collection<Resource> apply(ContentItemBackend backend,Resource context,Collection<Resource>... args);
+    public abstract Collection<Resource> apply(ContentItemBackend backend,Collection<Resource>... args);
     
     @Override
     public String getPathExpression(RDFBackend<Resource> backend) {

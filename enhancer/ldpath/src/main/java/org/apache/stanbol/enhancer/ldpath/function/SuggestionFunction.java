@@ -91,27 +91,13 @@ public class SuggestionFunction implements SelectorFunction<Resource> {
     }
     
     @Override
-    public Collection<Resource> apply(final RDFBackend<Resource> backend, Resource context,Collection<Resource>... args) throws IllegalArgumentException {
-        final Collection<Resource> contexts;
-        final int paramOffset;
-        if(args == null || args.length<1 || args[0] == null){
-            contexts = Collections.singleton(context);
-            paramOffset = 0;
-        }  else if(args[0].isEmpty()){
-            return Collections.emptyList(); //empty context -> empty result
-        } else if(!backend.isLiteral(args[0].iterator().next())){
-            contexts = args[0]; //param[0] contains references -> use this as context
-            paramOffset = 1; //start parsing parameters at position 1
-        } else { //literal parameter at param index 0 -> 
-            contexts = Collections.singleton(context); //use context
-            paramOffset = 0; //start parsing parameters at position 0
-        }
-        Integer limit = parseParamLimit(backend, args,paramOffset+0);
+    public Collection<Resource> apply(final RDFBackend<Resource> backend, Collection<Resource>... args) throws IllegalArgumentException {
+        Integer limit = parseParamLimit(backend, args,1);
 //        final String processingMode = parseParamProcessingMode(backend, args,2);
-        final int missingConfidenceMode = parseParamMissingConfidenceMode(backend, args,paramOffset+1);
+        final int missingConfidenceMode = parseParamMissingConfidenceMode(backend, args,2);
         List<Resource> result = new ArrayList<Resource>();
 //        if(processingMode.equals(ANNOTATION_PROCESSING_MODE_UNION)){
-            processAnnotations(backend, contexts, limit, missingConfidenceMode, result);
+            processAnnotations(backend, args[0], limit, missingConfidenceMode, result);
 //        } else {
 //            for(Resource context : args[0]){
 //                processAnnotations(backend, singleton(context),
