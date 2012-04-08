@@ -19,7 +19,6 @@ package org.apache.stanbol.enhancer.engines.metaxa;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
@@ -41,8 +40,10 @@ import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.engines.metaxa.core.MetaxaCore;
 import org.apache.stanbol.enhancer.engines.metaxa.core.RDF2GoUtils;
@@ -50,13 +51,13 @@ import org.apache.stanbol.enhancer.engines.metaxa.core.html.BundleURIResolver;
 import org.apache.stanbol.enhancer.engines.metaxa.core.html.HtmlExtractorFactory;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.ContentSink;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
-import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryBlob;
+import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
-import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.Statement;
@@ -90,7 +91,10 @@ public class MetaxaEngine
         implements EnhancementEngine, ServiceProperties {
 
     private static final Logger log = LoggerFactory.getLogger(MetaxaEngine.class);
-
+    /**
+     * The default charset
+     */
+    private static final Charset UTF8 = Charset.forName("UTF-8");
     /**
      * Plain text content of a content item.
       */
@@ -122,6 +126,14 @@ public class MetaxaEngine
      */
     @Property(boolValue=false)
     public static final String INCLUDE_TEXT_IN_METADATA = "org.apache.stanbol.enhancer.engines.metaxa.includeText";
+    
+    /**
+     * Internally used to create additional {@link Blob} for transformed
+     * versions af the original content
+     */
+    @Reference
+    private ContentItemFactory ciFactory;
+    
     private MetaxaCore extractor;
     
     BundleContext bundleContext;
@@ -131,7 +143,7 @@ public class MetaxaEngine
     
     private Set<String> ignoredMimeTypes;
     private boolean includeText = false;
-
+    
     /**
      * The activate method.
      *
@@ -202,93 +214,98 @@ public class MetaxaEngine
     }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
+        // get model from the extraction
+        URIImpl docId;
+        Model m = null;
+        ci.getLock().readLock().lock();
         try {
-            // get model from the extraction
-            URIImpl docId;
-            Model m;
-            ci.getLock().readLock().lock();
-            try {
-                docId = new URIImpl(ci.getUri().getUnicodeString());
-                m = this.extractor.extract(ci.getStream(), docId, ci.getMimeType());
-            } finally {
-                ci.getLock().readLock().unlock();
-            }
-            // add the statements from this model to the Metadata model
-            if (null != m) {
-                /*
-               String text = MetaxaCore.getText(m);
-               log.info(text);
-                */
-                // get the model where to add the statements
-                /*
-                 * NOTE(rweten): 
-                 *  There is no need to create an TextEnhancement to mark that
-                 *  a ContentItem was processed by Metaxa, because the
-                 *  ExecutionMetadata do record this anyway.
-                 */
-                //     
-                // create enhancement
-                //UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
-                // set confidence value to 1.0
-                //g.add(new TripleImpl(textEnhancement, Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(1.0)));
-                RDF2GoUtils.urifyBlankNodes(m);
-                HashMap<BlankNode, BNode> blankNodeMap = new HashMap<BlankNode, BNode>();
-                ClosableIterator<Statement> it = m.iterator();
-                ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-                Charset charset = Charset.forName("UTF-8");
-                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(byteOut, charset));
-                MGraph g = new SimpleMGraph(); //first add to a temporary graph
-                while (it.hasNext()) {
-                    Statement oneStmt = it.next();
-                    //we need to treat triples that provide the plain/text
-                    //version differently. Such Objects need to be added to
-                    //the plain text Blob!
-                    if(oneStmt.getSubject().equals(docId) && 
-                            oneStmt.getPredicate().equals(NIE_PLAINTEXT_PROPERTY)){
-                        out.write(oneStmt.getObject().toString());
-                        if (includeText) {
-                          NonLiteral subject = (NonLiteral) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
-                          UriRef predicate = (UriRef) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
-                          Resource object = asClerezzaResource(oneStmt.getObject(), blankNodeMap);
-                          g.add(new TripleImpl(subject, predicate, object));
+            docId = new URIImpl(ci.getUri().getUnicodeString());
+            m = this.extractor.extract(ci.getStream(), docId, ci.getMimeType());
+        } catch (ExtractorException e) {
+            throw new EngineException("Error while processing ContentItem "
+                + ci.getUri()+" with Metaxa",e);
+        } catch (IOException e) {
+            throw new EngineException("Error while processing ContentItem "
+                    + ci.getUri()+" with Metaxa",e);
+        } finally {
+            ci.getLock().readLock().unlock();
+        }
+        // Convert the RDF2go model to a Clerezza Graph and also extract
+        // the extracted plain text from the model
+        if (null == m) {
+            log.debug("Unable to preocess ContentItem {} (mime type {}) with Metaxa",
+                ci.getUri(),ci.getMimeType());
+            return;
+        }
+        ContentSink plainTextSink;
+        try {
+            plainTextSink = ciFactory.createContentSink("text/plain");
+        } catch (IOException e) {
+            m.close();
+            throw new EngineException("Unable to initialise Blob for storing" +
+            		"the plain text content",e);
+        }
+        HashMap<BlankNode, BNode> blankNodeMap = new HashMap<BlankNode, BNode>();
+        RDF2GoUtils.urifyBlankNodes(m);
+        ClosableIterator<Statement> it = m.iterator();
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+            plainTextSink.getOutputStream(), UTF8));
+        boolean textExtracted = false; //used to detect if some text was extracted
+        try {
+            MGraph g = new SimpleMGraph(); //first add to a temporary graph
+            while (it.hasNext()) {
+                Statement oneStmt = it.next();
+                //we need to treat triples that provide the plain/text
+                //version differently. Such Objects need to be added to
+                //the plain text Blob!
+                if(oneStmt.getSubject().equals(docId) && 
+                        oneStmt.getPredicate().equals(NIE_PLAINTEXT_PROPERTY)){
+                    String text = oneStmt.getObject().toString();
+                    if(text != null && !text.isEmpty()){
+                        try {
+                            out.write(oneStmt.getObject().toString());
+                        } catch (IOException e) {
+                            throw new EngineException("Unable to write extracted" +
+                            		"plain text to Blob (blob impl: "
+                                    + plainTextSink.getBlob().getClass()+")",e);
                         }
-                    } else { //add metadata to the metadata of the contentItem
-                        NonLiteral subject = (NonLiteral) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
-                        UriRef predicate = (UriRef) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
-                        Resource object = asClerezzaResource(oneStmt.getObject(), blankNodeMap);
-    
-                        if (null != subject && null != predicate && null != object) {
-                            Triple t = new TripleImpl(subject, predicate, object);
-                            g.add(t);
-                            log.debug("added " + t.toString());
+                        textExtracted = true;
+                        if (includeText) {
+                            NonLiteral subject = (NonLiteral) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
+                            UriRef predicate = (UriRef) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
+                            Resource object = asClerezzaResource(oneStmt.getObject(), blankNodeMap);
+                            g.add(new TripleImpl(subject, predicate, object));
                         }
                     }
+                } else { //add metadata to the metadata of the contentItem
+                    NonLiteral subject = (NonLiteral) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
+                    UriRef predicate = (UriRef) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
+                    Resource object = asClerezzaResource(oneStmt.getObject(), blankNodeMap);
+
+                    if (null != subject && null != predicate && null != object) {
+                        Triple t = new TripleImpl(subject, predicate, object);
+                        g.add(t);
+                        log.debug("added " + t.toString());
+                    }
                 }
-                ci.getLock().writeLock().lock();
-                try { 
-                    //now acquire a write lock and add the extracted 
-                    //metadata to the content item
-                    ci.getMetadata().addAll(g);
-                } finally {
-                    ci.getLock().writeLock().unlock();
-                }
-                out.close();
-                byte[] plainTextData = byteOut.toByteArray();
-                if(plainTextData.length > 0){
-                    //add plain text to the content item
-                    UriRef blobUri = new UriRef("urn:metaxa:plain-text:"+randomUUID());
-                    Blob plainTextBlob = new InMemoryBlob(plainTextData, 
-                        "text/plain;charset="+charset.toString());
-                    ci.addPart(blobUri, plainTextBlob);
-                    //TODO: add contentPart metadata to the contentItem
-                }
-                it.close();
-                m.close();
             }
-        } catch (ExtractorException e) {
-            throw new EngineException(e.getLocalizedMessage(), e);
-        } catch (IOException e) {
-            throw new EngineException(e.getLocalizedMessage(), e);
+            //add the extracted triples to the metadata of the ContentItem
+            ci.getLock().writeLock().lock();
+            try { 
+                ci.getMetadata().addAll(g);
+                g = null;
+            } finally {
+                ci.getLock().writeLock().unlock();
+            }
+        } finally {
+            it.close();
+            m.close();
+            IOUtils.closeQuietly(out);
+        }
+        if(textExtracted){
+            //add plain text to the content item
+            UriRef blobUri = new UriRef("urn:metaxa:plain-text:"+randomUUID());
+            ci.addPart(blobUri, plainTextSink.getBlob());
         }
     }
 
