@@ -446,7 +446,9 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
                 while(nextEntity == null && resultSet.hasNext()){
                     Binding firstValid = resultSet.nextBinding();
                     Node entityNode = firstValid.get(entityVar);
-                    if(entityNode.isURI()){ //only uri nodes are valid
+                    if(entityNode.isURI() && //only uri nodes are valid                  
+                            // it's unbelievable, but Jena URIs might be empty!
+                            !entityNode.toString().isEmpty()){
                       //store it temporarily in nextBinding
                         nextBinding = firstValid; 
                         //store it as next (first) entity
