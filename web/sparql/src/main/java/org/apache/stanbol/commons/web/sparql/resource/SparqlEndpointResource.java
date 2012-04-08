@@ -39,7 +39,6 @@ import org.apache.clerezza.rdf.core.sparql.query.Query;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.servicesapi.store.Store;
-import org.apache.stanbol.enhancer.servicesapi.SparqlQueryEngine.SparqlQueryEngineException;
 
 import com.sun.jersey.api.view.Viewable;
 
@@ -81,8 +80,7 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     @GET
     @Consumes(APPLICATION_FORM_URLENCODED)
     @Produces({TEXT_HTML + ";qs=2", "application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
-    public Response sparql(@QueryParam(value = "query") String sparqlQuery, @Context HttpHeaders headers) throws SparqlQueryEngineException,
-                                                                                                         ParseException {
+    public Response sparql(@QueryParam(value = "query") String sparqlQuery, @Context HttpHeaders headers) throws ParseException {
         if (sparqlQuery == null) {
             return Response.ok(new Viewable("index", this), TEXT_HTML).build();
         }
@@ -102,8 +100,7 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     @POST
     @Consumes(APPLICATION_FORM_URLENCODED)
     @Produces({"application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
-    public Response postSparql(@FormParam("query") String sparqlQuery, @Context HttpHeaders headers) throws SparqlQueryEngineException,
-                                                                                                    ParseException {
+    public Response postSparql(@FormParam("query") String sparqlQuery, @Context HttpHeaders headers) throws ParseException {
         return sparql(sparqlQuery, headers);
     }
 
