@@ -279,7 +279,7 @@ public final class ConfigUtils {
             int exclamationIndex = urlString.indexOf('!');
             if (slashIndex >= 0 && exclamationIndex > 0) {
                 classPath = urlString.substring(slashIndex, exclamationIndex + 1);
-                log.info("manually parsed plassPath: {} from {}", classPath, classLocation);
+                log.info("manually parsed classPath: {} from {}", classPath, classLocation);
             } else {
                 // looks like there is an other reason than an URL as described above
                 // so better to throw an exception than to guess ...
@@ -292,7 +292,6 @@ public final class ConfigUtils {
             return new File(classPath.substring(0, classPath.length() - classFileName.length()));
         }
     }
-
     /**
      * Copies a resource (URL of an resource within a Bundle) to a file
      * 
