@@ -60,5 +60,6 @@
     <module>installer/jarprovider</module>
     -->
     <module>httpqueryheaders</module>
+    <module>launchpad</module>
     </modules>
 </project>
