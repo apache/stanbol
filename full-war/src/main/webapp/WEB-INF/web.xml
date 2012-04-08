@@ -27,8 +27,16 @@
 		<display-name>Sling Servlet</display-name>
 		<servlet-name>sling</servlet-name>
 		<servlet-class>org.apache.sling.launchpad.webapp.SlingServlet</servlet-class>
+        <init-param> <!-- the default sling.home is set to stanbol -->
+                <param-name>sling.home</param-name> 
+                <param-value>stanbol/</param-value> 
+        </init-param> 
+        <init-param> <!-- set the stanbol.home to the sling.home -->
+                <param-name>stanbol.home</param-name> 
+                <param-value>${sling.home}</param-value> 
+        </init-param> 
         <load-on-startup>100</load-on-startup>
-	</servlet>
+    </servlet>
 
 	<!-- Default Mapping for the Context -->
 	<servlet-mapping>
