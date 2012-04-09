@@ -28,8 +28,9 @@
     official <a href="http://www.w3.org/TR/rdf-sparql-protocol/#query-bindings-http">W3C
     page for the RDF SPARQL protocol</a>.
 	
-  <p>The Stanbol enhancer SPARQL endpoint gives access to all the semantic
-    enhancements related to content items from the Stanbol enhancer <a href="/store">store</a>.</p>
+  <p>The Stanbol enhancer SPARQL endpoint gives access to all graphs registered to OSGi environment. 
+    For details please see Javadocs of <a href="http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/web/sparql/src/main/java/org/apache/stanbol/commons/web/sparql/resource/SparqlEndpointResource.java">SparqlEndpointResource</a>.
+  </p>
 
   <@sparql.form/>
 
