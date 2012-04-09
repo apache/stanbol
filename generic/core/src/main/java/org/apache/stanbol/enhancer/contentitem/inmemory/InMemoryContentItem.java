@@ -23,6 +23,7 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.ContentSource;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
 import org.apache.stanbol.enhancer.servicesapi.impl.ContentItemImpl;

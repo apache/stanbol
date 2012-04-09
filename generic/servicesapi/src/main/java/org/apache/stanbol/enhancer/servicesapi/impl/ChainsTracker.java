@@ -28,7 +28,6 @@ import java.util.Set;
 
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
-import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
