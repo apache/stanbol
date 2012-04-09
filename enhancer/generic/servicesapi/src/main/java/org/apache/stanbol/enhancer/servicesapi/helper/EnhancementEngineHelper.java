@@ -16,12 +16,10 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.helper;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.clerezza.rdf.core.Literal;

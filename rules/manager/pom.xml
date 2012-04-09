@@ -62,6 +62,23 @@
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-scr-plugin</artifactId>
 			</plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- NOTE: needed to add this here, because for some unknown reason
+                       the RAT tool was not able to apply the **/*.txt wildcard
+                       to the two excluded text files. Also an explicit
+                       exclude for that files in the Stanbol reactor had not 
+                       worked. (rwesten 2012-04-09) -->
+            <!-- license mentioned in the README in the same directory -->
+            <exclude>RuleConf/recipe_index.txt</exclude>
+            <exclude>demo/recipe.txt</exclude>
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
 		</plugins>
 	</build>
 

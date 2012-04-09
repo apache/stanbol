@@ -19,7 +19,6 @@ package org.apache.stanbol.enhancer.servicesapi;
 import java.io.InputStream;
 import java.util.concurrent.locks.ReadWriteLock;
 
-import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.LockableMGraph;
 
