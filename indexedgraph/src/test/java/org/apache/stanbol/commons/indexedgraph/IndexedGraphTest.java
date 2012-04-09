@@ -176,7 +176,7 @@ public class IndexedGraphTest  extends MGraphTest {
         MGraph sg = new SimpleMGraph();
         int iterations = 100; //reduced from 1000
         int graphsize = 100000;
-        Long seed = System.currentTimeMillis();
+        Long seed = new Long("1332943407752");//System.currentTimeMillis();
         log.info("Test Seed: {}",seed);
         createGraph(sg, graphsize, seed);
         MGraph ig = new IndexedMGraph(sg);
@@ -411,7 +411,7 @@ public class IndexedGraphTest  extends MGraphTest {
             }
             if (random > 2.0 || count == 0) {
                 if (!predicates.hasNext()) {
-                    Collections.shuffle(predicateList);
+                    Collections.shuffle(predicateList,rnd);
                     predicates = predicateList.iterator();
                 }
                 predicate = predicates.next();
