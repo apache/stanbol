@@ -56,14 +56,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.sun.jersey.api.view.Viewable;
 
 /**
- * This is the SPARQL endpoint which is used throughout the Stanbol. It tracks the {@link TripleCollection}s,
- * using a {@link ServiceTracker}, registered to OSGi environment. To be able to execute SPARQL queries on
- * triple collections, they should be registered to the OSGi environment with the following parameters:
+ * This is the SPARQL endpoint which is used throughout the Stanbol. It uses {@link BundleContext} to retrive
+ * {@link TripleCollection} s registered to OSGi environment. To be able to execute SPARQL queries on triple
+ * collections, they should be registered to the OSGi environment with the following parameters:
  * 
  * <p>
  * <ul>
@@ -189,19 +188,16 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     private LinkedHashMap<ServiceReference,TripleCollection> getServices(String graphUri) throws InvalidSyntaxException {
         LinkedHashMap<ServiceReference,TripleCollection> registeredGraphs = new LinkedHashMap<ServiceReference,TripleCollection>();
         BundleContext bundleContext = ContextHelper.getBundleContext(servletContext);
-        ServiceTracker graphTracker = new ServiceTracker(bundleContext,
-                bundleContext.createFilter(getFilter(graphUri)), null);
-        graphTracker.open();
-        ServiceReference[] refs = graphTracker.getServiceReferences();
+        ServiceReference[] refs = bundleContext.getServiceReferences(TripleCollection.class.getName(),
+            getFilter(graphUri));
         if (refs != null) {
             if (refs.length > 1) {
                 Arrays.sort(refs, ServiceReferenceRankingComparator.INSTANCE);
             }
             for (ServiceReference ref : refs) {
-                registeredGraphs.put(ref, (TripleCollection) graphTracker.getService(ref));
+                registeredGraphs.put(ref, (TripleCollection) bundleContext.getService(ref));
             }
         }
-        graphTracker.close();
         return registeredGraphs;
     }
 
