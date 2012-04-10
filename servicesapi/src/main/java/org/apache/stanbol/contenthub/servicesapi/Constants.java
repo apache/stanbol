@@ -34,7 +34,7 @@ public class Constants {
     /**
      * The URI of the global enhancement graph. All enhancements are stored in this graph.
      */
-    public static final String ENHANCEMENTS_GRAPH_URI = "org.apache.stanbol.enhancer.standalone.store.enhancements";
+    public static final String ENHANCEMENTS_GRAPH_URI = "org.apache.stanbol.contenthub.enhancements";
 
     /**
      * The URI of ???
