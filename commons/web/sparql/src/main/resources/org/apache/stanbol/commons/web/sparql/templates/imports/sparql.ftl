@@ -15,14 +15,19 @@
   limitations under the License.
 -->
 <#macro form>
-<#-- graph list -->
-<#if it.tripleCollectionList?size &gt; 0>
-  <select id="graphList" onChange='javascript:graphChangeHandler();'>
-  	<#list it.tripleCollectionList as tcInfo>
-  		<option value="${tcInfo.graphUri}">${tcInfo.graphUri}</option>
-  	</#list>
-  </select>
-</#if>
+<fieldset>
+  <legend>Registered TripleCollections</legend>
+  <#-- graph list -->
+  <#if it.tripleCollectionList?size &gt; 0>
+    <select id="graphList" onChange='javascript:graphChangeHandler();'>
+    	<#list it.tripleCollectionList as tcInfo>
+    		<option value="${tcInfo.graphUri}">${tcInfo.graphUri}</option>
+    	</#list>
+    </select>
+  <#else>
+    There is no registered TripleCollection.
+  </#if>
+</fieldset>
 
 <#if it.tripleCollectionList?size &gt; 0>
   <fieldset>

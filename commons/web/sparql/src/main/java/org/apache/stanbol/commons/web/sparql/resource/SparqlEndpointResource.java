@@ -42,6 +42,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.core.sparql.QueryParser;
@@ -171,6 +172,9 @@ public class SparqlEndpointResource extends BaseStanbolResource {
         if (services != null) {
             for (ServiceReference service : services.keySet()) {
                 Object graphUri = service.getProperty(GRAPH_URI);
+                if (service.getProperty(GRAPH_URI) instanceof UriRef) {
+                    graphUri = ((UriRef) graphUri).getUnicodeString();
+                }
                 Object graphName = service.getProperty("graph.name");
                 Object graphDescription = service.getProperty("graph.description");
                 if (graphUri instanceof String && graphName instanceof String
