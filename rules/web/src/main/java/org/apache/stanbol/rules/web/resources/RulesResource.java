@@ -66,7 +66,6 @@ import org.apache.stanbol.rules.base.api.UnsupportedTypeForExportException;
 import org.apache.stanbol.rules.base.api.util.RecipeList;
 import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.manager.RecipeImpl;
-import org.apache.stanbol.rules.web.writers.RulesPrettyPrintResource;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
