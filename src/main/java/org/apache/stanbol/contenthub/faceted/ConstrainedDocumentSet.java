@@ -15,6 +15,7 @@
  */
 package org.apache.stanbol.contenthub.faceted;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.apache.clerezza.rdf.core.Resource;
@@ -40,7 +41,7 @@ public interface ConstrainedDocumentSet {
 		
 		/**
 		 * 
-		 * @return the URIRef of Literal that documents matching this constraint have as value of this facet
+		 * @return the URIRef or Literal that documents matching this constraint have as value of this facet
 		 */
 		Resource getValue();
 	}
@@ -73,13 +74,23 @@ public interface ConstrainedDocumentSet {
 	
 	
 	/**
-	 * Note that this method might be implemented so that getting the size of
-	 * the set doesn't require enumerating the documents
+	 * The documents contained in this ConstrainedDocumentSet. There is no 
+	 * defined order of the list, but implementations should keep the order
+	 * stable as too allow stateless pagination.
+	 * 
+	 * Implementations may populate the list just when the respective 
+	 * elements are accessed and implement size() to access optimized backend 
+	 * functionality. Clients must thus that the list changes while they are 
+	 * using it. For example the size returned by List.size() may not match 
+	 * the actual number of elements when iterating throw it at a later point 
+	 * in time. The iterate() as well as the subList(int,int) method
+	 * are safe.
+	 * 
 	 * 
 	 * @return the documents matching this ConstrainedDocumentSet
 	 */
 	//TODO is just retuning the UriRef enough of should we rettur a DocumentResult or use ContentItem
-	Set<UriRef> getDocuments();
+	List<UriRef> getDocuments();
 	
 	/**
 	 * This is the breadcrumb of this ConstrainedDocumentSet
