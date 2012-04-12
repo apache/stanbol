@@ -80,8 +80,8 @@ public interface ConstrainedDocumentSet {
 	 * 
 	 * Implementations may populate the list just when the respective 
 	 * elements are accessed and implement size() to access optimized backend 
-	 * functionality. Clients must thus that the list changes while they are 
-	 * using it. For example the size returned by List.size() may not match 
+	 * functionality. Clients must thus take into account the possibility that 
+	 * the list changes while they are using it. For example the size returned by List.size() may not match 
 	 * the actual number of elements when iterating throw it at a later point 
 	 * in time. The iterate() as well as the subList(int,int) method
 	 * are safe.
