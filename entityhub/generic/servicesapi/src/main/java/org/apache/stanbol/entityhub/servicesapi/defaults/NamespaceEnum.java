@@ -119,7 +119,11 @@ public enum NamespaceEnum {
      * National Cancer Institute Thesaurus (http://www.mindswap.org/2003/CancerOntology/)
      */
     nci("http://www.mindswap.org/2003/nciOncology.owl#"),
-    tcm("http://purl.org/net/tcm/tcm.lifescience.ntu.edu.tw/")
+    tcm("http://purl.org/net/tcm/tcm.lifescience.ntu.edu.tw/"),
+    /**
+     * The Music Ontology (http://musicontology.com/)
+     */
+    mo("http://purl.org/ontology/mo/")
     ;
     /**
      * The logger
