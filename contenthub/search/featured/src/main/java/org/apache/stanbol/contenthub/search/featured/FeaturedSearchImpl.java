@@ -47,7 +47,7 @@ import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.search.featured.util.SolrContentItemConverter;
 import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.ConstrainedDocumentSet;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.ConstrainedDocumentList;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.Constraint;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
@@ -186,40 +186,40 @@ public class FeaturedSearchImpl implements FeaturedSearch {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.add(solrParams);
         List<FacetResult> allFacets = getAllFacetResults(ldProgramName);
-        SolrQueryUtil.setFacetParameters(solrQuery, allFacets);
+        SolrQueryUtil.setFacetFields(solrQuery, allFacets);
         QueryResponse queryResponse = solrSearch.search(solrQuery, ldProgramName);
         String queryTerm = SolrQueryUtil.extractQueryTermFromSolrQuery(solrParams);
         return search(queryTerm, queryResponse, ontologyURI, ldProgramName, allFacets);
     }
 
     @Override
-    public ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints) throws SearchException {
+    public ConstrainedDocumentList search(String keyword, Set<Constraint> constraints) throws SearchException {
         SolrQuery query = SolrQueryUtil.prepareSolrQuery(keyword);
+        SolrQueryUtil.addConstraintsToSolrQuery(constraints, query);
         List<FacetResult> allFacets = getAllFacetResults();
-        SolrQueryUtil.setFacetParameters(query, allFacets);
+        SolrQueryUtil.setFacetFields(query, allFacets);
         QueryResponse queryResponse = solrSearch.search(query);
-
-        return null;
+        return new DefaultConstrainedDocumentList(keyword, queryResponse, constraints, this);
     }
 
     @Override
-    public ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints, String indexName) throws SearchException {
+    public ConstrainedDocumentList search(String keyword, Set<Constraint> constraints, String indexName) throws SearchException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints, int offset, int limit) throws SearchException {
+    public ConstrainedDocumentList search(String keyword, Set<Constraint> constraints, int offset, int limit) throws SearchException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ConstrainedDocumentSet search(String keyword,
-                                         Set<Constraint> constraints,
-                                         String indexName,
-                                         int offset,
-                                         int limit) throws SearchException {
+    public ConstrainedDocumentList search(String keyword,
+                                          Set<Constraint> constraints,
+                                          String indexName,
+                                          int offset,
+                                          int limit) throws SearchException {
         // TODO Auto-generated method stub
         return null;
     }

@@ -25,9 +25,9 @@ import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
  * A set of documents that can be narrowed by applying {@link Constraint}s that are grouped by {@link Facet}s.
  * Instances of this class are immutable, narrowing and broadening return new instances.
  */
-public interface ConstrainedDocumentSet {
+public interface ConstrainedDocumentList {
     /**
-     * Returns the documents contained in this {@link ConstrainedDocumentSet}. There is no defined order of
+     * Returns the documents contained in this {@link ConstrainedDocumentList}. There is no defined order of
      * the list, but implementations should keep the order stable as too allow stateless pagination.
      * 
      * Implementations may populate the list just when the respective elements are accessed and implement
@@ -36,7 +36,7 @@ public interface ConstrainedDocumentSet {
      * match the actual number of elements when iterating throw it at a later point in time. The iterate() as
      * well as the subList(int,int) method are safe.
      * 
-     * @return the documents included in this {@link ConstrainedDocumentSet}
+     * @return the documents included in this {@link ConstrainedDocumentList}
      * @throws SearchException
      */
     List<UriRef> getDocuments() throws SearchException;
@@ -53,7 +53,7 @@ public interface ConstrainedDocumentSet {
      * This method returns all possible {@link Facet}s together with all their possible {@link Constraint}s
      * that can be used to filter documents included in this set.
      * 
-     * @return the {@link Facet}s by which this {@link ConstrainedDocumentSet} can be restricted.
+     * @return the {@link Facet}s by which this {@link ConstrainedDocumentList} can be restricted.
      */
     Set<Facet> getFacets();
 
@@ -63,27 +63,27 @@ public interface ConstrainedDocumentSet {
      * 
      * <code>narrow(additionalConstraint).getDocuments().size()</code>
      * 
-     * Creates a new {@link ConstrainedDocumentSet} with the new set of {@link Constraint} which is formed by
+     * Creates a new {@link ConstrainedDocumentList} with the new set of {@link Constraint} which is formed by
      * adding the specified <code>constraint</code> the constraint set returned by {@link #getConstraints()}.
      * 
      * @param constraint
      *            the additional {@link Constraint} to apply
-     * @return the restricted {@link ConstrainedDocumentSet} by applying the given additional
+     * @return the restricted {@link ConstrainedDocumentList} by applying the given additional
      *         <code>constraint</code>
      * @throws SearchException
      */
-    ConstrainedDocumentSet narrow(Constraint constraint) throws SearchException;
+    ConstrainedDocumentList narrow(Constraint constraint) throws SearchException;
 
     /**
-     * Creates a new {@link ConstrainedDocumentSet} with the new set of {@link Constraint}s which is formed by
+     * Creates a new {@link ConstrainedDocumentList} with the new set of {@link Constraint}s which is formed by
      * removing the specified <code>constraint</code> from the constraint set returned by
      * {@link #getConstraints()}.
      * 
      * @param constraint
      *            the {@link Constraint} which must be member of the set returned by {@link #getConstraints()}
-     * @return the broadened {@link ConstrainedDocumentSet} by removing the given <code>constraint</code>.
+     * @return the broadened {@link ConstrainedDocumentList} by removing the given <code>constraint</code>.
      * @throws SearchException
      */
-    ConstrainedDocumentSet broaden(Constraint constraint) throws SearchException;
+    ConstrainedDocumentList broaden(Constraint constraint) throws SearchException;
 
 }

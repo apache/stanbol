@@ -15,6 +15,7 @@
  */
 package org.apache.stanbol.contenthub.search.featured;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -49,10 +50,7 @@ public class FacetImpl implements Facet {
             throw new IllegalArgumentException("Label list must include at least one item");
         }
         this.labels = labels;
-    }
-
-    public void setConstraints(Set<Constraint> constraints) {
-        this.constraints = constraints;
+        this.constraints = new HashSet<Constraint>();
     }
 
     @Override

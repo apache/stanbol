@@ -125,7 +125,7 @@ public class SolrQueryUtil {
      * @param allAvailableFacetNames
      *            list of facets
      */
-    public static <T> void setFacetParameters(SolrQuery solrQuery, List<T> allAvailableFacetNames) {
+    public static <T> void setFacetFields(SolrQuery solrQuery, List<T> allAvailableFacetNames) {
         solrQuery.setFields("*", SCORE_FIELD);
         solrQuery.setFacet(true);
         solrQuery.setFacetMinCount(1);
@@ -166,7 +166,7 @@ public class SolrQueryUtil {
                                                                                      IOException {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setQuery(queryTerm);
-        setFacetParameters(solrQuery, getAllFacetNames(solrServer));
+        setFacetFields(solrQuery, getAllFacetNames(solrServer));
         return solrQuery;
     }
 
@@ -267,8 +267,10 @@ public class SolrQueryUtil {
      *            {@link SolrQuery} to be updated with the given <code>constraints</code>
      */
     public static void addConstraintsToSolrQuery(Set<Constraint> constraints, SolrQuery solrQuery) {
-        for (Constraint constraint : constraints) {
-            solrQuery.addFilterQuery(constraint.getFacet().getLabel(null), constraint.getValue());
+        if (constraints != null) {
+            for (Constraint constraint : constraints) {
+                solrQuery.addFilterQuery(constraint.getFacet().getLabel(null) + ":" + constraint.getValue());
+            }
         }
     }
 }

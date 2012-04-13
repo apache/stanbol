@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * A {@link Facet} is an aspect by which the {@link ConstrainedDocumentSet} can be narrowed. Facets correspond
+ * A {@link Facet} is an aspect by which the {@link ConstrainedDocumentList} can be narrowed. Facets correspond
  * to properties of documents and they are used in the search operations in {@link FeaturedSearch} of
  * Contenthub. Facets are considered as equal if their default labels are the same. Default labels of facets
  * are obtained by providing <code>null</code> to {@link #getLabel(Locale)}.
