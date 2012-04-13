@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.ConstrainedDocumentSet;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.Constraint;
 import org.apache.stanbol.webdav.resources.AbstractCollectionResource;
 
 import com.bradmcevoy.http.Auth;
@@ -21,24 +23,26 @@ import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 
-public class CountResource extends AbstractCollectionResource implements PropFindableResource, GetableResource, CollectionResource {
+public class ConstraintResource extends AbstractCollectionResource implements PropFindableResource, GetableResource, CollectionResource {
 
 
 	private static final String MESSAGE = "Hello world";
-	private Count value;
-	
-	public CountResource(Count value) {
-		this.value = value;
+	private ConstrainedDocumentSet cds;
+	private Constraint constraint;
+
+	public ConstraintResource(ConstrainedDocumentSet cds, Constraint constraint) {
+		this.cds = cds;
+		this.constraint = constraint;
 	}
 
 
 	public String getUniqueId() {
-		return value.getName();
+		return constraint.getValue();
 	}
  
 
 	public String getName() {
-		return value.getName();
+		return constraint.getValue();
 	}
  
 	public Object authenticate(String user, String password) {
@@ -94,6 +98,7 @@ public class CountResource extends AbstractCollectionResource implements PropFin
 		//TODO here we should add:
 		//- The categories as in root for the categories that have an entry that can reduce the current set of matching documents (but not to the empty set) 
 		//- Add the matching items
+		
 		return resources;
 	}
 

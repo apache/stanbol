@@ -24,8 +24,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.ConstrainedDocumentSet;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.Constraint;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.Facet;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.webdav.resources.AbstractCollectionResource;
 
@@ -43,21 +47,24 @@ import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 public class FacetedResource extends AbstractCollectionResource implements PropFindableResource, GetableResource, CollectionResource {
 	 
 	private static final String MESSAGE = "Hello world";
-	private FacetResult fr;
+	private Facet facet;
+	private ConstrainedDocumentSet cds;
  
  
-	public FacetedResource(FacetResult fr) {
-		this.fr = fr;
+
+	public FacetedResource(ConstrainedDocumentSet cds, Facet facet) {
+		this.cds = cds;
+		this.facet = facet;
 	}
 
 
 	public String getUniqueId() {
-		return fr.getFacetField().getName();
+		return facet.getLabel(null);
 	}
  
 
 	public String getName() {
-		return fr.getFacetField().getName();
+		return facet.getLabel(null);
 	}
  
 	public Object authenticate(String user, String password) {
@@ -110,9 +117,9 @@ public class FacetedResource extends AbstractCollectionResource implements PropF
 			throws NotAuthorizedException, BadRequestException {
 		// TODO Auto-generated method stub
 		List<Resource> resources = new ArrayList<Resource>();
-		List<Count> values = fr.getFacetField().getValues();
-		for (Count value : values) {
-			resources.add(new CountResource(value));
+		Set<Constraint> constraints = facet.getConstraints();
+		for (Constraint constraint : constraints) {
+			resources.add(new ConstraintResource(cds, constraint));
 		}
 	/*	resources.add(new FacetedResource("bar1"));
 		resources.add(new FacetedResource("bar2"));

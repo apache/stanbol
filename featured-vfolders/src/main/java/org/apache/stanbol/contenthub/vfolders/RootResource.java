@@ -3,15 +3,20 @@ package org.apache.stanbol.contenthub.vfolders;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.ConstrainedDocumentSet;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.Facet;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.Constraint;
 import org.apache.stanbol.webdav.resources.AbstractCollectionResource;
 
 import com.bradmcevoy.http.Auth;
@@ -74,13 +79,13 @@ public class RootResource extends AbstractCollectionResource implements PropFind
 	
 	public List<Resource> getChildren() {
 		try {
-			SearchResult searchResult = featuredSearch.search("a*");
-			List<FacetResult> facetResults = searchResult.getFacets();
+			ConstrainedDocumentSet cds = featuredSearch.search("*:*", new HashSet<Constraint>());
+			Set<Facet> facetResults = cds.getFacets();
 			List<Resource> resources = new ArrayList<Resource>();
-			for (FacetResult fr : facetResults) {
-				final String name = fr.getFacetField().getName();
+			for (Facet fr : facetResults) {
+				final String name = fr.getLabel(null);
 				System.out.println("name: "+name);
-				resources.add(new FacetedResource(fr));
+				resources.add(new FacetedResource(cds, fr));
 			}
 			//resources.add(new SlingResource());
 			System.out.println("returning: "+resources);
