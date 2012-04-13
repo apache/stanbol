@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -31,6 +32,8 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.Constraint;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.Facet;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
@@ -56,39 +59,6 @@ public class SolrQueryUtil {
     public final static char quotation = '"';
 
     public final static List<Character> queryDelimiters = Arrays.asList(' ', ',');
-
-    private static String getFacetFieldType(String fieldName, List<FacetResult> allAvailableFacets) {
-    	for(FacetResult fr : allAvailableFacets) {
-    		if(fieldName.equals(fr.getFacetField().getName())) {
-    			return fr.getType();
-    		}
-    	}
-    	return "";
-    }
-    
-    private static SolrQuery keywordQueryWithFacets(String keyword, List<FacetResult> allAvailableFacets, Map<String,List<Object>> constraints) {
-        SolrQuery query = new SolrQuery();
-        query.setQuery(keyword);
-        if (constraints != null) {
-            try {
-                for (Entry<String,List<Object>> entry : constraints.entrySet()) {
-                    String fieldName = ClientUtils.escapeQueryChars(entry.getKey());
-                    String type = getFacetFieldType(fieldName, allAvailableFacets);
-                    for (Object value : entry.getValue()) {
-                        if (SolrVocabulary.isRangeType(type)) {
-                            query.addFilterQuery(fieldName + facetDelimiter + (String) value);
-                        } else {
-                            query.addFilterQuery(fieldName + facetDelimiter + quotation
-                                                 + ClientUtils.escapeQueryChars((String) value) + quotation);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("Facet constraints could not be added to Query", e);
-            }
-        }
-        return query;
-    }
 
     private static String removeFacetConstraints(String query) {
         int delimiteri = query.indexOf(facetDelimiter);
@@ -144,7 +114,18 @@ public class SolrQueryUtil {
         return queryFull.trim();
     }
 
-    public static <T> void setDefaultQueryParameters(SolrQuery solrQuery, List<T> allAvailableFacetNames) {
+    /**
+     * This methods adds a facet field the given <code>solrQuery</code> for each facet passed in
+     * <code>allAvailableFacetNames</code>. This provides obtaining information about specified facets such as
+     * possible facet values, number documents of documents matching with certain values of facets, etc in the
+     * search results.
+     * 
+     * @param solrQuery
+     *            {@link SolrQuery} to be extended with facet fields
+     * @param allAvailableFacetNames
+     *            list of facets
+     */
+    public static <T> void setFacetParameters(SolrQuery solrQuery, List<T> allAvailableFacetNames) {
         solrQuery.setFields("*", SCORE_FIELD);
         solrQuery.setFacet(true);
         solrQuery.setFacetMinCount(1);
@@ -166,23 +147,88 @@ public class SolrQueryUtil {
         }
     }
 
-    public static SolrQuery prepareDefaultSolrQuery(SolrServer solrServer, String queryTerm) throws SolrServerException,
-                                                                                            IOException {
+    /**
+     * This method create a {@link SolrQuery} using the given parameters. <code>queryTerm</code> is the main
+     * query of the solr query to be created. <code>solrServer</code> is used fetch possible facet fields of
+     * the underlying Solr schema. Obtained facet names are attached to the query to obtain the corresponding
+     * facet information such as possible facet values, number documents of documents matching with certain
+     * values of facets, etc in the search results.
+     * 
+     * @param solrServer
+     *            Solr server to obtain corresponding facet names
+     * @param queryTerm
+     *            main query term to be used in {@link SolrQuery#setQuery(String)}
+     * @return {@link SolrQuery} constructed by using the given parameters
+     * @throws SolrServerException
+     * @throws IOException
+     */
+    public static SolrQuery prepareSolrQuery(SolrServer solrServer, String queryTerm) throws SolrServerException,
+                                                                                     IOException {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setQuery(queryTerm);
-        setDefaultQueryParameters(solrQuery, getAllFacetNames(solrServer));
+        setFacetParameters(solrQuery, getAllFacetNames(solrServer));
         return solrQuery;
     }
 
-    public static SolrQuery prepareDefaultSolrQuery(String queryTerm) {
+    /**
+     * This method simply wraps the given <code>queryTerm</code> in a {@link SolrQuery} instance.
+     * 
+     * @param queryTerm
+     *            {@link String} query term to be represented as a {@link SolrQuery}
+     * @return {@link SolrQuery} wrapping the given <code>queryTerm</code>
+     */
+    public static SolrQuery prepareSolrQuery(String queryTerm) {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setQuery(queryTerm);
         return solrQuery;
     }
 
-    public static SolrQuery prepareFacetedSolrQuery(String queryTerm, List<FacetResult> allAvailableFacets, Map<String,List<Object>> constraints) {
-        SolrQuery solrQuery = keywordQueryWithFacets(queryTerm, allAvailableFacets, constraints);
-        return solrQuery;
+    /**
+     * This method creates a {@link SolrQuery} with the given parameters. It sets the <code>queryTerm</code>
+     * as the main query and for each constraint passed in the <code>constraints</code> a filter query is
+     * added to the solr query.
+     * 
+     * @param queryTerm
+     *            main query to be used in {@link SolrQuery#setQuery(String)}
+     * @param allAvailableFacets
+     *            {@link FacetResult}s passed in this list are used to check types of the facets.
+     * @param constraints
+     *            additional constraints to be applied in the {@link SolrQuery}.
+     * @return {@link SolrQuery} constructed by using the given parameters
+     */
+    public static SolrQuery prepareSolrQuery(String queryTerm,
+                                             List<FacetResult> allAvailableFacets,
+                                             Map<String,List<Object>> constraints) {
+        SolrQuery query = new SolrQuery();
+        query.setQuery(queryTerm);
+        if (constraints != null) {
+            try {
+                for (Entry<String,List<Object>> entry : constraints.entrySet()) {
+                    String fieldName = ClientUtils.escapeQueryChars(entry.getKey());
+                    String type = getFacetFieldType(fieldName, allAvailableFacets);
+                    for (Object value : entry.getValue()) {
+                        if (SolrVocabulary.isRangeType(type)) {
+                            query.addFilterQuery(fieldName + facetDelimiter + (String) value);
+                        } else {
+                            query.addFilterQuery(fieldName + facetDelimiter + quotation
+                                                 + ClientUtils.escapeQueryChars((String) value) + quotation);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Facet constraints could not be added to Query", e);
+            }
+        }
+        return query;
+    }
+
+    private static String getFacetFieldType(String fieldName, List<FacetResult> allAvailableFacets) {
+        for (FacetResult fr : allAvailableFacets) {
+            if (fieldName.equals(fr.getFacetField().getName())) {
+                return fr.getType();
+            }
+        }
+        return "";
     }
 
     public static List<String> getAllFacetNames(SolrServer solrServer) throws SolrServerException,
@@ -207,6 +253,22 @@ public class SolrQueryUtil {
         } else {
             throw new IllegalStateException(
                     "Fields container is not a NamedList, so there is no facet information available");
+        }
+    }
+
+    /**
+     * This method parses the {@link Set} of {@link Constraint} and update the {@link SolrQuery} with
+     * corresponding field queries. Name of the field is obtained from associated {@link Facet} of a
+     * constraint and the value is obtained from the constraint itself.
+     * 
+     * @param constraints
+     *            {@link Set} of {@link Constraint}s to be transformed into the given <code>solrQuery</code>
+     * @param solrQuery
+     *            {@link SolrQuery} to be updated with the given <code>constraints</code>
+     */
+    public static void addConstraintsToSolrQuery(Set<Constraint> constraints, SolrQuery solrQuery) {
+        for (Constraint constraint : constraints) {
+            solrQuery.addFilterQuery(constraint.getFacet().getLabel(null), constraint.getValue());
         }
     }
 }

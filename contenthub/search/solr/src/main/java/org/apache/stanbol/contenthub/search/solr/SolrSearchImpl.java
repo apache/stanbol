@@ -60,7 +60,7 @@ public class SolrSearchImpl implements SolrSearch {
         SolrServer solrServer = null;
         try {
             solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer();
-            solrQuery = SolrQueryUtil.prepareDefaultSolrQuery(solrServer, queryTerm);
+            solrQuery = SolrQueryUtil.prepareSolrQuery(solrServer, queryTerm);
         } catch (StoreException e) {
             throw new SearchException(e.getMessage(), e);
         } catch (SolrServerException e) {
@@ -79,7 +79,7 @@ public class SolrSearchImpl implements SolrSearch {
         SolrServer solrServer = null;
         try {
             solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(ldProgramName);
-            solrQuery = SolrQueryUtil.prepareDefaultSolrQuery(solrServer, queryTerm);
+            solrQuery = SolrQueryUtil.prepareSolrQuery(solrServer, queryTerm);
         } catch (StoreException e) {
             throw new SearchException(e.getMessage(), e);
         } catch (SolrServerException e) {

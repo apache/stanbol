@@ -47,6 +47,8 @@ import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.search.featured.util.SolrContentItemConverter;
 import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.ConstrainedDocumentSet;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.Constraint;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FeaturedSearch;
@@ -112,7 +114,7 @@ public class FeaturedSearchImpl implements FeaturedSearch {
 
     @Reference
     private ContentItemFactory ciFactory;
-    
+
     private BundleContext bundleContext;
 
     @Activate
@@ -122,7 +124,7 @@ public class FeaturedSearchImpl implements FeaturedSearch {
 
     @Override
     public SearchResult search(String queryTerm) throws SearchException {
-        return search(queryTerm, null, null);
+        return search(queryTerm, "", "");
     }
 
     private List<FacetResult> convertFacetFields(List<FacetField> facetFields, List<FacetResult> allFacets) {
@@ -181,16 +183,45 @@ public class FeaturedSearchImpl implements FeaturedSearch {
 
     @Override
     public SearchResult search(SolrParams solrParams, String ontologyURI, String ldProgramName) throws SearchException {
-        /*
-         * RESTful services uses search method with "SolrParams" argument. For those operations
-         */
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.add(solrParams);
         List<FacetResult> allFacets = getAllFacetResults(ldProgramName);
-        SolrQueryUtil.setDefaultQueryParameters(solrQuery, allFacets);
+        SolrQueryUtil.setFacetParameters(solrQuery, allFacets);
         QueryResponse queryResponse = solrSearch.search(solrQuery, ldProgramName);
         String queryTerm = SolrQueryUtil.extractQueryTermFromSolrQuery(solrParams);
         return search(queryTerm, queryResponse, ontologyURI, ldProgramName, allFacets);
+    }
+
+    @Override
+    public ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints) throws SearchException {
+        SolrQuery query = SolrQueryUtil.prepareSolrQuery(keyword);
+        List<FacetResult> allFacets = getAllFacetResults();
+        SolrQueryUtil.setFacetParameters(query, allFacets);
+        QueryResponse queryResponse = solrSearch.search(query);
+
+        return null;
+    }
+
+    @Override
+    public ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints, String indexName) throws SearchException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints, int offset, int limit) throws SearchException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ConstrainedDocumentSet search(String keyword,
+                                         Set<Constraint> constraints,
+                                         String indexName,
+                                         int offset,
+                                         int limit) throws SearchException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
@@ -252,8 +283,8 @@ public class FeaturedSearchImpl implements FeaturedSearch {
             log.error("Failed to get enmancements for the query term: {}", queryTerm, e);
             error = true;
         } catch (IOException e) {
-            log.error("Failed to create a ContentItem by using "
-                    + ciFactory.getClass().getSimpleName()+"!",e);
+            log.error(
+                "Failed to create a ContentItem by using " + ciFactory.getClass().getSimpleName() + "!", e);
             error = true;
         }
 
