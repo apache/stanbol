@@ -47,7 +47,7 @@ import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.search.featured.util.SolrContentItemConverter;
 import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.ConstrainedDocumentList;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.ConstrainedDocumentSet;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.Constraint;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
@@ -57,6 +57,7 @@ import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearchManager;
 import org.apache.stanbol.contenthub.servicesapi.search.solr.SolrSearch;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
+import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
@@ -193,35 +194,25 @@ public class FeaturedSearchImpl implements FeaturedSearch {
     }
 
     @Override
-    public ConstrainedDocumentList search(String keyword, Set<Constraint> constraints) throws SearchException {
+    public ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints) throws SearchException {
+        return performSearch(keyword, constraints, SolrCoreManager.CONTENTHUB_DEFAULT_INDEX_NAME);
+    }
+
+    @Override
+    public ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints, String indexName) throws SearchException {
+        return performSearch(keyword, constraints, indexName);
+    }
+
+    private ConstrainedDocumentSet performSearch(String keyword, Set<Constraint> constraints, String indexName) throws SearchException {
         SolrQuery query = SolrQueryUtil.prepareSolrQuery(keyword);
         SolrQueryUtil.addConstraintsToSolrQuery(constraints, query);
         List<FacetResult> allFacets = getAllFacetResults();
         SolrQueryUtil.setFacetFields(query, allFacets);
+        query.setRows(Integer.MAX_VALUE);
+        query.setFields(SolrFieldName.ID.toString(), SolrFieldName.ENHANCEMENTCOUNT.toString(),
+            SolrFieldName.TITLE.toString(), SolrFieldName.MIMETYPE.toString());
         QueryResponse queryResponse = solrSearch.search(query);
-        return new DefaultConstrainedDocumentList(keyword, queryResponse, constraints, this);
-    }
-
-    @Override
-    public ConstrainedDocumentList search(String keyword, Set<Constraint> constraints, String indexName) throws SearchException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public ConstrainedDocumentList search(String keyword, Set<Constraint> constraints, int offset, int limit) throws SearchException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public ConstrainedDocumentList search(String keyword,
-                                          Set<Constraint> constraints,
-                                          String indexName,
-                                          int offset,
-                                          int limit) throws SearchException {
-        // TODO Auto-generated method stub
-        return null;
+        return new DefaultConstrainedDocumentSet(keyword, queryResponse, constraints, indexName, this);
     }
 
     @Override

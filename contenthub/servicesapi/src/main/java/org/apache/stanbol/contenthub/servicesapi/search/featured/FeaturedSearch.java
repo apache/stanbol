@@ -116,9 +116,9 @@ public interface FeaturedSearch {
 
     /**
      * This method searches the given <code>keyword</code> in the default index of Contenthub considering the
-     * given <code>constraints</code>. Results are returned in a {@link ConstrainedDocumentList} instance and
+     * given <code>constraints</code>. Results are returned in a {@link ConstrainedDocumentSet} instance and
      * all search results are returned without considering any <i>offset</i> or <i>limit</i> value.
-     * Furthermore, returned {@link ConstrainedDocumentList} contains {@link Constraint}s that were used to
+     * Furthermore, returned {@link ConstrainedDocumentSet} contains {@link Constraint}s that were used to
      * filter the results and all possible {@link Facet}s that can be used to filter results even more.
      * 
      * @param keyword
@@ -126,17 +126,17 @@ public interface FeaturedSearch {
      * @param constraints
      *            a {@link Set} of {@link Constraint}s to be provided in addition to initial query
      *            <code>keyword</code>
-     * @return an instance of {@link ConstrainedDocumentList} including the search results and additional
+     * @return an instance of {@link ConstrainedDocumentSet} including the search results and additional
      *         {@link Constraint} and {@link Facet} information.
      * @throws SearchException
      */
-    ConstrainedDocumentList search(String keyword, Set<Constraint> constraints) throws SearchException;
+    ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints) throws SearchException;
 
     /**
      * This method searches the given <code>keyword</code> in the Solr index identified by the given
      * <code>indexName</code> considering the given <code>constraints</code>. Results are returned in a
-     * {@link ConstrainedDocumentList} instance and all search results are returned without considering any
-     * <i>offset</i> or <i>limit</i> value. Furthermore, returned {@link ConstrainedDocumentList} contains
+     * {@link ConstrainedDocumentSet} instance and all search results are returned without considering any
+     * <i>offset</i> or <i>limit</i> value. Furthermore, returned {@link ConstrainedDocumentSet} contains
      * {@link Constraint}s that were used to filter the results and all possible {@link Facet}s that can be
      * used to filter results even more.
      * 
@@ -147,67 +147,11 @@ public interface FeaturedSearch {
      *            <code>keyword</code>
      * @param indexName
      *            name of the index (Solr core) on which search will be done
-     * @return an instance of {@link ConstrainedDocumentList} including the search results and additional
+     * @return an instance of {@link ConstrainedDocumentSet} including the search results and additional
      *         {@link Constraint} and {@link Facet} information.
      * @throws SearchException
      */
-    ConstrainedDocumentList search(String keyword, Set<Constraint> constraints, String indexName) throws SearchException;
-
-    /**
-     * This method searches the given <code>keyword</code> in the default index of Contenthub considering the
-     * given <code>constraints</code>. Results are returned in a {@link ConstrainedDocumentList} instance and
-     * search results are selected according to given <code>offset</code> and <code>limit</code> parameters.
-     * This allows pagination on the search results. Furthermore, returned {@link ConstrainedDocumentList}
-     * contains {@link Constraint}s that were used to filter the results and all possible {@link Facet}s that
-     * can be used to filter results even more.
-     * 
-     * @param keyword
-     *            keyword to be searched
-     * @param constraints
-     *            a {@link Set} of {@link Constraint}s to be provided in addition to initial query
-     *            <code>keyword</code>
-     * @param offset
-     *            a subset of all search results for the given <code>keyword</code> and
-     *            <code>constraints</code> is obtained starting from this value.
-     * @param limit
-     *            a subset having the size of this value of all search results for the given
-     *            <code>keyword</code> and <code>constraints</code> is obtained starting from
-     *            <code>offset</code>.
-     * @return an instance of {@link ConstrainedDocumentList} including the search results and additional
-     *         {@link Constraint} and {@link Facet} information.
-     * @throws SearchException
-     */
-    ConstrainedDocumentList search(String keyword, Set<Constraint> constraints, int offset, int limit) throws SearchException;
-
-    /**
-     * This method searches the given <code>keyword</code> in the Solr index identified by the given
-     * <code>indexName</code> considering the given <code>constraints</code>. Results are returned in a
-     * {@link ConstrainedDocumentList} instance and search results are selected according to given
-     * <code>offset</code> and <code>limit</code> parameters. This allows pagination on the search results.
-     * Furthermore, returned {@link ConstrainedDocumentList} contains {@link Constraint}s that were used to
-     * filter the results and all possible {@link Facet}s that can be used to filter results even more.
-     * 
-     * @param keyword
-     *            keyword to be searched
-     * @param constraints
-     *            a {@link Set} of {@link Constraint}s to be provided in addition to initial query
-     *            <code>keyword</code>
-     * @param offset
-     *            a subset of all search results for the given <code>keyword</code> and
-     *            <code>constraints</code> is obtained starting from this value.
-     * @param limit
-     *            a subset having the size of this value of all search results for the given
-     *            <code>keyword</code> and <code>constraints</code> is obtained starting from
-     *            <code>offset</code>.
-     * @return an instance of {@link ConstrainedDocumentList} including the search results and additional
-     *         {@link Constraint} and {@link Facet} information.
-     * @throws SearchException
-     */
-    ConstrainedDocumentList search(String keyword,
-                                  Set<Constraint> constraints,
-                                  String indexName,
-                                  int offset,
-                                  int limit) throws SearchException;
+    ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints, String indexName) throws SearchException;
 
     /**
      * This method obtains the available field names of the default index of Contenthub.

@@ -21,49 +21,59 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.stanbol.contenthub.search.featured.util.SolrContentItemConverter;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
-import org.apache.stanbol.contenthub.servicesapi.search.featured.ConstrainedDocumentList;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.ConstrainedDocumentSet;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.Constraint;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.Facet;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.FeaturedSearch;
-import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 
-public class DefaultConstrainedDocumentList implements ConstrainedDocumentList {
+/**
+ * This implementation of {@link ConstrainedDocumentSet} retrieves all results without any smart retrieval
+ * technique e.g retrieve actual documents from the storage when the respective documents are accessed.
+ * 
+ * @author suat
+ * 
+ */
+public class DefaultConstrainedDocumentSet implements ConstrainedDocumentSet {
 
     private String queryTerm;
     private FeaturedSearch featuredSearch;
-    private List<UriRef> documentURIs;
+    private String indexName;
+    private List<DocumentResult> documentURIs;
     private Set<Constraint> constraints;
     private Set<Facet> facets;
 
-    public DefaultConstrainedDocumentList(String queryTerm,
-                                          QueryResponse queryResponse,
-                                          Set<Constraint> constraints,
-                                          FeaturedSearch featuredSearch) throws SearchException {
+    public DefaultConstrainedDocumentSet(String queryTerm,
+                                         QueryResponse queryResponse,
+                                         Set<Constraint> constraints,
+                                         String indexName,
+                                         FeaturedSearch featuredSearch) throws SearchException {
         this.queryTerm = queryTerm;
+        this.indexName = indexName;
         this.featuredSearch = featuredSearch;
-        parseQueryResponse(queryResponse);
         this.constraints = constraints;
+        parseQueryResponse(queryResponse);
     }
 
     @Override
-    public List<UriRef> getDocuments() throws SearchException {
+    public List<DocumentResult> getDocuments() throws SearchException {
         return documentURIs;
     }
 
     private void parseQueryResponse(QueryResponse queryResponse) {
         // parse ids
-        List<UriRef> ids = new ArrayList<UriRef>();
+        List<DocumentResult> ids = new ArrayList<DocumentResult>();
         SolrDocumentList documentList = queryResponse.getResults();
         for (SolrDocument solrDocument : documentList) {
-            ids.add(new UriRef((String) solrDocument.getFieldValue(SolrFieldName.ID.toString())));
+            ids.add(SolrContentItemConverter.solrDocument2solrContentItem(solrDocument, indexName));
         }
         documentURIs = ids;
 
@@ -94,21 +104,17 @@ public class DefaultConstrainedDocumentList implements ConstrainedDocumentList {
         return this.facets;
     }
 
-    public ConstrainedDocumentList subSet(int offset, int limit) throws SearchException {
-        return featuredSearch.search(queryTerm, getConstraints(), offset, limit);
-    }
-
     @Override
-    public ConstrainedDocumentList narrow(Constraint constraint) throws SearchException {
+    public ConstrainedDocumentSet narrow(Constraint constraint) throws SearchException {
         Set<Constraint> newConstraints = new HashSet<Constraint>(getConstraints());
         newConstraints.add(constraint);
-        return featuredSearch.search(queryTerm, newConstraints);
+        return featuredSearch.search(queryTerm, newConstraints, indexName);
     }
 
     @Override
-    public ConstrainedDocumentList broaden(Constraint constraint) throws SearchException {
+    public ConstrainedDocumentSet broaden(Constraint constraint) throws SearchException {
         Set<Constraint> newConstraints = new HashSet<Constraint>(getConstraints());
         newConstraints.remove(constraint);
-        return featuredSearch.search(queryTerm, newConstraints);
+        return featuredSearch.search(queryTerm, newConstraints, indexName);
     }
 }
