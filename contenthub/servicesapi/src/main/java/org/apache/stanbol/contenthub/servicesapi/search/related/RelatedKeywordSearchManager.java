@@ -70,20 +70,6 @@ public interface RelatedKeywordSearchManager {
     SearchResult getRelatedKeywordsFromAllSources(String keyword, String ontologyURI) throws SearchException;
 
     /**
-     * Searches related keywords in the Wordnet database for the given <code>keyword</code>.
-     * 
-     * @param keyword
-     *            Keyword for which related keywords will be obtained
-     * @return a {@link SearchResult} instance which encapsulates the related keyword {@link Map}. This map
-     *         would have a single key which is the given <code>keyword</code>. The value corresponding to the
-     *         key is another map. It also has a single key which indicates the "Wordnet" source. Value
-     *         corresponding to this key contains {@link List} of {@link RelatedKeyword}s obtained from
-     *         Wordnet.
-     * @throws SearchException
-     */
-    SearchResult getRelatedKeywordsFromWordnet(String keyword) throws SearchException;
-
-    /**
      * Searches related keywords from the ontology specified by <code>ontologyURI</code> for the given
      * <code>keyword</code>.
      * 

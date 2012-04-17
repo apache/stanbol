@@ -116,7 +116,7 @@ public class RelatedKeywordResource extends BaseStanbolResource {
             return Response.status(Status.BAD_REQUEST).build();
         }
 
-        keyword = RestUtil.nullify(keyword);
+		keyword = RestUtil.nullify(keyword);
         if (keyword == null) {
             String msg = "RelatedKeywordResource.findAllRelatedKeywords requires \"keyword\" parameter. \"graphURI\" is optional";
             log.error(msg);
@@ -127,39 +127,6 @@ public class RelatedKeywordResource extends BaseStanbolResource {
         SearchResult searchResult = relatedKeywordSearchManager.getRelatedKeywordsFromAllSources(keyword,
             graphURI);
 
-        return prepareResponse(searchResult, headers);
-    }
-
-    /**
-     * HTTP GET method to retrieve related keywords from Wordnet. If a Wordnet database is not installed into
-     * Contenthub, this method cannot find any related keywords.
-     * 
-     * @param keyword
-     *            The keyword whose related keywords will be retrieved from Wordnet.
-     * @param headers
-     *            HTTP headers
-     * @return JSON string which is constructed by {@link SearchResultWriter}. {@link SearchResult} returned
-     *         by {@link RelatedKeywordSearchManager#getRelatedKeywordsFromWordnet(String)} contains only related keywords from Wordnet. (No
-     *         resultant documents or facet fields are returned within the {@link SearchResult}).
-     * @throws SearchException
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/wordnet")
-    public final Response findWordnetRelatedKeywords(@QueryParam("keyword") String keyword,
-                                                     @Context HttpHeaders headers) throws SearchException {
-        if (!RestUtil.isJSONaccepted(headers)) {
-            return Response.status(Status.BAD_REQUEST).build();
-        }
-
-        keyword = RestUtil.nullify(keyword);
-        if (keyword == null) {
-            String msg = "RelatedKeywordResource.findWordnetRelatedKeywords requires \"keyword\" parameter.";
-            log.error(msg);
-            throw new IllegalArgumentException(msg);
-        }
-
-        SearchResult searchResult = relatedKeywordSearchManager.getRelatedKeywordsFromWordnet(keyword);
         return prepareResponse(searchResult, headers);
     }
 
