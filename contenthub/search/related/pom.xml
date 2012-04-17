@@ -81,17 +81,4 @@ Finds related keywords from various types of source e.g Wordnet, an external ont
       <artifactId>arq</artifactId>
     </dependency>
   </dependencies>
-
-  <repositories>
-    <repository>
-      <releases>
-        <updatePolicy>always</updatePolicy>
-      </releases>
-      <snapshots>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-      <id>local-wordnet-repo</id>
-      <url>file://localhost/${project.basedir}/src/main/resources/local-maven-repository</url>
-    </repository>
-  </repositories>
 </project>
