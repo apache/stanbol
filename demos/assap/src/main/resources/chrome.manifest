@@ -1,4 +1,0 @@
-content	assap	content/
-locale	assap	en-US	locale/en-US/
-skin    assap	classic/1.0	skin/
-overlay	chrome://browser/content/browser.xul    chrome://assap/content/overlay.xul
