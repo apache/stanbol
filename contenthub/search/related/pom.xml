@@ -35,12 +35,6 @@ Finds related keywords from various types of source e.g Wordnet, an external ont
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Embed-Dependency>jaws</Embed-Dependency>
-            <Export-Package>edu.smu.tspell.*</Export-Package>
-          </instructions>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -85,12 +79,6 @@ Finds related keywords from various types of source e.g Wordnet, an external ont
     <dependency>
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>arq</artifactId>
-    </dependency>
-
-    <!-- Jaws Wordnet client -->
-    <dependency>
-      <groupId>edu.smu.tspell</groupId>
-      <artifactId>jaws</artifactId>
     </dependency>
   </dependencies>
 
