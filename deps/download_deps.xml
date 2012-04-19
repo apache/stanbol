@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project name="Dependency Download Helper" default="download" basedir=".">
+  <description>
+    Contains only a single target that is used by the Maven Ant
+    plugin to download dependencies from the web.
+  </description>
+
+  <property name="download.dir" location="target/download" />
+  <property name="deps.dir" location="target/deps" />
+
+  <target name="download">
+    <mkdir dir="${download.dir}" />
+    <mkdir dir="${deps.dir}" />
+    <antcall target="owlapi" />
+  </target>
+
+  <target name="owlapi">
+    <echo>Downloading OWL API 3.2.3...</echo>
+    <copy todir="${download.dir}" flatten="true">
+      <resources>
+        <url url="http://dfn.dl.sourceforge.net/project/owlapi/OWL%20API%20%28for%20OWL%202.0%29/3.2.3/owlapi-3.2.3.zip"/>
+      </resources>
+    </copy>
+
+    <mkdir dir="${deps.dir}/owlapi-3.2.3" />
+    <unzip src="${download.dir}/owlapi-3.2.3.zip" dest="${deps.dir}/owlapi-3.2.3">
+      <patternset>
+        <include name="*.jar"/>
+      </patternset>
+    </unzip>
+  </target>
+</project>
