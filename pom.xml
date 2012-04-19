@@ -171,24 +171,6 @@
                 <exclude>reasoners/web/src/main/resources/org/apache/stanbol/reasoners/web/static/jquery/jquery-1.6.1</exclude>
                 <exclude>rules/web/src/main/resources/org/apache/stanbol/rules/web/static/jquery/jquery-1.6.1</exclude>
                 <exclude>enhancer/jersey/src/main/resources/org/apache/stanbol/enhancer/jersey/static/openlayers-2.9/**</exclude>
-                <exclude>commons/owl/**</exclude>
-
-                <!-- unstable and not release relevant stuff -->
-                <exclude>PLAYGROUND.txt</exclude>
-                <exclude>conventions/**</exclude>
-                <exclude>contrib/**</exclude>
-                <exclude>enhancer/data/text-examples/**</exclude>
-                <exclude>enhancer/query-rendering/**</exclude>
-                <exclude>enhancer/stores/**</exclude>
-                <exclude>enhancer/autotagging/**</exclude>
-                <exclude>enhancer/engines/autotagging/**</exclude>
-                <exclude>enhancer/SemiAutomaticContentEnhancer/**</exclude>
-                <exclude>enhancer/engines/taxonomylinking/**</exclude>
-                <exclude>demos/**</exclude>
-                <exclude>launchers/kres/**</exclude>
-                <exclude>reasoners/hermit/**</exclude>
-                <exclude>reasoners/owllink/**</exclude>
-                <exclude>reengineer/**</exclude>
 
                 <!-- exclude hidden files -->
                 <exclude>**/.*</exclude>
