@@ -31,7 +31,7 @@ under the License.
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-framework-source-release-assembly-descriptor</artifactId>
   <packaging>jar</packaging>
-  <version>0.9.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   
   <name>Apache Stanbol Framework Source Release Assembly Descriptor</name>
   <description>

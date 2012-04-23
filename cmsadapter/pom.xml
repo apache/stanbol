@@ -22,7 +22,7 @@
 
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.cmsadapter.reactor</artifactId>
-	<version>0.9.0-incubating-SNAPSHOT</version>
+	<version>0.10.0-incubating-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	
 	<name>Apache Stanbol CMS Adapter Reactor</name>

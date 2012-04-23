@@ -40,7 +40,7 @@
     <bundle> <!-- The Apache Stanbol default configuration -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.defaultconfig</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle> <!-- dbpedia is includes as default data set -->
       <groupId>org.apache.stanbol</groupId>

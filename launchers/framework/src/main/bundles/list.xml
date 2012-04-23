@@ -44,7 +44,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
 
@@ -67,39 +67,39 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
     <!-- EnhancementJobManager implementations -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.eventjobmanager</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
     <!-- Enhancement Chain implementations -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.allactive</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.graph</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.weighted</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.list</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
   <!-- Stanbol Web Fragments -->
@@ -107,13 +107,13 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
     <!-- Benchmarks for the Stanbol Enhancer -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.benchmark</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
   
@@ -122,7 +122,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.factstore</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
  
@@ -131,7 +131,7 @@
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.owl</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<version>0.10.0-incubating-SNAPSHOT</version>
 	  </bundle>
   </startLevel>
 
