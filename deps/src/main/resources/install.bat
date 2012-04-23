@@ -33,4 +33,4 @@ echo.
 pause
 
 echo Installing OWL API 3.2.3
-call mvn install:install-file -DpomFile=deps\owlapi-3.2.3\owlapi-3.2.3.pom -Dfile=deps\owlapi-3.2.3\owlapi-bin.jar -Dsource=-Dfile=deps\owlapi-3.2.3\owlapi-src.jar
+call mvn install:install-file -DpomFile=deps\owlapi-3.2.3\owlapi-3.2.3.pom -Dfile=deps\owlapi-3.2.3\owlapi-bin.jar -Dsources=deps\owlapi-3.2.3\owlapi-src.jar
