@@ -171,7 +171,8 @@
                 <exclude>reasoners/web/src/main/resources/org/apache/stanbol/reasoners/web/static/jquery/jquery-1.6.1</exclude>
                 <exclude>rules/web/src/main/resources/org/apache/stanbol/rules/web/static/jquery/jquery-1.6.1</exclude>
                 <exclude>enhancer/jersey/src/main/resources/org/apache/stanbol/enhancer/jersey/static/openlayers-2.9/**</exclude>
-
+                <exclude>deps/src/main/resources/install.bat</exclude>
+                
                 <!-- exclude hidden files -->
                 <exclude>**/.*</exclude>
                 <exclude>**/.*/*</exclude>
