@@ -37,19 +37,6 @@
     constructs of the OWL and OWL 2 languages.
   </description>
 
-  <repositories>
-    <repository>
-      <releases>
-        <updatePolicy>always</updatePolicy>
-      </releases>
-      <snapshots>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-      <id>reasoners-owlapi-embedded</id>
-      <url>file://localhost/${project.basedir}/src/main/resources/maven/repo</url>
-    </repository>
-  </repositories>
-
   <inceptionYear>2010</inceptionYear>
 
   <build>
@@ -83,22 +70,6 @@
             </Import-Package>
             <_nouses>true</_nouses>
         </instructions>
-      </configuration>
-    </plugin>
-    <plugin>
-      <groupId>org.apache.rat</groupId>
-      <artifactId>apache-rat-plugin</artifactId>
-      <configuration>
-        <excludes>
-          <!-- AL20 License -->
-          <exclude>src/license/THIRD-PARTY.properties</exclude>
-
-          <!-- See src/main/resources/maven/repo/README file -->
-          <exclude>src/main/resources/maven/repo/owlapi/owlapi/maven-metadata-local.xml</exclude>
-          <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.3/owlapi-3.2.3.pom</exclude>
-          <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.3/owlapi-3.2.3.jar</exclude>
-          <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.3/owlapi-3.2.3-sources.jar</exclude>
-        </excludes>
       </configuration>
     </plugin>
     <plugin>
@@ -144,7 +115,7 @@
     <artifactId>arq</artifactId>
   </dependency>
   <dependency>
-    <groupId>owlapi</groupId>
+    <groupId>net.sourceforge.owlapi</groupId>
     <artifactId>owlapi</artifactId>
   </dependency>
 

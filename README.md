@@ -20,88 +20,107 @@
 Apache Stanbol is a modular set of components and HTTP services for
 semantic content management.
 
-## Building Stanbol
 
-To build Stanbol you need a JDK 1.6 and Maven 2.2.1 installed. You probably
-need
+## Prepare Your Environment
+
+To build Apache Stanbol you need a JDK 1.6 and Apache Maven 2.2.1
+installed. You probably need to set these Maven options to increase
+the available amount of memory for the Maven instance.
 
     $ export MAVEN_OPTS="-Xmx512M -XX:MaxPermSize=128M"
 
-The Stanbol build system consists of the following profiles:
+### Third Party Dependencies
 
-   - 'stack'     - to build the Stanbol Stack
+Apache Stanbol has a lot of dependencies to third party libraries. Normally,
+these are downloaded automatically by Maven during the build process from
+the Maven central repository. But Apache Stanbol 0.9.0-incubating has one
+depndency that is not available via Maven central. Therefore, you have to
+install this manually into your local Maven repository.
+
+Third party dependencies which are not available via Maven central:
+
+  - OWL API version 3.2.3 from http://owlapi.sourceforge.net/
+    License: Apache License, Version 2.0
+
+You can download the required dependency for your version of Apache
+Stanbol by downloading the Apache Stanbol -deps package from:
+
+http://www.apache.org/dist/incubator/stanbol/apache-stanbol-0.9.0-incubating-deps/
+
+*Note*, this -deps package download is only provided for your convinience.
+It is not part of any official Apache Stanbol source release. You can
+also generate the -deps package by going to the /deps folder in the source
+tree and following the instructions there.
+
+Another alternative would be to download the dependency from their project
+website and install it manually in your local Maven repository. You could use
+the following Maven command for this:
+
+    $ mvn install:install-file -Dfile=owlapi-bin.jar -Dsource=owlapi-src.jar \
+        -DgroupId=net.sourceforge.owlapi -DartifactId=owlapi -Dversion=3.2.3
+
+If you have decided to download the -deps package, you should extract its
+content and execute the included script.
+
+    $ install.[sh|bat]
+
+This will also install the deps into your local Maven repository.
+
+### The Build System
+
+The Apache Stanbol build system consists of the following profiles:
+
+   - 'stack'     - DEFAULT - to build the Stanbol Stack
    - 'framework' - to build the Stanbol Framework only
-   - 'kres'      - to build additional Reasoning components that
-                   are not yet in a stable state
 
-If you build Stanbol from a source tree that contains the whole Stanbol
-project, the 'stack' profile is activated by default. If you whish to activate
-another profile use the Maven -P command line switch.
+If you build Apache Stanbol from a source tree, the 'stack' profile
+is activated by default. If you whish to activate another profile use the
+Maven -P command line switch.
 
-If you build Stanbol from a source tree that just contains the Stanbol
-Framework, e.g. after downloading a Stanbol Framework source release, the
-'framework' profile will be activated by default.
-
-If you want to skip the tests for any build profile, add `-DskipTests` to the
-Maven command.
+If you want to skip the tests, add `-DskipTests` to the Maven command.
 
 
-## Building the Stanbol Stack
+## Building the Apache Stanbol Stack
 
-This builds the Stanbol Framework plus available Enhancement Engines and a
+This builds Apache Stanbol including all available Enhancement Engines and a
 default set of linked open data for the EntityHub. If you want to have a ready
-to use version of Stanbol, this is the way to go.
+to use version of Apache Stanbol, this is the way to go.
 
-In the Stanbol source directory type
+In the Apache Stanbol source directory type
 
     $ mvn install
 
-### Launching the Stanbol server
+or if you want to clean a previous built version before use
 
-The recommended lanchers are packaged under the `launchers/` folder. For
+    $ mvn clean install
+
+## Launching the Apache Stanbol Server
+
+The Apache Stanbol server lanchers are packaged under the `launchers/` folder. For
 instance:
 
-    $ java -Xmx1g -jar launchers/full/target/org.apache.stanbol.launchers.full-0.9.0-incubating-SNAPSHOT.jar
+    $ java -Xmx1g -jar launchers/full/target/org.apache.stanbol.launchers.full-0.9.0-incubating.jar
 
-Your instance is then available on <http://localhost:8080>. You can change the
-default port number by passing a `-p 9090` options to the commandline launcher.
+Your Apache Stanbol server instance is then available on <http://localhost:8080>.
+You can change the default port number by passing a `-p 9090` options to the
+commandline launcher.
 
 Upon first startup, a folder named `sling/` is created in the current folder.
 This folder will hold the files for any database used by Stanbol, deployment
 configuration and logs.
 
-If Stanbol is launched with a FactStore a folder named `factstore` is created
+If Apache Stanbol is launched with a FactStore a folder named `factstore` is created
 in the current folder. This folder holds the FactStore database (Apache Derby).
 
-
-## Building the Stanbol Framework only
-
-This build is used to build the Stanbol Framework only. That is without any
-Enhancement Engines or prepared linked open data indexes for the EntityHub.
-
-In the Stanbol source directory type
-
-    $ mvn install -Pframework
-
-If you build Stanbol from a source tree that just contains the Stanbol
-Framework, e.g. after downloading a Stanbol Framework source release, the
-'framework' is activated automatically and it is enough to type
-
-    $ mvn install
-    
-
-## Preloading the Entity Hub cache with a DBpedia index
-
-TODO: write me!
-
+You can now start to explore Apache Stanbol and its services. Have fun!
 
 ## Importing the source code as Eclipse projects
 
-Eclipse is the most popular IDE among Stanbol developers. Here are
+Eclipse is the most popular IDE among Apache Stanbol developers. Here are
 instructions to get you started with this IDE. For other IDEs / editors,
 please refer to their documentation and maven integration plugins.
 
-To generate the Eclipse project definition files, go to Stanbol source
+To generate the Eclipse project definition files, go to the Apache Stanbol source
 directory and type:
 
     $ mvn eclipse:eclipse
@@ -131,10 +150,10 @@ You can then apply the formatter to a selected area of a Java source code files
 by pressing `Shift+Ctrl+F`.
 
 
-## Debugging a Stanbol instance from Eclipse
+## Debugging an Apache Stanbol instance from Eclipse
 
-To debug a locally running Stanbol instance from eclipse, run the stanbol
-launcher with::
+To debug a locally running Apache Stanbol instance from eclipse, run the Apache
+Stanbol launcher with::
 
     $ java -Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n \
            -jar org.apache.stanbol.some.launcher.0.9-SNAPSHOT.jar -p 8080
@@ -142,24 +161,26 @@ launcher with::
 In eclipse, you can then create a new "Debug Configuration" with type "Remote
 Java Application" and connect it to localhost on port 8787.
 
+
 ## License check via the Apache's Release Audit Tool (RAT)
 
-To check for license headers within the source code Stanbol uses the RAT Maven
+To check for license headers within the source code, Apache Stanbol uses the RAT Maven
 plugin [1]. You can activate a 'rat:check' by using the 'rat' Maven profile.
 
-For example to check the licenses in the Stanbol Framework use
+For example to check the license headers in Apache Stanbol use
 
     $ mvn install -Prat
 
-## Release Apache Stanbol
+
+## Apache Stanbol Release Process
 
 You should read [1,2] before doing any release related actions.
 
 To do a release test build, you have to activate the 'apache-release' profile.
-For building the framework plus signing the artifacts as it would be done during
+For building Apache Stanbol plus signing the artifacts as it would be done during
 a release you can use
 
-    $ mvn install -Pframework,apache-release
+    $ mvn install -Pstack,apache-release
 
 The 'apache-release' profile will be automatically activated when the Maven
 release plugin [3] is used. For doing official release you start with
@@ -170,11 +191,11 @@ release plugin [3] is used. For doing official release you start with
 [2] http://incubator.apache.org/guides/releasemanagement.html
 [3] http://maven.apache.org/plugins/maven-release-plugin/
 
+
 ## Useful links
 
-  - Documentation will be published and mailing lists info on [the official
+  - Documentation is published and mailing lists info on [the official
     Stanbol page](http://incubator.apache.org/stanbol/)
 
   - Please report bugs on the [Apache issue tracker](
     https://issues.apache.org/jira/browse/STANBOL)
-

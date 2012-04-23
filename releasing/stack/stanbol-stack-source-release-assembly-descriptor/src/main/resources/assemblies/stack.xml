@@ -30,33 +30,10 @@
         <include>*/**</include>
       </includes>
       <excludes>
-        <exclude>PLAYGROUND.txt</exclude>
-
         <!-- license issues -->
-        <exclude>enhancer/engines/metaxa/**</exclude>
-        <exclude>reasoners/hermit/**</exclude>
-        <exclude>reasoners/owllink/**</exclude>
         <exclude>data/opennlp/lang/**/*.bin</exclude>
         <exclude>data/opennlp/ner/**/*.bin</exclude>
         <exclude>data/sites/dbpedia/**/*.zip</exclude>
-
-        <!-- unstable/old stuff in enhancer -->
-        <exclude>enhancer/autotagging/**</exclude>
-        <exclude>enhancer/engines/autotagging/**</exclude>
-        <exclude>enhancer/dereferencing/**</exclude>
-        <exclude>enhancer/query-rendering/**</exclude>
-        <exclude>enhancer/SemiAutomaticContentEnhancer/**</exclude>
-        <exclude>enhancer/stores/**</exclude>
-
-
-        <!-- demos have their own release cycle -->
-        <exclude>demos/**</exclude>
-
-        <!-- exclude components of KReS profile -->
-        <exclude>ontologymanager/store/**</exclude>
-        <exclude>reengineering/**</exclude>
-        <exclude>explanation/**</exclude>
-        <exclude>launchers/kres/**</exclude>
 
         <!-- SCM files -->
         <exclude>.gitignore</exclude>
