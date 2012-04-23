@@ -31,51 +31,56 @@ the available amount of memory for the Maven instance.
 
 ### Third Party Dependencies
 
-Apache Stanbol has dependencies to third party libraries that are not
-available via the Maven central repository, yet. Therefore, you have to
-install them manually into your local Maven repository.
+Apache Stanbol has a lot of dependencies to third party libraries. Normally,
+these are downloaded automatically by Maven during the build process from
+the Maven central repository. But Apache Stanbol 0.9.0-incubating has one
+depndency that is not available via Maven central. Therefore, you have to
+install this manually into your local Maven repository.
 
 Third party dependencies which are not available via Maven central:
 
   - OWL API version 3.2.3 from http://owlapi.sourceforge.net/
     License: Apache License, Version 2.0
 
-You can download the required dependencies for your version of Apache
+You can download the required dependency for your version of Apache
 Stanbol by downloading the Apache Stanbol -deps package from:
 
-TODO
+http://www.apache.org/dist/incubator/stanbol/apache-stanbol-0.9.0-incubating-deps/
 
-*Note*, that this -deps package download is only provided for your convinience.
+*Note*, this -deps package download is only provided for your convinience.
 It is not part of any official Apache Stanbol source release. You can
-also generate the -deps package by going to the /deps folder and following the
-instructions there. Third alternative would be to download the
-dependencies from their project websites and install them in the local
-Maven repository.
+also generate the -deps package by going to the /deps folder in the source
+tree and following the instructions there.
 
-If you have decided to download or generate the deps package, you
-should extract it and execute the included 'install.[sh|bat]' script.
-This will install the deps into your local Maven repository.
+Another alternative would be to download the dependency from their project
+website and install it manually in your local Maven repository. You could use
+the following Maven command for this:
+
+    $ mvn install:install-file -Dfile=owlapi-bin.jar -Dsource=owlapi-src.jar \
+        -DgroupId=net.sourceforge.owlapi -DartifactId=owlapi -Dversion=3.2.3
+
+If you have decided to download the -deps package, you should extract its
+content and execute the included script.
+
+    $ install.[sh|bat]
+
+This will also install the deps into your local Maven repository.
 
 ### The Build System
 
-The Stanbol build system consists of the following profiles:
+The Apache Stanbol build system consists of the following profiles:
 
    - 'stack'     - DEFAULT - to build the Stanbol Stack
    - 'framework' - to build the Stanbol Framework only
 
-If you build Stanbol from a source tree that contains the whole Stanbol
-project, the 'stack' profile is activated by default. If you whish to activate
-another profile use the Maven -P command line switch.
+If you build Apache Stanbol from a source tree, the 'stack' profile
+is activated by default. If you whish to activate another profile use the
+Maven -P command line switch.
 
-If you build Stanbol from a source tree that just contains the Stanbol
-Framework, e.g. after downloading a Stanbol Framework source release, the
-'framework' profile will be activated by default.
-
-If you want to skip the tests for any build profile, add `-DskipTests` to the
-Maven command.
+If you want to skip the tests, add `-DskipTests` to the Maven command.
 
 
-## Building Apache the Stanbol Stack
+## Building the Apache Stanbol Stack
 
 This builds Apache Stanbol including all available Enhancement Engines and a
 default set of linked open data for the EntityHub. If you want to have a ready
@@ -85,16 +90,20 @@ In the Apache Stanbol source directory type
 
     $ mvn install
 
+or if you want to clean a previous built version before use
+
+    $ mvn clean install
 
 ## Launching the Apache Stanbol Server
 
-The recommended lanchers are packaged under the `launchers/` folder. For
+The Apache Stanbol server lanchers are packaged under the `launchers/` folder. For
 instance:
 
     $ java -Xmx1g -jar launchers/full/target/org.apache.stanbol.launchers.full-0.9.0-incubating.jar
 
-Your instance is then available on <http://localhost:8080>. You can change the
-default port number by passing a `-p 9090` options to the commandline launcher.
+Your Apache Stanbol server instance is then available on <http://localhost:8080>.
+You can change the default port number by passing a `-p 9090` options to the
+commandline launcher.
 
 Upon first startup, a folder named `sling/` is created in the current folder.
 This folder will hold the files for any database used by Stanbol, deployment
@@ -107,7 +116,7 @@ You can now start to explore Apache Stanbol and its services. Have fun!
 
 ## Importing the source code as Eclipse projects
 
-Eclipse is the most popular IDE among Stanbol developers. Here are
+Eclipse is the most popular IDE among Apache Stanbol developers. Here are
 instructions to get you started with this IDE. For other IDEs / editors,
 please refer to their documentation and maven integration plugins.
 
@@ -141,7 +150,7 @@ You can then apply the formatter to a selected area of a Java source code files
 by pressing `Shift+Ctrl+F`.
 
 
-## Debugging a Stanbol instance from Eclipse
+## Debugging an Apache Stanbol instance from Eclipse
 
 To debug a locally running Apache Stanbol instance from eclipse, run the Apache
 Stanbol launcher with::
