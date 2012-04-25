@@ -94,10 +94,10 @@ public class FieldValueFilter implements EntityProcessor{
         Object value = config.get(PARAM_FIELD);
         if(value == null || value.toString().isEmpty()){
             this.field = NamespaceEnum.getFullName(DEFAULT_FIELD);
-            log.info("Using default Field %s",field);
+            log.info("Using default Field {}",field);
         } else {
             this.field = NamespaceEnum.getFullName(DEFAULT_FIELD);
-            log.info("configured Field: %s",field);
+            log.info("configured Field: {}",field);
         }
         value = config.get(PARAM_VALUES);
         if(value == null || value.toString().isEmpty()){

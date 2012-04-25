@@ -84,7 +84,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      * Parameter used to specify the name of the directory relative to the
      * {@link IndexingConfig#getConfigFolder()} that contains the
      * Solr configuration used for indexing. The default is that the config is
-     * searches under a folder with the name proveded by
+     * searches under a folder with the name provided by
      * {@link #PARAM_SOLR_INDEX_NAME} (that defaults to
      * {@link IndexingConfig#getName()}). <p>
      * However note that when this parameter is missing this configuration is 

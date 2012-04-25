@@ -20,6 +20,7 @@ import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstant
 import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_ENTITY_DATA_ITERABLE;
 import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_ENTITY_DATA_PROVIDER;
 import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_ENTITY_ID_ITERATOR;
+import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_ENTITY_POST_PROCESSOR;
 import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_ENTITY_PROCESSOR;
 import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_ENTITY_SCORE_PROVIDER;
 import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_INDEXING_DESTINATION;
@@ -83,6 +84,8 @@ public class IndexingConfig {
     
     private static final Logger log = LoggerFactory.getLogger(IndexingConfig.class);
     private static final String DEFAULT_INDEX_FIELD_CONFIG_FILE_NAME = "indexFieldConfig.txt";
+    
+    public static final String DEFAULT_INDEXED_ENTITIES_ID_FILE_NAME = "indexed-entities-ids.zip";
     
     /**
      * This stores the context within the classpath to initialise missing
@@ -183,6 +186,14 @@ public class IndexingConfig {
      * @see #getEntityProcessor()
      */
     private List<EntityProcessor> entityProcessor = null;
+    /**
+     * The {@link EntityProcessor}s initialised based on the value
+     * of the {@link IndexingConstants#KEY_ENTITY_POST_PROCESSOR} key or
+     * <code>null</code> if not configured.
+     * This variable uses lazy initialisation
+     * @see #getEntityProcessor()
+     */
+    private List<EntityProcessor> entityPostProcessor = null;
     /**
      * The {@link IndexingDestination} instance initialised based on the value
      * of the {@link IndexingConstants#KEY_INDEXING_DESTINATION} key or
@@ -837,6 +848,40 @@ public class IndexingConfig {
             return null;
         }
     }
+    /**
+     * Getter for the {@link EntityProcessor}s configured to be used for
+     * post-processing or <code>null</code> if none.
+     * @return
+     */
+    public List<EntityProcessor> getEntityPostProcessors(){
+        if(entityPostProcessor != null){
+            return entityPostProcessor;
+        } else if(configuration.containsKey(KEY_ENTITY_POST_PROCESSOR)){
+            List<ConfigEntry> configs = parseConfigEntries(configuration.get(KEY_ENTITY_POST_PROCESSOR).toString());
+            List<EntityProcessor> postProcessorList = new ArrayList<EntityProcessor>(configs.size());
+            for(ConfigEntry config : configs){
+                EntityProcessor postProcessor;
+                try {
+                    postProcessor = (EntityProcessor)Class.forName(config.getClassName()).newInstance();
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Invalid EntityProcessor configuration '"+config.getConfigString()+"' for post-processing!",e);
+                }
+                //add the configuration
+                Map<String,Object> configMap = getComponentConfig(config, postProcessor.getClass().getSimpleName(), false);
+                //add also the directly provided parameters
+                configMap.putAll(config.getParams());
+                postProcessor.setConfiguration(configMap);
+                postProcessorList.add(postProcessor);
+            }
+            if(!postProcessorList.isEmpty()){ //do not set empty lists
+                entityPostProcessor = Collections.unmodifiableList(postProcessorList);
+            }
+            return entityPostProcessor;
+        } else {
+            return null;
+        }
+    }
+    
     public IndexingDestination getIndexingDestination() {
         if(indexingDestination != null){
             return indexingDestination;
@@ -855,6 +900,16 @@ public class IndexingConfig {
             return indexingDestination;
         } else {
             return null;
+        }
+    }
+    public File getIndexedEntitiesIdsFile(){
+        Object value = configuration.get(IndexingConstants.KEX_INDEXED_ENTITIES_FILE);
+        if(value == null){
+            return new File(getDestinationFolder(),DEFAULT_INDEXED_ENTITIES_ID_FILE_NAME);
+        } else if (value.toString().isEmpty()){
+            return null; //deactivate this feature;
+        } else {
+            return new File(getDestinationFolder(),value.toString());
         }
     }
 

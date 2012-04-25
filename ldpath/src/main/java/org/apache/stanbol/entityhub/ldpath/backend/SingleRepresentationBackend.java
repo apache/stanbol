@@ -62,7 +62,9 @@ public class SingleRepresentationBackend extends AbstractBackend {
             throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
         }
     }
-    
+    public Representation getRepresentation(){
+        return representation;
+    }
     @Override
     protected ValueFactory getValueFactory() {
         return valueFactory;

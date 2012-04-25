@@ -18,18 +18,35 @@ package org.apache.stanbol.entityhub.indexing.core.impl;
 import static org.apache.stanbol.entityhub.indexing.core.impl.IndexerConstants.INDEXING_COMPLETED_QUEUE_ITEM;
 import static org.apache.stanbol.entityhub.indexing.core.impl.IndexerConstants.SCORE_FIELD;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterable;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterator;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataProvider;
@@ -48,6 +65,8 @@ import org.apache.stanbol.entityhub.indexing.core.impl.IndexingSourceInitialiser
 import org.apache.stanbol.entityhub.indexing.core.impl.IndexingSourceInitialiser.IndexingSourceInitialiserListener;
 import org.apache.stanbol.entityhub.indexing.core.normaliser.ScoreNormaliser;
 import org.apache.stanbol.entityhub.indexing.core.processor.EmptyProcessor;
+import org.apache.stanbol.entityhub.indexing.core.source.LineBasedEntityIterator;
+import org.apache.stanbol.entityhub.indexing.core.source.YardEntityDataProvider;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.slf4j.Logger;
@@ -80,23 +99,6 @@ public class IndexerImpl implements Indexer {
 
     private int chunkSize;
     public static final int MIN_QUEUE_SIZE = 500;
-    /**
-     * Queue used to add Entities read from the IndexingSource(s). This queue
-     * is consumed by the {@link EntityProcessorRunnable}.
-     */
-    private BlockingQueue<QueueItem<Representation>> indexedEntityQueue;
-    /**
-     * Queue used to add processed Entities. This queue is consumed by the
-     * {@link EntityPersisterRunnable}.
-     */
-    private BlockingQueue<QueueItem<Representation>> processedEntityQueue;
-    /**
-     * Queue used to add finished Entities. Mainly used for counting and
-     * logging
-     */
-    private BlockingQueue<QueueItem<Representation>> finishedEntityQueue;
-
-    private BlockingQueue<QueueItem<IndexingError>> errorEntityQueue;
     
     private boolean indexAllEntitiesState = false;
     
@@ -114,13 +116,29 @@ public class IndexerImpl implements Indexer {
     
     private State state = State.UNINITIALISED;
     private final Object stateSync = new Object();
+    /**
+     * The file to store the IDs of indexed entities. Might be <code>null</code>
+     * if {@link #entityPostProcessors} is <code>null</code>.
+     */
+    private File indexedEntityIdFile;
+    /**
+     * The {@link EntityProcessor}s used for the post processing phase or
+     * <code>null</code> if none.<p>
+     * If NOT <code>null</code> {@link #indexedEntityIdFile} is also
+     * guaranteed to be NET <code>null</code>!
+     */
+    private List<EntityProcessor> entityPostProcessors;
+
+    private OutputStream indexedEntityIdOutputStream;
     
     public IndexerImpl(EntityIterator entityIterator,
                        EntityDataProvider dataProvider,
                        ScoreNormaliser normaliser,
                        IndexingDestination indexingDestination, 
-                       List<EntityProcessor> entityProcessors){
-        this(normaliser,indexingDestination,entityProcessors);
+                       List<EntityProcessor> entityProcessors,
+                       File indexedEntityIdFile,
+                       List<EntityProcessor> entityPostProcessors){
+        this(normaliser,indexingDestination,entityProcessors,indexedEntityIdFile,entityPostProcessors);
         //set entityMode interfaces
         if(entityIterator == null){
             throw new IllegalArgumentException("The EntityIterator MUST NOT be NULL!");
@@ -135,8 +153,10 @@ public class IndexerImpl implements Indexer {
                        EntityScoreProvider scoreProvider, 
                        ScoreNormaliser normaliser,
                        IndexingDestination indexingDestination, 
-                       List<EntityProcessor> entityProcessors){
-        this(normaliser,indexingDestination,entityProcessors);
+                       List<EntityProcessor> entityProcessors,
+                       File indexedEntityIdFile,
+                       List<EntityProcessor> entityPostProcessors){
+        this(normaliser,indexingDestination,entityProcessors,indexedEntityIdFile,entityPostProcessors);
         //deactivate entityMode interfaces
         this.entityIterator = null;
         if(scoreProvider == null){
@@ -151,7 +171,9 @@ public class IndexerImpl implements Indexer {
     
     protected IndexerImpl(ScoreNormaliser normaliser,
                           IndexingDestination indexingDestination, 
-                          List<EntityProcessor> entityProcessors){
+                          List<EntityProcessor> entityProcessors,
+                          File indexedEntityIdFile,
+                          List<EntityProcessor> entityPostProcessors){
         if(indexingDestination == null){
             throw new IllegalArgumentException("The Yard MUST NOT be NULL!");
         }
@@ -167,6 +189,21 @@ public class IndexerImpl implements Indexer {
         indexingComponents.add(indexingDestination);
         indexingComponents.addAll(entityProcessors);
         listeners = new HashSet<IndexingListener>();
+        this.indexedEntityIdFile = indexedEntityIdFile;
+        if(entityPostProcessors != null){
+            if(entityPostProcessors.isEmpty()){
+                this.entityPostProcessors = null;
+            } else {
+                this.entityPostProcessors = entityPostProcessors;
+                if(indexedEntityIdFile == null){
+                    throw new IllegalArgumentException("The file used to store" +
+                    		"the IDs of indexed Entities MUST NOT be NULL if" +
+                    		"EntityPostProcessors are defined!");
+                }
+            }
+        } else {
+            this.entityPostProcessors = null;
+        }
     }
     public boolean addIndexListener(IndexingListener listener){
         if(listener != null){
@@ -226,7 +263,7 @@ public class IndexerImpl implements Indexer {
         return indexingDestination.getYard();
     }
     @Override
-    public void initialiseIndexingSources() {
+    public void initialiseIndexing() {
         synchronized (stateSync) { //ensure that two threads do not start the
             //initialisation at the same time ...
             if(getState() != State.UNINITIALISED){
@@ -279,6 +316,20 @@ public class IndexerImpl implements Indexer {
                 }
             }
         }
+        //initialise the stream used to write the ids of indexed entities
+        try {
+            indexedEntityIdOutputStream = getEntityIdFileOutputStream();
+        } catch (IOException e) {
+            if(entityPostProcessors != null){
+                throw new IllegalStateException("Unable to open stream for writing" +
+                        "the IDs of indexed Entities as required for post-" +
+                        "processing!",e);
+            } else {
+                log.warn("Unable to open stream for writing the Ids of indexed " +
+                        "Entities -> indexes entity Ids will not be available!",e);
+            }
+        }
+
         log.info("Initialisation completed");
         setState(State.INITIALISED);
     }
@@ -297,7 +348,9 @@ public class IndexerImpl implements Indexer {
                 "Calling this Method is not supported while in State %s! Supported States are ",
                 state,supportedStates));
         }
-        initialiseIndexingSources();
+        log.info("start initialisation ...");
+        initialiseIndexing();
+        log.info("  ... initialisation completed");
         //if now the state is an unsupported one it indicates that
         //initialiseIndexingSources() was called by an other thread before this one!
         state = getState(); 
@@ -306,15 +359,18 @@ public class IndexerImpl implements Indexer {
                 "Calling this Method is not supported while in State %s! Supported States are ",
                 state,supportedStates));
         }
-        log.info("Start Indexing");
-        indexAllEntities();
-        log.info("Indexing completed ...");
+        log.info("start indexing ...");
+        indexEntities();
+        log.info("  ... indexing completed");
+        log.info("start post-processing ...");
+        postProcessEntities();
+        log.info("  ... post-processing finished ...");
         log.info("start finalisation....");
-        finaliseIndexingTarget();
-        log.info("Indexing finished!");
+        finaliseIndexing();
+        log.info("  ...finalisation completed");
     }
     @Override
-    public void finaliseIndexingTarget() {
+    public void postProcessEntities() {
         synchronized (stateSync) { //ensure that two threads do not start the
             //initialisation at the same time ...
             State state = getState();
@@ -324,6 +380,153 @@ public class IndexerImpl implements Indexer {
             if(state != State.INDEXED){ //if state > INITIALISED
                 return; // ignore this call
             }
+            setState(State.POSTPROCESSING);
+            log.info("Indexing started ...");
+        }
+        if(entityPostProcessors == null || entityPostProcessors.isEmpty()){
+            setState(State.POSTPROCESSED);
+            return; //nothing to do
+        }
+        //init the post processing components
+        //use an EntityDataProvider based on the indexed data
+        EntityDataProvider dataProvider = new YardEntityDataProvider(indexingDestination.getYard());
+        //use an LineBasedEntityIterator to iterate over the indexed entity ids
+        EntityIterator entityIterator;
+        try {
+            entityIterator = new LineBasedEntityIterator(getEntityIdFileInputStream(),"UTF-8",null);
+        }  catch (IOException e) {
+            throw new IllegalStateException("Unable to open file containing the " +
+            		"IDs of the indexed Entities!",e);
+        }
+        Map<String,Object> config = new HashMap<String,Object>();
+        config.put(LineBasedEntityIterator.PARAM_ID_POS, 1);
+        config.put(LineBasedEntityIterator.PARAM_SCORE_POS, Integer.MAX_VALUE);
+        entityIterator.setConfiguration(config);
+        //init the post-processors (this time not in an own thread as this
+        //does not really make sense for processors
+        for(EntityProcessor processor : entityPostProcessors){
+            if(processor.needsInitialisation()){
+                processor.initialise();
+            }
+        }
+        //NOTE the destination needs not to be initialised -> it will be the same
+        //as for indexing!
+
+        //initialisation complete ... now setup the poet processing
+        //init the queues
+        int queueSize = Math.max(MIN_QUEUE_SIZE, chunkSize*2);
+        BlockingQueue<QueueItem<Representation>> indexedEntityQueue = 
+                new ArrayBlockingQueue<QueueItem<Representation>>(queueSize);
+        BlockingQueue<QueueItem<Representation>> processedEntityQueue = 
+                new ArrayBlockingQueue<QueueItem<Representation>>(queueSize);
+        BlockingQueue<QueueItem<Representation>> finishedEntityQueue = 
+                new ArrayBlockingQueue<QueueItem<Representation>>(queueSize);
+        BlockingQueue<QueueItem<IndexingError>> errorEntityQueue = 
+                new ArrayBlockingQueue<QueueItem<IndexingError>>(queueSize);
+
+        //Set holding all active post processing deamons
+        final SortedSet<IndexingDaemon<?,?>> activeIndexingDeamons = 
+            new TreeSet<IndexingDaemon<?,?>>();
+        //create the IndexingDaemos
+        //TODO: Here we would need to create multiple instances in case
+        //      one would e.g. like to use several threads for processing entities
+        //(1) the daemon reading from the IndexingSources
+        String entitySourceReaderName = "Post-processing: Entity Reader Deamon";
+        activeIndexingDeamons.add(
+            new EntityIdBasedIndexingDaemon(
+                entitySourceReaderName,
+                indexedEntityQueue, errorEntityQueue, 
+                entityIterator, 
+                dataProvider, 
+                null, //no score normaliser
+                true)); //post-process all indexed entities
+        //(2) The daemon for post-processing the entities
+        activeIndexingDeamons.add(
+            new EntityProcessorRunnable(
+                "Post-processing: Entity Processor Deamon",
+                indexedEntityQueue, //it consumes indexed Entities
+                processedEntityQueue,  //it produces processed Entities
+                errorEntityQueue,
+                entityPostProcessors, 
+                //TODO: check that the score is not overriden by the NULL
+                //      parsed by the used LineBasedEntityIterator!
+                Collections.singleton(SCORE_FIELD))); //ensure the score not changed
+        //(3) The daemon for persisting the entities
+        activeIndexingDeamons.add(
+            new EntityPersisterRunnable(
+                "Indexing: Entity Perstisting Deamon",
+                processedEntityQueue, //it consumes processed Entities
+                finishedEntityQueue, //it produces finished Entities
+                errorEntityQueue,
+                chunkSize, indexingDestination.getYard()));
+        //(4) The daemon for logging finished entities
+        activeIndexingDeamons.add(
+            new FinishedEntityDaemon(
+                finishedEntityQueue, -1, log, 
+                null)); //we have already all entity ids!
+        //(5) The daemon for logging errors
+        activeIndexingDeamons.add(
+            new EntityErrorLoggerDaemon(
+            errorEntityQueue, log));
+        //start post-processing and wait until it has finished
+        startAndWait(activeIndexingDeamons);        
+        
+        
+        setState(State.POSTPROCESSED);
+    }
+    /**
+     * Internally used to start the indexing/post-processing daemons and wait
+     * until they have finished.
+     * @param activeIndexingDeamons the deamos to start
+     */
+    private void startAndWait(final SortedSet<IndexingDaemon<?,?>> activeIndexingDeamons) {
+        //We need an listener for the IndexingDaemons we are about to start!
+        final IndexingDaemonListener listener = new IndexingDaemonListener() {
+            @Override
+            public void indexingDaemonFinished(IndexingDaemonEventObject indexingDaemonEventObject) {
+                //looks like one has finished
+                IndexingDaemon<?,?> indexingDaemon = indexingDaemonEventObject.getSource();
+                //handle the finished indexing daemon
+                handleFinishedIndexingDaemon(activeIndexingDeamons, indexingDaemon);
+                //finally remove the listener
+                indexingDaemon.removeIndexingDaemonListener(this);
+
+            }
+        };
+        //now start the IndexingDaemons in their own Threads
+        Set<IndexingDaemon<?,?>> deamonCopy = 
+            new HashSet<IndexingDaemon<?,?>>(activeIndexingDeamons);
+        for(IndexingDaemon<?,?> deamon : deamonCopy){
+            deamon.addIndexingDaemonListener(listener); //add the listener
+            Thread thread = new Thread(deamon);// create the thread
+            thread.setDaemon(true); //ensure that the JVM can terminate
+            thread.setName(deamon.getName()); // set the name of the thread
+            thread.start(); //start the Thread
+        }
+        //now we need to wait until all Threads have finished ...
+        while(!activeIndexingDeamons.isEmpty()){
+            synchronized (activeIndexingDeamons) {
+                try {
+                    activeIndexingDeamons.wait();
+                } catch (InterruptedException e) {
+                    //year ... looks like we are done
+                }
+            }
+        }
+        //done!
+    }
+
+    @Override
+    public void finaliseIndexing() {
+        synchronized (stateSync) { //ensure that two threads do not start the
+            //initialisation at the same time ...
+            State state = getState();
+            if(state.ordinal() < State.POSTPROCESSED.ordinal()){
+                throw new IllegalStateException("The Indexer MUST BE already "+State.POSTPROCESSED+" when calling this Method!");
+            }
+            if(state != State.POSTPROCESSED){ //if state > POSTPROCESSED
+                return; // ignore this call
+            }
             setState(State.FINALISING);
             log.info("Indexing started ...");
         }
@@ -331,7 +534,7 @@ public class IndexerImpl implements Indexer {
         setState(State.FINISHED);
     }
     @Override
-    public void indexAllEntities() {
+    public void indexEntities() {
         synchronized (stateSync) { //ensure that two threads do not start the
             //initialisation at the same time ...
             State state = getState();
@@ -346,10 +549,14 @@ public class IndexerImpl implements Indexer {
         }
         //init the queues
         int queueSize = Math.max(MIN_QUEUE_SIZE, chunkSize*2);
-        indexedEntityQueue = new ArrayBlockingQueue<QueueItem<Representation>>(queueSize);
-        processedEntityQueue = new ArrayBlockingQueue<QueueItem<Representation>>(queueSize);
-        finishedEntityQueue = new ArrayBlockingQueue<QueueItem<Representation>>(queueSize);
-        errorEntityQueue = new ArrayBlockingQueue<QueueItem<IndexingError>>(queueSize);
+        BlockingQueue<QueueItem<Representation>> indexedEntityQueue = 
+                new ArrayBlockingQueue<QueueItem<Representation>>(queueSize);
+        BlockingQueue<QueueItem<Representation>> processedEntityQueue = 
+                new ArrayBlockingQueue<QueueItem<Representation>>(queueSize);
+        BlockingQueue<QueueItem<Representation>> finishedEntityQueue = 
+                new ArrayBlockingQueue<QueueItem<Representation>>(queueSize);
+        BlockingQueue<QueueItem<IndexingError>> errorEntityQueue = 
+                new ArrayBlockingQueue<QueueItem<IndexingError>>(queueSize);
         
         //Set holding all active IndexingDaemons
         final SortedSet<IndexingDaemon<?,?>> activeIndexingDeamons = 
@@ -398,52 +605,21 @@ public class IndexerImpl implements Indexer {
         //(4) The daemon for logging finished entities
         activeIndexingDeamons.add(
             new FinishedEntityDaemon(
-                finishedEntityQueue, -1, log));
+                finishedEntityQueue, -1, log, indexedEntityIdOutputStream));
         //(5) The daemon for logging errors
         activeIndexingDeamons.add(
             new EntityErrorLoggerDaemon(
             errorEntityQueue, log));
-        //We need an listener for the IndexingDaemons we are about to start!
-        final IndexingDaemonListener listener = new IndexingDaemonListener() {
-            @Override
-            public void indexingDaemonFinished(IndexingDaemonEventObject indexingDaemonEventObject) {
-                //looks like one has finished
-                IndexingDaemon<?,?> indexingDaemon = indexingDaemonEventObject.getSource();
-                //handle the finished indexing daemon
-                handleFinishedIndexingDaemon(activeIndexingDeamons, indexingDaemon);
-                //finally remove the listener
-                indexingDaemon.removeIndexingDaemonListener(this);
-
-            }
-        };
-        //now start the IndexingDaemons in their own Threads
-        Set<IndexingDaemon<?,?>> deamonCopy = 
-            new HashSet<IndexingDaemon<?,?>>(activeIndexingDeamons);
-        for(IndexingDaemon<?,?> deamon : deamonCopy){
-            deamon.addIndexingDaemonListener(listener); //add the listener
-            Thread thread = new Thread(deamon);// create the thread
-            thread.setDaemon(true); //ensure that the JVM can terminate
-            thread.setName(deamon.getName()); // set the name of the thread
-            thread.start(); //start the Thread
-        }
-        //now we need to wait until all Threads have finished ...
-        while(!activeIndexingDeamons.isEmpty()){
-            synchronized (activeIndexingDeamons) {
-                try {
-                    activeIndexingDeamons.wait();
-                } catch (InterruptedException e) {
-                    //year ... looks like we are done
-                }
-            }
-        }
+        //start indexing and wait until it has finished
+        startAndWait(activeIndexingDeamons);
         //set the new state to INDEXED
         setState(State.INDEXED);
     }
     /**
      * Handles the necessary actions if an {@link IndexingDaemon} used for the
-     * work done within {@link #indexAllEntities()} completes its work (meaning
+     * work done within {@link #indexEntities()} completes its work (meaning
      * it has executed all entities).<p>
-     * The parsed SortedSet is created within  {@link #indexAllEntities()} and 
+     * The parsed SortedSet is created within  {@link #indexEntities()} and 
      * contains all {@link IndexingDaemon}s that have not yet finished. It is 
      * the responsibility of this method to remove finished 
      * {@link IndexingDaemon}s from this set.<p>
@@ -542,6 +718,71 @@ public class IndexerImpl implements Indexer {
      */
     public State getState() {
         return state;
+    }
+    /**
+     * Opens a stream to read data from the {@link #indexedEntityIdFile}. 
+     * Can only be called in {@link State}s earlier that {@link State#INDEXING}.
+     * @return the stream
+     * @throws IOException on any error while opening the stream
+     * @throws IllegalStateException if {@link #getState()} is later than
+     * {@link State#INITIALISED}
+     */
+    protected OutputStream getEntityIdFileOutputStream() throws IOException {
+        if(indexedEntityIdFile == null){
+            return null;
+        }
+        State state = getState();
+        if(state.ordinal() > State.INITIALISED.ordinal()){
+            throw new IllegalStateException("Opening an OutputStrem to the "
+                    + "indexed entity id file '"+indexedEntityIdFile+"' is not "
+                    + "allowed for states > "+State.INITIALISED +" (current: "+state+")!");
+        }
+        if(indexedEntityIdFile.isFile()){//exists
+            log.info(" ... delete existing IndexedEntityId file "+indexedEntityIdFile);
+            indexedEntityIdFile.delete(); //delete existing data
+        }
+        //support compression
+        String extension = FilenameUtils.getExtension(indexedEntityIdFile.getName());
+        OutputStream out = new FileOutputStream(indexedEntityIdFile);
+        if("zip".equalsIgnoreCase(extension)){
+            out = new ZipOutputStream(out);
+            ((ZipOutputStream)out).putNextEntry(new ZipEntry("entity-ids.txt"));
+        } else if("gz".equalsIgnoreCase(extension)) {
+            out = new GZIPOutputStream(out);
+        } else if("bz2".equalsIgnoreCase(extension)) {
+            out = new BZip2CompressorOutputStream(out);
+        }
+        return out;
+    }
+    /**
+     * Opens a stream to read data from the {@link #indexedEntityIdFile}. 
+     * Can only be called in {@link State}s later that {@link State#INDEXED}.
+     * @return the stream
+     * @throws IOException on any error while creating the stream
+     * @throws IllegalStateException if {@link #getState()} is earlier than
+     * {@link State#INDEXED}
+     */
+    protected InputStream getEntityIdFileInputStream() throws IOException {
+        if(indexedEntityIdFile == null){
+            return null;
+        }
+        State state = getState();
+        if(state.ordinal() < State.INDEXED.ordinal()){
+            throw new IllegalStateException("The indexed entity id data is not" +
+            		"available for states < "+State.INDEXED +" (current: "+state+")!");
+        }
+        //support compression
+        String extension = FilenameUtils.getExtension(indexedEntityIdFile.getName());
+        InputStream in = new FileInputStream(indexedEntityIdFile);
+        if("zip".equalsIgnoreCase(extension)){
+            in = new ZipInputStream(in);
+            ((ZipInputStream)in).getNextEntry();
+        } else if("gz".equalsIgnoreCase(extension)) {
+            in = new GZIPInputStream(in);
+        } else if("bz2".equalsIgnoreCase(extension)) {
+            in = new BZip2CompressorInputStream(in);
+        }
+        return in;
     }
 
 }

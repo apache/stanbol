@@ -16,6 +16,7 @@
 */
 package org.apache.stanbol.entityhub.indexing.core;
 
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
 /**
@@ -55,6 +56,14 @@ public interface Indexer {
          * and stored to the {@link IndexingTarget}.
          */
         INDEXED,
+        /**
+         * while post-processing of the indexed entities is performed
+         */
+        POSTPROCESSING,
+        /**
+         * after the post-processing of the entities has finished
+         */
+        POSTPROCESSED,
         /**
          * While the {@link IndexingTarget} is finalising the indexing process.
          */
@@ -101,7 +110,7 @@ public interface Indexer {
      * This Method is intended to be used by caller that need more control over 
      * the indexing process as simple to call {@link #index()}.
      */
-    void initialiseIndexingSources();
+    void initialiseIndexing();
     /**
      * Brings this indexer in the {@link State#INDEXED} by indexing all Entities
      * provided by the {@link IndexingComponent}s. This method blocks until the  
@@ -113,7 +122,19 @@ public interface Indexer {
      * @throws IllegalStateException if {@link #getState()} &lt; 
      * {@link State#INITIALISED}
      */
-    void indexAllEntities() throws IllegalStateException;
+    void indexEntities() throws IllegalStateException;
+    /**
+     * Performs {@link State#POSTPROCESSING} after all entities are 
+     * {@link State#INDEXED} ({@link #indexEntities()} completed).<p>
+     * Post-processing will use the {@link IndexingDestination} as source and
+     * target. It will retrieve the {@link Representation} of each indexed
+     * entity and sent it to the configured post-processing 
+     * {@link EntityProcessor}s<p>
+     * The resulting {@link Representation} will be stored to the 
+     * {@link IndexingDestination}
+     * @throws IllegalStateException if the state is &lt {@link State#INDEXED}
+     */
+    void postProcessEntities() throws IllegalStateException;
     /**
      * {@link State#FINISHED Finalises} the indexing process by calling finalise
      * on the {@link IndexingDestination}. This method blocks until the  
@@ -125,13 +146,13 @@ public interface Indexer {
      * @throws IllegalStateException if {@link #getState()} &lt; 
      * {@link State#INDEXED}
      */
-    void finaliseIndexingTarget() throws IllegalStateException;
+    void finaliseIndexing() throws IllegalStateException;
     /**
      * Initialise the {@link IndexingComponent}s, indexes all entities and 
      * finalises the {@link IndexingDestination}. <p>
      * Calls to this method do have the same result as subsequent calls to 
-     * {@link #initialiseIndexingSources()}, {@link #indexAllEntities()},
-     * {@link #finaliseIndexingTarget()}. This method can also be used if any of
+     * {@link #initialiseIndexing()}, {@link #indexEntities()},
+     * {@link #finaliseIndexing()}. This method can also be used if any of
      * the mentioned three methods was already called to this indexer instance.
      * <p>
      * This method blocks until the whole process is completed. Ideal if the 
