@@ -17,6 +17,7 @@
 package org.apache.stanbol.entityhub.servicesapi.query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,23 +32,38 @@ public class SimilarityConstraint extends Constraint {
 
     protected final String context;
 
-    protected final List<String> additionalFields = new ArrayList<String>();
+    protected final List<String> additionalFields;
 
     public SimilarityConstraint(String context) {
-        super(ConstraintType.similarity);
-        this.context = context;
+        this(context, null);
     }
 
     public SimilarityConstraint(String context, List<String> additionalFields) {
         super(ConstraintType.similarity);
         this.context = context;
-        this.additionalFields.addAll(additionalFields);
+        if(additionalFields == null || additionalFields.isEmpty()){
+            this.additionalFields = Collections.emptyList();
+        } else {
+            List<String> fields = new ArrayList<String>(additionalFields.size());
+            for(String field : additionalFields){
+                if(field != null && !field.isEmpty()){
+                    fields.add(field);
+                }
+            }
+            this.additionalFields = Collections.unmodifiableList(fields);
+        }
     }
-
+    /**
+     * Additional fields used for similarity calculations
+     * @return
+     */
     public List<String> getAdditionalFields() {
         return additionalFields;
     }
-    
+    /**
+     * The context used for checking the similarity
+     * @return
+     */
     public String getContext() {
         return context;
     }
