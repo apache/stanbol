@@ -29,6 +29,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
 import org.codehaus.jettison.json.JSONArray;
@@ -152,6 +153,15 @@ final class FieldQueryToJSON {
                 if(!dataTypes.isEmpty()){
                     jConstraint.put("datatype", dataTypes.iterator().next().getShortName());
                 }
+                break;
+            case similarity:
+                SimilarityConstraint simConstraint = (SimilarityConstraint) constraint;
+                jConstraint.put("context", simConstraint.getContext());
+                if(!simConstraint.getAdditionalFields().isEmpty()){
+                    jConstraint.put("addFields", new JSONArray(
+                        simConstraint.getAdditionalFields()));
+                }
+                break;
             default:
                 //unknown constraint type
                 log.warn("Unsupported Constriant Type " + constraint.getType() + " (implementing class=" + constraint.getClass() + "| toString=" + constraint + ") -> skiped");
