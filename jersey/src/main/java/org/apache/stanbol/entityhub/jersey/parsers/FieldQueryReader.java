@@ -48,6 +48,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.Constraint.ConstraintType;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
@@ -148,6 +149,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             JSONObject jConstraint = constraints.getJSONObject(i);
             if(jConstraint.has("field")){
                 String field = jConstraint.getString("field");
+                field = NamespaceEnum.getFullName(field);
                 //check if there is already a constraint for that field
                 if(field == null || field.isEmpty()){
 //                    log.warn("The value of the key \"field\" MUST NOT be NULL nor emtpy!");
@@ -206,6 +208,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         if(selected != null){
             for(int i=0;i<selected.length();i++){
                 String selectedField = selected.getString(i);
+                selectedField = NamespaceEnum.getFullName(selectedField);
                 if(selectedField != null && !selectedField.isEmpty()){
                     query.addSelectedField(selectedField);
                 }
@@ -255,6 +258,8 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                 return parseTextConstraint(jConstraint);
             } else if (type.equals(ConstraintType.range.name())){
                 return parseRangeConstraint(jConstraint);
+            } else if(type.equals(ConstraintType.similarity.name())){
+                return parseSimilarityConstraint(jConstraint);
             } else {
                 log.warn(String.format("Unknown Constraint Type %s. Supported values are %s",               
                     Arrays.asList("reference",ConstraintType.values())));
@@ -279,6 +284,27 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             message.append(jConstraint.toString(4));
             throw new IllegalArgumentException(message.toString());
         }
+    }
+
+    private static Constraint parseSimilarityConstraint(JSONObject jConstraint) throws JSONException {
+        String context = jConstraint.optString("context");
+        if(context == null){
+            throw new IllegalArgumentException("SimilarityConstraints MUST define a \"context\": \n "+jConstraint.toString(4));
+        }
+        JSONArray addFields = jConstraint.optJSONArray("addFields");
+        final List<String> fields;
+        if(addFields != null && addFields.length() > 0){
+            fields = new ArrayList<String>(addFields.length());
+            for(int i=0;i<addFields.length();i++){
+                String field = addFields.optString(i);
+                if(field != null && !field.isEmpty()){
+                    fields.add(NamespaceEnum.getFullName(field));
+                }
+            }
+        } else {
+            fields = null;
+        }
+        return new SimilarityConstraint(context,fields);
     }
 
     /**

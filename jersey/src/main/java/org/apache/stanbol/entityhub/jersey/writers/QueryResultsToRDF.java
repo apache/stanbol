@@ -16,14 +16,20 @@
  */
 package org.apache.stanbol.entityhub.jersey.writers;
 
+import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.query.clerezza.RdfQueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
@@ -115,4 +121,12 @@ final class QueryResultsToRDF {
         return resultGraph;
     }
 
+    public static void main(String[] args) throws Exception {
+        JenaSerializerProvider p = new JenaSerializerProvider();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        MGraph g = new SimpleMGraph();
+        g.add(new TripleImpl(new UriRef("urn:test"),new UriRef("http://test.org/test"),new PlainLiteralImpl("test")));
+        p.serialize(out, g, SupportedFormat.N_TRIPLE);
+        System.out.println(new String(out.toByteArray(),Charset.forName("UTF-8")));
+    }
 }
