@@ -16,8 +16,13 @@
 */
 package org.apache.stanbol.entityhub.indexing.source.jenatdb;
 
+import static org.apache.stanbol.entityhub.indexing.source.jenatdb.Constants.DEFAULT_MODEL_DIRECTORY;
+import static org.apache.stanbol.entityhub.indexing.source.jenatdb.Constants.PARAM_MODEL_DIRECTORY;
+import static org.apache.stanbol.entityhub.indexing.source.jenatdb.Utils.initTDBDataset;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +43,8 @@ import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import at.newmedialab.ldpath.api.backend.RDFBackend;
 
 import com.hp.hpl.jena.datatypes.BaseDatatype;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
@@ -71,19 +78,13 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
  * @author Rupert Westenthaler
  *
  */
-public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider {
+public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataIterable,EntityDataProvider, RDFBackend<Node> {
     /**
      * The Parameter used to configure the source folder(s) relative to the
      * {@link IndexingConfig#getSourceFolder()}. The ',' (comma) is used as
      * separator to parsed multiple sources.
      */
     public static final String PARAM_SOURCE_FILE_OR_FOLDER = "source";
-    /**
-     * Parameter used to configure the name of the directory used to store the
-     * RDF model (a Jena TDB dataset). The default name is
-     * {@link #DEFAULT_MODEL_DIRECTORY}
-     */
-    public static final String PARAM_MODEL_DIRECTORY = "model";
     /**
      * The Parameter that can be used to deactivate the importing of sources.
      * If this parameter is set to <code>false</code> the values configured for
@@ -95,11 +96,6 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
      * The default directory name used to search for RDF files to be imported
      */
     public static final String DEFAULT_SOURCE_FOLDER_NAME = "rdfdata";
-    /**
-     * The default name of the folder used to initialise the 
-     * {@link DatasetGraphTDB Jena TDB dataset}.
-     */
-    public static final String DEFAULT_MODEL_DIRECTORY = "tdb";
     //protected to allow internal classes direct access (without hidden getter/
     //setter added by the compiler that decrease performance)
     protected final static Logger log = LoggerFactory.getLogger(RdfIndexingSource.class);
@@ -151,7 +147,7 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
             throw new IllegalArgumentException("The parsed model location MUST NOT be NULL!");
         }
         //init the store
-        this.indexingDataset = createRdfModel(modelLocation);
+        this.indexingDataset = initTDBDataset(modelLocation);
         //use a ResourceLoader that fails on the first invalid RDF file (STANBOL-328)
         this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset), true,true);
         loader.addResource(sourceFileOrDirectory);
@@ -160,20 +156,13 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
     public void setConfiguration(Map<String,Object> config) {
         IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
         //first init the RDF Model
-        Object value = config.get(PARAM_MODEL_DIRECTORY);
-        File modelLocation;
-        if(value == null){
-            modelLocation = new File(indexingConfig.getSourceFolder(),DEFAULT_MODEL_DIRECTORY);
-        } else {
-            modelLocation = new File(indexingConfig.getSourceFolder(),value.toString());
-        }
-        this.indexingDataset = createRdfModel(modelLocation);
+        this.indexingDataset = Utils.getTDBDataset(config);
         //second we need to check if we need to import RDF files to the RDF model
         //create the ResourceLoader
         this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset), true); 
         //check if importing is deactivated
         boolean importSource = true; //default is true
-        value = config.get(PARAM_IMPORT_SOURCE);
+        Object value = config.get(PARAM_IMPORT_SOURCE);
         if(value != null){
             importSource = Boolean.parseBoolean(value.toString());
         }
@@ -218,22 +207,6 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
         } else {
             log.info("Importing RDF data deactivated by parameer {}={}"+PARAM_IMPORT_SOURCE,value);
         }
-    }
-    /**
-     * @param modelLocation
-     */
-    private DatasetGraphTDB createRdfModel(File modelLocation) {
-        if(modelLocation.exists() && !modelLocation.isDirectory()){
-            throw new IllegalArgumentException("The configured RDF model directory "+
-                modelLocation+"exists but is not a Directory");
-        } else if(!modelLocation.exists()){
-            if(!modelLocation.mkdirs()){
-                throw new IllegalArgumentException("Unable to create the configured RDF model directory "+
-                    modelLocation+"!");
-            }
-        }
-        Location location = new Location(modelLocation.getAbsolutePath());
-        return TDBFactory.createDatasetGraph(location);
     }
     @Override
     public boolean needsInitialisation() {
@@ -320,7 +293,7 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
                     literalValue = ll.getValue();
                     if(literalValue instanceof BaseDatatype.TypedValue){
                         //used for unknown data types
-                        // -> in such cases yust use the lecial type
+                        // -> in such cases just use the lexical type
                         String lexicalValue = ((BaseDatatype.TypedValue)literalValue).lexicalValue;
                         if(lexicalValue != null && !lexicalValue.isEmpty()){
                             source.add(field,lexicalValue);
@@ -595,6 +568,31 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
             }
             return representation;
         }
+    }
+    
+    /* ----------------------------------------------------------------------
+     *     RDF Backend implementation
+     * ----------------------------------------------------------------------
+     */
+    @Override
+    public Collection<Node> listObjects(Node subject, Node property) {
+        Collection<Node> nodes = new ArrayList<Node>();
+        ExtendedIterator<Triple> it = indexingDataset.getDefaultGraph().find(subject, property, null);
+        while(it.hasNext()){
+            nodes.add(it.next().getObject());
+        }
+        it.close();
+        return nodes;
+    }
+    @Override
+    public Collection<Node> listSubjects(Node property, Node object) {
+        Collection<Node> nodes = new ArrayList<Node>();
+        ExtendedIterator<Triple> it = indexingDataset.getDefaultGraph().find(null, property, object);
+        while(it.hasNext()){
+            nodes.add(it.next().getSubject());
+        }
+        it.close();
+        return nodes;
     }
     
 }

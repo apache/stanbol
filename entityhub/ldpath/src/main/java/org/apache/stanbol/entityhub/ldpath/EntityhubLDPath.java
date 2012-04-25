@@ -126,7 +126,7 @@ public class EntityhubLDPath extends LDPath<Object> {
      * @author Rupert Westenthaler
      *
      */
-    private static class EntityhubConfiguration extends DefaultConfiguration<Object>{
+    public static class EntityhubConfiguration extends DefaultConfiguration<Object>{
         public EntityhubConfiguration(ValueFactory vf){
             super();
             vf = vf == null ? InMemoryValueFactory.getInstance() : vf;

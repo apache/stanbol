@@ -260,7 +260,7 @@ Sider, Drugbank and Dailymed are interlinked with each other but do define a lot
     sideEffect = (owl:sameAs)+/sider:sideEffect/rdfs:label;
           
     genericName = (owl:sameAs)+/drugbank:genericName;
-    key = (owl:sameAs)+/drugbank:inchiKey;
+    inchiKey = (owl:sameAs)+/drugbank:inchiKey;
     indication = (owl:sameAs)+/drugbank:indication;
     foodInteraction = (owl:sameAs)+/drugbank:foodInteraction;
     toxicity = (owl:sameAs)+/drugbank:toxicity;

@@ -123,7 +123,28 @@ public enum NamespaceEnum {
     /**
      * The Music Ontology (http://musicontology.com/)
      */
-    mo("http://purl.org/ontology/mo/")
+    mo("http://purl.org/ontology/mo/"),
+    /**
+     *  The Time ontology (http://www.w3.org/TR/owl-time/)
+     */
+    owlTime("owl-time","http://www.w3.org/2006/time#"),
+    /**
+     *  The Event ontology (http://purl.org/NET/c4dm/event.owl#)
+     */
+    event("http://purl.org/NET/c4dm/event.owl#"),
+    /**
+     *  The Timeline ontology (http://purl.org/NET/c4dm/timeline.owl#)
+     */
+    timeline("http://purl.org/NET/c4dm/timeline.owl#"),
+    /**
+     *  Relationship: A vocabulary for describing relationships between people
+     *  (http://purl.org/vocab/relationship/)
+     */
+    rel("http://purl.org/vocab/relationship/"),
+    /**
+     *  Expression of Core FRBR Concepts in RDF (http://vocab.org/frbr/core)
+     */
+    frbr("http://purl.org/vocab/frbr/core#")
     ;
     /**
      * The logger

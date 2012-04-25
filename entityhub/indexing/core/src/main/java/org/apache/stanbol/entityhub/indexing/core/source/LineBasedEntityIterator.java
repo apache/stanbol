@@ -223,12 +223,14 @@ public class LineBasedEntityIterator implements EntityIterator {
             log.info("activate URL decoding of Entity IDs");
         }
         value = config.get(PARAM_ENTITY_SCORE_FILE);
-        if(value == null || value.toString().isEmpty()){
-            scoreFile = indexingConfig.getSourceFile(DEFAULT_ENTITY_SCORE_FILE);
-        } else {
-            scoreFile = indexingConfig.getSourceFile(value.toString());
-        }
-        log.info("Set Source File to '"+this.scoreFile+"'");
+        if(reader == null){
+            if(value == null || value.toString().isEmpty()){
+                scoreFile = indexingConfig.getSourceFile(DEFAULT_ENTITY_SCORE_FILE);
+            } else {
+                scoreFile = indexingConfig.getSourceFile(value.toString());
+            }
+            log.info("Set Source File to '"+this.scoreFile+"'");
+        } //else reader parsed in the constructor ... nothing todo
         //now done in the initialise() method
 //        try {
 //            initReader(new FileInputStream(scoreFile));
@@ -341,7 +343,7 @@ public class LineBasedEntityIterator implements EntityIterator {
         try {
             while((line = reader.readLine()) != null){
                 lineCounter++;
-                log.debug("> line = {}");
+                log.debug("> line = {}",line);
                 EntityScore entity = parseEntityFormLine(line);
                 if(entity != null){
                     return entity;

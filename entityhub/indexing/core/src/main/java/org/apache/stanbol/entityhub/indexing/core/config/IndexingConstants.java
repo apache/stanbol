@@ -34,6 +34,11 @@ public interface IndexingConstants {
     String KEY_INDEXING_DESTINATION = "indexingDestination";
     String KEY_INDEX_FIELD_CONFIG = "fieldConfiguration";
     /**
+     * Name of the file relative to the destination folder used to store
+     * the IDs of indexed Entities.
+     */
+    String KEX_INDEXED_ENTITIES_FILE = "indexedEntitiesFile";
+    /**
      * usage:<br>
      * <pre>
      * {class1},name:{name1};{class2},name:{name2};...
@@ -43,4 +48,5 @@ public interface IndexingConstants {
      */
     String KEY_SCORE_NORMALIZER      = "scoreNormalizer";
     String KEY_ENTITY_PROCESSOR      = "entityProcessor";
+    String KEY_ENTITY_POST_PROCESSOR = "entityPostProcessor";
 }

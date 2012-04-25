@@ -58,13 +58,14 @@ public class LdpathProcessor implements EntityProcessor{
      * By default appending of LDPath results to the parsed Representation is
      * activeted
      */
-    private static final boolean DEFAULT_APPEND_MODE = true;
+    public static final boolean DEFAULT_APPEND_MODE = true;
 
     private final ValueFactory vf;
-    private final EntityhubLDPath ldPath;
+    protected EntityhubLDPath ldPath;
     private final SingleRepresentationBackend backend;
     private Program<Object> program;
     private boolean appendMode;
+    protected IndexingConfig indexingConfig;
     
     public LdpathProcessor(){
         vf = InMemoryValueFactory.getInstance();
@@ -107,7 +108,7 @@ public class LdpathProcessor implements EntityProcessor{
     
     @Override
     public void setConfiguration(Map<String,Object> config) {
-        IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
+        indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
         //parse the ldpath
         final File ldpathFile;
         Object value = config.get(PARAMETER_LD_PATH);

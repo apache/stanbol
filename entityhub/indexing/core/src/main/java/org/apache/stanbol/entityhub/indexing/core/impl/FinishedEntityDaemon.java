@@ -21,8 +21,15 @@ import static org.apache.stanbol.entityhub.indexing.core.impl.IndexerConstants.S
 import static org.apache.stanbol.entityhub.indexing.core.impl.IndexerConstants.SOURCE_STARTED;
 import static org.apache.stanbol.entityhub.indexing.core.impl.IndexerConstants.STORE_DURATION;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.slf4j.Logger;
 
@@ -57,11 +64,20 @@ public class FinishedEntityDaemon extends IndexingDaemon<Representation,Object> 
     private long countedAll;
     private long countedMajor;
     private long countedMinor;
+    /**
+     * Allows to write finished ids to a file. one ID per line
+     */
+    private final BufferedWriter idWriter;
+    /**
+     * The charset used for the {@link #idWriter}
+     */
+    private static final Charset UTF8 = Charset.forName("UTF-8");
     
     
     public FinishedEntityDaemon(BlockingQueue<QueueItem<Representation>> consume,
                                   int majorInterval,
-                                  Logger out) {
+                                  Logger out,
+                                  OutputStream idOut) {
         super("Indexing: Finished Entity Logger Deamon",
             IndexerConstants.SEQUENCE_NUMBER_FINISHED_DAEMON,
             consume, null, null);
@@ -72,6 +88,11 @@ public class FinishedEntityDaemon extends IndexingDaemon<Representation,Object> 
             this.major = DEFAULT_MAJOR_INTERVAL;
         }
         this.minor = major/10;
+        if(idOut != null){
+            this.idWriter = new BufferedWriter(new OutputStreamWriter(idOut, UTF8));
+        } else {
+            this.idWriter = null;
+        }
     }
 
     @Override
@@ -85,6 +106,17 @@ public class FinishedEntityDaemon extends IndexingDaemon<Representation,Object> 
         while(!isQueueFinished()){
             QueueItem<Representation> item = consume();
             if(item != null){
+                if(idWriter != null && item.getItem() != null){
+                    String id = item.getItem().getId();
+                    try {
+                        if(count != 0){
+                            idWriter.newLine();
+                        }
+                        idWriter.write(id);
+                    } catch (Exception e){
+                        log.error("Exception while logging ID of indexed Entity '"+id+"'!",e);
+                    }
+                }
                 current = System.currentTimeMillis();
                 if(count == 0){
                     start = System.currentTimeMillis(); //default for the start!
@@ -154,6 +186,7 @@ public class FinishedEntityDaemon extends IndexingDaemon<Representation,Object> 
             }
         }
         printSummary(current);
+        IOUtils.closeQuietly(idWriter);
         setFinished();
     }
 
