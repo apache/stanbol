@@ -298,11 +298,12 @@ public enum NamespaceEnum {
      * the parsed URI is returned unchanged
      * @param shortUri the short URI
      * @return the full URI if the parsed shortUri uses a prefix defined by this
-     * Enumeration. Otherwise the parsed value.
+     * Enumeration. Otherwise (including <code>null</code>) the parsed value.
      */
     public static String getFullName(String shortUri){
-        if(shortUri == null) {
-            return null;
+        //ignore null and empty strings
+        if(shortUri == null || shortUri.isEmpty()) {
+            return shortUri;
         }
         int index = shortUri.indexOf(':');
         if(index>0){
