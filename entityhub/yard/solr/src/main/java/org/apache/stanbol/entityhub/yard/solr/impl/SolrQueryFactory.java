@@ -62,6 +62,7 @@ import org.apache.stanbol.entityhub.yard.solr.impl.queryencoders.RegexEncoder;
 import org.apache.stanbol.entityhub.yard.solr.impl.queryencoders.WildcardEncoder;
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
+import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 import org.apache.stanbol.entityhub.yard.solr.model.NoConverterException;
@@ -168,7 +169,8 @@ public class SolrQueryFactory {
             if (fieldConstraint.getValue().getType() == ConstraintType.similarity) {
                 // TODO: log make the FieldQuery ensure that there is no more than one instead of similarity
                 // constraint per query
-                List<String> fields = Arrays.asList(fieldConstraint.getKey());
+                List<String> fields = new ArrayList<String>();
+                fields.add(fieldConstraint.getKey());
                 SimilarityConstraint simConstraint = (SimilarityConstraint) fieldConstraint.getValue();
                 IndexValue indexValue = indexValueFactory.createIndexValue(simConstraint.getContext());
                 fields.addAll(simConstraint.getAdditionalFields());
@@ -177,12 +179,21 @@ public class SolrQueryFactory {
                 query.set(MoreLikeThisParams.MIN_DOC_FREQ, 1);
                 query.set(MoreLikeThisParams.MIN_TERM_FREQ, 1);
                 query.set(MoreLikeThisParams.INTERESTING_TERMS, "details");
-
-                // TODO: right now we ignore the fields and fallback to the hardcoded "_text" field
+                List<String> indexFields = new ArrayList<String>();
+                for(String field : fields){
+                    indexFields.addAll(fieldMapper.getFieldNames(
+                        new IndexField(Collections.singletonList(field), 
+                            IndexDataTypeEnum.TXT.getIndexType())));
+                }
+                /* rwesten: 2012-04-24: no parsed fields are parsed
+                // Obsolete: right now we ignore the fields and fallback to the hardcoded "_text" field
                 //Collection<String> mappedFields = fieldMapper.getFieldNames(fields, indexValue);
                 //query.set(MoreLikeThisParams.SIMILARITY_FIELDS, StringUtils.join(mappedFields, ","));
                 query.set(MoreLikeThisParams.SIMILARITY_FIELDS, "_text");
+                */
+                query.set(MoreLikeThisParams.SIMILARITY_FIELDS, indexFields.toArray(new String[fields.size()]));
                 query.set(CommonParams.STREAM_BODY, indexValue.getValue());
+                processedFieldConstraints.put(fieldConstraint.getKey(), fieldConstraint.getValue());
             } else {
                 IndexConstraint indexConstraint = createIndexConstraint(fieldConstraint);
                 if (indexConstraint.isInvalid()) {
