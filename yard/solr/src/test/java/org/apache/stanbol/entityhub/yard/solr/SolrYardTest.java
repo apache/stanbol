@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
@@ -152,7 +153,7 @@ public class SolrYardTest extends YardTest {
         String id1 = "urn:yard.test.testFieldQueryWithSimilarityConstraint:representation.id1";
         String id2 = "urn:yard.test.testFieldQueryWithSimilarityConstraint:representation.id2";
         String id3 = "urn:yard.test.testFieldQueryWithSimilarityConstraint:representation.id3";
-        String similarityfield = "urn:the.field:used.for.testFieldQueryWithSimilarityConstraint.similarity";
+        String similarityfield = NamespaceEnum.rdfs+"comment";
         String filterfield = "urn:the.field:used.for.testFieldQueryWithSimilarityConstraint.filter";
         Representation test1 = create(id1, true);
         Representation test2 = create(id2, true);
