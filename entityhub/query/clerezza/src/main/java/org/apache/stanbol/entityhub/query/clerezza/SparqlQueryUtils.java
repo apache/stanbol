@@ -40,6 +40,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
@@ -500,22 +501,22 @@ public final class SparqlQueryUtils {
             //see http://www.w3.org/TR/rdf-sparql-query/#QSynLiterals
             dataTypes = Collections.emptySet();
         }
-        if(constraint.getValue() != null){
+        if(constraint.getValues() != null){
             if(dataTypes.size()<=1){
                 addDataTypeValueConstraint(queryString, rootVarName, field,
                         dataTypes.isEmpty()?null:dataTypes.iterator().next(),
-                                constraint.getValue(),intend);
+                                constraint.getValues(),intend);
             } else { //we have multiple dataTypes -> ned to use union!
                 boolean first = true;
                 for(Iterator<String> it = dataTypes.iterator();it.hasNext();){
                     String dataType = it.next();
                     if(first){
-                        queryString.append(intend);
+                        //queryString.append(intend);
                         first = false;
                     } else {
-                        queryString.append(" UNION \n  ").append(intend);
+                        queryString.append(" UNION \n");
                     }
-                    addDataTypeValueConstraint(queryString, rootVarName, field, dataType, constraint.getValue(),"");
+                    addDataTypeValueConstraint(queryString, rootVarName, field, dataType, constraint.getValues(),intend);
                 }
                 //queryString.append('}');
             }
@@ -564,15 +565,33 @@ public final class SparqlQueryUtils {
      * @param dataType the dataType constraint or <code>null</code> if none
      * @param value the value. MUST NOT be <code>null</code>.
      */
-    private static void addDataTypeValueConstraint(StringBuilder queryString, String rootVarName, String field, String dataType, Object value, String intend) {
-        if(DataTypeEnum.Reference.getUri().equals(dataType) ||
-                value instanceof Reference){
-            queryString.append(String.format("%s?%s <%s> <%s>", 
-                intend,rootVarName,field,value));
-        } else {
-            queryString.append(String.format("%s?%s <%s> \"%s\"%s",
-                    intend, rootVarName,field,value,
-                    dataType!=null?String.format("^^<%s>",dataType):""));
+    private static void addDataTypeValueConstraint(StringBuilder queryString, String rootVarName, String field, String dataType, Collection<Object> values, String intend) {
+        String addIntend = intend;
+        queryString.append(intend);
+        if(values.size() > 1){
+            queryString.append("{ ");
+            addIntend = intend+"  ";
+        }
+        boolean first = true;
+        for(Object value : values){
+            if(first){
+                //queryString.append(intend);
+                first = false;
+            } else {
+                queryString.append(" UNION\n").append(addIntend);
+            }
+            if(DataTypeEnum.Reference.getUri().equals(dataType) ||
+                    value instanceof Reference){
+                queryString.append(String.format("?%s <%s> <%s>", 
+                    rootVarName,field,value));
+            } else {
+                queryString.append(String.format("?%s <%s> \"%s\"%s",
+                        rootVarName,field,value,
+                        dataType!=null?String.format("^^<%s>",dataType):""));
+            }
+        }
+        if(values.size() > 1){
+            queryString.append(" }");
         }
     }
     /**
@@ -857,19 +876,26 @@ public final class SparqlQueryUtils {
     public static void main(String[] args) {
         SparqlFieldQuery query = SparqlFieldQueryFactory.getInstance().createFieldQuery();
 //        query.setConstraint("urn:field1", new ReferenceConstraint("urn:testReference"));
+        query.setConstraint("urn:field1", new ReferenceConstraint(
+            Arrays.asList("urn:testReference","urn:testReference1","urn:testReference3")));
 //        query.setConstraint("urn:field1a", new ValueConstraint(null, Arrays.asList(
 //                DataTypeEnum.Float.getUri())));
 //        query.addSelectedField("urn:field1a");
+        
 //        query.setConstraint("urn:field1b", new ValueConstraint(9, Arrays.asList(
+//                DataTypeEnum.Float.getUri())));
+//        query.setConstraint("urn:field1b", new ValueConstraint(Arrays.asList(9,10,11), Arrays.asList(
 //                DataTypeEnum.Float.getUri())));
 //        query.setConstraint("urn:field1c", new ValueConstraint(null, Arrays.asList(
 //                DataTypeEnum.Float.getUri(),DataTypeEnum.Double.getUri(),DataTypeEnum.Decimal.getUri())));
 //        query.addSelectedField("urn:field1c");
 //        query.setConstraint("urn:field1d", new ValueConstraint(9, Arrays.asList(
 //                DataTypeEnum.Float.getUri(),DataTypeEnum.Double.getUri(),DataTypeEnum.Decimal.getUri())));
+//        query.setConstraint("urn:field1d", new ValueConstraint(Arrays.asList(9,10,11), Arrays.asList(
+//                DataTypeEnum.Float.getUri(),DataTypeEnum.Double.getUri(),DataTypeEnum.Decimal.getUri())));
 //        query.setConstraint("urn:field2", new TextConstraint("test value"));
-        query.setConstraint("urn:field3", new TextConstraint(Arrays.asList(
-            "text value","anothertest","some more values"),true));
+//        query.setConstraint("urn:field3", new TextConstraint(Arrays.asList(
+//            "text value","anothertest","some more values"),true));
 //        query.setConstraint("urn:field2a", new TextConstraint(":-]")); //tests escaping of REGEX
 //        query.setConstraint("urn:field3", new TextConstraint("language text","en"));
 //        query.setConstraint("urn:field4", new TextConstraint("multi language text","en","de",null));

@@ -17,7 +17,10 @@
 package org.apache.stanbol.entityhub.servicesapi.query;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * A constraint the filters/selects based on the value and/or the parsed
@@ -32,7 +35,7 @@ import java.util.LinkedHashSet;
 public class ValueConstraint extends Constraint {
 
 
-    private final Object value;
+    private final Set<Object> values;
     private final Collection<String> dataTypeUris;
 
     public ValueConstraint(Object value) {
@@ -40,7 +43,25 @@ public class ValueConstraint extends Constraint {
     }
     public ValueConstraint(Object value,Iterable<String> dataTypes) {
         super(ConstraintType.value);
-        this.value = value;
+        if(value == null){
+            this.values = null;
+        } else if(value instanceof Iterable<?>){
+            Set<Object> v = new LinkedHashSet<Object>();
+            @SuppressWarnings("unchecked")
+            Iterable<Object> values = (Iterable<Object>)value;
+            for(Object val : values){
+                if(val != null){
+                    v.add(val);
+                }
+            }
+            if(v.isEmpty()){
+                throw new IllegalArgumentException("The values MUST BE NULL or " +
+                		"contain at least a single NOT NULL value MUST BE parsed!");
+            }
+            this.values = Collections.unmodifiableSet(v);
+        } else { //single value
+            this.values = Collections.singleton(value);
+        }
         /*
          * Implementation NOTE:
          *   We need to use a LinkedHashSet here to
@@ -53,16 +74,21 @@ public class ValueConstraint extends Constraint {
          *   that values that need to be converted are preferable converted to
          *   the datatype specified as first)
          */
-        this.dataTypeUris = new LinkedHashSet<String>();
         if(dataTypes != null){
+            Set<String> dataTypeUris = new LinkedHashSet<String>();
             for(String dataType : dataTypes){
                 if(dataType != null && !dataType.isEmpty()){
                     dataTypeUris.add(dataType);
                 }
             }
-        }
-        if(value == null && dataTypeUris.isEmpty()){
-            throw new IllegalArgumentException("A value constraint MUST define at least a value or a valid - NOT NULL, NOT empty - data type uri!");
+            if(dataTypeUris.isEmpty()){
+                throw new IllegalArgumentException("At least a single NOT NULL and " +
+                        "not empty data type uri MUST BE parsed (NULL will trigger " +
+                        "detection of the data type based on the parsed value(s))!");
+            }
+            this.dataTypeUris = Collections.unmodifiableSet(dataTypeUris);
+        } else {
+            this.dataTypeUris = null;
         }
         //it's questionable if we should do that at this position, because
         //components that process that constraint might have better ways to
@@ -75,11 +101,18 @@ public class ValueConstraint extends Constraint {
 //        }
     }
     /**
+     * Getter for the first parsed value
+     * @return the value or <code>null</code> if the value is not constraint
+     */
+//    public final Object getValue() {
+//        return values.iterator().next();
+//    }
+    /**
      * Getter for the value
      * @return the value or <code>null</code> if the value is not constraint
      */
-    public final Object getValue() {
-        return value;
+    public final Set<Object> getValues() {
+        return values;
     }
     /**
      * Getter for the list of the parsed data types URIs
@@ -90,6 +123,6 @@ public class ValueConstraint extends Constraint {
     }
     @Override
     public String toString() {
-        return String.format("ValueConstraint[value=%s|types:%s]",value,dataTypeUris);
+        return String.format("ValueConstraint[values=%s|types:%s]",values,dataTypeUris);
     }
 }

@@ -34,6 +34,9 @@ import org.apache.stanbol.entityhub.jersey.parsers.RepresentationReader;
 import org.apache.stanbol.entityhub.jersey.resource.EntityhubRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.ReferencedSiteRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.SiteManagerRootResource;
+import org.apache.stanbol.entityhub.jersey.resource.reconcile.EntityhubReconcileResource;
+import org.apache.stanbol.entityhub.jersey.resource.reconcile.ReferencedSiteReconcileResource;
+import org.apache.stanbol.entityhub.jersey.resource.reconcile.SiteManagerReconcileResource;
 import org.apache.stanbol.entityhub.jersey.writers.JettisonWriter;
 import org.apache.stanbol.entityhub.jersey.writers.QueryResultListWriter;
 import org.apache.stanbol.entityhub.jersey.writers.RepresentationWriter;
@@ -74,6 +77,10 @@ public class EntityhubWebFragment implements WebFragment {
         //classes.add(EntityMappingResource.class);
         classes.add(ReferencedSiteRootResource.class);
         classes.add(SiteManagerRootResource.class);
+        //Google Refine Reconciliation API support
+        classes.add(ReferencedSiteReconcileResource.class);
+        classes.add(EntityhubReconcileResource.class);
+        classes.add(SiteManagerReconcileResource.class);
         //classes.add(SymbolResource.class);
         // message body readers and writers
         classes.add(FieldQueryReader.class);

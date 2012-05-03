@@ -18,12 +18,9 @@ package org.apache.stanbol.entityhub.yard.solr.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,7 +45,6 @@ import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint.ConstraintType;
-import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.impl.queryencoders.AssignmentEncoder;
 import org.apache.stanbol.entityhub.yard.solr.impl.queryencoders.DataTypeEncoder;
@@ -165,6 +161,7 @@ public class SolrQueryFactory {
         setSelected(query, fieldQuery, select);
         StringBuilder queryString = new StringBuilder();
         Map<String,Constraint> processedFieldConstraints = new HashMap<String,Constraint>();
+        boolean firstConstraint = true;
         for (Entry<String,Constraint> fieldConstraint : fieldQuery) {
             if (fieldConstraint.getValue().getType() == ConstraintType.similarity) {
                 // TODO: log make the FieldQuery ensure that there is no more than one instead of similarity
@@ -203,8 +200,11 @@ public class SolrQueryFactory {
                             fieldConstraint.getKey(), indexConstraint.getInvalidMessages()
                             });
                 } else {
-                    if (queryString.length() > 0) {
-                        queryString.append(" AND ");
+                    if(firstConstraint){
+                        queryString.append('(');
+                        firstConstraint = false;
+                    } else {
+                        queryString.append(") AND (");
                     }
                     indexConstraint.encode(queryString);
                     //set the constraint (may be changed because of some unsupported features)
@@ -214,6 +214,9 @@ public class SolrQueryFactory {
                                     indexConstraint.getFieldQueryConstraint()); //add the changed version
                 }
             }
+        }
+        if(!firstConstraint){
+            queryString.append(')');
         }
         //set the constraints as processed to the parsed query
         fieldQuery.removeAllConstraints();
@@ -372,7 +375,7 @@ public class SolrQueryFactory {
      * @param refConstraint
      */
     private void initIndexConstraint(IndexConstraint indexConstraint, ValueConstraint valueConstraint) {
-        if (valueConstraint.getValue() == null) {
+        if (valueConstraint.getValues() == null) {
             indexConstraint.setInvalid(String.format(
                 "ValueConstraint without a value - that check only any value for " +
                 "the parsed datatypes %s is present - can not be supported by a Solr query!",
@@ -395,26 +398,11 @@ public class SolrQueryFactory {
                     }
                 }
             }
-            IndexValue constraintValue;
-            if(indexDataTypes.isEmpty()){ // if no supported types are present
-                // get the dataType based on the type of the value
-                try {
-                    constraintValue = indexValueFactory.createIndexValue(valueConstraint.getValue());
-                } catch (NoConverterException e) {
-                    // if not found use the toString() and string as type
-                    log.warn("Unable to create IndexValue for value {} (type: {}). Create IndexValue manually by using the first parsed IndexDataType {}",
-                                new Object[]{
-                                    valueConstraint.getValue(), valueConstraint.getValue().getClass(),
-                                    IndexDataTypeEnum.STR.getIndexType()
-                                });
-                    constraintValue = new IndexValue(valueConstraint.getValue().toString(), 
-                        IndexDataTypeEnum.STR.getIndexType());
-                }
-                acceptedDataTypes.add(constraintValue.getType().getId());
-            } else {
-                constraintValue = new IndexValue(valueConstraint.getValue().toString(), indexDataTypes.get(0));
-                //we support only a single dataType ...
-                //  ... therefore remove additional data types from the ValueConstraint
+            //we support only a single dataType ...
+            //  ... therefore remove additional data types from the ValueConstraint
+            IndexDataType indexDataType = null;
+            if(!indexDataTypes.isEmpty()) {
+                indexDataType = indexDataTypes.get(0);
                 if(indexDataTypes.size() > 1){
                     log.warn("Only a single DataType is supported for ValueConstraints!");
                     while(acceptedDataTypes.size()>1){
@@ -422,21 +410,46 @@ public class SolrQueryFactory {
                         log.warn("  > ignore parsed dataType {}",ignored);
                     }
                 }
+            } //else empty we will initialise based on the first parsed value!
+            List<IndexValue> constraintValues = new ArrayList<IndexValue>(valueConstraint.getValues().size());
+            for(Object value : valueConstraint.getValues()){
+                IndexValue constraintValue;
+                if(indexDataType == null){ // if no supported types are present
+                    // get the dataType based on the type of the value
+                    try {
+                        constraintValue = indexValueFactory.createIndexValue(value);
+                    } catch (NoConverterException e) {
+                        // if not found use the toString() and string as type
+                        log.warn("Unable to create IndexValue for value {} (type: {}). Create IndexValue manually by using the first parsed IndexDataType {}",
+                                    new Object[]{
+                                        value, value.getClass(),
+                                        IndexDataTypeEnum.STR.getIndexType()
+                                    });
+                        constraintValue = new IndexValue(value.toString(), 
+                            IndexDataTypeEnum.STR.getIndexType());
+                    }
+                    //initialise the IndexDataType for this query based on the first parsed value
+                    indexDataType = constraintValue.getType();
+                } else {
+                    constraintValue = new IndexValue(value.toString(), indexDataType);
+                }
+                constraintValues.add(constraintValue); //add the constraint
             }
-            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.DATATYPE, constraintValue);
-            if(IndexDataTypeEnum.TXT.getIndexType().equals(constraintValue.getType())){
+            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.DATATYPE, indexDataType);
+            if(IndexDataTypeEnum.TXT.getIndexType().equals(indexDataType)){
                 //NOTE: in case of TEXT we need also to add the language to create a valid
                 //query!
+                // * We take the language of the first parsed element
                 indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.LANG, 
-                    Collections.singleton(constraintValue.getLanguage()));
+                    Collections.singleton(constraintValues.get(0).getLanguage()));
             }
-            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.EQ, constraintValue);
+            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.EQ, constraintValues);
             //update this constraint!
             if(valueConstraint instanceof ReferenceConstraint){
                 indexConstraint.setFieldQueryConstraint(valueConstraint);
             } else {
                 indexConstraint.setFieldQueryConstraint(
-                    new ValueConstraint(valueConstraint.getValue(), acceptedDataTypes));
+                    new ValueConstraint(valueConstraint.getValues(), Arrays.asList(indexDataType.getId())));
             }
         }
     }

@@ -25,6 +25,10 @@
 	<li><a href="${it.publicBaseUri}entityhub/sites/find">/entityhub/sites/find</a></li>
 	<li><a href="${it.publicBaseUri}entityhub/sites/query">/entityhub/sites/query</a></li>
     <li><a href="${it.publicBaseUri}entityhub/sites/ldpath">/entityhub/sites/ldpath</a></li>
+    <li><a href="reconcile">/entityhub/sites/reconcile</a>:
+       Implements the <a href="http://code.google.com/p/google-refine/">
+       Google Refine</a> Reconciliation API over all referenced sites.
+    </li>
 </ul>
 
 <hr>

@@ -24,6 +24,11 @@
 	<li><a href="find">/entityhub/site/{siteId}/find</a></li>
 	<li><a href="query">/entityhub/site/{siteId}/query</a></li>
     <li><a href="ldpath">/entityhub/site/{siteId}/ldpath</a></li>
+    <li><a href="reconcile">/entityhub/site/{siteId}/reconcile</a>:
+       Implements the <a href="http://code.google.com/p/google-refine/">
+       Google Refine</a> Reconciliation API
+    </li>
+    
 </ul>
 <hr>
 <#include "inc_metadata.ftl">

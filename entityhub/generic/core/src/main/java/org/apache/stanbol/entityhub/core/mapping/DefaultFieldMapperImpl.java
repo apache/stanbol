@@ -397,7 +397,7 @@ public class DefaultFieldMapperImpl implements FieldMapper, Cloneable {
      * @return
      */
     private Collection<Object> processFilter(ValueConstraint valueConstraint, Collection<Object> values,ValueFactory valueFactory) {
-        if(valueConstraint.getValue() != null){
+        if(valueConstraint.getValues() != null){
             log.warn("Filtering based on values is not yet implemented");
         }
         //1) collect all active dataTypes

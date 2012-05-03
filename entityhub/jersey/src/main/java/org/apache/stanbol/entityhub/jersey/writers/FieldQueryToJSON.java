@@ -88,8 +88,12 @@ final class FieldQueryToJSON {
         switch (constraint.getType()) {
             case value: //both ValueConstraint and ReferenceConstraint
                 ValueConstraint valueConstraint = ((ValueConstraint) constraint);
-                if (valueConstraint.getValue() != null) {
-                    jConstraint.put("value", valueConstraint.getValue());
+                if (valueConstraint.getValues() != null) {
+                    if(valueConstraint.getValues().size() == 1){
+                        jConstraint.put("value", valueConstraint.getValues().iterator().next());
+                    } else {
+                        jConstraint.put("value", new JSONArray(valueConstraint.getValues()));
+                    }
                 }
                 if(constraint instanceof ReferenceConstraint){
                     //the type "reference" is not present in the ConstraintType

@@ -351,5 +351,85 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
         //now execute the test
         executeQuery(test);
     }    
+    @Test
+    public void testFieldQueryMultiReferenceConstraints() throws IOException, JSONException {
+        FieldQueryTestCase test = new FieldQueryTestCase(
+            "{ "+
+                "'selected': ["+
+                    "'rdfs:label',"+
+                    "'rdf:type'],"+
+                "'offset': '0',"+ 
+                "'limit': '5',"+ 
+                "'constraints': ["+
+                    "{"+ 
+                        "'type': 'text',"+ 
+                        "'patternType': 'wildcard',"+
+                        "'text': ['ford'],"+ 
+                        "'field': 'rdfs:label',"+
+                     "},{"+ 
+                        "'type': 'reference',"+ 
+                        "'value': ['dbp-ont:Organisation','dbp-ont:OfficeHolder'],"+ 
+                        "'field': 'rdf:type',"+
+                     "}"+
+                 "]"+ 
+             "}",
+             Arrays.asList( //list of expected results
+                 "http://dbpedia.org/resource/Ford_Motor_Company",
+                 "http://dbpedia.org/resource/Gerald_Ford",
+                 //this third result is important, as we would get different
+                 //without the reference constraint
+                 "http://dbpedia.org/resource/Ford_Foundation"),
+             Arrays.asList( //list of required fields for results
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+        //now execute the test
+        executeQuery(test);
+    }
     
+    @Test
+    public void testFieldQueryMultipleValueConstraints() throws IOException, JSONException {
+        //munich is on geo:alt 519 (will change to 518 on dbpedia 3.7)
+        FieldQueryTestCase test = new FieldQueryTestCase(
+            "{ "+
+                "'selected': ["+
+                    "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
+                "'offset': '0',"+
+                "'limit': '3',"+
+                "'constraints': [{ "+
+                    "'type': 'value',"+
+                    "'value': ['34','519'],"+
+                    "'field': 'http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#alt',"+
+                    "'datatype': 'xsd:int'"+
+                    "}]"+
+             "}",
+             Arrays.asList( //list of expected results
+                 "http://dbpedia.org/resource/Munich",
+                 "http://dbpedia.org/resource/Berlin",
+                 "http://dbpedia.org/resource/Baghdad"),
+             Arrays.asList( //list of required fields for results
+                "http://www.w3.org/2000/01/rdf-schema#label"));
+        //now execute the test
+        executeQuery(test);
+        
+        //a 2nd time the same query (without a datatype), but now we parse a 
+        //JSON number as value
+        test = new FieldQueryTestCase(
+            "{ "+
+                "'selected': ["+
+                    "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
+                "'offset': '0',"+
+                "'limit': '3',"+
+                "'constraints': [{ "+
+                    "'type': 'value',"+
+                    "'value': [34,519],"+
+                    "'field': 'http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#alt',"+
+                    "}]"+
+             "}",
+             Arrays.asList( //list of expected results
+                 "http://dbpedia.org/resource/Munich",
+                 "http://dbpedia.org/resource/Berlin",
+                 "http://dbpedia.org/resource/Baghdad"));
+        //now execute the test
+        executeQuery(test);
+    }    
 }

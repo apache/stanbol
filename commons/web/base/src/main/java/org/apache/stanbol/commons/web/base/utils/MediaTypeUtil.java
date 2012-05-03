@@ -99,7 +99,29 @@ public final class MediaTypeUtil {
         }
         return acceptedMediaType;
     }
-    
+    /**
+     * Checks if the parse mediaType is compatible with one of the Accept headers.
+     * Fully supports wildcard for both parsed Accept headers AND the parsed
+     * {@link MediaType}
+     * @param headers
+     * @param mediaType
+     * @return
+     */
+    public static boolean isAcceptableMediaType(HttpHeaders headers, MediaType mediaType){
+        if (!headers.getAcceptableMediaTypes().isEmpty()) {
+            for (MediaType accepted : headers.getAcceptableMediaTypes()) {
+                //if one of the types is wildcard or types are equals AND
+                // one of the subtypes is wildcard or subtypes are equals
+                if ((accepted.isWildcardType() || mediaType.isWildcardType() || 
+                        accepted.getType().equals(mediaType.getType())) &&
+                        (accepted.isWildcardSubtype() || mediaType.isWildcardSubtype() || 
+                                accepted.getSubtype().equals(mediaType.getSubtype()))){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     public static boolean isAcceptableMediaType(MediaType mediaType, Collection<String> supported){
         if(supported == null || mediaType == null){
             return true;
