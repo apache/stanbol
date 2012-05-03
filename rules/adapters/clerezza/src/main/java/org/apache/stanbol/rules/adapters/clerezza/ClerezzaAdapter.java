@@ -48,7 +48,6 @@ import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.UnavailableRuleObjectException;
 import org.apache.stanbol.rules.base.api.UnsupportedTypeForExportException;
 import org.apache.stanbol.rules.base.api.util.RuleList;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,8 +68,6 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
     public static final String ARTIFACT = "org.apache.stanbol.rules.adapters.clerezza.atoms";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    
-    private ClassLoader loader;
 
     @Reference
     RuleStore ruleStore;
@@ -192,11 +189,13 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
                                                                      UnavailableRuleObjectException {
 
         if (type == ConstructQuery.class) {
-            
+
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
             String className = ruleAtom.getClass().getSimpleName();
 
             String canonicalName = ARTIFACT + "." + className;
-            
+
             try {
                 Class<AdaptableAtom> clerezzaAtomClass = (Class<AdaptableAtom>) loader
                         .loadClass(canonicalName);
@@ -217,9 +216,11 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
                 }
 
             } catch (ClassNotFoundException e) {
-                log.error(e.getMessage(), e);
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             } catch (SecurityException e) {
-                log.error(e.getMessage(), e);
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
 
         }
@@ -237,8 +238,6 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
     @Activate
     protected void activate(ComponentContext context) throws IOException {
 
-        loader = getClass().getClassLoader();
-        
         log.info("in " + ClerezzaAdapter.class + " activate with context " + context);
         if (context == null) {
             throw new IllegalStateException("No valid" + ComponentContext.class + " parsed in activate!");
