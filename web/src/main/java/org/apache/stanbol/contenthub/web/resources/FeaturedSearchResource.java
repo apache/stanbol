@@ -234,10 +234,10 @@ public class FeaturedSearchResource extends BaseStanbolResource {
 			if (this.chosenFacets != null) {
 				List<FacetResult> allAvailableFacets = featuredSearch
 						.getAllFacetResults(indexName);
-				sq = SolrQueryUtil.prepareFacetedSolrQuery(queryTerm,
+				sq = SolrQueryUtil.prepareSolrQuery(queryTerm,
 						allAvailableFacets, constraintsMap);
 			} else {
-				sq = SolrQueryUtil.prepareDefaultSolrQuery(queryTerm);
+				sq = SolrQueryUtil.prepareSolrQuery(queryTerm);
 			}
 			sq.setStart(offset);
 			sq.setRows(limit + 1);
