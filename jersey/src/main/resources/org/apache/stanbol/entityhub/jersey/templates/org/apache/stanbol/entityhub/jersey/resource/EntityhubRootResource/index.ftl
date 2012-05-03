@@ -79,6 +79,10 @@
     <li>LDPath @<a href="${it.publicBaseUri}entityhub/ldpath">/entityhub/ldpath</a>:
        Allows to execute LDPath programs on locally managed Entities.
     </li>
+    <li>Reconciliation @<a href="${it.publicBaseUri}entityhub/reconcile">/entityhub/reconcile</a>:
+       Implements the <a href="http://code.google.com/p/google-refine/">
+       Google Refine</a> Reconciliation API
+    </li>
   </ul>
   <hr>
   <#include "inc_entity.ftl">

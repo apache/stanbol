@@ -497,7 +497,36 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         Constraint constraint;
         Collection<String> dataTypes = parseDatatypeProperty(jConstraint);
         if(jConstraint.has("value") && !jConstraint.isNull("value")){
-            constraint = new ValueConstraint(jConstraint.get("value"), dataTypes);
+            Object value = jConstraint.get("value");
+            final List<Object> valueList;
+            if(value instanceof JSONArray){
+                valueList = new ArrayList<Object>(((JSONArray)value).length());
+                for(int i=0;i<((JSONArray)value).length();i++){
+                    Object v = ((JSONArray)value).get(i);
+                    if(v == null || v instanceof JSONArray || v instanceof JSONObject){
+                        log.warn("Parsed ValueConstraint does define illegal values (values={})!",value);
+                        StringBuilder message = new StringBuilder();
+                        message.append("Parsed ValueConstraint does define illegal values for field 'value'" +
+                        		"(value MUST NOT contain NULL, JSONObject nor JSONArray values)!\n");
+                        message.append("Parsed Constraint: \n");
+                        message.append(jConstraint.toString(4));
+                        throw new IllegalArgumentException(message.toString());
+                    }
+                    valueList.add(v);
+                }
+            } else if(value instanceof JSONObject){
+                log.warn("Parsed ValueConstraint does define illegal values (values={})!",value);
+                StringBuilder message = new StringBuilder();
+                message.append("Parsed ValueConstraint does define illegal value for field 'value'" +
+                        "(value MUST NOT be an JSON object. Only values and JSONArray to parse" +
+                        "multiple values are allowed)!\n");
+                message.append("Parsed Constraint: \n");
+                message.append(jConstraint.toString(4));
+                throw new IllegalArgumentException(message.toString());
+            } else {
+                valueList = Collections.singletonList(jConstraint.get("value"));
+            }
+            constraint = new ValueConstraint(valueList,dataTypes);
         } else {
             log.warn("Parsed ValueConstraint does not define the required field \"value\"!");
             StringBuilder message = new StringBuilder();
@@ -559,7 +588,26 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
     private static Constraint parseReferenceConstraint(JSONObject jConstraint) throws JSONException {
         Constraint constraint;
         if(jConstraint.has("value") && !jConstraint.isNull("value")){
-            constraint = new ReferenceConstraint(jConstraint.getString("value"));
+            Object value = jConstraint.get("value");
+            final List<String> refList;
+            if(value instanceof JSONArray){
+                refList = new ArrayList<String>(((JSONArray)value).length());
+                for(int i=0;i<((JSONArray)value).length();i++){
+                    refList.add(NamespaceEnum.getFullName(((JSONArray)value).getString(i)));
+                }
+            } else if(value instanceof JSONObject){
+                log.warn("Parsed ValueConstraint does define illegal values (values={})!",value);
+                StringBuilder message = new StringBuilder();
+                message.append("Parsed ValueConstraint does define illegal value for field 'value'" +
+                        "(value MUST NOT be an JSON object. Only values and JSONArray to parse" +
+                        "multiple values are allowed)!\n");
+                message.append("Parsed Constraint: \n");
+                message.append(jConstraint.toString(4));
+                throw new IllegalArgumentException(message.toString());
+            } else {
+                refList = Collections.singletonList(NamespaceEnum.getFullName(jConstraint.getString("value")));
+            }
+            constraint = new ReferenceConstraint(refList);
         } else {
             log.warn("Parsed ReferenceConstraint does not define the required field \"value\"!");
             StringBuilder message = new StringBuilder();
