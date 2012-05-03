@@ -17,6 +17,7 @@
 package org.apache.stanbol.contenthub.servicesapi.search.featured;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.solr.common.params.SolrParams;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
@@ -96,15 +97,14 @@ public interface FeaturedSearch {
 
     /**
      * This methods returns a {@link SearchResult} as a unified search response. The response contains content
-     * items retrieved from the index, which is accessed using the given <code>indexName</code>, of
-     * Contenthub for the given <code>queryTerm</code>. This name corresponds to a Solr Core name within
-     * Contenthub. It also consists of related keywords that are obtained from the available
-     * {@link RelatedKeywordSearch} instances. This method also takes an ontology URI. Using the URI, actual
-     * ontology is obtained and it is used as related keyword source. To obtain related keywords, first the
-     * meaningful query terms are extracted from the Solr query and then they are tokenized with
-     * {@link #tokenizeEntities(String)}. And then, related keyword searchers are queried for all the query
-     * tokens. Furthermore, the {@link SearchResult} includes Solr facets that are obtained for the obtained
-     * content items.
+     * items retrieved from the index, which is accessed using the given <code>indexName</code>, of Contenthub
+     * for the given <code>queryTerm</code>. This name corresponds to a Solr Core name within Contenthub. It
+     * also consists of related keywords that are obtained from the available {@link RelatedKeywordSearch}
+     * instances. This method also takes an ontology URI. Using the URI, actual ontology is obtained and it is
+     * used as related keyword source. To obtain related keywords, first the meaningful query terms are
+     * extracted from the Solr query and then they are tokenized with {@link #tokenizeEntities(String)}. And
+     * then, related keyword searchers are queried for all the query tokens. Furthermore, the
+     * {@link SearchResult} includes Solr facets that are obtained for the obtained content items.
      * 
      * @param solrQuery
      *            for which the search results will be obtained
@@ -113,6 +113,45 @@ public interface FeaturedSearch {
      * @throws SearchException
      */
     SearchResult search(SolrParams solrQuery, String ontologyURI, String indexName) throws SearchException;
+
+    /**
+     * This method searches the given <code>keyword</code> in the default index of Contenthub considering the
+     * given <code>constraints</code>. Results are returned in a {@link ConstrainedDocumentSet} instance and
+     * all search results are returned without considering any <i>offset</i> or <i>limit</i> value.
+     * Furthermore, returned {@link ConstrainedDocumentSet} contains {@link Constraint}s that were used to
+     * filter the results and all possible {@link Facet}s that can be used to filter results even more.
+     * 
+     * @param keyword
+     *            keyword to be searched
+     * @param constraints
+     *            a {@link Set} of {@link Constraint}s to be provided in addition to initial query
+     *            <code>keyword</code>
+     * @return an instance of {@link ConstrainedDocumentSet} including the search results and additional
+     *         {@link Constraint} and {@link Facet} information.
+     * @throws SearchException
+     */
+    ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints) throws SearchException;
+
+    /**
+     * This method searches the given <code>keyword</code> in the Solr index identified by the given
+     * <code>indexName</code> considering the given <code>constraints</code>. Results are returned in a
+     * {@link ConstrainedDocumentSet} instance and all search results are returned without considering any
+     * <i>offset</i> or <i>limit</i> value. Furthermore, returned {@link ConstrainedDocumentSet} contains
+     * {@link Constraint}s that were used to filter the results and all possible {@link Facet}s that can be
+     * used to filter results even more.
+     * 
+     * @param keyword
+     *            keyword to be searched
+     * @param constraints
+     *            a {@link Set} of {@link Constraint}s to be provided in addition to initial query
+     *            <code>keyword</code>
+     * @param indexName
+     *            name of the index (Solr core) on which search will be done
+     * @return an instance of {@link ConstrainedDocumentSet} including the search results and additional
+     *         {@link Constraint} and {@link Facet} information.
+     * @throws SearchException
+     */
+    ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints, String indexName) throws SearchException;
 
     /**
      * This method obtains the available field names of the default index of Contenthub.
