@@ -16,46 +16,52 @@
 -->
 <#import "/imports/common.ftl" as common>
 <#escape x as x?html>
-<@common.page title="Search" hasrestapi=false>
-  <div id="search">
-  <#-- this feildset was normally in a form, ajax is used to do the post, dont need to use fom -->
-    <fieldset>
-      <legend>Keyword Based Search</legend>
-      
-      <p>
-        Select an index: <div id="indexDiv"><#--this div will be populated by ajax--></div>
-      </p>
-      <p>
-        Keywords: <input id="keywordIn" class="autoCompleteText" <#-- onkeyup="javascript:completePattern();" --> name="topic" type="text" onkeydown="if (event.keyCode == 13) document.getElementById('submitIn').click()"/><br/>
-      </p>
-      <p>
-        <!-- Ontology selection combobox-->
-        <#if it.ontologies?exists && it.ontologies?size != 0>
-          Graph: 
-          <select  id="graphIn" name="max" type="text" value="5">
-            <option value="choose_ontology">Choose an ontology</option>
-            <#list it.ontologies as ont>
-              <option value="${ont}">${ont}</option>
-            </#list>
-          </select>
-        <#else>
-          <p><i>No graphs to search.<i><p> 
-        </#if>
-      </p>
-      <p>
-        <input id="submitIn" type="button" value="Search" onclick="getResults(null,null,'first');"></input>
-      </p>
-      <img id="busyIcon" class="invisible centerImage" src="${it.staticRootUrl}/contenthub/images/ajax-loader.gif"/>
-    </fieldset>
-  </div>  
-  
-  <div id="resultContainer" class="invisible">
-    <div class="invisible" id="previousSuggestionButton"></div>
-    <div>
-      <!-- To be populated with ajax without xml :)-->
+<@common.page title="Search" hasrestapi=true>
+  <div class="panel" id="webview">
+    <div id="search">
+    <#-- this feildset was normally in a form, ajax is used to do the post, dont need to use fom -->
+      <fieldset>
+        <legend>Keyword Based Search</legend>
+        
+        <p>
+          Select an index: <div id="indexDiv"><#--this div will be populated by ajax--></div>
+        </p>
+        <p>
+          Keywords: <input id="keywordIn" class="autoCompleteText" <#-- onkeyup="javascript:completePattern();" --> name="topic" type="text" onkeydown="if (event.keyCode == 13) document.getElementById('submitIn').click()"/><br/>
+        </p>
+        <p>
+          <!-- Ontology selection combobox-->
+          <#if it.ontologies?exists && it.ontologies?size != 0>
+            Graph: 
+            <select  id="graphIn" name="max" type="text" value="5">
+              <option value="choose_ontology">Choose an ontology</option>
+              <#list it.ontologies as ont>
+                <option value="${ont}">${ont}</option>
+              </#list>
+            </select>
+          <#else>
+            <p><i>No graphs to search.<i><p> 
+          </#if>
+        </p>
+        <p>
+          <input id="submitIn" type="button" value="Search" onclick="getResults(null,null,'first');"></input>
+        </p>
+        <img id="busyIcon" class="invisible centerImage" src="${it.staticRootUrl}/contenthub/images/ajax-loader.gif"/>
+      </fieldset>
+    </div>  
+    
+    <div id="resultContainer" class="invisible">
+      <div class="invisible" id="previousSuggestionButton"></div>
+      <div>
+        <!-- To be populated with ajax without xml :)-->
+      </div>
     </div>
   </div>
   
+  <div class="panel" id="restapi" style="display: none;">
+    <#include "/imports/searchrestapi.ftl">
+  </div>
+
   <!-- to be populated by the list of suggested keywords to be able to get back in search -->
   <input type="hidden" id="suggestedKeywordList" value=""/>  
   <!-- FIXME put a textarea so jQuery-ui tabs does not expand through footer -->
@@ -111,7 +117,17 @@
       }
 
       function getResults(facetName,facetValue,operation,voffset,vpageSize) {
-        
+
+          if($("#keywordIn").val() == null || $.trim($("#keywordIn").val()).length == 0) {
+              alert("You should enter keyword(s) for search");
+              return;
+          }
+          
+          $("#keywordIn").val($.trim($("#keywordIn").val()));          
+          if($("#keywordIn").val() == "*" || $("#keywordIn").val() == "?"){
+              $("#keywordIn").val("*:*");
+          }
+          
           //clears the content of div because it'll be filled by explorer posts
           var keywordToSearch = $("#keywordIn").val();
           
@@ -225,7 +241,7 @@
           //show busy icon
           $("#busyIcon").removeClass("invisible");
 
-		  var urlStr = "${it.publicBaseUri}contenthub/${it.indexName}/search/featured?queryTerm=" + $("#keywordIn").val();
+          var urlStr = "${it.publicBaseUri}contenthub/${it.indexName}/search/featured?queryTerm=" + $("#keywordIn").val();
 
           var graph_selected = "";
           var graphInCombo = document.getElementById('graphIn');
@@ -237,7 +253,7 @@
               }
           }
       
-      	    
+            
           $.ajax({
               url : urlStr,
               type : "GET",

@@ -17,39 +17,44 @@
 <#import "/imports/common.ftl" as common>
 <#escape x as x?html>
 <@common.page title="LD Path" hasrestapi=true>
-
-  <h3>Recently Submitted LD Programs</h3>
-  <div id="storeContents" class="storeContents">
-    <div id="submittedPrograms">
-      <table>
-        <tr>
-          <th></th>
-          <th>ProgramName</th>
-          <th>LD Path Program</th>
-        </tr>
-        <#list it.ldPrograms as ldProgram>
+  <div class="panel" id="webview">
+    <h3>Recently Submitted LD Programs</h3>
+    <div id="storeContents" class="storeContents">
+      <div id="submittedPrograms">
+        <table>
           <tr>
-            <td><img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" onClick="javascript:deleteProgram('${ldProgram.name}')" title="Delete this program" /></td>
-            <td>${ldProgram.name}</td>
-            <td>${ldProgram.ldPathProgram}</td>
+            <th></th>
+            <th>ProgramName</th>
+            <th>LD Path Program</th>
           </tr>
-        </#list>
-      </table>
+          <#list it.ldPrograms as ldProgram>
+            <tr>
+              <td><img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" onClick="javascript:deleteProgram('${ldProgram.name}')" title="Delete this program" /></td>
+              <td>${ldProgram.name}</td>
+              <td>${ldProgram.ldPathProgram}</td>
+            </tr>
+          </#list>
+        </table>
+      </div>
     </div>
+    
+    <br/>
+    
+    <h3>Submit a new LD Program</h3>
+    <fieldset>
+      <legend>Give an LD Program Name and LD Path Program</legend>
+      <p>Program Name:</p>
+      <p><input type="text" id="programNameText" /></p>
+      <p>LD Path Program:</p>
+      <p><textarea rows="15" id="ldPathProgramTextArea" name="content"></textarea></p>
+      <p><input type="submit" id="ldProgramSubmit" value="Submit Program" onClick="javascript:submitProgram();" /></p>
+    </fieldset>
   </div>
   
-  <br/>
-  
-  <h3>Submit a new LD Program</h3>
-  <fieldset>
-    <legend>Give an LD Program Name and LD Path Program</legend>
-    <p>Program Name:</p>
-    <p><input type="text" id="programNameText" /></p>
-    <p>LD Path Program:</p>
-    <p><textarea rows="15" id="ldPathProgramTextArea" name="content"></textarea></p>
-    <p><input type="submit" id="ldProgramSubmit" value="Submit Program" onClick="javascript:submitProgram();" /></p>
-  </fieldset>
-  
+  <div class="panel" id="restapi" style="display: none;">
+    <#include "/imports/ldpathrestapi.ftl">
+  </div>  
+
   <script language="javascript">
       function submitProgram() {
           var programName = $.trim($("#programNameText").val());
