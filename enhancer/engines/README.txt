@@ -1,22 +1,27 @@
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
 Enhancement Engines
 ===================
 
 This folder holds default implementations of enhancement engines
 (available as OSGi services). The current engines mainly focus on semantic
-lifting of unstructured content:
+lifting of unstructured content.
 
-- autotagging:
-
-  Given a content item of type text/plain, find a list of 3 suggestions of
-  semantically  related entities or topics referenced in a Lucene index
-  of entities such as DBpedia (see autotagging/README.txt for instructions
-  to obtain such an index).
-
-- opennlp-ner:
-
-  Given a content item of type text/plain, identify names of persons, locations,
-  organization, ... and there position in the text. If the autotagging service
-  is registered, further try to find if those names can match known entities
-  from the entity index or consider them as new entities otherwise.
-
-
+For documentation see 
+  
+  http://incubator.apache.org/stanbol/docs/trunk/enhancer/engines/list.html
