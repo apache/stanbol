@@ -38,8 +38,6 @@
     <module>owlapi</module>
     <module>jena</module>
     <module>test</module>
-    <!-- module>hermit</module -->
-    <!-- module>owllink</module -->
     <module>web</module>
     <module>bundlelist</module>
   </modules>
