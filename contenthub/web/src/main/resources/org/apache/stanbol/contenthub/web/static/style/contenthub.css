@@ -85,3 +85,17 @@ H3.ui-accordion-header{
 	font-size: 12px;
 	color: #C43187;
 }
+
+.preParent{
+  position:relative;
+}
+
+.copyImg{
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+
+.curlLine{
+  display: none;
+}

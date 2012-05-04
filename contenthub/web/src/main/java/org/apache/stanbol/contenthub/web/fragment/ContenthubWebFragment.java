@@ -31,6 +31,7 @@ import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.contenthub.web.resources.FeaturedSearchResource;
+import org.apache.stanbol.contenthub.web.resources.RelatedKeywordResource;
 import org.apache.stanbol.contenthub.web.resources.RootResource;
 import org.apache.stanbol.contenthub.web.resources.SemanticIndexManagerResource;
 import org.apache.stanbol.contenthub.web.resources.StoreResource;
@@ -74,6 +75,7 @@ public class ContenthubWebFragment implements WebFragment {
 		classes.add(StoreResource.class);
 		classes.add(FeaturedSearchResource.class);
 		classes.add(SemanticIndexManagerResource.class);
+		classes.add(RelatedKeywordResource.class);
 
 		classes.add(LDProgramCollectionWriter.class);
 		classes.add(SearchResultWriter.class);

@@ -93,7 +93,6 @@ import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrStore;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.contenthub.web.util.JSONUtils;
-import org.apache.stanbol.enhancer.jersey.resource.ContentItemResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
@@ -299,6 +298,8 @@ public class StoreResource extends BaseStanbolResource {
      *            content item will be prepared for download.
      * @param contentURI
      *            URI of the resource in the Stanbol Contenthub store
+     * @param format
+     *            Rdf serialization format of metadata
      * @return Raw content item or metadata of the content item.
      * @throws IOException
      * @throws StoreException
@@ -307,6 +308,7 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/download/{type}/{uri:.+}")
     public Response downloadContentItem(@PathParam(value = "type") String type,
                                         @PathParam(value = "uri") String contentURI,
+                                        @QueryParam(value = "format") String format,
                                         @Context HttpHeaders headers) throws IOException, StoreException {
 
         ContentItem ci = solrStore.get(contentURI, indexName);
@@ -314,7 +316,7 @@ public class StoreResource extends BaseStanbolResource {
             throw new WebApplicationException(404);
         }
         if (type.equals("metadata")) {
-            String fileName = contentURI + "-metadata";
+            String fileName = URLEncoder.encode(contentURI, "utf-8") + "-metadata";
             File file = new File(fileName);
             if (file.exists()) {
                 file.delete();
@@ -322,7 +324,7 @@ public class StoreResource extends BaseStanbolResource {
             boolean success = file.createNewFile();
             if (success) {
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                serializer.serialize(bos, ci.getMetadata(), SupportedFormat.RDF_XML);
+                serializer.serialize(bos, ci.getMetadata(), format);
                 bos.close();
             } else {
                 log.error("Failed to create file: {}", fileName);

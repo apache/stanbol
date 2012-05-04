@@ -40,11 +40,11 @@
               if(document.getElementById("${relatedKeywordId}${normalizedSourceName}button").innerHTML == "more") {
                   var a="<#list relatedKeywordList as related><#assign relatedName = related.keyword?replace(' ','_')><li><a href=javascript:getResults(null,'${relatedName}','explore')>${relatedName?replace('_', ' ')}</a></li></#list>";
                   document.getElementById("${relatedKeywordId}${normalizedSourceName}list").innerHTML=a;
-                  $(this).attr({ 'innerHTML': 'less' });
+                  $(this).html("less");
               } else{
                   var a="<#assign x=0><#list relatedKeywordList as related><#assign relatedName = related.keyword?replace('_',' ')><#if x == limit><#break/></#if><li><a href=javascript:getResults(null,'${relatedName}','explore')>${relatedName?replace('_', ' ')}</a></li><#assign x=x+1 /></#list>";
                   document.getElementById("${relatedKeywordId}${normalizedSourceName}list").innerHTML=a;
-                  $(this).attr({ 'innerHTML': 'more' });       
+                  $(this).html("more");       
               }    
           });
        }     
