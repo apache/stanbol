@@ -28,7 +28,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.opennlp.lang.sv</artifactId>
-  <version>1.0.1-incubating-SNAPSHOT</version>
+  <version>1.0.1-incubating</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: OpenNLP Models for Swedish</name>
