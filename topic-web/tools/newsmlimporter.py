@@ -58,7 +58,7 @@ def find_text_and_subjects(newsml_content,
 
 
 def register_newsml_document(text, codes, url):
-    id = sha1(text).hexdigest()
+    id = sha1(text.encode('utf-8')).hexdigest()
     url += "?example_id=%s" % id
     for code in codes:
         url += "&concept=%s" % quote(code)
