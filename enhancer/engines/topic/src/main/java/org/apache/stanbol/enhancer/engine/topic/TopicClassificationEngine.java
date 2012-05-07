@@ -232,8 +232,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     private int MAX_COLLECTED_EXAMPLES = 1000;
 
-    public int MAX_EVALUATION_SAMPLES = 200;
+    // Limit the evaluation time by computing the performance estimates on a bounded random selection of
+    // labeled examples in the training set.
+    public int MAX_EVALUATION_SAMPLES = 500;
 
+    // Do not try to compute performance estimates if there is not at least a minimum number of example
+    // documents for this concept.
     public int MIN_EVALUATION_SAMPLES = 10;
 
     public int MAX_CHARS_PER_TOPIC = 100000;
@@ -404,6 +408,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         List<TopicSuggestion> topics;
         try {
             topics = suggestTopics(text);
+            if (topics.isEmpty()) {
+                return;
+            }
         } catch (ClassifierException e) {
             throw new EngineException(e);
         }
@@ -568,7 +575,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             // no need to apply the cutting heuristic
             return suggestedTopics;
         }
-        // filter out suggestion that are less than some threshold based on the mean of the top scores
+        // filter out suggestions that are less than some threshold based on the mean of the top scores
         float mean = 0.0f;
         for (TopicSuggestion suggestion : suggestedTopics) {
             mean += suggestion.score / suggestedTopics.size();
@@ -1025,7 +1032,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             tmpfolder.mkdir();
             evaluationRunning = true;
             int cvFoldCount = 3; // 3-folds CV is hardcoded for now
-            int cvIterationCount = 1; // only one 3-folds CV iteration
+            int cvIterationCount = 3; // make it possible to limit the number of folds to use
 
             // We will use the training set quite intensively, ensure that the index is packed and its
             // statistics are up to date
