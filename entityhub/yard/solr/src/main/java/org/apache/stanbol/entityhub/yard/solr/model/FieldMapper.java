@@ -146,7 +146,11 @@ public interface FieldMapper {
      * @return the field name used for storing the id's of documents this document refers to.
      */
     String getReferredDocumentField();
-
+    /**
+     * Getter for the field name used to index all textual values of an Entity.
+     * @return the field name that indexes all textual values of an Entity.
+     */
+    String getFullTextSearchField();
     /**
      * Getter for the Merger Field for the parse language
      * 
@@ -164,7 +168,7 @@ public interface FieldMapper {
      * @return the field prefixes used to encode the parsed languages. Guaranteed to return NOT
      *         <code>null</code>. If no prefix is needed to encode, an empty collection is returned
      */
-    Collection<String> encodeLanguages(Collection<String> languages);
+    Collection<String> encodeLanguages(IndexField indexField);
 
     /**
      * Getter for the prefix/suffix used to encode the parsed index data type.
@@ -177,7 +181,7 @@ public interface FieldMapper {
      * @throws IllegalArgumentException
      *             if no prefix/suffix mapping is defined for the parsed index data type
      */
-    String[] encodeDataType(IndexDataType dataType) throws IllegalArgumentException;
+    String[] encodeDataType(IndexField indexField) throws IllegalArgumentException;
 
     /**
      * Getter for the encoded path
@@ -189,5 +193,5 @@ public interface FieldMapper {
      * @throws IllegalArgumentException
      *             if the parsed path and/or index value do not confirm with the requirements
      */
-    String encodePath(List<String> path) throws IllegalArgumentException;
+    String encodePath(IndexField indexField) throws IllegalArgumentException;
 }

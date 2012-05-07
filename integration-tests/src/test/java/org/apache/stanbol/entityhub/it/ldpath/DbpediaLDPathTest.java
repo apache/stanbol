@@ -222,7 +222,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
          .assertStatus(200)
          .assertContentType("text/turtle")
          .assertContentContains(
-             "<http://www.iks-project.eu/ontology/rick/query/score>",
+             "<http://stanbol.apache.org/ontology/entityhub/query#score>",
              "<http://dbpedia.org/resource/Vienna>",
              "<name_de> \"Wien\"@de .");
     }
@@ -242,7 +242,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
          .assertStatus(200)
          .assertContentType("text/turtle")
          .assertContentContains(
-             "<http://www.iks-project.eu/ontology/rick/query/score>",
+             "<http://stanbol.apache.org/ontology/entityhub/query#score>",
              "<http://dbpedia.org/resource/York>",
              "<lat>   \"53.958332\"^^<http://www.w3.org/2001/XMLSchema#double> .",
              "<http://dbpedia.org/resource/New_York_City>",
@@ -269,7 +269,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
          .assertStatus(200)
          .assertContentType("text/turtle")
          .assertContentContains(
-             "<http://www.iks-project.eu/ontology/rick/query/score>",
+             "<http://stanbol.apache.org/ontology/entityhub/query#score>",
              "<name>  \"Spider\"@en ;",
              "<category> <http://dbpedia.org/resource/Category:Arachnids> , " +
                  "<http://dbpedia.org/resource/Category:Spiders> ;",

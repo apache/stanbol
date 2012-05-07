@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+
 public class DbpediaDefaultdataConstants {
     
     private DbpediaDefaultdataConstants() { /* no instances */}
@@ -32,9 +34,12 @@ public class DbpediaDefaultdataConstants {
     public static final Set<String> DBPEDIA_DEFAULTDATA_OPTIONAL_FIELDS;
     static {
         Set<String> required = new HashSet<String>();
-        required.add("http://www.w3.org/2000/01/rdf-schema#label");
-        required.add("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-        required.add("http://www.iks-project.eu/ontology/rick/model/entityRank");
+        required.add(NamespaceEnum.rdfs+"label");
+        required.add(NamespaceEnum.rdf+"type");
+        //TODO: STANBOL-600 change to NamespaceEnum.entityhub as soon as a
+        //      new dbpedia default data index is available
+        //      This will be done as soon as the next DBpedia release is available
+        required.add(NamespaceEnum.rickModel+"entityRank");
         DBPEDIA_DEFAULTDATA_REQUIRED_FIELDS = Collections.unmodifiableSet(required);
 
         Set<String> optional = new HashSet<String>();

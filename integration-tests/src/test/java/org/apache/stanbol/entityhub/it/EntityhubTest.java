@@ -29,6 +29,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.stanbol.commons.testing.http.Request;
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.test.it.EntityhubTestBase;
 import org.apache.stanbol.entityhub.test.query.FieldQueryTestCase;
 import org.apache.stanbol.entityhub.test.query.FindQueryTestCase;
@@ -62,7 +63,7 @@ public final class EntityhubTest extends QueryTestBase {
     
     @Override
     protected String getDefaultFindQueryField() {
-        return "http://www.iks-project.eu/ontology/rick/model/label";
+        return NamespaceEnum.entityhub+"label";
     }
     /*
      * First the CRUD interface

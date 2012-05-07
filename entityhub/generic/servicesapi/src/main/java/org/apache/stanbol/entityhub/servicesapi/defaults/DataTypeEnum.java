@@ -63,8 +63,8 @@ import org.apache.stanbol.entityhub.servicesapi.model.Text;
  */
 public enum DataTypeEnum {
     //Entityhub specific
-    Reference(NamespaceEnum.entityhubModel,"ref",Reference.class),
-    Text(NamespaceEnum.entityhubModel,"text",Text.class),
+    Reference(NamespaceEnum.entityhub,"ref",Reference.class),
+    Text(NamespaceEnum.entityhub,"text",Text.class),
     //xsd types
     /**
      * currently URIs are preferable mapped to {@link Reference}, because there

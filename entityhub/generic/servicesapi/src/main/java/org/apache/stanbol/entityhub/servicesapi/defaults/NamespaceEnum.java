@@ -29,11 +29,32 @@ import org.slf4j.LoggerFactory;
  *
  */
 public enum NamespaceEnum {
-    
+    /*
+     * STANBOL internally used Namespaces
+     */
+    /**
+     * The Stanbol Enhancer namespace defining Enhancer, EnhancementEngine and
+     * EnhancementChain. This is NOT the namespace of the enhancement structure.
+     * As EnhancementStrucutre up to now still the old FISE namespace is used.
+     */
+    enhancer("http://stanbol.apache.org/ontology/enhancer/enhancer#"),
     //Namespaces defined by the entityhub
-    entityhubModel("entityhub","http://www.iks-project.eu/ontology/rick/model/"),
-    entityhubQuery("entityhub-query","http://www.iks-project.eu/ontology/rick/query/"),
-
+    /**
+     * The Namespace used by the Entityhub to define its concepts such as
+     * Entity, Representation ...
+     */
+    entityhub("http://stanbol.apache.org/ontology/entityhub/entityhub#"),
+    /**
+     * The namespace used by the Entityhub to define query related concepts
+     * e.g. the full text search field, semantic context field, result score ...
+     */
+    entityhubQuery("entityhub-query","http://stanbol.apache.org/ontology/entityhub/query#"),
+    /**
+     * The FISE namespace (1st version of the Enhancement Structure).
+     * Will be replaced by the Stanbol Enhancement Structure by a future
+     * release (see STANBOL-3).
+     */
+    fise("http://fise.iks-project.eu/ontology/"),
 
     //First the XML Namespaces
     xsd("http://www.w3.org/2001/XMLSchema#"),
@@ -144,7 +165,26 @@ public enum NamespaceEnum {
     /**
      *  Expression of Core FRBR Concepts in RDF (http://vocab.org/frbr/core)
      */
-    frbr("http://purl.org/vocab/frbr/core#")
+    frbr("http://purl.org/vocab/frbr/core#"),
+    
+    /*
+     * Old namespaces still kept for historical reasons
+     */
+    /**
+     * The old URI for the 'entityhub' namespace prefix as used by STANBOL
+     * 0.9.0-incubating.
+     * @see NamespaceEnum#entityhubModel
+     */
+    @Deprecated
+    rickModel("rick","http://www.iks-project.eu/ontology/rick/model/"),
+    /**
+     * The old URI for the 'entityhub-query' namespace prefix as used by STANBOL
+     * 0.9.0-incubating.
+     * @see NamespaceEnum#entityhubQuery
+     */
+    @Deprecated
+    rickQuery("rick-query","http://www.iks-project.eu/ontology/rick/query/"),
+
     ;
     /**
      * The logger

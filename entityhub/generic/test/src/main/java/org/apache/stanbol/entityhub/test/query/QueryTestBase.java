@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 
 import org.apache.stanbol.commons.testing.http.Request;
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.test.it.EntityhubTestBase;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -63,7 +64,7 @@ public abstract class QueryTestBase extends EntityhubTestBase {
     
     private final Logger log = LoggerFactory.getLogger(getClass());
     
-    public static final String RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
+    public static final String RDFS_LABEL = NamespaceEnum.rdfs+"label";
     protected final String endpointPath;
     /**
      * Constructs a FieldQueryServiceTest
@@ -209,7 +210,7 @@ public abstract class QueryTestBase extends EntityhubTestBase {
                 "'text': 'Paris' " + //NOTE: here the comma is missing here!
                 "'patternType' : 'none', " +
                 "'field': 'http:\\/\\/www.test.org\\/test#field', " +
-                "'dataTypes': ['http:\\/\\/www.iks-project.eu\\/ontology\\/rick\\/model\\/text'] " +
+                "'dataTypes': ['http:\\/\\/stanbol.apache.org\\/ontology\\/entityhub\\/entityhub#text'] " +
                 "}]" +
             "}", 
             400); //expect BadRequest
@@ -238,7 +239,7 @@ public abstract class QueryTestBase extends EntityhubTestBase {
                 "'text': 'Paris', " + 
                 "'patternType' : 'none', " +
                 "'field': '', " +
-                "'dataTypes': ['http:\\/\\/www.iks-project.eu\\/ontology\\/rick\\/model\\/text'] " +
+                "'dataTypes': ['http:\\/\\/stanbol.apache.org\\/ontology\\/entityhub\\/entityhub#text'] " +
                 "}]" +
             "}", 
             400); //expect BadRequest
@@ -269,7 +270,7 @@ public abstract class QueryTestBase extends EntityhubTestBase {
                 "'text': 'Paris', " + 
                 "'patternType' : 'none', " +
                 "'field': 'http:\\/\\/www.test.org\\/test#field', " +
-                "'dataTypes': ['http:\\/\\/www.iks-project.eu\\/ontology\\/rick\\/model\\/text'] " +
+                "'dataTypes': ['http:\\/\\/stanbol.apache.org\\/ontology\\/entityhub\\/entityhub#text'] " +
                 "},{ "+
                     "'type': 'reference', "+
                     "'field': 'http:\\/\\/www.test.org\\/test#field', "+
@@ -365,7 +366,7 @@ public abstract class QueryTestBase extends EntityhubTestBase {
                 "'text': 'Paris', " + 
                 "'patternType' : 'none', " +
                 //"'field': 'http:\\/\\/www.test.org\\/test#field', " +
-                "'dataTypes': ['http:\\/\\/www.iks-project.eu\\/ontology\\/rick\\/model\\/text'] " +
+                "'dataTypes': ['http:\\/\\/stanbol.apache.org\\/ontology\\/entityhub\\/entityhub#text'] " +
                 "}]" +
             "}", 
             400); //expect BadRequest

@@ -20,8 +20,16 @@ public enum NamespaceEnum {
 
     // TODO: change the namespace as soon as STANBOL-3 defines a namespace to be used for stanbol
     enhancer("http://fise.iks-project.eu/ontology/"),
+    @Deprecated
     rickModel("http://www.iks-project.eu/ontology/rick/model/"),
+    @Deprecated
     rickQuery("http://www.iks-project.eu/ontology/rick/query/"),
+    entityhub("http://stanbol.apache.org/ontology/entityhub/entityhub#"),
+    /**
+     * The namespace used by the Entityhub to define query related concepts
+     * e.g. the full text search field, semantic context field, result score ...
+     */
+    entityhubQuery("entityhub-query","http://stanbol.apache.org/ontology/entityhub/query#"),
     
     atom("http://www.w3.org/2005/Atom"),
     bio("dc-bio","http://purl.org/vocab/bio/0.1/"),

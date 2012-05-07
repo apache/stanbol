@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 public enum NamespaceEnum {
 
     // Namespaces defined by the entityhub
-    entityhubModel("entityhub", "http://www.iks-project.eu/ontology/rick/model/"),
-    entityhubQuery("entityhub-query", "http://www.iks-project.eu/ontology/rick/query/"),
+    entityhubModel("entityhub", "http://stanbol.apache.org/ontology/entityhub/entityhub#"),
+    entityhubQuery("entityhub-query", "http://stanbol.apache.org/ontology/entityhub/query#"),
     // Namespaces defined by the CMS Adapter
     cms("http://www.apache.org/stanbol/cms#"),
     // First the XML Namespaces

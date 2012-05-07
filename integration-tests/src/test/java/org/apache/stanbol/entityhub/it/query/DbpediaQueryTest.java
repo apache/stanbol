@@ -21,6 +21,7 @@ import java.util.Arrays;
 
 import org.apache.stanbol.entityhub.it.ReferencedSiteTest;
 import org.apache.stanbol.entityhub.it.SitesManagerTest;
+import org.apache.stanbol.entityhub.servicesapi.defaults.SpecialFieldEnum;
 import org.apache.stanbol.entityhub.test.query.FieldQueryTestCase;
 import org.apache.stanbol.entityhub.test.query.FindQueryTestCase;
 import org.apache.stanbol.entityhub.test.query.QueryTestBase;
@@ -432,4 +433,169 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
         //now execute the test
         executeQuery(test);
     }    
+    /**
+     * Tests that full text queries are possible by using the 
+     * {@link SpecialFieldEnum#fullText} field (STANBOL-596) 
+     */
+    @Test
+    public void testFullTextQuery() throws IOException, JSONException {
+        FieldQueryTestCase test = new FieldQueryTestCase(
+            "{ "+
+                "'selected': ["+
+                    "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
+                "'offset': '0',"+
+                "'limit': '3',"+
+                "'constraints': [{ "+
+                    "'type': 'text',"+ 
+                    "'patternType': 'wildcard',"+ 
+                    "'text': ['microbiologist'],"+  
+                    "'field': 'entityhub-query:fullText'"+ 
+                 "},{"+ 
+                    "'type': 'reference',"+  
+                    "'value': ['dbp-ont:Person'],"+  
+                    "'field': 'rdf:type',"+ 
+                    "}]"+
+             "}",
+             Arrays.asList( //list of expected results
+                 "http://dbpedia.org/resource/Louis_Pasteur"),
+             Arrays.asList( //list of required fields for results
+                "http://www.w3.org/2000/01/rdf-schema#label"));
+        //now execute the test
+        executeQuery(test);
+        
+    }
+    /**
+     * Tests searches for references in the semantic context field (the
+     * field containing all references to other entities (STANBOL-597) 
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testSemanticContextQuery() throws IOException, JSONException {
+        FieldQueryTestCase test = new FieldQueryTestCase(
+            "{ "+
+                "'selected': ["+
+                    "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
+                "'offset': '0',"+
+                "'limit': '5',"+
+                "'constraints': [{ "+
+                    "'type': 'reference',"+ 
+                    "'value': ["+
+                        "'http://dbpedia.org/resource/Category:Capitals_in_Europe',"+
+                        "'http://dbpedia.org/resource/Category:Host_cities_of_the_Summer_Olympic_Games'"+
+                    "],"+ 
+                    "'field': 'entityhub-query:references',"+
+                    "}]"+
+             "}",
+             Arrays.asList( //list of expected results
+                 "http://dbpedia.org/resource/London",
+                 "http://dbpedia.org/resource/Paris",
+                 "http://dbpedia.org/resource/Moscow",
+                 "http://dbpedia.org/resource/Rome",
+                 "http://dbpedia.org/resource/Berlin"),
+             Arrays.asList( //list of required fields for results
+                "http://www.w3.org/2000/01/rdf-schema#label"));
+        //now execute the test
+        executeQuery(test);        
+    }
+    
+    /**
+     * Tests ValueConstraint MODE "any" and "all" queries (STANBOL-595) 
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testConstraintValueModeQuery() throws IOException, JSONException {
+        //First with mode = 'any' -> combine Entity Ranking with types
+        FieldQueryTestCase test = new FieldQueryTestCase(
+            "{ "+
+                "'selected': ["+
+                    "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
+                "'offset': '0',"+
+                "'limit': '5',"+
+                "'constraints': [{ "+
+                    "'type': 'reference',"+ 
+                    "'value': ["+
+                        "'http:\\/\\/dbpedia.org\\/resource\\/Category:Capitals_in_Europe',"+
+                        "'http:\\/\\/dbpedia.org\\/resource\\/Category:Host_cities_of_the_Summer_Olympic_Games',"+
+                        "'http:\\/\\/dbpedia.org\\/ontology\\/City'"+
+                    "],"+ 
+                    "'field': 'entityhub-query:references',"+
+                    "'mode': 'any'"+
+                    "}]"+
+             "}",
+             Arrays.asList( //list of expected results
+                 "http://dbpedia.org/resource/London",
+                 "http://dbpedia.org/resource/Paris",
+                 "http://dbpedia.org/resource/Moscow",
+                 "http://dbpedia.org/resource/Rome",
+                 //now we get Los_Angeles because it has the dbp-ont:City type
+                 "http://dbpedia.org/resource/Los_Angeles"),
+             Arrays.asList( //list of required fields for results
+                "http://www.w3.org/2000/01/rdf-schema#label"));
+        //now execute the test
+        executeQuery(test);
+        
+        //Second query for Entities that do have relations to all three
+        //Entities (NOTE: the dbp-ont:City type is missing for most of the
+        //members of the two categories used in this example!)
+        test = new FieldQueryTestCase(
+            "{ "+
+                "'selected': ["+
+                    "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
+                "'offset': '0',"+
+                "'limit': '5',"+
+                "'constraints': [{ "+
+                    "'type': 'reference',"+ 
+                    "'value': ["+
+                        "'http:\\/\\/dbpedia.org\\/resource\\/Category:Capitals_in_Europe',"+
+                        "'http:\\/\\/dbpedia.org\\/resource\\/Category:Host_cities_of_the_Summer_Olympic_Games',"+
+                        "'http:\\/\\/dbpedia.org\\/ontology\\/City'"+
+                    "],"+ 
+                    "'field': 'entityhub-query:references',"+
+                    "'mode': 'all'"+
+                    "}]"+
+             "}",
+             Arrays.asList( //list of expected results
+                 "http://dbpedia.org/resource/Berlin",
+                 "http://dbpedia.org/resource/Amsterdam"),
+             Arrays.asList( //list of required fields for results
+                "http://www.w3.org/2000/01/rdf-schema#label"));
+        //now execute the test
+        executeQuery(test);        
+    }
+    /**
+     * Tests (1) similarity searches and (2) that the full text field is supported
+     * for those (STANBOL-589 and STANBOL-596)
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testSimilaritySearch() throws IOException, JSONException {
+        
+        //searches Places with "Wolfgang Amadeus Mozart" as context
+        FieldQueryTestCase test = new FieldQueryTestCase(
+            "{ "+
+                "'selected': ["+
+                    "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
+                "'offset': '0',"+
+                "'limit': '5',"+
+                "'constraints': [{ " +
+                        "'type': 'reference'," +
+                        "'value': 'http:\\/\\/dbpedia.org\\/ontology\\/Place'," +
+                        "'field': 'http:\\/\\/www.w3.org\\/1999\\/02\\/22-rdf-syntax-ns#type'," +
+                    "},{"+ 
+                        "'type': 'similarity'," + 
+                        "'context': 'Wolfgang Amadeus Mozart'," + 
+                        "'field': 'http:\\/\\/stanbol.apache.org\\/ontology\\/entityhub\\/query#fullText'," +
+                    "}]"+
+             "}",
+             Arrays.asList( //list of expected results
+                 "http://dbpedia.org/resource/Salzburg"),
+             Arrays.asList( //list of required fields for results
+                "http://www.w3.org/2000/01/rdf-schema#label"));
+        //now execute the test
+        executeQuery(test);        
+        
+    }
 }

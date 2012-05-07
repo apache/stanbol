@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.test.query.QueryTestCase;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -185,11 +186,11 @@ public class AssertEntityhubJson {
         JSONObject jMetadata = jEntity.getJSONObject("metadata");
         assertNotNull("Metadata is not an JSON Object",jMetadata);
         Map<String,Set<List<String>>> metadata = assertRepresentation(jMetadata, Arrays.asList(
-            "http://www.iks-project.eu/ontology/rick/model/isChached",
-            "http://www.iks-project.eu/ontology/rick/model/about",
-            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),null);
+            NamespaceEnum.entityhub+"isChached",
+            NamespaceEnum.entityhub+"about",
+            NamespaceEnum.rdf+"type"),null);
         assertTrue("The Metadata of an Entity MUST BE about the Entity",
-            metadata.get("http://www.iks-project.eu/ontology/rick/model/about")
+            metadata.get(NamespaceEnum.entityhub+"about")
                 .contains(Arrays.asList(id,"xsd:anyURI")));
         return jEntity;
     }

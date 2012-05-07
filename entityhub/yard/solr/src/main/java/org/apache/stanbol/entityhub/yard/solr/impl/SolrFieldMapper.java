@@ -19,6 +19,7 @@ package org.apache.stanbol.entityhub.yard.solr.impl;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.DEPENDENT_DOCUMENT_FIELD;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.DOCUMENT_ID_FIELD;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.DOMAIN_FIELD;
+import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.FULL_TEXT_FIELD;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.PATH_SEPERATOR;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.REFERRED_DOCUMENT_FIELD;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.SPECIAL_CONFIG_FIELD;
@@ -46,15 +47,14 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.apache.stanbol.entityhub.servicesapi.defaults.SpecialFieldEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst;
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
-import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
-import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -321,25 +321,41 @@ public class SolrFieldMapper implements FieldMapper {
         }
         Collection<String> fieldNames = indexFieldMappings.get(indexField);
         if (fieldNames == null) {
-            IndexDataTypeEnum dataTypeConfig = IndexDataTypeEnum.forIndexType(indexField.getDataType());
-            if (dataTypeConfig == null) {
-                throw new IllegalStateException(String.format(
-                    "No Config found for the parsed IndexDataType %s", indexField.getDataType()));
-            }
-            fieldNames = new HashSet<String>();
-            // Three things need to be done
-            // 1) Encode the Path
-            String pathName = encodePathName(indexField.getPath());
-            // 2) Encode the DataType
-            fieldNames.addAll(encodeDataType(pathName, dataTypeConfig));
-            // 3) Encode the Languages
-            if (indexField.hasLanguage()) {
-                fieldNames.addAll(encodeLanguages(pathName, indexField.getLanguages()));
-            }
-            // 4) add the language merger field (in case the dataType represent natural
-            // language texts)
-            if (dataTypeConfig.isLanguageType()) {
-                fieldNames.add(SolrConst.LANG_MERGER_FIELD + pathName);
+            SpecialFieldEnum specialField = indexField.getSpecialField();//check for special field;
+            if(specialField != null){
+                switch (specialField) {
+                    case fullText:
+                        fieldNames = Collections.singleton(getFullTextSearchField());
+                        break;
+                    case references:
+                        fieldNames = Collections.singleton(getReferredDocumentField());
+                    default:
+                        throw new IllegalStateException("Unsupported Special Field '"
+                            +specialField.getUri()+"! Please report this to the "
+                            + "Stanbol Developer Mailing list or create an according"
+                            + "JIRA issue at https://issues.apache.org/jira/browse/STANBOL!");
+                }
+            } else {
+                fieldNames = new HashSet<String>(2); //typically onle 1 or 2 values
+                IndexDataTypeEnum dataTypeConfig = IndexDataTypeEnum.forIndexType(indexField.getDataType());
+                if (dataTypeConfig == null) {
+                    throw new IllegalStateException(String.format(
+                        "No Config found for the parsed IndexDataType %s", indexField.getDataType()));
+                }
+                // Three things need to be done
+                // 1) Encode the Path
+                String pathName = encodePathName(indexField);
+                // 2) Encode the DataType
+                fieldNames.addAll(encodeDataType(pathName, dataTypeConfig));
+                // 3) Encode the Languages
+                if (indexField.hasLanguage()) {
+                    fieldNames.addAll(encodeLanguages(pathName, indexField.getLanguages()));
+                }
+                // 4) add the language merger field (in case the dataType represent natural
+                // language texts)
+                if (dataTypeConfig.isLanguageType()) {
+                    fieldNames.add(SolrConst.LANG_MERGER_FIELD + pathName);
+                }
             }
             // cache the mappings
             indexFieldMappings.put(indexField, fieldNames);
@@ -352,42 +368,64 @@ public class SolrFieldMapper implements FieldMapper {
      * within the path with <code>prefix+NAMESPACE_PREFIX_SEPERATOR_CHAR+localName</code>. In addition it
      * places the <code>PATH_SEPERATOR</code> char between the elements.
      * <p>
-     * NOTE: This Method assumes that both Parameters are not NULL and that the Path is not empty and contains
-     * no NULL nor emtpy element!
-     * 
+     * NOTES: <ul>
+     *  <li>This Method assumes that no empty or <code>null</code> elements are
+     *  containted in the parsed list.
+     *  <li>This Method supports special encoding of fields registered in the
+     *  {@link SpecialFieldEnum}. However those fields are only allowed to be
+     *  used in paths with the length <code>1</code>. 
+     *  An {@link IllegalArgumentException} is thrown if a special field is used
+     *  in a longer path.
+     * </ul>
      * @param path
      *            the path to encode
      * @return the path name
+     * @throws IllegalArgumentException if <code>null</code> or an empty list is
+     * parsed as path or a special field is used in a path with a length &gt; 1
+     * @throws IllegalStateException if an unknown {@link SpecialFieldEnum
+     * special field} is encountered.
      */
-    private String encodePathName(List<String> path) {
-        StringBuilder pathName = new StringBuilder();
-        // Now Iterate over the Path
-        pathName.append(PATH_SEPERATOR); // add the leading PathSeperator
-        Iterator<String> fields = path.iterator();
-        while (fields.hasNext()) {
-            String field = fields.next();
-            // PathElement element = it.next();
-            String[] namespaceLocalName = ModelUtils.getNamespaceLocalName(field);
-            // QName qName = getQName(field);
-            if (namespaceLocalName[0] != null && !namespaceLocalName[0].isEmpty()) {
-                pathName.append(getPrefix(namespaceLocalName[0], true));
-                // second the local name
-                pathName.append(NAMESPACE_PREFIX_SEPERATOR_CHAR);
+    private String encodePathName(IndexField indexField) {
+        SpecialFieldEnum specialField = indexField.getSpecialField();
+        if(specialField != null){ //handel special fields
+            switch (specialField) {
+                case fullText:
+                    return getFullTextSearchField();
+                case references:
+                    return getReferredDocumentField();
+                default:
+                    throw new IllegalStateException("Unsupported Special Field '"
+                            + specialField.getUri()+"'! Please report this to"
+                            + "the Apache Stanbol Developer Mailing List!");
             }
-            pathName.append(namespaceLocalName[1]);
-            // third add Path Separator if there are additional Elements
-            if (fields.hasNext()) {
-                pathName.append(PATH_SEPERATOR);
+        } else { //normal field
+            StringBuilder pathName = new StringBuilder();
+            // Now Iterate over the Path
+            pathName.append(PATH_SEPERATOR); // add the leading PathSeperator
+            Iterator<String> fields = indexField.getPath().iterator();
+            while (fields.hasNext()) {
+                String field = fields.next();
+                String[] namespaceLocalName = ModelUtils.getNamespaceLocalName(field);
+                // QName qName = getQName(field);
+                if (namespaceLocalName[0] != null && !namespaceLocalName[0].isEmpty()) {
+                    pathName.append(getPrefix(namespaceLocalName[0], true));
+                    // second the local name
+                    pathName.append(NAMESPACE_PREFIX_SEPERATOR_CHAR);
+                }
+                pathName.append(namespaceLocalName[1]);
+                // third add Path Separator if there are additional Elements
+                if (fields.hasNext()) {
+                    pathName.append(PATH_SEPERATOR);
+                }
             }
+            pathName.append(PATH_SEPERATOR); // add the tailing PathSeperator
+            return pathName.toString();
         }
-        pathName.append(PATH_SEPERATOR); // add the tailing PathSeperator
-        return pathName.toString();
     }
 
     @Override
-    public String encodePath(List<String> path) throws IllegalArgumentException {
-        IndexField.validatePath(path);
-        return encodePathName(path);
+    public String encodePath(IndexField indexField) throws IllegalArgumentException {
+        return encodePathName(indexField);
     }
 
     /**
@@ -415,11 +453,11 @@ public class SolrFieldMapper implements FieldMapper {
     }
 
     @Override
-    public String[] encodeDataType(IndexDataType dataType) throws IllegalArgumentException {
-        IndexDataTypeEnum dataTypeConfig = IndexDataTypeEnum.forIndexType(dataType);
+    public String[] encodeDataType(IndexField indexField) throws IllegalArgumentException {
+        IndexDataTypeEnum dataTypeConfig = IndexDataTypeEnum.forIndexType(indexField.getDataType());
         if (dataTypeConfig == null) {
             throw new IllegalStateException(String.format("No Config found for the parsed IndexDataType %s",
-                dataType));
+                indexField.getDataType()));
         }
         return encodeDataType(dataTypeConfig);
     }
@@ -470,6 +508,10 @@ public class SolrFieldMapper implements FieldMapper {
         }
     }
 
+    @Override
+    public Collection<String> encodeLanguages(IndexField indexField) {
+        return encodeLanguages(indexField.getLanguages());
+    }
     /**
      * Internally used instead of {@link #encodeLanguages(String...)}
      * 
@@ -478,7 +520,7 @@ public class SolrFieldMapper implements FieldMapper {
      * @return the prefixes
      * @see FieldMapper#encodeLanguages(String...)
      */
-    public Collection<String> encodeLanguages(Collection<String> languages) {
+    private Collection<String> encodeLanguages(Collection<String> languages) {
         if (languages == null || languages.isEmpty()) { // no language
             return Collections.emptySet();// just return the field
         } else if (languages.size() == 1) {
@@ -531,6 +573,10 @@ public class SolrFieldMapper implements FieldMapper {
     @Override
     public String getDependentDocumentField() {
         return DEPENDENT_DOCUMENT_FIELD;
+    }
+    @Override
+    public String getFullTextSearchField() {
+        return FULL_TEXT_FIELD;
     }
 
     /*--------------------------------------------------------------------------
