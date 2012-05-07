@@ -19,18 +19,17 @@ package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
+import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
+import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
-import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
-import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
 
-public class LangEncoder implements IndexConstraintTypeEncoder<Collection<String>> {
+public class LangEncoder implements IndexConstraintTypeEncoder<IndexField> {
 
     private static final ConstraintTypePosition PREFIX = new ConstraintTypePosition(PositionType.prefix);
     // private static final ConstraintTypePosition SUFFIX = new ConstraintTypePosition(PositionType.suffux);
@@ -44,19 +43,14 @@ public class LangEncoder implements IndexConstraintTypeEncoder<Collection<String
     }
 
     @Override
-    public void encode(EncodedConstraintParts constraint, Collection<String> value) {
+    public void encode(EncodedConstraintParts constraint, IndexField value) {
         //We need to process languages, because one may parse null, or
         //an empty list or a list that contains a single element "null"
         Collection<String> languages;
-        if(value == null || value.isEmpty()){
+        if(value == null){
             languages = Collections.emptyList();
         } else {
-            languages = new HashSet<String>();
-            for(String lang : value){
-                if(lang != null){
-                    languages.add(lang);
-                }
-            }
+            languages = value.getLanguages();
         }
         if (!languages.isEmpty()) {
             for (String prefix : fieldMapper.encodeLanguages(value)) {
@@ -84,11 +78,10 @@ public class LangEncoder implements IndexConstraintTypeEncoder<Collection<String
         return IndexConstraintTypeEnum.LANG;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Class<Collection<String>> acceptsValueType() {
+    public Class<IndexField> acceptsValueType() {
         // generic types are ereased anyway!
-        return (Class<Collection<String>>) (Class<?>) Collection.class;
+        return IndexField.class;
     }
 
 }

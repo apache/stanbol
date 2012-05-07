@@ -67,7 +67,7 @@ public interface IndexConstraintTypeEncoder<T> {
      * <p>
      * Please note that <code>null</code> might also be a valid parameter even if an Encoder does not support
      * a default value!
-     * 
+     * @param constraint the encoded constraint parts
      * @param value
      *            the value for the constraint
      * @throws IllegalArgumentException

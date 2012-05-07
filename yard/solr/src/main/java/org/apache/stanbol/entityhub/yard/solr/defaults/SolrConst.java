@@ -83,7 +83,14 @@ public final class SolrConst {
      * updated.
      */
     public static final String DEPENDENT_DOCUMENT_FIELD = SPECIAL_FIELD_PREFIX + "dep";
-
+    /**
+     * The field indexing all textual values of an Entity.<p>
+     * This field is created by copyfield configurations in the Solr schema.xml
+     */
+    public static final String FULL_TEXT_FIELD = SPECIAL_FIELD_PREFIX + "text";
+    /**
+     * Prefix used for fields that store meta information about the index.
+     */
     public static final String SPECIAL_CONFIG_FIELD = SPECIAL_FIELD_PREFIX + "config";
     /**
      * The name of the field that indicates the domain of a document.

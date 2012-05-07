@@ -17,12 +17,13 @@
 package org.apache.stanbol.entityhub.yard.solr.query;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 /**
  * This class is used to store the encoded parts of the index field constraints created by the
@@ -62,7 +63,10 @@ public class EncodedConstraintParts implements Iterable<Entry<ConstraintTypePosi
      * @param values
      */
     public void addEncoded(ConstraintTypePosition pos, String... values) {
-        if (values == null || values.length < 1) {
+        addEncoded(pos, values == null ? null : Arrays.asList(values));
+    }
+    public void addEncoded(ConstraintTypePosition pos, Collection<String> values) {
+        if (values == null || values.isEmpty()) {
             return;
         } else {
             Set<Set<String>> constraints = constraintMap.get(pos);
@@ -70,7 +74,7 @@ public class EncodedConstraintParts implements Iterable<Entry<ConstraintTypePosi
                 constraints = new HashSet<Set<String>>();
                 constraintMap.put(pos, constraints);
             }
-            constraints.add(new HashSet<String>(Arrays.asList(values)));
+            constraints.add(new HashSet<String>(values));
         }
     }
 

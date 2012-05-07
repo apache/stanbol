@@ -31,16 +31,23 @@ FieldQuery</a> is part of the java API defined in the
 
 <h3>Main Elements</h3> 
 <ul>
-    <li><code>"selected"</code>: 
+    <li><b><code>"selected"</code></b>: 
         json array with the name of the fields selected by this query </li>
-    <li><code>"offset"</code>: 
+    <li><b><code>"offset"</code></b>: 
         the offset of the first result returned by this query </li>
-    <li><code>"limit"</code>: 
+    <li><b><code>"limit"</code></b>: 
         the maximum number of results returned </li>
-    <li><code>"constraints"</code>: 
+    <li><b><code>"constraints"</code></b>: 
         json array holding all the constraints of the query </li>
+    <li><b><code>"ldpath"</code></b>: 
+        <a href="http://code.google.com/p/ldpath/wiki/PathLanguage">LDpath program </a>
+        that is executed for all results of the query. More powerful alternative 
+        to the <code>"selected"</code> parameter to define returned information 
+        for query results.</li>
 </ul>
-<h4>Example:</h4>
+<h4>Examples:</h4>
+<p>Simple Field Query that selects rdfs:label and rdf:type with no offset 
+that returns at max three results. Constraints are skipped</p>
 <code><pre>
 {
     "selected": [ 
@@ -51,36 +58,61 @@ FieldQuery</a> is part of the java API defined in the
     "constraints": [...]
 }
 </pre></code>
+<p>The following example uses an LDPath program to select the rdfs:type and 
+the rdfs:labels as schema:name. The offset is set to 5 and a maximum of 5 results
+are returned. This is similar the 2nd page if the number of items is set to 5. <p>
+<code><pre>
+{
+    "ldpath": "schema:name = rdfs:label;rdf:type;", 
+    "offset": "5", 
+    "limit": "5", 
+    "constraints": [...]
+}
+</pre></code>
 
 <h3>FieldQuery Constraints:</h3>
 
 <p>Constraints are always applied to a field. Currently the implementation is
 limited to a single constraint/field. This is an limitation of the implementation
 and not a theoretical one.</p>
-<p>There are 4 different constraint types.</p>
-<ol>
- <li><em>ValueConstraint:</em> Checks if the value of the field is equals to the parsed
-    value and data type</li>
- <li><em>TextConstraint:</em> Checks if the value of the field is equals to the parsed
-    value, language. It supports also wildcard and regex searches.</li>
- <li><em>RangeConstraint:</em> Checks if the value of the field is within the parsed range</li>
- <li><em>ReferenceConstraint:</em> A special form of the ValueConstraint that defaults the
-    data type to references (links to other entities)</li>
-</ol>
- 
-<p>Keys required by all Constraint types:</p>
+
+<p>While there are five different Constraint types the following attributes
+are required by all types.</p>
 <ul>
-    <li><code>field</code>: the field to apply the constraint</li>
-    <li><code>type</code>: the type of the constraint. 
+    <li><b><code>field</code></b>: the field to apply the constraint.</li>
+    <li><b><code>type</code></b>: the type of the constraint. 
         One of <code>"reference"</code>, <code>"value"</code>, 
-        <code>"text"</code> or <code>"range"</code></li>
+        <code>"text"</code>, <code>"range"</code> or <code>"similarity"</code>
+    </li>
 </ul>
 
-<h3>Reference Constraint: </h3>
+<p>There are 4 different constraint types.</p>
+<ol>
+ <li><em><a href="#value-constraint">ValueConstraint</a>:</em> 
+     Checks if the value of the field is equals to the parsed
+     value and data type</li>
+ <li><em><a href="#reference-constraint">ReferenceConstraint</a>:</em> 
+     A special form of the ValueConstraint that defaults the
+     data type to references (links to other entities)</li>
+ <li><em><a href="#text-constraint">TextConstraint</a>:</em> 
+     Checks if the value of the field is equals to the parsed
+     value, language. It supports also wildcard and regex searches.</li>
+ <li><em><a href="#range-constraint">RangeConstraint</a>:</em> 
+     Checks if the value of the field is within the parsed range</li>
+ <li><em><a href="#similarity-constraint">SimilarityConstraint</a>:</em> 
+     Checks if the value of the field is within the parsed range</li>
+</ol>
+ 
+
+<h3 id="reference-constraint">Reference Constraint: </h3>
 
 <p>Additional key:</p>
 <ul>
-    <li><code>value</code>: the value (usually an URI) (required) </li>
+    <li><b><code>value</code></b>(required): the URI value(s). For a single value a
+    string can be used. Multiple values need to be parsed as JSON array</li>
+    <li><b><code>mode</code></b>: If multiple values are parsed this can be used
+    to specify if query results must have "<code>any</code>" or "<code>all</code>"
+    parsed values (default: "<code>any</code>")
 </ul>
 
 <h4>Example:</h4>
@@ -95,7 +127,26 @@ and not a theoretical one.</p>
 } 
 </pre></code>
 
-<h3>Value Constraint</h3>
+<p id="reference-constraint-example2">
+Search Entities that link to all of the following Entities. NOTE that the
+field "<code>http://stanbol.apache.org/ontology/entityhub/query#references</code>
+is special as it will cause a search in any outgoing relation. See the section
+<a href="#special-fields">special fields</a> for details</p>
+
+<code><pre>
+{ 
+    "type": "reference", 
+    "field": "http:\/\/stanbol.apache.org\/ontology\/entityhub\/query#references", 
+    "value": [
+            "http:\/\/dbpedia.org\/resource\/Category:Capitals_in_Europe",
+            "http:\/\/dbpedia.org\/resource\/Category:Host_cities_of_the_Summer_Olympic_Games",
+            "http:\/\/dbpedia.org\/ontology\/City"
+       ],
+    "mode": "all"
+} 
+</pre></code>
+
+<h3 id="value-constraint">Value Constraint</h3>
 
 <p>Value Constraints are very similar to Reference Constraints however they can
 be used to check values of fields for any data type.<br>
@@ -104,15 +155,20 @@ JSON type of the value. For details please see the table below.</p>
 
 <p>Additional keys:</p>
 <ul>
-    <li><code>value</code>: the value (required)</li>
-    <li><code>datatype</code>: the data type of the value as a string. Multiple
-        data types can also be parsed by using a JSON array.
+    <li><b><code>value</code></b>(required): the value(s). For multiple values
+        a JSON array must be used.</li>
+    <li><b><code>datatype</code></b>: the data type of the value as a string. 
+        Multiple data types can also be parsed by using a JSON array.
         Note that if no datatype is define, the default is guessed based on the 
         type of the parsed value. <br>
         Especially note that string values are mapped to "xsd:string" and not 
         "entityhub:text" as used for natural language texts within the entityhub.
-        However users are encouraged anyway to use Text Constraints for filtering
-        based on natural languages values.</li>
+        Users that want to query for natural language text values should use
+        TextConstraints instead.</li>
+    <li><b><code>mode</code></b>: If multiple values are parsed this can be used
+        to specify if query results must have "<code>any</code>" or "<code>all</code>"
+        parsed values (default: "<code>any</code>"). For an usage example see the
+        <a href="#reference-constraint-example2"> 2nd reference constraint example</a>
 </ul> 
 
 <h4>Example:</h4>
@@ -150,16 +206,16 @@ value. Note however that this would not work for "xsd:long".</p>
 <p>Expected Results on DBPedia.org for this query include Berlin and Baghdad 
 </p>
 
-<h3>Text Constraint</h3>
+<h3 id="text-constraint">Text Constraint</h3>
 
 <p>Additional key:</p>
 <ul>
-    <li><code>text</code>: the text to search (required). If multiple values
-        are parsed, that those values are connected by using OR.<br>
-        Parsing "Barack Obama" returns Entities that contain "Barack Obama" as
-        value for the field. Parsing ["Barack","Obama"] will return all Entities
-        that contain any of the two words. Most Sites however will boost results
-        that contain both values over such that only contain a single one. 
+    <li><b><code>text</code></b>(required): the text to search. Multiple values
+        can be parsed by using a JSON array. Note that multiple values are
+        considerd optional. (e.g. parsing "Barack Obama" returns Entities that 
+        contain both "Barack" and "Obama" while parsing ["Barack","Obama"] 
+        will also return documents with any of the two words; Also combinations
+        like ["Barack Obama","USA","United States"] are allowed)
     </li>
     <li><code>language</code>: the language of the searched text as string.
         Multiple languages can be parsed as JSON array. Parsing "" as language
@@ -200,7 +256,7 @@ contains all the optional terms.
 the Airport of Frankfurt am Main, Frankfurt as well as Airport. 
 </p>
 
-<h3>Range Constraint:</h3>
+<h3 id="range-constraint">Range Constraint:</h3>
 
 <p>Additional key:</p>
 <ul>
@@ -277,6 +333,66 @@ because otherwise the parsed value would be converted the "xsd:integer".</p>
 
 <p>Expected Results on DBPedia.org include Bill Clinton, George W. Bush and
 Donald Trump.</p>
+
+<h3 id="similarity-constraint">Similarity Constraint: </h3>
+<p>This constaint allows to select entities similar to the parsed context. This
+constraint is curretly only supported by the Solr based storage of the Entityhub.
+It can not be implemented on storages that use SPARQL for search.<br>
+NOTE also that only a single Similarity Constraint can be used per Field Query.</p>
+<p>Additional key:</p>
+<ul>
+    <li><b><code>context</code></b>(required): The text used as context to search
+    for similar entities. Users can parse values form single words up to
+    the text of the current section or an whole document.</li>
+    <li><b><code>addFields</code></b>: This allows to parse additional fields
+    (properties) used for the similarity search. This fields will be added to
+    the value of the "<code>field</code>".
+</ul>
+
+<h4>Example:</h4>
+
+<p>This example combines a filter for Entities with the type Place with an
+similarity search for "Wolfgang Amadeus Mozart". The field
+<code>http://stanbol.apache.org/ontology/entityhub/query#fullText</code> is 
+a <a href="#special-fields">special field</a> that allows to search the full
+text (all textual and <code>xsd:string</code> values) of an Entity.</p>
+
+<code><pre>
+{ 
+   "type": "reference", 
+   "value": "http:\/\/dbpedia.org\/ontology\/Place", 
+   "field": "http:\/\/www.w3.org\/1999\/02\/22-rdf-syntax-ns#type",
+},
+{ 
+   "type": "similarity", 
+   "context": "Wolfgang Amadeus Mozart", 
+   "field": "http:\/\/stanbol.apache.org\/ontology\/entityhub\/query#fullText",
+}
+</pre></code>
+
+<p>Expected results with the default DBpedia dataset include Salzurg. However
+because the default dataset only includes the short rdfs:comment texts results
+of similarity searches are very limited. Typically the use of similarity 
+searches needs already considered when indexing data sets.</p>
+
+<h3 id="special-fields">Special Fields</h3>
+
+<p>Currently the following special fields are defined</p>
+<ul>
+<li><b><code>http://stanbol.apache.org/ontology/entityhub/query#fullText</code></b>:
+    Allows to search within the all natuaral langauge and <code>xsd:string</code>
+    values that are linked with the Entity. This field is especially usefull for 
+    <a href="#text-constraint">Text Constraints</a> and 
+    <a href="#similarity-constraint">Similarity Constraint</a> searches.<br>
+    NOTE that for text queries language constrains may be ignored as the full text
+    field MAY NOT be able to support language constraints.</li>
+<li><b><code>http://stanbol.apache.org/ontology/entityhub/query#references</code></b>:
+    Allows to search far all entities referenced by this Entity. This includes
+    other entities and <code>xsd:anyURI</code> values (e.g. foaf:homepage values).
+    Because if this <a href="#reference-constraint">Reference Constraints</a>
+    applied to this field are queries for the semantic context of an Entity.</li>
+</ul>
+
         </div>
     </div>
 </div>  

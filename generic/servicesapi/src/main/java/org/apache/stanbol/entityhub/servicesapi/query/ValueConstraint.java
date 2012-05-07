@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint.MODE;
+
 /**
  * A constraint the filters/selects based on the value and/or the parsed
  * dataTypes. A valid constraint MUST define a value OR valid data type. A
@@ -34,14 +36,36 @@ import java.util.Set;
  */
 public class ValueConstraint extends Constraint {
 
-
+    /**
+     * The mode how multiple values are treated
+     */
+    public static enum MODE {
+        /**
+         * Any of the parsed values is sufficient to select an entity. Similar
+         * to UNION in SPARQL
+         */
+        any,
+        /**
+         * All parsed values must be present.
+         */
+        all
+    };
+    /**
+     * The default {@link MODE} is {@link MODE#any}
+     */
+    public static final MODE DEFAULT_MODE = MODE.any;
     private final Set<Object> values;
     private final Collection<String> dataTypeUris;
+    private final MODE mode;
 
+    
     public ValueConstraint(Object value) {
         this(value,null);
     }
     public ValueConstraint(Object value,Iterable<String> dataTypes) {
+        this(value,dataTypes,null);
+    }
+    public ValueConstraint(Object value,Iterable<String> dataTypes,MODE mode) {
         super(ConstraintType.value);
         if(value == null){
             this.values = null;
@@ -90,15 +114,7 @@ public class ValueConstraint extends Constraint {
         } else {
             this.dataTypeUris = null;
         }
-        //it's questionable if we should do that at this position, because
-        //components that process that constraint might have better ways to
-        //do that and than they can not know if the user parsed a data type or
-        //this code has calculated it based on the java type of the value!
-//        if(dataTypeUris.isEmpty()){ //meaning value != null
-//            for(DataTypeEnum dataType : DataTypeEnum.getAllDataTypes(value.getClass())){
-//                dataTypeUris.add(dataType.getUri());
-//            }
-//        }
+        this.mode = mode == null ? DEFAULT_MODE : mode;
     }
     /**
      * Getter for the first parsed value
@@ -113,6 +129,13 @@ public class ValueConstraint extends Constraint {
      */
     public final Set<Object> getValues() {
         return values;
+    }
+    /**
+     * Getter for the {@link MODE} of this ValueConstraint
+     * @return the mode
+     */
+    public MODE getMode() {
+        return mode;
     }
     /**
      * Getter for the list of the parsed data types URIs

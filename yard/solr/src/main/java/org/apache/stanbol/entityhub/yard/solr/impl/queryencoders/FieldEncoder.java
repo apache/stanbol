@@ -18,18 +18,17 @@ package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
+import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
+import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
-import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
-import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
 
-public class FieldEncoder implements IndexConstraintTypeEncoder<List<String>> {
+public class FieldEncoder implements IndexConstraintTypeEncoder<IndexField> {
 
     private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.field);
     private final FieldMapper fieldMapper;
@@ -47,7 +46,7 @@ public class FieldEncoder implements IndexConstraintTypeEncoder<List<String>> {
     }
 
     @Override
-    public void encode(EncodedConstraintParts constraint, List<String> value) throws IllegalArgumentException {
+    public void encode(EncodedConstraintParts constraint, IndexField value) throws IllegalArgumentException {
         if (value == null) {
             throw new IllegalArgumentException("This encoder does not support the NULL value");
         }
@@ -64,11 +63,10 @@ public class FieldEncoder implements IndexConstraintTypeEncoder<List<String>> {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Class<List<String>> acceptsValueType() {
+    public Class<IndexField> acceptsValueType() {
         // NOTE: Generic types are erased at compile time anyways!
-        return (Class<List<String>>) (Class<?>) List.class;
+        return IndexField.class;
     }
 
 }

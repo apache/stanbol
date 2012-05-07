@@ -37,7 +37,10 @@ public class ReferenceConstraint extends ValueConstraint {
         this(reference != null ? Collections.singleton(reference) : null);
     }
     public ReferenceConstraint(Collection<String> references) {
-        super(references,Arrays.asList(DataTypeEnum.Reference.getUri()));
+        this(references,null);
+    }
+    public ReferenceConstraint(Collection<String> references, MODE mode) {
+        super(references,Arrays.asList(DataTypeEnum.Reference.getUri()),mode);
         if(references == null){
             throw new IllegalArgumentException("Parsed Reference(s) MUST NOT be NULL");
         }

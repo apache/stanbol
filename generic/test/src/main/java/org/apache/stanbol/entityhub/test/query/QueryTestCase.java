@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+
 public abstract class QueryTestCase {
     
     /**
@@ -31,7 +33,7 @@ public abstract class QueryTestCase {
      */
     public static final Set<String> DEFAULT_RESULT_FIELDS = 
         Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-            "http://www.iks-project.eu/ontology/rick/query/score")));
+            NamespaceEnum.entityhubQuery+"score")));
 
     public static final Map<? extends String,? extends String> DEFAULT_HEADER;
     static {

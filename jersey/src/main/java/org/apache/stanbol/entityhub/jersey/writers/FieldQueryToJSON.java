@@ -117,6 +117,10 @@ final class FieldQueryToJSON {
                         }
                     }
                 }
+                //finally write the MODE
+                if(valueConstraint.getMode() != null){
+                    jConstraint.put("mode", valueConstraint.getMode());
+                }
                 break;
             case text:
                 TextConstraint textConstraint = (TextConstraint) constraint;

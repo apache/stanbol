@@ -18,11 +18,11 @@ package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint.MODE;
+import org.apache.stanbol.entityhub.yard.solr.impl.SolrQueryFactory.ConstraintValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
@@ -38,35 +38,45 @@ import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
  * 
  * @author Rupert Westenthaler
  */
-public class AssignmentEncoder implements IndexConstraintTypeEncoder<Object> {
+public class AssignmentEncoder implements IndexConstraintTypeEncoder<ConstraintValue> {
 
     private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.assignment);
     private static final String EQ = ":";
-    private final IndexValueFactory indexValueFactory;
+//    private final IndexValueFactory indexValueFactory;
 
     public AssignmentEncoder(IndexValueFactory indexValueFactory) {
-        if (indexValueFactory == null) {
-            throw new IllegalArgumentException("The indexValueFactory MUST NOT be NULL");
-        }
-        this.indexValueFactory = indexValueFactory;
+//        if (indexValueFactory == null) {
+//            throw new IllegalArgumentException("The indexValueFactory MUST NOT be NULL");
+//        }
+//        this.indexValueFactory = indexValueFactory;
     }
 
     @Override
-    public void encode(EncodedConstraintParts constraint, Object value) {
-        Set<IndexValue> indexValues = QueryUtils.parseIndexValues(indexValueFactory,value);
-        // encode the value based on the type
-        for(IndexValue indexValue : indexValues){
-            String[] queryConstraints = QueryUtils.encodeQueryValue(indexValue, true);
-            String[] eqConstraints;
-            if (queryConstraints != null) {
-                eqConstraints = new String[queryConstraints.length];
-                for (int i = 0; i < eqConstraints.length; i++) {
-                    eqConstraints[i] = EQ + queryConstraints[i];
+    public void encode(EncodedConstraintParts constraint, ConstraintValue value) {
+        if(value == null){ //if no value is parsed
+            constraint.addEncoded(POS,EQ); // add the default
+            return; //and return
+        } //else encode the values and add them depending on the MODE
+        Set<String> queryConstraints = new HashSet<String>();
+        for(IndexValue indexValue : value){
+            String[] valueConstraints = QueryUtils.encodeQueryValue(indexValue, true);
+            if (valueConstraints != null) {
+                for (String stringConstraint : valueConstraints) {
+                    queryConstraints.add(EQ + stringConstraint);
                 }
             } else {
-                eqConstraints = new String[] {EQ};
+                queryConstraints.add(EQ);
             }
-            constraint.addEncoded(POS, eqConstraints);
+            if(value.getMode() == MODE.any){
+                //in any mode we need to add values separately
+                constraint.addEncoded(POS, queryConstraints);
+                //addEncoded copies the added values so we can clear and reuse
+                queryConstraints.clear(); 
+            }
+        }
+        if(value.getMode() == MODE.all){
+            //in all mode we need to add all values in a single call
+            constraint.addEncoded(POS, queryConstraints);
         }
     }
 
@@ -88,8 +98,8 @@ public class AssignmentEncoder implements IndexConstraintTypeEncoder<Object> {
     }
 
     @Override
-    public Class<Object> acceptsValueType() {
-        return Object.class;
+    public Class<ConstraintValue> acceptsValueType() {
+        return ConstraintValue.class;
     }
 
 }

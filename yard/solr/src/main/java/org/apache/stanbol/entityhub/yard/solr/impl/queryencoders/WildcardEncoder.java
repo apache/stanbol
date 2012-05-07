@@ -22,7 +22,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint.MODE;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.impl.SolrQueryFactory.ConstraintValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
@@ -33,7 +35,7 @@ import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
 
-public class WildcardEncoder implements IndexConstraintTypeEncoder<Object> {
+public class WildcardEncoder implements IndexConstraintTypeEncoder<ConstraintValue> {
 
     private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value);
 
@@ -44,32 +46,41 @@ public class WildcardEncoder implements IndexConstraintTypeEncoder<Object> {
         types.add(IndexDataTypeEnum.STR.getIndexType());
         SUPPORTED_TYPES = Collections.unmodifiableSet(types);
     }
-    private final IndexValueFactory indexValueFactory;
+//    private final IndexValueFactory indexValueFactory;
 
     public WildcardEncoder(IndexValueFactory indexValueFactory) {
-        if (indexValueFactory == null) {
-            throw new IllegalArgumentException("The indexValueFactory MUST NOT be NULL");
-        }
-        this.indexValueFactory = indexValueFactory;
+//        if (indexValueFactory == null) {
+//            throw new IllegalArgumentException("The indexValueFactory MUST NOT be NULL");
+//        }
+//        this.indexValueFactory = indexValueFactory;
     }
 
     @Override
-    public void encode(EncodedConstraintParts constraint, Object value) {
-        Set<IndexValue> indexValues = QueryUtils.parseIndexValues(indexValueFactory,value);
-        if(indexValues.size() == 1 && indexValues.iterator().next() == null){
+    public void encode(EncodedConstraintParts constraint, ConstraintValue value) {
+        if(value == null || value.getValues().isEmpty()){
             throw new IllegalArgumentException("This encoder does not support the NULL IndexValue!");
         }
         // encode the value based on the type
-        for(IndexValue indexValue : indexValues){
+        Set<String> queryConstraints = new HashSet<String>();
+        for(IndexValue indexValue : value){
             if (indexValue != null) {
                 if (!SUPPORTED_TYPES.contains(indexValue.getType())) {
                     throw new IllegalArgumentException(String.format(
                         "This encoder does not support the IndexDataType %s (supported: %s)", indexValue.getType(),
                         SUPPORTED_TYPES));
                 } else {
-                    constraint.addEncoded(POS, QueryUtils.encodeQueryValue(indexValue, false));
+                    queryConstraints.addAll(Arrays.asList(QueryUtils.encodeQueryValue(indexValue, false)));
+                }
+                if(value.getMode() == MODE.any){ //in any mode
+                    //we need to add constraints separately (to connect them with OR)
+                    constraint.addEncoded(POS, queryConstraints);
+                    queryConstraints.clear();
                 }
             } // else ignore null value
+        }
+        if(value.getMode() == MODE.all){ // an all mode we need to add all
+            //constraint in a single call (to connect them with AND)
+            constraint.addEncoded(POS, queryConstraints);
         }
     }
 
@@ -89,8 +100,8 @@ public class WildcardEncoder implements IndexConstraintTypeEncoder<Object> {
     }
 
     @Override
-    public Class<Object> acceptsValueType() {
-        return Object.class;
+    public Class<ConstraintValue> acceptsValueType() {
+        return ConstraintValue.class;
     }
 
 }

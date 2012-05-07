@@ -532,7 +532,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     private Representation site2Representation(String id){
         RdfValueFactory valueFactory = RdfValueFactory.getInstance();
         RdfRepresentation rep = valueFactory.createRepresentation(id);
-        String namespace = NamespaceEnum.entityhubModel.getNamespace();
+        String namespace = NamespaceEnum.entityhub.getNamespace();
         rep.add(namespace+"localMode", site.supportsLocalMode());
         rep.add(namespace+"supportsSearch", site.supportsSearch());
         SiteConfiguration config = site.getConfiguration();

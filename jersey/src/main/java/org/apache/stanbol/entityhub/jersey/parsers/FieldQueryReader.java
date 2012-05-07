@@ -52,6 +52,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint.MODE;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -496,9 +497,9 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
     private static Constraint parseValueConstraint(JSONObject jConstraint) throws JSONException {
         Constraint constraint;
         Collection<String> dataTypes = parseDatatypeProperty(jConstraint);
+        final List<Object> valueList;
         if(jConstraint.has("value") && !jConstraint.isNull("value")){
             Object value = jConstraint.get("value");
-            final List<Object> valueList;
             if(value instanceof JSONArray){
                 valueList = new ArrayList<Object>(((JSONArray)value).length());
                 for(int i=0;i<((JSONArray)value).length();i++){
@@ -526,7 +527,6 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             } else {
                 valueList = Collections.singletonList(jConstraint.get("value"));
             }
-            constraint = new ValueConstraint(valueList,dataTypes);
         } else {
             log.warn("Parsed ValueConstraint does not define the required field \"value\"!");
             StringBuilder message = new StringBuilder();
@@ -535,7 +535,41 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             message.append(jConstraint.toString(4));
             throw new IllegalArgumentException(message.toString());
         }
-        return constraint;
+        MODE mode = parseConstraintValueMode(jConstraint);
+        return new ValueConstraint(valueList,dataTypes,mode);
+    }
+
+    /**
+     * Parses the {@link MODE} for {@link ValueConstraint}s and 
+     * {@link ReferenceConstraint}s, by evaluating the 'mode' attribute of
+     * the parsed {@link JSONObject}
+     * @param jConstraint the JSON formatted constraint
+     * @return the parsed {@link MODE} or <code>null</code> if the 'mode'
+     * attribute is not present
+     * @throws JSONException if the value of the 'mode' is not an element of the
+     * {@link MODE} enumeration.
+     */
+    private static MODE parseConstraintValueMode(JSONObject jConstraint) throws JSONException {
+        MODE mode; 
+        if(jConstraint.has("mode")){
+            String jmode = jConstraint.getString("mode");
+            try {
+                mode = MODE.valueOf(jmode);
+            } catch (IllegalArgumentException e) {
+                String message = String.format("Parsed ValueConstraint defines an " +
+                		"unknown MODE %s (supported: %s)!", jmode,
+                		Arrays.asList(MODE.values()));
+                log.warn(message,e);
+                StringBuilder errorMessage = new StringBuilder();
+                errorMessage.append(message).append('\n');
+                errorMessage.append("Parsed Constraint: \n");
+                errorMessage.append(jConstraint.toString(4));
+                throw new IllegalArgumentException(message.toString(),e);
+            }
+        } else {
+            mode = null;
+        }
+        return mode;
     }
 
     /**
@@ -587,9 +621,9 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
      */
     private static Constraint parseReferenceConstraint(JSONObject jConstraint) throws JSONException {
         Constraint constraint;
+        final List<String> refList;
         if(jConstraint.has("value") && !jConstraint.isNull("value")){
             Object value = jConstraint.get("value");
-            final List<String> refList;
             if(value instanceof JSONArray){
                 refList = new ArrayList<String>(((JSONArray)value).length());
                 for(int i=0;i<((JSONArray)value).length();i++){
@@ -607,7 +641,8 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             } else {
                 refList = Collections.singletonList(NamespaceEnum.getFullName(jConstraint.getString("value")));
             }
-            constraint = new ReferenceConstraint(refList);
+            MODE mode = parseConstraintValueMode(jConstraint);
+            return new ReferenceConstraint(refList,mode);
         } else {
             log.warn("Parsed ReferenceConstraint does not define the required field \"value\"!");
             StringBuilder message = new StringBuilder();
@@ -616,6 +651,5 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             message.append(jConstraint.toString(4));
             throw new IllegalArgumentException(message.toString());
         }
-        return constraint;
     }
 }
