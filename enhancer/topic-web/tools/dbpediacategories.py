@@ -41,7 +41,7 @@ def load_topics_from_tsv(filename, server_url):
             broader_concepts = [DBPEDIA_URL_PREFIX + b.strip()
                                 for b in broader_concepts.split()]
 
-        url = server_url + "?id=%s&primaryTopic=%s" % (
+        url = server_url + "?id=%s&primary_topic=%s" % (
             concept, primary_topic)
 
         for broader_concept in broader_concepts:

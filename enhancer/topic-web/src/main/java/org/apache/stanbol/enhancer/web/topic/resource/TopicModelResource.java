@@ -109,7 +109,7 @@ public final class TopicModelResource extends BaseStanbolResource {
     @Path("concept")
     @Consumes(MediaType.WILDCARD)
     public Response addConcept(@QueryParam(value = "id") String concept,
-                               @QueryParam(value = "primaryTopic") String primaryTopicUri,
+                               @QueryParam(value = "primary_topic") String primaryTopicUri,
                                @QueryParam(value = "broader") List<String> broaderConcepts,
                                @Context HttpHeaders headers) throws ClassifierException {
         classifier.addConcept(concept, primaryTopicUri, broaderConcepts);
