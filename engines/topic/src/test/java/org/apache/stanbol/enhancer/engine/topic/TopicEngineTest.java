@@ -82,12 +82,12 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         solrHome = File.createTempFile("topicEngineTest_", "_solr_cores");
         solrHome.delete();
         solrHome.mkdir();
-        classifierSolrServer = makeEmbeddedSolrServer(solrHome, "classifierserver", "default-topic-model",
+        classifierSolrServer = makeEmbeddedSolrServer(solrHome, "classifierserver", "test-topic-model",
             "default-topic-model");
         classifier = TopicClassificationEngine.fromParameters(getDefaultClassifierConfigParams());
 
         trainingSetSolrServer = makeEmbeddedSolrServer(solrHome, "trainingsetserver",
-            "default-topic-trainingset", "default-topic-trainingset");
+            "test-topic-trainingset", "default-topic-trainingset");
         trainingSet = new SolrTrainingSet();
         trainingSet.configure(getDefaultTrainingSetConfigParams());
     }
@@ -124,7 +124,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
     }
 
     @Test
-    public void testEngineConfiguation() throws ConfigurationException {
+    public void testEngineConfiguration() throws ConfigurationException {
         Hashtable<String,Object> config = getDefaultClassifierConfigParams();
         TopicClassificationEngine classifier = TopicClassificationEngine.fromParameters(config);
         assertNotNull(classifier);
