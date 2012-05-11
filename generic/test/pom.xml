@@ -16,27 +16,27 @@
   limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-		<version>0.10.0-incubating-SNAPSHOT</version>
-		<relativePath>../../parent</relativePath>
-	</parent>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
+    <version>0.10.0-incubating-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
 
-	<groupId>org.apache.stanbol</groupId>
-	<artifactId>org.apache.stanbol.enhancer.test</artifactId>
-	<packaging>jar</packaging>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.enhancer.test</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
+  <packaging>jar</packaging>
 
-	<name>Apache Stanbol Enhancer Test framework</name>
-	<description>Provides Unit Tests for the Interfaces of the
-        Stanbol Enhancer Services API.
-    </description>
+  <name>Apache Stanbol Enhancer Test framework</name>
+  <description>Provides Unit Tests for the Interfaces
+    of the Stanbol Enhancer Services API.</description>
 
-	<inceptionYear>2012</inceptionYear>
+  <inceptionYear>2012</inceptionYear>
 
     <scm>
         <connection>
@@ -48,42 +48,43 @@
         <url>http://incubator.apache.org/stanbol/</url>
     </scm>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Export-Package>
-							org.apache.stanbol.enhancer.servicesapi;version=${project.version},
-							org.apache.stanbol.enhancer.servicesapi.helper;version=${project.version},
-							org.apache.stanbol.enhancer.servicesapi.rdf;version=${project.version}
-			            </Export-Package>
-						<Private-Package>
-							org.apache.stanbol.enhancer.servicesapi.helper.impl;version=${project.version}
-            			</Private-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.apache.stanbol.enhancer.servicesapi;version=${project.version},
+              org.apache.stanbol.enhancer.servicesapi.helper;version=${project.version},
+              org.apache.stanbol.enhancer.servicesapi.rdf;version=${project.version}
+            </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.servicesapi.helper.impl;version=${project.version}
+            </Private-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
-	<dependencies>
-        <dependency>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-        </dependency>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>rdf.core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -93,6 +94,6 @@
             <artifactId>junit</artifactId>
             <scope>compile</scope>
         </dependency>
-	</dependencies>
+  </dependencies>
 
 </project>
