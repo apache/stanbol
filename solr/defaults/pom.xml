@@ -28,6 +28,7 @@
 
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.commons.solr.defaults</artifactId>
+	<version>0.10.0-incubating-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<name>Apache Stanbol Commons Solr Defauts</name>

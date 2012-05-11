@@ -27,11 +27,12 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Bundle Provider</name>
   <description>Provides support for installing Configurations contained
-  within Bundles by using the Sling Installer infrastructure </description>
+  within Bundles by using the Sling Installer infrastructure.</description>
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/installer/bundleprovider
@@ -62,40 +63,16 @@
           </instructions>
         </configuration>
       </plugin>
-<!--      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin> -->
     </plugins>
   </build>
 
   <dependencies>
 
     <!-- Sling installer dependency -->
-<!--    <dependency>
-        <groupId>org.apache.sling</groupId>
-        <artifactId>org.apache.sling.launchpad.installer</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.sling</groupId>
-        <artifactId>org.apache.sling.launchpad.api</artifactId>
-    </dependency> -->
     <dependency>
         <groupId>org.apache.sling</groupId>
         <artifactId>org.apache.sling.installer.core</artifactId>
     </dependency>
-<!--    <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.scr.annotations</artifactId>
-    </dependency> -->
     <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
@@ -105,11 +82,11 @@
       <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
-	<dependency>
+	  <dependency>
 	    <groupId>org.osgi</groupId>
 	    <artifactId>org.osgi.compendium</artifactId>
 	    <scope>provided</scope>
-	</dependency>
+	  </dependency>
     <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>

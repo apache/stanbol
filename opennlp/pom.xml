@@ -29,6 +29,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons: Open NLP and Models</name>
@@ -83,6 +84,12 @@
   </build>
   
   <dependencies>
+   <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+        <version>0.9.0-incubating</version>
+    </dependency>
+
     <!-- obviously we need opennlp -->
     <dependency>
       <groupId>org.apache.opennlp</groupId>
@@ -107,31 +114,23 @@
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
 
-   <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
-<!--     <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-    </dependency>  -->
 
-    <!-- generic tax -->
-<!--     <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-    </dependency>  -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
 
     <!-- for tests -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
+      <version>1.0.2-incubating-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -140,11 +139,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
       <scope>test</scope>
     </dependency>
     
