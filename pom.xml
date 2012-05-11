@@ -79,7 +79,8 @@
               org.apache.solr.search.*,
               org.apache.solr.update .*,
               org.apache.solr.util.*,
-              org.apache.solr.analysis
+              org.apache.solr.analysis,
+              org.apache.lucene.*,
             </Export-Package>
             <!-- NOTE: 
                * The exclusion of javax.xml.stream assumes that only serialised
