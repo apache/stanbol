@@ -23,6 +23,7 @@
 
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.data.bundlelists.defaultdata</artifactId>
+	<version>0.10.0-incubating-SNAPSHOT</version>
 	<packaging>partialbundlelist</packaging>
 
 	<name>Apache Stanbol Data: Default Data Bundle List</name>
