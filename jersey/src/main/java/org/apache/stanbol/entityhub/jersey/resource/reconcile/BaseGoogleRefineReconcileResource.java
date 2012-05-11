@@ -25,8 +25,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,19 +49,23 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.stanbol.commons.web.base.CorsHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
+import org.apache.stanbol.entityhub.jersey.grefine.ReconcileProperty;
 import org.apache.stanbol.entityhub.jersey.grefine.ReconcileQuery;
+import org.apache.stanbol.entityhub.jersey.grefine.ReconcileValue;
 import org.apache.stanbol.entityhub.jersey.grefine.Utils;
-import org.apache.stanbol.entityhub.jersey.grefine.ReconcileQuery.Value;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.apache.stanbol.entityhub.servicesapi.defaults.SpecialFieldEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint.MODE;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -88,6 +94,18 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
     private static final Collection<String> SELECTED_FIELDS = Collections.unmodifiableList(
         Arrays.asList(NAME_FIELD,TYPE_FIELD));
 
+    private static final Comparator<JSONObject> resultScoreComparator = new Comparator<JSONObject>() {
+
+        @Override
+        public int compare(JSONObject o1, JSONObject o2) {
+            try {
+                return Double.compare(o2.getDouble("score"),o1.getDouble("score"));
+            } catch (JSONException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        
+    };
 
     protected BaseGoogleRefineReconcileResource(){
         super();
@@ -186,7 +204,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
         addPropertyConstraints(rQuery, query);
         query.setLimit(query.getLimit());
         QueryResultList<Representation> results = performQuery(query);
-        JSONArray jResultList = new JSONArray();
+        List<JSONObject> jResultList = new ArrayList<JSONObject>(results.size());
         //we need to know the highest score to normalise between [0..1]
         double maxQueryScore = -1;
         if(!results.isEmpty()){
@@ -221,11 +239,13 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
                 normalisedScore = normalisedScore*similarity/maxQueryScore;
                 jResult.put("score", normalisedScore);
                 jResult.put("match", similarity >= 0);
-                jResultList.put(jResult);
+                jResultList.add(jResult);
             }
         } //else no results ... nothing todo
+        //sort results based on score
+        Collections.sort(jResultList, resultScoreComparator);
         JSONObject jResultContainer = new JSONObject();
-        jResultContainer.put("result", jResultList);
+        jResultContainer.put("result", new JSONArray(jResultList));
         return jResultContainer;
     }
     /**
@@ -255,9 +275,20 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
         Collection<String> ids = new HashSet<String>();
         List<String> texts = new ArrayList<String>(); // keep order for texts
         Collection<Object> values = new HashSet<Object>();
-        for (Entry<String,Collection<Value>> property : rQuery.getProperties()) {
+        
+        //hold all references for @references special property
+        HashSet<String> references = new HashSet<String>();
+        //holds all texts for @fullText special property
+        List<String> fullText = new ArrayList<String>();
+        //holds the context for the @similarity special property
+        StringBuilder similarityContext = new StringBuilder();
+        //the field used for the @similarity special property
+        HashSet<String> similarityFields = new LinkedHashSet<String>();
+        
+        for (Entry<ReconcileProperty,Collection<ReconcileValue>> propertyEntry : rQuery.getProperties()) {
+            ReconcileProperty property = propertyEntry.getKey();
             // collect the properties
-            for (Value value : property.getValue()) {
+            for (ReconcileValue value : propertyEntry.getValue()) {
                 if (value.getId() != null) {
                     ids.add(value.getId());
                 }
@@ -267,43 +298,109 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
                     values.add(value.getValue());
                 }
             }
-            // add the Constraint to the FieldQuery
-            // TODO: how to deal with values of different types
-            //  * currently References > Text > Datatype. First present value
-            //    is used
-            //  * non Reference | Text | Datatype values are ignored
-            if (!ids.isEmpty()) {
-                // only references -> create reference constraint
-                query.setConstraint(property.getKey(), new ReferenceConstraint(ids));
-                if (ids.size() != property.getValue().size()) {
-                    log.info("Only some of the parsed values of the field {} contain"
-                             + "references -> will ignore values with missing references");
+            //handle supported special properties
+            if(property.isSpecial()){
+                if(property.getName().equalsIgnoreCase("references")){
+                    //Note that multiple "references" properties might be present
+                    //if Users do parse parameters - so we need to collect all values
+                    if(property.getParameter() != null){
+                        log.warn("parameters are not supported for @references -> ignore '{}'",property.getParameter());
+                    }
+                    if(ids.isEmpty()){
+                        log.warn("No URI values present for parsed @references property! (values: "
+                            +propertyEntry.getValue());
+                    }
+                    for(String id : ids){
+                        references.add(id);
+                    }
+                } else if(property.getName().equalsIgnoreCase("fulltext")){
+                    //Note that multiple "fullText" properties might be present
+                    //if Users do parse parameters - so we need to collect all values
+                    if(property.getParameter() != null){
+                        log.warn("parameters are not supported for @fullText -> ignore '{}'",property.getParameter());
+                    }
+                    for(String text : texts){ //add the values
+                        fullText.add(text);
+                    }
+                } else if(property.getName().equalsIgnoreCase("similarity")){
+                    similarityFields.add(property.getParameter() != null ? 
+                            NamespaceEnum.getFullName(property.getParameter()) :
+                                SpecialFieldEnum.fullText.getUri()); //the default
+                    for(String text : texts){ //Append the text values to the context
+                        similarityContext.append(text).append(' ');
+                    }
+                } else {
+                    //TODO: implement LDPATH support
+                    log.warn("ignore unsupported special property {}",property);
                 }
-            } else if (!texts.isEmpty()) {
-                // NOTE: This will use OR over all texts. To enforce AND one
-                // would need to parse a single string with all values e.g. by
-                // using StringUtils.join(texts," ")
-                query.setConstraint(property.getKey(), new TextConstraint(texts));
-                if (ids.size() != property.getValue().size()) {
-                    log.info("Only some of the parsed values of the field {} are"
-                             + "of type String -> will ignore non-string values");
-                }
-            } else if(!values.isEmpty()){
-                query.setConstraint(property.getKey(), new ValueConstraint(values));
-            } //else no values ... ignore property
+            } else { //no special property
+                // add the Constraint to the FieldQuery
+                // TODO: how to deal with values of different types
+                //  * currently References > Text > Datatype. First present value
+                //    is used
+                //  * non Reference | Text | Datatype values are ignored
+                if (!ids.isEmpty()) {
+                    // only references -> create reference constraint
+                    query.setConstraint(property.getName(), new ReferenceConstraint(ids));
+                    if (ids.size() != propertyEntry.getValue().size()) {
+                        log.info("Only some of the parsed values of the field {} contain"
+                                 + "references -> will ignore values with missing references");
+                    }
+                } else if (!texts.isEmpty()) {
+                    // NOTE: This will use OR over all texts. To enforce AND one
+                    // would need to parse a single string with all values e.g. by
+                    // using StringUtils.join(texts," ")
+                    query.setConstraint(property.getName(), new TextConstraint(texts));
+                    if (ids.size() != propertyEntry.getValue().size()) {
+                        log.info("Only some of the parsed values of the field {} are"
+                                 + "of type String -> will ignore non-string values");
+                    }
+                } else if(!values.isEmpty()){
+                    query.setConstraint(property.getName(), new ValueConstraint(values));
+                } //else no values ... ignore property
+            }
             //clean up
             ids.clear();
             texts.clear();
             values.clear();
         }
+        //now add constraints for the collected special properties
+        if(!references.isEmpty()){ 
+            //add references constraint
+            ReferenceConstraint refConstraint = new ReferenceConstraint(references, MODE.all);
+            query.setConstraint(SpecialFieldEnum.references.getUri(), refConstraint);
+        }
+        if(!fullText.isEmpty()){
+            TextConstraint textConstraint = new TextConstraint(fullText);
+            query.setConstraint(SpecialFieldEnum.fullText.getUri(), textConstraint);
+            //add full text constraint
+        }
+        if(similarityContext.length() > 0 && !similarityFields.isEmpty()){
+            //add similarity constraint
+            Iterator<String> fieldIt = similarityFields.iterator();
+            String field = fieldIt.next();
+            SimilarityConstraint simConstraint;
+            if(fieldIt.hasNext()){
+                List<String> addFields = new ArrayList<String>(similarityFields.size()-1);
+                while(fieldIt.hasNext()){
+                    addFields.add(fieldIt.next());
+                }
+                simConstraint = new SimilarityConstraint(similarityContext.toString(),addFields);
+            } else {
+                simConstraint = new SimilarityConstraint(similarityContext.toString());
+            }
+            query.setConstraint(field, simConstraint);
+        }
     }
+    
+    
     /**
      * @param rQuery
      * @param query
      */
     private void addTypeConstraint(ReconcileQuery rQuery, FieldQuery query) {
         //maybe an other column was also mapped to the TYPE_FIELD property
-        Collection<Value> additionalTypes = rQuery.removeProperty(TYPE_FIELD);
+        Collection<ReconcileValue> additionalTypes = rQuery.removeProperty(TYPE_FIELD);
         Set<String> queryTypes = rQuery.getTypes();
         Set<String> types = null;
         if(additionalTypes == null){
@@ -315,7 +412,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
             if(queryTypes != null){
                 types.add(rQuery.getQuery());
             }
-            for(Value value : additionalTypes){
+            for(ReconcileValue value : additionalTypes){
                 if(value != null){
                     if(value.getId() != null){
                         types.add(value.getId());
@@ -337,14 +434,14 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
      */
     private void addNameConstraint(ReconcileQuery rQuery, FieldQuery query) {
         //maybe an other column was also mapped to the NAME_FIELD property
-        Collection<Value> additionalValues = rQuery.removeProperty(NAME_FIELD);
+        Collection<ReconcileValue> additionalValues = rQuery.removeProperty(NAME_FIELD);
         List<String> values;
         if(additionalValues == null){
             values = Collections.singletonList(rQuery.getQuery());
         } else {
             values = new ArrayList<String>(additionalValues.size()+1);
             values.add(rQuery.getQuery());
-            for(Value value : additionalValues){
+            for(ReconcileValue value : additionalValues){
                 if(value != null && value.getValue() instanceof String){
                     values.add((String)value.getValue());
                 }

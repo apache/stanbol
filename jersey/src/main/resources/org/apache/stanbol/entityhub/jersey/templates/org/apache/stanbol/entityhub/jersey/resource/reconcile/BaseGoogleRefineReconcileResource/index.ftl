@@ -31,16 +31,15 @@ Entityhub.</p>
 <#-- START Collapseable -->
 <div class="docu"> 
     <div class="collapsed">
-        <h3 id="reconcileDocTitle" class="docuTitle">
-            Installation/Usage:</h3>
+        <h3 id="grefeineinstall" class="docuTitle">
+            Google Refine Installation:</h3>
         <script>
-            $("#reconcileDocTitle").click(function () {
-              $("#reconcileDocTitle").parent().toggleClass("collapsed");
+            $("#grefeineinstall").click(function () {
+              $("#grefeineinstall").parent().toggleClass("collapsed");
             }); 
         </script>
         <div class="docuCollapsable">
 
-<h3>Google Refine Installation</h3>
 Users that want to use this service need first to 
 <a href="http://code.google.com/p/google-refine/wiki/InstallationInstructions">
 install Google Refine</a>. Typically Stanbol users will also be interested in
@@ -48,12 +47,30 @@ installing the
 <a href="http://lab.linkeddata.deri.ie/2010/grefine-rdf-extension/"> RDF
 Extension</a> as this will allow you to map you data to RDF schemata and export
 them as RDF (e.g. to import them afterwards to the Stanbol Entityhub.)
-</p><p>
-<h3>Reconciliation Service Installation</h3>
-After installing Google Refine you will need to create a first project. For the
-sake of testing Reconciliation with the Stanbol Entityhub you can use the
+</p>
+<#-- END Collapseable -->
+        </div>
+    </div>
+</div>  
+
+<#-- START Collapseable -->
+<div class="docu"> 
+    <div class="collapsed">
+        <h3 id="reconcileservieconfig" class="docuTitle">
+            Configuring the Reconciliation Service</h3>
+        <script>
+            $("#reconcileservieconfig").click(function () {
+              $("#reconcileservieconfig").parent().toggleClass("collapsed");
+            }); 
+        </script>
+        <div class="docuCollapsable">
+
+<p>
+To configure a reconciliation service you need first to create a new (or open
+an existing) Google Refine Project. If you do not yet have an project 
+you can use the 
 '<a href="http://svn.apache.org/repos/asf/lucene/dev/tags/lucene_solr_3_6_0/solr/example/exampledocs/books.csv">
-book.scv</a>' file included in the Apache Solr distribution.
+book.scv</a>' file included in the Apache Solr distribution to create a new one.
 </p><p>
 If you created a new Google Refine Project (e.g. by using the 'books.csv' example)
 you will see the imported data in tabular form. The following Screenshot
@@ -62,17 +79,24 @@ visualises how to open the Reconciliation dialog for Book Authors.</p>
 <p> Via the Reconciliation dialog you can now "install" the Entityhub, Referenced
 Sites or the '/sites' endpoint as <b>Standard Reconciliation Service</b> by
 by pressing the [Add Standard Service ...] Button add copying the URL of 
-this page to the dialog. The following Screenshot shows how the install the
+this page to the dialog. 
+</p><p>
+Service URL:
+<code><pre>
+    ${it.requestUri}
+</pre></code>
+</p><p>
+The following Screenshot shows how the install the
 Referenced Site for DBpedia.org.</p>
 <img src="${it.staticRootUrl}/entityhub/images/google_refine_reconciliation-add_service.png"/>
-<h3>Reconciliation Service Usage</h3>
+<h4>Testing the Service</h4>
 <p>After this step a new Reconciliation Service will show up in the left link.
 In addition the newly installed site will be selected and used to provide 
 suggestions for the initially selected column of you Google Refine project
 (Book Authors if you used the 'book.csv' sample data and selected the 'author_t'
 column). 
 </p><p>
-The final Screenshot shows the installed Reconciliation service based on the
+The next Screenshot shows the installed Reconciliation service based on the
 <b>Stanbol Entityhub: dbpedia Referenced Site</b> that is ready to be used
 to reconcile Entities.</p>
 <img src="${it.staticRootUrl}/entityhub/images/google_refine_reconciliation-use_service.png"/>
@@ -81,6 +105,84 @@ to reconcile Entities.</p>
         </div>
     </div>
 </div>  
+
+<#-- START Collapseable -->
+<div class="docu"> 
+    <div class="collapsed">
+        <h3 id="reconcileserviceusage" class="docuTitle">
+            Usage of the Reconciliation Service</h3>
+        <script>
+            $("#reconcileserviceusage").click(function () {
+              $("#reconcileserviceusage").parent().toggleClass("collapsed");
+            }); 
+        </script>
+        <div class="docuCollapsable">
+<p>
+This provides first an overview about the usage of the Google Reconciliation service
+dialog and second the documentation of special features provided by this
+implementation.
+</p>
+<h4>Reconciliation Dialog</h4>
+<img src="${it.staticRootUrl}/entityhub/images/google_refine_reconciliation-use_service.png"/>
+<p>Reconciliation Dialog Fields</p><ul>
+<li><b>Reconclie Services:</b> On the left site the list of available Services is shown.
+As soon as you select one Google Refine will send a query of the first ten Entries of
+your current project to that service to obtain some meta data.</li>
+<li><b>Suggested Types:</b>In the middle a list of suggested types is presented.
+This list will be empty if the service does not return any results for the request
+of the first ten entries. You can also manually add the type in the Field below
+the list. It is also possible to reconcile without constraining the type by
+selecting the last option.</li>
+<li><b>Using additional Properties:</b> On the right side the list of all 
+columns of your project is shown. Information of those columns can be used to
+for reconciliation. To use values of other columns the name of the property
+must be specified on the text field next to the column name. The Stanbol
+Entityhub also supports some special option like the semantic context-, full
+text- and similarity-search (see below for details). <br>
+Note that it is possible to use the same property (and special fields) for
+mapping several columns. In this case values of all those columns are merged.</li>
+</ul>
+<p>
+The Entityhub does support qnames (e.g. rdfs:label) for prefixes registered in
+the <a href="http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/generic/servicesapi/src/main/java/org/apache/stanbol/entityhub/servicesapi/defaults/NamespaceEnum.java">
+NamespaceEnum</a>.</p>
+<h4>Special Property support</h4>
+<p>
+The Reconciliation Dialog allows to use values of other columns to improve
+reconciliation support. To further improve this ability the Stanbol Entityhub
+supports the following special fields:
+</p><ul>
+<li><b>Full Text</b> '<code>@fullText</code>': This allows to use textual values
+of other fields to be matched against any textual value that is linked with
+suggested Entities (e.g. the values of rdfs:comment, skos:note, dbp-ont:abstract,
+...).</li>
+<li><b>Semantic Context</b> '<code>@references</code>': This allows to match
+the URI values of other columns (that are already reconciled) with suggested
+Entities. This is very useful to link further columns of an project if you have
+already reconciled (and possibly manually corrected/improved) an other column
+of the project. Note that this requires the dataset to define those links</li>
+<li><b>Similarity Search</b> '<code>@similarity</code>': This will use textual
+values to rank returned values based on their similarity (using 
+<a href="http://wiki.apache.org/solr/MoreLikeThis">Solr MoreLikeThis</a>).<br>
+By default this also uses the full text field however users can change this
+by explicitly parsing a {property} URI (or qname)
+'<code>@similarity:{property}</code>' as parameter. Note that parsed fields
+need to be correctly configured to support Solr MLT queries. The documentation
+of the Apache Entityhub Indexing Tool provides more information on that.</li>
+</ul>
+<p>
+The following example shows how to use the '<code>@similarity</code>' for 
+disambiguating music artists based on the name of the track and the album. To
+make this work the <a href="">Musicbrainz</a> was imported in the Entityhub in
+a way that the labels of Albums and Tracks where indexed with the Artists.
+</p>
+<img src="${it.staticRootUrl}/entityhub/images/google_refine_reconciliation-similarityexample.png"/>
+
+<#-- END Collapseable -->
+        </div>
+    </div>
+</div>  
+
 
 </div>
 

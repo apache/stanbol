@@ -16,12 +16,20 @@
  */
 package org.apache.stanbol.entityhub.yard.solr.query;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.solr.analysis.ICUTokenizerFactory;
+import org.apache.solr.analysis.TokenizerFactory;
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
@@ -29,7 +37,20 @@ import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 
 public final class QueryUtils {
     private QueryUtils() {}
-
+    /**
+     * The {@link TokenizerFactory} used to create Tokens for parsed 
+     * {@link IndexValue#getValue()} in case <code>false</code> is parsed for
+     * the tokenize property of {@link #encodeQueryValue(IndexValue, boolean)}.
+     * <p>
+     * Currently the {@link ICUTokenizerFactory} is used for Tokenizing.
+     */
+    private final static TokenizerFactory tokenizerFactory = new ICUTokenizerFactory();
+    /**
+     * Regex patter that searches for Wildcard chars '*' and '?' excluding
+     * escaped versions '\*' and '\?'
+     */
+    private final static Pattern wILDCARD_QUERY_CHAR_PATTERN = Pattern.compile("[^\\\\][\\*\\?]");
+    
     /**
      * This method encodes a parsed index value as needed for queries.
      * <p>
@@ -74,18 +95,27 @@ public final class QueryUtils {
             value = SolrUtil.escapeWildCardString(value);
         }
         if (IndexDataTypeEnum.TXT.getIndexType().equals(indexValue.getType())) {
-            if(!escape){ 
-                value = value.toLowerCase();
-            } //rw: 20120314: respect case sensitivity for escaped (non wildcard)
-            Collection<String> tokens = new HashSet<String>(
-                    Arrays.asList(value.split(" ")));
-            tokens.remove("");
-            queryConstraints = tokens.toArray(new String[tokens.size()]);
+            if(escape) { 
+                //value does not contain '*' and '?' as they would be escaped.
+                queryConstraints = new String[] { value.indexOf(' ')>=0 ?
+                        '"'+value+'"' : value
+                };
+            } else { //non escaped strings might contain wildcard chars '*', '?'
+                //those need to be treated specially (STANBOL-607)
+                //Change to 2nd param to false after switching to Solr 3.6+ (see SOLR-2438)
+                queryConstraints = parseWildcardQueryTerms(value, true);
+            }
         } else if (IndexDataTypeEnum.STR.getIndexType().equals(indexValue.getType())) {
-            if(!escape){ 
-                value = value.toLowerCase();
-            } //rw: 20120314: respect case sensitivity for escaped (non wildcard)
-            queryConstraints = new String[] {value.replace(' ', '+')};
+            if(escape){ 
+                 //rw: 20120314: respect case sensitivity for escaped (non wildcard)
+                queryConstraints = new String[] { value.indexOf(' ')>=0 ?
+                        '"'+value+'"' : value
+                };
+            } else { //encode non
+                //rw: 20120314: respect case sensitivity for escaped (non wildcard)
+                //Change to 2nd param to false after switching to Solr 3.6+ (see SOLR-2438)
+                queryConstraints = parseWildcardQueryTerms(value, true);
+            }
         } else {
             queryConstraints = new String[] {value};
         }
@@ -125,4 +155,104 @@ public final class QueryUtils {
         }
         return indexValues;
     }
+    
+    public static void main(String[] args) throws IOException {
+        String value = "This is a te?t for multi* Toke? Wildc\\*adrd Se?rche*";
+        System.out.println(Arrays.toString(parseWildcardQueryTerms(value,true)));
+    }
+
+    /**
+     * Parses query terms for Wildcard queries as described in the first
+     * comment of STANBOL-607. <p>
+     * As an example the String:
+     * <code><pre>
+     *     "This is a te?t for multi* Toke? Wildc\*adrd Se?rche*
+     * </pre></code>
+     * is converted in the query terms
+     * <code><pre>
+     *     ["This is a","te?t","multi*","toke?","Wildc\*adrd","se?rche*"]
+     * </pre></code>
+     * NOTE: that tokens that include are converted to lower case
+     * @param value the value
+     * @param loewercaseWildcardTokens if query elements that include a wildcard
+     * should be converted to lower case.
+     * @return the query terms
+     * @throws IOException
+     */
+    private static String[] parseWildcardQueryTerms(String value,boolean loewercaseWildcardTokens) {
+        //This assumes that the Tokenizer does tokenize '*' and '?',
+        //what makes it a little bit tricky. 
+        Tokenizer tokenizer = tokenizerFactory.create(new StringReader(value));
+        Matcher m = wILDCARD_QUERY_CHAR_PATTERN.matcher(value);
+        int next = m.find()?m.start()+1:-1;
+        if(next < 0){ //No wildcard
+            return new String[]{value};
+        } 
+        ArrayList<String> queryElements = new ArrayList<String>(5);
+        int lastAdded = -1;
+        int lastOffset = 0;
+        boolean foundWildcard = false;
+        //Lucene tokenizer are really low level ...
+        try {
+            while(tokenizer.incrementToken()){
+                //only interested in the start/end indexes of tokens
+                OffsetAttribute offset = tokenizer.addAttribute(OffsetAttribute.class);
+                if(lastAdded < 0){ //rest with this token
+                    lastAdded = offset.startOffset();
+                }
+                if(foundWildcard){ //wildcard present in the current token
+                    //two cases: "wildcar? at the end", "wild?ard within the word"
+                    // (1) [wildcar,at,the,end] : In this case this is called with
+                    //      'at' as active Token and we need write "wildcar?" as
+                    //      query term
+                    // (2) [wild,ard,within,the,word]: In this case this is called with
+                    //      'ard' as active Tiken and we need write "wild?ard" as
+                    //      query term.
+                    if(offset.startOffset() > lastOffset+1) {//(1)
+                        String queryElement = value.substring(lastAdded,lastOffset+1);
+                        if(loewercaseWildcardTokens){
+                            queryElement = queryElement.toLowerCase();
+                        }
+                        queryElements.add(queryElement);
+                        lastAdded = offset.startOffset(); //previous token consumed
+                        //set to the start of the current token
+                        foundWildcard = false;
+                    } else if(next != offset.endOffset()){ //(2)
+                        String queryElement = value.substring(lastAdded,offset.endOffset());
+                        if(loewercaseWildcardTokens){
+                            queryElement = queryElement.toLowerCase();
+                        }
+                        queryElements.add(queryElement);
+                        lastAdded = -1; //consume the current token
+                        foundWildcard = false;
+                    }
+                }
+                if(next == offset.endOffset()){ //end of current token is '*' or '?'
+                    next = m.find()?m.start()+1:-1; //search next '*', '?' in value
+                    //we need to write all tokens previous to the current (if any)
+                    //NOTE: ignore if foundWildcard is TRUE (multiple wildcards in
+                    //      a single word
+                    if(!foundWildcard && lastAdded<lastOffset){
+                        queryElements.add(value.substring(lastAdded,lastOffset));
+                        lastAdded = offset.startOffset();
+                    }//else multiple wildcards in a single token
+                    foundWildcard = true;
+                }
+                lastOffset = offset.endOffset();
+            }
+        } catch (IOException e) {
+            //StringReader can not throw IOExceptions
+            throw new IllegalStateException(e);
+        }
+        if(lastAdded >= 0 && lastAdded < value.length()){
+            String queryElement = value.substring(lastAdded,value.length());
+            if(foundWildcard && loewercaseWildcardTokens){
+                queryElement = queryElement.toLowerCase();
+            }
+            queryElements.add(queryElement);
+        }
+        return queryElements.toArray(new String[queryElements.size()]);
+    }
+
+
 }
