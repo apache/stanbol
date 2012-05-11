@@ -20,7 +20,9 @@
     <relativePath>../../parent</relativePath>
   </parent>
 
+  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.contenthub.parent</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Contenthub parent POM</name>

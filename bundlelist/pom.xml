@@ -20,7 +20,9 @@
 		<version>0.10.0-incubating-SNAPSHOT</version>
 		<relativePath>../parent</relativePath>
 	</parent>
-
+    
+    <groupId>org.apache.stanbol</groupId>
+	<version>0.10.0-incubating-SNAPSHOT</version>
 	<artifactId>org.apache.stanbol.contenthub.bundlelist</artifactId>
 	<packaging>partialbundlelist</packaging>
 	
