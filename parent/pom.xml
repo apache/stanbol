@@ -1,11 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Apache Stanbol software is licensed under the Apache License, Version 2.0,
-    see http://www.apache.org/licenses/LICENSE-2.0 Unless required by
-    applicable law or agreed to in writing, software distributed under the
-    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-    CONDITIONS OF ANY KIND, either express or implied. See the License for
-    the specific language governing permissions and limitations under the
-    License.
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -441,421 +449,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <!-- Stanbol Deps -->
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.launchpad</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider.bundle</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.clerezza.ldpath</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.solr.install</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.solr.web</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.jobs.web</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-
-      <!-- Data Bundles included in the standard Stanbol Distribution -->
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
-        <version>1.0.1-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-        <version>1.0.1-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-        <version>1.0.3-incubating-SNAPSHOT</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.core</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.test</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.rdfentities</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.eventjobmanager</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.weightedjobmanager</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.engines.autotagging</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.engine.keywordextraction</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.engine.topic</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.autotagging</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <!-- TODO: Still the old name: this artifact will be removed
-        once the enhancement engine will be linked to the entityhub -->
-        <groupId>eu.iksproject</groupId>
-        <artifactId>iks-autotagging-data</artifactId>
-        <version>0.1.2</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.ext.org.geonames</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.test</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      
-      <!-- Stanbol Entityhub Indexing Bundles -->
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.indexing.source.jenatdb</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.indexing.source.vcard</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.indexing.destination.solryard</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.launchers.full</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.ontologymanager.registry</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.owl</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.rules.base</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.rules.manager</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.rules.refactor</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-
-		<!-- Stanbol Reasoners bundles -->
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.reasoners.manager</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.reasoners.owlapi</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.reasoners.jena</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.reasoners.owllink</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.reasoners.test</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.reasoners.services-tests</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      
-      <!-- Contenthub -->
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.contenthub.store.solr</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.contenthub.web</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.contenthub.search.solr</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.contenthub.search.featured</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.contenthub.search.related</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-<!--       <dependency> -->
-<!--         <groupId>org.apache.stanbol</groupId> -->
-<!--         <artifactId>org.apache.stanbol.contenthub.crawler.cnn</artifactId> -->
-<!--         <version>0.10.0-incubating-SNAPSHOT</version> -->
-<!--       </dependency> -->
-      
-      <!-- JTidy -->
-      <!-- Contenthub CNN News Crawler needs to parse DOM -->
-      <dependency>
-        <groupId>jtidy</groupId>
-        <artifactId>jtidy</artifactId>
-        <version>4aug2000r7-dev</version>
-        <!--  <type>jar</type>
-        <scope>compile</scope> -->
-      </dependency>
-      
-      <!-- Wordnet -->
-      <dependency>
-        <groupId>edu.smu.tspell</groupId>
-        <artifactId>jaws</artifactId>
-        <version>1.2</version>
-      </dependency>
-      
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.testing.jarexec</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.configadmin</artifactId>
-        <version>1.2.8</version>
-      </dependency>
-
-      <!-- CMS Adapter -->      
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.core</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.rest.client</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.jcr</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.cmis</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-      </dependency>
-
 
       <!-- CMIS -->
       <dependency>
@@ -892,81 +485,6 @@
         <version>2.2.5</version>
       </dependency>
 
-
-      <!-- Partial bundle list dependencies -->
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.cmsadapter.bundlelist</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.contenthub.bundlelist</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.data.bundlelists.defaultdata</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.data.bundlelists.opennlp</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.bundlelist</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.factstore.bundlelist</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.ontologymanager.bundlelist</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.rules.bundlelist</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.reasoners.bundlelist</artifactId>
-        <version>0.10.0-incubating-SNAPSHOT</version>
-        <type>partialbundlelist</type>
-      </dependency>
-
       <!-- OSGi -->
       <dependency>
         <groupId>org.osgi</groupId>
@@ -992,6 +510,11 @@
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.configadmin</artifactId>
+        <version>1.2.8</version>
+      </dependency>      
+      <dependency>
+        <groupId>org.apache.felix</groupId>
         <artifactId>org.osgi.compendium</artifactId>
         <version>1.4.0</version>
         <scope>test</scope>
@@ -1008,6 +531,7 @@
         <version>2.2.0</version>
         <scope>test</scope>
       </dependency>
+
 
       <!-- Apache Clerezza and runtime dependencies -->
       <dependency>
@@ -1143,7 +667,6 @@
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
         <version>1.5</version>
-        <!-- <version>1.3</version>  -->
       </dependency>
       <dependency>
         <groupId>commons-fileupload</groupId>
@@ -1590,11 +1113,6 @@
       <artifactId>ldpath-core-bundle</artifactId>
       <version>0.9.5</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.ldpath.clerezza</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
-    </dependency>
     
     <!-- Apache Tika -->
     <dependency>
@@ -1917,12 +1435,12 @@
               <dependency>
                 <groupId>org.apache.stanbol</groupId>
                 <artifactId>stanbol-framework-source-release-assembly-descriptor</artifactId>
-                <version>0.10.0-incubating-SNAPSHOT</version>
+                <version>0.9.0-incubating</version>
               </dependency>
               <dependency>
                 <groupId>org.apache.stanbol</groupId>
                 <artifactId>stanbol-stack-source-release-assembly-descriptor</artifactId>
-                <version>0.10.0-incubating-SNAPSHOT</version>
+                <version>0.9.0-incubating</version>
               </dependency>
             </dependencies>
           </plugin>

@@ -27,7 +27,9 @@
     <relativePath>../../parent</relativePath>
   </parent>
 
+  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.demos.crawler</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Crawlers</name>
@@ -70,11 +72,17 @@
       </plugin>
     </plugins>
   </build>
-  <dependencies>
 
+  <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
 
     <dependency>
@@ -100,11 +108,6 @@
     <dependency>
       <groupId>jtidy</groupId>
       <artifactId>jtidy</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
     </dependency>
     <dependency>
       <groupId>org.freemarker</groupId>

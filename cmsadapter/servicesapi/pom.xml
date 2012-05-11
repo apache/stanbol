@@ -23,6 +23,7 @@
 
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
+	<version>0.10.0-incubating-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<name>Apache Stanbol CMS adapter API bundle</name>

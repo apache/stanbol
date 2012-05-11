@@ -23,6 +23,7 @@
 
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.cmsadapter.jcr</artifactId>
+	<version>0.10.0-incubating-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<name>Apache Stanbol CMS Adapter JCR Bundle</name>
@@ -45,24 +46,19 @@
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
+			<version>0.9.0-incubating</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jackrabbit</groupId>
-			<artifactId>jackrabbit-jcr-rmi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.jcr</groupId>
-			<artifactId>jcr</artifactId>
+			<version>0.9.0-incubating</version>
 		</dependency>
 
 		<!-- Contenthub -->
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
+			<version>0.9.0-incubating</version>
 		</dependency>
 
 		<!-- Enhancer -->
@@ -70,6 +66,16 @@
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+			<version>0.9.0-incubating</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-jcr-rmi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.jcr</groupId>
+			<artifactId>jcr</artifactId>
 		</dependency>
 
 		<dependency>

@@ -18,20 +18,24 @@
 <project
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
   xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  
+  <modelVersion>4.0.0</modelVersion>
+
   <parent>
-    <artifactId>stanbol-parent</artifactId>
     <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
     <version>0.10.0-incubating-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.reasoners.jena</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Reasoners Jena</name>
-
   <description>Methods to use the Jena rule-based reasoner</description>
+
   <build>
     <!-- make it an OSGi bundle -->
     <plugins>
@@ -71,6 +75,12 @@
   </build>
 
   <dependencies>
+    <!-- Stanbol deps -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
 
     <!-- Diagnostic dependencies -->
     <dependency>
@@ -124,11 +134,6 @@
       </exclusions>
     </dependency>
     
-    <!-- Stanbol deps -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
-    </dependency>
   </dependencies>
 
 </project>

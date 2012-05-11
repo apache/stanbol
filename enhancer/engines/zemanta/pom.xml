@@ -29,6 +29,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.zemanta</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancer Enhancement Engine : Zemanta Tagging</name>
@@ -45,17 +46,49 @@
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>-Xmx1G</argLine>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engines.zemanta.impl.*
+            </Private-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
+      <version>0.9.0-incubating</version>
       <scope>provided</scope>
     </dependency>
+
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
@@ -86,6 +119,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -105,34 +139,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <argLine>-Xmx1G</argLine>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Private-Package>
-              org.apache.stanbol.enhancer.engines.zemanta.impl.*
-            </Private-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

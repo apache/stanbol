@@ -23,6 +23,7 @@
 
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
+	<version>0.10.0-incubating-SNAPSHOT</version>
 	<packaging>partialbundlelist</packaging>
 
 	<name>Apache Stanbol Enhancer Bundle List</name>

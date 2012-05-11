@@ -29,9 +29,10 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : for Entityhub ReferencedSites</name>
+  <name>Apache Stanbol Enhancer Enhancement Engine : Entity Tagging</name>
   <description>
     Implementation of an annotation engine that links named entities
     extracted from a text (TextAnnotations) to semantic entities
@@ -82,21 +83,26 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+      <version>0.9.0-incubating</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
+      <version>0.9.0-incubating</version>
       <scope>compile</scope>
     </dependency>
+
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -119,13 +125,16 @@
      <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
      <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.rdfentities</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
+    
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

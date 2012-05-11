@@ -22,6 +22,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol CMS Adapter parent POM</name>

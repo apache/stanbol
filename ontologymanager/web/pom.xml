@@ -28,9 +28,10 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.ontologymanager.web</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol OntoNet Web Home</name>
+  <name>Apache Stanbol OntoNet Web</name>
   <description>Home page of Apache Stanbol OntoNet HTTP endpoints.</description>
   <scm>
     <connection>
@@ -55,6 +56,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              javax.ws.rs.*; version="[0,2)",
+              *
+            </Import-Package>            
             <Export-Package>
               org.apache.stanbol.ontologymanager.web.*
             </Export-Package>
@@ -82,6 +87,33 @@
   </build>
 
   <dependencies>
+    <!-- Stanbol deps -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.registry</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.owl</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+
     <!-- dependencies on Clerezza modules -->
     <dependency>
       <groupId>org.apache.clerezza</groupId>
@@ -133,6 +165,10 @@
       <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+    </dependency>    
+    <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
     </dependency>
@@ -176,28 +212,6 @@
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
 
-    <!-- Stanbol deps -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.ontologymanager.registry</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.owl</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>jena</artifactId>
@@ -212,6 +226,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
+      <version>0.9.0-incubating</version>
       <scope>test</scope>
     </dependency>
     <dependency>

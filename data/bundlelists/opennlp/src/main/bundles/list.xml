@@ -25,17 +25,17 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.2-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.ner.es</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.2-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.ner.nl</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.2-incubating-SNAPSHOT</version>
     </bundle>
     
     <!-- Language models -->
@@ -44,32 +44,32 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.2-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.da</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.2-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.de</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.2-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.nl</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.2-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.pt</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.2-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.sv</artifactId>
-      <version>1.0.1-incubating-SNAPSHOT</version>
+      <version>1.0.2-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
 </bundles>  

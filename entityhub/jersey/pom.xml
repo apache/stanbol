@@ -22,6 +22,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Entityhub HTTP Endpoint</name>
@@ -71,33 +72,36 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
 
     <!-- dependencies on other Entityhub modules -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
+
     <!-- LD Path -->
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
@@ -135,12 +139,6 @@
       <artifactId>rdf.rdfjson</artifactId>
     </dependency>
 
-    <!-- JAX-RS JSR311 -->
-    <!-- is now included and exported by jersey-core
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-    </dependency> -->
     <!-- jersey-multipart now uses an other lib to read multipart/mime 
          however the MessagebodyReaderUtils still use this lib -->    
      <dependency>

@@ -27,6 +27,7 @@
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Jar Http Testing Library</name>

@@ -35,12 +35,6 @@
   <modules>
     <module>base</module>
     <module>db</module>
-    <!--
-    <module>mysql</module>
-    -->
-    <!--
-    <module>xerces</module>
-    -->
     <module>xml</module>
     <module>web</module>
   </modules>

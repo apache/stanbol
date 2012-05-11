@@ -29,6 +29,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.factstore</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol FactStore</name>
@@ -89,10 +90,12 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     
     <dependency>
@@ -156,6 +159,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
+      <version>0.9.0-incubating</version>
+      <scope>test</scope>    
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
@@ -164,11 +173,6 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
-      <scope>test</scope>    
     </dependency>
   </dependencies>
 

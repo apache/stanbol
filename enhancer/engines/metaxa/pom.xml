@@ -29,6 +29,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancer Enhancement Engine : Metaxa Metadata and Text Extractor</name>
@@ -136,6 +137,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+        
+    <dependency>
       <groupId>org.semanticdesktop.aperture</groupId>
       <artifactId>aperture-core</artifactId>
       <scope>compile</scope>
@@ -166,10 +173,6 @@
       <artifactId>icu4j</artifactId>
       <version>3.4.4</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>

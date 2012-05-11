@@ -22,10 +22,12 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Entityhub LDPath implementation</name>
   <description>Implementation of the LDPath (http://code.google.com/p/ldpath/) API for the Entityhub</description>
+
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/ldpath
@@ -65,6 +67,18 @@
   </build>
 
   <dependencies>
+    <!-- dependencies on other Entityhub modules -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+
     <!-- LD Path -->
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
@@ -73,30 +87,6 @@
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
       <artifactId>ldpath-core-bundle</artifactId>
-    </dependency>
-    <!-- additional LD Path dependencies -->
-<!-- 	<dependency>
-	  <groupId>com.google.guava</groupId>
-	  <artifactId>guava</artifactId>
-      <version>10.0.1</version>
-	</dependency>
-    <dependency>
-      <groupId>net.sourceforge.htmlcleaner</groupId>
-      <artifactId>htmlcleaner</artifactId>
-      <version>2.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jdom</groupId>
-      <artifactId>com.springsource.org.jdom</artifactId> 
-    </dependency> -->
-    <!-- dependencies on other Entityhub modules -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
     </dependency>
     
     <!-- generic tax -->
@@ -127,6 +117,39 @@
     </dependency>
 
     <!-- for tests -->
+    <!-- the SolrYard with the dbpedia default dataset is used for testing -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
+      <version>0.9.0-incubating</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
+      <version>1.0.4-incubating-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Apache Stanbol Commons Solr and Solr Yard dependencies -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+      <version>0.9.0-incubating</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency> <!-- provides Solr and OSGI utilities for Solr -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <version>0.9.0-incubating</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency> <!-- provides managed Solr servers -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+      <version>0.9.0-incubating</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
@@ -137,39 +160,13 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    <!-- the SolrYard with the dbpedia default dataset is used for testing -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <!-- Apache Stanbol Commons Solr and Solr Yard dependencies -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-      <scope>test</scope>
-    </dependency>
+
     <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency> <!-- provides Solr and OSGI utilities for Solr -->
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency> <!-- provides managed Solr servers -->
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-      <scope>test</scope>
-    </dependency>
-      <dependency>
+    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
       <scope>test</scope>

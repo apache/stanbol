@@ -25,7 +25,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Rules reactor</name>
+  <name>Apache Stanbol Rules Reactor</name>
   <description>
     Pseudo project to build the complete Apache Stanbol Rules.
   </description>

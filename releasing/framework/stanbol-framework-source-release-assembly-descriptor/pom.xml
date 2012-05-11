@@ -1,24 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
-Licensed to the Apache Software Foundation (ASF) under one
-or more contributor license agreements.  See the NOTICE file
-distributed with this work for additional information
-regarding copyright ownership.  The ASF licenses this file
-to you under the Apache License, Version 2.0 (the
-"License"); you may not use this file except in compliance
-with the License.  You may obtain a copy of the License at
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
 
-  http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, either express or implied.  See the License for the
-specific language governing permissions and limitations
-under the License.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
 -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
@@ -30,8 +26,8 @@ under the License.
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-framework-source-release-assembly-descriptor</artifactId>
-  <packaging>jar</packaging>
   <version>0.10.0-incubating-SNAPSHOT</version>
+  <packaging>jar</packaging>
   
   <name>Apache Stanbol Framework Source Release Assembly Descriptor</name>
   <description>
@@ -44,10 +40,10 @@ under the License.
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
-    <!-- workaround find from : https://issues.apache.org/jira/browse/SLING-2164b-->
-    <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-    <build>
-      <plugins>
+  <!-- workaround find from : https://issues.apache.org/jira/browse/SLING-2164b-->
+  <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+  <build>
+    <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
@@ -55,34 +51,34 @@ under the License.
       </plugin>
     </plugins>
 
-      <pluginManagement>
-    	<plugins>
-          <plugin>
-            <groupId>org.eclipse.m2e</groupId>
-            <artifactId>lifecycle-mapping</artifactId>
-            <version>1.0.0</version>
-            <configuration>
-              <lifecycleMappingMetadata>
-                <pluginExecutions>
-    		  <pluginExecution>
-                    <pluginExecutionFilter>
-                      <groupId>org.apache.maven.plugins</groupId>
-                      <artifactId>maven-remote-resources-plugin</artifactId>
-                      <versionRange>[1.0,)</versionRange>
-                      <goals>
-   						<goal>bundle</goal>
-                      </goals>
-                    </pluginExecutionFilter>
-                    <action>
-                      <execute />
-                    </action>
-                  </pluginExecution>
-                </pluginExecutions>
-              </lifecycleMappingMetadata>
-            </configuration>
-          </plugin>
-    	</plugins>
-      </pluginManagement>
-    </build>
+    <pluginManagement>
+     <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-remote-resources-plugin</artifactId>
+                    <versionRange>[1.0,)</versionRange>
+                    <goals>
+                      <goal>bundle</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
     
 </project>

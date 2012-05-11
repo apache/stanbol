@@ -26,7 +26,9 @@
     <relativePath>../../parent</relativePath>
   </parent>
 
+  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.reasoners.web</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Reasoners Web</name>
@@ -46,7 +48,7 @@
           <instructions>
             <Import-Package>
               javax.servlet.*, 
-              javax.ws.rs.*, 
+              javax.ws.rs.*; version="[0,2)",
               org.slf4j.*,
               org.osgi.framework.*,
               org.osgi.service.*,
@@ -89,6 +91,59 @@
   </build>
 
   <dependencies>
+    <!-- Stanbol deps -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.rules.base</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.rules.manager</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.rules.refactor</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.owl</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>    
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.reasoners.jena</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.reasoners.owlapi</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
@@ -138,7 +193,10 @@
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
@@ -183,53 +241,11 @@
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
 
-    <!-- Stanbol deps -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.rules.base</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.rules.manager</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.rules.refactor</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.owl</artifactId>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
-    </dependency>    
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.reasoners.jena</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.reasoners.owlapi</artifactId>
-    </dependency>    
     <dependency>
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>jena</artifactId>
       <scope>provided</scope>
     </dependency>
-  	<dependency>
-  		<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
-  	</dependency>
 
 		<!-- Testing deps -->
 		<dependency>

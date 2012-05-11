@@ -27,6 +27,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.frameworkfragment</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Default Framework Fragment Bundle</name>

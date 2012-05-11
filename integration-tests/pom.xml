@@ -26,7 +26,9 @@
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
+  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.integration-tests</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Integration Tests</name>
@@ -54,70 +56,6 @@
     <!-- Set this to true to keep the runnable jar running - useful to debug tests -->
     <keepJarRunning>false</keepJarRunning>
   </properties>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.full</artifactId>
-    </dependency>
-	<dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.test</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpcore-osgi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpmime</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-  	<dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-server</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.jettison</groupId>
-      <artifactId>jettison</artifactId>
-    </dependency>
-    <!-- Used to access constants such as Ontology URIs -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.ontologies</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.jena.serializer</artifactId>
-    </dependency>
-  </dependencies>
 
   <build>
     <plugins>
@@ -184,15 +122,82 @@
             <server.ready.path.6>/ontonet:Apache Stanbol OntoNet</server.ready.path.6>
             <server.ready.path.7>/reasoners:The Stanbol Reasoners provides</server.ready.path.7>
           </systemPropertyVariables>
-          <excludes>
-            <!-- TODO: remove before commit -->
-            <!-- <exclude>**/enhancer/it/*.java</exclude> -->
-            <!--
-            <exclude>**/ontologymanager/web/it/*.java</exclude>
-            -->
-          </excludes>
+          <excludes></excludes>
         </configuration>
       </plugin>
     </plugins>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.full</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.test</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+    <!-- Used to access constants such as Ontology URIs -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore-osgi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.ontologies</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.jena.serializer</artifactId>
+    </dependency>
+  </dependencies>
+
 </project>

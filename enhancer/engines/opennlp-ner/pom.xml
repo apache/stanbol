@@ -29,6 +29,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancer Enhancement Engine : Semantic NER</name>
@@ -45,20 +46,48 @@
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
 
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engines.opennlp.impl.*
+            </Private-Package>
+            <Import-Package>
+              !net.didion.*,
+              *
+            </Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>  
+
   <dependencies>
     <!-- The current opennlp version is exported by the commons.opennlp bundle -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
-
     <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+        <version>0.9.0-incubating</version>
     </dependency>
 
     <dependency>
@@ -95,6 +124,19 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
+      <version>1.0.2-incubating-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
+      <version>1.0.2-incubating-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -107,43 +149,6 @@
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Private-Package>
-              org.apache.stanbol.enhancer.engines.opennlp.impl.*
-            </Private-Package>
-<!--            <Embed-Dependency></Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>  -->
-            <Import-Package>
-              !net.didion.*,
-              *
-            </Import-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

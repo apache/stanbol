@@ -28,11 +28,12 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.httpqueryheaders</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Http Query Headers</name>
   <description>Allows to parse HTTP headers as QueryParameters by prefixing it with "header_{http-header}". This feature allows to bypass the inability of Internet Explorer to set headers for multi domain (CORS) requests. This is a general utility and has no dependencies to Apache Stanbol.</description>
-<!--  <scm>
+  <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/httpqueryheaders
     </connection>
@@ -40,7 +41,7 @@
       scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/httpqueryheaders
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
-  </scm> -->
+  </scm>
 
   <build>
     <!-- make it an OSGi bundle -->
@@ -53,17 +54,6 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-        <configuration>
-          <instructions>
-<!--            <Export-Package>
-              org.apache.stanbol.commons.httpqueryheaders.*
-            </Export-Package>
-            <Private-Package>
-              org.apache.stanbol.commons.httpqueryheaders.impl
-            </Private-Package>
-            <Import-Package>*</Import-Package> -->
-          </instructions>
-        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -89,10 +79,7 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
     </dependency>
-<!--    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-    </dependency> -->
+
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>

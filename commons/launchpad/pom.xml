@@ -29,6 +29,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.launchpad</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Launchpad</name>

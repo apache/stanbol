@@ -29,12 +29,13 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancer Enhancement Engine : Language Identifier</name>
-  <description>identifies a text as: German(de), English(en), French(fr), Spanish(es), Italian(it),
-    Swedish(sv), Polish(pl), Dutch(nl), Norwegian(no), Finnish(fi), Albanian(sq), Slovakian(sk),
-    Slovenian(sl), Danish(da), Hungarian(hu)
+  <description>identifies a text as: German(de), English(en), French(fr), Spanish(es),
+    Italian(it), Swedish(sv), Polish(pl), Dutch(nl), Norwegian(no), Finnish(fi),
+    Albanian(sq), Slovakian(sk), Slovenian(sl), Danish(da), Hungarian(hu)
   </description>
 
   <inceptionYear>2010</inceptionYear>
@@ -82,14 +83,11 @@
     </plugins>
   </build>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
 
     <dependency>

@@ -20,10 +20,12 @@
     <relativePath>../parent</relativePath>
   </parent>
 
+  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.contenthub.web</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Content Hub JAX-RS API</name>
+  <name>Apache Stanbol Content Hub Web</name>
   <description>HTTP endpoint to create and search for content items enriched
     with enhancer's annotations and links to entities from the entity hub.
   </description>
@@ -84,28 +86,38 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.store.solr</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.search.solr</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.search.featured</artifactId>
-    </dependency>
-
-    <!-- needed for the ContentItem resource -->
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>jaxrs.rdf.providers</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
 
     <!-- dependencies on other Stanbol modules -->
@@ -114,6 +126,13 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+
+    <!-- needed for the ContentItem resource -->
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>jaxrs.rdf.providers</artifactId>
     </dependency>
 
     <!-- Jersey -->
@@ -171,14 +190,7 @@
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-core</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-    </dependency>
+
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>

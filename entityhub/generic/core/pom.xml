@@ -29,6 +29,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Entityhub Core</name>
@@ -84,11 +85,14 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
+
     <!-- OSGI framework dependencies -->
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -118,10 +122,12 @@
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
     </dependency>
+    
     <!-- for tests -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.test</artifactId>
+      <version>0.9.0-incubating</version>
       <scope>test</scope>
     </dependency>
     <dependency>
