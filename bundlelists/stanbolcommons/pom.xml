@@ -27,6 +27,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>partialbundlelist</packaging>
 
   <name>Apache Stanbol Commons Bundle List </name>
