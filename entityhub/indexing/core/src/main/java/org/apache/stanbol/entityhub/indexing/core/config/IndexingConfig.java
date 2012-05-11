@@ -69,10 +69,14 @@ import org.slf4j.LoggerFactory;
 
 public class IndexingConfig {
     private static final String DEFAULT_ROOT_PATH = "indexing";
-    private static final String CONFIG_PATH = "config";
-    private static final String SOURCE_PATH = "resources";
-    private static final String DESTINATION_PATH = "destination";
-    private static final String DISTRIBUTION_PATH = "dist";
+    private static final String CONFIG_FOLDER = "config";
+    private static final String CONFIG_PATH = DEFAULT_ROOT_PATH+File.separatorChar+CONFIG_FOLDER;
+    private static final String SOURCE_FOLDER = "resources";
+    private static final String SOURCE_PATH = DEFAULT_ROOT_PATH+File.separatorChar+SOURCE_FOLDER;
+    private static final String DESTINATION_FOLDER = "destination";
+    private static final String DESTINATION_PATH = DEFAULT_ROOT_PATH+File.separatorChar+DESTINATION_FOLDER;
+    private static final String DISTRIBUTION_FOLDER = "dist";
+    private static final String DISTRIBUTION_PATH = DEFAULT_ROOT_PATH+File.separatorChar+DISTRIBUTION_FOLDER;
     private static final String INDEXING_PROERTIES = "indexing.properties";
     private static final String CONFIG_PARAM = "config";
     public static final String KEY_INDEXING_CONFIG = "indexingConfig";
@@ -100,32 +104,32 @@ public class IndexingConfig {
      * The root directory for the indexing (defaults to {@link #DEFAULT_ROOT_PATH})
      */
     private final File rootDir;
-    /**
-     * The root directory for the configuration
-     */
-    private final File configDir;
-    /**
-     * The root directory for the resources (indexing source files)
-     */
-    private final File sourceDir;
-    /**
-     * The root directory for the files created during the indexing process
-     */
-    private final File destinationDir;
-    /**
-     * The root directory for the distribution files created in the finalisation
-     * phase of the indexing (e.g. The archive with the index,
-     * OSGI configuration, ...)
-     */
-    private final File distributionDir;
-    
-    /**
-     * Map between the relative paths stored in {@link #rootDir}, {@link #configDir},
-     * {@link #sourceDir}, {@link #destinationDir} and {@link #distributionDir}
-     * to the {@link File#getCanonicalFile()} counterparts as returned by the
-     * {@link #getRootFolder()} ... methods.
-     */
-    private final Map<File,File> canonicalDirs = new HashMap<File,File>();
+//    /**
+//     * The root directory for the configuration
+//     */
+//    private final File configDir;
+//    /**
+//     * The root directory for the resources (indexing source files)
+//     */
+//    private final File sourceDir;
+//    /**
+//     * The root directory for the files created during the indexing process
+//     */
+//    private final File destinationDir;
+//    /**
+//     * The root directory for the distribution files created in the finalisation
+//     * phase of the indexing (e.g. The archive with the index,
+//     * OSGI configuration, ...)
+//     */
+//    private final File distributionDir;
+//    
+//    /**
+//     * Map between the relative paths stored in {@link #rootDir}, {@link #configDir},
+//     * {@link #sourceDir}, {@link #destinationDir} and {@link #distributionDir}
+//     * to the {@link File#getCanonicalFile()} counterparts as returned by the
+//     * {@link #getRootFolder()} ... methods.
+//     */
+//    private final Map<File,File> canonicalDirs = new HashMap<File,File>();
     
     /**
      * The main indexing configuration as parsed form {@link #INDEXING_PROERTIES}
@@ -208,30 +212,53 @@ public class IndexingConfig {
      * {@link IndexingConstants#KEY_INDEX_FIELD_CONFIG} key.
      */
     private Collection<FieldMapping> fieldMappings;
+    /**
+     * offset to load resources via the classpath (only used for unit testing)
+     */
+    private String classpathResourceOffset;
     
     /**
      * Creates an instance using {@link #DEFAULT_ROOT_PATH} (relative to the
-     * working directory) as {@link #getRootFolder()} for the indexing
+     * working directory) as {@link #getIndexingFolder()} for the indexing
      */
     public IndexingConfig(){
         this(null);
     }
     /**
      * Creates an isntace using the parsed offset plus {@link #DEFAULT_ROOT_PATH}
-     * as {@link #getRootFolder()} for the indexing
+     * as {@link #getIndexingFolder()} for the indexing
      * @param rootPath
      */
     public IndexingConfig(String rootPath){
+        this(rootPath,null);
+    }
+    /**
+     * Internally used for unit testing. Allows to parse an offset for loading
+     * the indexer configuration from the classpath. Currently a protected
+     * feature, but might be moved to the public API at a later point of time.
+     * (would allow to include multiple default configurations via the
+     * classpath).
+     * @param rootPath
+     * @param classpathOffset
+     */
+    protected IndexingConfig(String rootPath,String classpathOffset){
+        this.classpathResourceOffset = classpathOffset;
         //first get the root
         File root;// = new File(System.getProperty("user.dir"));
         if(rootPath != null){
-            root = new File(rootPath,DEFAULT_ROOT_PATH);
+            root = new File(rootPath);
         } else {
-            root = new File(DEFAULT_ROOT_PATH);
+            root = new File(".");
         }
-        log.info("Indexing directory: {}",root.getAbsoluteFile());
+        try {
+            root = root.getCanonicalFile();
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to get canonical file for "
+                    +root,e);
+        }
+        log.info("Indexing Working Directory: {}",root.getAbsoluteFile());
         this.rootDir = root;
-        this.configDir = new File(root,CONFIG_PATH);
+        File configDir = getConfigFolder();
         if(!configDir.getAbsoluteFile().isDirectory()){
             log.info(" > config directory {} does not exist",configDir);
             if(!configDir.getAbsoluteFile().mkdirs()){
@@ -242,7 +269,7 @@ public class IndexingConfig {
                 log.info("  - created");
             }
         }
-        this.sourceDir = new File(root,SOURCE_PATH);
+        File sourceDir = getSourceFolder();
         if(!sourceDir.getAbsoluteFile().exists()){
             log.info(" > resource folder '{} does not exist ",sourceDir);
             if(!sourceDir.getAbsoluteFile().mkdirs()){
@@ -253,7 +280,7 @@ public class IndexingConfig {
                 log.info("  - created");
             }
         }
-        this.destinationDir = new File(root,DESTINATION_PATH);
+        File destinationDir = getDestinationFolder();
         if(!destinationDir.getAbsoluteFile().exists()){
             log.debug(" > destination folder '{} does not exist ",destinationDir);
             if(!destinationDir.getAbsoluteFile().mkdirs()){
@@ -264,7 +291,7 @@ public class IndexingConfig {
                 log.debug("  - created");
             }
         }
-        this.distributionDir = new File(root,DISTRIBUTION_PATH);
+        File distributionDir = getDistributionFolder();
         if(!distributionDir.getAbsoluteFile().exists()){
             log.debug(" > distribution folder '{} does not exist ",distributionDir);
             if(!distributionDir.getAbsoluteFile().mkdirs()){
@@ -274,15 +301,6 @@ public class IndexingConfig {
             } else {
                 log.debug("  - created");
             }
-        }
-        try {
-            canonicalDirs.put(rootDir, rootDir.getCanonicalFile());
-            canonicalDirs.put(configDir, configDir.getCanonicalFile());
-            canonicalDirs.put(sourceDir, sourceDir.getCanonicalFile());
-            canonicalDirs.put(destinationDir, destinationDir.getCanonicalFile());
-            canonicalDirs.put(distributionDir, distributionDir.getCanonicalFile());
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to get canonical indexing directory",e);
         }
         //set up the root folder for the classpath
         this.classPathRootDir = getConfigClasspathRootFolder();
@@ -346,10 +364,10 @@ public class IndexingConfig {
      * @throws IOException
      */
     public InputStream openConfig(String configFileName) throws IOException {
-        return openResource(configDir,configFileName);
+        return openResource(CONFIG_PATH,configFileName);
     }
     public InputStream openSource(String sourceFileName) throws IOException {
-        return openResource(sourceDir,sourceFileName);
+        return openResource(SOURCE_PATH,sourceFileName);
     }
     /**
      * Getter for the config file with the given name. If the file/directory is 
@@ -359,7 +377,7 @@ public class IndexingConfig {
      * @return
      */
     public File getConfigFile(String configName) {
-        return getResource(configDir, configName);
+        return getResource(CONFIG_PATH, configName);
     }
     /**
      * Getter for the source file with the given name. If the file/directory is 
@@ -369,11 +387,11 @@ public class IndexingConfig {
      * @return
      */
     public File getSourceFile(String configName) {
-        return getResource(sourceDir, configName);
+        return getResource(SOURCE_PATH, configName);
     }
     
-    private InputStream openResource(File root,String fileName) throws IOException {
-        File resource = getResource(root, fileName);
+    private InputStream openResource(String path,String fileName) throws IOException {
+        File resource = getResource(path, fileName);
         InputStream in = null;
         if(resource.isFile()){
             in = new FileInputStream(resource);
@@ -389,12 +407,13 @@ public class IndexingConfig {
      * @param fileName the name of the file (file or directory)
      * @return the absolute File or <code>null</code> if not found.
      */
-    private File getResource(File root, String fileName) {
-        File resource = new File(root,fileName);
-        log.info("request for Resource {} (folder: {})",fileName,root);
+    private File getResource(String path, String fileName) {
+        File resourceDir = new File(getWorkingDirectory(),path);
+        File resource = new File(resourceDir,fileName);
+        log.info("request for Resource {} (folder: {})",fileName,resourceDir);
         if(resource.getAbsoluteFile().exists()){
             log.info(" > rquested Resource present");
-        } else if(copyFromClasspath(resource)){
+        } else if(copyFromClasspath(new File(path,fileName))){
             log.info(" > rquested Resource copied from Classpath ");
         } else {
             log.info(" > rquested Resource not found");
@@ -411,16 +430,23 @@ public class IndexingConfig {
      * @return <code>true</code> if the resource was found and copied.
      */
     private boolean copyFromClasspath(File resource){
+        String resourcePath;
+        if(classpathResourceOffset != null){
+            String rs = resource.getPath();
+            resourcePath = FilenameUtils.concat(classpathResourceOffset, rs);
+        } else {
+            resourcePath = resource.getPath();
+        }
         if(classPathRootDir == null){ //not available
             return false;
         } else if(classPathRootDir.isDirectory()){ // loaded from directory
-            File classpathResource = new File(classPathRootDir,resource.getPath());
+            File classpathResource = new File(classPathRootDir,resourcePath);
             try {
                 if(classpathResource.isFile()){
-                    FileUtils.copyFile(classpathResource, resource.getAbsoluteFile());
+                    FileUtils.copyFile(classpathResource, new File(getWorkingDirectory(),resource.getPath()));
                     return true;
                 } else if(classpathResource.isDirectory()){
-                    FileUtils.copyDirectory(classpathResource, resource.getAbsoluteFile());
+                    FileUtils.copyDirectory(classpathResource, new File(getWorkingDirectory(),resource.getPath()));
                     return true;
                 } else {
                     return false;
@@ -436,7 +462,7 @@ public class IndexingConfig {
             JarFile jar = null;
             try {
                 jar = new JarFile(classPathRootDir);
-                String resourceName = resource.getPath();
+                //String resourceName = resource.getPath();
                 Enumeration<JarEntry> entries = jar.entries();
                 boolean completed = false;
                 //we need to iterate over the entries because the resource might
@@ -444,16 +470,16 @@ public class IndexingConfig {
                 while(entries.hasMoreElements() && !completed){
                     JarEntry entry = entries.nextElement();
                     String entryName = entry.getName();
-                    if(entryName.startsWith(resourceName)){
+                    if(entryName.startsWith(resourcePath)){
                         log.info("found entry : {}[dir={}]",entryName,entry.isDirectory());
-                        if(entryName.equals(resourceName) && !entry.isDirectory()){
+                        if(entryName.equals(resourcePath) && !entry.isDirectory()){
                             //found the resource and it is an file -> copy and return
                             completed = true;
                         }
                         if(!entry.isDirectory()){ //copy a file
                             //still check if the target folder exist
                             //TODO: this depends on user.dir is root dir
-                            File targetFolder = new File(
+                            File targetFolder = new File(getWorkingDirectory(),
                                 FilenameUtils.getPathNoEndSeparator(entryName));
                             if(targetFolder.exists() || targetFolder.mkdirs()){
                                 File outFile = new File(targetFolder,
@@ -527,12 +553,19 @@ public class IndexingConfig {
      */
     private File getConfigClasspathRootFolder() {
         //use the indexing.properties file as context
-        String contextResource = new File(configDir,INDEXING_PROERTIES).getPath();
+        //STANBOL-
+        String contextResource;
+        if(classpathResourceOffset != null){
+            contextResource = FilenameUtils.concat(classpathResourceOffset, 
+                CONFIG_PATH+File.separatorChar+INDEXING_PROERTIES);
+        } else {
+            contextResource = CONFIG_PATH+File.separatorChar+INDEXING_PROERTIES;
+        }
         URL contextUrl = loadViaClasspath(contextResource);
         if(contextUrl == null){// if indexing.properties is not found via classpath
             log.info("No '{}' found via classpath. Loading Resource via" +
             		"the classpath is deactivated.",
-                INDEXING_PROERTIES);
+            		contextResource);
             return null;
         }
         String resourcePath;
@@ -648,11 +681,19 @@ public class IndexingConfig {
         return configMap;
     }
     /**
-     * Getter for the root folder used for the Indexing
+     * Getter for the working direcotry of the Indexing tool. (the directory
+     * containing the /indexing folder). By defualt htis 
+     * @return
+     */
+    public final File getWorkingDirectory(){
+        return rootDir;
+    }
+    /**
+     * Getter for the root folder used for the Indexing (root/indexing)
      * @return the root folder (containing the config, resources, target and dist folders)
      */
-    public final File getRootFolder() {
-        return canonicalDirs.get(rootDir);
+    public final File getIndexingFolder() {
+        return new File(getWorkingDirectory(),DEFAULT_ROOT_PATH);
     }
 
     /**
@@ -660,7 +701,7 @@ public class IndexingConfig {
      * @return the root folder for the configuration
      */
     public final File getConfigFolder() {
-        return canonicalDirs.get(configDir);
+        return new File(getIndexingFolder(),CONFIG_FOLDER);
     }
 
     /**
@@ -669,7 +710,7 @@ public class IndexingConfig {
      * @return the root folder for the resources
      */
     public final File getSourceFolder() {
-        return canonicalDirs.get(sourceDir);
+        return new File(getIndexingFolder(),SOURCE_FOLDER);
     }
 
     /**
@@ -678,14 +719,14 @@ public class IndexingConfig {
      * @return the target folder
      */
     public final File getDestinationFolder() {
-        return canonicalDirs.get(destinationDir);
+        return new File(getIndexingFolder(),DESTINATION_FOLDER);
     }
     /**
      * The root folder for the distribution. Guaranteed to exist.
      * @return the distribution folder
      */
     public final File getDistributionFolder() {
-        return canonicalDirs.get(distributionDir);
+        return new File(getIndexingFolder(),DISTRIBUTION_FOLDER);
     }
     /**
      * Getter for the name as configured by the {@link IndexingConstants#KEY_NAME}
@@ -970,7 +1011,7 @@ public class IndexingConfig {
 //        }
         //if the CONFIG_PARAM is present in the config we assume that a config is required
         String name = configEntry.getParams().get(CONFIG_PARAM);
-        Map<String,Object> config = loadConfig(name == null ? defaultName : name, configDir, required);
+        Map<String,Object> config = loadConfigFile(name == null ? defaultName : name, required);
         //we need to also add the key used to get (this) indexing config
         config.put(KEY_INDEXING_CONFIG, this);
         return config;
@@ -985,17 +1026,9 @@ public class IndexingConfig {
      * @param required if this config is required or optional
      * @return the key value mappings as map
      */
-    private Map<String,Object> loadConfig(String name, File configDir, boolean required) {
+    private Map<String,Object> loadConfigFile(String name, boolean required) {
         Map<String,Object> loadedConfig;
-        name = name.endsWith(".properties")? name : name+".properties";
-        if(name == null){
-            if(required){
-                throw new IllegalArgumentException("Missing required parameter'"+
-                    CONFIG_PARAM+"' Syntax: '"+SYNTAX_ERROR_MESSAGE +"'!");
-            } else {
-                return new HashMap<String,Object>();
-            }
-        }
+        name = name.endsWith(".properties") ? name : name+".properties";
         loadedConfig = loadConfig(name,required);
         return loadedConfig;
     }
@@ -1052,7 +1085,7 @@ public class IndexingConfig {
      * <code>true</code> was parsed for required
      */
     public Map<String,Object> getConfig(String name,boolean required) throws IllegalArgumentException {
-        return loadConfig(name, configDir, required);
+        return loadConfigFile(name, required);
     }
     /**
      * Getter for configured properties directly by the key. Typically used

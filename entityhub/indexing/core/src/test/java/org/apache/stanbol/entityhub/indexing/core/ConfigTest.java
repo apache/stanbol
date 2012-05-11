@@ -93,7 +93,7 @@ public class ConfigTest {
         //this should create the specified folder and than throw an
         //illegalArgumentException because the indexing.properties file can not
         //be found in the classpath under
-        new IndexingConfig(CONFIG_ROOT+"noConfig");
+        new IndexingConfig(CONFIG_ROOT+"noConfig",CONFIG_ROOT+"noConfig"){};
     }
     /**
      * In this case the config exists in the classpath, but is not valid because
@@ -101,7 +101,7 @@ public class ConfigTest {
      */
     @Test(expected=IllegalArgumentException.class)
     public void missingConfigDir(){
-        new IndexingConfig(CONFIG_ROOT+"missingconfig");
+        new IndexingConfig(CONFIG_ROOT+"missingconfig",CONFIG_ROOT+"missingconfig"){};
     }
     /**
      * Loads a simple but not functional configuration to test the loading and
@@ -110,13 +110,13 @@ public class ConfigTest {
     @Test
     public void loadSimpleConfigDir() throws IOException {
         String name = CONFIG_ROOT+"simple";
-        IndexingConfig config = new IndexingConfig(name);
+        IndexingConfig config = new IndexingConfig(name,name){};
         //assert that this directory exists (is created)
         File expectedRoot = new File(testRoot,name);
         expectedRoot = new File(expectedRoot,"indexing");
         assertTrue("Root Dir not created",expectedRoot.isDirectory());
         assertEquals("Root dir other the expected ",
-            expectedRoot.getCanonicalPath(),config.getRootFolder().getCanonicalPath());
+            expectedRoot.getCanonicalPath(),config.getIndexingFolder().getCanonicalPath());
         assertTrue(config.getConfigFolder().isDirectory());
         assertTrue(config.getSourceFolder().isDirectory());
         assertTrue(config.getDestinationFolder().isDirectory());

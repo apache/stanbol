@@ -82,7 +82,7 @@ public class RdfIndexingSourceTest {
     }
     @Test
     public void testEntityDataIterable(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"iterable");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"iterable",CONFIG_ROOT+"iterable"){};
         EntityDataIterable iterable = config.getDataInterable();
         assertNotNull(iterable);
         assertEquals(iterable.getClass(), RdfIndexingSource.class);
@@ -106,7 +106,7 @@ public class RdfIndexingSourceTest {
     }
     @Test
     public void testEntityDataProvider(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"provider");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"provider",CONFIG_ROOT+"provider"){};
         EntityIterator entityIdIterator = config.getEntityIdIterator();
         assertNotNull("Unable to perform test whithout EntityIterator",entityIdIterator);
         if(entityIdIterator.needsInitialisation()){
