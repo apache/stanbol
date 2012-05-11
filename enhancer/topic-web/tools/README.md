@@ -48,9 +48,28 @@ IPTC topics to text documents.
 ## Using DBpedia categories
 
 A subset of Wikipedia / DBpedia categories can be used as a classifier. To
-extract such a taxonomy of topics you can use [dbpediakit][3]:
+extract such a taxonomy of topics you can use [dbpediakit][3] (you
+will need python and postgresql for this to run):
+
+    git clone https://github.com/ogrisel/dbpediakit
+    cd dbpediakit
+
+Create the dbpediakit database on the postgresql server by following the
+instructions in:
+
+    https://github.com/ogrisel/dbpediakit/blob/master/dbpediakit/postgres.py
+
+You can now run the extraction (this will download the required dumps and load
+them in postgresql hence can take a long time):
+
+    python examples/topics/build_taxonomy.py --max-depth=2
+
+Back in this folder, import the taxonomy and training set to Stanbol so
+as to build the classifier model:
+
+    python dbpediacategories.py
+        /path/to/dbpediakit/dbpedia-taxonomy.tsv \
+        /path/to/dbpediakit/dbpedia-examples.tsv.bz2 \
+        http://localhost:8080/topic/model
 
 [3] https://github.com/ogrisel/dbpediakit
-
-    python dbpediacategories.py topics.tsv examples.tsv \
-        http://localhost:8080/topic/model
