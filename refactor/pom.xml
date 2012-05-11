@@ -24,34 +24,30 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-	<version>0.10.0-incubating-SNAPSHOT</version>
-	<relativePath>../../parent</relativePath>
+    <version>0.10.0-incubating-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.refactor</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : Refactoring service</name>
-  <description>Implementation of an enhancement engine which refactor the ouptut to a target vocabulary 
+  <name>Apache Stanbol Enhancer Enhancement Engine : Refactor Engine</name>
+  <description>Implementation of an enhancement engine which refactors the ouptut to a target vocabulary 
   </description>
 
   <inceptionYear>2010</inceptionYear>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
-    <scm>
-        <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/geonames/
-        </connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/geonames/
-        </developerConnection>
-        <url>http://incubator.apache.org/stanbol/</url>
-    </scm>
-
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/geonames/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/geonames/
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
 
   <build>
     <plugins>
@@ -80,42 +76,30 @@
   </build>
 
   <dependencies>
-    
     <!-- Enhancer Sevice API -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     
     <!-- EntityHub -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
        <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-    </dependency>
-        
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <scope>provided</scope>
+       <version>0.9.0-incubating</version>
     </dependency>
 
     <!-- KReS dependencies -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <groupId>org.apache.felix</groupId>
@@ -138,23 +122,44 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
+      <version>0.9.0-incubating</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.base</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.manager</artifactId>
+      <version>0.9.0-incubating</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.refactor</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+        
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+
     <dependency>
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>jena</artifactId>
