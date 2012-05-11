@@ -52,6 +52,10 @@ public class BaseStanbolResource {
     @Context
     protected ServletContext servletContext;
 
+    public URI getRequestUri(){
+        return uriInfo.getAbsolutePath();
+    }
+    
     public URI getPublicBaseUri() {
         return uriInfo.getBaseUri();
     }
