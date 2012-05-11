@@ -29,7 +29,9 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.indexing.source.jenatdb</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
+
   <name>Apache Stanbol Entityhub IndexingSource for RDF using Jena TDB</name>
   <description>
     Provides support for indexing RDF data by using an Jena TDB triple store.
@@ -38,6 +40,7 @@
     This implementation is tested to work even for very large data sets such as
     http://dbpedia.org dumps. 
   </description>
+  
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/rdf/jenatdb
@@ -47,6 +50,7 @@
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
+  
   <build>
     <plugins>
       <plugin>
@@ -85,19 +89,24 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
+    
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -121,8 +130,8 @@
       <artifactId>tdb</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.hp.hpl.jena</groupId>
-        <artifactId>arq</artifactId>
+      <groupId>com.hp.hpl.jena</groupId>
+      <artifactId>arq</artifactId>
     </dependency>
     <!-- dependencies for testing -->
     <dependency>

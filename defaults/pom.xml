@@ -22,10 +22,12 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.defaults</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Entityhub default configuration</name>
   <description>This provides the default configuration for the Entityhub. This bundle can be removed by users that want/need to provide their own configuration conflicting with the defaults.</description>
+  
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/defaults

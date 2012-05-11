@@ -29,11 +29,14 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.test</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
+
   <name>Apache Stanbol Entityhub - Test Framework</name>
   <description>Unit test framework for the Interfaces defined within the
-    services APO of the Entityhub
+    services APO of the Entityhub.
   </description>
+
   <inceptionYear>2010</inceptionYear>
 
   <scm>
@@ -50,7 +53,14 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -60,18 +70,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <!-- dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
-    </dependency -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
     </dependency>
     <dependency>
       <groupId>org.codehaus.jettison</groupId>
