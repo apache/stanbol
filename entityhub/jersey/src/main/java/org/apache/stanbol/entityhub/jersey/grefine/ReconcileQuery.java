@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Java Representation for <a href="http://code.google.com/p/google-refine/wiki/ReconciliationServiceApi#Query_Request">
  * Google Refine Reconciliation queries</a>.<p>
- * {@link #getTypes()} and {@link Value#getId()} do support 'prefix:localname'
+ * {@link #getTypes()} and {@link ReconcileValue#getId()} do support 'prefix:localname'
  * syntax for prefixes defined in the {@link NamespaceEnum}.
  * Also defines methods for parsing single and multiple request strings.
  * 
@@ -51,9 +51,13 @@ import org.slf4j.LoggerFactory;
 public class ReconcileQuery {
 
     private static final Logger log = LoggerFactory.getLogger(ReconcileQuery.class);
-    
+    /**
+     * The default limit for suggestions if not explicitly parsed
+     */
     public static final Integer DEFAULT_LIMIT = 5;
-    
+    /**
+     * The default entity type mode if not explicitly parsed by the query
+     */
     public static final TYPE_STRICT DEFAULT_TYPE_STRICT = TYPE_STRICT.any;
     
     private final String query;
@@ -62,12 +66,10 @@ public class ReconcileQuery {
     
     private Integer limit;
     
-    private final Map<String,Collection<Value>> properties = new HashMap<String,Collection<Value>>();
+    private final Map<ReconcileProperty,Collection<ReconcileValue>> properties = new HashMap<ReconcileProperty,Collection<ReconcileValue>>();
     
     private TYPE_STRICT typeStrict;
-    
-    protected static final ValueFactory vf = InMemoryValueFactory.getInstance();
-    
+       
     /**
      * @return the limit
      */
@@ -132,86 +134,30 @@ public class ReconcileQuery {
         }
     }
     
-    public Collection<Value> putProperty(String field, Collection<Value> values){
+    public Collection<ReconcileValue> putProperty(String field, Collection<ReconcileValue> values){
         if(field == null || field.isEmpty()){
             throw new IllegalArgumentException("The field for an property MUST NOT be NULL!");
         }
-        if(values == null || values.isEmpty()){
-            return properties.remove(values);
+        ReconcileProperty property = ReconcileProperty.parseProperty(field);
+        if(property != null){
+            if(values == null || values.isEmpty()){
+                return properties.remove(values);
+            } else {
+                return properties.put(property, values);
+            }
         } else {
-            return properties.put(field, values);
+            return null;
         }
     }
-    public Collection<Value> removeProperty(String field){
+    public Collection<ReconcileValue> removeProperty(String field){
         return properties.remove(field);
     }
-    public Collection<Value> getProperty(String field){
+    public Collection<ReconcileValue> getProperty(String field){
         return properties.get(field);
     }
-    public Iterable<Entry<String,Collection<Value>>> getProperties(){
+    public Iterable<Entry<ReconcileProperty,Collection<ReconcileValue>>> getProperties(){
         return properties.entrySet();
     }
-    /**
-     * Values can be simple JSON values or JSON objects with an 'id' and a
-     * 'name'. This is mapped to {@link Value} objects with an optional 
-     * {@link #getId()} and a required {@link #getValue()}.<p>
-     * The 'id' supports prefix:localname syntax for prefixes defined within the
-     * {@link NamespaceEnum}
-     * @author Rupert Westenthaler
-     *
-     */
-    public static class Value {
-        private final String id;
-        private final Object value;
-
-        private Value(Object value){
-            this(null,value);
-        }
-        private Value(String id, Object value){
-            this.id = id == null ? null : NamespaceEnum.getFullName(id);
-            if(value == null){
-                throw new IllegalArgumentException("The parsed value MUST NOT be NULL!");
-            }
-            this.value = value;
-        }
-
-        /**
-         * The getter for the value of the 'id' property of the 'v' object
-         * if present. This represents the value of fields that are already
-         * successfully linked (reconciled) with some entity.
-         * @return the id
-         */
-        public String getId() {
-            return id;
-        }
-
-        /**
-         * @return the value
-         */
-        public Object getValue() {
-            return value;
-        }
-        /**
-         * Calls the {@link #toString()} method of the {@link #getValue()}
-         */
-        @Override
-        public String toString() {
-            return value.toString();
-        }
-        @Override
-        public int hashCode() {
-            return id != null ? id.hashCode() : value.hashCode();
-        }
-        @Override
-        public boolean equals(Object o) {
-            return o instanceof Value && ( //other is value
-                    (id != null && id.equals(((Value) o).id)) || //ids are equals or 
-                        (id == null && ((Value)o).id == null //ids are null and
-                        && value.equals(((Value)o).value))); //values are equals
-            
-        }
-    }
-    
     public static Map<String,ReconcileQuery> parseQueries(String queriesString) throws WebApplicationException {
         JSONObject jQueries;
         try {
@@ -335,18 +281,18 @@ public class ReconcileQuery {
     private static void parseProperty(ReconcileQuery reconcileQuery,JSONObject jProperty) {
         if(jProperty != null){
             //parse property
-            String property = NamespaceEnum.getFullName(jProperty.optString("pid"));
+            String property = jProperty.optString("pid");
             if(property == null){
                 log.warn("Ignore Property because of missing 'pid'! \n{}",jProperty.toString());
             } else {
                 //property keys may appear multiple times in queries
                 //so we need to initialise the property values with already
                 //existing values
-                Collection<Value> values = reconcileQuery.getProperty(property);
+                Collection<ReconcileValue> values = reconcileQuery.getProperty(property);
                 if(values == null){ //if not create a new Set
                     //maybe the order is important (e.g. for similarity alg) 
                     //   ... so try to keep it
-                    values = new LinkedHashSet<Value>();
+                    values = new LinkedHashSet<ReconcileValue>();
                 }
                 //parse the value
                 Object jValue = jProperty.opt("v");
@@ -354,7 +300,7 @@ public class ReconcileQuery {
                     log.warn("Ignore Property '{}' because it has no value! \n {}",property,jProperty.toString());
                 } else if(jValue instanceof JSONObject){
                     //Reconciliation data available!
-                    Value value = parseValueFromV(jValue);
+                    ReconcileValue value = parseValueFromV(jValue);
                     if(value != null){
                         values.add(value);
                     } else {
@@ -368,7 +314,7 @@ public class ReconcileQuery {
                         jValue = jValueArray.opt(j);
                         if(jValue instanceof JSONObject){
                             //Reconciliation data available!
-                            Value value = parseValueFromV(jValue);
+                            ReconcileValue value = parseValueFromV(jValue);
                             if(value != null){
                                 values.add(value);
                             } else {
@@ -376,7 +322,7 @@ public class ReconcileQuery {
                                     property,jValue.toString());
                             }
                         } else if(jValue != null){
-                            values.add(new Value(jValue));
+                            values.add(new ReconcileValue(jValue));
                         }
                     }
                     if(values.isEmpty()){
@@ -384,7 +330,7 @@ public class ReconcileQuery {
                             property,jProperty.toString());
                     }
                 } else { //number or String
-                    values.add(new Value(jValue)); //directly use the value
+                    values.add(new ReconcileValue(jValue)); //directly use the value
                 }
                 
                 if(!values.isEmpty()){
@@ -400,10 +346,10 @@ public class ReconcileQuery {
      * @return The value or <code>null</code> if the parsed json object does not
      * contain the required information.
      */
-    private static Value parseValueFromV(Object jValue) {
+    private static ReconcileValue parseValueFromV(Object jValue) {
         String id = ((JSONObject)jValue).optString("id");
         String value = ((JSONObject)jValue).optString("name");
-        return value != null ? new Value(id,value) : null;
+        return value != null ? new ReconcileValue(id,value) : null;
     }
     
 }

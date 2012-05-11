@@ -21,7 +21,10 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
+import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
+import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
@@ -52,15 +55,17 @@ public class LangEncoder implements IndexConstraintTypeEncoder<IndexField> {
         } else {
             languages = value.getLanguages();
         }
-        if (!languages.isEmpty()) {
-            for (String prefix : fieldMapper.encodeLanguages(value)) {
-                constraint.addEncoded(PREFIX, SolrUtil.escapeSolrSpecialChars(prefix));
+        if(value.getDataType().equals(IndexDataTypeEnum.TXT.getIndexType())){
+            if (!languages.isEmpty()) {
+                for (String prefix : fieldMapper.encodeLanguages(value)) {
+                    constraint.addEncoded(PREFIX, SolrUtil.escapeSolrSpecialChars(prefix));
+                }
+            } else { // default
+                // search in the language merger field of the default language
+                constraint.addEncoded(PREFIX,
+                    SolrUtil.escapeSolrSpecialChars(fieldMapper.getLanguageMergerField(null)));
             }
-        } else { // default
-            // search in the language merger field of the default language
-            constraint.addEncoded(PREFIX,
-                SolrUtil.escapeSolrSpecialChars(fieldMapper.getLanguageMergerField(null)));
-        }
+        } //else no Text field -> do not add language prefixes
     }
 
     @Override

@@ -293,6 +293,32 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
         executeQuery(test);  
     }
     @Test
+    public void testMultiWordWildcardTextConstraints() throws IOException, JSONException {
+        //this is specially for issue described in the first comment of
+        //STANBOL-607
+        FieldQueryTestCase test = new FieldQueryTestCase(
+            "{ "+
+                "'selected': ["+
+                    "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
+                "'offset': '0',"+
+                "'limit': '3',"+
+                "'constraints': [{ "+
+                    "'type': 'text', "+
+                    "'language': 'de', "+
+                    "'patternType': 'wildcard', "+
+                    "'text': 'Frankf* am Main', "+
+                    "'field': 'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label' "+
+                "}]"+
+             "}",
+             Arrays.asList( //list of expected results
+                 "http://dbpedia.org/resource/Frankfurt"),
+             Arrays.asList( //list of required fields for results
+                "http://www.w3.org/2000/01/rdf-schema#label"));
+        //now execute the test
+        executeQuery(test);  
+    }
+    
+    @Test
     public void testFieldQueryValueConstraints() throws IOException, JSONException {
         FieldQueryTestCase test = new FieldQueryTestCase(
             "{ "+
