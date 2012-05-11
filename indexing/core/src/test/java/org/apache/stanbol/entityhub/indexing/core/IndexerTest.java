@@ -120,14 +120,14 @@ public class IndexerTest {
     
     @Test
     public void testDataInteratingMode(){
-        Indexer indexer = factory.create(CONFIG_ROOT+"dataIterating");
+        Indexer indexer = factory.create(CONFIG_ROOT+"dataIterating",CONFIG_ROOT+"idIterating");
         indexer.index();
         //check that all entities have been indexed
         validateAllIndexed();
     }
     @Test
     public void testEntityIdIteratingMode(){
-        Indexer indexer = factory.create(CONFIG_ROOT+"idIterating");
+        Indexer indexer = factory.create(CONFIG_ROOT+"idIterating",CONFIG_ROOT+"idIterating");
         indexer.index();
         //check that all entities have been indexed
         validateAllIndexed();

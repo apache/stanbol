@@ -80,8 +80,22 @@ public class IndexerFactory {
      * not found or is not valid
      */
     public Indexer create(String dir){
+        return create(dir, null);
+    }
+    /**
+     * Internally used for unit testing
+     * @param dir
+     * @param classpathOffset
+     * @return
+     */
+    protected Indexer create(String dir,String classpathOffset){
         Indexer indexer;
-        IndexingConfig config = new IndexingConfig(dir);
+        IndexingConfig config;
+        if(classpathOffset != null){
+            config= new IndexingConfig(dir,classpathOffset){};
+        } else {
+            config= new IndexingConfig(dir);
+        }
         //get the mode based on the configured IndexingComponents
         EntityDataIterable dataIterable = config.getDataInterable();
         EntityIterator idIterator = config.getEntityIdIterator();

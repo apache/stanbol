@@ -123,12 +123,12 @@ public class SolrYardIndexingDestinationTest {
     }
     @Test(expected=IllegalArgumentException.class)
     public void testMissingBoostConfig(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingBoostConfig");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingBoostConfig",CONFIG_ROOT+"missingBoostConfig"){};
         config.getIndexingDestination();
     }
     @Test(expected=IllegalArgumentException.class)
     public void testInvalidBoostConfig(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"invalidBoostConfig");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"invalidBoostConfig",CONFIG_ROOT+"invalidBoostConfig"){};
         config.getIndexingDestination();
     }
     /**
@@ -137,7 +137,7 @@ public class SolrYardIndexingDestinationTest {
      */
     @Test(expected=IllegalArgumentException.class)
     public void testMissingDefaultSolrSchemaConfig(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingDefaultSolrConf");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingDefaultSolrConf",CONFIG_ROOT+"missingDefaultSolrConf"){};
         config.getIndexingDestination();
     }
     /**
@@ -146,17 +146,17 @@ public class SolrYardIndexingDestinationTest {
      */
     @Test(expected=IllegalArgumentException.class)
     public void testMissingSolrSchemaConfig(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingSolrConf");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingSolrConf",CONFIG_ROOT+"missingSolrConf"){};
         config.getIndexingDestination();
     }
     @Test
     public void testSimple() throws YardException, IOException {
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"simple");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"simple",CONFIG_ROOT+"simple"){};
         validateSolrDestination(config);
     }
     @Test
     public void testWithSolrConf() throws YardException, IOException {
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"withSolrConf");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"withSolrConf",CONFIG_ROOT+"withSolrConf"){};
         validateSolrDestination(config);
     }
     
