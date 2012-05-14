@@ -124,8 +124,32 @@
     <!-- Testing -->
      <dependency>
       <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.test</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+     <dependency>
+      <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+     <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+      <version>0.9.0-incubating</version>
+      <scope>test</scope>
+    </dependency>
+     <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
+      <version>0.9.0-incubating</version>
+      <scope>test</scope>
+    </dependency>
+     <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
+      <version>1.0.4-incubating-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
      <dependency>

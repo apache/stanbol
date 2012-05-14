@@ -25,6 +25,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EN
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_CATEGORY;
@@ -46,6 +47,7 @@ import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -103,7 +105,7 @@ import org.slf4j.LoggerFactory;
 public class ZemantaEnhancementEngine 
         extends AbstractEnhancementEngine<IOException,RuntimeException>
         implements EnhancementEngine, ServiceProperties {
-
+    
     @Property
     public static final String API_KEY_PROPERTY = "org.apache.stanbol.enhancer.engines.zemanta.key";
 
@@ -113,6 +115,15 @@ public class ZemantaEnhancementEngine
     protected static final Set<String> SUPPORTED_MIMETYPES = 
             Collections.unmodifiableSet(new HashSet<String>(
                     Arrays.asList("text/plain","text/html")));
+
+    /**
+     * The maximal prefix/suffix size used for the selection context. This is
+     * required, because Zemanta does only provide the Anchor text, but not the
+     * exact position within the text. So this engine creates a TextAnnotation
+     * for each occurrence of the Anchor within the text and uses the surrounding
+     * as context.
+     */
+    private static final int SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE = 50;
 
     private static final Logger log = LoggerFactory.getLogger(ZemantaEnhancementEngine.class);
 
@@ -223,13 +234,13 @@ public class ZemantaEnhancementEngine
         Iterator<Triple> categories = results.filter(null, RDF_TYPE, ZemantaOntologyEnum.Category.getUri());
         while (categories.hasNext()) {
             NonLiteral category = categories.next().getSubject();
-            log.info("process category " + category);
+            log.debug("process category " + category);
             Double confidence = parseConfidence(results, category);
-            log.info(" > confidence :" + confidence);
+            log.debug(" > confidence :" + confidence);
             //now we need to follow the Target link
             UriRef target = EnhancementEngineHelper.getReference(results, category, ZemantaOntologyEnum.target.getUri());
             if (target != null) {
-                //first check the the used categorisation
+                //first check the used categorisation
                 UriRef categorisationScheme = EnhancementEngineHelper.getReference(results, target, ZemantaOntologyEnum.categorization.getUri());
                 if (categorisationScheme != null && categorisationScheme.equals(ZemantaOntologyEnum.categorization_DMOZ.getUri())) {
                     String categoryTitle = EnhancementEngineHelper.getString(results, target, ZemantaOntologyEnum.title.getUri());
@@ -237,7 +248,7 @@ public class ZemantaEnhancementEngine
                         //now write the Stanbol Enhancer entity enhancement
                         UriRef categoryEnhancement = EnhancementEngineHelper.createEntityEnhancement(enhancements, this, ciId);
                         //write the title
-                        enhancements.add(new TripleImpl(categoryEnhancement, ENHANCER_ENTITY_LABEL, literalFactory.createTypedLiteral(categoryTitle)));
+                        enhancements.add(new TripleImpl(categoryEnhancement, ENHANCER_ENTITY_LABEL, new PlainLiteralImpl(categoryTitle)));
                         //write the reference
                         if (categoryTitle.startsWith(ZEMANTA_DMOZ_PREFIX)) {
                             enhancements.add(
@@ -417,6 +428,28 @@ public class ZemantaEnhancementEngine
                         new TripleImpl(textAnnotation, ENHANCER_END, literalFactory.createTypedLiteral(current + anchorLength)));
                 enhancements.add(
                         new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, anchorLiteral));
+                //extract the selection context
+                int beginPos;
+                if(current <= SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE){
+                    beginPos = 0;
+                } else {
+                    int start = current-SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE;
+                    beginPos = text.indexOf(' ',start);
+                    if(beginPos < 0 || beginPos >= current){ //no words
+                        beginPos = start; //begin within a word
+                    }
+                }
+                int endPos;
+                if(current+anchorLength+SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE >= text.length()){
+                    endPos = text.length();
+                } else {
+                    int start = current+anchorLength+SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE;
+                    endPos = text.lastIndexOf(' ', start);
+                    if(endPos <= current+anchorLength){
+                        endPos = start; //end within a word;
+                    }
+                }
+                enhancements.add(new TripleImpl(textAnnotation,ENHANCER_SELECTION_CONTEXT,new PlainLiteralImpl(text.substring(beginPos, endPos))));
                 //TODO: Currently I use the confidence of the extraction, but I think this is more
                 //      related to the annotated Entity rather to the selected text.
                 if (confidence != null) {
