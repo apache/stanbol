@@ -50,7 +50,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- define the path to/home of the OpenNLP modles-->
     <opennlp.model.path>org/apache/stanbol/data/opennlp</opennlp.model.path>
-    <opennlp.model.home>http://dev.iks-project.eu/downloads/opennlp/models-1.5/</opennlp.model.home>
+    <opennlp.model.home>http://dev.iks-project.eu/downloads/opennlp/models-1.5</opennlp.model.home>
   </properties>
 
   <build>
