@@ -134,7 +134,7 @@ public class TestTaxonomyLinker {
     }
 
     @Test
-    public void testTaxonomyLinker() throws Exception{
+    public void testTaxonomyLinker() throws Exception {
         OpenNlpAnalysedContentFactory acf = OpenNlpAnalysedContentFactory.getInstance(openNLP,
             new TextAnalyzerConfig());
         EntityLinkerConfig config = new EntityLinkerConfig();
