@@ -191,14 +191,14 @@ public class NamedEntityTaggingEngine
     /**
      * The field used to search for the selected text of the TextAnnotation.
      */
-    private String nameField;
+    protected String nameField;
 
     /**
      * The number of Suggestions to be added
      */
-    public Integer numSuggestions = 3;
+    protected Integer numSuggestions = 3;
     
-    public boolean dereferenceEntities = true;
+    protected boolean dereferenceEntities = true;
 
     /**
      * The {@link OfflineMode} is used by Stanbol to indicate that no external service should be referenced.

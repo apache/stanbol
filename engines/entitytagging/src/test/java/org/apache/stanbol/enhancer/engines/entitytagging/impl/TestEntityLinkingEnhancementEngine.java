@@ -16,20 +16,32 @@
  */
 package org.apache.stanbol.enhancer.engines.entitytagging.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PERSON;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_CREATOR;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EXTRACTED_FROM;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateAllEntityAnnotations;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
@@ -39,8 +51,12 @@ import org.apache.stanbol.enhancer.rdfentities.fise.TextAnnotation;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
+import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
+import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -68,11 +84,34 @@ public class TestEntityLinkingEnhancementEngine {
 
     private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
     
-    static NamedEntityTaggingEngine entityLinkingEngine
-            = new NamedEntityTaggingEngine();
+    static NamedEntityTaggingEngine entityLinkingEngine;
 
+    private static String userDir = System.getProperty("user.dir");
+    
     @BeforeClass
     public static void setUpServices() throws IOException {
+        //TODO: set user.dir to /target/test-files
+        File testFiles = new File("./target/test-files");
+        if(!testFiles.isDirectory()){
+            if(!testFiles.mkdirs()){
+                throw new IOException("Unable to create directory for test files "+testFiles);
+            }
+        }
+        
+        System.getProperties().setProperty("user.dir", testFiles.getCanonicalPath());
+        entityLinkingEngine = new NamedEntityTaggingEngine();
+        //instead of calling activate we directly set the required fields
+        //we need a data source for linking
+        entityLinkingEngine.entityhub = new MockEntityhub();
+        entityLinkingEngine.personState = true;
+        entityLinkingEngine.personType = OntologicalClasses.DBPEDIA_PERSON.getUnicodeString();
+        entityLinkingEngine.orgState = true;
+        entityLinkingEngine.orgType = OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString();
+        entityLinkingEngine.placeState = true;
+        entityLinkingEngine.placeType = OntologicalClasses.DBPEDIA_PLACE.getUnicodeString();
+        entityLinkingEngine.nameField = Properties.RDFS_LABEL.getUnicodeString();
+        //not implemented
+        entityLinkingEngine.dereferenceEntities = false;
     }
 
     @Before
@@ -85,6 +124,7 @@ public class TestEntityLinkingEnhancementEngine {
 
     @AfterClass
     public static void shutdownServices() {
+        System.getProperties().setProperty("user.dir", userDir);
     }
 
     public static ContentItem getContentItem(final String id, final String text) throws IOException {
@@ -118,68 +158,22 @@ public class TestEntityLinkingEnhancementEngine {
 
     @Test
     public void testEntityLinkingEnhancementEngine() throws Exception{
-        //TODO: adapt this test to work with this engine
-        // -> here the problem is mainly to fake the needed infrastructure
-        return;
-//        //create a content item
-//        ContentItem ci = getContentItem("urn:iks-project:enhancer:text:content-item:person", CONTEXT);
-//        //add three text annotations to be consumed by this test
-//        getTextAnnotation(ci, PERSON, CONTEXT, OntologicalClasses.DBPEDIA_PERSON);
-//        getTextAnnotation(ci, ORGANISATION, CONTEXT, OntologicalClasses.DBPEDIA_ORGANISATION);
-//        getTextAnnotation(ci, PLACE, CONTEXT, OntologicalClasses.DBPEDIA_PLACE);
-//        //perform the computation of the enhancements
-//        entityLinkingEngine.computeEnhancements(ci);
-//        int entityAnnotationCount = checkAllEntityAnnotations(ci.getMetadata());
-//        assertEquals(2, entityAnnotationCount);
+        //create a content item
+        ContentItem ci = getContentItem("urn:iks-project:enhancer:text:content-item:person", CONTEXT);
+        //add three text annotations to be consumed by this test
+        getTextAnnotation(ci, PERSON, CONTEXT, DBPEDIA_PERSON);
+        getTextAnnotation(ci, ORGANISATION, CONTEXT, DBPEDIA_ORGANISATION);
+        getTextAnnotation(ci, PLACE, CONTEXT, DBPEDIA_PLACE);
+        //perform the computation of the enhancements
+        entityLinkingEngine.computeEnhancements(ci);
+        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        expectedValues.put(ENHANCER_EXTRACTED_FROM, ci.getUri());
+        expectedValues.put(DC_CREATOR,LiteralFactory.getInstance().createTypedLiteral(
+            entityLinkingEngine.getClass().getName()));
+        int entityAnnotationCount = validateAllEntityAnnotations(ci.getMetadata(),expectedValues);
+        assertEquals(3, entityAnnotationCount);
     }
 
-    /*
-     * -----------------------------------------------------------------------
-     * Helper Methods to check Text and EntityAnnotations
-     * -----------------------------------------------------------------------
-     */
 
-    private int checkAllEntityAnnotations(MGraph g) {
-        Iterator<Triple> entityAnnotationIterator = g.filter(null,
-                RDF_TYPE, ENHANCER_ENTITYANNOTATION);
-        int entityAnnotationCount = 0;
-        while (entityAnnotationIterator.hasNext()) {
-            UriRef entityAnnotation = (UriRef) entityAnnotationIterator.next().getSubject();
-            // test if selected Text is added
-            checkEntityAnnotation(g, entityAnnotation);
-            entityAnnotationCount++;
-        }
-        return entityAnnotationCount;
-    }
-
-    /**
-     * Checks if an entity annotation is valid.
-     */
-    private void checkEntityAnnotation(MGraph g, UriRef entityAnnotation) {
-        Iterator<Triple> relationToTextAnnotationIterator = g.filter(
-                entityAnnotation, DC_RELATION, null);
-        // check if the relation to the text annotation is set
-        assertTrue(relationToTextAnnotationIterator.hasNext());
-        while (relationToTextAnnotationIterator.hasNext()) {
-            // test if the referred annotations are text annotations
-            UriRef referredTextAnnotation = (UriRef) relationToTextAnnotationIterator.next().getObject();
-            assertTrue(g.filter(referredTextAnnotation, RDF_TYPE,
-                    ENHANCER_TEXTANNOTATION).hasNext());
-        }
-
-        // test if an entity is referred
-        Iterator<Triple> entityReferenceIterator = g.filter(entityAnnotation,
-                ENHANCER_ENTITY_REFERENCE, null);
-        assertTrue(entityReferenceIterator.hasNext());
-        // test if the reference is an URI
-        assertTrue(entityReferenceIterator.next().getObject() instanceof UriRef);
-        // test if there is only one entity referred
-        assertFalse(entityReferenceIterator.hasNext());
-
-        // finally test if the entity label is set
-        Iterator<Triple> entityLabelIterator = g.filter(entityAnnotation,
-                ENHANCER_ENTITY_LABEL, null);
-        assertTrue(entityLabelIterator.hasNext());
-    }
 
 }

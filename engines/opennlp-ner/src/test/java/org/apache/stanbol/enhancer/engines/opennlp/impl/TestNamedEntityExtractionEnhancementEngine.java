@@ -16,33 +16,25 @@
  */
 package org.apache.stanbol.enhancer.engines.opennlp.impl;
 
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateAllTextAnnotations;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItem;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
+import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -134,91 +126,12 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
             throws EngineException, IOException {
         ContentItem ci = wrapAsContentItem("my doc id", SINGLE_SENTENCE);
         nerEngine.computeEnhancements(ci);
+        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
+        expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(nerEngine.getClass().getName()));
         MGraph g = ci.getMetadata();
-        int textAnnotationCount = checkAllTextAnnotations(g,SINGLE_SENTENCE);
+        int textAnnotationCount = validateAllTextAnnotations(g,SINGLE_SENTENCE,expectedValues);
         assertEquals(3, textAnnotationCount);
-
-        //This Engine dose no longer create entityAnnotations
-//        int entityAnnotationCount = checkAllEntityAnnotations(g);
-//        assertEquals(2, entityAnnotationCount);
     }
 
-    /*
-     * -----------------------------------------------------------------------
-     * Helper Methods to check Text and EntityAnnotations
-     * -----------------------------------------------------------------------
-     */
-
-    private int checkAllTextAnnotations(MGraph g, String content) {
-        Iterator<Triple> textAnnotationIterator = g.filter(null,
-                RDF_TYPE, ENHANCER_TEXTANNOTATION);
-        // test if a textAnnotation is present
-        assertTrue(textAnnotationIterator.hasNext());
-        int textAnnotationCount = 0;
-        while (textAnnotationIterator.hasNext()) {
-            UriRef textAnnotation = (UriRef) textAnnotationIterator.next().getSubject();
-            // test if selected Text is added
-            checkTextAnnotation(g, textAnnotation,content);
-            textAnnotationCount++;
-        }
-        return textAnnotationCount;
-    }
-
-    /**
-     * Checks if a text annotation is valid
-     */
-    private void checkTextAnnotation(MGraph g, UriRef textAnnotation, String content) {
-        Iterator<Triple> selectedTextIterator = g.filter(textAnnotation,
-                ENHANCER_SELECTED_TEXT, null);
-        // check if the selected text is added
-        assertTrue(selectedTextIterator.hasNext());
-        // test if the selected text is part of the TEXT_TO_TEST
-        Resource object = selectedTextIterator.next().getObject();
-        assertTrue(object instanceof Literal);
-        Literal selectedText = (Literal)object;
-        object = null;
-        assertTrue(SINGLE_SENTENCE.contains(selectedText.getLexicalForm()));
-        // test if context is added
-        Iterator<Triple> selectionContextIterator = g.filter(textAnnotation,
-                ENHANCER_SELECTION_CONTEXT, null);
-        assertTrue(selectionContextIterator.hasNext());
-        // test if the selected text is part of the TEXT_TO_TEST
-        object = selectionContextIterator.next().getObject();
-        assertTrue(object instanceof Literal);
-        assertTrue(SINGLE_SENTENCE.contains(((Literal) object).getLexicalForm()));
-        object = null;
-        //test start/end if present
-        Iterator<Triple> startPosIterator = g.filter(textAnnotation,
-                ENHANCER_START, null);
-        Iterator<Triple> endPosIterator = g.filter(textAnnotation,
-                ENHANCER_END, null);
-        //start end is optional, but if start is present, that also end needs to be set
-        if(startPosIterator.hasNext()){
-            Resource resource = startPosIterator.next().getObject();
-            //only a single start position is supported
-            assertTrue(!startPosIterator.hasNext());
-            assertTrue(resource instanceof TypedLiteral);
-            TypedLiteral startPosLiteral = (TypedLiteral) resource;
-            resource = null;
-            int start = LiteralFactory.getInstance().createObject(Integer.class, startPosLiteral);
-            startPosLiteral = null;
-            //now get the end
-            //end must be defined if start is present
-            assertTrue(endPosIterator.hasNext());
-            resource = endPosIterator.next().getObject();
-            //only a single end position is supported
-            assertTrue(!endPosIterator.hasNext());
-            assertTrue(resource instanceof TypedLiteral);
-            TypedLiteral endPosLiteral = (TypedLiteral) resource;
-            resource = null;
-            int end = LiteralFactory.getInstance().createObject(Integer.class, endPosLiteral);
-            endPosLiteral = null;
-            //check for equality of the selected text and the text on the selected position in the content
-            //System.out.println("TA ["+start+"|"+end+"]"+selectedText.getLexicalForm()+"<->"+content.substring(start,end));
-            assertEquals(content.substring(start, end), selectedText.getLexicalForm());
-        } else {
-            //if no start position is present, there must also be no end position defined
-            assertTrue(!endPosIterator.hasNext());
-        }
-    }
 }

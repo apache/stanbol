@@ -494,9 +494,9 @@ public class NEREngineCore implements EnhancementEngine {
                 return defaultLang;
             }
         } else {
-            log.warn("Unable to extract language for ContentItem %s! Is the %s active?",
+            log.info("Unable to extract language for ContentItem {}! Is the {} active?",
                 ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm());
-            log.warn(" ... return '{}' as default",defaultLang);
+            log.info(" ... return '{}' as default",defaultLang);
             return defaultLang;
         }
     }
