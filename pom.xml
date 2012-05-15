@@ -25,18 +25,18 @@
   </parent>
   
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>stanbol-stack-source-release-assembly-descriptor</artifactId>
+  <artifactId>stanbol-source-release</artifactId>
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
   
-  <name>Apache Stanbol Stack Source Release Assembly Descriptor</name>
+  <name>Apache Stanbol Source Release Assembly Descriptor</name>
   <description>
     This jar contains a customized source assembly descriptor to produce Apache Stanbol compliant source bundles.
   </description>
   
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/release/apache-stanbol-stack-source-release-assembly-descriptor</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/release/apache-stanbol-stack-source-release-assembly-descriptor</developerConnection>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/release/stanbol-source-release</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/release/stanbol-source-release</developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
