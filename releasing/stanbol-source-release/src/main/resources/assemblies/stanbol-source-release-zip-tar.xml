@@ -25,6 +25,6 @@
     <format>tar.gz</format>
   </formats>
   <componentDescriptors>
-    <componentDescriptor>assemblies/stack.xml</componentDescriptor>
+    <componentDescriptor>assemblies/stanbol.xml</componentDescriptor>
   </componentDescriptors>
 </assembly>
