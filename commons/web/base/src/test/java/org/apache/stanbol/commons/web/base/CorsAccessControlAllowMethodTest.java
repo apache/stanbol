@@ -56,7 +56,7 @@ public class CorsAccessControlAllowMethodTest {
         MultivaluedMap<String,String> header = new MultivaluedMapImpl();
         header.add("Origin", "https://issues.apache.org/jira/browse/STANBOL-616");
         header.put("Access-Control-Request-Headers", Arrays.asList("Origin", "Content-Type", "Accept"));
-        header.add("Access-Control-Request-Method", "PUT");
+        header.add("Access-Control-Request-Methods", "PUT");
         HttpHeaders requestHeaders = new MockHttpHeaders(header);
 
         
@@ -71,9 +71,9 @@ public class CorsAccessControlAllowMethodTest {
         Assert.assertTrue("'Access-Control-Allow-Origin' expected", metadata.containsKey("Access-Control-Allow-Origin"));
         Assert.assertEquals("'Access-Control-Allow-Origin' does not have the expected value '*'",
             "*", metadata.getFirst("Access-Control-Allow-Origin"));
-        Assert.assertTrue("'Access-Control-Allow-Method' expected", metadata.containsKey("Access-Control-Allow-Method"));
-        value = (String)metadata.getFirst("Access-Control-Allow-Method");
-        Assert.assertTrue("'Access-Control-Allow-Method' does not contain the expected values", 
+        Assert.assertTrue("'Access-Control-Allow-Methods' expected", metadata.containsKey("Access-Control-Allow-Methods"));
+        value = (String)metadata.getFirst("Access-Control-Allow-Methods");
+        Assert.assertTrue("'Access-Control-Allow-Methods' does not contain the expected values", 
             value.contains(OPTIONS) && value.contains(GET) && value.contains(POST) && value.contains(PUT));
     }
     
