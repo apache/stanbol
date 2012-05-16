@@ -32,7 +32,7 @@
   <packaging>pom</packaging>
   <version>0.10.0-incubating-SNAPSHOT</version>
 
-  <name>Apache Stanbol Parent POM</name>
+  <name>Apache Stanbol Parent</name>
   <description>Parent POM for the Apache Stanbol project</description>
 
   <inceptionYear>2010</inceptionYear>
