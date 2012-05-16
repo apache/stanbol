@@ -31,7 +31,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Http Query Headers</name>
+  <name>Apache Stanbol Commons HTTP Query Headers</name>
   <description>Allows to parse HTTP headers as QueryParameters by prefixing it with "header_{http-header}". This feature allows to bypass the inability of Internet Explorer to set headers for multi domain (CORS) requests. This is a general utility and has no dependencies to Apache Stanbol.</description>
   <scm>
     <connection>

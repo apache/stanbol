@@ -29,7 +29,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Offline Utilities</name>
+  <name>Apache Stanbol Commons Offline Utilities</name>
   <description>
     Offline mode utilities for Stanbol
   </description>

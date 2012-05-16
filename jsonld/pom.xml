@@ -32,7 +32,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol JSON-LD API</name>
+  <name>Apache Stanbol Commons JSON-LD API</name>
   <description>The Stanbol JSON-LD API to create JSON-LD structures,
   parse them from String representation and to serialize them to Strings.
   </description>

@@ -30,7 +30,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Data File Provider for Bundles</name>
+  <name>Apache Stanbol Commons Data File Provider for Bundles</name>
   <description>
     This uses the Bundle Extender Pattern (http://www.aqute.biz/Snippets/Extender)
     to automatically Bundles that provide Data Files and makes them available

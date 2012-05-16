@@ -32,7 +32,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol OWL libraries</name>
+  <name>Apache Stanbol Commons OWL Bundle</name>
   <description>
     Includes the libraries and utilities for managing 
     constructs of the OWL and OWL 2 languages.

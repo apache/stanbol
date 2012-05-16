@@ -30,7 +30,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Data File Provider</name>
+  <name>Apache Stanbol Commons Data File Provider</name>
   <description>
     Main DataFileProvider services
     </description>

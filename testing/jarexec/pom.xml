@@ -30,7 +30,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Apache Stanbol Jar Executor</name>
+  <name>Apache Stanbol Commons Testing Jar Executor</name>
   <description>
     Jar file execution utilities.
     Not Stanbol-specific, should be reusable in other contexts.
