@@ -24,7 +24,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
   
-  <name>Apache Stanbol Data reactor</name>
+  <name>Apache Stanbol Data Reactor</name>
 
   <scm>
       <connection>

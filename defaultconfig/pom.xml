@@ -25,9 +25,9 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Default Configuration</name>
-  <description>This provides the default configuration as used by the 
-      different launchers provided by Apache Stanbol</description>
+  <name>Apache Stanbol Data Default Configuration</name>
+  <description>This provides the default configuration as used by the different launchers provided by Apache Stanbol.</description>
+
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/defaultconfig
