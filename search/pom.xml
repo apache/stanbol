@@ -19,7 +19,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Search Reactor</name>
+  <name>Apache Stanbol Contenthub Search Reactor</name>
   <description>
     Pseudo project to build the complete semantic search project
   </description>

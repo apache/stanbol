@@ -26,7 +26,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Search Solr Searcher</name>
+  <name>Apache Stanbol Contenthub Search Solr Searcher</name>
 
   <description>Finds indexed document from Solr according to field constraints</description>
   <build>

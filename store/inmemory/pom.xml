@@ -26,7 +26,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Contenthub InMemory Store Implementation</name>
+  <name>Apache Stanbol Contenthub InMemory Store</name>
   <description>Persists documents into the InMemory Store (lives in memory)</description>
 
   <build>

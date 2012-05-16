@@ -25,7 +25,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Contenthub parent POM</name>
+  <name>Apache Stanbol Contenthub Parent</name>
   <description>
     Parent POM for the Apache Stanbol Contenthub component
   </description>
