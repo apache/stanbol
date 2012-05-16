@@ -53,7 +53,7 @@ public final class CorsHelper {
      * The "Access-Control-Request-Method" header
      */
     public static final String REQUEST_METHOD = "Access-Control-Request-Method";
-    
+
     /**
      * The "Access-Control-Request-Headers" header
      */
@@ -64,6 +64,10 @@ public final class CorsHelper {
      */
     public static final String ALLOW_HEADERS = "Access-Control-Allow-Headers";
     
+    /**
+     * The "Access-Control-Allow-Method" header
+     */
+    public static final String ALLOW_METHOD = "Access-Control-Allow-Method";
 
     /**
      * The default methods for the Access-Control-Request-Method header field.
@@ -175,7 +179,7 @@ public final class CorsHelper {
             if(!added){
                 methods.append(CorsHelper.DEFAULT_REQUEST_METHODS);
             }
-            responseBuilder.header(CorsHelper.REQUEST_METHOD, methods.toString());
+            responseBuilder.header(CorsHelper.ALLOW_METHOD, methods.toString());
             //third replay parsed "Access-Control-Request-Headers" values
             //currently there is no need to restrict such headers so the simplest
             //way is to return them as they are parsed
