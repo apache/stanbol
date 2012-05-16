@@ -31,7 +31,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Data parent POM</name>
+  <name>Apache Stanbol Data Parent</name>
   <description>
     Parent POM for the Apache Stanbol Data modules
   </description>
