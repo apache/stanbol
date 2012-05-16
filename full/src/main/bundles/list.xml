@@ -72,7 +72,7 @@
     <!-- The Content-Editable based UI for Enhancing Text written on a Webpage -->
     <bundle>
         <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.web.vie</artifactId>
+        <artifactId>org.apache.stanbol.demos.enhancer.vie</artifactId>
         <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
