@@ -27,41 +27,26 @@ need
 
     $ export MAVEN_OPTS="-Xmx512M -XX:MaxPermSize=128M"
 
-The Stanbol build system consists of the following profiles:
-
-   - 'stack'     - to build the Stanbol Stack
-   - 'framework' - to build the Stanbol Framework only
-   - 'kres'      - to build additional Reasoning components that
-                   are not yet in a stable state
-
-If you build Stanbol from a source tree that contains the whole Stanbol
-project, the 'stack' profile is activated by default. If you whish to activate
-another profile use the Maven -P command line switch.
-
-If you build Stanbol from a source tree that just contains the Stanbol
-Framework, e.g. after downloading a Stanbol Framework source release, the
-'framework' profile will be activated by default.
-
-If you want to skip the tests for any build profile, add `-DskipTests` to the
-Maven command.
+If you want to skip the tests, add `-DskipTests` to the Maven command.
 
 
-## Building the Stanbol Stack
+## Building Apache Stanbol
 
-This builds the Stanbol Framework plus available Enhancement Engines and a
+This builds the Apache Stanbol plus available Enhancement Engines and a
 default set of linked open data for the EntityHub. If you want to have a ready
-to use version of Stanbol, this is the way to go.
+to use version of Apache Stanbol, this is the way to go.
 
-In the Stanbol source directory type
+In the Apache Stanbol source directory type
 
     $ mvn install
+    
 
-### Launching the Stanbol server
+### Launching the Apache Stanbol Server
 
 The recommended lanchers are packaged under the `launchers/` folder. For
 instance:
 
-    $ java -Xmx1g -jar launchers/full/target/org.apache.stanbol.launchers.full-0.9.0-incubating-SNAPSHOT.jar
+    $ java -Xmx1g -jar launchers/full/target/org.apache.stanbol.launchers.full-0.10.0-incubating-SNAPSHOT.jar
 
 Your instance is then available on <http://localhost:8080>. You can change the
 default port number by passing a `-p 9090` options to the commandline launcher.
@@ -72,28 +57,7 @@ configuration and logs.
 
 If Stanbol is launched with a FactStore a folder named `factstore` is created
 in the current folder. This folder holds the FactStore database (Apache Derby).
-
-
-## Building the Stanbol Framework only
-
-This build is used to build the Stanbol Framework only. That is without any
-Enhancement Engines or prepared linked open data indexes for the EntityHub.
-
-In the Stanbol source directory type
-
-    $ mvn install -Pframework
-
-If you build Stanbol from a source tree that just contains the Stanbol
-Framework, e.g. after downloading a Stanbol Framework source release, the
-'framework' is activated automatically and it is enough to type
-
-    $ mvn install
-    
-
-## Preloading the Entity Hub cache with a DBpedia index
-
-TODO: write me!
-
+  
 
 ## Importing the source code as Eclipse projects
 
@@ -131,13 +95,13 @@ You can then apply the formatter to a selected area of a Java source code files
 by pressing `Shift+Ctrl+F`.
 
 
-## Debugging a Stanbol instance from Eclipse
+## Debugging an Apache Stanbol Instance from Eclipse
 
 To debug a locally running Stanbol instance from eclipse, run the stanbol
 launcher with::
 
     $ java -Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n \
-           -jar org.apache.stanbol.some.launcher.0.9-SNAPSHOT.jar -p 8080
+           -jar org.apache.stanbol.some.launcher-[VERSION].jar -p 8080
 
 In eclipse, you can then create a new "Debug Configuration" with type "Remote
 Java Application" and connect it to localhost on port 8787.
@@ -156,10 +120,10 @@ For example to check the licenses in the Stanbol Framework use
 You should read [1,2] before doing any release related actions.
 
 To do a release test build, you have to activate the 'apache-release' profile.
-For building the framework plus signing the artifacts as it would be done during
+For building Apache Stanbol plus signing the artifacts as it would be done during
 a release you can use
 
-    $ mvn install -Pframework,apache-release
+    $ mvn install -Papache-release
 
 The 'apache-release' profile will be automatically activated when the Maven
 release plugin [3] is used. For doing official release you start with

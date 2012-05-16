@@ -32,7 +32,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Core</name>
+  <name>Apache Stanbol Entityhub Generic Core</name>
   <description>The Core Components of the Entityhub. This includes the default
     implementations for the services defined by the services API as well as an
     in-memory implementation of the model.

@@ -25,7 +25,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Ontology Manager reactor</name>
+  <name>Apache Stanbol Ontology Manager Reactor</name>
   <description>
     Pseudo project to build the complete Apache Stanbol Ontology Manager.
   </description>

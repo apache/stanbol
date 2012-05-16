@@ -26,7 +26,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol CMS Adapter Core Bundle</name>
+  <name>Apache Stanbol CMS Adapter Core</name>
 
   <build>
     <plugins>

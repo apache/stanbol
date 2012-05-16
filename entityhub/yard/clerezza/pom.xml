@@ -32,7 +32,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Yard implementation hased on Clerezza</name>
+  <name>Apache Stanbol Entityhub Yard based on Clerezza</name>
   <description>This bundle provides implementation of the Entityhub Yard interface(s)
     based on a RDF Triple store by using the Clerezza framework.
   </description>

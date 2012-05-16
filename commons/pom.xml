@@ -36,30 +36,34 @@
 
   <modules>
     <module>jsonld</module>
-    <module>jobs</module>
-    <module>opennlp</module>
+
     <module>web/base</module>
     <module>web/home</module>
-    <module>web/sparql</module>
-    <module>testing/jarexec</module>
-    <module>testing/http</module>
-    <module>testing/stanbol</module>
-    <module>stanboltools/offline</module>
+
     <module>stanboltools/datafileprovider</module>
+    <module>stanboltools/offline</module>
     <module>stanboltools/bundledatafileprovider</module>
     <module>installer/bundleprovider</module>
+
     <module>solr/core</module>
     <module>solr/managed</module>
     <module>solr/web</module>
     <module>solr/install</module>
     <module>solr/defaults</module>
+
+    <module>web/sparql</module>
+    <module>jobs</module>
+  
+    <module>opennlp</module>
     <module>owl</module>
+  
     <module>indexedgraph</module>
     <module>ldpath/clerezza</module>
-    <!-- not in a stable state right now 
-    <module>installer/jarprovider</module>
-    -->
     <module>httpqueryheaders</module>
     <module>launchpad</module>
-    </modules>
+
+    <module>testing/jarexec</module>
+    <module>testing/http</module>
+    <module>testing/stanbol</module>
+  </modules>
 </project>

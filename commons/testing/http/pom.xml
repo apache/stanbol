@@ -30,7 +30,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Apache Stanbol Jar Http Testing Library</name>
+  <name>Apache Stanbol Commons Testing HTTP Testing Library</name>
   <description>
     Utilities for HTTP-based testing.
     Not Stanbol-specific, should be reusable in other contexts.

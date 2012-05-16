@@ -25,7 +25,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Entityhub reactor</name>
+  <name>Apache Stanbol Entityhub Reactor</name>
   <description>
     Pseudo project to build the complete Apache Stanbol Entityhub component
   </description>

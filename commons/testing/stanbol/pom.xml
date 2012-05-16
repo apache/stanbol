@@ -30,7 +30,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Apache Stanbol Testing Utilities</name>
+  <name>Apache Stanbol Commons Testing Stanbol Utilities</name>
   <description>
     Stanbol-specific testing utilities
   </description>

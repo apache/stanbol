@@ -32,10 +32,7 @@
 
   <name>Apache Stanbol Default Framework Fragment Bundle</name>
 
-  <description>
-    Fragment bundle that causes additional packages from the JVM
-    environment to be exported. 
-  </description>
+  <description>Fragment bundle that causes additional packages from the JVM environment to be exported.</description>
 
   <build>
     <plugins>

@@ -30,7 +30,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>Apache Stanbol Launcher - Full WAR</name>
+  <name>Apache Stanbol Launchers Full Launcher as WAR</name>
   <description>WAR packaging for Apache Stanbol Full Launcher</description>
 
   <scm>

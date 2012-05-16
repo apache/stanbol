@@ -30,9 +30,9 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Bundle Provider</name>
-  <description>Provides support for installing Configurations contained
-  within Bundles by using the Sling Installer infrastructure.</description>
+  <name>Apache Stanbol Commons Installer Bundle Provider</name>
+  <description>Provides support for installing configurations contained
+  within bundles by using the Sling installer infrastructure.</description>
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/installer/bundleprovider

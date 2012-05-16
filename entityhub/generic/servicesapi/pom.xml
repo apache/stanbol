@@ -32,7 +32,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Services API</name>
+  <name>Apache Stanbol Entityhub Generic Service API</name>
   <description>The Services API of the Entityhub</description>
 
   <inceptionYear>2010</inceptionYear>

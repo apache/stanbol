@@ -30,7 +30,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Apache Stanbol Launcher - Full</name>
+  <name>Apache Stanbol Launchers Full Launcher</name>
   <description>Runnable jar that runs the full Stanbol configuration</description>
 
   <scm>

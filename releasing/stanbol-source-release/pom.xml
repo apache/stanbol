@@ -29,7 +29,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
   
-  <name>Apache Stanbol Source Release Assembly Descriptor</name>
+  <name>Apache Stanbol Releasing Source Release Assembly Descriptor</name>
   <description>
     This jar contains a customized source assembly descriptor to produce Apache Stanbol compliant source bundles.
   </description>

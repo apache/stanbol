@@ -32,7 +32,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Ontology Registry Manager</name>
+  <name>Apache Stanbol Ontology Manager Registry Manager</name>
   <description>
     A facility for storing, caching and managing local ontology registries and central repositories.
   </description>

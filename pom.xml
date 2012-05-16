@@ -32,9 +32,7 @@
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Reactor</name>
-  <description>
-    Pseudo project to build the complete stanbol project
-  </description>
+  <description>Pseudo project to build Apache Stanbol.</description>
 
   <inceptionYear>2010</inceptionYear>
 
@@ -48,12 +46,27 @@
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
 
+  <properties>
+    <sourceReleaseAssemblyDescriptor>
+      stanbol-source-release-zip-tar
+    </sourceReleaseAssemblyDescriptor>
+  </properties>  
+
+  <build>
+    <finalName>apache-stanbol-${project.version}</finalName>  
+  </build>
+
   <!-- These modules form the Stanbol Framework -->
   <modules>
     <module>parent</module>
-    <module>commons</module>
     <module>data</module>
+    <module>commons</module>
     <module>frameworkfragment</module>
+
+    <module>entityhub</module>
+    <module>ontologymanager</module>
+
+    <module>rules</module>
 
     <module>enhancer/parent</module>
     <module>enhancer/generic/servicesapi</module>
@@ -65,73 +78,35 @@
     <module>enhancer/chain/graph</module>
     <module>enhancer/chain/weighted</module>
     <module>enhancer/chain/list</module>
+
     <module>enhancer/jersey</module>
     <module>enhancer/ldpath</module>
     <module>enhancer/benchmark</module>
     <module>enhancer/defaults</module>
     <module>enhancer/bundlelist</module>
 
-    <module>cmsadapter</module>
     <module>contenthub</module>
-    <module>entityhub</module>
+
+    <module>enhancer/engines</module>
+    <module>enhancer/topic-web</module>
+
+    <module>cmsadapter</module>
+
     <module>factstore</module>
-    <module>ontologymanager</module>
-    <module>rules</module>
     <module>reasoners</module>
+
+    <module>demos/webvie</module>
+
+    <module>launchers/bundlelists/osgiframework</module>
+    <module>launchers/bundlelists/stanbolcommons</module>
+    <module>launchers/full</module>
+    <module>integration-tests</module>
+
+    <module>launchers/stable</module>
+    <module>launchers/full-war</module>
   </modules>
 
   <profiles>
-    <profile>
-      <id>stack</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <sourceReleaseAssemblyDescriptor>
-          stack-source-release-zip-tar
-        </sourceReleaseAssemblyDescriptor>
-      </properties>
-      <build>
-        <finalName>apache-stanbol-${project.version}</finalName>  
-      </build>
-      <modules>
-        <module>demos/webvie</module>
-
-        <module>enhancer/engines</module>
-        <module>enhancer/topic-web</module>
-
-        <module>launchers/bundlelists/osgiframework</module>
-        <module>launchers/bundlelists/stanbolcommons</module>
-        <module>launchers/stable</module>
-        <module>launchers/stateless</module>
-        <module>launchers/full</module>
-        <module>launchers/full-war</module>
-        <module>integration-tests</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>framework</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <!-- The framework profile is activated automatically if the
-             full launcher is missing. This is used for framework releases
-             where the full launcher is not packaged. -->
-        <file>
-          <missing>launchers/full</missing>
-        </file>
-      </activation>
-      <properties>
-        <sourceReleaseAssemblyDescriptor>
-          framework-source-release-zip-tar
-        </sourceReleaseAssemblyDescriptor>
-      </properties>
-      <build>
-        <finalName>apache-stanbol-framework-${project.version}</finalName> 
-      </build>
-      <modules>
-        <module>launchers/framework</module>
-      </modules>
-    </profile>
     <profile>
       <id>rat</id>
       <activation>
@@ -145,6 +120,22 @@
             <configuration>
               <excludeSubProjects>false</excludeSubProjects>
               <excludes>
+                <!-- exclude hidden files -->
+                <exclude>**/.*</exclude>
+                <exclude>**/.*/*</exclude>
+                <exclude>**/.*/**/*</exclude>
+
+                <!-- exclude build files -->
+                <exclude>**/target/**</exclude>
+                <exclude>**/*.log</exclude>
+                <exclude>launchers/full/sling/**</exclude>
+                <exclude>launchers/full/factstore/**</exclude>                
+
+                <!-- exclude generated files listing the licenses of deps -->
+                <exclude>DEPENDENCIES</exclude>
+                <exclude>DEPENDENCIES-BY-LICENSE</exclude>
+                <exclude>**/src/license/THIRD-PARTY.properties</exclude>
+
                 <!-- AL20 files without header by file type -->
                 <exclude>**/*.config</exclude>
                 <exclude>**/*.cfg</exclude>
@@ -152,6 +143,7 @@
                 <exclude>**/*.txt</exclude>
                 <exclude>**/*.tsv</exclude>
                 <exclude>**/*.sem</exclude>
+
                 <!-- Open NLP model files. Not in SVN, but downloaded during build -->
                 <exclude>**/*.bin</exclude> 
                 <exclude>**/test/**/*.eml</exclude>
@@ -164,9 +156,6 @@
                 <exclude>**/test/**/*.odt</exclude>
 
                 <!-- approved licenses, see modules' POMs for details -->
-                <exclude>DEPENDENCIES</exclude>
-                <exclude>DEPENDENCIES-BY-LICENSE</exclude>
-                <exclude>**/src/license/THIRD-PARTY.properties</exclude>
                 <exclude>commons/web/home/src/main/resources/org/apache/stanbol/commons/web/home/static/scripts/jquery-1.4.2.js</exclude>
                 <exclude>contenthub/web/src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jit.js</exclude>
                 <exclude>contenthub/web/src/main/resources/org/apache/stanbol/contenthub/web/static/style/jquery-ui-1.8.11.custom.css</exclude>
@@ -184,29 +173,10 @@
                 <exclude>PLAYGROUND.txt</exclude>
                 <exclude>conventions/**</exclude>
                 <exclude>contrib/**</exclude>
-                <exclude>enhancer/data/text-examples/**</exclude>
-                <exclude>enhancer/query-rendering/**</exclude>
-                <exclude>enhancer/stores/**</exclude>
-                <exclude>enhancer/autotagging/**</exclude>
-                <exclude>enhancer/engines/autotagging/**</exclude>
-                <exclude>enhancer/SemiAutomaticContentEnhancer/**</exclude>
-                <exclude>enhancer/engines/taxonomylinking/**</exclude>
                 <exclude>demos/**</exclude>
+                <exclude>enhancer/data/text-examples/**</exclude>
                 <exclude>launchers/kres/**</exclude>
-                <exclude>reasoners/hermit/**</exclude>
-                <exclude>reasoners/owllink/**</exclude>
                 <exclude>reengineer/**</exclude>
-
-                <!-- exclude hidden files -->
-                <exclude>**/.*</exclude>
-                <exclude>**/.*/*</exclude>
-                <exclude>**/.*/**/*</exclude>
-
-                <!-- exclude generated files -->
-                <exclude>**/target/**</exclude>
-                <exclude>**/*.log</exclude>
-                <exclude>launchers/full/sling/**</exclude>
-                <exclude>launchers/full/factstore/**</exclude>
               </excludes>
             </configuration>
           </plugin>
@@ -244,10 +214,8 @@
           </plugin>
         </plugins>
       </build>
-
       <modules>
-        <module>releasing/framework/stanbol-framework-source-release-assembly-descriptor</module>
-        <module>releasing/stack/stanbol-stack-source-release-assembly-descriptor</module>
+        <module>releasing/stanbol-source-release</module>
       </modules>
     </profile>
 
@@ -258,11 +226,7 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>reasoners</module>
         <module>reengineer</module>
-        <!--
-        <module>explanation</module>
-        -->
         <module>launchers/kres</module>
       </modules>
     </profile>

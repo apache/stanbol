@@ -32,7 +32,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Commons: Open NLP and Models</name>
+  <name>Apache Stanbol Commons OpenNLP Utilities and Models</name>
   <description>
     Provides a Bundle and support for the management of Models.
     The Data File Provider infrastructure is used to load requested

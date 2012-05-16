@@ -26,7 +26,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Featured Search</name>
+  <name>Apache Stanbol Contenthub Featured Search</name>
 
   <description>Aggregates the results of SolrSearch and RelatedKeywordSearch</description>
   <build>

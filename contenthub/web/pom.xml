@@ -25,7 +25,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Content Hub Web</name>
+  <name>Apache Stanbol Contenthub Web</name>
   <description>HTTP endpoint to create and search for content items enriched
     with enhancer's annotations and links to entities from the entity hub.
   </description>

@@ -41,8 +41,8 @@
     <module>store</module>
     <module>search</module>
     <module>web</module>
-    <module>bundlelist</module>
     <module>ldpath</module>
+    <module>bundlelist</module>
   </modules>
 
 </project>

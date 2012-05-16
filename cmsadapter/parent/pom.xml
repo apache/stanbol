@@ -25,7 +25,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol CMS Adapter parent POM</name>
+  <name>Apache Stanbol CMS Adapter Parent</name>
   <description>
     Parent POM for the Apache Stanbol CMS Adapter
   </description>
