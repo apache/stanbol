@@ -25,7 +25,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub LDPath implementation</name>
+  <name>Apache Stanbol Entityhub LDPath Support</name>
   <description>Implementation of the LDPath (http://code.google.com/p/ldpath/) API for the Entityhub</description>
 
   <scm>

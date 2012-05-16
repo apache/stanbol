@@ -32,7 +32,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Yard implementation hased on Solr</name>
+  <name>Apache Stanbol Entityhub Yard based on Solr</name>
   <description>This bundle provides implementation of the Entityhub Yard interface(s)
     based on a Solr Search Server
   </description>
