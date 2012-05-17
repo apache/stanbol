@@ -31,6 +31,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.contenthub.servicesapi.store.Store;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -68,7 +69,7 @@ public class InMemoryStore implements Store {
                 : new UriRef(id);
         log.debug("create ContentItem for id " + uri + " on TC Manager= "
                 + tcProvider);
-        final MGraph g = new SimpleMGraph();
+        final MGraph g = new IndexedMGraph();
         try {
             return ciFactory.createContentItem(uri, new ByteArraySource(content, mimeType), g);
         } catch (IOException e) {
