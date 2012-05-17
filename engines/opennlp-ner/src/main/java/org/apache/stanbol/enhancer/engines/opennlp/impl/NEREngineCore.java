@@ -473,31 +473,34 @@ public class NEREngineCore implements EnhancementEngine {
      */
     public static final Literal LANG_ID_ENGINE_NAME = LiteralFactory.getInstance().createTypedLiteral("org.apache.stanbol.enhancer.engines.langid.LangIdEnhancementEngine");
     /**
-     * Extracts the language of the parsed ContentItem from the metadata
+     * Extracts the language of the parsed ContentItem by using
+     * {@link EnhancementEngineHelper#getLanguage(ContentItem)} and 
+     * {@link #defaultLang} as default
      * @param ci the content item
      * @return the language
      */
     private String extractLanguage(ContentItem ci) {
-        MGraph metadata = ci.getMetadata();
-        Iterator<Triple> langaugeEnhancementCreatorTriples = 
-            metadata.filter(null, Properties.DC_CREATOR, LANG_ID_ENGINE_NAME);
-        if(langaugeEnhancementCreatorTriples.hasNext()){
-            String lang = EnhancementEngineHelper.getString(metadata, 
-                langaugeEnhancementCreatorTriples.next().getSubject(), 
-                Properties.DC_LANGUAGE);
-            if(lang != null){
-                return lang;
-            } else {
-                log.info("Unable to extract language for ContentItem %s! The Enhancement of the %s is missing the %s property",
-                    new Object[]{ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm(),Properties.DC_LANGUAGE});
-                log.info(" ... return '{}' as default",defaultLang);
-                return defaultLang;
-            }
+        String lang = EnhancementEngineHelper.getLanguage(ci);
+//        MGraph metadata = ci.getMetadata();
+//        Iterator<Triple> langaugeEnhancementCreatorTriples = 
+//            metadata.filter(null, Properties.DC_CREATOR, LANG_ID_ENGINE_NAME);
+//        if(langaugeEnhancementCreatorTriples.hasNext()){
+//            String lang = EnhancementEngineHelper.getString(metadata, 
+//                langaugeEnhancementCreatorTriples.next().getSubject(), 
+//                Properties.DC_LANGUAGE);
+        if(lang != null){
+            return lang;
         } else {
-            log.info("Unable to extract language for ContentItem {}! Is the {} active?",
-                ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm());
+            log.info("Unable to extract language for ContentItem %s! The Enhancement of the %s is missing the %s property",
+                new Object[]{ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm(),Properties.DC_LANGUAGE});
             log.info(" ... return '{}' as default",defaultLang);
             return defaultLang;
         }
+//        } else {
+//            log.info("Unable to extract language for ContentItem {}! Is the {} active?",
+//                ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm());
+//            log.info(" ... return '{}' as default",defaultLang);
+//            return defaultLang;
+//        }
     }
 }

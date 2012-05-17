@@ -257,7 +257,7 @@ public class OpenCalaisEngine
 
     public int canEnhance(ContentItem ci) throws EngineException {
         if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null){
-            String language = getMetadataLanguage(ci.getMetadata(), null);
+            String language = EnhancementEngineHelper.getLanguage(ci);
             if (language != null && !SUPPORTED_LANGUAGES.contains(language)) {
                 log.info("OpenCalais can not process ContentItem {} because "
                     + "language {} is not supported (supported: {})",
@@ -320,7 +320,7 @@ public class OpenCalaisEngine
     public void createEnhancements(Collection<CalaisEntityOccurrence> occs, ContentItem ci) {
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         final Language language; // used for plain literals representing parts fo the content
-        String langString = getMetadataLanguage(ci.getMetadata(), null);
+        String langString = EnhancementEngineHelper.getLanguage(ci);
         if(langString != null && !langString.isEmpty()){
             language = new Language(langString);
         } else {
@@ -591,25 +591,6 @@ public class OpenCalaisEngine
         }
         return IOUtils.toString(
                 urlConn.getInputStream(), responseEncoding);
-    }
-
-    public String getMetadataLanguage(MGraph model, NonLiteral subj) {
-        Iterator<Triple> it = model.filter(subj, DC_LANGUAGE, null);
-        if (it.hasNext()) {
-            Resource langNode = it.next().getObject();
-            return getLexicalForm(langNode);
-        }
-        return null;
-    }
-
-    public String getLexicalForm(Resource res) {
-        if (res == null) {
-            return null;
-        } else if (res instanceof Literal) {
-            return ((Literal) res).getLexicalForm();
-        } else {
-            return res.toString();
-        }
     }
 
     /**

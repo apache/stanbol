@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.langid.core;
 
+import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -35,16 +36,21 @@ import org.junit.Test;
  */
 public class LangIdTest {
 
+    private static final String TEST_FILE_NAME = "en.txt";
     /**
-     * This contains the text categorizer to test.
+     * This contains the text used for testing
      */
-  
+    private static String text;
     /**
      * This initializes the text categorizer.
      */
     @BeforeClass
     public static void oneTimeSetUp() throws IOException {
         LanguageIdentifier.initProfiles();
+        InputStream in = LangIdTest.class.getClassLoader().getResourceAsStream(
+            TEST_FILE_NAME);
+        assertNotNull("failed to load resource " + TEST_FILE_NAME, in);
+        text = IOUtils.toString(in);
     }
 
     /**
@@ -54,16 +60,8 @@ public class LangIdTest {
      */
     @Test
     public void testLangId() throws IOException {
-        String testFileName = "en.txt";
-
-        InputStream in = this.getClass().getClassLoader().getResourceAsStream(
-                testFileName);
-        assertNotNull("failed to load resource " + testFileName, in);
-
-        String text = IOUtils.toString(in);
         LanguageIdentifier tc = new LanguageIdentifier(text);
         String language = tc.getLanguage();
         assertEquals("en", language);
     }
-
 }

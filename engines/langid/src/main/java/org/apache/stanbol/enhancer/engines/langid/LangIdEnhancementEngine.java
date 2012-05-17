@@ -17,6 +17,8 @@
 package org.apache.stanbol.enhancer.engines.langid;
 
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.DCTERMS_LINGUISTIC_SYSTEM;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -34,6 +36,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
+import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -73,7 +76,11 @@ public class LangIdEnhancementEngine
 
     /**
      * The default value for the Execution of this Engine. Currently set to
-     * {@link ServiceProperties#ORDERING_PRE_PROCESSING}
+     * {@link ServiceProperties#ORDERING_PRE_PROCESSING} - 2<p>
+     * NOTE: this information is used by the default and weighed {@link Chain}
+     * implementation to determine the processing order of 
+     * {@link EnhancementEngine}s. Other {@link Chain} implementation do not
+     * use this information.
      */
     public static final Integer defaultOrder = ORDERING_PRE_PROCESSING - 2;
 
@@ -162,6 +169,7 @@ public class LangIdEnhancementEngine
         try {
             UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
             g.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl(language)));
+            g.add(new TripleImpl(textEnhancement, DC_TYPE, DCTERMS_LINGUISTIC_SYSTEM));
         } finally {
             ci.getLock().writeLock().unlock();
         }
