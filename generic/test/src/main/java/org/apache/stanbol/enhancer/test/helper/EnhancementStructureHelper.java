@@ -1,6 +1,11 @@
 package org.apache.stanbol.enhancer.test.helper;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PERSON;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
@@ -8,8 +13,11 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SE
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.DCTERMS_LINGUISTIC_SYSTEM;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENHANCEMENT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TOPICANNOTATION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -18,11 +26,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
@@ -32,6 +44,8 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.ontologies.DCTERMS;
 import org.apache.clerezza.rdf.ontologies.XSD;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 
@@ -53,7 +67,8 @@ public class EnhancementStructureHelper {
         Iterator<Triple> textAnnotationIterator = enhancements.filter(null,
                 RDF_TYPE, ENHANCER_TEXTANNOTATION);
         // test if a textAnnotation is present
-        assertTrue(textAnnotationIterator.hasNext());
+        //assertTrue(textAnnotationIterator.hasNext()); 
+        //  -> this might be used to test that there are no TextAnnotations
         int textAnnotationCount = 0;
         while (textAnnotationIterator.hasNext()) {
             UriRef textAnnotation = (UriRef) textAnnotationIterator.next().getSubject();
@@ -77,37 +92,52 @@ public class EnhancementStructureHelper {
      * @param expectedValues expected values (properties for the values are used as keys)
      */
     public static void validateTextAnnotation(TripleCollection enhancements, UriRef textAnnotation, String content, Map<UriRef,Resource> expectedValues) {
+        //validate the rdf:type
+        Iterator<Triple> rdfTypeIterator = enhancements.filter(textAnnotation, RDF_TYPE, ENHANCER_TEXTANNOTATION);
+        assertTrue("Parsed Enhancement "+textAnnotation +" is missing the fise:TextAnnotation type ",
+            rdfTypeIterator.hasNext());
         Iterator<Triple> selectedTextIterator = enhancements.filter(textAnnotation,
                 ENHANCER_SELECTED_TEXT, null);
-        // check if the selected text is added
-        assertTrue("TextAnnotations MUST have a fise:selected-text value",selectedTextIterator.hasNext());
-        // test if the selected text is part of the TEXT_TO_TEST
-        Resource selectedTextResource = selectedTextIterator.next().getObject();
-        assertTrue("fise:selected-text MUST BE of type PlainLiteral",selectedTextResource instanceof PlainLiteral);
-        Literal selectedText = (Literal)selectedTextResource;
-        assertTrue("The parsed content MUST contain the fise:selected-text value '"
-            +selectedText.getLexicalForm()+"'!",content.contains(selectedText.getLexicalForm()));
+        // check if the selected text is added (or not)
+        Resource selectedTextResource;
+        if(selectedTextIterator.hasNext()){
+            // test if the selected text is part of the TEXT_TO_TEST
+            selectedTextResource = selectedTextIterator.next().getObject();
+            assertTrue("fise:selected-text MUST BE of type PlainLiteral (uri: "+textAnnotation+")",
+                selectedTextResource instanceof PlainLiteral);
+            Literal selectedText = (Literal)selectedTextResource;
+            assertTrue("The parsed content MUST contain the fise:selected-text value '"
+                +selectedText.getLexicalForm()+"' (uri: "+textAnnotation+")!",content.contains(selectedText.getLexicalForm()));
+        } else {
+            selectedTextResource = null; //no selected text
+        }
+        //check against an expected value
         Resource expectedSelectedText = expectedValues.get(ENHANCER_SELECTED_TEXT);
         if(expectedSelectedText != null){
-            assertEquals("The fise:selected-text is not the expected value "+expectedSelectedText+"!",
-                expectedSelectedText, selectedText);
+            assertEquals("The fise:selected-text is not the expected value "+expectedSelectedText+" (uri: "+textAnnotation+")!",
+                expectedSelectedText, selectedTextResource);
         }
         Resource selectionContextResource;
         // test if context is added
         Iterator<Triple> selectionContextIterator = enhancements.filter(textAnnotation,
                 ENHANCER_SELECTION_CONTEXT, null);
         if(selectionContextIterator.hasNext()) { //context is optional
+            //selection context is not allowed without selected-text
+            assertNotNull("If fise:selection-context is present also fise:selected-text MUST BE present (uri: "+textAnnotation+")",
+                selectedTextResource);
             // test if the selected text is part of the TEXT_TO_TEST
             selectionContextResource = selectionContextIterator.next().getObject();
-            assertTrue("The fise:selection-context MUST BE of type PlainLiteral",selectionContextResource instanceof PlainLiteral);
+            assertTrue("The fise:selection-context MUST BE of type PlainLiteral (uri: "+textAnnotation+")",
+                selectionContextResource instanceof PlainLiteral);
             //check that the content contains the context
             assertTrue("The fise:selection-context MUST BE contained in the Content | context= "+ selectionContextResource,
             content.contains(((Literal)selectionContextResource).getLexicalForm()));
             //check that the context contains the selected text
             assertTrue("The fise:selected-text value MUST BE containted within the fise:selection-context value",
                 ((Literal)selectionContextResource).getLexicalForm().contains(
-                    selectedText.getLexicalForm()));
+                    ((Literal)selectedTextResource).getLexicalForm()));
         } else {
+            assertNull("If no fise:selection-context is present also fise:selected-text MUST BE NOT present!", selectedTextResource);
             selectionContextResource = null;
         }
         Resource expectedSelectionContext = expectedValues.get(ENHANCER_SELECTION_CONTEXT);
@@ -124,36 +154,42 @@ public class EnhancementStructureHelper {
         TypedLiteral startPosLiteral;
         TypedLiteral endPosLiteral;
         if(startPosIterator.hasNext()){
-            assertNotNull("If fise:start is present the fise:selection-context MUST also be present!",
-                selectionContextResource);
+            //NOTE: TextAnnotations might be use to select whole sections of a text
+            //      (e.g. see STANBOL-617) in those cases adding the text of the
+            //      whole section is not feasible.
+            //assertNotNull("If fise:start is present the fise:selection-context MUST also be present (uri: "+textAnnotation+")!",
+            //    selectionContextResource);
             Resource resource = startPosIterator.next().getObject();
             //only a single start position is supported
-            assertFalse("fise:start MUST HAVE only a single value!",startPosIterator.hasNext());
-            assertTrue("fise:start MUST be a typed Literal!",resource instanceof TypedLiteral);
+            assertFalse("fise:start MUST HAVE only a single value (uri: "+textAnnotation+")!",startPosIterator.hasNext());
+            assertTrue("fise:start MUST be a typed Literal (uri: "+textAnnotation+")!",resource instanceof TypedLiteral);
             startPosLiteral = (TypedLiteral) resource;
-            assertEquals("fise:start MUST use xsd:int as data type",XSD.int_, startPosLiteral.getDataType());
+            assertEquals("fise:start MUST use xsd:int as data type (uri: "+textAnnotation+")",XSD.int_, startPosLiteral.getDataType());
             resource = null;
             Integer start = LiteralFactory.getInstance().createObject(Integer.class, startPosLiteral);
             assertNotNull("Unable to parse Integer from TypedLiteral "+startPosLiteral,start);
             //now get the end
             //end must be defined if start is present
-            assertTrue("If fise:start is present also fise:end MUST BE defined!",endPosIterator.hasNext());
+            assertTrue("If fise:start is present also fise:end MUST BE defined (uri: "+textAnnotation+")!",endPosIterator.hasNext());
             resource = endPosIterator.next().getObject();
             //only a single end position is supported
-            assertFalse("fise:end MUST HAVE only a single value!",endPosIterator.hasNext());
-            assertTrue("fise:end values MUST BE TypedLiterals",resource instanceof TypedLiteral);
+            assertFalse("fise:end MUST HAVE only a single value (uri: "+textAnnotation+")!",endPosIterator.hasNext());
+            assertTrue("fise:end values MUST BE TypedLiterals (uri: "+textAnnotation+")",resource instanceof TypedLiteral);
             endPosLiteral = (TypedLiteral) resource;
-            assertEquals("fise:end MUST use xsd:int as data type",XSD.int_, endPosLiteral.getDataType());
+            assertEquals("fise:end MUST use xsd:int as data type (uri: "+textAnnotation+")",XSD.int_, endPosLiteral.getDataType());
             resource = null;
             Integer end = LiteralFactory.getInstance().createObject(Integer.class, endPosLiteral);
             assertNotNull("Unable to parse Integer from TypedLiteral "+endPosLiteral,end);
             endPosLiteral = null;
             //check for equality of the selected text and the text on the selected position in the content
             //System.out.println("TA ["+start+"|"+end+"]"+selectedText.getLexicalForm()+"<->"+content.substring(start,end));
-            assertEquals("the substring [fise:start,fise:end] does not correspond to "
-                + "the fise:selected-text value '"+selectedText.getLexicalForm()
-                + "' of this TextAnnotation!",content.substring(start, end), selectedText.getLexicalForm());
+            if(selectedTextResource != null){
+                assertEquals("the substring [fise:start,fise:end] does not correspond to "
+                    + "the fise:selected-text value '"+((Literal)selectedTextResource).getLexicalForm()
+                    + "' of this TextAnnotation!",content.substring(start, end), ((Literal)selectedTextResource).getLexicalForm());
+            } // else no selected-text present ... unable to test this
         } else {
+            assertNull("if fise:selected-text is present also fise:start AND fise:end MUST BE present!",selectedTextResource);
             assertNull("If fise:selection-context is present also fise:start AND fise:end MUST BE present!",selectionContextResource);
             assertFalse("if fise:end is presnet also fise:start AND fise:selection-context MUST BE present!",endPosIterator.hasNext());
             startPosLiteral = null;
@@ -172,8 +208,76 @@ public class EnhancementStructureHelper {
         
         //validate fise:Enhancement specific rules
         validateEnhancement(enhancements, textAnnotation, expectedValues);
+        
+        //validate for special TextAnnotations
+        validateLanguageAnnotations(enhancements,textAnnotation);
+        validateNERAnnotations(enhancements,textAnnotation, selectedTextResource);
     }
-    
+    /**
+     * Validates the correctness of fise:TextAnnotations that annotate the language 
+     * of the text as defined by 
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-613">STANBOL-613</a><p>
+     * Called by {@link #validateTextAnnotation(TripleCollection, UriRef, String, Map)}
+     * @param enhancements
+     * @param textAnnotation
+     */
+    private static void validateLanguageAnnotations(TripleCollection enhancements, UriRef textAnnotation) {
+        Iterator<Triple> dcLanguageIterator = enhancements.filter(textAnnotation, DC_LANGUAGE, null);
+        if(dcLanguageIterator.hasNext()){ //a language annotation
+            Resource dcLanguageResource = dcLanguageIterator.next().getObject();
+            assertTrue("The dc:language value MUST BE a PlainLiteral", dcLanguageResource instanceof PlainLiteral);
+            assertTrue("The dc:language value '"+dcLanguageResource+"'MUST BE at least two chars long", 
+                ((Literal)dcLanguageResource).getLexicalForm().length() >=2);
+            assertFalse("TextAnnotations with the dc:language property MUST only have a single dc:language value (uri "
+                    +textAnnotation+")",dcLanguageIterator.hasNext());
+
+            Iterator<Triple> dcTypeIterator = enhancements.filter(textAnnotation, DC_TYPE, null);
+            assertTrue("TextAnnotations with the dc:language property MUST use dc:type dc:LinguisticSystem (uri "
+                +textAnnotation+")", dcTypeIterator.hasNext());
+            assertEquals("TextAnnotations with the dc:language property MUST use dc:type dc:LinguisticSystem (uri "
+                +textAnnotation+")", DCTERMS_LINGUISTIC_SYSTEM,dcTypeIterator.next().getObject());
+            assertFalse("TextAnnotations with the dc:language property MUST only have a single dc:type value (uri "
+                +textAnnotation+")",dcTypeIterator.hasNext());
+            //assert that the created TextAnnotation is correctly returned by the
+            //EnhancementEngineHelper methods
+            List<NonLiteral> languageAnnotation = EnhancementEngineHelper.getLanguageAnnotations(enhancements);
+            assertTrue("Language annotation "+textAnnotation+" was not returned by "
+                +"EnhancementEngineHelper.getLanguageAnnotations(..)!",languageAnnotation.contains(textAnnotation));
+        } else { //no language annotation
+            Iterator<Triple> dcTypeIterator = enhancements.filter(textAnnotation, DC_TYPE, null);
+            while(dcTypeIterator.hasNext()){
+                assertFalse("Only fise:TextAnnotations without a dc:language value MUST NOT use the "
+                    + "dc:type value dc:LinguisticSystem (uri "+textAnnotation+")",
+                    DCTERMS_LINGUISTIC_SYSTEM.equals(dcTypeIterator.next().getObject()));
+            }
+        }
+        
+    }
+    /**
+     * Validates that fise:TextAnnotations with the dc:type dbp-ont:Person,
+     * dbp-ont:Organisation and dbp-ont:Place do have a
+     * fise:selected-text value (this implicitly also checks that
+     * fise:selection-context, fise:start and fise:end are defined!<p>
+     * Called by {@link #validateTextAnnotation(TripleCollection, UriRef, String, Map)}
+     * @param enhancements
+     * @param textAnnotation
+     * @param selectedTextResource the fise:selected-text value
+     */
+    private static void validateNERAnnotations(TripleCollection enhancements, UriRef textAnnotation, Resource selectedTextResource) {
+        Iterator<Triple> dcTypeIterator = enhancements.filter(textAnnotation, DC_TYPE, null);
+        boolean isNERAnnotation = false;
+        while(dcTypeIterator.hasNext() && !isNERAnnotation){
+            Resource dcTypeValue = dcTypeIterator.next().getObject();
+            isNERAnnotation = DBPEDIA_PERSON.equals(dcTypeValue) ||
+                    DBPEDIA_ORGANISATION.equals(dcTypeValue) ||
+                    DBPEDIA_PLACE.equals(dcTypeValue);
+        }
+        if(isNERAnnotation){
+            assertNotNull("fise:TextAnnotations with a dc:type of c:type dbp-ont:Person, "
+                +"dbp-ont:Organisation or dbp-ont:Place MUST have a fise:selected-text value (uri "
+                    +textAnnotation+")", selectedTextResource);
+        }
+    }
     /**
      * Validates all fise:EntityAnnotations contained by the parsed enhancements
      * graph.
@@ -212,11 +316,7 @@ public class EnhancementStructureHelper {
         Iterator<Triple> relationToTextAnnotationIterator = enhancements.filter(
                 entityAnnotation, DC_RELATION, null);
         // check if the relation to the text annotation is set
-        //TODO: currently it is not required that all EntityAnnotations are linked to
-        //      an TextAnnotation, because EntityAnnotations are also used for 
-        //      Topics (that do not explicitly occur in texts.
-        //      This might change as soon there is an own Topic type!
-        //assertTrue(relationToTextAnnotationIterator.hasNext());
+        assertTrue(relationToTextAnnotationIterator.hasNext());
         while (relationToTextAnnotationIterator.hasNext()) {
             // test if the referred annotations are text annotations
             UriRef referredTextAnnotation = (UriRef) relationToTextAnnotationIterator.next().getObject();
@@ -280,6 +380,10 @@ public class EnhancementStructureHelper {
      * @param expectedValues expected values (properties for the values are used as keys)
      */
     public static void validateEnhancement(TripleCollection enhancements, UriRef enhancement, Map<UriRef,Resource> expectedValues){
+        //validate the rdf:type
+        Iterator<Triple> rdfTypeIterator = enhancements.filter(enhancement, RDF_TYPE, ENHANCER_ENHANCEMENT);
+        assertTrue("Parsed Enhancement "+enhancement +" is missing the fise:Enhancement type ",
+            rdfTypeIterator.hasNext());
         //validate the creator
         Iterator<Triple> creatorIterator = enhancements.filter(enhancement, Properties.DC_CREATOR, null);
         assertTrue("Enhancements MUST HAVE a creator",creatorIterator.hasNext());
@@ -378,6 +482,108 @@ public class EnhancementStructureHelper {
             }
             assertFalse("Only a single dc:type value is allowed!", dcTypeIterator.hasNext());
         }
+    }
+    /**
+     * Validates all fise:TopicAnnotations contained by the parsed enhancements
+     * graph.
+     * @param enhancements the enhancement graph
+     * @param expectedValues the expected values of all validated TopicAnnotations.
+     * Properties are used as keys. Typical example would be fise:extracted-from
+     * with the id of the ContentItem as value; dc-terms:creator with the
+     * {@link Class#getName()} as value.
+     * @return the number of found and validated TopicAnnotations.
+     */
+    @SuppressWarnings("unchecked")
+    public static int validateAllTopicAnnotations(TripleCollection enhancements,Map<UriRef,Resource> expectedValues) {
+        expectedValues = expectedValues == null ? Collections.EMPTY_MAP : expectedValues;
+        Iterator<Triple> topicAnnotationIterator = enhancements.filter(null,
+                RDF_TYPE, ENHANCER_TOPICANNOTATION);
+        int topicAnnotationCount = 0;
+        while (topicAnnotationIterator.hasNext()) {
+            UriRef topicAnnotation = (UriRef) topicAnnotationIterator.next().getSubject();
+            // test if selected Text is added
+            validateTopicAnnotation(enhancements, topicAnnotation, 
+                expectedValues);
+            topicAnnotationCount++;
+        }
+        return topicAnnotationCount;
+    }
+    
+    /**
+     * Checks if a fise:TopicAnnotation is valid as defined by 
+     * <a herf="https://issues.apache.org/jira/browse/STANBOL-617">STANBOL-617</a>. 
+     * NOTE that this also validates all fise:Enhancement related requirements by 
+     * calling {@link #validateEnhancement(TripleCollection, UriRef, Map)}
+     * @param enhancements the enhancements graph
+     * @param topicAnnotation the topic annotation to validate
+     * @param expectedValues expected values (properties for the values are used as keys)
+     */
+    public static void validateTopicAnnotation(TripleCollection enhancements, UriRef topicAnnotation, Map<UriRef,Resource> expectedValues){
+        //validate the rdf:type
+        Iterator<Triple> rdfTypeIterator = enhancements.filter(topicAnnotation, RDF_TYPE, ENHANCER_TOPICANNOTATION);
+        assertTrue("Parsed Enhancement "+topicAnnotation +" is missing the fise:TopicAnnotation type ",
+            rdfTypeIterator.hasNext());
+        
+        //TopicAnnotations need to be linked to TextAnnotations describing the
+        //section of the text that has a specific Topic.
+        //If the topic is for the whole text the TextAnnotation will have no
+        //selected-text value
+        Iterator<Triple> relationToTextAnnotationIterator = enhancements.filter(
+            topicAnnotation, DC_RELATION, null);
+        // check if the relation to the text annotation is set
+        assertTrue(relationToTextAnnotationIterator.hasNext());
+        while (relationToTextAnnotationIterator.hasNext()) {
+            // test if the referred annotations are text annotations
+            UriRef referredTextAnnotation = (UriRef) relationToTextAnnotationIterator.next().getObject();
+            assertTrue(enhancements.filter(referredTextAnnotation, RDF_TYPE,
+                    ENHANCER_TEXTANNOTATION).hasNext());
+        }
+    
+        // test if an entity (the topic) is referred (NOTE: in contrast to
+        // fise:EntityAnnotations this property is NOT required - cardinality [0..*]
+        Iterator<Triple> entityReferenceIterator = enhancements.filter(topicAnnotation,
+                ENHANCER_ENTITY_REFERENCE, null);
+        Resource expectedReferencedEntity = expectedValues.get(ENHANCER_ENTITY_REFERENCE);
+        while(entityReferenceIterator.hasNext()){ //check possible multiple references
+            Resource entityReferenceResource = entityReferenceIterator.next().getObject();
+            // test if the reference is an URI
+            assertTrue("fise:entity-reference value MUST BE of URIs",entityReferenceResource instanceof UriRef);
+            if(expectedReferencedEntity != null && expectedReferencedEntity.equals(entityReferenceResource)){
+                expectedReferencedEntity = null; //found
+            }
+        }
+        assertNull("EntityAnnotation "+topicAnnotation+"fise:entity-reference has not the expected value "
+                +expectedReferencedEntity+"!", expectedReferencedEntity);
+        
+        //test if the entity label is set (required)
+        Iterator<Triple> entityLabelIterator = enhancements.filter(topicAnnotation, ENHANCER_ENTITY_LABEL, null);
+        assertTrue(entityLabelIterator.hasNext());
+        Resource expectedEntityLabel = expectedValues.get(ENHANCER_ENTITY_LABEL);
+        while(entityLabelIterator.hasNext()){
+            Resource entityLabelResource =  entityLabelIterator.next().getObject();
+            assertTrue("fise:entity-label values MUST BE PlainLiterals (EntityAnnotation: "+topicAnnotation+")!",
+                entityLabelResource instanceof PlainLiteral);
+            if(expectedEntityLabel != null && expectedEntityLabel.equals(entityLabelResource)){
+                expectedEntityLabel = null;
+            }
+        }
+        assertNull("The expected EntityLabel "+expectedEntityLabel+" was not found",
+            expectedEntityLabel);
+        
+        // test fise:entity-type(s). NOTE: this is not required - cardinality [0..*]
+        Iterator<Triple> entityTypeIterator = enhancements.filter(topicAnnotation, Properties.ENHANCER_ENTITY_TYPE, null);
+        Resource expectedEntityType = expectedValues.get(Properties.ENHANCER_ENTITY_TYPE);
+        if(entityTypeIterator.hasNext()){
+            Resource entityTypeResource = entityTypeIterator.next().getObject();
+            assertTrue("fise:entity-type values MUST BE URIs",entityTypeResource instanceof UriRef);
+            if(expectedEntityType != null && expectedEntityType.equals(entityTypeResource)){
+                expectedEntityType = null; //found
+            }
+        }
+        assertNull("The expected fise:entity-type value "+expectedEntityType+" was not found!", expectedEntityType);
+        
+        //test all properties required by fise:Enhancement
+        validateEnhancement(enhancements, topicAnnotation, expectedValues);
     }
     
 }

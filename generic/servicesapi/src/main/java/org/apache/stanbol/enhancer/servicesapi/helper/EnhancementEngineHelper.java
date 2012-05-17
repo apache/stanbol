@@ -16,9 +16,18 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.helper;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -31,6 +40,7 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
@@ -42,9 +52,11 @@ import org.slf4j.LoggerFactory;
 
 public class EnhancementEngineHelper {
 
-    protected static Random rng = new Random();
+    protected final static Random rng = new Random();
 
-    private static final Logger log = LoggerFactory.getLogger(EnhancementEngineHelper.class);
+    private final static Logger log = LoggerFactory.getLogger(EnhancementEngineHelper.class);
+
+    private final static LiteralFactory lf = LiteralFactory.getInstance();
 
     public static void setSeed(long seed) {
         rng.setSeed(seed);
@@ -117,6 +129,39 @@ public class EnhancementEngineHelper {
         metadata.add(new TripleImpl(enhancement, Properties.RDF_TYPE,
                 TechnicalClasses.ENHANCER_ENTITYANNOTATION));
         return enhancement;
+    }
+    /**
+     * Create a new instance with the types enhancer:Enhancement and
+     * enhancer:TopicAnnotation in the parsed graph along with default properties
+     * (dc:creator, dc:created and enhancer:extracted-form) and return
+     * the UriRef of the extraction so that engines can further add.
+     *
+     * @param metadata the graph
+     * @param engine the engine
+     * @param contentItemId the id
+     *
+     * @return the URI of the new enhancement instance
+     */
+    public static UriRef createTopicEnhancement(MGraph metadata,
+                 EnhancementEngine engine, UriRef contentItemId){
+         UriRef enhancement = createEnhancement(metadata, engine, contentItemId);
+         metadata.add(new TripleImpl(enhancement, Properties.RDF_TYPE,
+                 TechnicalClasses.ENHANCER_TOPICANNOTATION));
+         return enhancement;
+     }
+    /**
+     * Create a new instance with the types enhancer:Enhancement and
+     * enhancer:TopicAnnotation in the metadata-graph of the content
+     * item along with default properties (dc:creator and dc:created) and return
+     * the UriRef of the extraction so that engines can further add
+     *
+     * @param ci the ContentItem being under analysis
+     * @param engine the Engine performing the analysis
+     * @return the URI of the new enhancement instance
+     */
+    public static UriRef createTopicEnhancement(ContentItem ci,
+            EnhancementEngine engine){
+        return createTopicEnhancement(ci.getMetadata(), engine, new UriRef(ci.getUri().getUnicodeString()));
     }
     /**
      * Create a new enhancement instance in the metadata-graph of the content
@@ -397,5 +442,83 @@ public class EnhancementEngineHelper {
             }
         }
         return ServiceProperties.ORDERING_DEFAULT;
+    }
+    
+    /**
+     * Getter for the Resources of fise:TextAnnotations that do have a value 
+     * of the dc:language property. The returned list is sorted by 'fise:confidence'.
+     * Annotations with missing confidence are ranked last.<p>
+     * NOTE that the returned list will likely contain annotations for the same language
+     * if multiple language identification are used in the same {@link Chain}.
+     * @param graph the graph with the enhancement. 
+     * Typically {@link ContentItem#getMetadata()}
+     * @return the sorted list of language annotations or an empty list if none.
+     * @throws IllegalArgumentException if <code>null</code> is parsed as graph
+     */
+    public static List<NonLiteral> getLanguageAnnotations(TripleCollection graph){
+        if(graph == null){
+            throw new IllegalArgumentException("The parsed graph MUST NOT be NULL!");
+        }
+        // I do not use SPARQL, because I do not want to instantiate a QueryEngine
+        final Map<NonLiteral,Double> confidences = new HashMap<NonLiteral,Double>();
+        List<NonLiteral> langAnnotations = new ArrayList<NonLiteral>();
+        Iterator<Triple> textAnnoataions = graph.filter(null, RDF_TYPE, ENHANCER_TEXTANNOTATION);
+        while(textAnnoataions.hasNext()){
+            NonLiteral textAnnotation = textAnnoataions.next().getSubject();
+            String language = getString(graph, textAnnotation, DC_LANGUAGE);
+            if(language != null){
+                Double confidence = get(graph, textAnnotation, Properties.ENHANCER_CONFIDENCE, Double.class, lf);
+                confidences.put(textAnnotation,confidence);
+                langAnnotations.add(textAnnotation);
+            }
+        }
+        if(langAnnotations.size() > 1){
+            Collections.sort(langAnnotations,new Comparator<NonLiteral>() {
+                @Override
+                public int compare(NonLiteral o1, NonLiteral o2) {
+                    Double c1 = confidences.get(o1);
+                    Double c2 = confidences.get(o2);
+                    //decrising order (values without confidence last)
+                    if(c1 == null){
+                        return c2 == null ? 0 : 1;
+                    } else if(c2 == null){
+                        return -1;
+                    } else {
+                        return c2.compareTo(c1);
+                    }
+                }
+            });
+        }
+        return langAnnotations;
+    }
+    /**
+     * Getter for language identified for (extracted-from) the parsed
+     * ContentItem. The returned value is the Annotation with the highest
+     * 'fise:confidence' value - or if no annotations are present - the
+     * 'dc-terms:language' value of the {@link ContentItem#getUri()}.<p>
+     * Users that want to obtain all language annotations should use
+     * {@link #getLanguageAnnotations(TripleCollection)} instead.<p>
+     * This method ensures a write lock on the {@link ContentItem}.
+     * @param ci the contentItem
+     * @return the identified language of the parsed {@link ContentItem}.
+     * <code>null</code> if not available.
+     * @throws IllegalArgumentException if <code>null</code> is parsed as content item
+     * @see #getLanguageAnnotations(TripleCollection)
+     */
+    public static String getLanguage(ContentItem ci){
+        if(ci == null){
+            throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
+        }
+        ci.getLock().readLock().lock();
+        try {
+            List<NonLiteral> langAnnotations = getLanguageAnnotations(ci.getMetadata());
+            if(langAnnotations.isEmpty()){ //fallback
+                return getString(ci.getMetadata(), ci.getUri(), DC_LANGUAGE);
+            } else {
+                return getString(ci.getMetadata(), langAnnotations.get(0), DC_LANGUAGE);
+            }
+        } finally {
+            ci.getLock().readLock().unlock();
+        }
     }
 }
