@@ -63,6 +63,7 @@ public class EnhancementRDFUtils {
      * @param entity
      *            the related entity
      * @param nameField the field used to extract the name
+     * @param lang the preferred language to include
      */
     public static UriRef writeEntityAnnotation(EnhancementEngine engine,
                                                LiteralFactory literalFactory,
@@ -70,7 +71,8 @@ public class EnhancementRDFUtils {
                                                UriRef contentItemId,
                                                Collection<NonLiteral> relatedEnhancements,
                                                Representation rep,
-                                               String nameField) {
+                                               String nameField, 
+                                               String lang) {
         // 1. check if the returned Entity does has a label -> if not return null
         // add labels (set only a single label. Use "en" if available!
         Text label = null;
@@ -81,7 +83,7 @@ public class EnhancementRDFUtils {
                 label = actLabel;
             } else {
                 //use startWith to match also en-GB and en-US ...
-                if (actLabel.getLanguage() != null && actLabel.getLanguage().startsWith("en")) {
+                if (actLabel.getLanguage() != null && actLabel.getLanguage().startsWith(lang)) {
                     label = actLabel;
                 }
             }

@@ -49,6 +49,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -61,6 +62,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
+import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
@@ -126,6 +128,11 @@ public class NamedEntityTaggingEngine
 
     @Property(intValue=0)
     public static final String SERVICE_RANKING = Constants.SERVICE_RANKING;
+    /**
+     * The default language for labels included in the enhancement metadata
+     * (if not available for the parsed content).
+     */
+    private static final String DEFAULT_LANGUAGE = "en";
     
     /**
      * Service of the Entityhub that manages all the active referenced Site. This Service is used to lookup the
@@ -152,6 +159,7 @@ public class NamedEntityTaggingEngine
      * {@link EnhancementJobManager#DEFAULT_ORDER}
      */
     public static final Integer defaultOrder = ORDERING_EXTRACTION_ENHANCEMENT;
+
 
 
     /**
@@ -319,8 +327,11 @@ public class NamedEntityTaggingEngine
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         // Retrieve the existing text annotations (requires read lock)
         Map<NamedEntity,List<UriRef>> textAnnotations = new HashMap<NamedEntity,List<UriRef>>();
+        //the language extracted for the parsed content or NULL if not available
+        String contentLangauge;
         ci.getLock().readLock().lock();
         try {
+            contentLangauge = EnhancementEngineHelper.getLanguage(ci);
             for (Iterator<Triple> it = graph.filter(null, RDF_TYPE, TechnicalClasses.ENHANCER_TEXTANNOTATION); it
                     .hasNext();) {
                 UriRef uri = (UriRef) it.next().getSubject();
@@ -346,7 +357,7 @@ public class NamedEntityTaggingEngine
         for (Entry<NamedEntity,List<UriRef>> entry : textAnnotations.entrySet()) {
             try {
                 List<Entity> entitySuggestions = computeEntityRecommentations(
-                    site, entry.getKey(),entry.getValue());
+                    site, entry.getKey(),entry.getValue(),contentLangauge);
                 if(entitySuggestions != null && !entitySuggestions.isEmpty()){
                     suggestions.put(entry.getKey(), entitySuggestions);
                 }
@@ -366,7 +377,10 @@ public class NamedEntityTaggingEngine
                 for(Entity suggestion : entitySuggestions.getValue()){
                     log.debug("Add Suggestion {} for {}", suggestion.getId(), entitySuggestions.getKey());
                     EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory, graph, ci.getUri(),
-                        annotationsToRelate, suggestion.getRepresentation(), nameField);
+                        annotationsToRelate, suggestion.getRepresentation(), nameField,
+                        //TODO: maybe we want labels in a different language than the
+                        //      language of the content (e.g. Accept-Language header)?!
+                        contentLangauge == null ? DEFAULT_LANGUAGE : contentLangauge);
                     if (dereferenceEntities) {
                         entityData.put(suggestion.getId(), suggestion.getRepresentation());
                     }
@@ -391,13 +405,15 @@ public class NamedEntityTaggingEngine
      * @param contentItemId the id of the contentItem
      * @param textAnnotation the text annotation to enhance
      * @param subsumedAnnotations other text annotations for the same entity 
+     * @param language the language of the analyzed text or <code>null</code>
+     * if not available.
      * @return the suggested {@link Entity entities}
      * @throws EntityhubException On any Error while looking up Entities via
      * the Entityhub
      */
     protected final List<Entity> computeEntityRecommentations(ReferencedSite site,
             NamedEntity namedEntity,
-            List<UriRef> subsumedAnnotations) throws EntityhubException {
+            List<UriRef> subsumedAnnotations, String language) throws EntityhubException {
         // First get the required properties for the parsed textAnnotation
         // ... and check the values
 
@@ -406,7 +422,16 @@ public class NamedEntityTaggingEngine
                 entityhub.getQueryFactory().createFieldQuery() : 
                     site.getQueryFactory().createFieldQuery();
         // replace spaces with plus to create an AND search for all words in the name!
-        query.setConstraint(nameField, new TextConstraint(namedEntity.getName()));// name.replace(' ', '+')));
+        Constraint labelConstraint;
+        //TODO: make case sensitivity configurable
+        boolean casesensitive = false;
+        if(language != null){
+            //search labels in the language and without language
+            labelConstraint = new TextConstraint(namedEntity.getName(),casesensitive,language,null);
+        } else {
+            labelConstraint = new TextConstraint(namedEntity.getName(),casesensitive);
+        }
+        query.setConstraint(nameField, labelConstraint);
         if (OntologicalClasses.DBPEDIA_PERSON.equals(namedEntity.getType())) {
             if (personState) {
                 if (personType != null) {
@@ -457,7 +482,7 @@ public class NamedEntityTaggingEngine
             boolean found = false;
             while(labels.hasNext() && !found){
                 Text label = labels.next();
-                if(label.getLanguage() == null || label.getLanguage().startsWith("en")){
+                if(label.getLanguage() == null || (language != null && label.getLanguage().startsWith(language))){
                     if(label.getText().equalsIgnoreCase(namedEntity.getName())){
                         found = true;
                     }
