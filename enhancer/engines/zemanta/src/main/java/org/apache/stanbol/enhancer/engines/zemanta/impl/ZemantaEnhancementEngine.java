@@ -16,7 +16,10 @@
  */
 package org.apache.stanbol.enhancer.engines.zemanta.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.createTextEnhancement;
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.createTopicEnhancement;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getReferences;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.SKOS_CONCEPT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
@@ -73,6 +76,7 @@ import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -232,6 +236,8 @@ public class ZemantaEnhancementEngine
     
     protected void processCategories(MGraph results, MGraph enhancements, UriRef ciId) {
         Iterator<Triple> categories = results.filter(null, RDF_TYPE, ZemantaOntologyEnum.Category.getUri());
+        //add the root Text annotation as soon as the first TopicAnnotation is added.
+        UriRef textAnnotation = null;
         while (categories.hasNext()) {
             NonLiteral category = categories.next().getSubject();
             log.debug("process category " + category);
@@ -245,8 +251,16 @@ public class ZemantaEnhancementEngine
                 if (categorisationScheme != null && categorisationScheme.equals(ZemantaOntologyEnum.categorization_DMOZ.getUri())) {
                     String categoryTitle = EnhancementEngineHelper.getString(results, target, ZemantaOntologyEnum.title.getUri());
                     if (categoryTitle != null) {
-                        //now write the Stanbol Enhancer entity enhancement
-                        UriRef categoryEnhancement = EnhancementEngineHelper.createEntityEnhancement(enhancements, this, ciId);
+                        if(textAnnotation == null){
+                            //this is the first category ... create the TextAnnotation used
+                            //to link all fise:TopicAnnotations
+                            textAnnotation = createTextEnhancement(enhancements, this, ciId);
+                            enhancements.add(new TripleImpl(textAnnotation,DC_TYPE,SKOS_CONCEPT));
+                        }
+                        //now write the TopicAnnotation
+                        UriRef categoryEnhancement = createTopicEnhancement(enhancements, this, ciId);
+                        //make related to the EntityAnnotation
+                        enhancements.add(new TripleImpl(categoryEnhancement, DC_RELATION, textAnnotation));
                         //write the title
                         enhancements.add(new TripleImpl(categoryEnhancement, ENHANCER_ENTITY_LABEL, new PlainLiteralImpl(categoryTitle)));
                         //write the reference
@@ -256,14 +270,16 @@ public class ZemantaEnhancementEngine
                         }
                         //write the confidence
                         if (confidence != null) {
-                            enhancements.add(
-                                    new TripleImpl(categoryEnhancement, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(confidence)));
+                            enhancements.add(new TripleImpl(categoryEnhancement, ENHANCER_CONFIDENCE, 
+                                literalFactory.createTypedLiteral(confidence)));
                         }
-                        //we need to write the entity type and the dc:type
+                        //we need to write the fise:entity-type
+                        //as of STANBOL-617 we use now both the zemanta:Category AND the skos:Concept
+                        //type. dc:type is no longer used as this is only used by fise:TextAnnotations
                         // see http://wiki.iks-project.eu/index.php/ZemantaEnhancementEngine#Mapping_of_Categories
                         // for more Information
-                        enhancements.add(new TripleImpl(categoryEnhancement, DC_TYPE, ENHANCER_CATEGORY));
-                        //Use the Zemanta Category as type for the referred Entity
+                        enhancements.add(new TripleImpl(categoryEnhancement, ENHANCER_ENTITY_TYPE, SKOS_CONCEPT));
+                        //Use also Zemanta Category as type for the referred Entity
                         enhancements.add(new TripleImpl(categoryEnhancement, ENHANCER_ENTITY_TYPE, ZemantaOntologyEnum.Category.getUri()));
                     } else {
                         log.warn("Unable to process category " + category + " because no title is present");

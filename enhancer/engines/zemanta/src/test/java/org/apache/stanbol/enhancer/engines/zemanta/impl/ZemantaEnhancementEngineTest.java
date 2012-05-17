@@ -120,6 +120,8 @@ public class ZemantaEnhancementEngineTest {
         log.info(textAnnoNum + " TextAnnotations found ...");
         int entityAnnoNum = EnhancementStructureHelper.validateAllEntityAnnotations(ci.getMetadata(),expectedValues);
         log.info(entityAnnoNum + " EntityAnnotations found ...");
+        int topicAnnoNum = EnhancementStructureHelper.validateAllTopicAnnotations(ci.getMetadata(),expectedValues);
+        log.info(entityAnnoNum + " TopicAnnotations found ...");
     }
 
     public static void main(String[] args) throws Exception{

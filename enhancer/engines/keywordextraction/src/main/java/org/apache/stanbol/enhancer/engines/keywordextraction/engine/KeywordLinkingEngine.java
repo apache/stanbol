@@ -463,32 +463,36 @@ public class KeywordLinkingEngine
         }
     }
     /**
-     * Extracts the language of the parsed ContentItem from the metadata
+     * Extracts the language of the parsed ContentItem by using
+     * {@link EnhancementEngineHelper#getLanguage(ContentItem)} and "en" as
+     * default.
      * @param ci the content item
      * @return the language
      */
     private String extractLanguage(ContentItem ci) {
-        MGraph metadata = ci.getMetadata();
-        Iterator<Triple> langaugeEnhancementCreatorTriples = 
-            metadata.filter(null, Properties.DC_CREATOR, LANG_ID_ENGINE_NAME);
-        if(langaugeEnhancementCreatorTriples.hasNext()){
-            String lang = EnhancementEngineHelper.getString(metadata, 
-                langaugeEnhancementCreatorTriples.next().getSubject(), 
-                Properties.DC_LANGUAGE);
-            if(lang != null){
-                return lang;
-            } else {
-                log.warn("Unable to extract language for ContentItem %s! The Enhancement of the %s is missing the %s property",
-                    new Object[]{ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm(),Properties.DC_LANGUAGE});
-                log.warn(" ... return 'en' as default");
-                return "en";
-            }
+        String lang = EnhancementEngineHelper.getLanguage(ci);
+//        if(lang != null){
+//        MGraph metadata = ci.getMetadata();
+//        Iterator<Triple> langaugeEnhancementCreatorTriples = 
+//            metadata.filter(null, Properties.DC_CREATOR, LANG_ID_ENGINE_NAME);
+//        if(langaugeEnhancementCreatorTriples.hasNext()){
+//            String lang = EnhancementEngineHelper.getString(metadata, 
+//                langaugeEnhancementCreatorTriples.next().getSubject(), 
+//                Properties.DC_LANGUAGE);
+        if(lang != null){
+            return lang;
         } else {
-            log.warn("Unable to extract language for ContentItem %s! Is the %s active?",
-                ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm());
+            log.warn("Unable to extract language for ContentItem %s! The Enhancement of the %s is missing the %s property",
+                new Object[]{ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm(),Properties.DC_LANGUAGE});
             log.warn(" ... return 'en' as default");
             return "en";
         }
+//        } else {
+//            log.warn("Unable to extract language for ContentItem %s! Is the %s active?",
+//                ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm());
+//            log.warn(" ... return 'en' as default");
+//            return "en";
+//        }
     }
 
     
