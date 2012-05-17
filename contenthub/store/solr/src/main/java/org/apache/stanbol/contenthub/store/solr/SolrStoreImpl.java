@@ -62,6 +62,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
@@ -171,7 +172,7 @@ public class SolrStoreImpl implements SolrStore {
             uri = new UriRef(ContentItemIDOrganizer.attachBaseURI(id));
         }
         log.debug("Created ContentItem with id:{} and uri:{}", id, uri);
-        final MGraph g = new SimpleMGraph();
+        final MGraph g = new IndexedMGraph();
         return new SolrContentItemImpl(uri.getUnicodeString(), title, content, contentType, g, constraints);
     }
 
@@ -556,7 +557,7 @@ public class SolrStoreImpl implements SolrStore {
         }
 
         ResultSet resultSet = tcManager.executeSparqlQuery(selectQuery, this.getEnhancementGraph());
-        MGraph metadata = new SimpleMGraph();
+        MGraph metadata = new IndexedMGraph();
         while (resultSet.hasNext()) {
             SolutionMapping mapping = resultSet.next();
             UriRef ref = (UriRef) mapping.get("enhID");

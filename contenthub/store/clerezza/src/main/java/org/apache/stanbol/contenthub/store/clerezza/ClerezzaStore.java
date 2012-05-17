@@ -30,6 +30,7 @@ import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.contenthub.servicesapi.store.Store;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 
@@ -68,7 +69,7 @@ public class ClerezzaStore implements Store {
         }
         handler.put(new UriRef(id), MediaType.valueOf(contentType), content);
         ContentItem contentItem = new ClerezzaContentItem(new GraphNode(uriRef,
-                cgProvider.getContentGraph()), new SimpleMGraph(metadataGraph), handler);
+                cgProvider.getContentGraph()), new IndexedMGraph(metadataGraph), handler);
         return contentItem;
     }
 

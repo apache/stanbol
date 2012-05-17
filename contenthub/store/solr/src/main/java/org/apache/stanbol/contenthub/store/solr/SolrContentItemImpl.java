@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.store.solr.util.ContentItemIDOrganizer;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryBlob;
@@ -78,10 +79,10 @@ public class SolrContentItemImpl extends ContentItemImpl implements SolrContentI
                 //using this deprecated constructor is OK as a major change to
                 //this component is done in an other branch (STANBOL-471) 
                 new InMemoryBlob(content, mimeType), 
-                metadata == null ? new SimpleMGraph() : metadata);
+                metadata == null ? new IndexedMGraph() : metadata);
 
         if (metadata == null) {
-            metadata = new SimpleMGraph();
+            metadata = new IndexedMGraph();
         }
         if (constraints == null) {
             constraints = new HashMap<String,List<Object>>();
