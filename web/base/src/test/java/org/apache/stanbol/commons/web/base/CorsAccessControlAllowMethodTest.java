@@ -56,7 +56,7 @@ public class CorsAccessControlAllowMethodTest {
         MultivaluedMap<String,String> header = new MultivaluedMapImpl();
         header.add("Origin", "https://issues.apache.org/jira/browse/STANBOL-616");
         header.put("Access-Control-Request-Headers", Arrays.asList("Origin", "Content-Type", "Accept"));
-        header.add("Access-Control-Request-Methods", "PUT");
+        header.add("Access-Control-Request-Method", "PUT");
         HttpHeaders requestHeaders = new MockHttpHeaders(header);
 
         

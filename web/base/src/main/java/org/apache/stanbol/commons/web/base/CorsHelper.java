@@ -52,7 +52,7 @@ public final class CorsHelper {
     /**
      * The "Access-Control-Request-Method" header
      */
-    public static final String REQUEST_METHODS = "Access-Control-Request-Methods";
+    public static final String REQUEST_METHOD = "Access-Control-Request-Method";
 
     /**
      * The "Access-Control-Request-Headers" header
@@ -65,7 +65,7 @@ public final class CorsHelper {
     public static final String ALLOW_HEADERS = "Access-Control-Allow-Headers";
     
     /**
-     * The "Access-Control-Allow-Method" header
+     * The "Access-Control-Allow-Methods" header
      */
     public static final String ALLOW_METHODS = "Access-Control-Allow-Methods";
 
