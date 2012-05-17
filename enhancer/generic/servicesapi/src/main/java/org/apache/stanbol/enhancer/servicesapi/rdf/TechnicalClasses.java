@@ -24,8 +24,9 @@ import org.apache.clerezza.rdf.core.UriRef;
  *
  * @author ogrisel
  */
-public class TechnicalClasses {
-
+public final class TechnicalClasses {
+    
+    private TechnicalClasses() {}
     /**
      * Type used for all enhancement created by Stanbol Enhancer
      */
@@ -87,11 +88,22 @@ public class TechnicalClasses {
      * Used to indicate, that an EntityAnnotation describes an Categorisation.
      * see <a href="http://wiki.iks-project.eu/index.php/ZemantaEnhancementEngine#Mapping_of_Categories">
      * Mapping of Categories</a> for more Information)
+     * @deprecated the preferred rdf:type for categories and topics is
+     * {@link OntologicalClasses#SKOS_CONCEPT} (see 
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-617">STANBOL-617</a>)
      */
     public static final UriRef ENHANCER_CATEGORY = new UriRef(
             NamespaceEnum.fise + "Category");
 
-    private TechnicalClasses() {
-    }
+    /**
+     * DC terms Linguistic System is the type used as Range for the dc:language
+     * property. As this property is also used for describing the language
+     * as identified for analysed content this type is used as dc:type for
+     * {@value #ENHANCER_TEXTANNOTATION} describing the language of the text
+     * (see 
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-613">STANBOL-613</a>)
+     */
+    public static final UriRef DCTERMS_LINGUISTIC_SYSTEM = new UriRef(
+            NamespaceEnum.dc + "LinguisticSystem");
 
 }
