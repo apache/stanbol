@@ -72,6 +72,9 @@ public class JerseyEndpoint {
     @Property(cardinality = 100, value = {"*"})
     public static final String CORS_ORIGIN = "org.apache.stanbol.commons.web.cors.origin";
 
+    @Property(cardinality = 100, value = {"Location"})
+    public static final String CORS_ACCESS_CONTROL_EXPOSE_HEADERS = "org.apache.stanbol.commons.web.cors.access_control_expose_headers";
+
     @Reference
     HttpService httpService;
 
@@ -84,6 +87,8 @@ public class JerseyEndpoint {
     protected final List<String> registeredAliases = new ArrayList<String>();
 
     protected Set<String> corsOrigins;
+
+    protected Set<String> exposedHeaders;
 
     public Dictionary<String,String> getInitParams() {
         Dictionary<String,String> initParams = new Hashtable<String,String>();
@@ -116,6 +121,24 @@ public class JerseyEndpoint {
             throw new ConfigurationException(CORS_ORIGIN,
                     "CORS origin(s) MUST be a String, String[], Iterable<String> (value:" + values + ")");
         }
+
+        // parse headers to be exposed
+        values = componentContext.getProperties().get(CORS_ACCESS_CONTROL_EXPOSE_HEADERS);
+        if (values instanceof String && !((String) values).isEmpty()) {
+            exposedHeaders = Collections.singleton((String) values);
+        } else if (values instanceof String[]) {
+            exposedHeaders = new HashSet<String>(Arrays.asList((String[]) values));
+        } else if (values instanceof Iterable<?>) {
+            exposedHeaders = new HashSet<String>();
+            for (Object value : (Iterable<?>) values) {
+                if (value != null && !value.toString().isEmpty()) {
+                    exposedHeaders.add(value.toString());
+                }
+            }
+        } else {
+            exposedHeaders = new HashSet<String>();
+        }
+
         if (!webFragments.isEmpty()) {
             initJersey();
         }
@@ -183,6 +206,7 @@ public class JerseyEndpoint {
         servletContext.setAttribute(BaseStanbolResource.SCRIPT_RESOURCES, scriptResources);
         servletContext.setAttribute(BaseStanbolResource.NAVIGATION_LINKS, navigationLinks);
         servletContext.setAttribute(CORS_ORIGIN, corsOrigins);
+        servletContext.setAttribute(CORS_ACCESS_CONTROL_EXPOSE_HEADERS, exposedHeaders);
 
         log.info("JerseyEndpoint servlet registered at {}", applicationAlias);
     }
