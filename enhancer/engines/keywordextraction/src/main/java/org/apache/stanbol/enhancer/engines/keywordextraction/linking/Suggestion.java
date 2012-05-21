@@ -110,12 +110,14 @@ public class Suggestion implements Comparable<Suggestion>{
                 throw new IllegalArgumentException("For "+match+" matches the token span and count MUST BE > 0");
             }
             if(match == MATCH.PARTIAL){
-                if(span <= count){
-                    throw new IllegalArgumentException("For "+match+" matches the token span MUST BE > than the token count!");
+                if(span <= count && labelTokenCount <= count){
+                    throw new IllegalArgumentException("For "+match+" matches the (token span OR label token count) MUST BE > than the token count!");
                 }
             } else {
                 if(span != count){
-                    throw new IllegalArgumentException("For "+match+" matches the token span MUST BE equals to the token count!");
+                    throw new IllegalArgumentException("For "+match+" matches the token span '"
+                            +span+"' MUST BE equals to the token count '"+count+"' (label: '"
+                            +label.getText()+"')!");
                 }
             }
         }

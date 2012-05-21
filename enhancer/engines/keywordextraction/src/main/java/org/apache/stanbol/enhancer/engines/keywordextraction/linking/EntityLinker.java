@@ -284,6 +284,22 @@ public class EntityLinker {
         if(suggestions.size()>1){
             Collections.sort(suggestions,Suggestion.DEFAULT_SUGGESTION_COMPARATOR);
         }
+        //TODO: Work in Progress feature ... allowing to refine search if no
+        //      suggestion is found but results where present
+        //      However this would need full limit/offset support for the
+        //      EntitySearcher. (rwesten 2012-05-21)
+//        Integer maxResults = entitySearcher.getLimit();
+//        if(maxResults == null){
+//            maxResults = 1; //fall back to 1 if limit is not known
+//        }
+//        if(suggestions.isEmpty() && //if no suggestions where found
+//                results.size() >= maxResults && //but the query had max results
+//                //than the actual entity might not be within the first LIMIT results
+//                searchStrings.size() > 1){ //if multiple words where used for the search
+//            //try again with only a single word
+//            suggestions = lookupEntities(Collections.singletonList(searchStrings.get(0)));
+//            
+//        }
         //remove all elements > config.getMaxSuggestions()
         return suggestions;
     }
@@ -466,6 +482,7 @@ public class EntityLinker {
             String labelTokenText = labelTokens[labelIndex];
             if(labelTokenSet.remove(labelTokenText)){ //still not matched
                 currentToken = state.getSentence().getTokens().get(currentIndex);
+                boolean isProcessable = isProcessableToken(currentToken);
                 currentTokenText = currentToken.getText();
                 if(!config.isCaseSensitiveMatching()){
                     currentTokenText = currentTokenText.toLowerCase();
@@ -484,13 +501,16 @@ public class EntityLinker {
                     }
                 }
                 if(found){ //found
+                    if(isProcessable){
+                        foundProcessableTokens++; //only count processable Tokens
+                    }
                     foundTokens++;
                     foundTokenMatch = foundTokenMatch + matchFactor; //sum up the matches
                     firstFoundIndex = currentIndex;
                     currentIndex --;
                 } else {
                     notFound++;
-                    if(notFound > maxNotFound){
+                    if(isProcessable || notFound > maxNotFound){
                         //stop as soon as a token that needs to be processed is
                         //not found in the label or the maximum number of tokens
                         //that are not processable are not found
@@ -519,9 +539,15 @@ public class EntityLinker {
                 //of non-processable!
                 foundTokens = coveredTokens;
             } else if((foundProcessableTokens >= config.getMinFoundTokens() ||
-                    foundTokens == coveredTokens) && 
+                    //NOTE (rwesten, 2012-05-21): Do not check if all covered
+                    //  Tokens are found, but if all Tokens of the Label are
+                    //  matched! (STANBOL-622)
+                    //foundTokens == coveredTokens) && 
+                    foundTokens >= labelTokens.length) &&
                     labelMatchScore >= 0.6f){
-                if(foundTokens == coveredTokens){
+                //same as above
+                //if(foundTokens == coveredTokens){
+                if(foundTokens == labelTokens.length && foundTokenMatch == coveredTokens){
                     labelMatch = MATCH.FULL;
                 } else {
                     labelMatch = MATCH.PARTIAL;

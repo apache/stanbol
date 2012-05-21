@@ -832,10 +832,11 @@ public class KeywordLinkingEngine
             throw new ConfigurationException(REFERENCED_SITE_ID,
                     "The ID of the Referenced Site is a required Parameter and MUST NOT be an empty String!");
         }
+        //TODO: make limit configurable!
         if(Entityhub.ENTITYHUB_IDS.contains(refSiteId.toLowerCase())){
-            entitySearcher = new EntityhubSearcher(context.getBundleContext());
+            entitySearcher = new EntityhubSearcher(context.getBundleContext(),10);
         } else {
-            entitySearcher = new ReferencedSiteSearcher(context.getBundleContext(),refSiteId);
+            entitySearcher = new ReferencedSiteSearcher(context.getBundleContext(),refSiteId,10);
         }
     }
     /**

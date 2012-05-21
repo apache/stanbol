@@ -35,12 +35,15 @@ import org.osgi.framework.BundleContext;
 
 public final class ReferencedSiteSearcher extends TrackingEntitySearcher<ReferencedSite> implements EntitySearcher {
     
+    
     private final String siteId;
+    private final Integer limit;
 
-    public ReferencedSiteSearcher(BundleContext context,String siteId) {
+    public ReferencedSiteSearcher(BundleContext context,String siteId, Integer limit) {
         super(context, ReferencedSite.class, 
             Collections.singletonMap(SiteConfiguration.ID,siteId));
         this.siteId = siteId;
+        this.limit = limit != null && limit > 0 ? limit : null;
     }
     
     @Override
@@ -74,6 +77,9 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Referen
         }
         FieldQuery query = EntitySearcherUtils.createFieldQuery(site.getQueryFactory(), 
             field, includeFields, search, languages);
+        if(limit != null){
+            query.setLimit(limit);
+        }
         QueryResultList<Representation> results;
         try {
             results = site.find(query);
@@ -90,5 +96,10 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Referen
         ReferencedSite site = getSearchService();
         //Do not throw an exception here if the site is not available. Just return false
         return site == null ? false : site.supportsLocalMode();
+    }
+
+    @Override
+    public Integer getLimit() {
+        return limit;
     }
 }
