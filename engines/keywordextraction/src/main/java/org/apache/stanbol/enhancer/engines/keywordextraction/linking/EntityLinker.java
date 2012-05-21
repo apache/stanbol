@@ -547,7 +547,7 @@ public class EntityLinker {
                     labelMatchScore >= 0.6f){
                 //same as above
                 //if(foundTokens == coveredTokens){
-                if(foundTokens == labelTokens.length && foundTokenMatch == coveredTokens){
+                if(foundTokens == labelTokens.length && foundTokens == coveredTokens){
                     labelMatch = MATCH.FULL;
                 } else {
                     labelMatch = MATCH.PARTIAL;
