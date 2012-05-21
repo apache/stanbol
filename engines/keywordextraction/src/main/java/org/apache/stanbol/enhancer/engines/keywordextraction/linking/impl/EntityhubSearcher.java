@@ -33,8 +33,11 @@ import org.osgi.framework.BundleContext;
 
 public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> implements EntitySearcher {
     
-    public EntityhubSearcher(BundleContext context) {
+    private final Integer limit;
+
+    public EntityhubSearcher(BundleContext context, Integer limit) {
         super(context,Entityhub.class,null);
+        this.limit = limit != null && limit > 0 ? limit : null;
     }
     
     @Override
@@ -79,6 +82,11 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
     @Override
     public boolean supportsOfflineMode() {
         return true; //the entityhub is always offline
+    }
+
+    @Override
+    public Integer getLimit() {
+        return limit;
     }
 
 }

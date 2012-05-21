@@ -98,4 +98,10 @@ public class TestSearcherImpl implements EntitySearcher {
         return true;
     }
 
+
+    @Override
+    public Integer getLimit() {
+        return null;
+    }
+
 }
