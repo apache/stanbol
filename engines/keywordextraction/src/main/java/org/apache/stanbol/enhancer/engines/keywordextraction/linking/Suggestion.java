@@ -233,7 +233,7 @@ public class Suggestion implements Comparable<Suggestion>{
             if (actLang != null && actLang.startsWith(language)) {
                 //prefer labels with the correct language
                 label = actLabel;
-                if(label.getText().equalsIgnoreCase(label.getText())){
+                if(this.label.getText().equalsIgnoreCase(label.getText())){
                     //found label in that language that exactly matches the
                     //label used to match the text
                     matchFound = true; 
