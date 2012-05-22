@@ -82,6 +82,7 @@ import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
+import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
@@ -239,6 +240,7 @@ public class KeywordLinkingEngine
         unbind = "disableOfflineMode", 
         strategy = ReferenceStrategy.EVENT)
     private OfflineMode offlineMode;
+    private String referencedSiteName;
 
     /**
      * Called by the ConfigurationAdmin to bind the {@link #offlineMode} if the service becomes available
@@ -452,6 +454,10 @@ public class KeywordLinkingEngine
                     metadata.add(new TripleImpl(entityAnnotation, 
                         Properties.DC_RELATION, textAnnotation));
                 }
+                //add the name of the ReferencedSite providing this suggestion
+                metadata.add(new TripleImpl(entityAnnotation, 
+                    new UriRef(RdfResourceEnum.site.getUri()), 
+                    new PlainLiteralImpl(referencedSiteName)));
                 //in case dereferencing of Entities is enabled we need also to
                 //add the RDF data for entities
                 if(dereferenceEntitiesState){
@@ -827,16 +833,16 @@ public class KeywordLinkingEngine
             throw new ConfigurationException(REFERENCED_SITE_ID,
                     "The ID of the Referenced Site is a required Parameter and MUST NOT be NULL!");
         }
-        String refSiteId = value.toString();
-        if (refSiteId.isEmpty()) {
+        referencedSiteName = value.toString();
+        if (referencedSiteName.isEmpty()) {
             throw new ConfigurationException(REFERENCED_SITE_ID,
                     "The ID of the Referenced Site is a required Parameter and MUST NOT be an empty String!");
         }
         //TODO: make limit configurable!
-        if(Entityhub.ENTITYHUB_IDS.contains(refSiteId.toLowerCase())){
+        if(Entityhub.ENTITYHUB_IDS.contains(referencedSiteName.toLowerCase())){
             entitySearcher = new EntityhubSearcher(context.getBundleContext(),10);
         } else {
-            entitySearcher = new ReferencedSiteSearcher(context.getBundleContext(),refSiteId,10);
+            entitySearcher = new ReferencedSiteSearcher(context.getBundleContext(),referencedSiteName,10);
         }
     }
     /**
@@ -891,5 +897,6 @@ public class KeywordLinkingEngine
             ((TrackingEntitySearcher<?>)entitySearcher).close();
         }
         entitySearcher = null;
+        referencedSiteName = null;
     }
 }

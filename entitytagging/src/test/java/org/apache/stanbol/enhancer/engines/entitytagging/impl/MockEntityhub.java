@@ -37,6 +37,8 @@ import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Mocks an Entityhub for the {@link NamedEntityTaggingEngine} for Unit Testing<p>
@@ -46,12 +48,18 @@ import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
  */
 class MockEntityhub implements Entityhub {
 
+    private static final Logger log = LoggerFactory.getLogger(MockEntityhub.class);
+    
     protected SolrYard yard;
     
     protected MockEntityhub(){
         SolrYardConfig config = new SolrYardConfig("dbpedia", "dbpedia_43k");
         try {
             yard = new SolrYard(config);
+            Representation paris = yard.getRepresentation("http://dbpedia.org/resource/Paris");
+            if(paris == null){
+                throw new IllegalStateException("Initialised Yard does not contain the expected resource dbpedia:Paris!");
+            }
         } catch (YardException e) {
             throw new IllegalStateException("Unable to init Yard!",e);
         }
@@ -67,9 +75,12 @@ class MockEntityhub implements Entityhub {
     }
     @Override
     public QueryResultList<Entity> findEntities(FieldQuery query) throws EntityhubException {
+        log.info("Performing Query: {}",query);
         QueryResultList<Representation> results = yard.findRepresentation(query);
+        log.info("  ... {} results",results.size());
         Collection<Entity> entities = new ArrayList<Entity>(results.size());
         for(Representation r : results){
+            log.info("    > {}",r.getId());
             entities.add(new EntityImpl("dbpedia", r, null));
         }
         return new QueryResultListImpl<Entity>(results.getQuery(),entities,Entity.class);

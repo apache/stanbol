@@ -34,7 +34,7 @@ import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider
  * @author Rupert Westenthaler
  *
  */
-public class TestDataFileProvider implements DataFileProvider {
+public class DbPediaDataFileProvider implements DataFileProvider {
 
     private static String DBPEDIA_PREFIX = "org/apache/stanbol/data/site/dbpedia/default/index/";
     
@@ -58,7 +58,7 @@ public class TestDataFileProvider implements DataFileProvider {
      * @return
      */
     private URL lookupResource(String resource) {
-        ClassLoader cl = TestDataFileProvider.class.getClassLoader();
+        ClassLoader cl = DbPediaDataFileProvider.class.getClassLoader();
         URL resourceUri = cl.getResource(resource);
         if(resourceUri == null){
             cl = Thread.currentThread().getContextClassLoader();
