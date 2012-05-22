@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.entitytagging.impl;
 
+import static org.apache.commons.lang.StringUtils.getLevenshteinDistance;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 
@@ -33,6 +34,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -353,10 +355,10 @@ public class NamedEntityTaggingEngine
             ci.getLock().readLock().unlock();
         }
         //search the suggestions
-        Map<NamedEntity,List<Entity>> suggestions = new HashMap<NamedEntity,List<Entity>>(textAnnotations.size());
+        Map<NamedEntity,List<Suggestion>> suggestions = new HashMap<NamedEntity,List<Suggestion>>(textAnnotations.size());
         for (Entry<NamedEntity,List<UriRef>> entry : textAnnotations.entrySet()) {
             try {
-                List<Entity> entitySuggestions = computeEntityRecommentations(
+                List<Suggestion> entitySuggestions = computeEntityRecommentations(
                     site, entry.getKey(),entry.getValue(),contentLangauge);
                 if(entitySuggestions != null && !entitySuggestions.isEmpty()){
                     suggestions.put(entry.getKey(), entitySuggestions);
@@ -370,19 +372,19 @@ public class NamedEntityTaggingEngine
         try {
             RdfValueFactory factory = RdfValueFactory.getInstance();
             Map<String, Representation> entityData = new HashMap<String,Representation>();
-            for(Entry<NamedEntity,List<Entity>> entitySuggestions : suggestions.entrySet()){
+            for(Entry<NamedEntity,List<Suggestion>> entitySuggestions : suggestions.entrySet()){
                 List<UriRef> subsumed = textAnnotations.get(entitySuggestions.getKey());
                 List<NonLiteral> annotationsToRelate = new ArrayList<NonLiteral>(subsumed);
                 annotationsToRelate.add(entitySuggestions.getKey().getEntity());
-                for(Entity suggestion : entitySuggestions.getValue()){
-                    log.debug("Add Suggestion {} for {}", suggestion.getId(), entitySuggestions.getKey());
+                for(Suggestion suggestion : entitySuggestions.getValue()){
+                    log.debug("Add Suggestion {} for {}", suggestion.getEntity().getId(), entitySuggestions.getKey());
                     EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory, graph, ci.getUri(),
-                        annotationsToRelate, suggestion.getRepresentation(), nameField,
+                        annotationsToRelate, suggestion, nameField,
                         //TODO: maybe we want labels in a different language than the
                         //      language of the content (e.g. Accept-Language header)?!
                         contentLangauge == null ? DEFAULT_LANGUAGE : contentLangauge);
                     if (dereferenceEntities) {
-                        entityData.put(suggestion.getId(), suggestion.getRepresentation());
+                        entityData.put(suggestion.getEntity().getId(), suggestion.getEntity().getRepresentation());
                     }
                 }
             }
@@ -405,19 +407,19 @@ public class NamedEntityTaggingEngine
      * @param contentItemId the id of the contentItem
      * @param textAnnotation the text annotation to enhance
      * @param subsumedAnnotations other text annotations for the same entity 
-     * @param language the language of the analyzed text or <code>null</code>
+     * @param language the language of the analysed text or <code>null</code>
      * if not available.
-     * @return the suggested {@link Entity entities}
+     * @return the suggestions for the parsed {@link NamedEntity}
      * @throws EntityhubException On any Error while looking up Entities via
      * the Entityhub
      */
-    protected final List<Entity> computeEntityRecommentations(ReferencedSite site,
+    protected final List<Suggestion> computeEntityRecommentations(ReferencedSite site,
             NamedEntity namedEntity,
             List<UriRef> subsumedAnnotations, String language) throws EntityhubException {
         // First get the required properties for the parsed textAnnotation
         // ... and check the values
 
-        log.debug("Process {}", namedEntity);
+        log.info("Process {}", namedEntity);
         FieldQuery query = site == null ? //if site is NULL use the Entityhub
                 entityhub.getQueryFactory().createFieldQuery() : 
                     site.getQueryFactory().createFieldQuery();
@@ -425,11 +427,12 @@ public class NamedEntityTaggingEngine
         Constraint labelConstraint;
         //TODO: make case sensitivity configurable
         boolean casesensitive = false;
+        String namedEntityLabel = casesensitive ? namedEntity.getName() : namedEntity.getName().toLowerCase();
         if(language != null){
             //search labels in the language and without language
-            labelConstraint = new TextConstraint(namedEntity.getName(),casesensitive,language,null);
+            labelConstraint = new TextConstraint(namedEntityLabel,casesensitive,language,null);
         } else {
-            labelConstraint = new TextConstraint(namedEntity.getName(),casesensitive);
+            labelConstraint = new TextConstraint(namedEntityLabel,casesensitive);
         }
         query.setConstraint(nameField, labelConstraint);
         if (OntologicalClasses.DBPEDIA_PERSON.equals(namedEntity.getType())) {
@@ -467,55 +470,68 @@ public class NamedEntityTaggingEngine
         QueryResultList<Entity> results = site == null? //if site is NULL
                 entityhub.findEntities(query) : //use the Entityhub
                     site.findEntities(query); //else the referenced site
-        log.debug("{} results returned by query {}", results.size(), query);
-
+        log.info(" - {} results returned by query {}", results.size(), results.getQuery());
+        if(results.isEmpty()){ //no results nothing to do
+            return Collections.emptyList();
+        }
+        //we need to normalise the confidence values from [0..1]
+        // * levenshtein distance as absolute (1.0 for exact match)
+        // * Solr scores * levenshtein to rank entities relative to each other
         Float maxScore = null;
-        int exactCount = 0;
-        List<Entity> matches = new ArrayList<Entity>(numSuggestions);
-        for (Iterator<Entity> guesses = results.iterator();guesses.hasNext() && exactCount<numSuggestions;) {
-            Entity guess = guesses.next();
-            Representation rep = guess.getRepresentation();
+        Float maxExactScore = null;
+        List<Suggestion> matches = new ArrayList<Suggestion>(numSuggestions);
+        //assumes entities are sorted by score
+        for (Iterator<Entity> guesses = results.iterator();guesses.hasNext();) {
+            Suggestion match = new Suggestion(guesses.next());
+            Representation rep = match.getEntity().getRepresentation();
+            Float score = rep.getFirst(RdfResourceEnum.resultScore.getUri(),Float.class);
             if(maxScore == null){
-                maxScore = rep.getFirst(RdfResourceEnum.resultScore.getUri(),Float.class);
+                maxScore = score;
             }
             Iterator<Text> labels = rep.getText(nameField);
-            boolean found = false;
-            while(labels.hasNext() && !found){
+            while(labels.hasNext() && match.getLevenshtein() < 1.0){
                 Text label = labels.next();
-                if(label.getLanguage() == null || (language != null && label.getLanguage().startsWith(language))){
-                    if(label.getText().equalsIgnoreCase(namedEntity.getName())){
-                        found = true;
+                if(language == null || //if the content language is unknown -> accept all labels
+                        label.getLanguage() == null ||  //accept labels with no language
+                        //and labels in the same language as the content
+                        (language != null && label.getLanguage().startsWith(language))){
+                    double actMatch = levenshtein(
+                        casesensitive ? label.getText().toLowerCase() : label.getText(), 
+                                namedEntityLabel);
+                    if(actMatch > match.getLevenshtein()){
+                        match.setLevenshtein(actMatch);
+                        match.setMatchedLabel(label);
                     }
                 }
             }
-            if(found){
-                matches.add(exactCount,guess);
-                exactCount++;
-            } else if(matches.size()<numSuggestions){
-                matches.add(guess);
-            }
-        }
-        //now write the results
-        for(int i=0;i<matches.size();i++){
-            Representation rep = matches.get(i).getRepresentation();
-            if(i<exactCount){ //and boost the scores of the exact matches
-                if(maxScore == null){
-                    rep.set(RdfResourceEnum.resultScore.getUri(), 1.0f);
+            if(match.getMatchedLabel() != null){
+                if(match.getLevenshtein() == 1.0){
+                    if(maxExactScore == null){
+                        maxExactScore = score;
+                    }
+                    //normalise exact matches against the best exact score
+                    match.setScore(score.doubleValue()/maxExactScore.doubleValue());
                 } else {
-                    Float score = rep.getFirst(RdfResourceEnum.resultScore.getUri(), Float.class);
-                    rep.set(RdfResourceEnum.resultScore.getUri(), 
-                        maxScore.doubleValue()+(score != null?score.doubleValue():0));
+                    //normalise partial matches against the best match and the
+                    //Levenshtein similarity with the label
+                    match.setScore(score.doubleValue()*match.getLevenshtein()/maxScore.doubleValue());
                 }
+                matches.add(match);
+            } else {
+                log.info("No value of {} for Entity {}!",nameField,match.getEntity().getId());
             }
         }
-        return matches;
+        //now sort the results
+        Collections.sort(matches);
+        return matches.subList(0, Math.min(matches.size(),numSuggestions));
     }
 
+    /**
+     * This EnhancementEngine can enhance any ContentItem as it does consume
+     * existing TextAnnotations with the configured dc:type's
+     * @see org.apache.stanbol.enhancer.servicesapi.EnhancementEngine#canEnhance(org.apache.stanbol.enhancer.servicesapi.ContentItem)
+     */
     public int canEnhance(ContentItem ci) {
-        /*
-         * This engine consumes existing enhancements because of that it can enhance any type of ci! TODO: It
-         * would also be possible to check here if there is an TextAnnotation and use that as result!
-         */
         return ENHANCE_ASYNC; //Entity tagging now supports asyc processing
     }
 
@@ -524,5 +540,23 @@ public class NamedEntityTaggingEngine
         return Collections.unmodifiableMap(Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING,
             (Object) defaultOrder));
     }
-
+    /**
+     * Compares two strings (after {@link StringUtils#trim(String) trimming})
+     * by using the Levenshtein's Edit Distance of the two
+     * strings. Does not return the {@link Integer} number of changes but
+     * <code>1-(changes/maxStringSizeAfterTrim)</code><p>
+     * @param s1 the first string
+     * @param s2 the second string
+     * @return the distance
+     * @throws IllegalArgumentException if any of the two parsed strings is NULL
+     */
+    private  static double levenshtein(String s1, String s2) {
+        if(s1 == null || s2 == null){
+            throw new IllegalArgumentException("NONE of the parsed String MUST BE NULL!");
+        }
+        s1 = StringUtils.trim(s1);
+        s2 = StringUtils.trim(s2);
+        return s1.isEmpty() || s2.isEmpty() ? 0 :
+            1.0 - (((double)getLevenshteinDistance(s1, s2)) / ((double)(Math.max(s1.length(), s2.length()))));
+    }
 }

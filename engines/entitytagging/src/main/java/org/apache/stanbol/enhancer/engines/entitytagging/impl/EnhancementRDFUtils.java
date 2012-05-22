@@ -21,7 +21,6 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CO
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_TYPE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDFS_LABEL;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 
 import java.util.Collection;
@@ -60,37 +59,39 @@ public class EnhancementRDFUtils {
      *            the contentItemId the enhancement is extracted from
      * @param relatedEnhancements
      *            enhancements this textAnnotation is related to
-     * @param entity
-     *            the related entity
+     * @param suggestion
+     *            the entity suggestion
      * @param nameField the field used to extract the name
-     * @param lang the preferred language to include
+     * @param lang the preferred language to include or <code>null</code> if none
      */
     public static UriRef writeEntityAnnotation(EnhancementEngine engine,
                                                LiteralFactory literalFactory,
                                                MGraph graph,
                                                UriRef contentItemId,
                                                Collection<NonLiteral> relatedEnhancements,
-                                               Representation rep,
+                                               Suggestion suggestion,
                                                String nameField, 
                                                String lang) {
-        // 1. check if the returned Entity does has a label -> if not return null
-        // add labels (set only a single label. Use "en" if available!
-        Text label = null;
-        Iterator<Text> labels = rep.getText(nameField);
-        while (labels.hasNext()) {
-            Text actLabel = labels.next();
-            if (label == null) {
-                label = actLabel;
-            } else {
-                //use startWith to match also en-GB and en-US ...
-                if (actLabel.getLanguage() != null && actLabel.getLanguage().startsWith(lang)) {
+        Representation rep = suggestion.getEntity().getRepresentation();
+        // 1. extract the "best label"
+        //Start with the matched one
+        Text label = suggestion.getMatchedLabel();
+        //if the matched label is not in the requested language
+        boolean langMatch = (lang == null && label.getLanguage() == null) ||
+                (label.getLanguage() != null && label.getLanguage().startsWith(lang));
+            //search if a better label is available for this Entity
+        if(!langMatch){
+            Iterator<Text> labels = rep.getText(nameField);
+            while (labels.hasNext() && !langMatch) {
+                Text actLabel = labels.next();
+                langMatch = (lang == null && actLabel.getLanguage() == null) ||
+                        (actLabel.getLanguage() != null && actLabel.getLanguage().startsWith(lang));
+                if(langMatch){ //if the language matches ->
+                    //override the matched label
                     label = actLabel;
                 }
             }
-        }
-        if (label == null) {
-            return null;
-        }
+        } //else the matched label will be the best to use
         Literal literal;
         if (label.getLanguage() == null) {
             literal = new PlainLiteralImpl(label.getText());
@@ -109,31 +110,23 @@ public class EnhancementRDFUtils {
         graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_REFERENCE, entityUri));
         // add the label parsed above
         graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_LABEL, literal));
-        // TODO: add real confidence values!
-        // -> in case of SolrYards this will be a Lucene score and not within the range [0..1]
-        // -> in case of SPARQL there will be no score information at all.
-        Object score = rep.getFirst(RdfResourceEnum.resultScore.getUri());
-        Double scoreValue = new Double(-1); // use -1 if no score is available!
-        if (score != null) {
-            try {
-                scoreValue = Double.valueOf(score.toString());
-            } catch (NumberFormatException e) {
-                // ignore
-            }
+        if (suggestion.getScore() != null) {
+            graph.add(new TripleImpl(entityAnnotation, ENHANCER_CONFIDENCE, literalFactory
+                .createTypedLiteral(suggestion.getScore())));
         }
-        graph.add(new TripleImpl(entityAnnotation, ENHANCER_CONFIDENCE, literalFactory
-                .createTypedLiteral(scoreValue)));
 
         Iterator<Reference> types = rep.getReferences(RDF_TYPE.getUnicodeString());
         while (types.hasNext()) {
             graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_TYPE, new UriRef(types.next()
                     .getReference())));
         }
-        // TODO: for now add the information about this entity to the graph
-        // -> this might be replaced by some additional engine at the end
-        // RdfValueFactory rdfValueFactory = RdfValueFactory.getInstance();
-        // RdfRepresentation representation = rdfValueFactory.toRdfRepresentation(entity.getRepresentation());
-        // graph.addAll(representation.getRdfGraph());
+        //add the name of the ReferencedSite that manages the Entity
+        if(suggestion.getEntity().getSite() != null){
+            graph.add(new TripleImpl(entityAnnotation, 
+                new UriRef(RdfResourceEnum.site.getUri()), 
+                new PlainLiteralImpl(suggestion.getEntity().getSite())));
+        }
+        
         return entityAnnotation;
     }
 

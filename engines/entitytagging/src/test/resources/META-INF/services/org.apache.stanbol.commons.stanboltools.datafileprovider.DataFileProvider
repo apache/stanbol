@@ -13,4 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-org.apache.stanbol.enhancer.engines.entitytagging.impl.TestDataFileProvider
+org.apache.stanbol.enhancer.engines.entitytagging.impl.DbPediaDataFileProvider

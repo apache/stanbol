@@ -16,11 +16,13 @@
  */
 package org.apache.stanbol.enhancer.engines.entitytagging.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PERSON;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_CREATOR;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EXTRACTED_FROM;
@@ -28,12 +30,14 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateAllEntityAnnotations;
+import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateEntityAnnotation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,13 +47,17 @@ import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.rdfentities.RdfEntityFactory;
 import org.apache.stanbol.enhancer.rdfentities.fise.TextAnnotation;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -60,10 +68,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class TestEntityLinkingEnhancementEngine {
-
+    
+    private static final Logger log = LoggerFactory.getLogger(TestEntityLinkingEnhancementEngine.class);
+    
     /**
      * The context for the tests (same as in TestOpenNLPEnhancementEngine)
      */
@@ -97,8 +109,9 @@ public class TestEntityLinkingEnhancementEngine {
                 throw new IOException("Unable to create directory for test files "+testFiles);
             }
         }
-        
-        System.getProperties().setProperty("user.dir", testFiles.getCanonicalPath());
+        String testRootDir = testFiles.getCanonicalPath();
+        log.info("Test 'user.dir' folder {}",testRootDir);
+        System.getProperties().setProperty("user.dir", testRootDir);
         entityLinkingEngine = new NamedEntityTaggingEngine();
         //instead of calling activate we directly set the required fields
         //we need a data source for linking
@@ -140,20 +153,20 @@ public class TestEntityLinkingEnhancementEngine {
             content = "";
         }
         RdfEntityFactory factory = RdfEntityFactory.createInstance(ci.getMetadata());
-        TextAnnotation testAnnotation = factory.getProxy(
-                new UriRef("urn:iks-project:enhancer:test:text-annotation:person"), TextAnnotation.class);
-        testAnnotation.setCreator(new UriRef("urn:iks-project:enhancer:test:dummyEngine"));
-        testAnnotation.setCreated(new Date());
-        testAnnotation.setSelectedText(name);
-        testAnnotation.setSelectionContext(context);
-        testAnnotation.getDcType().add(type);
+        TextAnnotation textAnnotation = factory.getProxy(
+                new UriRef("urn:iks-project:enhancer:test:text-annotation:"+randomUUID()), TextAnnotation.class);
+        textAnnotation.setCreator(new UriRef("urn:iks-project:enhancer:test:dummyEngine"));
+        textAnnotation.setCreated(new Date());
+        textAnnotation.setSelectedText(name);
+        textAnnotation.setSelectionContext(context);
+        textAnnotation.getDcType().add(type);
         Integer start = content.indexOf(name);
         if (start < 0){ //if not found in the content
             //set some random numbers for start/end
             start = (int)Math.random()*100;
         }
-        testAnnotation.setStart(start);
-        testAnnotation.setEnd(start+name.length());
+        textAnnotation.setStart(start);
+        textAnnotation.setEnd(start+name.length());
     }
 
     @Test
@@ -164,16 +177,46 @@ public class TestEntityLinkingEnhancementEngine {
         getTextAnnotation(ci, PERSON, CONTEXT, DBPEDIA_PERSON);
         getTextAnnotation(ci, ORGANISATION, CONTEXT, DBPEDIA_ORGANISATION);
         getTextAnnotation(ci, PLACE, CONTEXT, DBPEDIA_PLACE);
+        //add the language
+        ci.getMetadata().add(new TripleImpl(ci.getUri(), Properties.DC_LANGUAGE, new PlainLiteralImpl("en")));
         //perform the computation of the enhancements
         entityLinkingEngine.computeEnhancements(ci);
+        int entityAnnotationCount = validateAllEntityAnnotations(ci);
+        assertEquals(4, entityAnnotationCount);
+    }
+    
+    private static int validateAllEntityAnnotations(ContentItem ci){
         Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
         expectedValues.put(ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(DC_CREATOR,LiteralFactory.getInstance().createTypedLiteral(
             entityLinkingEngine.getClass().getName()));
-        int entityAnnotationCount = validateAllEntityAnnotations(ci.getMetadata(),expectedValues);
-        assertEquals(3, entityAnnotationCount);
+        Iterator<Triple> entityAnnotationIterator = ci.getMetadata().filter(null,
+                RDF_TYPE, ENHANCER_ENTITYANNOTATION);
+        int entityAnnotationCount = 0;
+        while (entityAnnotationIterator.hasNext()) {
+            UriRef entityAnnotation = (UriRef) entityAnnotationIterator.next().getSubject();
+            // test if selected Text is added
+            validateEntityAnnotation(ci.getMetadata(), entityAnnotation, expectedValues);
+            //validate also that the confidence is between [0..1]
+            Iterator<Triple> confidenceIterator = ci.getMetadata().filter(entityAnnotation, ENHANCER_CONFIDENCE, null);
+            //NOTE: the fact that fise:confidence values are TypedLiterals of type xsd:double
+            //      is already validated at this point
+            //      Also that there are only [0..1] confidence values
+            assertTrue("Expected fise:confidence value is missing (entityAnnotation "
+                    +entityAnnotation+")",confidenceIterator.hasNext());
+            Double confidence = LiteralFactory.getInstance().createObject(Double.class,
+                (TypedLiteral)confidenceIterator.next().getObject());
+            assertTrue("fise:confidence MUST BE <= 1 (value= '"+confidence
+                    + "',entityAnnotation " +entityAnnotation+")",
+                    1.0 >= confidence.doubleValue());
+            assertTrue("fise:confidence MUST BE >= 0 (value= '"+confidence
+                    +"',entityAnnotation "+entityAnnotation+")",
+                    0.0 <= confidence.doubleValue());
+            entityAnnotationCount++;
+        }
+        return entityAnnotationCount;
+        
     }
-
 
 
 }
