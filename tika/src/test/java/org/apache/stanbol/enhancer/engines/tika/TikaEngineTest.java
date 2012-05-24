@@ -1,5 +1,5 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
+ * Licensed to the Apache Software Foundation (ASF) under one or more
 * contributor license agreements.  See the NOTICE file distributed with
 * this work for additional information regarding copyright ownership.
 * The ASF licenses this file to You under the Apache License, Version 2.0
@@ -362,6 +362,46 @@ public class TikaEngineTest {
         verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"hasFormat"), XSD.string, "Stereo");
         verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"samplingRate"), XSD.int_, "44100");
         verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"hasCompression"), XSD.string, "MP3");
+    }
+    /**
+     * Tests mappings for the Mp4 metadata extraction capabilities added to
+     * Tika 1.1 (STANBOL-627)
+     * @throws EngineException
+     * @throws IOException
+     * @throws ParseException
+     */
+    //@Test deactivated because of TIKA-852
+    public void testMp4() throws EngineException, IOException, ParseException {
+        log.info(">>> testMp4 <<<");
+        ContentItem ci = createContentItem("testMP4.m4a", "audio/mp4");
+        assertFalse(engine.canEnhance(ci) == CANNOT_ENHANCE);
+        engine.computeEnhancements(ci);
+        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, 
+            singleton("text/plain"));
+        assertNotNull(contentPart);
+        Blob plainTextBlob = contentPart.getValue();
+        assertNotNull(plainTextBlob);
+        assertContentRegexp(plainTextBlob, 
+            "Test Title",
+            "Test Artist",
+            "Test Album");
+        //validate XHTML results
+        contentPart = ContentItemHelper.getBlob(ci, 
+            singleton("application/xhtml+xml"));
+        assertNotNull(contentPart);
+        Blob xhtmlBlob = contentPart.getValue();
+        assertNotNull(xhtmlBlob);
+        //Test AudioTrack metadata
+        NonLiteral audioTrack = verifyNonLiteral(ci, new UriRef(NamespaceEnum.media+"hasTrack"));
+        //types
+        verifyValues(ci, audioTrack, RDF.type, 
+            new UriRef(NamespaceEnum.media+"MediaFragment"),
+            new UriRef(NamespaceEnum.media+"Track"),
+            new UriRef(NamespaceEnum.media+"AudioTrack"));
+        //properties
+        verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"hasFormat"), XSD.string, "Stereo");
+        verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"samplingRate"), XSD.int_, "44100");
+        verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"hasCompression"), XSD.string, "M4A");
     }
     @Test
     public void testGEOMetadata() throws EngineException, IOException, ParseException{

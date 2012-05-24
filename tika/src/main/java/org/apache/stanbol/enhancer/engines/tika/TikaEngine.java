@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
@@ -171,7 +172,8 @@ public class TikaEngine
         }
         ParseContext context = new ParseContext();
         context.set(Parser.class,parser);
-        if(parser.getSupportedTypes(context).contains(plainMediaType)) {
+        Set<MediaType> supproted = parser.getSupportedTypes(context);
+        if(supproted.contains(plainMediaType)) {
             final InputStream in;
             if(mtas.in == null){
                 in = ci.getStream();
@@ -238,7 +240,7 @@ public class TikaEngine
             //add the extracted metadata
             if(log.isDebugEnabled()){
                 for(String name : metadata.names()){
-                    log.debug("{}: {}",name,Arrays.toString(metadata.getValues(name)));
+                    log.info("{}: {}",name,Arrays.toString(metadata.getValues(name)));
                 }
             }
             ci.getLock().writeLock().lock();
