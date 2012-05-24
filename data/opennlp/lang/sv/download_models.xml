@@ -26,6 +26,8 @@
   <mapper type="merge" />
   <!-- ensure the delition of the no longer used Swedish tokenizer -->  
   <delete dir="${target.directory}" includes="sv-token.bin" />
+  <!-- switched from perceptron to maxent for POS tagging for openNLP 1.5.2 -->
+  <delete file="${target.directory}/sv-pos-perceptron.bin" quiet="true"></delete>
    
   <target name="download">
 <!-- Based on some testing the decision was to use the SimpleTokenizer for 
@@ -43,11 +45,17 @@
           </resources>
           <mergemapper to="sv-sent.bin"/>
       </copy>
-      <copy toDir="${target.directory}/">
+      <!-- copy toDir="${target.directory}/">
           <resources>
               <url url="${model.url}/se-pos-perceptron.bin"/>
           </resources>
           <mergemapper to="sv-pos-perceptron.bin"/>
+      </copy -->
+      <copy toDir="${target.directory}/">
+          <resources>
+              <url url="${model.url}/se-pos-maxent.bin"/>
+          </resources>
+          <mergemapper to="sv-pos-maxent.bin"/>
       </copy>
   </target>
 </project>
