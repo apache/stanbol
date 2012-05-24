@@ -29,14 +29,14 @@
     <bundle> <!-- Apache Tika core (required by the LangId and TikaEngine) -->
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-core</artifactId>
-        <version>1.0</version>
+        <version>1.1</version>
     </bundle>
   </startLevel>
   <startLevel level="17">
     <bundle> <!-- Apache Tika bundle (required by the TikaEngine) -->
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-bundle</artifactId>
-        <version>1.0</version>
+        <version>1.1</version>
     </bundle>
   </startLevel>
   <!-- Stanbol Enhancer infrastructure and required libraries -->
