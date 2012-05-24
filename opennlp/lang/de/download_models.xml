@@ -24,6 +24,8 @@
   <!-- Removed the German Tokenizer, because it does sometime create "wrong"
        tokens. In the absence of this model the SimpleTokenizer will be used by
        default. -->
+  <!-- switched from perceptron to maxent for POS tagging for openNLP 1.5.2 -->
+  <delete file="${target.directory}/de-pos-perceptron.bin" quiet="true"></delete>
   <target name="download">
     <!-- Added this delete to ensure that already downloaded versions of the 
          German Tokenizer models are removed. -->
@@ -33,7 +35,8 @@
         <!-- url url="${model.url}/de-token.bin"/>
               -->
         <url url="${model.url}/de-sent.bin"/>
-        <url url="${model.url}/de-pos-perceptron.bin"/>
+        <!-- url url="${model.url}/de-pos-perceptron.bin"/ -->
+        <url url="${model.url}/de-pos-maxent.bin"/>
         <!-- no Chunker for german
          <url url="${model.url}/de-chunker.bin"/>
           -->

@@ -22,11 +22,14 @@
   </description>
    
   <target name="download">
+    <!-- switched from perceptron to maxent for POS tagging for openNLP 1.5.2 -->
+    <delete file="${target.directory}/pt-pos-perceptron.bin" quiet="true"></delete>
     <copy todir="${target.directory}" flatten="true">
       <resources>
         <url url="${model.url}/pt-token.bin"/>
         <url url="${model.url}/pt-sent.bin"/>
-        <url url="${model.url}/pt-pos-perceptron.bin"/>
+        <!-- url url="${model.url}/pt-pos-perceptron.bin"/ -->
+        <url url="${model.url}/pt-pos-maxent.bin"/>
         <!-- no Chunker for pt
          <url url="${model.url}/pt-chunker.bin"/>
           -->

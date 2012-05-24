@@ -24,6 +24,8 @@
   <target name="download">
    <!-- ensure the delition of the no longer used Danish tokenizer -->	
    <delete dir="${target.directory}" includes="da-token.bin" />
+   <!-- switched from perceptron to maxent for POS tagging for openNLP 1.5.2 -->
+   <delete file="${target.directory}/da-pos-perceptron.bin" quiet="true"></delete>
    <copy todir="${target.directory}" flatten="true">
       <resources>
         <!-- 
@@ -32,8 +34,9 @@
         <url url="${model.url}/da-token.bin"/>
         -->
         <url url="${model.url}/da-sent.bin"/>
-        <url url="${model.url}/da-pos-perceptron.bin"/>
-        <!-- no Chunker for german
+        <!-- <url url="${model.url}/da-pos-perceptron.bin"/> -->
+        <url url="${model.url}/da-pos-maxent.bin"/>
+        <!-- no Chunker for da
          <url url="${model.url}/da-chunker.bin"/>
           -->
       </resources>
