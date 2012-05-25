@@ -48,6 +48,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -496,7 +497,7 @@ public class LocationEnhancementEngine
         }
         graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_REFERENCE, entityRef));
         log.debug("  > name " + toponym.getName());
-        graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_LABEL, literalFactory.createTypedLiteral(toponym.getName())));
+        graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_LABEL, new PlainLiteralImpl(toponym.getName())));
         Double score = getToponymScore(toponym);
         if (score == null) { //use the default score as fallback
             score = defaultScore;
