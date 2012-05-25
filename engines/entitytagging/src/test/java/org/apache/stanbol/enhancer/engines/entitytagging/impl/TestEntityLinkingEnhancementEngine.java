@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
@@ -62,6 +63,7 @@ import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
+import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -212,6 +214,16 @@ public class TestEntityLinkingEnhancementEngine {
             assertTrue("fise:confidence MUST BE >= 0 (value= '"+confidence
                     +"',entityAnnotation "+entityAnnotation+")",
                     0.0 <= confidence.doubleValue());
+            //Test the entityhub:site property (STANBOL-625)
+            UriRef ENTITYHUB_SITE = new UriRef(RdfResourceEnum.site.getUri());
+            Iterator<Triple> entitySiteIterator = ci.getMetadata().filter(entityAnnotation, 
+                ENTITYHUB_SITE, null);
+            assertTrue("Expected entityhub:site value is missing (entityAnnotation "
+                    +entityAnnotation+")",entitySiteIterator.hasNext());
+            Resource siteResource = entitySiteIterator.next().getObject();
+            assertTrue("entityhub:site values MUST BE Literals", siteResource instanceof Literal);
+            assertEquals("'dbpedia' is expected as entityhub:site value", "dbpedia", ((Literal)siteResource).getLexicalForm());
+            assertFalse("entityhub:site MUST HAVE only a single value", entitySiteIterator.hasNext());
             entityAnnotationCount++;
         }
         return entityAnnotationCount;
