@@ -16,30 +16,24 @@
  */
 package org.apache.stanbol.enhancer.engines.geonames.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.EnhancementEngine.PROPERTY_NAME;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PERSON;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_REQUIRES;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateAllEntityAnnotations;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.Map;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.LiteralFactory;
+import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
@@ -49,6 +43,7 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
+import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -89,6 +84,7 @@ public class TestLocationEnhancementEngine {
     @BeforeClass
     public static void setUpServices() throws IOException, ConfigurationException {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        properties.put(PROPERTY_NAME, "geonames");
         // use the anonymous service for the unit tests
         properties.put(LocationEnhancementEngine.GEONAMES_USERNAME, 
             "\u0073\u0074\u0061\u006E\u0062\u006F\u006C");
@@ -157,67 +153,22 @@ public class TestLocationEnhancementEngine {
                 return;
             }
         }
+        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
+        expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
+            locationEnhancementEngine.getClass().getName()));
+
         /*
          * Note:
          *  - Expected results depend on the geonames.org data. So if the test
          *    fails it may also mean that the data provided by geonames.org have
          *    changed
          */
-        int entityAnnotationCount = checkAllEntityAnnotations(ci.getMetadata());
+        int entityAnnotationCount = validateAllEntityAnnotations(ci.getMetadata(),expectedValues);
         //two suggestions for New Zealand and one hierarchy entry for the first
         //suggestion
-        assertEquals(3, entityAnnotationCount);
+        assertEquals(2, entityAnnotationCount);
     }
 
-    /*
-     * -----------------------------------------------------------------------
-     * Helper Methods to check Text and EntityAnnotations
-     * -----------------------------------------------------------------------
-     */
-
-    private int checkAllEntityAnnotations(MGraph g) {
-        Iterator<Triple> entityAnnotationIterator = g.filter(null,
-                RDF_TYPE, ENHANCER_ENTITYANNOTATION);
-        int entityAnnotationCount = 0;
-        while (entityAnnotationIterator.hasNext()) {
-            UriRef entityAnnotation = (UriRef) entityAnnotationIterator.next().getSubject();
-            // test if selected Text is added
-            checkEntityAnnotation(g, entityAnnotation);
-            entityAnnotationCount++;
-        }
-        return entityAnnotationCount;
-    }
-
-    /**
-     * Checks if an entity annotation is valid
-     */
-    private void checkEntityAnnotation(MGraph g, UriRef entityAnnotation) {
-        Iterator<Triple> relationIterator = g.filter(
-                entityAnnotation, DC_RELATION, null);
-        Iterator<Triple> requiresIterator = g.filter(
-                entityAnnotation, DC_REQUIRES, null);
-        // check if the relation or an requires annotation set
-        assertTrue(relationIterator.hasNext() || requiresIterator.hasNext());
-        while (relationIterator.hasNext()) {
-            // test if the referred annotations are text annotations
-            UriRef referredTextAnnotation = (UriRef) relationIterator.next().getObject();
-            assertTrue(g.filter(referredTextAnnotation, RDF_TYPE,
-                    ENHANCER_TEXTANNOTATION).hasNext());
-        }
-
-        // test if an entity is referred
-        Iterator<Triple> entityReferenceIterator = g.filter(entityAnnotation,
-                ENHANCER_ENTITY_REFERENCE, null);
-        assertTrue(entityReferenceIterator.hasNext());
-        // test if the reference is an URI
-        assertTrue(entityReferenceIterator.next().getObject() instanceof UriRef);
-        // test if there is only one entity referred
-        assertFalse(entityReferenceIterator.hasNext());
-
-        // finally test if the entity label is set
-        Iterator<Triple> entityLabelIterator = g.filter(entityAnnotation,
-                ENHANCER_ENTITY_LABEL, null);
-        assertTrue(entityLabelIterator.hasNext());
-    }
 
 }
