@@ -240,7 +240,11 @@ public class KeywordLinkingEngine
         unbind = "disableOfflineMode", 
         strategy = ReferenceStrategy.EVENT)
     private OfflineMode offlineMode;
-    private String referencedSiteName;
+    /**
+     * The name of the reference site ('local' or 'entityhub') if the
+     * Entityhub is used for enhancing
+     */
+    protected String referencedSiteName;
 
     /**
      * Called by the ConfigurationAdmin to bind the {@link #offlineMode} if the service becomes available
