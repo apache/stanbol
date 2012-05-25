@@ -20,7 +20,7 @@
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:interaction="http://stanbol.apache.org/ontologies/models/interaction#">
     <owl:Ontology rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/interpretation.owl">
-        <owl:imports rdf:resource="http://svn.apache.org/repos/asf/incubator/stanbol/trunk/explanation/core/src/main/resources/model/interaction/base.owl"/>
+        <owl:imports rdf:resource="http://svn.apache.org/repos/asf/incubator/stanbol/branches/ontonet-showcase/explanation/core/src/main/resources/model/interaction/base.owl"/>
     </owl:Ontology>
     
 
