@@ -121,9 +121,15 @@ public abstract class AbstractEnhancerUiResource extends AbstractEnhancerResourc
         if(!buildAjaxview){ //rewrite to a normal EnhancementRequest
             return enhanceFromData(ci, null, false, null, false, null, false, null, headers);
         } else { //enhance and build the AJAX response
-            enhance(ci);
+            EnhancementException enhancementException;
+            try {
+                enhance(ci);
+                enhancementException = null;
+            } catch (EnhancementException e){
+                enhancementException = e;
+            }
             ContentItemResource contentItemResource = new ContentItemResource(null, ci, uriInfo, "",
-                    tcManager, serializer, servletContext);
+                    tcManager, serializer, servletContext, enhancementException);
             contentItemResource.setRdfSerializationFormat(format);
             Viewable ajaxView = new Viewable("/ajax/contentitem", contentItemResource);
             ResponseBuilder rb = Response.ok(ajaxView);

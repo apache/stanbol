@@ -241,6 +241,8 @@ public class EnhancementJobHandler implements EventHandler {
                     job.setCompleted(execution);
                 } catch (EngineException e) {
                     job.setFailed(execution, engine, e);
+                } catch (RuntimeException e) {
+                    job.setFailed(execution, engine, e);
                 }
             } else { //CANNOT_ENHANCE
                 if(exception != null){

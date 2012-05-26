@@ -610,7 +610,7 @@ public class EnhancementJob {
             log.debug(">> w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
             StringBuilder message = new StringBuilder();
             message.append(String.format("Unable to process ContentItem '%s' with " +
-            		"Enhancement Engine %s because the engine ", 
+            		"Enhancement Engine '%s' because the engine ", 
             		contentItem.getUri(), engineName));
             if(engine == null){
                 message.append("is currently not active");
@@ -629,9 +629,9 @@ public class EnhancementJob {
             if(!optional && !isExecutionFailed(executionMetadata, chainExecutionNode)){
                 //set also the whole chain to faild!
                 String chainMessage = String.format(
-                    "Enhancement Chain failed because of required Engine '%s' failed" +
+                    "Enhancement Chain failed because of required Engine '%s' failed " +
                     "with Message: %s", engineName, message);
-                setExecutionFaild(executionMetadata, execution, chainMessage);
+                setExecutionFaild(executionMetadata, chainExecutionNode, chainMessage);
                 error = exception; //this member stores the exception to allow
                 //re-throwing by the EnhancementJobManager.
             }
@@ -683,7 +683,7 @@ public class EnhancementJob {
     public String getErrorMessage() {
         readLock.lock();
         try {
-            return getString(executionMetadata, executionPlanNode, ExecutionMetadata.STATUS_MESSAGE);
+            return getString(executionMetadata, chainExecutionNode, ExecutionMetadata.STATUS_MESSAGE);
         } finally {
             readLock.unlock();
         }
