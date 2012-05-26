@@ -76,9 +76,8 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- Deactivated because the free geonames.org services are 
-                 most of the time overloaded and may case the unit tests to
-                 fail. 
+            <!-- Reactivated this test. If it fails because of geonames.org
+                 we might need to deactivate it again.
             <exclude>**/TestLocationEnhancementEngine*.java</exclude> -->
           </excludes>
         </configuration>
