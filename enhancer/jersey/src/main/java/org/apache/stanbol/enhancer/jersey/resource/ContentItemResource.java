@@ -37,6 +37,8 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHAN
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.text.DateFormat;
@@ -87,6 +89,7 @@ import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
@@ -145,6 +148,8 @@ public class ContentItemResource extends BaseStanbolResource {
     private ChainExecution chainExecution;
 
     private ArrayList<org.apache.stanbol.enhancer.jersey.resource.ContentItemResource.Execution> engineExecutions;
+
+    private EnhancementException enhancementException;
     
     public ContentItemResource(String localId,
                                ContentItem ci,
@@ -152,14 +157,15 @@ public class ContentItemResource extends BaseStanbolResource {
                                String storePath,
                                TcManager tcManager,
                                Serializer serializer,
-                               ServletContext servletContext) throws IOException {
+                               ServletContext servletContext,
+                               EnhancementException enhancementException) throws IOException {
         this.contentItem = ci;
         this.localId = localId;
         this.uriInfo = uriInfo;
         this.tcManager = tcManager;
         this.serializer = serializer;
         this.servletContext = servletContext;
-
+        this.enhancementException = enhancementException;
         if (localId != null) {
             URI rawURI = uriInfo.getBaseUriBuilder().path(storePath).path("raw").path(localId).build();
             Entry<UriRef,Blob> plainTextContentPart = ContentItemHelper.getBlob(contentItem, Collections.singleton("text/plain"));
@@ -178,7 +184,9 @@ public class ContentItemResource extends BaseStanbolResource {
         defaultThumbnails.put(SKOS_CONCEPT, getStaticRootUrl() + "/home/images/black_gear_48.png");
         defaultThumbnails.put(null, getStaticRootUrl() + "/home/images/unknown_48.png");
         long start = System.currentTimeMillis();
-        initOccurrences();
+        if(enhancementException == null){
+            initOccurrences();
+        }
         //init ExecutionMetadata
         try {
             executionMetadata = ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, MGraph.class);
@@ -203,9 +211,15 @@ public class ContentItemResource extends BaseStanbolResource {
     }
 
     public String getRdfMetadata(String mediatype) throws UnsupportedEncodingException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        serializer.serialize(out, contentItem.getMetadata(), mediatype);
-        return out.toString("utf-8");
+        if(enhancementException == null){
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            serializer.serialize(out, contentItem.getMetadata(), mediatype);
+            return out.toString("utf-8");
+        } else {//in case of an exception print the stacktrace
+            StringWriter writer = new StringWriter();
+            enhancementException.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
     }
 
     public String getRdfMetadata() throws UnsupportedEncodingException {

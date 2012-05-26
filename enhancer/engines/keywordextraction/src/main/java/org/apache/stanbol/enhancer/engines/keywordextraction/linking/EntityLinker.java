@@ -32,6 +32,7 @@ import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.ProcessingState;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinkerConfig.RedirectProcessingMode;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.Suggestion.MATCH;
+import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -82,7 +83,7 @@ public class EntityLinker {
     /**
      * Steps over the sentences, chunks, tokens of the {@link #sentences}
      */
-    public void process(){
+    public void process() throws EngineException {
         while(state.next()) {
             if(isProcessableToken(state.getToken())){
                 List<String> searchStrings = new ArrayList<String>(config.getMaxSearchTokens());
@@ -269,10 +270,14 @@ public class EntityLinker {
      * @return The sorted list with the suggestions.
      * If there are no suggestions an empty list will be returned.
      */
-    private List<Suggestion> lookupEntities(List<String> searchStrings) {
-        Collection<? extends Representation> results = entitySearcher.lookup(
-            config.getNameField(),config.getSelectedFields(),
+    private List<Suggestion> lookupEntities(List<String> searchStrings) throws EngineException {
+        Collection<? extends Representation> results;
+        try {
+            results = entitySearcher.lookup(config.getNameField(),config.getSelectedFields(),
             searchStrings, state.getSentence().getLanguage(),config.getDefaultLanguage());
+        } catch (RuntimeException e) {
+            throw new EngineException(e.getMessage(),e);
+        }
         List<Suggestion> suggestions = new ArrayList<Suggestion>();
         for(Representation result : results){ 
             Suggestion match = matchLabels(result);
