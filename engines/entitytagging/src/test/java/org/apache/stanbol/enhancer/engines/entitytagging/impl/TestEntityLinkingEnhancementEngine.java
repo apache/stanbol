@@ -194,26 +194,25 @@ public class TestEntityLinkingEnhancementEngine {
             entityLinkingEngine.getClass().getName()));
         Iterator<Triple> entityAnnotationIterator = ci.getMetadata().filter(null,
                 RDF_TYPE, ENHANCER_ENTITYANNOTATION);
+        //adding null as expected for confidence makes it a required property
+        expectedValues.put(Properties.ENHANCER_CONFIDENCE, null);
         int entityAnnotationCount = 0;
         while (entityAnnotationIterator.hasNext()) {
             UriRef entityAnnotation = (UriRef) entityAnnotationIterator.next().getSubject();
             // test if selected Text is added
             validateEntityAnnotation(ci.getMetadata(), entityAnnotation, expectedValues);
-            //validate also that the confidence is between [0..1]
-            Iterator<Triple> confidenceIterator = ci.getMetadata().filter(entityAnnotation, ENHANCER_CONFIDENCE, null);
-            //NOTE: the fact that fise:confidence values are TypedLiterals of type xsd:double
-            //      is already validated at this point
-            //      Also that there are only [0..1] confidence values
-            assertTrue("Expected fise:confidence value is missing (entityAnnotation "
-                    +entityAnnotation+")",confidenceIterator.hasNext());
-            Double confidence = LiteralFactory.getInstance().createObject(Double.class,
-                (TypedLiteral)confidenceIterator.next().getObject());
-            assertTrue("fise:confidence MUST BE <= 1 (value= '"+confidence
-                    + "',entityAnnotation " +entityAnnotation+")",
-                    1.0 >= confidence.doubleValue());
-            assertTrue("fise:confidence MUST BE >= 0 (value= '"+confidence
-                    +"',entityAnnotation "+entityAnnotation+")",
-                    0.0 <= confidence.doubleValue());
+            //fise:confidence now checked by EnhancementStructureHelper (STANBOL-630)
+//            Iterator<Triple> confidenceIterator = ci.getMetadata().filter(entityAnnotation, ENHANCER_CONFIDENCE, null);
+//            assertTrue("Expected fise:confidence value is missing (entityAnnotation "
+//                    +entityAnnotation+")",confidenceIterator.hasNext());
+//            Double confidence = LiteralFactory.getInstance().createObject(Double.class,
+//                (TypedLiteral)confidenceIterator.next().getObject());
+//            assertTrue("fise:confidence MUST BE <= 1 (value= '"+confidence
+//                    + "',entityAnnotation " +entityAnnotation+")",
+//                    1.0 >= confidence.doubleValue());
+//            assertTrue("fise:confidence MUST BE >= 0 (value= '"+confidence
+//                    +"',entityAnnotation "+entityAnnotation+")",
+//                    0.0 <= confidence.doubleValue());
             //Test the entityhub:site property (STANBOL-625)
             UriRef ENTITYHUB_SITE = new UriRef(RdfResourceEnum.site.getUri());
             Iterator<Triple> entitySiteIterator = ci.getMetadata().filter(entityAnnotation, 
