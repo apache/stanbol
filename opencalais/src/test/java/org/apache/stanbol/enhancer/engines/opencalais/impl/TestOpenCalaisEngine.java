@@ -90,7 +90,7 @@ public class TestOpenCalaisEngine {
     }
 
     @Test
-    public void testEntityExtraction() throws IOException {
+    public void testEntityExtraction() throws IOException, EngineException {
         String testFile = "calaisresult.owl";
         String format = "application/rdf+xml";
         InputStream in = this.getClass().getClassLoader().getResourceAsStream(testFile);
@@ -109,6 +109,8 @@ public class TestOpenCalaisEngine {
         expectedValues.put(Properties.DC_CREATOR, 
             LiteralFactory.getInstance().createTypedLiteral(
                 calaisExtractor.getClass().getName()));
+        //adding null as expected for confidence makes it a required property
+        expectedValues.put(Properties.ENHANCER_CONFIDENCE, null);
         validateAllTextAnnotations(ci.getMetadata(), 
             TEST_TEXT, expectedValues);
         validateAllEntityAnnotations(ci.getMetadata(), expectedValues);

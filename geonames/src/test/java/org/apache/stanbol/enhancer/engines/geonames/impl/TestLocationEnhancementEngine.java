@@ -157,6 +157,8 @@ public class TestLocationEnhancementEngine {
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
             locationEnhancementEngine.getClass().getName()));
+        //adding null as expected for confidence makes it a required property
+        expectedValues.put(Properties.ENHANCER_CONFIDENCE, null);
 
         /*
          * Note:

@@ -115,13 +115,16 @@ public class ZemantaEnhancementEngineTest {
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
             zemantaEngine.getClass().getName()));
-        
+        //deactivate require fise:confidence values for fise:TextAnnotations, because
+        //the one used to group the TopicAnnotations does not have a confidence value
         int textAnnoNum = validateAllTextAnnotations(ci.getMetadata(), BIO_DOMAIN_TEXT, expectedValues);
         log.info(textAnnoNum + " TextAnnotations found ...");
+        //adding null as expected for confidence makes it a required property
+        expectedValues.put(Properties.ENHANCER_CONFIDENCE, null);
         int entityAnnoNum = EnhancementStructureHelper.validateAllEntityAnnotations(ci.getMetadata(),expectedValues);
         log.info(entityAnnoNum + " EntityAnnotations found ...");
         int topicAnnoNum = EnhancementStructureHelper.validateAllTopicAnnotations(ci.getMetadata(),expectedValues);
-        log.info(entityAnnoNum + " TopicAnnotations found ...");
+        log.info(topicAnnoNum + " TopicAnnotations found ...");
     }
 
     public static void main(String[] args) throws Exception{

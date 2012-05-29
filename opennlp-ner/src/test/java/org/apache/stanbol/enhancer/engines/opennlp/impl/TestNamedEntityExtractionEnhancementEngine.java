@@ -129,6 +129,8 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
         Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(nerEngine.getClass().getName()));
+        //adding null as expected for confidence makes it a required property
+        expectedValues.put(Properties.ENHANCER_CONFIDENCE, null);
         MGraph g = ci.getMetadata();
         int textAnnotationCount = validateAllTextAnnotations(g,SINGLE_SENTENCE,expectedValues);
         assertEquals(3, textAnnotationCount);
