@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.engines.opencalais.impl;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
@@ -343,6 +344,12 @@ public class OpenCalaisEngine
             model.add(new TripleImpl(textAnnotation, ENHANCER_START, literalFactory.createTypedLiteral(occ.offset)));
             model.add(new TripleImpl(textAnnotation, ENHANCER_END, literalFactory.createTypedLiteral(occ.offset + occ.length)));
             model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, new PlainLiteralImpl(occ.context,language)));
+            //use the relevance as confidence
+            if(occ.relevance != null && Double.valueOf(0).compareTo(occ.relevance) <= 0 ){
+                //we do not know if the relevance is available (may be NULL)
+                //or the relevance feature is activated (may be -1)
+                model.add(new TripleImpl(textAnnotation, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(occ.relevance)));
+            }
             //create EntityAnnotation only once but add a reference to the textAnnotation
             if (entityAnnotationMap.containsKey(occ.id)) {
                 model.add(new TripleImpl(entityAnnotationMap.get(occ.id), DC_RELATION, textAnnotation));
@@ -382,7 +389,8 @@ public class OpenCalaisEngine
                 //    "c:enableMetadataType=\"GenericRelations,SocialTags\" "+
                 //    "c:enableMetadataType=\"GenericRelations\" "+
                 "c:outputFormat=\"rdf/xml\" " +
-                "c:calculateRelevanceScore=\"false\" " +
+                //NOTE (rw, 2012-05-29) changed to true while working on STANBOL-630
+                "c:calculateRelevanceScore=\"true\" " + 
                 "c:omitOutputtingOriginalText=\"true\"" +
                 ">" +
                 "</c:processingDirectives>" +
@@ -445,8 +453,10 @@ public class OpenCalaisEngine
      * @param model the MGraph representing the Calais data
      *
      * @return a Collection of entity information
+     * @throws EngineException on a {@link ParseException} while processing the
+     * Sparql query.
      */
-    public Collection<CalaisEntityOccurrence> queryModel(MGraph model) {
+    public Collection<CalaisEntityOccurrence> queryModel(MGraph model) throws EngineException {
         //TODO extract also Geo info (latitude/longitude)?
         String query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
@@ -510,8 +520,7 @@ public class OpenCalaisEngine
                 result.add(occ);
             }
         } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new EngineException("Unable to parse SPARQL query for processing OpenCalais results",e);
         }
         log.info("Found {} occurences", result.size());
         return result;

@@ -460,15 +460,30 @@ public class EnhancementStructureHelper {
         }
         //validate that fise:confidence has [0..1] values and are of type xsd:float
         Iterator<Triple> confidenceIterator = enhancements.filter(enhancement,Properties.ENHANCER_CONFIDENCE,null);
+        boolean confidenceRequired = expectedValues.containsKey(Properties.ENHANCER_CONFIDENCE);
         if(confidenceIterator.hasNext()){ //confidence is optional
             Resource confidenceResource = confidenceIterator.next().getObject();
             assertTrue("fise:confidence value MUST BE a TypedLiteral", confidenceResource instanceof TypedLiteral);
             assertTrue("fise:confidence MUST BE xsd:double",
                 XSD.double_.equals(((TypedLiteral)confidenceResource).getDataType()));
-            Double value = LiteralFactory.getInstance().createObject(Double.class, (TypedLiteral)confidenceResource);
-            assertNotNull("Unable to convert TypedLiteral '"+confidenceResource+"' to a Java Float value",value);
-            assertTrue("fise:confidence value "+value+" MUST BE > 0",0f < value);
+            Double confidence = LiteralFactory.getInstance().createObject(Double.class, (TypedLiteral)confidenceResource);
+            assertNotNull("Unable to convert TypedLiteral '"+confidenceResource+"' to a Java Double value",confidence);
             assertFalse("fise:confidence MUST HAVE [0..1] values",confidenceIterator.hasNext());
+            //STANBOL-630: confidence [0..1]
+            assertTrue("fise:confidence MUST BE <= 1 (value= '"+confidence
+                + "',enhancement " +enhancement+")",
+                1.0 >= confidence.doubleValue());
+            assertTrue("fise:confidence MUST BE >= 0 (value= '"+confidence
+                    +"',enhancement "+enhancement+")",
+                    0.0 <= confidence.doubleValue());
+            Resource expectedConfidence = expectedValues.get(Properties.ENHANCER_CONFIDENCE);
+            if(expectedConfidence != null){
+                assertEquals("The fise:confidence for enhancement "
+                    +enhancement+" does not have the expected value", expectedConfidence,confidenceResource);
+            }
+        } else {
+            assertFalse("The required fise:confidence value is missing for enhancement "
+                +enhancement,confidenceRequired);
         }
         //validate that the (optional) dc:type is an URI and that there are not multiple values
         Iterator<Triple> dcTypeIterator = enhancements.filter(enhancement, Properties.DC_TYPE, null);
