@@ -65,26 +65,8 @@
 
     <module>entityhub</module>
     <module>ontologymanager</module>
-
     <module>rules</module>
-
-    <module>enhancer/parent</module>
-    <module>enhancer/generic/servicesapi</module>
-    <module>enhancer/generic/core</module>
-    <module>enhancer/generic/test</module>
-    <module>enhancer/generic/rdfentities</module>
-    <module>enhancer/jobmanager</module>
-    <module>enhancer/chain/allactive</module>
-    <module>enhancer/chain/graph</module>
-    <module>enhancer/chain/weighted</module>
-    <module>enhancer/chain/list</module>
-
-    <module>enhancer/jersey</module>
-    <module>enhancer/ldpath</module>
-    <module>enhancer/benchmark</module>
-    <module>enhancer/defaults</module>
-    <module>enhancer/bundlelist</module>
-
+    <module>enhancer</module>
     <module>contenthub</module>
 
     <module>enhancer/engines</module>
