@@ -31,7 +31,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Jersey JAX-RS API and front-end</name>
+  <name>Apache Stanbol Enhancer Web (Jersey)</name>
   <description>HTTP endpoints of the Apache Stanbol Enhancer.</description>
 
   <scm>
