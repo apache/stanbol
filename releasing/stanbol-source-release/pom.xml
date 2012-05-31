@@ -26,7 +26,7 @@
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-source-release</artifactId>
-  <version>0.11.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <name>Apache Stanbol Releasing Source Release Assembly Descriptor</name>
