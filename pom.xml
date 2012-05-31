@@ -197,7 +197,7 @@
         </plugins>
       </build>
       <modules>
-        <module>releasing/stanbol-source-release</module>
+        <module>releasing/source-assembly</module>
       </modules>
     </profile>
 
