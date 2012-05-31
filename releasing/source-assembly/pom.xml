@@ -35,8 +35,8 @@
   </description>
   
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/releasing/stanbol-source-release</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/releasing/stanbol-source-release</developerConnection>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/releasing/source-assembly</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/releasing/source-assembly</developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
