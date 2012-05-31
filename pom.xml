@@ -34,8 +34,8 @@
 
   <name>Apache Stanbol Data: DBpedia.org</name>
   <description>
-    This bundle allows to use DBpedia as Referenced Site. It also
-    includes a small local index that contains 43k entities.
+    This bundle allows to use DBpedia as Referenced Site. The build
+    also downloads a small DBPedia index that contains 43k entities.
     This index can be upgrated to an bigger version by copying a
     dbpedia.solrindex.zip file into the Stanbol /datafiles folder.
   </description>
@@ -51,16 +51,44 @@
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <dbpedia.default.index.url>http://www.salzburgresearch.at/~rwesten/stanbol/dbpedia_43k.solrindex.zip</dbpedia.default.index.url>
     <dbpedia.default.path>org/apache/stanbol/data/site/dbpedia/default</dbpedia.default.path>
     <dbpedia.default.index.path>${dbpedia.default.path}/index</dbpedia.default.index.path>
     <dbpedia.default.config.path>${dbpedia.default.path}/config</dbpedia.default.config.path>
+    <downloadWarning>
+*                  
+* WARNING - this build downloads a DPBedia index for 43k entities
+* that is *not* licensed under the Apache License, but under the
+* Creative Commons Attribution-ShareAlike 3.0 Unported License.
+*
+    </downloadWarning>    
   </properties>
 
   <build>
     <plugins>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <inherited>true</inherited>
+          <extensions>true</extensions>
+          <configuration>
+            <instructions>
+            </instructions>
+          </configuration>
+        </plugin>
+        <plugin>
+          <!-- 
+            Ant is used to download the datafiles over the
+            web
+            -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.6</version>
+        </plugin>
+
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
@@ -133,14 +161,14 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- License provided in src/main/resources/README -->
+            <!-- AL20 licensed. See src/main/resources/README -->
             <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/dbpedia.solrindex.ref</exclude>
             <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine-dbpedia.config</exclude>
             <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.core.site.CacheImpl-dbpedia.config</exclude>
             <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.site.referencedSite-dbpedia.config</exclude>
             <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-dbpedia.config</exclude>
 
-            <!-- Downloaded during the build process, therefore not part of the source tree -->
+            <!-- Licensed under Creative Commons Attribution-ShareAlike 3.0 Unported License -->
             <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/index/dbpedia_43k.solrindex.zip</exclude>
           </excludes>
         </configuration>
