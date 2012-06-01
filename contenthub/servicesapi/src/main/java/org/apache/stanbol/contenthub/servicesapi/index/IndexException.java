@@ -7,7 +7,9 @@ import org.apache.stanbol.contenthub.servicesapi.exception.ContenthubException;
  */
 public class IndexException extends ContenthubException {
 
-	public IndexException(String msg) {
+    private static final long serialVersionUID = 1528679884791958046L;
+
+    public IndexException(String msg) {
 		super(msg);
 	}
 

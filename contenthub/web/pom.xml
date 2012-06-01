@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.contenthub.parent</artifactId>
-    <version>0.9.0-incubating-SNAPSHOT</version>
+    <version>0.10.0-incubating-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
 
@@ -84,29 +84,25 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.10.1-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.contenthub.store.solr</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.contenthub.search.solr</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.contenthub.search.featured</artifactId>
+      <artifactId>org.apache.stanbol.contenthub.store.file</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
 
-    <!-- needed for the ContentItem resource -->
+<!--     needed for ContentItemResource -->
     <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>jaxrs.rdf.providers</artifactId>
     </dependency>
+
 
     <!-- dependencies on other Stanbol modules -->
     <!-- TODO : added to get DefaultQueryFactory at SearchResource, find 
@@ -114,6 +110,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
 
     <!-- Jersey -->
@@ -174,10 +171,12 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>

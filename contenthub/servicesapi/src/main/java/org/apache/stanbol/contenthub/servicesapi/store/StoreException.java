@@ -20,7 +20,7 @@ import org.apache.stanbol.contenthub.servicesapi.exception.ContenthubException;
 
 /**
  * @author anil.sinaci
- *
+ * 
  */
 public class StoreException extends ContenthubException {
 
@@ -32,7 +32,7 @@ public class StoreException extends ContenthubException {
     public StoreException(String msg) {
         super(msg);
     }
-    
+
     /**
      * @param cause
      */

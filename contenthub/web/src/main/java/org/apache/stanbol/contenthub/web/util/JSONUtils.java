@@ -33,7 +33,6 @@ import org.apache.stanbol.contenthub.servicesapi.index.search.featured.DocumentR
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
-import org.apache.stanbol.contenthub.store.solr.util.ContentItemIDOrganizer;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -200,7 +199,7 @@ public class JSONUtils {
         }
         return jObj.toString(4);
     }
-    
+
     public static String createJSONString(SolrContentItem sci) throws JSONException {
         String content = null;
         try {
@@ -212,7 +211,7 @@ public class JSONUtils {
         JSONObject jObj = new JSONObject(sci.getConstraints());
         jObj.put("content", content);
         jObj.put("mimeType", sci.getMimeType());
-        jObj.put("uri", ContentItemIDOrganizer.detachBaseURI(sci.getUri().getUnicodeString()));
+        // jObj.put("uri", ContentItemIDOrganizer.detachBaseURI(sci.getUri().getUnicodeString()));
         jObj.put("title", sci.getTitle());
         return jObj.toString(4);
     }

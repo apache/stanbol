@@ -16,7 +16,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.contenthub.reactor</artifactId>
-  <version>0.9.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Contenthub Reactor</name>
@@ -38,12 +38,12 @@
   <modules>
     <module>parent</module>
     <module>servicesapi</module>
-    <module>store</module>
-    <module>index</module>
-    <module>search</module>
+    <module>store/file</module>
+<!--     <module>index</module> -->
+<!--     <module>search</module> -->
     <module>web</module>
     <module>bundlelist</module>
-    <module>ldpath</module>
+<!--     <module>ldpath</module> -->
   </modules>
 
 </project>

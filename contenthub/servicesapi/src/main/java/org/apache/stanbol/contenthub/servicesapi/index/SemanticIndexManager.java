@@ -16,7 +16,16 @@
  */
 package org.apache.stanbol.contenthub.servicesapi.index;
 
+import java.io.Reader;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathException;
+import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathProgramCollection;
+
+import at.newmedialab.ldpath.model.programs.Program;
 
 public interface SemanticIndexManager {
     SemanticIndex getIndex(String name);
@@ -30,4 +39,23 @@ public interface SemanticIndexManager {
     SemanticIndex getIndex(String name, EndpointType endpointType);
 
     List<SemanticIndex> getIndexes(String name, EndpointType endpointType);
+
+	String getProgramByName(String programName);
+
+	Program<Object> getParsedProgramByName(String programName);
+
+	void deleteProgram(String programName);
+
+	boolean isManagedProgram(String programName);
+
+	void submitProgram(String programName, String ldPathProgram)
+			throws LDPathException;
+
+	void submitProgram(String programName, Reader ldPathProgramReader)
+			throws LDPathException;
+
+	LDPathProgramCollection retrieveAllPrograms();
+
+	Map<String, Collection<?>> executeProgram(String programName,
+			Set<String> contexts) throws LDPathException;
 }

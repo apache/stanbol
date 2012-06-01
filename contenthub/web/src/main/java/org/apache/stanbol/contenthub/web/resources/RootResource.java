@@ -33,7 +33,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
 /**
- * Base resource which automatically redirects to "contenthub/contenthub/store"
+ * Base resource which automatically redirects to "contenthub/store"
  * 
  * @author anil.sinaci
  * 
@@ -51,7 +51,7 @@ public class RootResource extends BaseStanbolResource {
     @GET
     public Response getView(@Context HttpHeaders headers) throws URISyntaxException {
         ResponseBuilder rb = Response
-                .seeOther(new URI(uriInfo.getBaseUri() + "contenthub/contenthub/store/"));
+                .seeOther(new URI(uriInfo.getBaseUri() + "contenthub/store/"));
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }

@@ -30,9 +30,7 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.contenthub.web.resources.FeaturedSearchResource;
 import org.apache.stanbol.contenthub.web.resources.RootResource;
-import org.apache.stanbol.contenthub.web.resources.SemanticIndexManagerResource;
 import org.apache.stanbol.contenthub.web.resources.StoreResource;
 import org.apache.stanbol.contenthub.web.writers.LDProgramCollectionWriter;
 import org.apache.stanbol.contenthub.web.writers.SearchResultWriter;
@@ -43,94 +41,87 @@ import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
 
 /**
- * Statically define the list of available resources and providers to be
- * contributed to the the Stanbol JAX-RS Endpoint.
+ * Statically define the list of available resources and providers to be contributed to the the Stanbol JAX-RS
+ * Endpoint.
  */
 @Component(immediate = true, metatype = true)
 @Service
 public class ContenthubWebFragment implements WebFragment {
 
-	private static final String NAME = "contenthub";
+    private static final String NAME = "contenthub";
 
-	private static final String TEMPLATE_PATH = "/org/apache/stanbol/contenthub/web/templates";
-	private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/contenthub/web/static";
+    private static final String TEMPLATE_PATH = "/org/apache/stanbol/contenthub/web/templates";
+    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/contenthub/web/static";
 
-	private BundleContext bundleContext;
+    private BundleContext bundleContext;
 
-	@Override
-	public String getName() {
-		return NAME;
-	}
+    @Override
+    public String getName() {
+        return NAME;
+    }
 
-	@Activate
-	protected void activate(ComponentContext ctx) {
-		this.bundleContext = ctx.getBundleContext();
-	}
+    @Activate
+    protected void activate(ComponentContext ctx) {
+        this.bundleContext = ctx.getBundleContext();
+    }
 
-	@Override
-	public Set<Class<?>> getJaxrsResourceClasses() {
-		Set<Class<?>> classes = new HashSet<Class<?>>();
-		classes.add(RootResource.class);
-		classes.add(StoreResource.class);
-		classes.add(FeaturedSearchResource.class);
-		classes.add(SemanticIndexManagerResource.class);
+    @Override
+    public Set<Class<?>> getJaxrsResourceClasses() {
+        Set<Class<?>> classes = new HashSet<Class<?>>();
+        classes.add(RootResource.class);
+        classes.add(StoreResource.class);
 
-		classes.add(LDProgramCollectionWriter.class);
-		classes.add(SearchResultWriter.class);
+        classes.add(LDProgramCollectionWriter.class);
+        classes.add(SearchResultWriter.class);
 
-		return classes;
-	}
+        return classes;
+    }
 
-	@Override
-	public Set<Object> getJaxrsResourceSingletons() {
-		return Collections.emptySet();
-	}
+    @Override
+    public Set<Object> getJaxrsResourceSingletons() {
+        return Collections.emptySet();
+    }
 
-	@Override
-	public String getStaticResourceClassPath() {
-		return STATIC_RESOURCE_PATH;
-	}
+    @Override
+    public String getStaticResourceClassPath() {
+        return STATIC_RESOURCE_PATH;
+    }
 
-	@Override
-	public TemplateLoader getTemplateLoader() {
-		return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
-	}
+    @Override
+    public TemplateLoader getTemplateLoader() {
+        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
+    }
 
-	@Override
-	public List<LinkResource> getLinkResources() {
-		List<LinkResource> resources = new ArrayList<LinkResource>();
-		resources.add(new LinkResource("stylesheet", "style/contenthub.css",
-				this, 0));
-		resources.add(new LinkResource("stylesheet",
-				"style/jquery-ui-1.8.11.custom.css", this, 1));
-		return resources;
-	}
+    @Override
+    public List<LinkResource> getLinkResources() {
+        List<LinkResource> resources = new ArrayList<LinkResource>();
+        resources.add(new LinkResource("stylesheet", "style/contenthub.css", this, 0));
+        resources.add(new LinkResource("stylesheet", "style/jquery-ui-1.8.11.custom.css", this, 1));
+        return resources;
+    }
 
-	@Override
-	public List<ScriptResource> getScriptResources() {
-		List<ScriptResource> resources = new ArrayList<ScriptResource>();
-		resources.add(new ScriptResource("text/javascript",
-				"scripts/prettify/prettify.js", this, 0));
-		resources.add(new ScriptResource("text/javascript", "scripts/jit.js",
-				this, 1));
-		resources.add(new ScriptResource("text/javascript",
-				"scripts/jquery-1.5.1.min.js", this, 2));
-		resources.add(new ScriptResource("text/javascript",
-				"scripts/jquery-ui-1.8.11.custom.min.js", this, 3));
-		return resources;
-	}
+    @Override
+    public List<ScriptResource> getScriptResources() {
+        List<ScriptResource> resources = new ArrayList<ScriptResource>();
+        resources.add(new ScriptResource("text/javascript", "scripts/prettify/prettify.js", this, 0));
+        resources.add(new ScriptResource("text/javascript", "scripts/jit.js", this, 1));
+        resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.5.1.min.js", this, 2));
+        resources
+                .add(new ScriptResource("text/javascript", "scripts/jquery-ui-1.8.11.custom.min.js", this, 3));
+        return resources;
+    }
 
-	@Override
-	public List<NavigationLink> getNavigationLinks() {
-		List<NavigationLink> links = new ArrayList<NavigationLink>();
-		links.add(new NavigationLink("contenthub/contenthub/store",
-				"/contenthub", "/imports/contenthubDescription.ftl", 20));
-		return links;
-	}
+    @Override
+    public List<NavigationLink> getNavigationLinks() {
+        List<NavigationLink> links = new ArrayList<NavigationLink>();
+        links.add(new NavigationLink("contenthub/store", "/contenthub", "/imports/contenthubDescription.ftl",
+                20));
+        return links;
+    }
 
-	@Override
-	public BundleContext getBundleContext() {
-		return bundleContext;
-	}
+    @Override
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
 
 }
