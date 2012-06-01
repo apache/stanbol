@@ -34,7 +34,14 @@
     This jar contains a customized source assembly descriptor to produce Apache Stanbol compliant source bundles.
   </description>
   <inceptionYear>2012</inceptionYear>
-  <license>Apache Software License, Version 2.0</license>
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
   
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/releasing/source-assembly</connection>
