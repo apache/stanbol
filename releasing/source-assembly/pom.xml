@@ -26,7 +26,7 @@
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>source-assembly</artifactId>
-  <version>0.10.0-incubating</version>
+  <version>0.10.1-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <name>Apache Stanbol Releasing Source Assembly Descriptor</name>
@@ -44,9 +44,9 @@
   </licenses>
   
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/source-assembly-0.10.0-incubating</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/source-assembly-0.10.0-incubating</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/source-assembly-0.10.0-incubating</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/releasing/source-assembly</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/releasing/source-assembly</developerConnection>
+    <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
   <build>
