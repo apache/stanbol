@@ -101,7 +101,7 @@
     <dependency> <!-- provides Solr and OSGI utilities for Solr -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.1-incubating-SNAPSHOT</version>
     </dependency>
     <dependency> <!-- provides managed Solr servers -->
       <groupId>org.apache.stanbol</groupId>
