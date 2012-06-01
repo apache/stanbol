@@ -18,16 +18,21 @@
 <project
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
   xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <modelVersion>4.0.0</modelVersion>
+
   <parent>
-    <artifactId>stanbol-parent</artifactId>
     <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
     <version>2-incubating-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
+
   <name>Apache Stanbol Reasoners Services API</name>
 
   <description>Services API of Stanbol Reasoners</description>
