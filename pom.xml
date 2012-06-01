@@ -47,12 +47,13 @@
     <module>topic</module>
     <module>metaxa</module>
     <module>tika</module>
-    <module>geonames</module>
     <module>entitytagging</module>
     <module>keywordextraction</module>
     <module>refactor</module>
-
-    <module>opencalais</module>
-    <module>zemanta</module>
+    <!-- Enhancement Engines using external services -->
+    <module>celi</module> <!-- http://linguagrid.org -->
+    <module>geonames</module> <!-- http://geonames.org -->
+    <module>opencalais</module> <!-- http://opencalais.com/ -->
+    <module>zemanta</module> <!-- htt://zemanta.com -->
   </modules>
 </project>

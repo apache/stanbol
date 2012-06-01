@@ -1,0 +1,106 @@
+package org.apache.stanbol.enhancer.engines.celi.classification.impl;
+
+import static junit.framework.Assert.assertEquals;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateAllTopicAnnotations;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+
+import junit.framework.Assert;
+
+import org.apache.clerezza.rdf.core.LiteralFactory;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
+import org.apache.stanbol.enhancer.engines.celi.testutils.MockComponentContext;
+import org.apache.stanbol.enhancer.engines.celi.testutils.TestUtils;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
+import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.osgi.service.cm.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+public class CeliClassificationEnhancementEngineTest {
+	
+	static CeliClassificationEnhancementEngine classificationEngine = new CeliClassificationEnhancementEngine();
+
+	private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
+	
+	private static final Logger log = LoggerFactory.getLogger(CeliClassificationEnhancementEngine.class);
+	
+	private static final String TEXT = "Brigitte Bardot, née  le 28 septembre " +
+			"1934 à Paris, est une actrice de cinéma et chanteuse française.";
+
+	@BeforeClass
+	public static void setUpServices() throws IOException, ConfigurationException {
+		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		properties.put(EnhancementEngine.PROPERTY_NAME, "celiClassification");
+	    properties.put(CeliClassificationEnhancementEngine.SERVICE_URL, "http://linguagrid.org/LSGrid/ws/dbpedia-classification");
+	 	
+		MockComponentContext context = new MockComponentContext(properties);
+		classificationEngine.activate(context);
+	}
+
+	@AfterClass
+	public static void shutdownServices() {
+		classificationEngine.deactivate(null);
+	}
+
+	public static ContentItem wrapAsContentItem(final String text) throws IOException {
+		return ciFactory.createContentItem(new StringSource(text));
+	}
+
+	@Test
+	public void tesetEngine() throws Exception {
+		ContentItem ci = wrapAsContentItem(TEXT);
+		try {
+	        //add a simple triple to statically define the language of the test
+            //content
+            ci.getMetadata().add(new TripleImpl(ci.getUri(), DC_LANGUAGE, new PlainLiteralImpl("fr")));
+            //unit test should not depend on each other (if possible)
+            //CeliLanguageIdentifierEnhancementEngineTest.addEnanchements(ci);
+    			
+			classificationEngine.computeEnhancements(ci);
+
+	        TestUtils.logEnhancements(ci);
+	         HashMap<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+	            expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
+	            expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
+	                classificationEngine.getClass().getName()));
+
+			int textAnnoNum = EnhancementStructureHelper.validateAllTextAnnotations(ci.getMetadata(), TEXT,expectedValues);
+			assertEquals("Only a single fise:TextAnnotation is expeted", 1, textAnnoNum);
+			int numTopicAnnotations = validateAllTopicAnnotations(ci.getMetadata()  , expectedValues);
+			assertTrue("No TpocisAnnotations found", numTopicAnnotations > 0);
+		} catch (EngineException e) {
+			if (e.getCause() != null && e.getCause() instanceof UnknownHostException) {
+				log.warn("Celi Service not reachable -> offline? -> deactivate test");
+				return;
+			}
+			throw e;
+		}
+	}
+
+}
