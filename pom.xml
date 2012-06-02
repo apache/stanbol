@@ -41,14 +41,18 @@
   </description>
 
   <inceptionYear>2011</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>  
 
   <scm>
-    <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites/dbpediadefault
-    </connection>
-    <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites/dbpediadefault
-    </developerConnection>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites/dbpedia</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites/dbpedia</developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
 
