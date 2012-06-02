@@ -59,6 +59,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jersey-version>1.12</jersey-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
+    <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
   </properties>
 
   <build>
@@ -1420,7 +1421,7 @@
             <executions>
               <execution>
                 <goals>
-                  <goal>add-third-party</goal>
+                  <goal>aggregate-add-third-party</goal>
                 </goals>
               </execution>
             </executions>
@@ -1441,7 +1442,7 @@
               <dependency>
                 <groupId>org.apache.stanbol</groupId>
                 <artifactId>source-assembly</artifactId>
-                <version>0.10.0-incubating</version>
+                <version>0.10.1-incubating-SNAPSHOT</version>
               </dependency>
             </dependencies>
           </plugin>
