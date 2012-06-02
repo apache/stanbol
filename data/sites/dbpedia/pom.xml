@@ -15,21 +15,20 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.parent</artifactId>
-    <version>0.10.1-incubating-SNAPSHOT</version>
+    <version>0.10.0-incubating</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-  <version>1.0.4-incubating-SNAPSHOT</version>
+  <version>1.0.4-incubating</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: DBpedia.org</name>
@@ -51,9 +50,9 @@
   </licenses>  
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites/dbpedia</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites/dbpedia</developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.data.sites.dbpedia-1.0.4-incubating</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.data.sites.dbpedia-1.0.4-incubating</developerConnection>
+    <url>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.data.sites.dbpedia-1.0.4-incubating</url>
   </scm>
 
   <properties>
@@ -122,15 +121,15 @@
                 available!
               -->
               <target>
-                <property name="target.directory" value="${project.basedir}/src/main/resources/${dbpedia.default.index.path}"/>
-                <property name="index.url" value="${dbpedia.default.index.url}"/>
+                <property name="target.directory" value="${project.basedir}/src/main/resources/${dbpedia.default.index.path}" />
+                <property name="index.url" value="${dbpedia.default.index.url}" />
                                 
-                <echo message="copy Solr Index "/>
-                <echo message="  FROM ${index.url} "/>
-                <echo message="  TO ${target.directory}"/>
+                <echo message="copy Solr Index " />
+                <echo message=" FROM ${index.url} " />
+                <echo message=" TO ${target.directory}" />
 
                 <ant antfile="${basedir}/download_index.xml">
-                  <target name="download"/>
+                  <target name="download" />
                 </ant>
               </target>
             </configuration>
