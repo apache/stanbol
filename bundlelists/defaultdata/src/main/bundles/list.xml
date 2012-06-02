@@ -45,7 +45,7 @@
     <bundle> <!-- dbpedia is includes as default data set -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-      <version>1.0.4-incubating-SNAPSHOT</version>
+      <version>1.0.5-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
 </bundles>  
