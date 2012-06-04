@@ -57,7 +57,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <dbpedia.default.index.url>http://www.salzburgresearch.at/~rwesten/stanbol/dbpedia_43k.solrindex.zip</dbpedia.default.index.url>
+    <dbpedia.default.index.url>http://dev.iks-project.eu/downloads/stanbol-indices/dbpedia_43k.solrindex.zip</dbpedia.default.index.url>
     <dbpedia.default.path>org/apache/stanbol/data/site/dbpedia/default</dbpedia.default.path>
     <dbpedia.default.index.path>${dbpedia.default.path}/index</dbpedia.default.index.path>
     <dbpedia.default.config.path>${dbpedia.default.path}/config</dbpedia.default.config.path>
