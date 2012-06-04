@@ -16,13 +16,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.10.0-incubating</version>
+    <version>0.10.1-incubating-SNAPSHOT</version>
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
-  <version>0.10.0-incubating</version>
+  <version>0.10.1-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Entityhub LDPath Support</name>
@@ -39,12 +39,12 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.entityhub.reactor-0.10.0-incubating/ldpath
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/ldpath
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.entityhub.reactor-0.10.0-incubating/ldpath
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/ldpath
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.entityhub.reactor-0.10.0-incubating/stanbol</url>
+    <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
   <build>
@@ -136,7 +136,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-      <version>1.0.4-incubating</version>
+      <version>1.0.5-incubating-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <!-- Apache Stanbol Commons Solr and Solr Yard dependencies -->

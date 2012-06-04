@@ -28,7 +28,7 @@
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.indexing.reactor</artifactId>
-  <version>0.10.0-incubating</version>
+  <version>0.10.1-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Entityhub Indexing Reactor</name>
@@ -49,12 +49,12 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.entityhub.reactor-0.10.0-incubating/indexing
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.entityhub.reactor-0.10.0-incubating/indexing
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.entityhub.reactor-0.10.0-incubating/stanbol</url>
+    <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
   <modules>
