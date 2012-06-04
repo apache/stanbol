@@ -188,7 +188,7 @@ public class EnhancementJobHandler implements EventHandler {
                     for(NonLiteral runningNode : job.getRunning()){
                         running.add(getEngine(job.getExecutionPlan(), runningNode));
                     }
-                    log.debug("Job {} failed, but {} still running!",
+                    log.info("Job {} failed, but {} still running!",
                         job.getContentItem().getUri(),running);
                 }
             }

@@ -590,7 +590,8 @@ public class EnhancementJob {
         readLock.lock();
         try {
             log.debug(">> r: {}","isFinished");
-            return executable.isEmpty() && running.isEmpty();
+            return running.isEmpty() && // wait for running engine (regard if failed or not)
+                    (executable.isEmpty() || isFailed()); //no more engines or already failed
         } finally {
             log.debug("<< r: {}","isFinished");
             readLock.unlock();
