@@ -28,7 +28,7 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.entityhub.reactor</artifactId>
+  <artifactId>apache-stanbol-entityhub</artifactId>
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
@@ -55,11 +55,7 @@
       scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
-  </scm>
-
-  <build>
-    <finalName>apache-stanbol-entityhub-${project.version}</finalName>  
-  </build>  
+  </scm>  
 
   <modules>
     <module>parent</module>
