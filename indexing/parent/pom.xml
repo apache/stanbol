@@ -15,20 +15,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.10.0-incubating-SNAPSHOT</version>
+    <version>0.10.0-incubating</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.indexing.parent</artifactId>
-  <version>0.10.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-incubating</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Entityhub Indexing Parent</name>
@@ -48,12 +47,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/parent
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.entityhub.reactor-0.10.0-incubating/indexing/parent
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/parent
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.entityhub.reactor-0.10.0-incubating/indexing/parent
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/org.apache.stanbol.entityhub.reactor-0.10.0-incubating/incubator.apache.org/stanbol</url>
   </scm>
 
   <build>
