@@ -31,10 +31,20 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Indexing SolrYard destination</name>
+  <name>Apache Stanbol Entityhub Indexing Destination SolrYard</name>
   <description>
   Implementation of the IndexingTarget interface for the Stanbol Entityhub SolrYard.
   </description>
+
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/destination/solryard
@@ -44,6 +54,7 @@
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
+  
   <build>
     <plugins>
       <plugin>

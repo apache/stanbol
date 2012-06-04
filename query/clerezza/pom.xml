@@ -32,12 +32,20 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Query implementation hased on SPARQL </name>
+  <name>Apache Stanbol Entityhub Query SPARQL</name>
   <description>This bundle provides implementation of the Entityhub Query interface(s) 
   based on SPARQL by using the Clerezza framework.</description>
 
   <inceptionYear>2010</inceptionYear>
-
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+  
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/query/clerezza
