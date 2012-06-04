@@ -32,7 +32,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Entityhub Indexing reactor</name>
+  <name>Apache Stanbol Entityhub Indexing Reactor</name>
   <description>
     Pseudo project to build the complete Apache Stanbol Entityhub Indexing component
   </description>
