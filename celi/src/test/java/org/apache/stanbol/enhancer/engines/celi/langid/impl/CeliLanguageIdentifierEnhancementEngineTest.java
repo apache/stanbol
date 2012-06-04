@@ -33,7 +33,9 @@ import org.slf4j.LoggerFactory;
 
 public class CeliLanguageIdentifierEnhancementEngineTest {
 	
-	static CeliLanguageIdentifierEnhancementEngine langIdentifier = new CeliLanguageIdentifierEnhancementEngine();
+    public static final String CELI_LANGID_SERVICE_URL = "http://linguagrid.org/LSGrid/ws/language-identifier";
+    
+    static CeliLanguageIdentifierEnhancementEngine langIdentifier = new CeliLanguageIdentifierEnhancementEngine();
 
     private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
 
@@ -45,7 +47,7 @@ public class CeliLanguageIdentifierEnhancementEngineTest {
 	public static void setUpServices() throws IOException, ConfigurationException {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EnhancementEngine.PROPERTY_NAME, "celiLangIdentifier");
-	    properties.put(CeliLanguageIdentifierEnhancementEngine.SERVICE_URL, "http://linguagrid.org/LSGrid/ws/language-identifier");
+	    properties.put(CeliLanguageIdentifierEnhancementEngine.SERVICE_URL, CELI_LANGID_SERVICE_URL);
 	    
 		MockComponentContext context = new MockComponentContext(properties);
 		langIdentifier.activate(context);
