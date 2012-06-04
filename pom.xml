@@ -21,18 +21,18 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.apache</groupId>
-    <artifactId>apache</artifactId>
-    <version>10</version>
-    <relativePath />
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>2-incubating-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
   </parent>
-    
+
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.reactor</artifactId>
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Entityhub Reactor</name>
+  <name>Apache Stanbol Entityhub</name>
   <description>
     Pseudo project to build the complete Apache Stanbol Entityhub component
   </description>
@@ -57,6 +57,10 @@
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
+  <build>
+    <finalName>apache-stanbol-entityhub-${project.version}</finalName>  
+  </build>  
+
   <modules>
     <module>parent</module>
 
@@ -76,4 +80,78 @@
     <module>defaults</module>
     <module>bundlelist</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>apache-release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <configuration>
+              <excludeSubProjects>false</excludeSubProjects>
+              <excludes>
+                <!--
+                  All license headers are also checked per
+                  artifact. These excludes are necessary
+                  to make the reactor build suceed. Consider
+                  the excluded files here as already checked
+                  in the artifacts.
+                -->
+
+                <!-- exclude hidden files -->
+                <exclude>**/.*</exclude>
+                <exclude>**/.*/*</exclude>
+                <exclude>**/.*/**/*</exclude>
+
+                <!-- exclude build files -->
+                <exclude>**/target/**</exclude>
+                <exclude>**/*.log</exclude>             
+
+                <!-- exclude generated files listing the licenses of deps -->
+                <exclude>DEPENDENCIES</exclude>
+                <exclude>DEPENDENCIES-BY-LICENSE</exclude>
+                <exclude>RAT-REPORT</exclude>
+                <exclude>**/src/license/THIRD-PARTY.properties</exclude>
+
+                <!-- exclude certain file types -->
+                <exclude>**/*.config</exclude>
+                <exclude>**/*.cfg</exclude>
+                <exclude>**/*.ref</exclude>
+                <exclude>**/*.txt</exclude>
+                <exclude>**/*.tsv</exclude>
+                <exclude>**/*.sem</exclude>
+
+                <!-- exclude test files --> 
+                <exclude>**/test/**/*.eml</exclude>
+                <exclude>**/test/**/*.nt</exclude>
+                <exclude>**/test/**/*.html</exclude>
+                <exclude>**/test/**/*.xhtml</exclude>
+                <exclude>**/test/**/*.rdf</exclude>
+                <exclude>**/test/**/*.rtf</exclude>
+                <exclude>**/test/**/*.rules</exclude>
+                <exclude>**/test/**/*.odt</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>aggregate-add-third-party</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>
