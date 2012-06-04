@@ -392,6 +392,13 @@
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
           <version>0.8</version>
+          <executions>
+            <execution>
+              <configuration>
+                <reportFile>${project.build.directory}/maven-shared-archive-resources/META-INF/RAT-REPORT</reportFile>
+              </configuration> 
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -1407,13 +1414,13 @@
                 <goals>
                   <goal>check</goal>
                 </goals>
-              </execution>
+              </execution>             
             </executions>
             <configuration>
               <excludes>
                 <exclude>src/license/THIRD-PARTY.properties</exclude>
-              </excludes>
-            </configuration>
+              </excludes>    
+            </configuration>             
           </plugin>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
@@ -1421,7 +1428,7 @@
             <executions>
               <execution>
                 <goals>
-                  <goal>aggregate-add-third-party</goal>
+                  <goal>add-third-party</goal>
                 </goals>
               </execution>
             </executions>
@@ -1436,6 +1443,23 @@
       </activation>
       <build>
         <plugins>
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>compile</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <excludes>
+                <exclude>src/license/THIRD-PARTY.properties</exclude>
+              </excludes>    
+            </configuration>
+          </plugin>          
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
             <dependencies>
@@ -1456,7 +1480,7 @@
                 </goals>
               </execution>
             </executions>
-          </plugin>          
+          </plugin>
         </plugins>
       </build>
     </profile>
