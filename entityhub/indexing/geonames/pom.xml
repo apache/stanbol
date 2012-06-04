@@ -32,9 +32,21 @@
   <artifactId>org.apache.stanbol.entityhub.indexing.geonames</artifactId>
   <packaging>jar</packaging>
   <version>0.10.0-incubating-SNAPSHOT</version>
+  
   <name>Apache Stanbol Entityhub Indexing for geonames.org</name>
-  <description>This uses the DB dump of geonames.org to create a Full Yard containing all points of interest of geonames.org
+  
+  <description>
+    This uses the DB dump of geonames.org to create a Full Yard containing all points of interest of geonames.org
   </description>
+
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
 
   <scm>
     <connection>

@@ -32,13 +32,21 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Linked Data Protocol Implementation</name>
+  <name>Apache Stanbol Entityhub Site Linked Data Protocol</name>
   <description>This includes EntityDereferencer and EntitySearcher implementations
     for the protocols such as CoolURI and SPARQL Endpoints
   </description>
 
   <inceptionYear>2010</inceptionYear>
-
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+  
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/site/linkeddata

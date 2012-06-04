@@ -32,7 +32,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub IndexingSource for RDF using Jena TDB</name>
+  <name>Apache Stanbol Entityhub Indexing Source for Jena TDB</name>
   <description>
     Provides support for indexing RDF data by using an Jena TDB triple store.
     It supports to used an existing triple store and to create an new one by
@@ -41,12 +41,21 @@
     http://dbpedia.org dumps. 
   </description>
   
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+    
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/rdf/jenatdb
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/source/jenatdb
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/rdf/jenatdb
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/source/jenatdb
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>

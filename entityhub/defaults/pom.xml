@@ -25,7 +25,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub default configuration</name>
+  <name>Apache Stanbol Entityhub Default Configuration</name>
   <description>This provides the default configuration for the Entityhub. This bundle can be removed by users that want/need to provide their own configuration conflicting with the defaults.</description>
   
   <scm>
@@ -38,6 +38,15 @@
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+  
   <build>
     <!-- make it an OSGi bundle -->
     <plugins>
