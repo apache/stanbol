@@ -19,15 +19,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-<!-- Do not use a parent because of problems with missing dependencies with
-     mvn assembly:assembly
-    <parent>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
-      <relativePath>../../parent</relativePath>
-    </parent>
-  -->
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
+    <version>0.10.0-incubating-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
+
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.indexing.geonames</artifactId>
   <packaging>jar</packaging>
