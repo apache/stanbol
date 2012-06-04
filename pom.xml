@@ -19,9 +19,10 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-    <groupId>org.apache.apache.resources</groupId>
-    <artifactId>apache-resource-bundles</artifactId>
-    <version>3</version>
+    <groupId>org.apache</groupId>
+    <artifactId>apache</artifactId>
+    <version>10</version>
+    <relativePath />
   </parent>
   
   <groupId>org.apache.stanbol</groupId>
