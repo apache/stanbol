@@ -27,14 +27,12 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.RecipeConstructionException;
@@ -53,7 +51,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.reasoner.Reasoner;
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
 import com.hp.hpl.jena.sparql.pfunction.PropertyFunctionRegistry;
 
@@ -89,9 +86,9 @@ public class RefactorerImpl implements Refactorer {
      * <p>
      * DO NOT USE to manually create instances - the RefactorerImpl instances do need to be configured! YOU
      * NEED TO USE
-     * {@link #RefactorerImpl(WeightedTcProvider, Serializer, TcManager, ONManager, SemionManager, RuleStore, Reasoner, Dictionary)}
-     * or its overloads, to parse the configuration and then initialise the rule store if running outside a
-     * OSGI environment.
+     * {@link #RefactorerImpl(WeightedTcProvider, TcManager, RuleStore, RuleAdapterManager, Dictionary)} or
+     * its overloads, to parse the configuration and then initialise the rule store if running outside a OSGI
+     * environment.
      */
     public RefactorerImpl() {
 

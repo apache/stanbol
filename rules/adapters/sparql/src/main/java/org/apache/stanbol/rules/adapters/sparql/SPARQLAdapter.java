@@ -199,14 +199,15 @@ public class SPARQLAdapter extends AbstractRuleAdapter {
 
         if (type == SPARQLObject.class) {
 
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
             String className = ruleAtom.getClass().getSimpleName();
 
             String canonicalName = ARTIFACT + "." + className;
 
             try {
-                Class<AdaptableAtom> sparqlAtomClass = (Class<AdaptableAtom>) loader.loadClass(canonicalName);
+                // ClassLoader loader = Thread.currentThread().getContextClassLoader();
+                // Class<AdaptableAtom> sparqlAtomClass =
+                // (Class<AdaptableAtom>)loader.loadClass(canonicalName);
+                Class<AdaptableAtom> sparqlAtomClass = (Class<AdaptableAtom>) Class.forName(canonicalName);
 
                 try {
                     AdaptableAtom sparqlAtom = sparqlAtomClass.newInstance();
@@ -286,10 +287,9 @@ public class SPARQLAdapter extends AbstractRuleAdapter {
 
     @Override
     public <T> boolean canAdaptTo(Adaptable adaptable, Class<T> type) {
-        if(type == SPARQLObject.class){
+        if (type == SPARQLObject.class) {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }

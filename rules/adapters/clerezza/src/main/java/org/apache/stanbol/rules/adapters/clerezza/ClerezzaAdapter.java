@@ -190,15 +190,16 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
 
         if (type == ConstructQuery.class) {
 
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
             String className = ruleAtom.getClass().getSimpleName();
 
             String canonicalName = ARTIFACT + "." + className;
 
             try {
-                Class<AdaptableAtom> clerezzaAtomClass = (Class<AdaptableAtom>) loader
-                        .loadClass(canonicalName);
+
+                // ClassLoader loader = Thread.currentThread().getContextClassLoader();
+                // Class<AdaptableAtom> clerezzaAtomClass = (Class<AdaptableAtom>)
+                // loader.loadClass(canonicalName);
+                Class<AdaptableAtom> clerezzaAtomClass = (Class<AdaptableAtom>) Class.forName(canonicalName);
 
                 try {
                     AdaptableAtom clerezzaAtom = clerezzaAtomClass.newInstance();
@@ -269,10 +270,9 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
 
     @Override
     public <T> boolean canAdaptTo(Adaptable adaptable, Class<T> type) {
-        if(type == ConstructQuery.class){
+        if (type == ConstructQuery.class) {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }

@@ -129,9 +129,9 @@ public class RulesResource extends BaseStanbolResource {
                        MediaType.TEXT_PLAIN})
     @Path("/find/recipes")
     public Response findRecipes(@QueryParam("description") String description) {
-        
+
         log.info("Searching for recipes with description like to {}.", description);
-        
+
         RecipeList recipes = ruleStore.findRecipesByDescription(description);
 
         log.info("The recipe list is emplty? {} ", recipes.isEmpty());
@@ -233,13 +233,13 @@ public class RulesResource extends BaseStanbolResource {
         addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
     }
-    
+
     @GET
     @Path("/recipe/{recipe:.+}")
     @Produces(value = {MediaType.TEXT_HTML})
     public Response showRecipe(@PathParam("recipe") String recipeID,
-                            @QueryParam("rule") String ruleID,
-                            @Context HttpHeaders headers) {
+                               @QueryParam("rule") String ruleID,
+                               @Context HttpHeaders headers) {
 
         Recipe recipe;
         Rule rule;
@@ -256,7 +256,8 @@ public class RulesResource extends BaseStanbolResource {
                 recipe = new RecipeImpl(recipe.getRecipeID(), recipe.getRecipeDescription(), ruleList);
             }
 
-            responseBuilder = Response.ok(new Viewable("rules", new RulesPrettyPrintResource(servletContext,uriInfo,recipe)));
+            responseBuilder = Response.ok(new Viewable("rules", new RulesPrettyPrintResource(servletContext,
+                    uriInfo, recipe)));
 
         } catch (NoSuchRecipeException e) {
             log.error(e.getMessage(), e);
@@ -268,7 +269,7 @@ public class RulesResource extends BaseStanbolResource {
             log.error(e.getMessage(), e);
             responseBuilder = Response.status(Status.NOT_FOUND);
         }
-        
+
         addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
     }
@@ -310,12 +311,12 @@ public class RulesResource extends BaseStanbolResource {
         return responseBuilder.build();
 
     }
-    
+
     @GET
     @Path("/recipe")
     @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.RDF_JSON,
                        KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL})
-    public Response listRecipes(@Context HttpHeaders headers){
+    public Response listRecipes(@Context HttpHeaders headers) {
         ResponseBuilder responseBuilder = null;
         try {
             RecipeList recipeList = getListRecipes();
@@ -327,12 +328,12 @@ public class RulesResource extends BaseStanbolResource {
             log.error(e.getMessage(), e);
             responseBuilder = Response.status(Status.INTERNAL_SERVER_ERROR);
         }
-        
-       addCORSOrigin(servletContext, responseBuilder, headers);
-       return responseBuilder.build();
+
+        addCORSOrigin(servletContext, responseBuilder, headers);
+        return responseBuilder.build();
     }
-    
-    public RecipeList getListRecipes() throws NoSuchRecipeException, RecipeConstructionException{
+
+    public RecipeList getListRecipes() throws NoSuchRecipeException, RecipeConstructionException {
         return ruleStore.listRecipes();
     }
 
@@ -472,10 +473,11 @@ public class RulesResource extends BaseStanbolResource {
 
         ResponseBuilder responseBuilder = null;
 
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
         Class<?> classToLoad;
         try {
-            classToLoad = loader.loadClass(format);
+            // ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            // classToLoad = loader.loadClass(format);
+            classToLoad = Class.forName(format);
             Recipe rcp = ruleStore.getRecipe(new UriRef(recipe));
             RuleAdapter adapter = adapterManager.getAdapter(rcp, classToLoad);
 
@@ -573,8 +575,7 @@ public class RulesResource extends BaseStanbolResource {
         return responseBuilder.build();
 
     }
-    
-    
+
     public List<RuleAdapter> getListAdapters() {
 
         return adapterManager.listRuleAdapters();

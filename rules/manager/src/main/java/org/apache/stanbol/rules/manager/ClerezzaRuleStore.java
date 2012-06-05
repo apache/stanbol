@@ -24,7 +24,6 @@ package org.apache.stanbol.rules.manager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +52,6 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.rules.base.api.AlreadyExistingRecipeException;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.NoSuchRuleInRecipeException;
@@ -102,8 +100,8 @@ public class ClerezzaRuleStore implements RuleStore {
      * Component Runtime support.
      * <p>
      * DO NOT USE to manually create instances - the RuleStoreImpl instances do need to be configured! YOU
-     * NEED TO USE {@link #RuleStoreImpl(ONManager, Dictionary)} or its overloads, to parse the configuration
-     * and then initialise the rule store if running outside a OSGI environment.
+     * NEED TO USE {@link #ClerezzaRuleStore(Dictionary, TcManager)} or its overloads, to parse the
+     * configuration and then initialise the rule store if running outside a OSGI environment.
      */
     public ClerezzaRuleStore() {}
 
@@ -197,15 +195,14 @@ public class ClerezzaRuleStore implements RuleStore {
 
         TripleCollection recipeIndexTripleCollection = tcManager.getMGraph(new UriRef(recipeIndexLocation));
         recipeIndexTripleCollection.add(recipeTriple);
-        
-        if(recipeDescription != null && !recipeDescription.isEmpty()){
+
+        if (recipeDescription != null && !recipeDescription.isEmpty()) {
             Triple descriptionTriple = new TripleImpl(recipeID, Symbols.description, new PlainLiteralImpl(
                     recipeDescription));
             tripleCollection.add(descriptionTriple);
-            
+
             recipeIndexTripleCollection.add(descriptionTriple);
         }
-        
 
         // add the recpe ID to the list of known recipes
         recipes.add(recipeID);
@@ -250,7 +247,7 @@ public class ClerezzaRuleStore implements RuleStore {
 
         tripleCollection.add(new TripleImpl(rule.getRuleID(), Symbols.ruleName, new PlainLiteralImpl(rule
                 .getRuleName())));
-        if(description != null && !description.isEmpty()){
+        if (description != null && !description.isEmpty()) {
             tripleCollection.add(new TripleImpl(rule.getRuleID(), Symbols.description, new PlainLiteralImpl(
                     description)));
         }
@@ -425,7 +422,7 @@ public class ClerezzaRuleStore implements RuleStore {
             }
             recipeList.add(recipe);
         }
-        
+
         log.info("The Clerezza rule store contains {} recipes", recipeList.size());
 
         return recipeList;
@@ -539,7 +536,7 @@ public class ClerezzaRuleStore implements RuleStore {
 
                 try {
                     Recipe recipe = getRecipe(recipeID);
-                    
+
                     log.info("Found recipe {}.", recipeID.toString());
                     matchingRecipes.add(recipe);
                     log.info("Found {} matching recipes.", matchingRecipes.size());
@@ -578,7 +575,6 @@ public class ClerezzaRuleStore implements RuleStore {
 
         try {
 
-            
             SelectQuery query = (SelectQuery) QueryParser.getInstance().parse(sparql);
 
             ResultSet resultSet = tcManager.executeSparqlQuery(query, unionMGraph);

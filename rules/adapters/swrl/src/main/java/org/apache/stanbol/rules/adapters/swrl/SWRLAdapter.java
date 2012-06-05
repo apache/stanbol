@@ -142,14 +142,14 @@ public class SWRLAdapter extends AbstractRuleAdapter {
 
         if (type == SWRLRule.class) {
 
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
             String className = ruleAtom.getClass().getSimpleName();
 
             String canonicalName = ARTIFACT + "." + className;
 
             try {
-                Class<AdaptableAtom> swrlAtomClass = (Class<AdaptableAtom>) loader.loadClass(canonicalName);
+                // ClassLoader loader = Thread.currentThread().getContextClassLoader();
+                // Class<AdaptableAtom> swrlAtomClass = (Class<AdaptableAtom>)loader.loadClass(canonicalName);
+                Class<AdaptableAtom> swrlAtomClass = (Class<AdaptableAtom>) Class.forName(canonicalName);
 
                 try {
                     AdaptableAtom swrlAtom = swrlAtomClass.newInstance();
@@ -224,10 +224,9 @@ public class SWRLAdapter extends AbstractRuleAdapter {
 
     @Override
     public <T> boolean canAdaptTo(Adaptable adaptable, Class<T> type) {
-        if(type == SWRLRule.class){
+        if (type == SWRLRule.class) {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }

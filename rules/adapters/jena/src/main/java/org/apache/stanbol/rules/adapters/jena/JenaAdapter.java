@@ -164,14 +164,14 @@ public class JenaAdapter extends AbstractRuleAdapter {
 
         if (type == com.hp.hpl.jena.reasoner.rulesys.Rule.class) {
 
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
             String className = ruleAtom.getClass().getSimpleName();
 
             String canonicalName = ARTIFACT + "." + className;
 
             try {
-                Class<AdaptableAtom> jenaAtomClass = (Class<AdaptableAtom>) loader.loadClass(canonicalName);
+                // ClassLoader loader = Thread.currentThread().getContextClassLoader();
+                // Class<AdaptableAtom> jenaAtomClass = (Class<AdaptableAtom>)loader.loadClass(canonicalName);
+                Class<AdaptableAtom> jenaAtomClass = (Class<AdaptableAtom>) Class.forName(canonicalName);
 
                 try {
                     AdaptableAtom jenaAtom = jenaAtomClass.newInstance();
@@ -246,10 +246,9 @@ public class JenaAdapter extends AbstractRuleAdapter {
 
     @Override
     public <T> boolean canAdaptTo(Adaptable adaptable, Class<T> type) {
-        if(type == com.hp.hpl.jena.reasoner.rulesys.Rule.class){
+        if (type == com.hp.hpl.jena.reasoner.rulesys.Rule.class) {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
