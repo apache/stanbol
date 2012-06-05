@@ -186,7 +186,7 @@ public final class QueryUtils {
         Matcher m = wILDCARD_QUERY_CHAR_PATTERN.matcher(value);
         int next = m.find()?m.start()+1:-1;
         if(next < 0){ //No wildcard
-            return new String[]{value};
+            return new String[]{'"'+value+'"'};
         } 
         ArrayList<String> queryElements = new ArrayList<String>(5);
         int lastAdded = -1;
@@ -206,14 +206,15 @@ public final class QueryUtils {
                     //      'at' as active Token and we need write "wildcar?" as
                     //      query term
                     // (2) [wild,ard,within,the,word]: In this case this is called with
-                    //      'ard' as active Tiken and we need write "wild?ard" as
+                    //      'ard' as active Token and we need write "wild?ard" as
                     //      query term.
                     if(offset.startOffset() > lastOffset+1) {//(1)
                         String queryElement = value.substring(lastAdded,lastOffset+1);
                         if(loewercaseWildcardTokens){
                             queryElement = queryElement.toLowerCase();
                         }
-                        queryElements.add(queryElement);
+                        
+                        queryElements.add('"'+queryElement+'"');
                         lastAdded = offset.startOffset(); //previous token consumed
                         //set to the start of the current token
                         foundWildcard = false;
@@ -222,7 +223,7 @@ public final class QueryUtils {
                         if(loewercaseWildcardTokens){
                             queryElement = queryElement.toLowerCase();
                         }
-                        queryElements.add(queryElement);
+                        queryElements.add('"'+queryElement+'"');
                         lastAdded = -1; //consume the current token
                         foundWildcard = false;
                     }
@@ -233,7 +234,8 @@ public final class QueryUtils {
                     //NOTE: ignore if foundWildcard is TRUE (multiple wildcards in
                     //      a single word
                     if(!foundWildcard && lastAdded<lastOffset){
-                        queryElements.add(value.substring(lastAdded,lastOffset));
+                        String queryElement = value.substring(lastAdded,lastOffset);
+                        queryElements.add('"'+queryElement+'"');
                         lastAdded = offset.startOffset();
                     }//else multiple wildcards in a single token
                     foundWildcard = true;
@@ -249,7 +251,7 @@ public final class QueryUtils {
             if(foundWildcard && loewercaseWildcardTokens){
                 queryElement = queryElement.toLowerCase();
             }
-            queryElements.add(queryElement);
+            queryElements.add('"'+queryElement+'"');
         }
         return queryElements.toArray(new String[queryElements.size()]);
     }
