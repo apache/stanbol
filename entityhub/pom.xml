@@ -23,7 +23,7 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
     <version>2-incubating-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
+    <relativePath>../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
