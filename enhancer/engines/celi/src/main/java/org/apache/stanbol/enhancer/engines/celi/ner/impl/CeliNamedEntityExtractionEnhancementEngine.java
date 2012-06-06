@@ -56,6 +56,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
 import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
+import org.apache.stanbol.enhancer.engines.celi.utils.Utils;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -66,6 +67,7 @@ import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -75,7 +77,8 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties(value = { 
     @Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiNer"),
-    @Property(name = CeliConstants.CELI_LICENSE)
+    @Property(name = CeliConstants.CELI_LICENSE),
+    @Property(name = CeliConstants.CELI_TEST_ACCOUNT,boolValue=false)
 })
 public class CeliNamedEntityExtractionEnhancementEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 	
@@ -114,7 +117,7 @@ public class CeliNamedEntityExtractionEnhancementEngine extends AbstractEnhancem
 	 */
 	public static final Integer defaultOrder = ORDERING_CONTENT_EXTRACTION;
 
-	private Logger log = LoggerFactory.getLogger(getClass());
+	private static final Logger log = LoggerFactory.getLogger(CeliNamedEntityExtractionEnhancementEngine.class);
 
 	/**
 	 * This contains the only MIME type directly supported by this enhancement
@@ -147,13 +150,7 @@ public class CeliNamedEntityExtractionEnhancementEngine extends AbstractEnhancem
         Dictionary<String, Object> properties = ctx.getProperties();
         log.info("Activate CELI NER engine:");
         log.info(" > name: {}",getName());
-        this.licenseKey = (String) properties.get(CeliConstants.CELI_LICENSE);
-        if (licenseKey == null || licenseKey.isEmpty()) {
-            this.licenseKey = ctx.getBundleContext().getProperty(CeliConstants.CELI_LICENSE);
-        }
-		if (licenseKey == null || licenseKey.isEmpty()) {
-			log.warn("no CELI license key configured for this Engine, a guest account will be used (max 100 requests per day). Go on http://linguagrid.org for getting a proper license key.");
-		}
+        this.licenseKey = Utils.getLicenseKey(properties,ctx.getBundleContext());
 		String url = (String) properties.get(SERVICE_URL);
 		if (url == null || url.isEmpty()) {
 			throw new ConfigurationException(SERVICE_URL, String.format("%s : please configure the URL of the CELI Web Service (e.g. by" + "using the 'Configuration' tab of the Apache Felix Web Console).", getClass().getSimpleName()));

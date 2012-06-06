@@ -30,6 +30,7 @@ import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
+import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
 import org.apache.stanbol.enhancer.engines.celi.testutils.MockComponentContext;
 import org.apache.stanbol.enhancer.engines.celi.testutils.TestUtils;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -63,6 +64,7 @@ public class CeliLanguageIdentifierEnhancementEngineTest {
 	public static void setUpServices() throws IOException, ConfigurationException {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EnhancementEngine.PROPERTY_NAME, "celiLangIdentifier");
+        properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
 	    properties.put(CeliLanguageIdentifierEnhancementEngine.SERVICE_URL, CELI_LANGID_SERVICE_URL);
 	    
 		MockComponentContext context = new MockComponentContext(properties);

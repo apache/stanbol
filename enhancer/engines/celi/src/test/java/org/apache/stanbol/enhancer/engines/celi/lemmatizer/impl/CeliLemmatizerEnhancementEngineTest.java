@@ -51,6 +51,7 @@ import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.XSD;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
+import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
 import org.apache.stanbol.enhancer.engines.celi.testutils.MockComponentContext;
 import org.apache.stanbol.enhancer.engines.celi.testutils.TestUtils;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -77,6 +78,7 @@ public class CeliLemmatizerEnhancementEngineTest {
 	public CeliLemmatizerEnhancementEngine initEngine(boolean completeMorphoAnalysis) throws IOException, ConfigurationException {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EnhancementEngine.PROPERTY_NAME, "celiLemmatizer");
+        properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
 	    properties.put(SERVICE_URL, "http://linguagrid.org/LSGrid/ws/morpho-analyser");
 	    properties.put(MORPHOLOGICAL_ANALYSIS, completeMorphoAnalysis);
 		MockComponentContext context = new MockComponentContext(properties);

@@ -31,6 +31,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
+import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
 import org.apache.stanbol.enhancer.engines.celi.classification.impl.CeliClassificationEnhancementEngine;
 import org.apache.stanbol.enhancer.engines.celi.testutils.MockComponentContext;
 import org.apache.stanbol.enhancer.engines.celi.testutils.TestUtils;
@@ -75,6 +76,7 @@ public class CeliNamedEntityExtractionEnhancementEngineTest {
 	public static void setUpServices() throws IOException, ConfigurationException {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EnhancementEngine.PROPERTY_NAME, "celiNer");
+        properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
 	    properties.put(CeliNamedEntityExtractionEnhancementEngine.SERVICE_URL, "http://linguagrid.org/LSGrid/ws/com.celi-france.linguagrid.namedentityrecognition.v0u0.demo");
 	    properties.put(CeliNamedEntityExtractionEnhancementEngine.SUPPORTED_LANGUAGES, "fr;it");
 	    MockComponentContext context = new MockComponentContext(properties);

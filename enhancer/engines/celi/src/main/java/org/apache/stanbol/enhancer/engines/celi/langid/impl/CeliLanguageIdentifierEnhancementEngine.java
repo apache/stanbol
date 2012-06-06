@@ -47,6 +47,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
 import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
+import org.apache.stanbol.enhancer.engines.celi.utils.Utils;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -67,7 +68,8 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties(value = { 
     @Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiLangid"),
-    @Property(name = CeliConstants.CELI_LICENSE)
+    @Property(name = CeliConstants.CELI_LICENSE),
+    @Property(name = CeliConstants.CELI_TEST_ACCOUNT,boolValue=false)
 })
 public class CeliLanguageIdentifierEnhancementEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 	/**
@@ -118,13 +120,7 @@ public class CeliLanguageIdentifierEnhancementEngine extends AbstractEnhancement
 	public void activate(ComponentContext ctx) throws IOException, ConfigurationException {
 		super.activate(ctx);
 		Dictionary<String, Object> properties = ctx.getProperties();
-		this.licenseKey = (String) properties.get(CeliConstants.CELI_LICENSE);
-        if (licenseKey == null || licenseKey.isEmpty()) {
-            this.licenseKey = ctx.getBundleContext().getProperty(CeliConstants.CELI_LICENSE);
-        }
-		if (licenseKey == null || licenseKey.isEmpty()) {
-			log.warn("no CELI license key configured for this Engine, a guest account will be used (max 100 requests per day). Go on http://linguagrid.org for getting a proper license key.");
-		}
+        this.licenseKey = Utils.getLicenseKey(properties,ctx.getBundleContext());
 		String url = (String) properties.get(SERVICE_URL);
 		if (url == null || url.isEmpty()) {
 			throw new ConfigurationException(SERVICE_URL, 
