@@ -23,6 +23,8 @@ import java.net.URL;
 
 import javax.xml.soap.SOAPException;
 
+import junit.framework.Assert;
+
 import org.apache.stanbol.enhancer.engines.celi.langid.impl.LanguageIdentifierClientHTTP;
 import org.junit.Test;
 
@@ -48,10 +50,24 @@ public class CeliHttpTest {
      * @throws IOException
      * @throws SOAPException
      */
-    //@Test(expected=IOException.class) Currently fails
+    @Test(expected=IOException.class)
     public void testIllegalFormattedAuthentification() throws IOException, SOAPException {
         LanguageIdentifierClientHTTP testClient = new LanguageIdentifierClientHTTP(
             new URL(CELI_LANGID_SERVICE_URL), "illeagalFormatted");
         testClient.guessQueryLanguage("This is a dummy request");
     }
+    /**
+     * Also illegal formatted user account are expected to throw a IOException
+     * with a HTTP status code 4** (Bad Request)
+     * 
+     * @throws IOException
+     * @throws SOAPException
+     */
+    @Test
+    public void testTestAccount() throws IOException, SOAPException {
+        LanguageIdentifierClientHTTP testClient = new LanguageIdentifierClientHTTP(
+            new URL(CELI_LANGID_SERVICE_URL), null);
+        Assert.assertNotNull(testClient.guessQueryLanguage("This is a dummy request"));
+    }
+    
 }
