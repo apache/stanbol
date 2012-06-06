@@ -19,10 +19,19 @@ package org.apache.stanbol.enhancer.engines.celi.utils;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Dictionary;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class Utils {
+    
+    private static final Logger log = LoggerFactory.getLogger(Utils.class);
     
     private Utils(){}
     
@@ -86,5 +95,39 @@ public final class Utils {
         }
         return urlConn;
     }
-
+    /**
+     * Parses the {@link CeliConstants#CELI_LICENSE} form the configuration and
+     * the Environment. Also checks for {@link CeliConstants#CELI_TEST_ACCOUNT}
+     * if no license key is configured.
+     * @param configuration the configuration of the CELI engine
+     * @param ctx the {@link BundleContext} used to read the configuration of
+     * the environment.
+     * @return The license key or <code>null</code> if no license key is configured
+     * but <code>{@link CeliConstants#CELI_TEST_ACCOUNT}=true</code>.
+     * @throws ConfigurationException if no {@link CeliConstants#CELI_LICENSE} 
+     * is configured and {@link CeliConstants#CELI_TEST_ACCOUNT} is not present
+     * or not set to <code>true</code>.
+     */
+    public static String getLicenseKey(Dictionary<String,Object> configuration,BundleContext ctx) throws ConfigurationException {
+        String licenseKey = (String) configuration.get(CeliConstants.CELI_LICENSE);
+        if (licenseKey == null || licenseKey.isEmpty()) {
+            licenseKey = ctx.getProperty(CeliConstants.CELI_LICENSE);
+        }
+        if (licenseKey == null || licenseKey.isEmpty()) {
+            Object value = configuration.get(CeliConstants.CELI_TEST_ACCOUNT);
+            if(value == null){
+                value = ctx.getProperty(CeliConstants.CELI_TEST_ACCOUNT);
+            }
+            if(value == null || !Boolean.parseBoolean(value.toString())){
+                throw new ConfigurationException(CeliConstants.CELI_LICENSE,
+                    "The CELI License Key is a required configuration. To test the "
+                    + "CELI engines you can also activate the test account by setting '"
+                    + CeliConstants.CELI_TEST_ACCOUNT+"=true'. This account is limited "
+                    +"to 100 requests pre day and IP address.");
+            } else {
+                log.warn("no CELI license key configured for this Engine, a guest account will be used (max 100 requests per day). Go on http://linguagrid.org for getting a proper license key.");
+            }
+        }
+        return licenseKey;
+    }
 }

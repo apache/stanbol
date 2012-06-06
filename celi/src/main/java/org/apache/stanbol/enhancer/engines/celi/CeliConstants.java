@@ -23,7 +23,7 @@ public interface CeliConstants {
     
     /**
      * Property used to provide the license key for the CELI service to all the
-     * CELI engines.<p>
+     * CELI engines. Keys need to be configured in the form '{user-name}:{password}'<p>
      * License keys are read from:<ol>
      * <li> {@link ComponentContext#getProperties()} - engine configuration: 
      * This can be used to configure a specific keys for single Engine
@@ -39,5 +39,18 @@ public interface CeliConstants {
      * </ul>
      */
     String CELI_LICENSE = "celi.license";
+    /**
+     * If this property is present and set to "true" engines will allow to use
+     * the test account. This allows to test the CELI engines without requesting
+     * an account on <a href="http://www.linguagrid.org">linguagrid.org</a><p>
+     * NOTES: <ul>
+     * <li> This can be parsed as configuration for a specific CELI engine, as
+     * OSGI framework property or System property. If a {@link #CELI_LICENSE} is
+     * present this property will be ignored.
+     * <li> The test account does not require to configure a {@link #CELI_LICENSE}
+     * <li>Requests are limited to 100 requests per day and IP address.
+     * </ul>
+     */
+    String CELI_TEST_ACCOUNT = "celi.testaccount";
 
 }

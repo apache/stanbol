@@ -33,6 +33,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
+import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
 import org.apache.stanbol.enhancer.engines.celi.testutils.MockComponentContext;
 import org.apache.stanbol.enhancer.engines.celi.testutils.TestUtils;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -65,6 +66,7 @@ public class CeliClassificationEnhancementEngineTest {
 	public static void setUpServices() throws IOException, ConfigurationException {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EnhancementEngine.PROPERTY_NAME, "celiClassification");
+		properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
 	    properties.put(CeliClassificationEnhancementEngine.SERVICE_URL, "http://linguagrid.org/LSGrid/ws/dbpedia-classification");
 	 	
 		MockComponentContext context = new MockComponentContext(properties);
