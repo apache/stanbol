@@ -214,7 +214,7 @@ public final class QueryUtils {
                             queryElement = queryElement.toLowerCase();
                         }
                         
-                        queryElements.add('"'+queryElement+'"');
+                        queryElements.add(queryElement);
                         lastAdded = offset.startOffset(); //previous token consumed
                         //set to the start of the current token
                         foundWildcard = false;
@@ -223,7 +223,7 @@ public final class QueryUtils {
                         if(loewercaseWildcardTokens){
                             queryElement = queryElement.toLowerCase();
                         }
-                        queryElements.add('"'+queryElement+'"');
+                        queryElements.add(queryElement);
                         lastAdded = -1; //consume the current token
                         foundWildcard = false;
                     }
@@ -251,7 +251,11 @@ public final class QueryUtils {
             if(foundWildcard && loewercaseWildcardTokens){
                 queryElement = queryElement.toLowerCase();
             }
-            queryElements.add('"'+queryElement+'"');
+            if(foundWildcard){
+                queryElements.add(queryElement);
+            } else {
+                queryElements.add('"'+queryElement+'"');
+            }
         }
         return queryElements.toArray(new String[queryElements.size()]);
     }
