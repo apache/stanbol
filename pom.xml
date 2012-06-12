@@ -141,7 +141,7 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>2.0.1</version>
+          <version>2.3.7</version>
           <inherited>true</inherited>
           <configuration>
             <instructions>
@@ -155,7 +155,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
-        <version>1.4.4</version>
+        <version>1.7.4</version>
         <!-- slf4j impl is needed when QDox inspects/loads classes that use a
              static field for the logger, so that those classes can be loaded. -->
           <dependencies>
@@ -521,7 +521,7 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr.annotations</artifactId>
-        <version>1.4.0</version>
+        <version>1.6.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -747,7 +747,7 @@
       <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
-        <version>2.4</version>
+        <version>2.5</version>
       </dependency>
 
       <!-- Jersey -->
@@ -1224,23 +1224,23 @@
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.base</artifactId>
-      <version>2.3.0</version>
+      <version>2.4.0</version>
       <classifier>app</classifier>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.installer</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.api</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.installer.core</artifactId>
-      <version>3.2.0</version>
+      <version>3.3.6</version>
     </dependency>
 
     <!-- Apache James -->
@@ -1324,7 +1324,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.framework</artifactId>
-      <version>3.2.2</version>
+      <version>4.0.2</version>
       <scope>test</scope>
     </dependency>
     <!--  already present
