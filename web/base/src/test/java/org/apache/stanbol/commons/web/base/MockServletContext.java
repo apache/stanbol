@@ -175,4 +175,8 @@ public final class MockServletContext implements ServletContext {
         return "Mock";
     }
 
+    @Override
+    public String getContextPath() {
+        return null;
+    }
 }
