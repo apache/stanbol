@@ -33,10 +33,12 @@ public class OsgiConsoleTest extends StanbolTestBase {
                 "logs",
                 "memoryusage",
                 "services",
-                "shell",
+                //"shell", No longer available with Felix Webconsole 4.0.0
                 "stanbol_datafileprovider",
                 "osgi-installer",
-                "slinglog"
+                "slinglog",
+                "depfinder",
+                "vmstat"
         };
         
         for(String subpath : subpaths) {
