@@ -411,7 +411,11 @@ public class JsonLdTest {
         jsonLd.put(r1);
 
         String actual = jsonLd.toString();
-        String expected = "{\"@subject\":\"<http://example.org/people#joebob>\",\"http://xmlns.com/foaf/0.1/nick\":{\"@literal\":\"stu\",\"@datatype\":\"http://www.w3.org/2001/XMLSchema#string\"}}";
+        String expected = "{\"@subject\":\"<http://example.org/people#joebob>\"," +
+        		"\"http://xmlns.com/foaf/0.1/nick\":{" +
+                "\"@datatype\":\"http://www.w3.org/2001/XMLSchema#string\"," +
+        		"\"@literal\":\"stu\"" +
+        		"}}";
         assertEquals(expected, actual);
     }
     
@@ -432,7 +436,11 @@ public class JsonLdTest {
         jsonLd.put(r1);
 
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"<http://example.org/people#joebob>\",\"foaf:nick\":{\"@literal\":\"stu\",\"@datatype\":\"xsd:string\"}}";
+        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"}," +
+        		"\"@subject\":\"<http://example.org/people#joebob>\",\"foaf:nick\":{" +
+                "\"@datatype\":\"xsd:string\"," +
+        		"\"@literal\":\"stu\"" +
+        		"}}";
         assertEquals(expected, actual);
     }
 
@@ -473,11 +481,41 @@ public class JsonLdTest {
         jsonLd.put(r1);
 
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"<http://example.org/people#joebob>\",\"foaf:nick\":[{\"@literal\":\"stu\",\"@datatype\":\"xsd:string\"},{\"@literal\":\"groknar\",\"@datatype\":\"xsd:string\"},{\"@literal\":\"radface\",\"@datatype\":\"xsd:string\"}]}";
+        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"}," +
+        		"\"@subject\":\"<http://example.org/people#joebob>\"," +
+        		"\"foaf:nick\":[{" +
+                "\"@datatype\":\"xsd:string\"," +
+        		"\"@literal\":\"stu\"" +
+        		"},{" +
+                "\"@datatype\":\"xsd:string\"," +
+        		"\"@literal\":\"groknar\"" +
+        		"},{" +
+                "\"@datatype\":\"xsd:string\"," +
+        		"\"@literal\":\"radface\"" +
+        		"}]}";
         assertEquals(expected, actual);
 
         String actualIndent = jsonLd.toString(4);
-        String expectedIndent = "{\n    \"@context\": {\n        \"foaf\": \"http://xmlns.com/foaf/0.1/\",\n        \"xsd\": \"http://www.w3.org/2001/XMLSchema#\"\n    },\n    \"@subject\": \"<http://example.org/people#joebob>\",\n    \"foaf:nick\": [\n        {\n            \"@literal\": \"stu\",\n            \"@datatype\": \"xsd:string\"\n        },\n        {\n            \"@literal\": \"groknar\",\n            \"@datatype\": \"xsd:string\"\n        },\n        {\n            \"@literal\": \"radface\",\n            \"@datatype\": \"xsd:string\"\n        }\n    ]\n}";
+        String expectedIndent = "{\n" +
+        		"    \"@context\": {\n" +
+        		"        \"foaf\": \"http://xmlns.com/foaf/0.1/\",\n" +
+        		"        \"xsd\": \"http://www.w3.org/2001/XMLSchema#\"\n" +
+        		"    },\n" +
+        		"    \"@subject\": \"<http://example.org/people#joebob>\",\n" +
+        		"    \"foaf:nick\": [\n" +
+        		"        {\n" +
+                "            \"@datatype\": \"xsd:string\",\n" +
+        		"            \"@literal\": \"stu\"\n" +
+        		"        },\n" +
+        		"        {\n" +
+                "            \"@datatype\": \"xsd:string\",\n" +
+        		"            \"@literal\": \"groknar\"\n" +
+        		"        },\n" +
+        		"        {\n" +
+                "            \"@datatype\": \"xsd:string\",\n" +
+        		"            \"@literal\": \"radface\"\n" +
+        		"        }\n" +
+        		"    ]\n}";
         assertEquals(expectedIndent, actualIndent);
     }
 
@@ -718,7 +756,11 @@ public class JsonLdTest {
         jsonLd.put(r1);
         
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"_:bnode1\",\"foaf:age\":{\"@literal\":\"31\",\"@datatype\":\"xsd:int\"}}";
+        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"}," +
+        		"\"@subject\":\"_:bnode1\",\"foaf:age\":{" +
+                "\"@datatype\":\"xsd:int\"," +
+        		"\"@literal\":\"31\"" +
+        		"}}";
         assertEquals(expected, actual);
     }
     
@@ -781,7 +823,11 @@ public class JsonLdTest {
         jsonLd.put(r1);
         
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"_:bnode1\",\"foaf:age\":{\"@literal\":\"31.533567\",\"@datatype\":\"xsd:int\"}}";
+        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"}," +
+        		"\"@subject\":\"_:bnode1\",\"foaf:age\":{" +
+                "\"@datatype\":\"xsd:int\"," +
+        		"\"@literal\":\"31.533567\"" +
+        		"}}";
         assertEquals(expected, actual);        
     }
     
@@ -925,7 +971,14 @@ public class JsonLdTest {
         jsonLd.put(r1);
         
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":[{\"@literal\":\"31.533567\",\"@datatype\":\"xsd:Float\"},{\"@literal\":\"test\",\"@datatype\":\"xsd:String\"}]}";
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"}," +
+        		"\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":[{" +
+                "\"@datatype\":\"xsd:Float\"," +
+        		"\"@literal\":\"31.533567\"" +
+        		"},{" +
+                "\"@datatype\":\"xsd:String\"," +
+        		"\"@literal\":\"test\"" +
+        		"}]}";
         assertEquals(expected, actual); 
     }
     
@@ -956,7 +1009,15 @@ public class JsonLdTest {
         jsonLd.put(r1);
         
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":[{\"@literal\":\"31.533567\",\"@datatype\":\"xsd:Float\"},{\"@literal\":\"test\",\"@language\":\"en\",\"@datatype\":\"xsd:String\"}]}";
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"}," +
+        		"\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":[{" +
+                "\"@datatype\":\"xsd:Float\"," +
+        		"\"@literal\":\"31.533567\"" +
+        		"},{" +
+                "\"@datatype\":\"xsd:String\"," +
+                "\"@language\":\"en\"," +
+        		"\"@literal\":\"test\"" +
+        		"}]}";
         assertEquals(expected, actual); 
     }
     
@@ -989,7 +1050,15 @@ public class JsonLdTest {
         jsonLd.put(r1);
         
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":[{\"@literal\":\"31.533567\",\"@datatype\":\"xsd:Float\"},{\"@literal\":\"test\",\"@language\":\"en\",\"@datatype\":\"xsd:String\"},\"On more untyped value\"]}";
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"}," +
+        		"\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":[{" +
+                "\"@datatype\":\"xsd:Float\"," +
+        		"\"@literal\":\"31.533567\"" +
+        		"},{" +
+                "\"@datatype\":\"xsd:String\"," +
+                "\"@language\":\"en\"," +
+        		"\"@literal\":\"test\"" +
+        		"},\"On more untyped value\"]}";
         assertEquals(expected, actual); 
     }
 
