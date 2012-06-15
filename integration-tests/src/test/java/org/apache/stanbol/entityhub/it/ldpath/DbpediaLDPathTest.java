@@ -182,11 +182,11 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
             "\"homepage\": [",
             "http://www.paris.fr",
             "\"labels\": [",
-            "\"@literal\": \"Pariisi\",",
-            "\"@literal\": \"巴黎\",",
-            "\"location\": \"[48.856667,2.350833]\",",
+            "\"@literal\": \"Pariisi\"",
+            "\"@literal\": \"巴黎\"",
+            "\"location\": \"[48.856667,2.350833]\"",
             "\"name\": {",
-            "\"@literal\": \"Paris\","
+            "\"@literal\": \"Paris\""
             );
     }
     /*
@@ -268,15 +268,15 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
          )
          .assertStatus(200)
          .assertContentType("text/turtle")
-         .assertContentContains(
+         .assertContentRegexp(
              "<http://stanbol.apache.org/ontology/entityhub/query#score>",
              "<name>  \"Spider\"@en ;",
-             "<category> <http://dbpedia.org/resource/Category:Arachnids> , " +
-                 "<http://dbpedia.org/resource/Category:Spiders> ;",
-             "<others> <http://dbpedia.org/resource/Acari> , " +
-                 "<http://dbpedia.org/resource/Spider> , " +
-                 "<http://dbpedia.org/resource/Scorpion> , " +
-                 "<http://dbpedia.org/resource/Arachnid> .");
+             "<category>.*<http://dbpedia.org/resource/Category:Arachnids>",
+             "<category>.*<http://dbpedia.org/resource/Category:Spiders>",
+             "<others>.*<http://dbpedia.org/resource/Acari>",
+             "<others>.*<http://dbpedia.org/resource/Spider>",
+             "<others>.*<http://dbpedia.org/resource/Scorpion>",
+             "<others>.*<http://dbpedia.org/resource/Arachnid>");
     }
     @Test
     public void testQueryIllegalLDPath() throws IOException {
@@ -367,7 +367,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         )
         .assertStatus(200)
         .assertContentType("text/turtle")
-        .assertContentContains(
+        .assertContentRegexp(
             //first expected entities
             "<http://dbpedia.org/resource/Bonn>",
             "<http://dbpedia.org/resource/Aachen>",
@@ -377,9 +377,9 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
             "<name>  \"Koblenz\"@en",
             "<lat>   \"50.359722\"",
             "<long>  \"7.597778\"",
-            "<type>  <http://www.w3.org/2002/07/owl#Thing> , " +
-                "<http://www.opengis.net/gml/_Feature> , " +
-                "<http://dbpedia.org/ontology/Town>",
+            "<type>.*<http://www.w3.org/2002/07/owl#Thing>",
+            "<type>.*<http://www.opengis.net/gml/_Feature>",
+            "<type>.*<http://dbpedia.org/ontology/Town>",
             "<population> 314926");
     }
     

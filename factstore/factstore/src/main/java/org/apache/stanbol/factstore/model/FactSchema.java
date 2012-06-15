@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.stanbol.commons.jsonld.JsonLdProfile;
 
@@ -28,7 +29,7 @@ public class FactSchema {
 
     private String factSchemaURN;
     
-    private Map<String, List<String>> roleMap = new HashMap<String,List<String>>();
+    private Map<String, List<String>> roleMap = new TreeMap<String,List<String>>();
 
     public String getFactSchemaURN() {
         return factSchemaURN;

@@ -337,7 +337,7 @@ public class JsonLd extends JsonLdCommon {
         // This is a single value property but it may have
         // a datatype and a language.
         Object value = jldProperty.getValues().get(0);
-        Map<String,Object> valueObject = new HashMap<String,Object>();
+        Map<String,Object> valueObject = new TreeMap<String,Object>();
         putProperty(valueObject, resource.getCoerceMap(), property, value);
         
         if (valueObject.containsKey(DATATYPE)) {
@@ -410,7 +410,7 @@ public class JsonLd extends JsonLdCommon {
         List<Object> valueList = new ArrayList<Object>();
         
         for (JsonLdPropertyValue value : jldProperty.getValues()) {
-            Map<String,Object> valueObject = new HashMap<String,Object>();
+            Map<String,Object> valueObject = new TreeMap<String,Object>();
             putProperty(valueObject, resource.getCoerceMap(), property, value);
             
             if (valueObject.containsKey(DATATYPE)) {
@@ -470,7 +470,7 @@ public class JsonLd extends JsonLdCommon {
                                Object value) throws ShorteningException {
         if (value instanceof JsonLdIRI) {
             JsonLdIRI iriValue = (JsonLdIRI) value;
-            Map<String,Object> iriObject = new HashMap<String,Object>();
+            Map<String,Object> iriObject = new TreeMap<String,Object>();
             iriObject.put(IRI, shortenURI(iriValue.getIRI()));
             jsonObject.put(shortenURI(property), iriObject);
         } else if (value instanceof JsonLdPropertyValue) {

@@ -38,12 +38,12 @@ public class DefaultChainTest extends EnhancerTestBase {
         "xmlns:rdf=.http://www.w3.org/1999/02/22-rdf-syntax-ns",
     
         "application/rdf+json", 
-        "application/rdf+json", 
-        "\\{.*value.*ontology.*TextAnnotation.*type.*uri.*}",
+        "application/rdf+json",
+        "\"value\":\"org.apache.stanbol.enhancer.engines.langid.LangIdEnhancementEngine\"",
     
         "text/turtle", 
         "text/turtle", 
-        "a.*ontology/TextAnnotation.*ontology/Enhancement.*;",
+        "a.*ontology/TextAnnotation.*;",
     
         "text/rdf+nt", 
         "text/rdf+nt", 
