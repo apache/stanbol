@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>0.9.0-incubating</version>
+    <!--<relativePath>../../parent</relativePath>-->
+  </parent>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.launchers.fullflow</artifactId>
+  <packaging>jar</packaging>
+
+  <name>Apache Stanbol Launcher - Full with Flow</name>
+  <description>Runnable jar that runs the full Stanbol configuration</description>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/launchers/fullflow/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/tags/0.9.0-incubating/launchers/fullflow/
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>.</directory>
+              <includes>
+                <include>sling/**</include>
+                <include>factstore/**</include>
+                <include>*.log</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.sling</groupId>
+        <artifactId>maven-launchpad-plugin</artifactId>
+        <!--
+          TODO the maven-launchpad-plugin can also generate a war file and
+          Karaf description, we could add this. See
+          http://sling.apache.org/site/maven-launchpad-plugin.html
+        -->
+        <executions>
+          <execution>
+            <id>prepare-package</id>
+            <goals>
+              <goal>prepare-package</goal>
+            </goals>
+            <configuration>
+              <includeDefaultBundles>false</includeDefaultBundles>
+              <!-- Standalone jar requires an OSGi http service implementation -->
+              <jarWebSupport>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.http.jetty</artifactId>
+                <version>2.2.0</version>
+              </jarWebSupport>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <!-- make the generated jar runnable -->
+              <addClasspath>true</addClasspath>
+              <mainClass>org.apache.sling.launchpad.app.Main</mainClass>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes></excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <!-- maven-launchpad-plugin builds on the launchpad.base app -->
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.launchpad.base</artifactId>
+      <classifier>app</classifier>
+    </dependency>
+    
+    <!-- OSGi Framemework Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Stanbol Commons Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol CMS Adapter Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.cmsadapter.bundlelist</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol Contenthub Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.contenthub.bundlelist</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol Data Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.bundlelists.defaultdata</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency> <!-- include all OpenNLP models in the full launcher -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.bundlelists.opennlp</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol Enhancer Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol Entityhub Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.bundlelist</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol FactStore Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.factstore.bundlelist</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol Ontology Manager Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.bundlelist</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol Rules Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.rules.bundlelist</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Stanbol Reasoners Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.reasoners.bundlelist</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Stanbol Flow Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.flow.bundlelist</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+  </dependencies>
+</project>
