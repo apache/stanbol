@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
-    <OCD id="org.apache.stanbol.flow.weightedgraphflow.WeightedChain" name="%org.apache.stanbol.flow.weightedgraphflow.WeightedChain.name" description="%org.apache.stanbol.flow.weightedgraphflow.WeightedChain.description"/>
-    <Designate pid="org.apache.stanbol.flow.weightedgraphflow.WeightedChain">
-        <Object ocdref="org.apache.stanbol.flow.weightedgraphflow.WeightedChain"/>
-    </Designate>
-</metatype:MetaData>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
-    <OCD id="org.apache.stanbol.flow.filepoolgraphflow.FileRoute" name="%org.apache.stanbol.flow.filepoolgraphflow.FileRoute.name" description="%org.apache.stanbol.flow.filepoolgraphflow.FileRoute.description"/>
-    <Designate pid="org.apache.stanbol.flow.filepoolgraphflow.FileRoute">
-        <Object ocdref="org.apache.stanbol.flow.filepoolgraphflow.FileRoute"/>
-    </Designate>
-</metatype:MetaData>
