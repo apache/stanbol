@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.flow.reactor</artifactId>
+		<version>0.9.0-incubating-SNAPSHOT</version>
+		<relativePath>../</relativePath>
+	</parent>
+	
+	<artifactId>org.apache.stanbol.flow.servicesapi</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>Apache Stanbol Flow : Services API</name>
+	<description>The Stanbol Flow Services API</description>
+
+	<inceptionYear>2012</inceptionYear>
+
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/flow/servicesapi/
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/flow/servicesapi/
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>
+							org.apache.stanbol.enhancer.servicesapi;version=${project.version},
+							org.apache.stanbol.enhancer.servicesapi.helper;version=${project.version},
+							org.apache.stanbol.enhancer.servicesapi.rdf;version=${project.version}
+			            </Export-Package>
+						<Private-Package>
+							org.apache.stanbol.enhancer.servicesapi.helper.impl;version=${project.version}
+            			</Private-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<!-- for tests -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>
