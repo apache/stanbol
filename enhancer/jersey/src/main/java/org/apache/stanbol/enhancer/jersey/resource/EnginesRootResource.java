@@ -25,6 +25,7 @@ import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -45,6 +47,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -155,6 +158,17 @@ public class EnginesRootResource extends BaseStanbolResource {
     public Response enhanceFromData(byte[] data,
                                     @QueryParam(value = "uri") String uri,
                                     @Context HttpHeaders headers) throws EngineException, IOException {
+    	
+        return enhanceFromData(data,uri,headers,EnhancementJobManager.DEFAULT_CHAIN_NAME);
+    }
+    
+    @POST
+    @Path("{chain}")
+    @Consumes(WILDCARD)
+    public Response enhanceFromData(byte[] data,
+                                    @QueryParam(value = "uri") String uri,
+                                    @Context HttpHeaders headers,
+                                    @PathParam("chain") String chain) throws EngineException, IOException {
         String format = TEXT_PLAIN;
         if (headers.getMediaType() != null) {
             format = headers.getMediaType().toString();
@@ -164,15 +178,23 @@ public class EnginesRootResource extends BaseStanbolResource {
             uri = null;
         }
         ContentItem ci = new InMemoryContentItem(uri, data, format);
-        return enhanceAndBuildResponse(null, headers, ci, false);
+        return enhanceAndBuildResponse(null, headers, ci, false,chain);
     }
-
+    
+    protected Response enhanceAndBuildResponse(String format,
+            HttpHeaders headers,
+            ContentItem ci,
+            boolean buildAjaxview) throws EngineException, IOException {
+    	return enhanceAndBuildResponse(format, headers, ci, buildAjaxview, EnhancementJobManager.DEFAULT_CHAIN_NAME);
+    }
+    
     protected Response enhanceAndBuildResponse(String format,
                                                HttpHeaders headers,
                                                ContentItem ci,
-                                               boolean buildAjaxview) throws EngineException, IOException {
+                                               boolean buildAjaxview,
+                                               String chain) throws EngineException, IOException {
         if (jobManager != null) {
-            jobManager.enhanceContent(ci);
+            jobManager.enhanceContent(ci,chain);
         }
 
         if (buildAjaxview) {

@@ -27,7 +27,12 @@ import java.util.List;
  * ContentItem's metadata.
  */
 public interface EnhancementJobManager {
-
+	
+	/**
+	 * Default chain name to use in jobmanager implementation and wanted default chain
+	 */
+	String DEFAULT_CHAIN_NAME = "defaultChain";
+	
     /**
      * Create relevant asynchronous requests or enhance content immediately. The
      * result is not persisted right now. The caller is responsible for calling the

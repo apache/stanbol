@@ -21,8 +21,8 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>0.9.0-incubating-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
+    <version>0.9.0-incubating</version>
+    <!--<relativePath>../../parent</relativePath>-->
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
@@ -161,29 +161,30 @@
     </dependency>
 
     <!-- Stanbol Data Bundle List -->
-    <dependency>
+    <!--<dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.bundlelist</artifactId>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>
+    </dependency>-->
 
     <!-- Stanbol Enhancer Bundle List -->
-    <!--<dependency>
+    <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>-->
+    </dependency>
    
-    <!-- Stanbol Camel JobManager Bundle List -->
+    <!-- Stanbol Flow Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.jobmanager.cameljobmanager.bundlelist</artifactId>
+      <artifactId>org.apache.stanbol.flow.bundlelist</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
+
     <!-- Stanbol Entityhub Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
