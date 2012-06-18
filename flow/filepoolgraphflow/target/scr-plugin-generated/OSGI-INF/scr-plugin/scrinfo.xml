@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+    <scr:component enabled="true" immediate="true" name="org.apache.stanbol.flow.filepoolgraphflow.FileRoute">
+        <implementation class="org.apache.stanbol.flow.filepoolgraphflow.FileRoute"/>
+        <service servicefactory="false">
+            <provide interface="org.apache.camel.RoutesBuilder"/>
+        </service>
+        <property name="service.vendor" type="String" value="Apache Stanbol (incubating)" private="true"/>
+        <property name="service.pid" value="org.apache.stanbol.flow.filepoolgraphflow.FileRoute" private="false"/>
+    </scr:component>
+</components>
