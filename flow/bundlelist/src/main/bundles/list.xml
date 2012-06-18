@@ -11,7 +11,7 @@
 	language governing permissions and limitations under the License. -->
 
 <bundles>
-	<!-- Stanbol Chain infrastructure and required libraries -->
+	<!-- Stanbol Chain job manager required libs -->
 	<startLevel level="20">
 	
 		<!-- Camel dependencies -->
@@ -35,84 +35,90 @@
 
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.flow.servicesapi</artifactId>
+			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
-		
+		<!-- <bundle> <groupId>org.apache.stanbol</groupId> <artifactId>org.apache.stanbol.entityhub.site.linkeddata</artifactId> 
+			<version>0.9.0-incubating-SNAPSHOT</version> </bundle> <bundle> <groupId>org.apache.stanbol</groupId> 
+			<artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId> <version>0.9.0-incubating-SNAPSHOT</version> 
+			</bundle> <bundle> <groupId>org.apache.stanbol</groupId> <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId> 
+			<version>0.9.0-incubating-SNAPSHOT</version> </bundle> <bundle> <groupId>org.apache.stanbol</groupId> 
+			<artifactId>org.apache.stanbol.entityhub.core</artifactId> <version>0.9.0-incubating-SNAPSHOT</version> 
+			</bundle> -->
 	</startLevel>
 
 	<!-- Web Fragment -->
 	<startLevel level="21">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.flow.web</artifactId>
+			<artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
 
 	<!-- Benchmarks for the Stanbol Enhancer -->
 	<startLevel level="21">
-		<!--<bundle>
+		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.benchmark</artifactId>
-			<version>0.9.0-incubating</version>
-		</bundle>-->
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
 	</startLevel>
 	
   <!-- Stanbol Enhancer plug-ins (the Enhancement Engines) -->
   <startLevel level="25">
-    <!--<bundle>
+    <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opencalais</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.zemanta</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
-      <version>0.9.0-incubating</version>
-    </bundle>-->
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
     <!--
       The geonames.org LocationEnhancement Engines needs two additional bundles 1) jettyjson 2) commons-io.
       Both of them are already present in the bundle list.
     -->
-    <!--<bundle>
+    <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
-      <version>0.9.0-incubating</version>
-    </bundle>-->
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
     <!-- Entity Tagging Engine (depends on the Entityhub) -->
-    <!--<bundle>
+    <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
-      <version>0.9.0-incubating</version>
-    </bundle>-->
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
     <!-- Taxonomy Linking Engine (depends on the Entityhub) Deprecated 
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.taxonomy</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle> -->
     <!-- Keyword Extraction Engine (depends on the Entityhub) -->
-    <!--<bundle>
+    <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.keywordextraction</artifactId>
-      <version>0.9.0-incubating</version>
-    </bundle>-->
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
   </startLevel>	
 
 	<!-- StartLevel for the chainjobmanager : after engines (level 25 to 26) 
@@ -120,7 +126,8 @@
 	<startLevel level="28">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.flow.cameljobmanager</artifactId>
+			<artifactId>org.apache.stanbol.enhancer.jobmanager.chainjobmanager
+			</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
@@ -130,12 +137,14 @@
 		<!-- filepool chain to activate after -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.flow.filepoolgraphflow</artifactId>
+			<artifactId>org.apache.stanbol.enhancer.jobmanager.chainjobmanager.filepoolchain
+			</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.flow.weightedgraphflow</artifactId>
+			<artifactId>org.apache.stanbol.enhancer.jobmanager.chainjobmanager.weightedchain
+			</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
