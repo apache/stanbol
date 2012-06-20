@@ -60,7 +60,8 @@ public abstract class AbstractClerezzaGraphInputSource extends
 
     protected Set<TripleCollection> getImportedGraphs(TripleCollection g, boolean recursive) {
         Set<TripleCollection> result = new HashSet<TripleCollection>();
-        UriRef u = null;
+        UriRef u = 
+                null;
 
         Iterator<Triple> it = g.filter(null, RDF.type, OWL.Ontology);
         if (it.hasNext()) {

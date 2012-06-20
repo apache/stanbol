@@ -28,6 +28,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.reasoners.owllink</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>Apache Stanbol Reasoners Ext OWLlink</name>
 

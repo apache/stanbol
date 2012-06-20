@@ -24,11 +24,13 @@
     <version>2-incubating-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
-<modelVersion>4.0.0</modelVersion>
+  
+  <modelVersion>4.0.0</modelVersion>
   <artifactId>org.apache.stanbol.reasoners.hermit</artifactId>
+  <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Reasoners: Hermit</name>
+  <name>Apache Stanbol Reasoners: HermiT</name>
 
   <repositories>
      <repository>
@@ -56,7 +58,7 @@
     </dependency>
     
 		<!--Diagnostic dependencies -->
-		    <dependency>
+	<dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <scope>provided</scope>
