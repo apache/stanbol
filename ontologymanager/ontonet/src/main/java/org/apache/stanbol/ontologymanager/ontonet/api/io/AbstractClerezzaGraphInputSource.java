@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
@@ -28,7 +29,9 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.ontologies.OWL;
-import org.apache.stanbol.commons.owl.util.OWLUtils;
+import org.apache.clerezza.rdf.ontologies.RDF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Default implementation of an {@link OntologyInputSource} that returns {@link Graph} objects as ontologies.
@@ -43,6 +46,8 @@ import org.apache.stanbol.commons.owl.util.OWLUtils;
 public abstract class AbstractClerezzaGraphInputSource extends
         AbstractGenericInputSource<TripleCollection,TcProvider> {
 
+    protected Logger log = LoggerFactory.getLogger(getClass());
+
     @Override
     protected void bindRootOntology(TripleCollection ontology) {
         super.bindRootOntology(ontology);
@@ -55,8 +60,17 @@ public abstract class AbstractClerezzaGraphInputSource extends
 
     protected Set<TripleCollection> getImportedGraphs(TripleCollection g, boolean recursive) {
         Set<TripleCollection> result = new HashSet<TripleCollection>();
-        UriRef u = OWLUtils.guessOntologyIdentifier(g);
-        Iterator<Triple> it = g.filter(u, OWL.imports, null);
+        UriRef u = null;
+
+        Iterator<Triple> it = g.filter(null, RDF.type, OWL.Ontology);
+        if (it.hasNext()) {
+            NonLiteral subj = it.next().getSubject();
+            if (it.hasNext()) log.warn(
+                "RDF Graph has multiple OWL ontology definitions! Ignoring all but {}", subj);
+            if (subj instanceof UriRef) u = (UriRef) subj;
+        }
+
+        it = g.filter(u, OWL.imports, null);
         while (it.hasNext()) {
             Resource r = it.next().getObject();
             if (r instanceof UriRef) {

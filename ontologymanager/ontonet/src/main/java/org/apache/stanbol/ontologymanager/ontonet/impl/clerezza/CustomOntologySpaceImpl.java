@@ -16,9 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.semanticweb.owlapi.model.IRI;
 
@@ -38,11 +36,6 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implement
 
     public CustomOntologySpaceImpl(String scopeID, IRI namespace, OntologyProvider<?> ontologyProvider) {
         super(buildId(scopeID), namespace, SpaceType.CUSTOM, ontologyProvider);
-    }
-
-    @Override
-    public void attachCoreSpace(CoreOntologySpace coreSpace, boolean skipRoot) throws UnmodifiableOntologyCollectorException {
-        // TODO deprecated, remove asap.
     }
 
     /**

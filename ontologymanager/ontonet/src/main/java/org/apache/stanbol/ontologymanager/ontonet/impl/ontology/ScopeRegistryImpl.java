@@ -34,28 +34,26 @@ import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
  */
 public class ScopeRegistryImpl implements ScopeRegistry {
 
-    private Set<String> activeScopeIRIs;
+    protected Set<String> activeScopeIRIs;
 
-    private Set<ScopeEventListener> scopeListeners;
+    protected Set<ScopeEventListener> listeners;
 
-    private Map<String,OntologyScope> scopeMap;
+    protected Map<String,OntologyScope> scopeMap;
 
     public ScopeRegistryImpl() {
         scopeMap = new HashMap<String,OntologyScope>();
         activeScopeIRIs = new HashSet<String>();
-        scopeListeners = new HashSet<ScopeEventListener>();
+        listeners = new HashSet<ScopeEventListener>();
     }
 
     @Override
     public void addScopeRegistrationListener(ScopeEventListener listener) {
-        scopeListeners.add(listener);
-
+        listeners.add(listener);
     }
 
     @Override
     public void clearScopeRegistrationListeners() {
-        scopeListeners.clear();
-
+        listeners.clear();
     }
 
     @Override
@@ -77,9 +75,9 @@ public class ScopeRegistryImpl implements ScopeRegistry {
 
     protected void fireScopeActivationChange(String scopeID, boolean activated) {
         OntologyScope scope = scopeMap.get(scopeID);
-        if (activated) for (ScopeEventListener l : scopeListeners)
+        if (activated) for (ScopeEventListener l : listeners)
             l.scopeActivated(scope);
-        else for (ScopeEventListener l : scopeListeners)
+        else for (ScopeEventListener l : listeners)
             l.scopeDeactivated(scope);
     }
 
@@ -90,7 +88,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
      *            the scope that was removed.
      */
     protected void fireScopeDeregistered(OntologyScope scope) {
-        for (ScopeEventListener l : scopeListeners)
+        for (ScopeEventListener l : listeners)
             l.scopeDeregistered(scope);
     }
 
@@ -101,7 +99,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
      *            the scope that was added.
      */
     protected void fireScopeRegistered(OntologyScope scope) {
-        for (ScopeEventListener l : scopeListeners)
+        for (ScopeEventListener l : listeners)
             l.scopeRegistered(scope);
     }
 
@@ -125,7 +123,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
 
     @Override
     public Set<ScopeEventListener> getScopeRegistrationListeners() {
-        return scopeListeners;
+        return listeners;
     }
 
     @Override
@@ -148,7 +146,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
 
     @Override
     public void removeScopeRegistrationListener(ScopeEventListener listener) {
-        scopeListeners.remove(listener);
+        listeners.remove(listener);
     }
 
     @Override

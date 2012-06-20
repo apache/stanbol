@@ -397,7 +397,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
         if (file != null && file.canRead() && file.exists()) {
             try {
                 InputStream content = new FileInputStream(file);
-                key = ontologyProvider.loadInStore(content, format, null, true);
+                key = ontologyProvider.loadInStore(content, format, true);
             } catch (UnsupportedFormatException e) {
                 log.warn(
                     "POST method failed for media type {}. This should not happen (should fail earlier)",
@@ -408,7 +408,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
             }
         } else if (location != null) {
             try {
-                key = ontologyProvider.loadInStore(location, null, null, true);
+                key = ontologyProvider.loadInStore(location, null, true);
             } catch (Exception e) {
                 log.error("Failed to load ontology from " + location, e);
                 throw new WebApplicationException(e, BAD_REQUEST);
@@ -474,7 +474,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
             || N3_TYPE.equals(mt) || N_TRIPLE_TYPE.equals(mt) || RDF_JSON_TYPE.equals(mt)) {
             String key = null;
             try {
-                key = ontologyProvider.loadInStore(content, headers.getMediaType().toString(), null, true);
+                key = ontologyProvider.loadInStore(content, headers.getMediaType().toString(), true);
                 rb = Response.ok();
             } catch (UnsupportedFormatException e) {
                 log.warn(
@@ -491,7 +491,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
             try {
                 OntologyInputSource<OWLOntology,OWLOntologyManager> src = new OntologyContentInputSource(
                         content);
-                ontologyProvider.loadInStore(src.getRootOntology(), null, true);
+                ontologyProvider.loadInStore(src.getRootOntology(), true);
                 rb = Response.ok();
             } catch (OWLOntologyCreationException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);

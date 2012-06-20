@@ -18,6 +18,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.Lockable;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListenable;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
 
@@ -38,7 +39,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
  * @author alexdma
  * 
  */
-public interface OntologyScope extends NamedResource, Lockable, ScopeOntologyListenable, OWLExportable {
+public interface OntologyScope extends NamedResource, Lockable, OntologyCollectorListenable, OWLExportable {
 
     /**
      * Returns the core ontology space for this ontology scope. The core space should never be null for any

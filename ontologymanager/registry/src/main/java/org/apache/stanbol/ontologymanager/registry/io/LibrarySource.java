@@ -22,8 +22,8 @@ import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.AbstractOWLOntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologySetInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.SetInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * ontology, either new or supplied by the developer. This input source can either accept an already built
  * {@link LibraryImpl} object, or parse a library OWL file from its logical URI.
  */
-public class LibrarySource extends AbstractOWLOntologyInputSource implements OntologySetInputSource {
+public class LibrarySource extends AbstractOWLOntologyInputSource implements SetInputSource {
 
     /**
      * Creates a new ontology manager that shares the same offline configuration as the registry manager.

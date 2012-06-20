@@ -23,17 +23,19 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.OntologySpaceFactoryImpl;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerType;
@@ -123,8 +125,10 @@ public class XMLReengineerTest {
         TcManager tcm = new SpecialTcManager(qe, wtcp);
 
         // Two different ontology storages, the same sparql engine and tcprovider
-        ONManager onManager = new ONManagerImpl(new ClerezzaOntologyProvider(tcm, offline, new Parser()),
-                offline, emptyConf);
+
+        OntologyProvider<TcProvider> provider = new ClerezzaOntologyProvider(tcm, offline, new Parser());
+        ONManager onManager = new ONManagerImpl(provider, offline, new OntologySpaceFactoryImpl(provider,
+                emptyConf), emptyConf);
         xmlExtractor = new XMLExtractor(new ReengineerManagerImpl(emptyConf), onManager, emptyConf);
     }
 

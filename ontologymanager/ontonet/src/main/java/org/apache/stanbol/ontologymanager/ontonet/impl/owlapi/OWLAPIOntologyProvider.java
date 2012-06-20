@@ -139,7 +139,7 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
-    public String loadInStore(InputStream data, String formatIdentifier, String preferredKey, boolean force) {
+    public String loadInStore(InputStream data, String formatIdentifier, boolean force) {
         try {
             OWLOntology o = store.loadOntologyFromOntologyDocument(data);
             return OWLUtils.guessOntologyIdentifier(o).toString();
@@ -149,7 +149,7 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
-    public String loadInStore(IRI location, String formatIdentifier, String preferredKey, boolean force) {
+    public String loadInStore(IRI location, String formatIdentifier, boolean force) {
         OWLOntology o = null;
         try {
             o = store.loadOntologyFromOntologyDocument(location);
@@ -164,7 +164,7 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
-    public String loadInStore(Object ontology, String preferredKey, boolean force) {
+    public String loadInStore(Object ontology, boolean force) {
         throw new UnsupportedOperationException("Not implemented for OWL API version.");
     }
 
@@ -183,6 +183,23 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     public <O extends TripleCollection> O getMetaGraph(Class<O> returnType) {
         throw new UnsupportedOperationException(
                 "The OWL API implementation does not use a graph for storing correspondencies");
+    }
+
+    @Override
+    public String getKey(OWLOntologyID ontologyId) {
+        return ontologyId.getDefaultDocumentIRI().toString();
+    }
+
+    @Override
+    public Set<String> getOntologyVersionKeys(IRI ontologyIRI) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setLocatorMapping(IRI locator, String key) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

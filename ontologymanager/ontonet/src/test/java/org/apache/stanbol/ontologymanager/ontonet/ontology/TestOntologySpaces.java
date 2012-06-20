@@ -101,8 +101,6 @@ public class TestOntologySpaces {
 
     }
 
-    String scopeId = "Comics";
-
     @After
     public void cleanup() {
         reset();
@@ -113,7 +111,7 @@ public class TestOntologySpaces {
         CustomOntologySpace space = null;
         IRI logicalId = nonexSrc.getRootOntology().getOntologyID().getOntologyIRI();
 
-        space = factory.createCustomOntologySpace(scopeId, dropSrc);
+        space = factory.createCustomOntologySpace("testAddOntology", dropSrc);
         space.addOntology(minorSrc);
         space.addOntology(nonexSrc);
 
@@ -124,7 +122,7 @@ public class TestOntologySpaces {
 
     @Test
     public void testCoreLock() throws Exception {
-        CoreOntologySpace space = factory.createCoreOntologySpace(scopeId, inMemorySrc);
+        CoreOntologySpace space = factory.createCoreOntologySpace("testCoreLock", inMemorySrc);
         space.setUp();
         try {
             space.addOntology(minorSrc);
@@ -136,14 +134,14 @@ public class TestOntologySpaces {
 
     @Test
     public void testCreateSpace() throws Exception {
-        CustomOntologySpace space = factory.createCustomOntologySpace(scopeId, dropSrc);
+        CustomOntologySpace space = factory.createCustomOntologySpace("testCreateSpace", dropSrc);
         IRI logicalId = dropSrc.getRootOntology().getOntologyID().getOntologyIRI();
         assertTrue(space.hasOntology(logicalId));
     }
 
     @Test
     public void testCustomLock() throws Exception {
-        CustomOntologySpace space = factory.createCustomOntologySpace(scopeId, inMemorySrc);
+        CustomOntologySpace space = factory.createCustomOntologySpace("testCustomLock", inMemorySrc);
         space.setUp();
         try {
             space.addOntology(minorSrc);
@@ -231,7 +229,8 @@ public class TestOntologySpaces {
     @Test
     public void testRemoveCustomOntology() throws Exception {
         CustomOntologySpace space = null;
-        space = factory.createCustomOntologySpace(scopeId, dropSrc);
+        space = factory.createCustomOntologySpace("testRemoveCustomOntology", dropSrc);
+
         IRI dropId = dropSrc.getRootOntology().getOntologyID().getOntologyIRI();
         IRI nonexId = nonexSrc.getRootOntology().getOntologyID().getOntologyIRI();
 
@@ -240,6 +239,10 @@ public class TestOntologySpaces {
         // The other remote ontologies may change base IRI...
         assertTrue(space.hasOntology(ont.getOntologyID().getOntologyIRI()) && space.hasOntology(dropId)
                    && space.hasOntology(nonexId));
+
+        IRI bogus = IRI.create("http://www.example.org/ontology/bogus");
+        space.removeOntology(bogus);
+
         space.removeOntology(dropId);
         assertFalse(space.hasOntology(dropId));
         space.removeOntology(nonexId);

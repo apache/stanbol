@@ -16,8 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.owlapi;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -42,21 +40,6 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implement
 
     public CustomOntologySpaceImpl(String scopeID, IRI namespace, OWLOntologyManager ontologyManager) {
         super(buildId(scopeID), namespace, SpaceType.CUSTOM, ontologyManager);
-    }
-
-    @Override
-    public void attachCoreSpace(CoreOntologySpace coreSpace, boolean skipRoot) throws UnmodifiableOntologyCollectorException {
-        // OWLOntology o = coreSpace.getTopOntology();
-        // // This does the append thingy
-        // log.debug("Attaching " + o + " TO " + getTopOntology() + " ...");
-        // try {
-        // // It is in fact the addition of the core space top ontology to the
-        // // custom space, with import statements and all.
-        // addOntology(new RootOntologySource(o, null));
-        // // log.debug("ok");
-        // } catch (Exception ex) {
-        // log.error("FAILED", ex);
-        // }
     }
 
     /**

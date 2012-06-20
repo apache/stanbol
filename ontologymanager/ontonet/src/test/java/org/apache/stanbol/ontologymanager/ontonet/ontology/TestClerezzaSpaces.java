@@ -37,7 +37,6 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
-import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
@@ -45,7 +44,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
@@ -66,6 +64,7 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
@@ -78,7 +77,9 @@ public class TestClerezzaSpaces {
 
     private static OntologySpaceFactory factory;
 
-    private static OntologyInputSource<?,?> inMemorySrc, minorSrc, dropSrc, nonexSrc;
+    private static OntologyInputSource<TripleCollection,?> minorSrc, dropSrc, nonexSrc;
+
+    private static OntologyInputSource<OWLOntology,?> inMemorySrc;
 
     private static OfflineConfiguration offline;
 
@@ -106,8 +107,8 @@ public class TestClerezzaSpaces {
         minorSrc = new GraphSource(ont2.getGraph());
         dropSrc = getLocalSource("/ontologies/droppedcharacters.owl");
         nonexSrc = getLocalSource("/ontologies/nonexistentcharacters.owl");
-        inMemorySrc = new RootOntologyIRISource(IRI.create(TestClerezzaSpaces.class
-                .getResource("/ontologies/maincharacters.owl")));
+        inMemorySrc = new ParentPathInputSource(new File(TestClerezzaSpaces.class.getResource(
+            "/ontologies/maincharacters.owl").toURI()));
 
         OWLDataFactory df = OWLManager.getOWLDataFactory();
         OWLClass cHuman = df.getOWLClass(IRI.create(baseIri + "/" + Constants.humanBeing));
@@ -129,16 +130,17 @@ public class TestClerezzaSpaces {
     @Test
     public void testAddOntology() throws Exception {
         CustomOntologySpace space = null;
-        IRI logicalId = IRI.create(OWLUtils.guessOntologyIdentifier(nonexSrc.getRootOntology())
-                .getUnicodeString());
+
+        IRI logicalId = OWLUtils.guessOntologyIdentifier(nonexSrc.getRootOntology()).getOntologyIRI();
+        assertNotNull(logicalId);
 
         space = factory.createCustomOntologySpace(scopeId, dropSrc, minorSrc);
         space.addOntology(minorSrc);
         space.addOntology(nonexSrc);
-
         assertTrue(space.hasOntology(logicalId));
-        logicalId = IRI
-                .create(OWLUtils.guessOntologyIdentifier(dropSrc.getRootOntology()).getUnicodeString());
+
+        logicalId = OWLUtils.guessOntologyIdentifier(dropSrc.getRootOntology()).getOntologyIRI();
+        assertNotNull(logicalId);
         assertTrue(space.hasOntology(logicalId));
     }
 
@@ -157,8 +159,13 @@ public class TestClerezzaSpaces {
     @Test
     public void testCreateSpace() throws Exception {
         CustomOntologySpace space = factory.createCustomOntologySpace(scopeId, dropSrc);
-        IRI logicalId = IRI.create(OWLUtils.guessOntologyIdentifier(dropSrc.getRootOntology())
-                .getUnicodeString());
+        IRI logicalId = null;
+        Object o = dropSrc.getRootOntology();
+        if (o instanceof TripleCollection) logicalId = OWLUtils.guessOntologyIdentifier((TripleCollection) o)
+                .getOntologyIRI();
+        else if (o instanceof OWLOntology) logicalId = OWLUtils.guessOntologyIdentifier((OWLOntology) o)
+                .getOntologyIRI();
+        assertNotNull(logicalId);
         assertTrue(space.hasOntology(logicalId));
     }
 
@@ -253,8 +260,8 @@ public class TestClerezzaSpaces {
     public void testRemoveCustomOntology() throws Exception {
         CustomOntologySpace space = null;
         space = factory.createCustomOntologySpace(scopeId, dropSrc);
-        IRI dropId = URIUtils.createIRI(OWLUtils.guessOntologyIdentifier(dropSrc.getRootOntology()));
-        IRI nonexId = URIUtils.createIRI(OWLUtils.guessOntologyIdentifier(nonexSrc.getRootOntology()));
+        IRI dropId = OWLUtils.guessOntologyIdentifier(dropSrc.getRootOntology()).getOntologyIRI();
+        IRI nonexId = OWLUtils.guessOntologyIdentifier(nonexSrc.getRootOntology()).getOntologyIRI();
 
         space.addOntology(inMemorySrc);
         space.addOntology(nonexSrc);

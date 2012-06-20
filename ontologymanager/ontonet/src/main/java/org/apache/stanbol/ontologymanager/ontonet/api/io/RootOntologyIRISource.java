@@ -23,7 +23,14 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * An input source that provides the OWL Ontology loaded from the supplied physical IRI, as well as the
- * physical IRI itself for consumers that need to load the ontology themselves.<br>
+ * physical IRI itself for consumers that need to load the ontology themselves. This means that in order to
+ * use the {@link RootOntologyIRISource}, <i>one</i> the following requirements must be met:
+ * <ol>
+ * <li>Stanbol is in online mode and all imports can be resolved recursively;
+ * <li>Stanbol is in offline mode and the ontology has no recursive import statements.
+ * </ol>
+ * If Stanbol is in offline mode and it is known that all imported ontologies are in the same local directory
+ * as the root ontology, one should use a {@link ParentPathInputSource} instead. <br>
  * <br>
  * For convenience, an existing OWL ontology manager can be supplied for loading the ontology.
  * 

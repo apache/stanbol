@@ -29,6 +29,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -92,7 +93,7 @@ public class TestOntologyCollectors {
         // OntologyInputSource<OWLOntology> src = new OntologyContentInputSource(content,mgr);
 
         OWLOntology original = src.getRootOntology();
-
+        Assert.assertNotNull(original);
         OntologySpace spc = new CustomOntologySpaceImpl("Test", scopeNs, ontologyProvider);
         spc.addOntology(src);
 

@@ -98,8 +98,7 @@ public class ReengineerResource extends BaseStanbolResource {
     public Response countReengineers(@Context HttpHeaders headers) {
 
         return Response.ok(reengineeringManager.countReengineers()).build();
-        
-        
+
     }
 
     @GET
@@ -124,7 +123,7 @@ public class ReengineerResource extends BaseStanbolResource {
             mGraph.add(new TripleImpl(semionRef, hasReengineer, reenginnerLiteral));
         }
 
-        //return Response.ok(mGraph).build();
+        // return Response.ok(mGraph).build();
         ResponseBuilder rb = Response.ok(mGraph);
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
         addCORSOrigin(servletContext, rb, headers);
@@ -144,7 +143,7 @@ public class ReengineerResource extends BaseStanbolResource {
         try {
             reengineerType = ReengineerType.getType(inputType);
         } catch (UnsupportedReengineerException e) {
-            //Response.status(404).build();
+            // Response.status(404).build();
             ResponseBuilder rb = Response.status(Status.NOT_FOUND);
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
@@ -163,37 +162,37 @@ public class ReengineerResource extends BaseStanbolResource {
                               + httpServletRequest.getLocalPort();
                 if (outputGraph == null || outputGraph.equals("")) {
                     ontology = reengineeringManager.performReengineering(servletPath, null, dataSource);
-                    //return Response.ok().build();
+                    // return Response.ok().build();
                     ResponseBuilder rb = Response.ok();
                     addCORSOrigin(servletContext, rb, headers);
                     return rb.build();
-                    
+
                 } else {
                     ontology = reengineeringManager.performReengineering(servletPath,
                         IRI.create(outputGraph), dataSource);
 
                     store(ontology);
-                    //return Response.ok(ontology).build();
+                    // return Response.ok(ontology).build();
                     ResponseBuilder rb = Response.ok(ontology);
                     addCORSOrigin(servletContext, rb, headers);
                     return rb.build();
                 }
             } catch (ReengineeringException e) {
                 e.printStackTrace();
-                //return Response.status(500).build();
+                // return Response.status(500).build();
                 ResponseBuilder rb = Response.status(Status.BAD_REQUEST);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             }
 
         } catch (NoSuchDataSourceExpection e) {
-            //return Response.status(415).build();
+            // return Response.status(415).build();
             ResponseBuilder rb = Response.status(415);
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
-            
+
         } catch (InvalidDataSourceForTypeSelectedException e) {
-            //return Response.status(204).build();
+            // return Response.status(204).build();
             ResponseBuilder rb = Response.status(204);
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
@@ -231,14 +230,14 @@ public class ReengineerResource extends BaseStanbolResource {
             try {
                 ontology = reengineeringManager.performReengineering(servletPath, IRI.create(outputGraph),
                     dataSource);
-                //return Response.ok(ontology).build();
+                // return Response.ok(ontology).build();
                 ResponseBuilder rb = Response.ok(ontology);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
-                
+
             } catch (ReengineeringException e) {
-                //return Response.status(500).build();
-                
+                // return Response.status(500).build();
+
                 ResponseBuilder rb = Response.status(Status.BAD_REQUEST);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
@@ -247,12 +246,12 @@ public class ReengineerResource extends BaseStanbolResource {
         } else {
             try {
                 reengineeringManager.performReengineering(servletPath, null, dataSource);
-                //return Response.ok().build();
+                // return Response.ok().build();
                 ResponseBuilder rb = Response.ok();
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             } catch (ReengineeringException e) {
-                //return Response.status(500).build();
+                // return Response.status(500).build();
                 ResponseBuilder rb = Response.status(Status.BAD_REQUEST);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
@@ -294,12 +293,12 @@ public class ReengineerResource extends BaseStanbolResource {
                  * MediaType mediaType = headers.getMediaType(); String res =
                  * OntologyRenderUtils.renderOntology(ontology, mediaType.getType());
                  */
-                //return Response.ok(ontology).build();
+                // return Response.ok(ontology).build();
                 ResponseBuilder rb = Response.ok(ontology);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             } catch (ReengineeringException e) {
-                //return Response.status(500).build();
+                // return Response.status(500).build();
                 ResponseBuilder rb = Response.status(Status.BAD_REQUEST);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
@@ -307,12 +306,12 @@ public class ReengineerResource extends BaseStanbolResource {
         } else {
             try {
                 reengineeringManager.performSchemaReengineering(servletPath, null, dataSource);
-                //return Response.ok().build();
+                // return Response.ok().build();
                 ResponseBuilder rb = Response.ok();
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             } catch (ReengineeringException e) {
-                //return Response.status(500).build();
+                // return Response.status(500).build();
                 ResponseBuilder rb = Response.status(Status.BAD_REQUEST);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
@@ -361,7 +360,7 @@ public class ReengineerResource extends BaseStanbolResource {
                     return rb.build();
                 }
             } catch (ReengineeringException e) {
-                //return Response.status(500).build();
+                // return Response.status(500).build();
                 ResponseBuilder rb = Response.status(Status.BAD_REQUEST);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
@@ -391,7 +390,7 @@ public class ReengineerResource extends BaseStanbolResource {
         // MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
         TripleCollection mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
         MGraph mg2 = null;
-        IRI iri = OWLUtils.guessOntologyIdentifier(o);
+        IRI iri = OWLUtils.guessOntologyIdentifier(o).getOntologyIRI();
         UriRef ref = new UriRef(iri.toString());
         try {
             mg2 = tcManager.createMGraph(ref);
@@ -402,7 +401,7 @@ public class ReengineerResource extends BaseStanbolResource {
 
         mg2.addAll(mg);
     }
-    
+
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();

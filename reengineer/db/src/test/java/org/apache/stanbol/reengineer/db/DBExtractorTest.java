@@ -48,7 +48,7 @@ public class DBExtractorTest {
 
         OfflineConfiguration offline = new OfflineConfigurationImpl(emptyConf);
         OntologyProvider<TcProvider> ontologyProvider = new ClerezzaOntologyProvider(tcm, offline,
-                Parser.getInstance());
+                new Parser());
 
         // Two different ontology storages, the same sparql engine and tcprovider
         OntologySpaceFactory sf = new OntologySpaceFactoryImpl(ontologyProvider, emptyConf);

@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * Creates a new graph input source by parsing <code>content</code>. Every supported format will be tried

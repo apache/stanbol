@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
@@ -73,19 +75,21 @@ public interface OntologyProvider<S> {
      * Gets a string that can be used to directly access the ontology whose logical identifier is
      * <tt>ontologyIRI</tt>.
      * 
-     * @param ontologyIRI
+     * @param locator
      *            the logical identifier of the ontology.
      * @return the key to access the ontology from the store.
      */
-    String getKey(IRI ontologyIRI);
+    String getKey(IRI locator);
 
     /**
-     * Returns the graph that stores all the information on stored ontologies
+     * Gets the key of the ontology with the supplied ontology ID. Note that both ontoloeyIRI and versionIRI
+     * (if present) must match, otherwise it will return null. To get the keys for a givemn ontologyIRI, no
+     * matte what its version is, use {@link #getOntologyVersionKeys(IRI)}.
      * 
-     * @param returnType
+     * @param ontologyId
      * @return
      */
-    <O extends TripleCollection> O getMetaGraph(Class<O> returnType);
+    String getKey(OWLOntologyID ontologyId);
 
     /**
      * Gets the set of all the strings that can be used to access the ontologies stored by this provider.
@@ -93,6 +97,26 @@ public interface OntologyProvider<S> {
      * @return the ontology key set.
      */
     Set<String> getKeys();
+
+    /**
+     * Returns the graph that stores all the information on stored ontologies. Whether the returned triple
+     * collection is a {@link Graph} or a {@link MGraph} depends on the provider's policy on allowing external
+     * modifications to the meta-level graph or not.
+     * 
+     * @param returnType
+     * @return
+     */
+    <O extends TripleCollection> O getMetaGraph(Class<O> returnType);
+
+    /**
+     * Will return the keys of all the ontologies whose ontologyIRI is the one provided. These include any
+     * ontologies with that ontologyIRI and a versionIRI, and one ontology with no version IRI (if it exists,
+     * it must be unique).
+     * 
+     * @param ontologyIRI
+     * @return
+     */
+    Set<String> getOntologyVersionKeys(IRI ontologyIRI);
 
     /**
      * Returns the storage system used by this ontology provider (e.g. a {@link TcProvider} or an
@@ -249,8 +273,8 @@ public interface OntologyProvider<S> {
      * @throws UnsupportedFormatException
      *             if no parsers are able to parse the supplied format (or the actual file format).
      */
-    String loadInStore(InputStream data, String formatIdentifier, String preferredKey, boolean force) throws IOException,
-                                                                                                     UnsupportedFormatException;
+    String loadInStore(InputStream data, String formatIdentifier, boolean force) throws IOException,
+                                                                                UnsupportedFormatException;
 
     /**
      * Retrieves an ontology physically located at <code>location</code> (unless mapped otherwise by the
@@ -279,7 +303,7 @@ public interface OntologyProvider<S> {
      * @throws UnsupportedFormatException
      *             if no parsers are able to parse the supplied format (or the actual file format).
      */
-    String loadInStore(IRI location, String formatIdentifier, String preferredKey, boolean force) throws IOException;
+    String loadInStore(IRI location, String formatIdentifier, boolean force) throws IOException;
 
     /**
      * Stores an ontology that has already been loaded into an object. If the object is of a non-native yet
@@ -299,7 +323,7 @@ public interface OntologyProvider<S> {
      *            set on offline mode, this method will fail.
      * @return
      */
-    String loadInStore(Object ontology, String preferredKey, boolean force);
+    String loadInStore(Object ontology, boolean force);
 
     /**
      * Sets the policy adopted by this provider whenever an import statement is found in an ontology <i>that
@@ -310,5 +334,17 @@ public interface OntologyProvider<S> {
      *            the import management policy.
      */
     void setImportManagementPolicy(ImportManagementPolicy policy);
+
+    /**
+     * Will not be checked by dereferencing
+     * 
+     * If the key does not exist in the provider, or if locator is already bound to a different key, an
+     * {@link IllegalArgumentException} will be thrown.
+     * 
+     * 
+     * @param locator
+     * @param key
+     */
+    void setLocatorMapping(IRI locator, String key);
 
 }

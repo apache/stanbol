@@ -71,6 +71,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -79,10 +80,11 @@ import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDExcep
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologySetInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.SetInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
@@ -650,17 +652,24 @@ public class ScopeResource extends BaseStanbolResource {
             // Expand core sources
             List<OntologyInputSource<?,?>> expanded = new ArrayList<OntologyInputSource<?,?>>();
             if (coreSrc != null) {
-                if (coreSrc instanceof OntologySetInputSource) {
-                    for (OWLOntology o : ((OntologySetInputSource) coreSrc).getOntologies()) {
-                        expanded.add(new RootOntologySource(o));
+                if (coreSrc instanceof SetInputSource) {
+                    for (Object o : ((SetInputSource<?>) coreSrc).getOntologies()) {
+                        OntologyInputSource<?,?> src = null;
+                        if (o instanceof OWLOntology) src = new RootOntologySource((OWLOntology) o);
+                        else if (o instanceof TripleCollection) src = new GraphSource((TripleCollection) o);
+                        if (src != null) expanded.add(src);
                     }
-                } else expanded.add(coreSrc);
+                } else expanded.add(coreSrc); // Must be denoting a single ontology
             }
             if (custSrc != null) {
-                if (custSrc instanceof OntologySetInputSource) for (OWLOntology o : ((OntologySetInputSource) custSrc)
-                        .getOntologies())
-                    expanded.add(new RootOntologySource(o));
-                else expanded.add(custSrc);
+                if (custSrc instanceof SetInputSource) {
+                    for (Object o : ((SetInputSource<?>) custSrc).getOntologies()) {
+                        OntologyInputSource<?,?> src = null;
+                        if (o instanceof OWLOntology) src = new RootOntologySource((OWLOntology) o);
+                        else if (o instanceof TripleCollection) src = new GraphSource((TripleCollection) o);
+                        if (src != null) expanded.add(src);
+                    }
+                } else expanded.add(custSrc); // Must be denoting a single ontology
             }
             // Invoke the appropriate factory method depending on the
             // availability of a custom source.

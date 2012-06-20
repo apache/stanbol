@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
-import java.util.Collection;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
@@ -32,16 +31,8 @@ import org.semanticweb.owlapi.model.IRI;
  * @author alexdma
  * 
  */
-public interface OntologyCollector extends NamedResource, OntologyInputSourceHandler {
-
-    /**
-     * Registers a new listener for changes in this ontology space. Has no effect if the same listener is
-     * already registered with this ontology space.
-     * 
-     * @param listener
-     *            the ontology space listener to be added.
-     */
-    void addListener(OntologyCollectorListener listener);
+public interface OntologyCollector extends OntologyCollectorListenable, NamedResource,
+        OntologyInputSourceHandler {
 
     /**
      * Adds the given ontology to the ontology space. If the supplied ontology is not already present in
@@ -53,19 +44,6 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * @return the key that can be used for accessing the stored ontology directly
      */
     String addOntology(OntologyInputSource<?,?> ontologySource);
-
-    /**
-     * Removes all ontology space listeners registered with this space.
-     */
-    void clearListeners();
-
-    /**
-     * Returns all the listeners registered with this ontology space. Whether the collection reflects or not
-     * the order in which they were registered depends on the implementation.
-     * 
-     * @return the registered ontology space listeners.
-     */
-    Collection<OntologyCollectorListener> getListeners();
 
     /**
      * Returns the ontologies managed by this ontology space. This is a shortcut method for iterating
@@ -109,15 +87,6 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * @return true if an ontology with this ID has been loaded in this space.
      */
     boolean hasOntology(IRI ontologyIri);
-
-    /**
-     * Unregisters the supplied for changes in this ontology space. Has no effect if the same listener was not
-     * registered with this ontology space.
-     * 
-     * @param listener
-     *            the ontology space listener to be removed.
-     */
-    void removeListener(OntologyCollectorListener listener);
 
     /**
      * Removes the given ontology from the ontology space, if the ontology is a direct child of the top

@@ -34,6 +34,7 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
@@ -42,7 +43,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeOntologyListener;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -50,6 +50,7 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologySetProvider;
 import org.semanticweb.owlapi.util.OWLOntologyMerger;
@@ -80,7 +81,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
      */
     protected String id = null;
 
-    private Set<ScopeOntologyListener> listeners = new HashSet<ScopeOntologyListener>();
+    private Set<OntologyCollectorListener> listeners = new HashSet<OntologyCollectorListener>();
 
     /**
      * An ontology scope knows whether it's write-locked or not. Initially it is not.
@@ -98,32 +99,33 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
         setID(id);
         setNamespace(namespace);
 
-        this.coreSpace = factory.createCoreOntologySpace(id, coreOntologies);
-        this.coreSpace.addListener(this);
+        this.coreSpace = factory.createCoreOntologySpace(id/* , coreOntologies */);
+        this.coreSpace.addOntologyCollectorListener(this); // Set listener before adding core ontologies
+        for (OntologyInputSource<?,?> src : coreOntologies)
+            this.coreSpace.addOntology(src);
         // let's just lock it. Once the core space is done it's done.
         this.coreSpace.setUp();
 
         try {
-            setCustomSpace(factory.createCustomOntologySpace(id/* , coreOntologies */));
+            setCustomSpace(factory.createCustomOntologySpace(id));
         } catch (UnmodifiableOntologyCollectorException e) {
-            // Cannot happen unless the factory or space implementations are
-            // really naughty.
+            // Cannot happen unless the factory or space implementations are really naughty.
             log.warn(
                 "Ontology scope "
                         + id
                         + " was denied creation of its own custom space upon initialization! This should not happen.",
                 e);
         }
-        this.customSpace.addListener(this);
+        this.customSpace.addOntologyCollectorListener(this);
     }
 
     @Override
-    public void addOntologyScopeListener(ScopeOntologyListener listener) {
+    public void addOntologyCollectorListener(OntologyCollectorListener listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void clearOntologyScopeListeners() {
+    public void clearOntologyCollectorListeners() {
         listeners.clear();
     }
 
@@ -284,14 +286,14 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
         return ont;
     }
 
-    protected void fireOntologyAdded(IRI ontologyIri) {
-        for (ScopeOntologyListener listener : listeners)
-            listener.onOntologyAdded(this.getID(), ontologyIri);
+    protected void fireOntologyAdded(OntologySpace space, OWLOntologyID addedOntology) {
+        for (OntologyCollectorListener listener : listeners)
+            listener.onOntologyAdded(space, addedOntology);
     }
 
-    protected void fireOntologyRemoved(IRI ontologyIri) {
-        for (ScopeOntologyListener listener : listeners)
-            listener.onOntologyRemoved(this.getID(), ontologyIri);
+    protected void fireOntologyRemoved(OntologySpace space, OWLOntologyID removedOntology) {
+        for (OntologyCollectorListener listener : listeners)
+            listener.onOntologyRemoved(space, removedOntology);
     }
 
     @Override
@@ -320,7 +322,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     }
 
     @Override
-    public Collection<ScopeOntologyListener> getOntologyScopeListeners() {
+    public Collection<OntologyCollectorListener> getOntologyCollectorListeners() {
         return listeners;
     }
 
@@ -330,19 +332,20 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     }
 
     @Override
-    public void onOntologyAdded(String collectorId, IRI addedOntology) {
+    public void onOntologyAdded(OntologyCollector collector, OWLOntologyID addedOntology) {
         // Propagate events to scope listeners
-        fireOntologyAdded(addedOntology);
+        if (collector instanceof OntologySpace) fireOntologyAdded((OntologySpace) collector, addedOntology);
     }
 
     @Override
-    public void onOntologyRemoved(String collectorId, IRI removedOntology) {
+    public void onOntologyRemoved(OntologyCollector collector, OWLOntologyID removedOntology) {
         // Propagate events to scope listeners
-        fireOntologyRemoved(removedOntology);
+        if (collector instanceof OntologySpace) fireOntologyRemoved((OntologySpace) collector,
+            removedOntology);
     }
 
     @Override
-    public void removeOntologyScopeListener(ScopeOntologyListener listener) {
+    public void removeOntologyCollectorListener(OntologyCollectorListener listener) {
         listeners.remove(listener);
     }
 
@@ -354,7 +357,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
                 "supplied object is not a CustomOntologySpace instance.");
         else {
             this.customSpace = (CustomOntologySpace) customSpace;
-            this.customSpace.addListener(this);
+            this.customSpace.addOntologyCollectorListener(this);
         }
     }
 
@@ -397,10 +400,10 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     @Override
     public synchronized void setUp() {
         if (locked || (customSpace != null && !customSpace.isLocked())) return;
-        this.coreSpace.addListener(this);
+        this.coreSpace.addOntologyCollectorListener(this);
         this.coreSpace.setUp();
         if (this.customSpace != null) {
-            this.customSpace.addListener(this);
+            this.customSpace.addOntologyCollectorListener(this);
             this.customSpace.setUp();
         }
         locked = true;

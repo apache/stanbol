@@ -161,7 +161,7 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
                 IRI id = o.getIRI();
                 try {
                     // No preferred key, we don't have a prefix here.
-                    String key = loader.loadInStore(id, null, null, false);
+                    String key = loader.loadInStore(id, null, false);
                     if (key == null || key.isEmpty()) log.error(
                         "Empty storage key. Ontology {} was apparently not stored.", id);
                 } catch (IOException ex) {

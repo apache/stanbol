@@ -24,6 +24,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -34,6 +35,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.junit.After;
@@ -64,8 +66,9 @@ public class TestStorage {
     public void storageOnScopeCreation() throws Exception {
 
         assertEquals(1, ontologyProvider.getStore().listTripleCollections().size());
-        OntologyInputSource ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
-            "/ontologies/minorcharacters.owl")));
+        // This one has an import that we want to hijack locally, so we use the ParentPathInputSource.
+        OntologyInputSource<?,?> ois = new ParentPathInputSource(new File(getClass().getResource(
+            "/ontologies/minorcharacters.owl").toURI()));
 
         OntologyScope sc = onManager.createOntologyScope(scopeId, ois);
 

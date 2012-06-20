@@ -16,11 +16,13 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
-import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 
 /**
- * Objects that react to the addition or removal of ontologies to an ontology collector will implement this
- * interface.
+ * Objects that react to the addition or removal of ontologies to or from an ontology collector will implement
+ * this interface.<br>
+ * <br>
+ * XXX add "before" methods.
  * 
  * @author alexdma
  * 
@@ -28,23 +30,23 @@ import org.semanticweb.owlapi.model.IRI;
 public interface OntologyCollectorListener {
 
     /**
-     * Fired after an ontology was successfully added to an ontology collector.
+     * Fired <i>after</i> an ontology was successfully added to an ontology collector.
      * 
      * @param collectorId
      *            the ontology collector identifier.
      * @param addedOntology
      *            the added ontology identifier.
      */
-    void onOntologyAdded(String collectorId, IRI addedOntology);
+    void onOntologyAdded(OntologyCollector collector, OWLOntologyID addedOntology);
 
     /**
-     * Fired after an ontology was successfully removed from an ontology collector.
+     * Fired <i>after</i> an ontology was successfully removed from an ontology collector.
      * 
      * @param collectorId
      *            the ontology collector identifier.
      * @param removedOntology
      *            the removed ontology identifier.
      */
-    void onOntologyRemoved(String collectorId, IRI removedOntology);
+    void onOntologyRemoved(OntologyCollector collector, OWLOntologyID removedOntology);
 
 }

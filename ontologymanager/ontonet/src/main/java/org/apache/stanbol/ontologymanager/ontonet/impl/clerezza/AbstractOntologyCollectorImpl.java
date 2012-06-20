@@ -76,11 +76,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractOntologyCollectorImpl implements OntologyCollector, Lockable,
         OntologyInputSourceHandler, OWLExportable {
 
-    @Override
-    public Set<IRI> listManagedOntologies() {
-        return managedOntologies;
-    }
-
     protected String _id = null;
 
     /**
@@ -100,9 +95,10 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
     /**
      * The identifier of the ontologies directly managed by this collector (i.e. that were directly added to
-     * this space, hence not including those just pulled in via import statements).
-     * 
-     * TODO make it a set again and have the ontology provider manage the mapping?
+     * this space, hence not including those just pulled in via import statements).<br>
+     * <br>
+     * XXX depending on whether we want to support multiple versionIRIs in the same collector, we may want to
+     * turn this one into a set of {@link OWLOntologyID}.
      */
     protected Set<IRI> managedOntologies;
 
@@ -124,11 +120,6 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public void addListener(OntologyCollectorListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
     public synchronized String addOntology(OntologyInputSource<?,?> ontologySource) throws UnmodifiableOntologyCollectorException {
 
         long before = System.currentTimeMillis();
@@ -142,56 +133,48 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
                 "Ontology source cannot be null and must provide an ontology object.");
 
         Object o = ontologySource.getRootOntology();
-        UriRef uri;
         /*
          * Note for the developer: make sure the call to guessOntologyIdentifier() is only performed once
          * during all the storage process, otherwise multiple calls could return different results for
          * anonymous ontologies.
          */
+        OWLOntologyID id;
         if (o instanceof TripleCollection) {
-            uri = OWLUtils.guessOntologyIdentifier((TripleCollection) o);
+            id = OWLUtils.guessOntologyIdentifier((TripleCollection) o);
         } else if (o instanceof OWLOntology) {
-            uri = new UriRef(OWLUtils.guessOntologyIdentifier((OWLOntology) o).toString());
+            id = OWLUtils.guessOntologyIdentifier((OWLOntology) o);
         } else throw new UnsupportedOperationException(
                 "This ontology collector implementation cannot handle " + o.getClass().getCanonicalName()
                         + " objects.");
 
         // Now for the actual storage. We pass the ontology object directly.
         String key = null;
-        if (ontologyProvider.hasOntology(IRI.create(uri.getUnicodeString()))) if (o instanceof MGraph) claimOwnership((MGraph) o);
-        else if (o instanceof OWLOntology) claimOwnership((OWLOntology) o);
-        key = ontologyProvider.loadInStore(o, uri.getUnicodeString(), false);
+        // // FIXME restore ownership management, but maybe not by directly setting the versionIRI
+        // if (ontologyProvider.hasOntology(id.getOntologyIRI())) if (o instanceof MGraph)
+        // claimOwnership((MGraph) o);
+        // else if (o instanceof OWLOntology) claimOwnership((OWLOntology) o);
+        key = ontologyProvider.loadInStore(o, false);
+        if (ontologySource.hasPhysicalIRI()) ontologyProvider.setLocatorMapping(
+            ontologySource.getPhysicalIRI(), key);
+
         /*
          * Actually we are not interested in knowing the key here (ontology collectors are not concerned with
          * them), but knowing it is non-null and non-empty indicates the operation was successful.
          */
         if (key != null && !key.isEmpty()) {
             // add to index
-            managedOntologies.add(IRI.create(uri.getUnicodeString()));
+            managedOntologies.add(id.getOntologyIRI());
             // Note that imported ontologies are not considered as managed! TODO should we change this?
             log.debug("Add ontology completed in {} ms.", (System.currentTimeMillis() - before));
             // fire the event
-            fireOntologyAdded(uri);
+            fireOntologyAdded(id);
         }
         return key;
     }
 
-    protected void claimOwnership(OWLOntology ontology) {
-        log.info("Checking ownership of {} {}", OWLOntology.class.getSimpleName(), ontology.getOntologyID());
-        OWLOntologyID id = ontology.getOntologyID();
-        if (id.getOntologyIRI() != null) {
-            IRI ontologyIRI = id.getOntologyIRI();
-            IRI versionIri = id.getVersionIRI();
-            if (versionIri == null) {
-                log.info("    No OWL version IRI Found . Will set to own ID. ");
-                versionIri = IRI.create(getNamespace() + getID());
-                OWLOntologyID newId = new OWLOntologyID(ontologyIRI, versionIri);
-                OWLOntologyChange change = new SetOntologyID(ontology, newId);
-                ontology.getOWLOntologyManager().applyChange(change);
-                log.info("    Set OWL version IRI : {} . ", versionIri);
-            } else log.info("    Found OWL version IRI {} . Will not claim ownership. ", versionIri);
-        }
-
+    @Override
+    public void addOntologyCollectorListener(OntologyCollectorListener listener) {
+        listeners.add(listener);
     }
 
     protected void claimOwnership(MGraph ontology) {
@@ -219,8 +202,26 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         }
     }
 
+    protected void claimOwnership(OWLOntology ontology) {
+        log.info("Checking ownership of {} {}", OWLOntology.class.getSimpleName(), ontology.getOntologyID());
+        OWLOntologyID id = ontology.getOntologyID();
+        if (id.getOntologyIRI() != null) {
+            IRI ontologyIRI = id.getOntologyIRI();
+            IRI versionIri = id.getVersionIRI();
+            if (versionIri == null) {
+                log.info("    No OWL version IRI Found . Will set to own ID. ");
+                versionIri = IRI.create(getNamespace() + getID());
+                OWLOntologyID newId = new OWLOntologyID(ontologyIRI, versionIri);
+                OWLOntologyChange change = new SetOntologyID(ontology, newId);
+                ontology.getOWLOntologyManager().applyChange(change);
+                log.info("    Set OWL version IRI : {} . ", versionIri);
+            } else log.info("    Found OWL version IRI {} . Will not claim ownership. ", versionIri);
+        }
+
+    }
+
     @Override
-    public void clearListeners() {
+    public void clearOntologyCollectorListeners() {
         listeners.clear();
     }
 
@@ -405,19 +406,9 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
      * @param ontologyIri
      *            the identifier of the ontology that was added to this space.
      */
-    protected void fireOntologyAdded(IRI ontologyIri) {
+    protected void fireOntologyAdded(OWLOntologyID ontologyId) {
         for (OntologyCollectorListener listener : listeners)
-            listener.onOntologyAdded(this.getID(), ontologyIri);
-    }
-
-    /**
-     * Notifies all ontology space listeners that an ontology has been added to this space.
-     * 
-     * @param ontologyIri
-     *            the identifier of the ontology that was added to this space.
-     */
-    protected void fireOntologyAdded(UriRef ontologyIri) {
-        fireOntologyAdded(IRI.create(ontologyIri.getUnicodeString()));
+            listener.onOntologyAdded(this, ontologyId);
     }
 
     /**
@@ -426,13 +417,9 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
      * @param ontologyIri
      *            the identifier of the ontology that was removed from this space.
      */
-    protected void fireOntologyRemoved(IRI ontologyIri) {
+    protected void fireOntologyRemoved(OWLOntologyID ontologyId) {
         for (OntologyCollectorListener listener : listeners)
-            listener.onOntologyRemoved(this.getID(), ontologyIri);
-    }
-
-    protected void fireOntologyRemoved(UriRef ontologyIri) {
-        fireOntologyRemoved(IRI.create(ontologyIri.getUnicodeString()));
+            listener.onOntologyRemoved(this, ontologyId);
     }
 
     @Override
@@ -443,11 +430,6 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     @Override
     public String getID() {
         return _id;
-    }
-
-    @Override
-    public Collection<OntologyCollectorListener> getListeners() {
-        return listeners;
     }
 
     @Override
@@ -598,6 +580,11 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
+    public Collection<OntologyCollectorListener> getOntologyCollectorListeners() {
+        return listeners;
+    }
+
+    @Override
     public Set<Class<?>> getSupportedOntologyTypes() {
         return Collections.unmodifiableSet(supportedTypes);
     }
@@ -613,19 +600,26 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public void removeListener(OntologyCollectorListener listener) {
-        listeners.remove(listener);
+    public Set<IRI> listManagedOntologies() {
+        return managedOntologies;
     }
 
     @Override
     public void removeOntology(IRI ontologyId) throws OntologyCollectorModificationException {
         if (locked) throw new UnmodifiableOntologyCollectorException(this);
         try {
-            managedOntologies.remove(ontologyId);
-            fireOntologyRemoved(ontologyId);
+            if (managedOntologies.remove(ontologyId)) { // Don't fire if the ontology wasn't there.
+                OWLOntologyID fullId = new OWLOntologyID(ontologyId); // TODO do something about versionIRI
+                fireOntologyRemoved(fullId);
+            }
         } catch (RuntimeException ex) {
             throw new OntologyCollectorModificationException(this, ex);
         }
+    }
+
+    @Override
+    public void removeOntologyCollectorListener(OntologyCollectorListener listener) {
+        listeners.remove(listener);
     }
 
     protected abstract void setID(String id);

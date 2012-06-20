@@ -14,34 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.scope;
+package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
-import org.semanticweb.owlapi.model.IRI;
+import java.util.Collection;
 
 /**
- * Implementations of this interface are able to react to modifications on the ontology network
- * infrastructure.
+ * Informs listeners about changes in an ontology collector. Implementations of this interface should be able
+ * to fire events related to the modification of ontologies within an ontology collector.
  * 
  * @author alexdma
  * 
  */
-public interface ScopeOntologyListener {
+public interface OntologyCollectorListenable {
 
-    /**
-     * Called whenever an ontology is set to be managed by a scope, space or session.
-     * 
-     * @param scopeId
-     * @param addedOntology
-     */
-    void onOntologyAdded(String scopeId, IRI addedOntology);
+    void addOntologyCollectorListener(OntologyCollectorListener listener);
 
-    /**
-     * Called whenever an ontology is set to no longer be managed by a scope, space or session. This method is
-     * not called if that ontology was not being managed earlier.
-     * 
-     * @param scopeId
-     * @param addedOntology
-     */
-    void onOntologyRemoved(String scopeId, IRI removedOntology);
+    void clearOntologyCollectorListeners();
+
+    Collection<OntologyCollectorListener> getOntologyCollectorListeners();
+
+    void removeOntologyCollectorListener(OntologyCollectorListener listener);
 
 }

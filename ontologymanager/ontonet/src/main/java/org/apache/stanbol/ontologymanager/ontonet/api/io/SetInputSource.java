@@ -14,25 +14,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.ontologymanager.ontonet.api.scope;
+package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
-import java.util.Collection;
+import java.util.Set;
 
-/**
- * Implementations of this interface are able to fire events related to the
- * modification of ontologies within an ontology scope.
- * 
- * @author alexdma
- * 
- */
-public interface ScopeOntologyListenable {
+import org.semanticweb.owlapi.model.OWLOntology;
 
-	void addOntologyScopeListener(ScopeOntologyListener listener);
+public interface SetInputSource<O> {
 
-	void clearOntologyScopeListeners();
-
-	Collection<ScopeOntologyListener> getOntologyScopeListeners();
-
-	void removeOntologyScopeListener(ScopeOntologyListener listener);
+    Set<O> getOntologies();
 
 }

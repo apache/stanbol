@@ -21,8 +21,16 @@ public class Vocabulary {
     public static final String _NS_ONTONET = "http://stanbol.apache.org/ontology/meta/ontonet#";
 
     public static final String IS_MANAGED_BY = _NS_ONTONET + "isManagedBy";
+    
+    public static final String IS_MANAGED_BY_CORE = _NS_ONTONET + "isManagedByCore";
 
+    public static final String IS_MANAGED_BY_CUSTOM = _NS_ONTONET + "isManagedByCustom";
+    
     public static final String MANAGES = _NS_ONTONET + "manages";
+    
+    public static final String MANAGES_IN_CORE = _NS_ONTONET + "managesInCore";
+    
+    public static final String MANAGES_IN_CUSTOM = _NS_ONTONET + "managesInCustom";
     
     public static final String HAS_STATUS = _NS_ONTONET + "hasStatus";
     

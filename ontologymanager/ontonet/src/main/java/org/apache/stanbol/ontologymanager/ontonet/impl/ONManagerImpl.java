@@ -22,12 +22,16 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
+import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcProvider;
+import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -41,6 +45,7 @@ import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
@@ -136,8 +141,6 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
 
     private Helper helper = null;
 
-    private Set<ScopeEventListener> listeners = new HashSet<ScopeEventListener>();
-
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Reference
@@ -179,20 +182,14 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
      * Component Runtime support.
      * <p>
      * DO NOT USE to manually create instances - the ReengineerManagerImpl instances do need to be configured!
-     * YOU NEED TO USE {@link #ONManagerImpl(OntologyProvider, OfflineConfiguration, Dictionary)} or its
+     * YOU NEED TO USE
+     * {@link #ONManagerImpl(OntologyProvider, OfflineConfiguration, OntologySpaceFactory, Dictionary)} or its
      * overloads, to parse the configuration and then initialise the rule store if running outside an OSGI
      * environment.
      */
     public ONManagerImpl() {
         super();
         // All bindings are deferred to the activator
-    }
-
-    @Deprecated
-    public ONManagerImpl(OntologyProvider<?> ontologyProvider,
-                         OfflineConfiguration offline,
-                         Dictionary<String,Object> configuration) {
-        this(ontologyProvider, offline, null, configuration);
     }
 
     public ONManagerImpl(OntologyProvider<?> ontologyProvider,
@@ -314,7 +311,10 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
             // Create and populate the scopes from the config ontology.
             bootstrapOntologyNetwork(oConf);
 
+        } else {
+            rebuildScopes();
         }
+
         log.debug(ONManager.class + " activated.");
 
     }
@@ -334,11 +334,15 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         }
         IRI iri = IRI.create(getOntologyNetworkNamespace() + scopeRegistryId + "/");
         ontologySpaceFactory.setNamespace(iri);
+
+        // Add listeners
+        if (ontologyProvider instanceof ScopeEventListener) this
+                .addScopeEventListener((ScopeEventListener) ontologyProvider);
     }
 
     private void bootstrapOntologyNetwork(OWLOntology configOntology) {
         if (configOntology == null) {
-            log.debug("Ontology Network Manager starting with empty scope set.");
+            log.info("Ontology Network Manager starting with empty scope set.");
             return;
         }
         try {
@@ -424,8 +428,12 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
                                                                         + scopeRegistryId + "/"),
                 getOntologySpaceFactory(), coreSources);
         if (scope != null) {
-            this.registerScope(scope);
+            // Commented out: for the time being we try not to propagate additions to scopes.
+
+            // if (ontologyProvider instanceof OntologyCollectorListener) scope
+            // .addOntologyCollectorListener((OntologyCollectorListener) ontologyProvider);
             fireScopeCreated(scope);
+            this.registerScope(scope);
         }
         return scope;
     }
@@ -440,7 +448,6 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
                 super.registerScope(scope);
             } else log.warn("Ignoring unnecessary call to already registered scope {}", id);
         } else super.registerScope(scope);
-
     }
 
     /**
@@ -554,4 +561,30 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         this.ontonetNS = namespace;
     }
 
+    private void rebuildScopes() {
+        TripleCollection meta = ontologyProvider.getMetaGraph(TripleCollection.class);
+        for (Iterator<Triple> it = meta.filter(null, RDF.type, new UriRef(Vocabulary.SCOPE)); it.hasNext();) {
+            NonLiteral sub = it.next().getSubject();
+            if (sub instanceof UriRef) {
+                String s = ((UriRef) sub).getUnicodeString(), prefix = getOntologyNetworkNamespace()
+                                                                       + scopeRegistryId + "/";
+                if (s.startsWith(prefix)) {
+                    String scopeId = s.substring(prefix.length());
+                    OntologyScope scope = new OntologyScopeImpl(scopeId, IRI.create(prefix),
+                            getOntologySpaceFactory());
+
+                    // retrieve the ontologies
+                    for (Iterator<Triple> it2 = meta.filter(sub, null, null); it2.hasNext();) {
+                        Triple t = it2.next();
+                        UriRef predicate = t.getPredicate();
+                        if (predicate.equals(new UriRef(Vocabulary.MANAGES_IN_CUSTOM))) {
+                            System.out.println(t.getObject());
+                        }
+                    }
+
+                    scopeMap.put(scopeId, scope);
+                }
+            }
+        }
+    }
 }

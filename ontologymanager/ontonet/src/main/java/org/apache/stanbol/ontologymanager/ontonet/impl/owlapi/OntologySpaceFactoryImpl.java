@@ -67,7 +67,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
         OntologyScope parentScope = registry.getScope(scopeID);
 
         if (parentScope != null && parentScope instanceof OntologyCollectorListener) s
-                .addListener((OntologyCollectorListener) parentScope);
+                .addOntologyCollectorListener((OntologyCollectorListener) parentScope);
         // Set the supplied ontology's parent as the root for this space.
         if (ontologySources != null) try {
             for (OntologyInputSource<?,?> src : ontologySources)

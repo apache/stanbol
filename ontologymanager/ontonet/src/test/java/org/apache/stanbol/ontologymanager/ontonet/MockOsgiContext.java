@@ -31,52 +31,71 @@ import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.OntologySpaceFactoryImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 
 /**
- * Utility class that provides some object that would be provided by SCR reference in an OSGi environment. Can
- * be used to simulate OSGi in unit tests.
+ * Utility class that provides some objects that would otherwise be provided by SCR reference in an OSGi
+ * environment. Can be used to simulate OSGi in unit tests.
  * 
  * @author alexdma
  * 
  */
 public class MockOsgiContext {
 
-    public static Parser parser;
-
-    public static TcManager tcManager;
-
-    public static ONManager onManager;
-
-    public static Serializer serializer;
-
-    public static OntologyProvider<TcProvider> ontologyProvider;
+    private static Dictionary<String,Object> config;
 
     private static OfflineConfiguration offline;
 
+    public static ONManager onManager;
+
+    public static OntologyProvider<TcProvider> ontologyProvider;
+
+    public static Parser parser;
+
+    public static Serializer serializer;
+
+    public static SessionManager sessionManager;
+
+    public static TcManager tcManager;
+
     static {
+        config = new Hashtable<String,Object>();
+        config.put(ONManager.ONTOLOGY_NETWORK_NS, "http://stanbol.apache.org/scope/");
+        config.put(SessionManager.SESSIONS_NS, "http://stanbol.apache.org/session/");
+        config.put(SessionManager.MAX_ACTIVE_SESSIONS, "-1");
         offline = new OfflineConfigurationImpl(new Hashtable<String,Object>());
         reset();
     }
 
+    /**
+     * Sets up a new mock OSGi context and cleans all resources and components.
+     */
     public static void reset() {
+        // reset Clerezza objects
         tcManager = new TcManager();
         tcManager.addWeightedTcProvider(new SimpleTcProvider());
-
-        parser = new Parser();
+        parser = new Parser(); // add Jena-supported formats + RDF/JSON
         parser.bindParsingProvider(new JenaParserProvider());
         parser.bindParsingProvider(new RdfJsonParsingProvider());
-
-        serializer = new Serializer();
+        serializer = new Serializer(); // add Jena-supported formats + RDF/JSON
         serializer.bindSerializingProvider(new JenaSerializerProvider());
         serializer.bindSerializingProvider(new RdfJsonSerializingProvider());
 
+        // reset Stanbol objects
         ontologyProvider = new ClerezzaOntologyProvider(tcManager, offline, parser);
-        Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
-        onmconf.put(ONManager.ONTOLOGY_NETWORK_NS, "http://stanbol.apache.org/scope/");
-        onManager = new ONManagerImpl(ontologyProvider, offline, onmconf);
+        resetManagers();
+    }
+
+    public static void resetManagers() {
+        OntologySpaceFactory factory = new OntologySpaceFactoryImpl(ontologyProvider, config);
+        onManager = new ONManagerImpl(ontologyProvider, offline, factory, config);
+        sessionManager = new SessionManagerImpl(ontologyProvider, config);
     }
 
 }

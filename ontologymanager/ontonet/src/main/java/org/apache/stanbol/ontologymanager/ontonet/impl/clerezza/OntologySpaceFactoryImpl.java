@@ -25,6 +25,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
@@ -107,6 +108,11 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
         //
         // if (parentScope != null && parentScope instanceof OntologyCollectorListener) s
         // .addListener((OntologyCollectorListener) parentScope);
+
+        // Make sure the ontology provider listens to ontology additions before core ontologies are added.
+        if (ontologyProvider instanceof OntologyCollectorListener) s
+                .addOntologyCollectorListener((OntologyCollectorListener) ontologyProvider);
+
         // Set the supplied ontology's parent as the root for this space.
         if (ontologySources != null) try {
             for (OntologyInputSource<?,?> src : ontologySources)

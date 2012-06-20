@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.commons.owl.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.InputStream;
 
@@ -26,7 +26,6 @@ import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
-import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,7 +54,7 @@ public class TestOWLUtils {
         InputStream inputStream = getClass().getResourceAsStream("/owl/nameless_ontology.owl");
         MGraph mg = TcManager.getInstance().createMGraph(uri);
         pp.parse(mg, inputStream, "application/rdf+xml", uri);
-//        No longer null!
+        // No longer null!
         assertNotNull(OWLUtils.guessOntologyIdentifier(mg.getGraph()));
     }
 
