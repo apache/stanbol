@@ -40,15 +40,6 @@ public class OWLUtils {
 
     public static final String NS_STANBOL = "http://stanbol.apache.org/";
 
-    public static UriRef guessOntologyIdentifier(Object g) {
-        if (g instanceof TripleCollection) return URIUtils.createUriRef(guessOWLOntologyID(
-            (TripleCollection) g).getOntologyIRI());
-        else if (g instanceof OWLOntology) return URIUtils
-                .createUriRef(guessOntologyIdentifier((OWLOntology) g));
-        else throw new IllegalArgumentException("Cannot guess ontology identifier for objects of type "
-                                                + g.getClass());
-    }
-
     /**
      * If the ontology is named, this method will return its logical ID, otherwise it will return the location
      * it was retrieved from (which is still unique).
@@ -56,15 +47,21 @@ public class OWLUtils {
      * @param o
      * @return
      */
-    public static IRI guessOntologyIdentifier(OWLOntology o) {
-        String iri;
+    public static OWLOntologyID guessOntologyIdentifier(OWLOntology o) {
+
+        String oiri;
+        IRI viri = null;
         // For named OWL ontologies it is their ontology ID. For anonymous ontologies, it is the URI they were
         // fetched from, if any.
-        if (o.isAnonymous()) iri = o.getOWLOntologyManager().getOntologyDocumentIRI(o).toString();
-        else iri = o.getOntologyID().getOntologyIRI().toString();
+        if (o.isAnonymous()) oiri = o.getOWLOntologyManager().getOntologyDocumentIRI(o).toString();
+        else {
+            OWLOntologyID id = o.getOntologyID();
+            oiri = id.getOntologyIRI().toString();
+            viri = id.getVersionIRI();
+        }
         // Strip fragment or query tokens. TODO do proper URL Encoding.
-        while (iri.endsWith("#") || iri.endsWith("?"))
-            iri = iri.substring(0, iri.length() - 1);
+        while (oiri.endsWith("#") || oiri.endsWith("?"))
+            oiri = oiri.substring(0, oiri.length() - 1);
         // try {
         // if (originalIri.endsWith("#")) originalIri = originalIri.substring(0,
         // originalIri.length() - 1) + URLEncoder.encode("#", "UTF-8");
@@ -74,32 +71,12 @@ public class OWLUtils {
         // } catch (UnsupportedEncodingException e) {
         // // That cannot be.
         // }
-        return IRI.create(iri);
+
+        if (viri != null) return new OWLOntologyID(IRI.create(oiri), viri);
+        else return new OWLOntologyID(IRI.create(oiri));
     }
 
-    /**
-     * Returns an UriRef wrapper for the first instance of owl:Ontology it detects, and ignores further
-     * instances (which is nonstandard in OWL).
-     * 
-     * If the ontology is anonymous, a timestamped UriRef is created
-     * 
-     * @param g
-     * @return
-     */
-    public static UriRef guessOntologyIdentifier(TripleCollection g) {
-        Iterator<Triple> it = g.filter(null, RDF.type, OWL.Ontology);
-        if (it.hasNext()) {
-            NonLiteral subj = it.next().getSubject();
-            if (it.hasNext()) log.warn(
-                "RDF Graph {} has multiple OWL ontology definitions! Ignoring all but {}", g, subj);
-            if (subj instanceof UriRef) return (UriRef) subj;
-        }
-        String s = NS_STANBOL + System.currentTimeMillis();
-        log.debug("Ontology is anonymous. Returning generated ID <{}> .", s);
-        return new UriRef(s);
-    }
-
-    public static OWLOntologyID guessOWLOntologyID(TripleCollection g) {
+    public static OWLOntologyID guessOntologyIdentifier(TripleCollection g) {
         IRI ontologyIri = null, versionIri = null;
         Iterator<Triple> it = g.filter(null, RDF.type, OWL.Ontology);
         if (it.hasNext()) {
@@ -114,12 +91,15 @@ public class OWLUtils {
                         .getUnicodeString());
             }
         }
-        if (ontologyIri == null) ontologyIri = IRI.create(NS_STANBOL + System.currentTimeMillis());
+        if (ontologyIri == null) {
+            ontologyIri = IRI.create(NS_STANBOL + System.currentTimeMillis());
+            log.debug("Ontology is anonymous. Returning generated ID <{}> .", ontologyIri);
+        }
         if (versionIri == null) return new OWLOntologyID(ontologyIri);
         else return new OWLOntologyID(ontologyIri, versionIri);
     }
 
-    public static IRI guessOntologyIdentifier(UriRef key, TcProvider store) {
-        return guessOWLOntologyID(store.getTriples(key)).getOntologyIRI();
+    public static OWLOntologyID guessOntologyIdentifier(UriRef key, TcProvider store) {
+        return guessOntologyIdentifier(store.getTriples(key));
     }
 }
