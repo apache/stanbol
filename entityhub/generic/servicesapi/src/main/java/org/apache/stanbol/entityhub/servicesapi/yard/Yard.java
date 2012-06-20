@@ -152,6 +152,11 @@ public interface Yard {
     void remove(Iterable<String> ids) throws IllegalArgumentException, YardException;
 
     /**
+     * Removes all the {@link Representation} managed by this Yard
+     * @throws YardException On any error related to the Yard
+     */
+    void removeAll() throws YardException;
+    /**
      * checks if a representation with the given id is present in the Yard
      *
      * @param id the id. Calls with <code>null</code> are ignored

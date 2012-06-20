@@ -243,7 +243,7 @@ public class SolrYard extends AbstractYard implements Yard {
      * The {@link FieldMapper} is responsible for converting fields of {@link Representation} to fields in the
      * {@link SolrInputDocument} and vice versa
      */
-    private FieldMapper _fieldMapper;
+    private SolrFieldMapper _fieldMapper;
     /**
      * The {@link IndexValueFactory} is responsible for converting values of fields in the
      * {@link Representation} to the according {@link IndexValue}. One should note, that some properties of
@@ -686,7 +686,7 @@ public class SolrYard extends AbstractYard implements Yard {
                     " could not be initialised!",e);
         }
     }
-    private FieldMapper getFieldMapper() throws YardException {
+    private SolrFieldMapper getFieldMapper() throws YardException {
         if(_fieldMapper == null){
             // the fieldMapper need the Server to store it's namespace prefix configuration
             _fieldMapper = new SolrFieldMapper(getServer());
@@ -1024,6 +1024,26 @@ public class SolrYard extends AbstractYard implements Yard {
         // only the representation of the Entity is deleted and not the
         // Entity itself. So even that we do no longer have an representation
         // the entity still exists and might be referenced by others!
+    }
+    @Override
+    public void removeAll() throws YardException {
+        SolrServer server = getServer();
+        try {
+            //ensures that the fildMapper is initialised and reads the
+            //namespace config before deleting all documents
+            getFieldMapper();
+            //delete all documents
+            server.deleteByQuery("*:*");
+            //ensure that the namespace config is stored again after deleting
+            //all documents
+            getFieldMapper().saveNamespaceConfig();
+            server.commit();
+        } catch (SolrServerException e) {
+            throw new YardException("Error while deleting documents from the Solr server", e);
+        } catch (IOException e) {
+            throw new YardException("Unable to access SolrServer", e);
+        }
+        
     }
 
     @Override

@@ -495,7 +495,22 @@ public class CacheImpl implements Cache {
             yard.remove(ids);
         }
     }
-
+    @Override
+    public void removeAll() throws YardException {
+        Yard yard = getCacheYard();
+        if (yard == null) {
+            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
+        } else {
+            //ensure that the baseConfig (if present) is not deleted by this
+            //operation
+            Representation baseConfig = yard.getRepresentation(Cache.BASE_CONFIGURATION_URI);
+            yard.removeAll();
+            if(baseConfig != null){
+                yard.store(baseConfig);
+            }
+        }
+    }
+    
     @Override
     public Iterable<Representation> store(Iterable<Representation> representations) throws IllegalArgumentException, YardException {
         Yard yard = getCacheYard();
