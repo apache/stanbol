@@ -465,7 +465,40 @@ public abstract class YardTest {
         assertFalse(yard.isRepresentation(test1.getId())); // test if removed
         assertFalse(yard.isRepresentation(test2.getId()));
     }
-
+    /**
+     * Tests that multiple Representations are removed.
+     * 
+     * @throws YardException
+     */
+    @Test
+    public void testRemoveAll() throws YardException {
+        // NOTE: This test needs not to use the create(..) method, because we
+        // remove the created representation form the store anyway as part of the
+        // test
+        String id = "urn:yard.test.testRemoveAll:representation.id1";
+        String id2 = "urn:yard.test.testRemoveAll:representation.id2";
+        String field = "urn:the.field:used.for.this.Test";
+        String testValue = "This is a test";
+        Yard yard = getYard();
+        // use both ways to add the two Representations (should make no differences,
+        // but one never can know ...
+        Representation test1 = yard.create(id); // create and add
+        test1.add(field, testValue); // add value
+        yard.store(test1);// store
+        Representation test2 = yard.getValueFactory().createRepresentation(id2); // create
+        test2.add(field, testValue); // add value
+        yard.store(test2);// store
+        assertTrue(yard.isRepresentation(test1.getId())); // test if stored
+        assertTrue(yard.isRepresentation(test2.getId()));
+        yard.removeAll(); // remove
+        assertFalse(yard.isRepresentation(test1.getId())); // test if removed
+        assertFalse(yard.isRepresentation(test2.getId()));
+        //test that Yard is still useable after removeAll
+        yard.store(test1);// store
+        assertTrue(yard.isRepresentation(test1.getId())); // test if stored
+        yard.removeAll(); // remove
+        assertFalse(yard.isRepresentation(test1.getId()));
+    }
     /**
      * Tests if <code>null</code> values within the Iterable are ignored and do not cause an Exception
      * 

@@ -795,7 +795,7 @@ public class SolrFieldMapper implements FieldMapper {
     /**
      * Saves the current configuration to the index!
      */
-    private void saveNamespaceConfig() {
+    public void saveNamespaceConfig() {
         Map<String,String> prefixMap = getPrefixMap();
         SolrInputDocument inputDoc = new SolrInputDocument();
         inputDoc.addField(getDocumentIdField(), FieldMapper.URI);

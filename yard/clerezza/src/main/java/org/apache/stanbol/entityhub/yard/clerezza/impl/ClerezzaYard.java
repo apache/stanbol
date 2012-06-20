@@ -343,6 +343,23 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         }
     }
     @Override
+    public final void removeAll() throws YardException {
+        final Lock writeLock;
+        if(graph instanceof LockableMGraph){
+            writeLock = ((LockableMGraph)graph).getLock().writeLock();
+            writeLock.lock();
+        } else {
+            throw new YardException("Unable to remove all Entities"
+                + "because the backing RDF graph '"+yardGraphUri
+                + "' is read-only!");
+        }
+        try {
+            graph.clear();
+        } finally {
+            writeLock.unlock();
+        }
+    }
+    @Override
     public final Representation store(Representation representation) throws IllegalArgumentException, YardException {
         if(representation == null){
             throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
