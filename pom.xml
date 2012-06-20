@@ -161,8 +161,6 @@
                 <exclude>contrib/**</exclude>
                 <exclude>demos/**</exclude>
                 <exclude>enhancer/data/text-examples/**</exclude>
-                <exclude>launchers/kres/**</exclude>
-                <exclude>reengineer/**</exclude>
               </excludes>
             </configuration>
           </plugin>
@@ -181,17 +179,6 @@
       </build>
     </profile>
 
-    <!-- One day the KReS profile will disappear -->
-    <profile>
-      <id>kres</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>reengineer</module>
-        <module>launchers/kres</module>
-      </modules>
-    </profile>
   </profiles>
 
 </project>

@@ -29,7 +29,7 @@ public class ScopeTest extends StanbolTestBase {
 
     private static final String _ROOT_URI = "/ontonet";
 
-    private static final String URI_SCOPE_CLASS = "http://kres.iks-project.eu/ontology/onm/meta.owl#Scope";;
+    private static final String URI_SCOPE_CLASS = "http://stanbol.apache.org/ontology/meta/ontonet#Scope";
     private static final String BASE_SCOPES_URI = _ROOT_URI + "/ontology";
 
     private static final Logger log = LoggerFactory.getLogger(ScopeTest.class);
