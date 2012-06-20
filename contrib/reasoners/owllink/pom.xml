@@ -22,8 +22,8 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>0.10.0-incubating-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
+    <version>2-incubating-SNAPSHOT</version>
+    <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
@@ -90,7 +90,7 @@
     <dependency>
       <groupId>owl-link</groupId>
       <artifactId>owl-link</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.2</version>
       <type>jar</type>
     </dependency>
   </dependencies>

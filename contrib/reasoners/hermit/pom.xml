@@ -21,8 +21,8 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>0.10.0-incubating-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
+    <version>2-incubating-SNAPSHOT</version>
+    <relativePath>../../../parent</relativePath>
   </parent>
 <modelVersion>4.0.0</modelVersion>
   <artifactId>org.apache.stanbol.reasoners.hermit</artifactId>
