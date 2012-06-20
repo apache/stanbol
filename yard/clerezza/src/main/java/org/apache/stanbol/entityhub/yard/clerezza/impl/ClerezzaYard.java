@@ -47,6 +47,8 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
@@ -92,6 +94,14 @@ import org.slf4j.LoggerFactory;
         metatype = true
         )
 @Service
+@Properties(value={
+    @Property(name=Yard.ID,value="changeme"),
+    @Property(name=Yard.NAME,value="The human readable name"),
+    @Property(name=Yard.DESCRIPTION,value="A description"),
+    @Property(name=ClerezzaYard.GRAPH_URI),
+    @Property(name=AbstractYard.DEFAULT_QUERY_RESULT_NUMBER,intValue=-1),
+    @Property(name=AbstractYard.MAX_QUERY_RESULT_NUMBER,intValue=-1)
+})
 public class ClerezzaYard extends AbstractYard implements Yard {
     private static Logger log = LoggerFactory.getLogger(ClerezzaYard.class);
     /**
@@ -109,6 +119,13 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      */
     public static final UriRef MANAGED_REPRESENTATION = new UriRef("urn:org.apache.stanbol:entityhub.yard:rdf.clerezza:managesRepresentation");
     /**
+     * Property used to optionally configure the URI of the Clerezza Graph.
+     * This graph will be looked up by using {@link TcManager#getTriples(UriRef).<p>
+     * Note that if the returned RDF graph is of instance Graph the write/delete
+     * operations of this implementations will not work.
+     */
+    public static final String GRAPH_URI = "org.apache.stanbol.entityhub.yard.clerezza.graphuri";
+    /**
      * The TRUE value used as object for the property {@link #MANAGED_REPRESENTATION}.
      */
     private static final Literal TRUE_LITERAL = LiteralFactory.getInstance().createTypedLiteral(Boolean.FALSE);
@@ -119,12 +136,13 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     @Reference
     private TcManager tcManager;
     private UriRef yardGraphUri;
-    private LockableMGraph graph;
+    TripleCollection graph;
+    //private LockableMGraph graph;
 
     public ClerezzaYard() {
         super();
     }
-    public ClerezzaYard(YardConfig config) {
+    public ClerezzaYard(ClerezzaYardConfig config) {
         super();
         activate(config);
     }
@@ -135,7 +153,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         if(context == null || context.getProperties() == null){
             throw new IllegalStateException("No valid"+ComponentContext.class+" parsed in activate!");
         }
-        activate(new SimpleYardConfig(context.getProperties()));
+        activate(new ClerezzaYardConfig(context.getProperties()));
     }
     /**
      * Internally used to activate the Yard. In case the Yard runs within a
@@ -146,20 +164,27 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      * @throws IllegalArgumentException In case <code>null</code> is parsed as 
      * configuration or the configuration is invalid
      */
-    private final void activate(YardConfig config) throws IllegalArgumentException {
+    private final void activate(ClerezzaYardConfig config) throws IllegalArgumentException {
         super.activate(RdfValueFactory.getInstance(), SparqlFieldQueryFactory.getInstance(), config);
         if(tcManager == null){ //this will be the case if we are not in an OSGI environment
           //use the getInstance() method!
             tcManager = TcManager.getInstance(); 
         }
-        String yardUri = getUriPrefix();
-        //remove the "." at the last position of the prefix
-        this.yardGraphUri = new UriRef(yardUri.substring(0, yardUri.length()-2));
+        this.yardGraphUri = config.getGraphUri();
+        if(this.yardGraphUri == null){ // use default
+            String yardUri = getUriPrefix();
+            //remove the "." at the last position of the prefix
+            this.yardGraphUri = new UriRef(yardUri.substring(0, yardUri.length()-2));
+        }
         try {
-            this.graph = tcManager.getMGraph(yardGraphUri);
-            log.info("  ... (re)use existing Graph "+yardGraphUri+" for Yard "+config.getName());
+            this.graph = tcManager.getTriples(yardGraphUri);
+            log.info("  ... (re)use existing Graph {} for Yard {}",
+                yardGraphUri,config.getName());
+            if(!(graph instanceof LockableMGraph)){
+                log.info("        > NOTE: this ClerezzaYard is read-only");
+            }
         } catch (NoSuchEntityException e) {
-            log.info("   ... create new Graph "+yardGraphUri+" for Yard "+config.getName()+"!");
+            log.info("   ... create new Graph {} for Yard {}",yardGraphUri,config.getName());
             this.graph =  tcManager.createMGraph(yardGraphUri);
         }
 
@@ -199,8 +224,13 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      * @return the Representation
      */
     protected final Representation getRepresentation(UriRef uri, boolean check) {
-        Lock readLock = graph.getLock().readLock();
-        readLock.lock();
+        final Lock readLock;
+        if(graph instanceof LockableMGraph){
+            readLock = ((LockableMGraph)graph).getLock().readLock();
+            readLock.lock();
+        } else {
+            readLock = null;
+        }
         try {
             if(!check || isRepresentation(uri)){
                 MGraph nodeGraph = createRepresentationGraph(uri, graph);
@@ -213,7 +243,9 @@ public class ClerezzaYard extends AbstractYard implements Yard {
                 return null; //not found
             }
         } finally {
-            readLock.unlock();
+            if(readLock != null){
+                readLock.unlock();
+            }
         }
     }
     /**
@@ -277,13 +309,20 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     }
 
     @Override
-    public void remove(String id) throws IllegalArgumentException {
+    public void remove(String id) throws YardException, IllegalArgumentException {
         if(id == null) {
             throw new IllegalArgumentException("The parsed Representation id MUST NOT be NULL!");
         }
         UriRef resource = new UriRef(id);
-        Lock writeLock = graph.getLock().writeLock();
-        writeLock.lock();
+        final Lock writeLock;
+        if(graph instanceof LockableMGraph){
+            writeLock = ((LockableMGraph)graph).getLock().writeLock();
+            writeLock.lock();
+        } else {
+            throw new YardException("Unable to remove Entity '"+id
+                + "' because the backing RDF graph '"+yardGraphUri
+                + "' is read-only!");
+        }
         try {
             if(isRepresentation(resource)){
                 graph.removeAll(createRepresentationGraph(resource, graph));
@@ -364,7 +403,15 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         //get the graph for the Representation and add it to the store
         RdfRepresentation toAdd = ((RdfValueFactory)getValueFactory()).toRdfRepresentation(representation);
 //        log.info("  > add "+toAdd.size()+" triples to Yard "+getId());
-        Lock writeLock = graph.getLock().writeLock();
+        final Lock writeLock;
+        if(graph instanceof LockableMGraph){
+            writeLock = ((LockableMGraph)graph).getLock().writeLock();
+            writeLock.lock();
+        } else {
+            throw new YardException("Unable to store Entity '"+representation.getId()
+                + "' because the backing RDF graph '"+yardGraphUri
+                + "' is read-only!");
+        }
         writeLock.lock();
         try {
             graph.addAll(toAdd.getRdfGraph());
