@@ -1,4 +1,4 @@
-package org.apache.stanbol.contenthub.test;
+package org.apache.stanbol.contenthub.test.store.file;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.test;
+package org.apache.stanbol.contenthub.test.store.file;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -23,7 +23,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.UriRef;
@@ -181,41 +180,7 @@ public class FileRevisionManagerTest {
             } finally {
                 dbManager.closeStatement(ps);
                 dbManager.closeConnection(con);
-                printDBTables();
             }
-        }
-    }
-
-    private void printDBTables() {
-        Connection con = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            con = dbManager.getConnection();
-            String selectRevisionsQuery = "SELECT * FROM content_item_revisions";
-            String selectRecentlyEnhancedQuery = "SELECT * from recently_enhanced_content_items";
-            stmt = con.createStatement();
-            rs = stmt.executeQuery(selectRevisionsQuery);
-            System.out.println("===============REVISION TABLE================");
-            while (rs.next()) {
-                System.out.println(rs.getString(1));
-            }
-            System.out.println("===============RECENTLY ENHANCED TABLE================");
-            rs = stmt.executeQuery(selectRecentlyEnhancedQuery);
-            while (rs.next()) {
-                System.out.println(rs.getString(1));
-            }
-
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (StoreException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            dbManager.closeConnection(con);
-            dbManager.closeStatement(stmt);
-            dbManager.closeResultSet(rs);
         }
     }
 
@@ -266,7 +231,6 @@ public class FileRevisionManagerTest {
             } finally {
                 dbManager.closeStatement(ps);
                 dbManager.closeConnection(con);
-                printDBTables();
             }
         }
     }
