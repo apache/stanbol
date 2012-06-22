@@ -145,7 +145,7 @@
     <artifactId>arq</artifactId>
   </dependency>
   <dependency>
-    <groupId>owlapi</groupId>
+    <groupId>net.sourceforge.owlapi</groupId>
     <artifactId>owlapi</artifactId>
   </dependency>
 
