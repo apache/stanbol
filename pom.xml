@@ -85,6 +85,7 @@
 
     <module>launchers/bundlelists/osgiframework</module>
     <module>launchers/bundlelists/stanbolcommons</module>
+    <module>launchers/bundlelists/zzshell</module>
     <module>launchers/full</module>
     <module>integration-tests</module>
 
