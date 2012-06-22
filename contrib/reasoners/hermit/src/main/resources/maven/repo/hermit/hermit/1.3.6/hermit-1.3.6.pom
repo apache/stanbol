@@ -9,7 +9,7 @@
   <dependencies>
     <!-- Stanbol deps -->
     <dependency>
-      <groupId>owlapi</groupId>
+      <groupId>net.sourceforge.owlapi</groupId>
       <artifactId>owlapi</artifactId>
       <version>3.2.2</version>
     </dependency>

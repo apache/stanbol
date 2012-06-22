@@ -32,6 +32,16 @@
 
   <name>Apache Stanbol Reasoners: HermiT</name>
 
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/contrib/reasoners/hermit/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/contrib/reasoners/hermit/
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
+  
   <repositories>
      <repository>
              <releases>
@@ -44,6 +54,7 @@
              <url>file://localhost/${project.basedir}/src/main/resources/maven/repo</url>
      </repository>
   </repositories>
+  
   <dependencies>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -57,7 +68,7 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>owlapi</groupId>
+      <groupId>net.sourceforge.owlapi</groupId>
       <artifactId>owlapi</artifactId>
     </dependency>
     <dependency>
