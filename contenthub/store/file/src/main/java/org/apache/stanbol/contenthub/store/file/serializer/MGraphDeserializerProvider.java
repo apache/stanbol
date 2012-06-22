@@ -22,37 +22,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 
 /**
- * This {@link ContentPartDeserializerProvider} implementation supports {@link IndexedGraph}, {@link Graph}
- * and {@link TripleCollection} parts. In each case, as a result an {@link IndexedGraph} is returned as a
- * specific implementation.
+ * This {@link ContentPartDeserializerProvider} implementation supports {@link IndexedMGraph} parts. As a
+ * result an {@link IndexedMGraph} is returned as a specific implementation.
  * 
  * @author suat
  * 
  */
 @Component
 @Service
-public class IndexedGraphDeserializerProvider implements ContentPartDeserializerProvider {
+public class MGraphDeserializerProvider implements ContentPartDeserializerProvider {
 
     @Reference
-    Parser parser;
+    private Parser parser;
 
     @Override
     public Set<Class<?>> getSupportedContentPartTypes() {
         Set<Class<?>> supportedClasses = new HashSet<Class<?>>();
-        supportedClasses.add(IndexedGraph.class);
-        supportedClasses.add(Graph.class);
-        supportedClasses.add(TripleCollection.class);
+        supportedClasses.add(MGraph.class);
         return supportedClasses;
     }
 
@@ -65,7 +61,7 @@ public class IndexedGraphDeserializerProvider implements ContentPartDeserializer
     @Override
     public <T> T deserialize(InputStream inputStream, String mediaType) throws StoreException {
         mediaType = (mediaType == null || mediaType.trim().equals("")) ? SupportedFormat.RDF_XML : mediaType;
-        return (T) new IndexedGraph(parser.parse(inputStream, mediaType));
+        return (T) new IndexedMGraph(parser.parse(inputStream, mediaType));
     }
 
     @Override
@@ -73,4 +69,5 @@ public class IndexedGraphDeserializerProvider implements ContentPartDeserializer
         throw new UnsupportedOperationException(
                 "This deserializer does not support specifiying header values");
     }
+
 }

@@ -46,6 +46,8 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
@@ -63,9 +65,9 @@ import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.StreamSource;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
-import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,13 +91,20 @@ import org.slf4j.LoggerFactory;
  * the {@link ContentItem}s. Additional metadata is also stored in the Apache Derby database.
  * </p>
  * 
+ * To be able to use other {@link Store} implementations rather than this, the
+ * {@link Constants#SERVICE_RANKING} property of other implementations should be set higher than of this one.
+ * 
  * @author suat
  * @author meric
  * 
  */
-@Component(immediate = false)
+@Component(immediate = true)
 @Service
+@Properties(value = {@Property(name = Constants.SERVICE_RANKING, intValue = 100)})
 public class FileStore implements Store {
+    // @Property(name = Constants.SERVICE_RANKING)
+    // private int ranking;
+
     public static final String RECENTLY_ENHANCED_TABLE_NAME = "recently_enhanced_content_items";
 
     public static final UriRef CONSTRAINTS_URI = new UriRef("org.apache.stanbol.contenthub.constraints");
@@ -109,6 +118,8 @@ public class FileStore implements Store {
     public static final String FIELD_TITLE = "title";
 
     public static final String FIELD_ID = "id";
+    
+    public static final String FILE_STORE_NAME = "filestore";
 
     private static final String SELECT_RECENTLY_ENHANCED_ITEMS = "SELECT t1.id, mimeType, enhancementCount, title FROM "
                                                                  + FileRevisionManager.REVISION_TABLE_NAME
@@ -165,8 +176,7 @@ public class FileStore implements Store {
     protected void activate(ComponentContext componentContext) throws StoreException {
         // check store folder
         String stanbolHome = componentContext.getBundleContext().getProperty("sling.home");
-        String fileStoreName = "filestore";
-        storeFolder = new File(stanbolHome + "/" + fileStoreName);
+        storeFolder = new File(stanbolHome + "/" + FILE_STORE_NAME);
         if (!storeFolder.exists()) {
             storeFolder.mkdirs();
         }
@@ -195,7 +205,7 @@ public class FileStore implements Store {
         removeFromRecentlyEnhancedTable(id.getUnicodeString());
     }
 
-    public void removeFromRecentlyEnhancedTable(String contentItemID) throws StoreException {
+    private void removeFromRecentlyEnhancedTable(String contentItemID) throws StoreException {
         // get connection
         Connection con = dbManager.getConnection();
 
@@ -236,7 +246,8 @@ public class FileStore implements Store {
 
     private long getEnhancementCount(ContentItem ci) {
         long enhancementCount = 0;
-        Iterator<Triple> it = ci.getMetadata().filter(null, Properties.ENHANCER_EXTRACTED_FROM,
+        Iterator<Triple> it = ci.getMetadata().filter(null,
+            org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EXTRACTED_FROM,
             new UriRef(ci.getUri().getUnicodeString()));
         while (it.hasNext()) {
             it.next();
@@ -527,9 +538,15 @@ public class FileStore implements Store {
     public ContentItem get(UriRef id) throws StoreException {
         // get the zip file
         String fileName = encodeId(id.getUnicodeString());
+        File file = new File(storeFolder.getPath() + "/" + fileName + ".zip");
+        if (!file.exists()) {
+            log.info("Failed to get file for the given id: {}", id);
+            return null;
+        }
+
         ZipFile zipFile;
         try {
-            zipFile = new ZipFile(new File(storeFolder.getPath() + "/" + fileName + ".zip"));
+            zipFile = new ZipFile(file);
         } catch (ZipException e) {
             throw new StoreException(String.format("Failed to get file for the given id: %s", id), e);
         } catch (IOException e) {
@@ -627,12 +644,18 @@ public class FileStore implements Store {
         String partType;
         String partUri;
         String partSuperType;
+        String partMimeType;
         T contentPart;
 
         try {
             partType = contentPartMetadata.getString("class");
             partUri = contentPartMetadata.getString("uri");
             partSuperType = contentPartMetadata.getString("superclass");
+            try {
+                partMimeType = contentPartMetadata.getString("metadata");
+            } catch (JSONException e1) {
+                partMimeType = null;
+            }
 
         } catch (JSONException e) {
             throw new StoreException("Failed to read content part metadata from the header", e);
@@ -647,20 +670,21 @@ public class FileStore implements Store {
                 encodeId(partUri), contentItem.getUri().getUnicodeString()), e);
         }
         try {
-            contentPart = contentPartDeserializer.deserializeContentPart(partStream, partType);
+            contentPart = contentPartDeserializer.deserializeContentPart(partStream, partType, partMimeType);
         } catch (StoreException e) {
             log.warn(
                 "Failed to deserialize main blob for the class: {}. Trying to serialize with the superclass: {}",
                 partType, partSuperType);
-            contentPart = contentPartDeserializer.deserializeContentPart(partStream, partSuperType);
+            contentPart = contentPartDeserializer.deserializeContentPart(partStream, partSuperType,
+                partMimeType);
         }
 
         return contentPart;
     }
 
     @Override
-    public ChangeSet changes(long revision, int offset, int batchSize) throws StoreException {
-        ChangeSetImpl changesSet = (ChangeSetImpl) revisionManager.getChanges(revision, offset, batchSize);
+    public ChangeSet changes(long revision, int batchSize) throws StoreException {
+        ChangeSetImpl changesSet = (ChangeSetImpl) revisionManager.getChanges(revision, batchSize);
         changesSet.setStore(this);
         return changesSet;
     }

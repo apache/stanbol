@@ -59,7 +59,10 @@ public class FileRevisionManager {
                                                   + " SET revision=? WHERE id=?";
 
     private static final String SELECT_CHANGES = "SELECT id, revision FROM " + REVISION_TABLE_NAME
-                                                 + " WHERE revision > ? ORDER BY revision ASC OFFSET ? ROWS";
+                                                 + " WHERE revision > ? ORDER BY revision ASC";
+
+    private static final String SELECT_MORECHANGES = "SELECT id, revision FROM " + REVISION_TABLE_NAME
+                                                     + " WHERE revision >= ? ORDER BY revision ASC";
 
     @Reference
     FileStoreDBManager dbManager;
@@ -128,22 +131,18 @@ public class FileRevisionManager {
     }
 
     /**
-     * Returns the updates after the given revision number. It returns at most <code>batchSize</code> number
-     * of changes within the returned {@link ChangeSet} object starting from the given <code>offset</code>.
-     * This method does not necessarily return the all changes for the given revision number. If there are
-     * more changes than the batch size for the given version, only batch size number of changes are returned.
-     * Other changes must be obtained by giving the same revision and the suitable offset.
+     * Returns the updates after the given revision number. If the total size of revisions after the given
+     * revision number fit in <code>batchSize</code>, result size is <code>batchSize</code> within the
+     * returned {@link ChangeSet} object; else results are greater than <code>batchSize</code>
      * 
      * @param revision
      *            Starting revision number for the returned {@link ChangeSet}
-     * @param offset
-     *            Starting number of the changes as of the given <code>revision</code>.
      * @param batchSize
      *            Maximum number of changes to be returned
      * @return a {@link ChangeSet} including the changes in the store
      * @throws StoreException
      */
-    public ChangeSet getChanges(long revision, int offset, int batchSize) throws StoreException {
+    public ChangeSet getChanges(long revision, int batchSize) throws StoreException {
         ChangeSetImpl changes = new ChangeSetImpl();
 
         // get connection
@@ -156,21 +155,58 @@ public class FileRevisionManager {
             ps = con.prepareStatement(SELECT_CHANGES, ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY);
             ps.setLong(1, revision);
-            ps.setLong(2, offset);
-            ps.setMaxRows(batchSize);
+            ps.setMaxRows(batchSize + 1);
             rs = ps.executeQuery();
 
-            // set changed uris
             Set<UriRef> changedUris = new LinkedHashSet<UriRef>();
-            while (rs.next()) {
-                changedUris.add(new UriRef(rs.getString(1)));
+
+            if(!rs.first()){
+                changes.setChangedUris(changedUris);
+                changes.setFrom(-1);
+                changes.setTo(-1);
+                return changes;
             }
+            if (rs.absolute(batchSize + 1)) {
+                long lastRowRevision = rs.getLong(2);
+                rs.previous();
+                long nextToLastRowRevision = rs.getLong(2);
+                rs.beforeFirst();
+                // if we are in the middle of a revision, add all changes in that revision to changedUris
+                if (lastRowRevision == nextToLastRowRevision) {
+                    ps = con.prepareStatement(SELECT_MORECHANGES, ResultSet.TYPE_SCROLL_INSENSITIVE,
+                        ResultSet.CONCUR_READ_ONLY);
+                    ps.setLong(1, revision);
+                    rs = ps.executeQuery();
+
+                    while (rs.next()) {
+                        changedUris.add(new UriRef(rs.getString(1)));
+                    }
+                } else {
+                    while (rs.next()) {
+                        if (rs.isLast()) {
+                            break;
+                        }
+                        changedUris.add(new UriRef(rs.getString(1)));
+                    }
+                }
+
+            } else {
+                rs.beforeFirst();
+                while (rs.next()) {
+                    changedUris.add(new UriRef(rs.getString(1)));
+                }
+            }
+
             changes.setChangedUris(changedUris);
             // set minimum and maximum revision numbers of the change set
+            if (rs.isLast()) {
+                rs.previous();
+            } else {
+                rs.last();
+            }
+            changes.setTo(rs.getLong(2));
             rs.first();
             changes.setFrom(rs.getLong(2));
-            rs.last();
-            changes.setTo(rs.getLong(2));
 
         } catch (SQLException e) {
             log.error("Failed to get changes", e);
@@ -182,5 +218,4 @@ public class FileRevisionManager {
         }
         return changes;
     }
-
 }

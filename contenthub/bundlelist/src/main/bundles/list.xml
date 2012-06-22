@@ -24,8 +24,33 @@
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.contenthub.store.solr</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.web</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.contenthub.test</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
+<!--     <bundle> -->
+<!--       <groupId>org.apache.stanbol</groupId> -->
+<!--       <artifactId>org.apache.stanbol.contenthub.index</artifactId> -->
+<!--       <version>0.10.0-incubating-SNAPSHOT</version> -->
+<!--     </bundle> -->
+    <bundle>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.junit.core</artifactId>
+      <version>1.0.6</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.commons.json</artifactId>
+      <version>2.0.6</version>
     </bundle>
   </startLevel>
 </bundles>

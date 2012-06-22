@@ -35,11 +35,11 @@ import static org.apache.stanbol.contenthub.store.file.FileStore.FIELD_ID;
 import static org.apache.stanbol.contenthub.store.file.FileStore.FIELD_MIME_TYPE;
 import static org.apache.stanbol.contenthub.store.file.FileStore.FIELD_TITLE;
 
-import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -80,10 +80,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.store.Store;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
-import org.apache.stanbol.contenthub.store.file.FileRevisionManager;
 import org.apache.stanbol.contenthub.store.file.FileStore;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
@@ -125,8 +123,6 @@ public class StoreResource extends BaseStanbolResource {
     private Store store;
 
     private ContentItemFactory cif;
-
-    FileRevisionManager revisionManager;
 
     private Serializer serializer;
 
@@ -182,17 +178,12 @@ public class StoreResource extends BaseStanbolResource {
      * 
      * @param context
      * @param uriInfo
-     * @param indexName
-     *            Name of the LDPath program (name of the Solr core/index) to be used while storing this
-     *            content item. LDPath programs can be managed through {@link SemanticIndexManagerResource} or
-     *            {@link SemanticIndexManager}
      */
     public StoreResource(@Context ServletContext context, @Context UriInfo uriInfo) {
 
         this.tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
         this.store = ContextHelper.getServiceFromContext(Store.class, context);
         this.cif = ContextHelper.getServiceFromContext(ContentItemFactory.class, context);
-        this.revisionManager = ContextHelper.getServiceFromContext(FileRevisionManager.class, context);
         this.serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
         this.uriInfo = uriInfo;
 
@@ -324,42 +315,19 @@ public class StoreResource extends BaseStanbolResource {
             throw new WebApplicationException(404);
         }
         if (type.equals("metadata")) {
-            String fileName = contentURI + "-metadata";
-            File file = new File(fileName);
-            if (file.exists()) {
-                file.delete();
-            }
-            boolean success = file.createNewFile();
-            if (success) {
-                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                serializer.serialize(bos, ci.getMetadata(), format);
-                bos.close();
-            } else {
-                log.error("Failed to create file: {}", fileName);
-            }
+            String fileName = URLEncoder.encode(contentURI, "utf-8") + "-metadata";
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            serializer.serialize(baos, ci.getMetadata(), format);
+            InputStream is = new ByteArrayInputStream(baos.toByteArray());
 
-            ResponseBuilder response = Response.ok((Object) file);
+            ResponseBuilder response = Response.ok((Object) is);
             response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
             response.type("text/plain");
             addCORSOrigin(servletContext, response, headers);
             return response.build();
         } else if (type.equals("raw")) {
-            // TODO we should return the content directly without the file indirection
             String fileName = URLEncoder.encode(contentURI, "utf-8") + "-raw";
-            File file = new File(fileName);
-            if (file.exists()) {
-                file.delete();
-            }
-            boolean success = file.createNewFile();
-            if (success) {
-                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                bos.write(IOUtils.toByteArray(ci.getStream()));
-                bos.close();
-            } else {
-                log.error("Failed to create file: {}", fileName);
-            }
-
-            ResponseBuilder response = Response.ok((Object) file);
+            ResponseBuilder response = Response.ok((Object) ci.getStream());
             response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
             response.type(ci.getMimeType());
             addCORSOrigin(servletContext, response, headers);
@@ -424,14 +392,13 @@ public class StoreResource extends BaseStanbolResource {
     /**
      * HTTP POST method to create a content item in Contenthub. This is the very basic method to create the
      * content item. The payload of the POST method should include the raw data of the content item to be
-     * created. This method stores the content in the default Solr index ("contenthub").
+     * created.
      * 
      * @param data
      *            Raw data of the content item
      * @param headers
      *            HTTP Headers
-     * @return Redirects to "contenthub/{indexName}/store/content/uri" which shows the content item in the
-     *         HTML view.
+     * @return Redirects to "contenthub/store/content/uri" which shows the content item in the HTML view.
      * @throws URISyntaxException
      * @throws EngineException
      * @throws StoreException
@@ -455,8 +422,7 @@ public class StoreResource extends BaseStanbolResource {
      *            Raw data of the content item
      * @param headers
      *            HTTP headers
-     * @return Redirects to "contenthub/{indexName}/store/content/uri" which shows the content item in the
-     *         HTML view.
+     * @return Redirects to "contenthub/store/content/uri" which shows the content item in the HTML view.
      * @throws URISyntaxException
      * @throws EngineException
      * @throws StoreException
@@ -492,8 +458,7 @@ public class StoreResource extends BaseStanbolResource {
      *            For example, search results are presented by showing the titles of resultant content items.
      * @param headers
      *            HTTP headers (optional)
-     * @return Redirects to "contenthub/{indexName}/store/content/uri" which shows the content item in the
-     *         HTML view.
+     * @return Redirects to "contenthub/store/content/uri" which shows the content item in the HTML view.
      * @throws URISyntaxException
      * @throws EngineException
      * @throws MalformedURLException
@@ -511,6 +476,7 @@ public class StoreResource extends BaseStanbolResource {
                                                                            MalformedURLException,
                                                                            IOException,
                                                                            StoreException {
+
         return createContentItemFromForm(content, url, null, null, null, headers, constraints, title);
     }
 
@@ -532,8 +498,7 @@ public class StoreResource extends BaseStanbolResource {
      *            For example, search results are presented by showing the titles of resultant content items.
      * @param headers
      *            HTTP headers (optional)
-     * @return Redirects to "contenthub/{indexName}/store/content/uri" which shows the content item in the
-     *         HTML view.
+     * @return Redirects to "contenthub/store/content/uri" which shows the content item in the HTML view.
      * @throws URISyntaxException
      * @throws EngineException
      * @throws MalformedURLException
@@ -636,6 +601,7 @@ public class StoreResource extends BaseStanbolResource {
             throw new StoreException("Failed to create the ContentItem", e);
         }
         store.put(ci);
+
         if (useExplicitRedirect) {
             // use an redirect to point browsers to newly created content
             ResponseBuilder rb = Response.seeOther(makeRedirectionURI(ci.getUri().getUnicodeString()));

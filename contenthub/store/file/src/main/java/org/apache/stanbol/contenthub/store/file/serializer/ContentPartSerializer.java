@@ -42,7 +42,7 @@ import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 @Component
 @Service(value = ContentPartSerializer.class)
 public class ContentPartSerializer {
-    private static Map<Class<?>,ContentPartSerializerProvider> serializerMap = new HashMap<Class<?>,ContentPartSerializerProvider>();
+    private Map<Class<?>,ContentPartSerializerProvider> serializerMap = new HashMap<Class<?>,ContentPartSerializerProvider>();
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, referenceInterface = ContentPartSerializerProvider.class, policy = ReferencePolicy.DYNAMIC, strategy = ReferenceStrategy.EVENT, bind = "bindContentPartSerializerProvider", unbind = "unbindContentPartSerializerProvider")
     private List<ContentPartSerializerProvider> serializerList = new ArrayList<ContentPartSerializerProvider>();

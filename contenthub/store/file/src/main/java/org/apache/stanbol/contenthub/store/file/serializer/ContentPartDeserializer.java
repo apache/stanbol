@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class ContentPartDeserializer {
     private static final Logger log = LoggerFactory.getLogger(ContentPartDeserializer.class);
 
-    private static Map<Class<?>,ContentPartDeserializerProvider> deserializerMap = new HashMap<Class<?>,ContentPartDeserializerProvider>();
+    private Map<Class<?>,ContentPartDeserializerProvider> deserializerMap = new HashMap<Class<?>,ContentPartDeserializerProvider>();
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, referenceInterface = ContentPartDeserializerProvider.class, policy = ReferencePolicy.DYNAMIC, strategy = ReferenceStrategy.EVENT, bind = "bindContentPartDeserializerProvider", unbind = "unbindContentPartDeserializerProvider")
     private List<ContentPartDeserializerProvider> deserializerList = new ArrayList<ContentPartDeserializerProvider>();
@@ -69,6 +69,29 @@ public class ContentPartDeserializer {
      * @throws StoreException
      */
     public <T> T deserializeContentPart(InputStream is, Class<?> klass) throws StoreException {
+        return deserializeContentPart(is, klass, null);
+    }
+
+    /**
+     * Deserializes the content part which will be read from the given {@link InputStream} using a
+     * {@link ContentPartDeserializerProvider} which will be obtained by the given {@link Class}. The first
+     * deserializer compatible with the given class is used. The types supported by a deserializer are
+     * compared with the given class parameter through the {@link Class#isAssignableFrom(Class)} method. This
+     * means that a deserializer is compatible with the given class if one of the supported types by
+     * deserializer either is a superclass or superinterface of the given class or same with the given class.
+     * 
+     * @param <T>
+     *            Generic type representing the content part to be returned
+     * @param is
+     *            {@link InputStream} from which the content part data will be read
+     * @param klass
+     *            Type for which a deserializer instance will be obtained.
+     * @param mimeType
+     *            Mime type of the content part to be serialized
+     * @return the deserialized content part
+     * @throws StoreException
+     */
+    public <T> T deserializeContentPart(InputStream is, Class<?> klass, String mimeType) throws StoreException {
         ContentPartDeserializerProvider deserializer = null;
         synchronized (deserializerList) {
             for (Entry<Class<?>,ContentPartDeserializerProvider> e : deserializerMap.entrySet()) {
@@ -82,9 +105,9 @@ public class ContentPartDeserializer {
             throw new StoreException(String.format(
                 "Failed to obtain serializer for the content part having type: %s", klass.getName()));
         }
-        return deserializer.deserialize(is);
+        return deserializer.deserialize(is, mimeType);
     }
-
+    
     /**
      * Deserializes the content part which will be read from the given {@link InputStream} using a
      * {@link ContentPartDeserializerProvider} which will be obtained by the given class name. In the first
@@ -104,6 +127,30 @@ public class ContentPartDeserializer {
      * @throws StoreException
      */
     public <T> T deserializeContentPart(InputStream is, String className) throws StoreException {
+        return deserializeContentPart(is, className, null);
+    }
+
+    /**
+     * Deserializes the content part which will be read from the given {@link InputStream} using a
+     * {@link ContentPartDeserializerProvider} which will be obtained by the given class name. In the first
+     * step, to be able to get a dedicated deserializer for the given <code>className</code>, this method
+     * checks a suitable deserializers using this name. This is done by comparing the name parameter with the
+     * name of the supported types of registered deserializers. If this attempt is unsuccessful, a serializer
+     * is tried to be obtained through the {@link #deserializeContentPart(InputStream, Class)} method after
+     * getting a {@link Class} from the given class name by {@link Class#forName(String)}.
+     * 
+     * @param <T>
+     *            Generic type of representing content part to be returned
+     * @param is
+     *            {@link InputStream} from which the content part data will be read
+     * @param className
+     *            Name of the class for which a deserializer instance will be obtained.
+     * @param mimeType
+     *            Mime type of the content part to be serialized
+     * @return the deserialized content part
+     * @throws StoreException
+     */
+    public <T> T deserializeContentPart(InputStream is, String className, String mimeType) throws StoreException {
         ContentPartDeserializerProvider deserializer = null;
         synchronized (deserializerList) {
             for (Entry<Class<?>,ContentPartDeserializerProvider> e : deserializerMap.entrySet()) {
@@ -117,7 +164,7 @@ public class ContentPartDeserializer {
             log.info("No deserializer supporting directly the class: {}", className);
             try {
                 Class<?> klass = Class.forName(className);
-                return deserializeContentPart(is, klass);
+                return deserializeContentPart(is, klass, mimeType);
             } catch (ClassNotFoundException e) {
                 throw new StoreException(String.format("Failed to load class: %s", className));
             }
