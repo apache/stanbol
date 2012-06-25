@@ -1119,12 +1119,13 @@
       <version>3.0.0</version>
     </dependency>
 
-    <!-- OWL -->
+    <!-- OWL 
+       directly defined in the org.apache.stanbol.commons.owl POM
     <dependency>
       <groupId>net.sourceforge.owlapi</groupId>
       <artifactId>owlapi</artifactId>
       <version>3.2.3</version>
-    </dependency>
+    </dependency> -->
     <!-- see also lucene-xercesImpl -->
     <dependency>
       <groupId>xerces</groupId>
