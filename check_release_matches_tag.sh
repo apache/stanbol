@@ -6,7 +6,10 @@
 #
 PROJECT=stanbol
 BASE=$2/$1/org/apache/${PROJECT}
-TAGBASE=http://svn.apache.org/repos/asf/incubator/${PROJECT}/tags/
+TAGBASE=http://svn.apache.org/repos/asf/incubator/${PROJECT}/tags
+
+# set this to the command that computes an md5 sum on your system
+MD5=md5
 
 function fail() {
 	echo $* >&2
@@ -41,5 +44,5 @@ do
        ZIP=${1}/${2}/${3}
        check $TAG $ZIP
 done
-md5 $(find . -name *source-release.zip)
+$MD5 $(find . -name *source-release.zip)
 cd $CURDIR
