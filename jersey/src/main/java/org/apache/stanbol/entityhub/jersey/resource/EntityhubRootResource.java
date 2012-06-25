@@ -282,22 +282,30 @@ public class EntityhubRootResource extends BaseStanbolResource {
         }
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         Entity entity;
+        ResponseBuilder rb;
         try {
-            entity = entityhub.delete(id);
+            if(id.equals("*")){
+                log.info("Deleting all Entities form the Entityhub");
+                entityhub.deleteAll();
+                rb = Response.status(Response.Status.OK);
+            } else {
+                entity = entityhub.delete(id);
+                if(entity == null){
+                    rb = Response.status(Status.NOT_FOUND).entity("An Entity with the" +
+                            "parsed id "+id+" is not managed by the Entityhub")
+                            .header(HttpHeaders.ACCEPT, accepted);
+                } else {
+                    rb =  Response.ok(entity);
+                    rb.header(HttpHeaders.CONTENT_TYPE, accepted+"; charset=utf-8")
+                        .header(HttpHeaders.ACCEPT, accepted);
+                }
+            }
         } catch (EntityhubException e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
-            .header(HttpHeaders.ACCEPT, accepted).build();
+            rb = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
+            .header(HttpHeaders.ACCEPT, accepted);
         }
-        if(entity == null){
-            return Response.status(Status.NOT_FOUND).entity("An Entity with the" +
-                    "parsed id "+id+" is not managed by the Entityhub")
-                    .header(HttpHeaders.ACCEPT, accepted).build();
-        } else {
-            ResponseBuilder rb =  Response.ok(entity);
-            rb.header(HttpHeaders.CONTENT_TYPE, accepted+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
-            return rb.build();
-        }
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
     /**
      * Implements the creation/update of Representations within the Entityhub.
@@ -325,6 +333,9 @@ public class EntityhubRootResource extends BaseStanbolResource {
             return Response.status(Status.INTERNAL_SERVER_ERROR).
                 entity("The Entityhub is currently unavailable.")
                 .header(HttpHeaders.ACCEPT, accepted).build();
+        }
+        if("*".equals(id)){ //also support '*' to import all
+            id = null;
         }
         //(1) if an id is parsed we need to filter parsed Representations
         if(id != null){
