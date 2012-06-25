@@ -172,4 +172,8 @@ class MockEntityhub implements Entityhub {
         return null;
     }
 
+    @Override
+    public void deleteAll() throws EntityhubException {
+    }
+
 }
