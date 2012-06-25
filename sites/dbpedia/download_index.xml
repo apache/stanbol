@@ -17,7 +17,7 @@
 -->
 <project name="Index Download Helper" default="download" basedir=".">
   <description>
-    Contains only a singel target that is used by the Maven Ant
+    Contains only a single target that is used by the Maven Ant
     Plugin to download the Index parsed via 'index.url'
     to 'target.directory'
   </description>
