@@ -706,8 +706,14 @@ public class SolrFieldMapper implements FieldMapper {
             }
             addNamespaceMapping(prefix, namespace); // we need to add the new mapping
             saveNamespaceConfig(); // save the configuration
-            // (TODO: we do not make a flush here ... so maybe we need to ensure that a flush is called
-            // sometimes)
+            //make sure the namespaces are committed to the Solr Server
+            try {
+                server.commit();
+            } catch (SolrServerException e) {
+                log.error("Unable to commit NamespaceConfig to SolrServer",e);
+            } catch (IOException e) {
+                log.error("Unable to commit NamespaceConfig to SolrServer",e);
+            }
         }
         return prefix; // may return null if !create
     }
@@ -793,7 +799,8 @@ public class SolrFieldMapper implements FieldMapper {
     }
 
     /**
-     * Saves the current configuration to the index!
+     * Saves the current configuration to the index! This does NOT commit the
+     * changes!
      */
     public void saveNamespaceConfig() {
         Map<String,String> prefixMap = getPrefixMap();

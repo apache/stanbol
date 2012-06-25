@@ -210,7 +210,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
     }
 
     @Override
-    public EntityhubConfiguration getConfig() {
+    public final EntityhubConfiguration getConfig() {
         return config;
     }
     
@@ -251,7 +251,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         }
     }
     @Override
-    public Entity importEntity(String reference) throws IllegalStateException, IllegalArgumentException, YardException {
+    public final Entity importEntity(String reference) throws IllegalStateException, IllegalArgumentException, YardException {
         Entity entity = getEntity(reference);
         if(entity == null){
             Entity entityMapping = getMappingBySource(reference);
@@ -297,7 +297,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
      *  {@link #entityhubYard}, but the representation can not be wrapped by an {@link Symbol}.
      */
     @Override
-    public Entity getEntity(String entityId) throws IllegalArgumentException,IllegalStateException, YardException {
+    public final Entity getEntity(String entityId) throws IllegalArgumentException,IllegalStateException, YardException {
         if(entityId == null || entityId.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor empty!");
         }
@@ -313,14 +313,14 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         }
     }
     @Override
-    public boolean isRepresentation(String entityId) throws EntityhubException, IllegalArgumentException {
+    public final boolean isRepresentation(String entityId) throws EntityhubException, IllegalArgumentException {
         if(entityId == null || entityId.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor empty!");
         }
         return lookupYard().isRepresentation(entityId);
     }
     @Override
-    public Entity store(Representation representation) throws EntityhubException, IllegalArgumentException {
+    public final Entity store(Representation representation) throws EntityhubException, IllegalArgumentException {
         if(representation == null){
             throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
         }
@@ -351,7 +351,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         return updated.getWrappedEntity();
     }
     @Override
-    public Entity delete(String id) throws EntityhubException, IllegalArgumentException {
+    public final Entity delete(String id) throws EntityhubException, IllegalArgumentException {
         if(id == null || id.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor emtpty!");
         }
@@ -369,7 +369,12 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         return entity;
     }
     @Override
-    public Entity setState(String id, ManagedEntityState state) throws EntityhubException,
+    public final void deleteAll() throws EntityhubException {
+        Yard yard = lookupYard();
+        yard.removeAll();
+    }
+    @Override
+    public final Entity setState(String id, ManagedEntityState state) throws EntityhubException,
                                                                IllegalArgumentException {
         if(id == null || id.isEmpty()){
             throw new IllegalStateException("The parsed id MUST NOT be NULL nor empty!");
@@ -708,7 +713,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
     }
 
     @Override
-    public Entity getMappingById(String id) throws IllegalArgumentException, EntityhubException{
+    public final Entity getMappingById(String id) throws IllegalArgumentException, EntityhubException{
         if(id == null || id.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor empty");
         }
@@ -725,26 +730,26 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         }
     }
     @Override
-    public FieldQueryFactory getQueryFactory() {
+    public final FieldQueryFactory getQueryFactory() {
         Yard entityhubYard = getYard();
         return entityhubYard==null? //if no yard available
                 DefaultQueryFactory.getInstance(): //use the default
                     entityhubYard.getQueryFactory(); //else return the query factory used by the yard
     }
     @Override
-    public FieldMapper getFieldMappings() {
+    public final FieldMapper getFieldMappings() {
         return fieldMapper;
     }
     @Override
-    public QueryResultList<Representation> find(FieldQuery query) throws YardException{
+    public final QueryResultList<Representation> find(FieldQuery query) throws YardException{
         return lookupYard().find(query);
     }
     @Override
-    public QueryResultList<String> findEntityReferences(FieldQuery query) throws YardException{
+    public final QueryResultList<String> findEntityReferences(FieldQuery query) throws YardException{
         return lookupYard().findReferences(query);
     }
     @Override
-    public QueryResultList<Entity> findEntities(FieldQuery query) throws YardException{
+    public final QueryResultList<Entity> findEntities(FieldQuery query) throws YardException{
         QueryResultList<String> references = lookupYard().findReferences(query);
         List<Entity> entities = new ArrayList<Entity>(references.size());
         for(String reference : references){

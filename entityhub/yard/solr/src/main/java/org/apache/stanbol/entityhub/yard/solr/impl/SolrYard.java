@@ -986,8 +986,20 @@ public class SolrYard extends AbstractYard implements Yard {
             throw new IllegalArgumentException("The parsed Representation id MUST NOT be empty!");
         }
         SolrServer server = getServer();
+        SolrYardConfig config = (SolrYardConfig)getConfig();
+        SolrFieldMapper fieldMapper = getFieldMapper();
         try {
-            server.deleteById(id);
+            if(config.isMultiYardIndexLayout()){
+                //make sure we only delete the Entity only if it is  managed by 
+                //this Yard. Entities of other Yards MUST NOT be deleted!
+                server.deleteByQuery(String.format("%s:%s AND %s:%s",
+                    fieldMapper.getDocumentDomainField(),
+                    SolrUtil.escapeSolrSpecialChars(getId()),
+                    fieldMapper.getDocumentIdField(),
+                    SolrUtil.escapeSolrSpecialChars(id)));
+            } else {
+                server.deleteById(id);
+            }
             server.commit();
         } catch (SolrServerException e) {
             throw new YardException("Error while deleting document " + id + " from the Solr server", e);
@@ -1012,8 +1024,23 @@ public class SolrYard extends AbstractYard implements Yard {
             }
         }
         SolrServer server = getServer();
+        SolrYardConfig config = (SolrYardConfig)getConfig();
+        SolrFieldMapper fieldMapper = getFieldMapper();
         try {
-            server.deleteById(toRemove);
+            if(config.isMultiYardIndexLayout()){
+                //make sure we only delete Entities managed by this Yard
+                //if someone parses an ID managed by an other yard we MUST NOT
+                //delete it!
+                for(String id : toRemove){
+                    server.deleteByQuery(String.format("%s:%s AND %s:%s",
+                        fieldMapper.getDocumentDomainField(),
+                        SolrUtil.escapeSolrSpecialChars(getId()),
+                        fieldMapper.getDocumentIdField(),
+                        SolrUtil.escapeSolrSpecialChars(id)));
+                }
+            } else {
+                server.deleteById(toRemove);
+            }
             server.commit();
         } catch (SolrServerException e) {
             throw new YardException("Error while deleting documents from the Solr server", e);
@@ -1028,12 +1055,20 @@ public class SolrYard extends AbstractYard implements Yard {
     @Override
     public void removeAll() throws YardException {
         SolrServer server = getServer();
+        SolrYardConfig config = (SolrYardConfig)getConfig();
         try {
             //ensures that the fildMapper is initialised and reads the
             //namespace config before deleting all documents
             getFieldMapper();
             //delete all documents
-            server.deleteByQuery("*:*");
+            if(config.isMultiYardIndexLayout()){
+                //only delete entities of this referenced site
+                server.deleteByQuery(String.format("%s:%s", 
+                    getFieldMapper().getDocumentDomainField(),
+                    SolrUtil.escapeSolrSpecialChars(getId())));
+            } else { //we can delete all
+                server.deleteByQuery("*:*");
+            }
             //ensure that the namespace config is stored again after deleting
             //all documents
             getFieldMapper().saveNamespaceConfig();

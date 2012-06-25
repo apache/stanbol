@@ -153,12 +153,12 @@ entity with {id} is not yet present within the Entityhub, than a BAD REQUEST wou
 be returned</p>
 <pre>curl -i -X POST -H "Content-Type:application/rdf+xml" -T {file.rdf} "${it.publicBaseUri}entityhub/entity?id={id}&create=false</pre>
 
-<h4> Delete an Entity  entityhub/entity</h4>
+<h4> Delete an/all Entities</h4>
 <table>
 <tbody>
     <tr>
         <th>Description</th>
-        <td>Service to update an Entity already managed by the Entityhub</td>
+        <td>Service to delete an/all entities managed by the Entityhub</td>
     </tr>
     <tr>
         <th>Request</th>
@@ -166,12 +166,19 @@ be returned</p>
     </tr>
     <tr>
         <th>Parameter</th>
-        <td>id: The id of the Entity to delete.</th>
+        <td>id: The {uri} of the Entity to delete or '*' to delete all Entities</th>
     </tr>
     <tr>
         <th>Produces</th>
-        <td>200 with the data of the deleted entity encoded in the format specified by
-        the Accept header</td>
+        <td> 
+          Status "200 OK" with:
+          <ul>
+            <li>the deleted entity encoded in the format specified by the Accept header</li>
+            <li>an empty response if all entities where deleted ('*' was parsed as URI</li>
+          </ul>
+          Status "404 NOT FOUND" if no Entity with the parsed URI is managed 
+          by the Entityhub
+        </td>
     </tr>
 </tbody>
 </table>

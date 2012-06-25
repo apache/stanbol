@@ -252,6 +252,11 @@ public interface Entityhub {
      */
     Entity delete(String id) throws EntityhubException, IllegalArgumentException;
     /**
+     * Deletes all Entities and their Mappings from the Entityhub.
+     * @throws EntityhubException On any error while performing the operation
+     */
+    void deleteAll() throws EntityhubException;
+    /**
      * Setter for the state of an Entity. This can be used to directly set the
      * {@link ManagedEntityState} as stored with the 
      * {@link Entity#getMetadata() metadata} of an entity.
