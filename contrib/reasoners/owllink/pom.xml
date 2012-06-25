@@ -50,6 +50,7 @@
             <Embed-Dependency>jaxp-ri</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive> 
             <Import-Package>
+            !com.sun.org.apache.xml.internal.serialize,
               !com.sun.java_cup.*,
               !org.mortbay.http,
               !org.mortbay.http.handler,

@@ -54,6 +54,8 @@
             </Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
+              javax.servlet.*, 
+              javax.ws.rs.*; version="[0,2)",
               org.semanticweb.owlapi.*,
               *
             </Import-Package>
