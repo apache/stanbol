@@ -42,7 +42,7 @@
                   <img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="(not available yet) Delete this item" />
                 -->
                 </td>
-                <td><a href="${session.namespace}${session.ID}" title="${session.ID}">${session.ID}</a></td>
+                <td><a href="${it.publicBaseUri}ontonet/session/${session.ID}" title="${session.ID}">${session.ID}</a></td>
                 <td>${session.locked?string("locked", "modifiable")}</td>
                 <td></td>
                 <td>${session.listManagedOntologies()?size}</td>

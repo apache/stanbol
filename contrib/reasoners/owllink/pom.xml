@@ -86,6 +86,14 @@
         </configuration>
       </plugin>
     </plugins>
+    <resources> <!-- Do not include the embedded repository in the build -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <excludes>
+          <exclude>maven/**</exclude>
+        </excludes>
+      </resource>
+    </resources>
   </build>
 
   <dependencies>

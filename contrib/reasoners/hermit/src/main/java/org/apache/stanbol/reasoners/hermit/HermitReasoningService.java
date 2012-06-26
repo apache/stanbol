@@ -23,6 +23,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.reasoners.owlapi.AbstractOWLApiReasoningService;
 import org.apache.stanbol.reasoners.owlapi.OWLApiReasoningService;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
+import org.apache.stanbol.reasoners.servicesapi.annotations.Documentation;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner.ReasonerFactory;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true, metatype = true)
 @Service
+@Documentation(name = "HermiT OWL 2", description = "This service supports OWL 2 profiles as implemented by the HermiT reasoner.")
 public class HermitReasoningService extends AbstractOWLApiReasoningService implements OWLApiReasoningService {
     private final Logger log = LoggerFactory.getLogger(getClass());
     public static final String _DEFAULT_PATH = "owl2";

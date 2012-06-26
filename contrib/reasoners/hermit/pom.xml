@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Licensed to the Apache Software Foundation (ASF) under one or more
-    contributor license agreements. See the NOTICE file distributed with
-    this work for additional information regarding copyright ownership.
-    The ASF licenses this file to You under the Apache License, Version
-    2.0 (the "License"); you may not use this file except in compliance
-    with the License. You may obtain a copy of the License at
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 Unless required by
-    applicable law or agreed to in writing, software distributed under the
-    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-    CONDITIONS OF ANY KIND, either express or implied. See the License for
-    the specific language governing permissions and limitations under the
-    License.
-  -->
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
+  <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
@@ -25,7 +27,6 @@
     <relativePath>../../../parent</relativePath>
   </parent>
   
-  <modelVersion>4.0.0</modelVersion>
   <artifactId>org.apache.stanbol.reasoners.hermit</artifactId>
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -44,14 +45,14 @@
   
   <repositories>
      <repository>
-             <releases>
-                     <updatePolicy>always</updatePolicy>
-             </releases>
-             <snapshots>
-                     <updatePolicy>always</updatePolicy>
-             </snapshots>
-             <id>reasoners-hermit-embedded</id>
-             <url>file://localhost/${project.basedir}/src/main/resources/maven/repo</url>
+       <id>reasoners-hermit-embedded</id>
+       <url>file://localhost/${project.basedir}/src/main/resources/maven/repo</url>
+       <releases>
+         <updatePolicy>always</updatePolicy>
+       </releases>
+       <snapshots>
+         <updatePolicy>always</updatePolicy>
+       </snapshots>
      </repository>
   </repositories>
   
@@ -66,8 +67,13 @@
           <groupId>owlapi</groupId>
           <artifactId>owlapi</artifactId>
         </exclusion>
+        <exclusion><!-- we want to use owlapi version exported by o.a.s.commons.owl -->
+          <groupId>net.sourceforge.owlapi</groupId>
+          <artifactId>owlapi</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
+    <!-- Dependencies of the HermiT library -->
     <dependency>
 	  <groupId>jautomata</groupId> 
 	  <artifactId>core</artifactId> 
@@ -78,7 +84,7 @@
       <artifactId>automaton</artifactId>
       <version>1.11-8</version>
     </dependency>
-    <!--Diagnostic dependencies -->
+    <!-- Diagnostic dependencies -->
 	<dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -100,7 +106,7 @@
 		<artifactId>slf4j-log4j12</artifactId>
 		<scope>test</scope>
 	</dependency>
-	<!-- osgi dependencies -->
+	<!-- OSGi dependencies -->
 	<dependency>
 		<groupId>org.osgi</groupId>
 		<artifactId>org.osgi.core</artifactId>
@@ -116,7 +122,6 @@
 		<artifactId>org.osgi.compendium</artifactId>
 		<scope>provided</scope>
 	</dependency>
-	
 	<!-- Stanbol dependencies -->
 	<dependency>
 		<groupId>org.apache.stanbol</groupId>
@@ -133,17 +138,17 @@
   <build>
   <!-- make it an OSGi bundle -->
     <plugins>
-    	<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-scr-plugin</artifactId>
-			</plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Embed-Dependency>hermit;scope=compile|runtime;inline=true</Embed-Dependency>
+            <Embed-Dependency>hermit,core,automaton</Embed-Dependency>
             <Bundle-ClassPath>.</Bundle-ClassPath>
             <Export-Package>org.apache.stanbol.reasoners.hermit.*</Export-Package>
             <Private-Package/>
@@ -164,30 +169,22 @@
               !org.w3c.dom.*,
               !org.apache.axiom.*,
               org.apache.stanbol.reasoners.servicesapi.*,
-              org.semanticweb.HermiT.datatypes.*;version=1.3.6,
+              org.semanticweb.HermiT.*;version=1.3.6,
               *
             </Import-Package>
             <_nouses>true</_nouses>
-            <Embed-Dependency>hermit,core,automaton</Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>
-      <!-- plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <configuration>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-      </plugin-->
     </plugins>
+    <resources> <!-- Do not include the embedded repository in the build -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <excludes>
+          <exclude>maven/**</exclude>
+        </excludes>
+      </resource>
+    </resources>
   </build>
+  
 </project>

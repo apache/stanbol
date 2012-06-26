@@ -42,7 +42,7 @@
                   <img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="(not available yet) Delete this item" />
                 -->
                 </td>
-                <td><a href="${scope.namespace}${scope.ID}" title="${scope.ID}">${scope.ID}</a></td>
+                <td><a href="${it.publicBaseUri}ontonet/ontology/${scope.ID}" title="${scope.ID}">${scope.ID}</a></td>
                 <td>${scope.locked?string("locked", "modifiable")}</td>
                 <td></td>
                 <td>${scope.coreSpace.listManagedOntologies()?size + scope.customSpace.listManagedOntologies()?size}</td>

@@ -14,4 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<#macro view>This is a the implementation of Stanbol Reasoners.</#macro>
+The entry point to multiple <strong>reasoning services</strong> that are used for
+obtaining unexpressed additional knowledge from the explicit axioms in an ontology.
+Multiple reasoning profiles are available, each with its expressive power and computational cost.

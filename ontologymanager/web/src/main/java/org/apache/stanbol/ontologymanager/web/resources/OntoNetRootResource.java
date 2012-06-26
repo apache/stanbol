@@ -344,11 +344,9 @@ public class OntoNetRootResource extends BaseStanbolResource {
 
         log.debug("Retrieved ontology {} .", iri);
 
-        // Rewrite imports
+        // Rewrite import statements
         String uri = uriInfo.getRequestUri().toString();
         URI base = URI.create(uri.substring(0, uri.lastIndexOf(ontologyId) - 1));
-
-        // Rewrite import statements
         List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
         OWLDataFactory df = o.getOWLOntologyManager().getOWLDataFactory();
         /*
