@@ -159,6 +159,14 @@
       <version>0.10.0-incubating-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
+    
+    <dependency> <!-- include all OpenNLP models in the full launcher -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.bundlelists.opennlp</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- Stanbol Enhancer Bundle List -->
     <dependency>
