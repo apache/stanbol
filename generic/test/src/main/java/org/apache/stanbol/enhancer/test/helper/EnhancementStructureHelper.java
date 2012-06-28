@@ -48,6 +48,7 @@ import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
+import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.CONFIDENCE_LEVEL_ENUM;
 
 public class EnhancementStructureHelper {
 
@@ -497,6 +498,27 @@ public class EnhancementStructureHelper {
             }
             assertFalse("Only a single dc:type value is allowed!", dcTypeIterator.hasNext());
         }
+        //validate the fise:confidence-value introduced by STANBOL-631
+        Iterator<Triple> confidenceLevelIterator = enhancements.filter(
+            enhancement, Properties.ENHANCER_CONFIDENCE_LEVEL, null);
+        Resource expectedConfidenceValue = expectedValues.get(Properties.ENHANCER_CONFIDENCE_LEVEL);
+        if(confidenceLevelIterator.hasNext()){
+            Resource confidenceLevelResource = confidenceLevelIterator.next().getObject();
+            assertTrue("fise:confidence-level values MUST BE URIs but found "+confidenceLevelResource,
+                confidenceLevelResource instanceof UriRef);
+            assertNotNull("The fise:confidence-level value MUST BE one of the four "
+                + "values defined in the ontology! (found: "+ confidenceLevelResource
+                + " | enhancement " + enhancement+")",
+                CONFIDENCE_LEVEL_ENUM.getConfidenceLevel((UriRef)confidenceLevelResource));
+            assertFalse("The fise:confidence-level property is functional and MUST "
+                + "HAVE only a single value (enhancement " +
+                    enhancement+")!",confidenceLevelIterator.hasNext());
+        } else {
+            assertNull("fise:confidence-level "+expectedConfidenceValue
+                + "expected for Enhancement "+enhancement
+                + "but no 'fise:confidence-level' value present!", expectedConfidenceValue);
+        }
+        
     }
     /**
      * Validates all fise:TopicAnnotations contained by the parsed enhancements

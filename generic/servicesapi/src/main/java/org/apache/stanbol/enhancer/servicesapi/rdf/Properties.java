@@ -159,6 +159,12 @@ public class Properties {
      */
     public static final UriRef ENHANCER_ENTITY_LABEL = new UriRef(
             NamespaceEnum.fise + "entity-label");
+    /**
+     * The confidence level (introducdes by
+     * <a herf="https://issues.apache.org/jira/browse/STANBOL-631">STANBOL-631</a>)
+     */
+    public static final UriRef ENHANCER_CONFIDENCE_LEVEL = new UriRef(
+            NamespaceEnum.fise + "confidence-level");
 
     /**
      * Internet Media Type of a content item.
