@@ -370,22 +370,24 @@ public abstract class AbstractBackend implements RDFBackend<Object> {
      */
     @SuppressWarnings("unchecked")
     private <T> T convert(DataTypeEnum type, Object value){
-        T converted;
+//        T converted;
         Object convertedObject = valueConverter.convert(value, type.getUri(), getValueFactory());
         try {
-            converted = (T)convertedObject;
+            return (T)convertedObject;
         } catch (ClassCastException e) {
             //this is something unexpected ... fail cleanly
             throw new IllegalStateException("Convert value for Node'"+
                 value+"' has not the expected java type "+type.getJavaType()+
                 "(for type '"+type.getShortName()+"') but '"+convertedObject.getClass()+"'!");
         }
-        if(converted == null){
-            throw new IllegalArgumentException("Unable to convert value '"+
-                value+"' to dataType '"+type.getShortName()+"' (java: "+
-                type.getJavaType()+")!");
-        }
-        return converted;
+        //STANBOL-661: silently ignore values that can not be transformed to the
+        //  requested xsd data type
+//        if(converted == null){
+//            throw new IllegalArgumentException("Unable to convert value '"+
+//                value+"' to dataType '"+type.getShortName()+"' (java: "+
+//                type.getJavaType()+")!");
+//        }
+//        return converted;
     }
     /*
      * Utility methods for managing the local cache
