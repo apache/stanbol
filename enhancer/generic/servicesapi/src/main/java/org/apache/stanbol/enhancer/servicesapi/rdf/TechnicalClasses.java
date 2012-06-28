@@ -16,6 +16,10 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.rdf;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.clerezza.rdf.core.UriRef;
 
 /**
@@ -105,5 +109,77 @@ public final class TechnicalClasses {
      */
     public static final UriRef DCTERMS_LINGUISTIC_SYSTEM = new UriRef(
             NamespaceEnum.dc + "LinguisticSystem");
+    
+    /**
+     * The confidence level of {@link #ENHANCER_ENHANCEMENT}s
+     */
+    public static final UriRef FNHANCER_CONFIDENCE_LEVEL = new UriRef(
+            NamespaceEnum.fise + "ConfidenceLevel");
+    
+    /**
+     * Enumeration over the four instance of the {@link #FNHANCER_CONFIDENCE_LEVEL}
+     * class as introduced by
+     * <a herf="https://issues.apache.org/jira/browse/STANBOL-631">STANBOL-631</a>)
+     * <p>
+     * {@link #name()} returns the local name; {@link #toString()} the URI as
+     * {@link String}.
+     * @author Rupert Westenthaler
+     *
+     */
+    public static enum CONFIDENCE_LEVEL_ENUM{
+        certain,ambiguous,suggestion,uncertain;
+
+        private final UriRef uri;
+        private final String localName;
+        
+        private CONFIDENCE_LEVEL_ENUM() {
+            localName = "cl-"+name();
+            uri = new UriRef(NamespaceEnum.fise+localName);
+        }
+        
+        public String getLocalName(){
+            return localName;
+        }
+        
+        public String toString() {
+            return uri.toString();
+        };
+        
+        public UriRef getUri(){
+            return uri;
+        }
+        
+        private static final Map<UriRef,CONFIDENCE_LEVEL_ENUM> uriRef2enum;
+        private static final Map<String,CONFIDENCE_LEVEL_ENUM> uri2enum;
+        static {
+            Map<UriRef,CONFIDENCE_LEVEL_ENUM> ur = new HashMap<UriRef,TechnicalClasses.CONFIDENCE_LEVEL_ENUM>();
+            Map<String,CONFIDENCE_LEVEL_ENUM> us = new HashMap<String,TechnicalClasses.CONFIDENCE_LEVEL_ENUM>();
+            for(CONFIDENCE_LEVEL_ENUM cl : CONFIDENCE_LEVEL_ENUM.values()){
+                ur.put(cl.getUri(), cl);
+                us.put(cl.toString(), cl);
+            }
+            uriRef2enum = Collections.unmodifiableMap(ur);
+            uri2enum = Collections.unmodifiableMap(us);
+        }
+        /**
+         * Getter for the fise:ConfidenceLevel instance for the {@link UriRef}
+         * @param uri the URI
+         * @return the fise:ConfidenceLevel instance or <code>null</code> if the
+         * parsed URI is not one of the four defined instances
+         */
+        public static CONFIDENCE_LEVEL_ENUM getConfidenceLevel(UriRef uri){
+            return uriRef2enum.get(uri);
+        }
+        
+        /**
+         * Getter for the fise:ConfidenceLevel instance for the {@link UriRef}
+         * @param uri the URI string
+         * @return the fise:ConfidenceLevel instance or <code>null</code> if the
+         * parsed URI is not one of the four defined instances
+         */
+        public static CONFIDENCE_LEVEL_ENUM getConfidenceLevel(String uri){
+            return uri2enum.get(uri);
+        }
+    }
 
 }
