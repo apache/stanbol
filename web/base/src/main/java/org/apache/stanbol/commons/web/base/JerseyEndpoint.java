@@ -148,12 +148,14 @@ public class JerseyEndpoint {
     private synchronized void initJersey() throws NamespaceException, ServletException {
 
         if (componentContext == null) {
-            throw new IllegalStateException("Null ComponentContext, not activated?");
+            log.debug(" ... can not init Jersey Endpoint - Component not yet activated!");
+            //throw new IllegalStateException("Null ComponentContext, not activated?");
+            return;
         }
 
         shutdownJersey();
 
-        log.info("Initializing the Jersey subsystem");
+        log.info("(Re)initializing the Stanbol Jersey subsystem");
 
         // register all the JAX-RS resources into a a JAX-RS application and bind it to a configurable URL
         // prefix
@@ -167,7 +169,7 @@ public class JerseyEndpoint {
         List<ScriptResource> scriptResources = new ArrayList<ScriptResource>();
         List<NavigationLink> navigationLinks = new ArrayList<NavigationLink>();
         for (WebFragment fragment : webFragments) {
-            log.info("Registering web fragment '{}' into jaxrs application", fragment.getName());
+            log.debug("Registering web fragment '{}' into jaxrs application", fragment.getName());
             linkResources.addAll(fragment.getLinkResources());
             scriptResources.addAll(fragment.getScriptResources());
             navigationLinks.addAll(fragment.getNavigationLinks());
@@ -213,7 +215,7 @@ public class JerseyEndpoint {
 
     /** Shutdown Jersey, if there's anything to do */
     private synchronized void shutdownJersey() {
-        log.info("Unregistering aliases {}", registeredAliases);
+        log.debug("Unregistering aliases {}", registeredAliases);
         for (String alias : registeredAliases) {
             httpService.unregister(alias);
         }
