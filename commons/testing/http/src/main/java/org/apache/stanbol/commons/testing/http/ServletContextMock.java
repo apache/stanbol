@@ -62,112 +62,96 @@ public class ServletContextMock implements ServletContext {
     }
 
     public ServletContext getContext(String uripath) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public String getInitParameter(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public Enumeration getInitParameterNames() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public int getMajorVersion() {
-        // TODO Auto-generated method stub
-        return 0;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public String getMimeType(String file) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public int getMinorVersion() {
-        // TODO Auto-generated method stub
-        return 0;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public RequestDispatcher getNamedDispatcher(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public String getRealPath(String path) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public RequestDispatcher getRequestDispatcher(String path) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public URL getResource(String path) throws MalformedURLException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public InputStream getResourceAsStream(String path) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public Set getResourcePaths(String path) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public String getServerInfo() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public Servlet getServlet(String name) throws ServletException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public String getServletContextName() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public Enumeration getServletNames() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public Enumeration getServlets() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public void log(String msg) {
-    // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public void log(Exception exception, String msg) {
-    // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public void log(String message, Throwable throwable) {
-    // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public void removeAttribute(String name) {
-    // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
     public void setAttribute(String name, Object object) {
         this.putAttribute(name, object);
+    }
+
+    @Override
+    public String getContextPath() {
+        throw new UnsupportedOperationException("not included in the mock implementation");
     }
 
 }

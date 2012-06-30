@@ -115,7 +115,7 @@ public class RequestExecutor {
             // And add request interceptor to have preemptive authentication
             httpClient.addRequestInterceptor(new PreemptiveAuthInterceptor(), 0);
         } else {
-            httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, null);
+            //httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, null);
             httpClient.removeRequestInterceptorByClass(PreemptiveAuthInterceptor.class);
         }
 
