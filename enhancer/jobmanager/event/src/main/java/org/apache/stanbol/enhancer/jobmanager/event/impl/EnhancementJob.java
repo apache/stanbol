@@ -420,7 +420,7 @@ public class EnhancementJob {
                     + " | chain.running " + running + ")!");
         }
         if (running.remove(executionNode)) {
-            log.info(
+            log.debug(
                 "Execution of '{}' for ContentItem {} completed "
                 + "(chain: {}, node: {}, optional {})",
                 new Object[] {engine, contentItem.getUri().getUnicodeString(), 
@@ -490,7 +490,7 @@ public class EnhancementJob {
                                        chain, executionNode, optional});
                 return;
             } else { //added an engine to running
-                log.info("Started Execution of '{}' for ContentItem {} "
+                log.debug("Started Execution of '{}' for ContentItem {} "
                          + "(chain: {}, node: {}, optional {})",
                     new Object[] {engine, contentItem.getUri().getUnicodeString(), chain,
                                   executionNode, optional});
