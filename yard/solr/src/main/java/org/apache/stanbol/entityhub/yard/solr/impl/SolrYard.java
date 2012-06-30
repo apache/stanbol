@@ -28,6 +28,9 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -49,6 +52,7 @@ import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.core.SolrCore;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
@@ -76,10 +80,8 @@ import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -239,6 +241,17 @@ public class SolrYard extends AbstractYard implements Yard {
      * {@link #activate(ComponentContext)}.
      */
     private SolrServer _server;
+    
+    /**
+     * In case the {@link SolrServer} changes during normal operation the
+     * {@link SolrFieldMapper} needs to be reinitialised for the new Core.
+     * This lock is used to avoid NPE when setting the {@link #_fieldMapper}
+     * variable back to <code>null</code> in those cases. While this will
+     * trigger automatic re-initialisation on the next call to 
+     * {@link #getFieldMapper()} there would be the possibility that calls to
+     * {@link #getFieldMapper()} return <code>null</code>.
+     */
+    private final ReadWriteLock fieldMapperLock = new ReentrantReadWriteLock();
     /**
      * The {@link FieldMapper} is responsible for converting fields of {@link Representation} to fields in the
      * {@link SolrInputDocument} and vice versa
@@ -502,10 +515,16 @@ public class SolrYard extends AbstractYard implements Yard {
                     } catch (InterruptedException e) {}
                 }
             }
-            if(server == null || !server.equals(this._server)){
+            if(server != null && !server.equals(this._server)){
                 //reset the fieldMapper so that it is reinitialised for the new one
                 //STANBOL-519
-                _fieldMapper = null; 
+                Lock writeLock = fieldMapperLock.writeLock();
+                writeLock.lock();
+                try {
+                    _fieldMapper = null;
+                }finally{
+                    writeLock.unlock();
+                }
             }
         } else {
             //for remove servers and when running outside OSGI
@@ -515,8 +534,16 @@ public class SolrYard extends AbstractYard implements Yard {
         if(server != null){
             return server;
         } else {
+            Lock writeLock = fieldMapperLock.writeLock();
+            writeLock.lock();
+            try {
+                _fieldMapper = null;
+            }finally{
+                writeLock.unlock();
+            }
             throw new YardException(String.format("The SolrIndex '%s' for SolrYard '%s' is currently not active!",
                 ((SolrYardConfig)getConfig()).getSolrServerLocation(),getName()));
+            
         }
     }
 
@@ -687,11 +714,24 @@ public class SolrYard extends AbstractYard implements Yard {
         }
     }
     private SolrFieldMapper getFieldMapper() throws YardException {
-        if(_fieldMapper == null){
+        Lock readLock = fieldMapperLock.readLock();
+        readLock.lock();
+        try {
+            if(_fieldMapper != null){
+                return _fieldMapper;
+            }
+        } finally {
+            readLock.unlock();
+        }
+        Lock writeLock = fieldMapperLock.writeLock();
+        writeLock.lock();
+        try {
             // the fieldMapper need the Server to store it's namespace prefix configuration
             _fieldMapper = new SolrFieldMapper(getServer());
+            return _fieldMapper;
+        } finally {
+            writeLock.unlock();
         }
-        return _fieldMapper;
     }
     
     /**
@@ -889,6 +929,12 @@ public class SolrYard extends AbstractYard implements Yard {
      * @return the Representation
      */
     protected final Representation createRepresentation(FieldMapper fieldMapper, SolrDocument doc, Set<String> fields) {
+        if(fieldMapper == null){
+            throw new IllegalArgumentException("The parsed FieldMapper MUST NOT be NULL!");
+        }
+        if(doc == null){
+            throw new IllegalArgumentException("The parsed SolrDocument MUST NOT be NULL!");
+        }
         Object id = doc.getFirstValue(fieldMapper.getDocumentIdField());
         if (id == null) {
             throw new IllegalStateException(String.format(
