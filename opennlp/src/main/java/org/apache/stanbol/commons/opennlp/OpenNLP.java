@@ -176,7 +176,7 @@ public class OpenNLP {
             model = null;
         }
         if(model == null){
-            log.info("No perceptron based POS model for language "+language+
+            log.debug("No perceptron based POS model for language "+language+
                 "available. Will try to load maxent model");
             try {
                 model = initModel(String.format("%s-pos-maxent.bin",language), POSModel.class);
@@ -280,7 +280,7 @@ public class OpenNLP {
 //                    log.debug("ModelLocations for Bundle {} and Paths {} already registered");
 //                    return;
 //                } else { //remove current registration
-//                    log.info("remove existing ModelLocations for Bundle {} and Paths {}",
+//                    log.debug("remove existing ModelLocations for Bundle {} and Paths {}",
 //                        bundleSymbolicName,current.paths);
 //                    if(current.provider != null){
 //                        current.provider.close();
@@ -310,7 +310,7 @@ public class OpenNLP {
 //        synchronized (modelLocations) {
 //            ModelLocation current = modelLocations.remove(bundleSymbolicName);
 //            if(current != null){
-//                log.info("remove modelLocation for Bundle {} and paths {}",
+//                log.debug("remove modelLocation for Bundle {} and paths {}",
 //                    bundleSymbolicName,current.paths);
 //                if(current.provider != null){
 //                    current.provider.close();
@@ -350,11 +350,11 @@ public class OpenNLP {
             try {
                 modelDataStream = lookupModelStream(name,modelProperties);
             } catch (IOException e) {
-                log.info("Unable to load Resource {} via the DataFileProvider",name);
+                log.debug("Unable to load Resource {} via the DataFileProvider",name);
                 return null;
             }
             if(modelDataStream == null){
-                log.info("Unable to load Resource {} via the DataFileProvider",name);
+                log.debug("Unable to load Resource {} via the DataFileProvider",name);
                 return null;
             }
             T built;
