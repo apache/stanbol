@@ -177,7 +177,7 @@ public class EnhancerTestBase extends StanbolTestBase {
             @Override
             protected void reportException(Throwable t) {
                 log.info("Exception in RetryLoop, will retry for up to " 
-                        + getRemainingTimeSeconds() + " seconds: " + t);
+                        + getRemainingTimeSeconds() + " seconds: ", t);
             }
             
             protected void onTimeout() {
