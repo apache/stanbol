@@ -265,7 +265,7 @@ public class NamedEntityTaggingEngine
                     "The ID of the Referenced Site is a required Parameter and MUST NOT be an empty String!");
         }
         if(Entityhub.ENTITYHUB_IDS.contains(this.referencedSiteID.toLowerCase())){
-            log.info("Init NamedEntityTaggingEngine instance for the Entityhub");
+            log.debug("Init NamedEntityTaggingEngine instance for the Entityhub");
             this.referencedSiteID = null;
         }
         Object state = config.get(PERSON_STATE);
@@ -419,7 +419,7 @@ public class NamedEntityTaggingEngine
         // First get the required properties for the parsed textAnnotation
         // ... and check the values
 
-        log.info("Process {}", namedEntity);
+        log.debug("Process {}", namedEntity);
         FieldQuery query = site == null ? //if site is NULL use the Entityhub
                 entityhub.getQueryFactory().createFieldQuery() : 
                     site.getQueryFactory().createFieldQuery();
@@ -470,7 +470,7 @@ public class NamedEntityTaggingEngine
         QueryResultList<Entity> results = site == null? //if site is NULL
                 entityhub.findEntities(query) : //use the Entityhub
                     site.findEntities(query); //else the referenced site
-        log.info(" - {} results returned by query {}", results.size(), results.getQuery());
+        log.debug(" - {} results returned by query {}", results.size(), results.getQuery());
         if(results.isEmpty()){ //no results nothing to do
             return Collections.emptyList();
         }
@@ -518,7 +518,7 @@ public class NamedEntityTaggingEngine
                 }
                 matches.add(match);
             } else {
-                log.info("No value of {} for Entity {}!",nameField,match.getEntity().getId());
+                log.debug("No value of {} for Entity {}!",nameField,match.getEntity().getId());
             }
         }
         //now sort the results
