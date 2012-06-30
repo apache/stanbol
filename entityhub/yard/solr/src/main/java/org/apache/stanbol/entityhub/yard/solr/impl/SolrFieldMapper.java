@@ -125,12 +125,16 @@ public class SolrFieldMapper implements FieldMapper {
      * 
      * @see LinkedHashMap#
      */
-    private final LRU<IndexField,Collection<String>> indexFieldMappings = new LRU<IndexField,Collection<String>>();
+    private final Map<IndexField,Collection<String>> indexFieldMappings = 
+            //STANBOL-669: LRU chaches MUST BE synchronized!
+            Collections.synchronizedMap(new LRU<IndexField,Collection<String>>());
     /**
      * The assumption is, that only a handful of fields appear in index documents. So it makes sense to keep
      * some mappings within a cache rather than calculating them again and again.
      */
-    private final LRU<String,IndexField> fieldMappings = new LRU<String,IndexField>();
+    private final Map<String,IndexField> fieldMappings = 
+            //STANBOL-669: LRU chaches MUST BE synchronized!
+            Collections.synchronizedMap(new LRU<String,IndexField>());
 
     public SolrFieldMapper(SolrServer server) {
         if (server == null) {
@@ -599,7 +603,9 @@ public class SolrFieldMapper implements FieldMapper {
      */
     private Map<String,String> getNamespaceMap() {
         if (__namespaceMap == null) {
-            loadNamespaceConfig();
+            synchronized (prefixNamespaceMappingsLock) {
+                loadNamespaceConfig();
+            }
         }
         return __namespaceMap;
     }
@@ -608,6 +614,11 @@ public class SolrFieldMapper implements FieldMapper {
      * Do never access this Map directly! Use {@link #getPrefixMap()}!
      */
     private Map<String,String> __prefixMap = null;
+    /**
+     * used as lock during loading of the namespace <-> prefix mappings
+     * (fixes STANBOL-668)
+     */
+    private Object prefixNamespaceMappingsLock = new Object();
 
     /**
      * Getter for the prefix to namespace mappings
@@ -616,7 +627,9 @@ public class SolrFieldMapper implements FieldMapper {
      */
     private Map<String,String> getPrefixMap() {
         if (__prefixMap == null) {
-            loadNamespaceConfig();
+            synchronized (prefixNamespaceMappingsLock) {
+                loadNamespaceConfig();
+            }
         }
         return __prefixMap;
     }
@@ -729,8 +742,10 @@ public class SolrFieldMapper implements FieldMapper {
     }
 
     private void addNamespaceMapping(String prefix, String namespace) {
-        getPrefixMap().put(prefix, namespace);
-        getNamespaceMap().put(namespace, prefix);
+        synchronized (prefixNamespaceMappingsLock) { 
+            getPrefixMap().put(prefix, namespace);
+            getNamespaceMap().put(namespace, prefix);
+        }
     }
 
     /**
@@ -738,8 +753,8 @@ public class SolrFieldMapper implements FieldMapper {
      * the prefix &lt;-&gt; namespace mappings
      */
     private void loadNamespaceConfig() {
-        __prefixMap = new HashMap<String,String>();
-        __namespaceMap = new HashMap<String,String>();
+        HashMap<String,String> prefixMap = new HashMap<String,String>();
+        HashMap<String,String> namespaceMap = new HashMap<String,String>();
         SolrDocument config = null;
         try {
             config = getSolrDocument(FieldMapper.URI);
@@ -758,14 +773,14 @@ public class SolrFieldMapper implements FieldMapper {
                         String prefix = configFieldElements[1];
                         Object value = config.getFirstValue(fieldName);
                         if (value != null) {
-                            if (__namespaceMap.containsKey(value.toString())) {
-                                log.error("found two prefixes (" + __namespaceMap.get(value.toString())
+                            if (namespaceMap.containsKey(value.toString())) {
+                                log.error("found two prefixes (" + namespaceMap.get(value.toString())
                                           + " and " + prefix + ") for Namespace " + value.toString()
                                           + " keep the first one");
                             } else {
                                 log.debug(" > prefix: " + prefix + " value: " + value);
-                                __prefixMap.put(prefix, value.toString());
-                                __namespaceMap.put(value.toString(), prefix);
+                                prefixMap.put(prefix, value.toString());
+                                namespaceMap.put(value.toString(), prefix);
                                 // check for default NS
                                 if (prefix.startsWith(DEFAULT_NS_PREFIX_STRING)) {
                                     String prefixNumber = prefix.substring(DEFAULT_NS_PREFIX_STRING.length());
@@ -791,6 +806,11 @@ public class SolrFieldMapper implements FieldMapper {
                     }
                 }
             }
+        }
+        //only store complete mappings to the member variables (STANBOL-668)
+        synchronized (prefixNamespaceMappingsLock) {
+            __prefixMap = prefixMap;
+            __namespaceMap = namespaceMap;
         }
     }
 
