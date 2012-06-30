@@ -119,7 +119,7 @@
     <bundle>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore-osgi</artifactId>
-      <version>4.1.4</version>
+      <version>4.2</version>
     </bundle>
     <bundle> <!-- Bundle for org.json -->
         <!-- this bundle was suggested in the release vote of felix.webconsole 4.0.0 -->
