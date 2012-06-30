@@ -68,7 +68,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
     
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        log.info("isReadable type {}, mediaType {}",type,mediaType);
+        log.debug("isReadable type {}, mediaType {}",type,mediaType);
         return FieldQuery.class.isAssignableFrom(type); //&& mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE);
     }
 
@@ -319,7 +319,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         if(jConstraint.has("inclusive")){
             inclusive = jConstraint.getBoolean("inclusive");
         } else {
-            log.info("RangeConstraint does not define the field 'inclusive'. Use false as default!");
+            log.debug("RangeConstraint does not define the field 'inclusive'. Use false as default!");
             inclusive = false;
         }
         Object upperBound = jConstraint.opt("upperBound");

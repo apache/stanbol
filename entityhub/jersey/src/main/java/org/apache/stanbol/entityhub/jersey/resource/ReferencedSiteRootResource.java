@@ -150,7 +150,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     public ReferencedSiteRootResource(@PathParam(value = "site") String siteId,
                                       @Context ServletContext servletContext) {
         super();
-        log.info("<init> with site {}", siteId);
+        log.debug("<init> with site {}", siteId);
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
             ReferencedSiteManager.class, servletContext);
         if (siteId == null || siteId.isEmpty()) {
@@ -253,10 +253,10 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @GET
     @Path("/entity")
     public Response getEntityById(@QueryParam(value = "id") String id, @Context HttpHeaders headers) {
-        log.info("site/{}/entity Request",site.getId());
-        log.info("  > id       : " + id);
-        log.info("  > accept   : " + headers.getAcceptableMediaTypes());
-        log.info("  > mediaType: " + headers.getMediaType());
+        log.debug("site/{}/entity Request",site.getId());
+        log.debug("  > id       : " + id);
+        log.debug("  > accept   : " + headers.getAcceptableMediaTypes());
+        log.debug("  > mediaType: " + headers.getMediaType());
         Collection<String> supported = new HashSet<String>(JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
         final MediaType acceptedMediaType = getAcceptableMediaType(headers,
@@ -273,7 +273,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
-        log.info("handle Request for Entity {} of Site {}", id, site.getId());
+        log.debug("handle Request for Entity {} of Site {}", id, site.getId());
         Entity entity;
         try {
             entity = site.getEntity(id);
@@ -290,7 +290,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         } else {
             // TODO: How to parse an ErrorMessage?
             // create an Response with the the Error?
-            log.info(" ... Entity {} not found on referenced site {}", 
+            log.debug(" ... Entity {} not found on referenced site {}", 
                 id, site.getId());
             return Response.status(Status.NOT_FOUND).
             entity("Entity '"+id+"' not found on referenced site '"+site.getId()+"'\n")
