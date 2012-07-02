@@ -29,6 +29,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
  */
 public interface OntologySpace extends OntologyCollector, OWLExportable, Lockable {
 
+    static final String shortName = "space";
+
     /**
      * The possible types of ontology spaces managed by OntoNet.
      */

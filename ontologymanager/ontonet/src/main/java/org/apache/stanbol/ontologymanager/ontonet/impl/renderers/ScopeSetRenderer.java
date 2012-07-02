@@ -48,7 +48,7 @@ public class ScopeSetRenderer {
 
     private static OWLDataFactory __factory = OWLManager.getOWLDataFactory();
 
-    private static IRI _scopeIri = IRI.create(Vocabulary.SCOPE);
+    private static IRI _scopeIri = IRI.create(Vocabulary.SCOPE.getUnicodeString());
 
     private static OWLClass cScope = __factory.getOWLClass(_scopeIri);
 

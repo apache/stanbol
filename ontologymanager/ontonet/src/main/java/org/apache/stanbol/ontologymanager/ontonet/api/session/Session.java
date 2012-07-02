@@ -31,6 +31,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
  */
 public interface Session extends OntologyCollector, OWLExportable, Lockable, SessionListenable {
 
+    static final String shortName = "session";
+
     /**
      * The states a session can be in: ACTIVE (for running sessions), HALTED (for inactive sessions that may
      * later be activated, e.g. when a user logs in), ZOMBIE (inactive and bound for destruction, no longer

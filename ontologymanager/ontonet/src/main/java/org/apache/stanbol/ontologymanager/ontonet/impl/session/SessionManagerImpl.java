@@ -31,6 +31,9 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
@@ -166,7 +169,16 @@ public class SessionManagerImpl implements SessionManager {
             log.warn("The Ontology Network Manager configuration does not define a ID for the Ontology Network Manager");
         }
 
-        idgen = new TimestampedSessionIDGenerator(IRI.create(getNamespace() + getID() + "/"));
+        idgen = new TimestampedSessionIDGenerator();
+
+        // Add listeners
+        if (ontologyProvider instanceof SessionListener) this
+                .addSessionListener((SessionListener) ontologyProvider);
+
+        // Rebuild sessions
+        rebuildSessions();
+
+        log.debug(SessionManager.class + " activated.");
     }
 
     protected synchronized void addSession(Session session) {
@@ -214,6 +226,11 @@ public class SessionManagerImpl implements SessionManager {
         checkSessionLimit();
         IRI ns = IRI.create(getNamespace() + getID() + "/");
         Session session = new SessionImpl(sessionID, ns, ontologyProvider);
+
+        // Have the ontology provider listen to ontology events
+        if (ontologyProvider instanceof OntologyCollectorListener) session
+                .addOntologyCollectorListener((OntologyCollectorListener) ontologyProvider);
+
         addSession(session);
         fireSessionCreated(session);
         return session;
@@ -304,6 +321,31 @@ public class SessionManagerImpl implements SessionManager {
     @Override
     public Collection<SessionListener> getSessionListeners() {
         return listeners;
+    }
+
+    private void rebuildSessions() {
+        if (ontologyProvider == null) {
+            log.warn("No ontology provider supplied. Cannot rebuild sessions");
+            return;
+        }
+        OntologyNetworkConfiguration struct = ontologyProvider.getOntologyNetworkConfiguration();
+        for (String sessionId : struct.getSessionIDs()) {
+            Session session;
+            try {
+                session = createSession(sessionId);
+                // Register even if some ontologies were to fail to be restored afterwards.
+                sessionsByID.put(sessionId, session);
+                session.setActive(false); // Restored sessions are inactive at first.
+                for (String key : struct.getOntologyKeysForSession(sessionId))
+                    session.addOntology(new GraphSource(key));
+            } catch (DuplicateSessionIDException e) {
+                log.warn("Session \"{}\" already exists and will be reused.", sessionId);
+                session = getSession(sessionId);
+            } catch (SessionLimitException e) {
+                log.error("Cannot create session {}. Session limit of {} reached.", sessionId,
+                    getActiveSessionLimit());
+            }
+        }
     }
 
     protected synchronized void removeSession(Session session) {

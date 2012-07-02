@@ -58,7 +58,7 @@ public interface ScopeEventListener {
 	 * @param scope
 	 *            the deregistered ontology scope
 	 */
-    void scopeDeregistered(OntologyScope scope);
+    void scopeUnregistered(OntologyScope scope);
 
 	/**
 	 * Called <i>after</i> an ontology scope is added to the scope registry.

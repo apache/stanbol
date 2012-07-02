@@ -25,6 +25,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
+import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.ImportManagementPolicy;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyID;
@@ -107,6 +108,8 @@ public interface OntologyProvider<S> {
      * @return
      */
     <O extends TripleCollection> O getMetaGraph(Class<O> returnType);
+
+    public OntologyNetworkConfiguration getOntologyNetworkConfiguration();
 
     /**
      * Will return the keys of all the ontologies whose ontologyIRI is the one provided. These include any

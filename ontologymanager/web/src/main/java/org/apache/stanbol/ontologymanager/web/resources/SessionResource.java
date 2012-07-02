@@ -16,6 +16,11 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.OPTIONS;
+import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -186,7 +191,7 @@ public class SessionResource extends BaseStanbolResource {
         } catch (SessionLimitException e) {
             throw new WebApplicationException(e, FORBIDDEN);
         }
-        ResponseBuilder rb = Response.ok();
+        ResponseBuilder rb = Response.created(uriInfo.getRequestUri());
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -211,6 +216,26 @@ public class SessionResource extends BaseStanbolResource {
         ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
+    }
+
+    /*
+     * Needed for freemarker
+     */
+    public Set<OntologyScope> getAppendableScopes() {
+        Set<OntologyScope> notAppended = new HashSet<OntologyScope>();
+        for (OntologyScope sc : onMgr.getRegisteredScopes())
+            if (!session.getAttachedScopes().contains(sc.getID())) notAppended.add(sc);
+        return notAppended;
+    }
+
+    /*
+     * Needed for freemarker
+     */
+    public Set<OntologyScope> getAppendedScopes() {
+        Set<OntologyScope> appended = new HashSet<OntologyScope>();
+        for (OntologyScope sc : onMgr.getRegisteredScopes())
+            if (session.getAttachedScopes().contains(sc.getID())) appended.add(sc);
+        return appended;
     }
 
     @GET
@@ -238,30 +263,18 @@ public class SessionResource extends BaseStanbolResource {
         return session;
     }
 
-    /*
-     * Needed for freemarker
-     */
-    public Set<OntologyScope> getAppendableScopes() {
-        Set<OntologyScope> notAppended = new HashSet<OntologyScope>();
-        for (OntologyScope sc : onMgr.getRegisteredScopes())
-            if (!session.getAttachedScopes().contains(sc.getID())) notAppended.add(sc);
-        return notAppended;
-    }
-
-    /*
-     * Needed for freemarker
-     */
-    public Set<OntologyScope> getAppendedScopes() {
-        Set<OntologyScope> appended = new HashSet<OntologyScope>();
-        for (OntologyScope sc : onMgr.getRegisteredScopes())
-            if (session.getAttachedScopes().contains(sc.getID())) appended.add(sc);
-        return appended;
-    }
-
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers);
+        enableCORS(servletContext, rb, headers, GET, POST, PUT, DELETE, OPTIONS);
+        return rb.build();
+    }
+
+    @OPTIONS
+    @Path("/{ontologyId:.+}")
+    public Response handleCorsPreflightOntology(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers, GET, DELETE, OPTIONS);
         return rb.build();
     }
 

@@ -23,8 +23,8 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 
 /**
- * An {@link OntologyInputSource} that gets ontologies from either a Clerezza {@link Graph} (or {@link MGraph}
- * ), or its identifier and an optionally supplied triple collection manager.
+ * An {@link OntologyInputSource} that gets ontologies from either a stored Clerezza {@link Graph} (or
+ * {@link MGraph} ), or its identifier and an optionally supplied triple collection manager.
  * 
  * @author alexdma
  * 
@@ -37,6 +37,10 @@ public class GraphSource extends AbstractClerezzaGraphInputSource {
         else throw new IllegalArgumentException("GraphSource supports only Graph and MGraph types. "
                                                 + graph.getClass() + " is not supported.");
         bindPhysicalIri(null);
+    }
+
+    public GraphSource(String graphId) {
+        this(new UriRef(graphId));
     }
 
     public GraphSource(UriRef graphId) {

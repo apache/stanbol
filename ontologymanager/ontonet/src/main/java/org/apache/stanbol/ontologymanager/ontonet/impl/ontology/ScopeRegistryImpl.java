@@ -89,7 +89,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
      */
     protected void fireScopeDeregistered(OntologyScope scope) {
         for (ScopeEventListener l : listeners)
-            l.scopeDeregistered(scope);
+            l.scopeUnregistered(scope);
     }
 
     /**

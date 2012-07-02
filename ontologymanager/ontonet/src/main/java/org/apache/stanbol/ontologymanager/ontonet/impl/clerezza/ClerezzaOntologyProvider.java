@@ -16,12 +16,17 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_MANAGED_BY_CORE;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_MANAGED_BY_CUSTOM;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.MANAGES_IN_CORE;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.MANAGES_IN_CUSTOM;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_SPACE_CORE;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_SPACE_CUSTOM;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_MANAGED_BY;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_SPACE_CORE_OF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_SPACE_CUSTOM_OF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.MANAGES;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SCOPE;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SESSION;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SPACE;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary._NS_ONTONET;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary._NS_STANBOL_INTERNAL;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,10 +35,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -71,15 +79,18 @@ import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.ImportManagementPolicy;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeEventListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -105,7 +116,7 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, metatype = true)
 @Service(OntologyProvider.class)
 public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, ScopeEventListener,
-        OntologyCollectorListener {
+        SessionListener, OntologyCollectorListener {
 
     private class InvalidMetaGraphStateException extends RuntimeException {
 
@@ -514,6 +525,21 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         }
     }
 
+    private UriRef getIRIforScope(OntologyScope scope) {
+        // Use the Stanbol-internal namespace, so that the whole configuration can be ported.
+        return new UriRef(_NS_STANBOL_INTERNAL + OntologyScope.shortName + "/" + scope.getID());
+    }
+
+    private UriRef getIRIforSession(Session session) {
+        // Use the Stanbol-internal namespace, so that the whole configuration can be ported.
+        return new UriRef(_NS_STANBOL_INTERNAL + Session.shortName + "/" + session.getID());
+    }
+
+    private UriRef getIRIforSpace(OntologySpace space) {
+        // Use the Stanbol-internal namespace, so that the whole configuration can be ported.
+        return new UriRef(_NS_STANBOL_INTERNAL + OntologySpace.shortName + "/" + space.getID());
+    }
+
     @Override
     public String getKey(IRI ontologyIri) {
         ontologyIri = URIUtils.sanitizeID(ontologyIri);
@@ -540,10 +566,134 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         return (O) store.getTriples(new UriRef(metaGraphId));
     }
 
+    public OntologyNetworkConfiguration getOntologyNetworkConfiguration() {
+        Map<String,Collection<String>> coreOntologies = new HashMap<String,Collection<String>>(), customOntologies = new HashMap<String,Collection<String>>();
+        final TripleCollection meta = store.getTriples(new UriRef(metaGraphId));
+
+        // Scopes first
+        for (Iterator<Triple> it = meta.filter(null, RDF.type, SCOPE); it.hasNext();) { // for each scope
+            Triple ta = it.next();
+            NonLiteral sub = ta.getSubject();
+            if (sub instanceof UriRef) {
+                String s = ((UriRef) sub).getUnicodeString(), prefix = _NS_STANBOL_INTERNAL
+                                                                       + OntologyScope.shortName + "/";
+                if (s.startsWith(prefix)) {
+                    String scopeId = s.substring(prefix.length());
+                    log.info("Rebuilding scope \"{}\".", scopeId);
+                    coreOntologies.put(scopeId, new LinkedList<String>());
+                    customOntologies.put(scopeId, new LinkedList<String>());
+                    UriRef core_ur = null, custom_ur = null;
+                    Resource r;
+                    // Check core space
+                    Iterator<Triple> it2 = meta.filter(sub, HAS_SPACE_CORE, null);
+                    if (it2.hasNext()) {
+                        r = it2.next().getObject();
+                        if (r instanceof UriRef) core_ur = (UriRef) r;
+                    } else {
+                        it2 = meta.filter(null, IS_SPACE_CORE_OF, sub);
+                        if (it2.hasNext()) {
+                            r = it2.next().getSubject();
+                            if (r instanceof UriRef) core_ur = (UriRef) r;
+                        }
+                    }
+
+                    // Check custom space
+                    it2 = meta.filter(sub, HAS_SPACE_CUSTOM, null);
+                    if (it2.hasNext()) {
+                        r = it2.next().getObject();
+                        if (r instanceof UriRef) custom_ur = (UriRef) r;
+                    } else {
+                        it2 = meta.filter(null, IS_SPACE_CUSTOM_OF, sub);
+                        if (it2.hasNext()) {
+                            r = it2.next().getSubject();
+                            if (r instanceof UriRef) custom_ur = (UriRef) r;
+                        }
+                    }
+
+                    // retrieve the ontologies
+                    if (core_ur != null) {
+                        for (it2 = meta.filter(core_ur, null, null); it2.hasNext();) {
+                            Triple t = it2.next();
+                            UriRef predicate = t.getPredicate();
+                            if (predicate.equals(MANAGES)) {
+                                if (t.getObject() instanceof UriRef) coreOntologies.get(scopeId).add(
+                                  ((UriRef) t.getObject()).getUnicodeString());
+                            }
+                        }
+                        for (it2 = meta.filter(null, null, core_ur); it2.hasNext();) {
+                            Triple t = it2.next();
+                            UriRef predicate = t.getPredicate();
+                            if (predicate.equals(IS_MANAGED_BY)) {
+                                if (t.getSubject() instanceof UriRef) coreOntologies.get(scopeId).add(
+                                    ((UriRef) t.getSubject()).getUnicodeString());
+                            }
+                        }
+                    }
+                    if (custom_ur != null) {
+                        for (it2 = meta.filter(custom_ur, null, null); it2.hasNext();) {
+                            Triple t = it2.next();
+                            UriRef predicate = t.getPredicate();
+                            if (predicate.equals(MANAGES)) {
+                                if (t.getObject() instanceof UriRef) customOntologies.get(scopeId).add(
+                                  ((UriRef) t.getObject()).getUnicodeString());
+                            }
+                        }
+                        for (it2 = meta.filter(null, null, custom_ur); it2.hasNext();) {
+                            Triple t = it2.next();
+                            UriRef predicate = t.getPredicate();
+                            if (predicate.equals(IS_MANAGED_BY)) {
+                                if (t.getSubject() instanceof UriRef) customOntologies.get(scopeId).add(
+                                  ((UriRef) t.getSubject()).getUnicodeString());
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+        // Sessions next
+        Map<String,Collection<String>> sessionOntologies = new HashMap<String,Collection<String>>();
+        for (Iterator<Triple> it = meta.filter(null, RDF.type, SESSION); it.hasNext();) { // for each scope
+            Triple ta = it.next();
+            NonLiteral sub = ta.getSubject();
+            if (sub instanceof UriRef) {
+                UriRef ses_ur = (UriRef) sub;
+                String s = ((UriRef) sub).getUnicodeString();
+                String prefix = _NS_STANBOL_INTERNAL + Session.shortName + "/";
+                if (s.startsWith(prefix)) {
+                    String sessionId = s.substring(prefix.length());
+                    log.info("Rebuilding session \"{}\".", sessionId);
+                    sessionOntologies.put(sessionId, new HashSet<String>());
+                    // retrieve the ontologies
+                    if (ses_ur != null) {
+                        for (Iterator<Triple> it2 = meta.filter(ses_ur, null, null); it2.hasNext();) {
+                            Triple t = it2.next();
+                            UriRef predicate = t.getPredicate();
+                            if (predicate.equals(MANAGES)) {
+                                if (t.getObject() instanceof UriRef) sessionOntologies.get(sessionId).add(
+                                    ((UriRef) t.getObject()).getUnicodeString());
+                            }
+                        }
+                        for (Iterator<Triple> it2 = meta.filter(null, null, ses_ur); it2.hasNext();) {
+                            Triple t = it2.next();
+                            UriRef predicate = t.getPredicate();
+                            if (predicate.equals(IS_MANAGED_BY)) {
+                                if (t.getSubject() instanceof UriRef) sessionOntologies.get(sessionId).add(
+                                   ((UriRef) t.getSubject()).getUnicodeString());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return new OntologyNetworkConfiguration(coreOntologies, customOntologies, sessionOntologies);
+    }
+
     @Override
     public Set<String> getOntologyVersionKeys(IRI ontologyIRI) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Method not implemented yet.");
     }
 
     @Override
@@ -859,6 +1009,109 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
     }
 
     @Override
+    public void onOntologyAdded(OntologyCollector collector, OWLOntologyID addedOntology) {
+        // When the ontology provider hears an ontology has been added to a collector, it has to register this
+        // into the metadata graph.
+
+        // log.info("Heard addition of ontology {} to collector {}", addedOntology, collector.getID());
+        // log.info("This ontology is stored as {}", getKey(addedOntology));
+
+        String colltype = "";
+        if (collector instanceof OntologyScope) colltype = OntologyScope.shortName + "/"; // Cannot be
+        else if (collector instanceof OntologySpace) colltype = OntologySpace.shortName + "/";
+        else if (collector instanceof Session) colltype = Session.shortName + "/";
+        UriRef c = new UriRef(_NS_STANBOL_INTERNAL + colltype + collector.getID());
+        UriRef u = new UriRef(prefix + "::" + keymap.buildResource(addedOntology).getUnicodeString());
+
+        // TODO OntologyProvider should not be aware of scopes, spaces or sessions. Move elsewhere.
+        MGraph meta = getMetaGraph(MGraph.class);
+        boolean hasValues = false;
+        log.debug("Ontology {}", addedOntology);
+        log.debug("-- is already managed by the following collectors :");
+        for (Iterator<Triple> it = meta.filter(u, IS_MANAGED_BY, null); it.hasNext();) {
+            hasValues = true;
+            log.debug("-- {}", it.next().getObject());
+        }
+        for (Iterator<Triple> it = meta.filter(null, MANAGES, u); it.hasNext();) {
+            hasValues = true;
+            log.debug("-- {} (inverse)", it.next().getSubject());
+        }
+        if (!hasValues) log.debug("-- <none>");
+
+        // Add both inverse triples. This graph has to be traversed efficiently, no need for reasoners.
+        UriRef predicate1 = null, predicate2 = null;
+        if (collector instanceof OntologySpace) {
+            predicate1 = MANAGES;
+            predicate2 = IS_MANAGED_BY;
+        } else if (collector instanceof Session) {
+            // TODO implement model for sessions.
+            predicate1 = MANAGES;
+            predicate2 = IS_MANAGED_BY;
+        } else {
+            log.error("Unrecognized ontology collector type {} for \"{}\". Aborting.", collector.getClass(),
+                collector.getID());
+            return;
+        }
+        synchronized (meta) {
+            Triple t;
+            if (predicate1 != null) {
+                t = new TripleImpl(c, predicate1, u);
+                boolean b = meta.add(t);
+                log.debug((b ? "Successful" : "Redundant") + " addition of meta triple");
+                log.debug("-- {} ", t);
+            }
+            if (predicate2 != null) {
+                t = new TripleImpl(u, predicate2, c);
+                boolean b = meta.add(t);
+                log.debug((b ? "Successful" : "Redundant") + " addition of meta triple");
+                log.debug("-- {} ", t);
+            }
+        }
+    }
+
+    @Override
+    public void onOntologyRemoved(OntologyCollector collector, OWLOntologyID removedOntology) {
+        log.info("Heard removal of ontology {} from collector {}", removedOntology, collector.getID());
+
+        String colltype = "";
+        if (collector instanceof OntologyScope) colltype = OntologyScope.shortName + "/"; // Cannot be
+        else if (collector instanceof OntologySpace) colltype = OntologySpace.shortName + "/";
+        else if (collector instanceof Session) colltype = Session.shortName + "/";
+        UriRef c = new UriRef(_NS_STANBOL_INTERNAL + colltype + collector.getID());
+        UriRef u = new UriRef(prefix + "::" + keymap.buildResource(removedOntology).getUnicodeString());
+
+        // XXX condense the following code
+        MGraph meta = getMetaGraph(MGraph.class);
+        boolean badState = true;
+
+        log.debug("Checking ({},{}) pattern", c, u);
+        for (Iterator<Triple> it = meta.filter(c, null, u); it.hasNext();) {
+            UriRef property = it.next().getPredicate();
+            if (collector instanceof OntologySpace || collector instanceof Session) {
+                if (property.equals(MANAGES)) badState = false;
+            }
+        }
+
+        log.debug("Checking ({},{}) pattern", u, c);
+        for (Iterator<Triple> it = meta.filter(u, null, c); it.hasNext();) {
+            UriRef property = it.next().getPredicate();
+            if (collector instanceof OntologySpace || collector instanceof Session) {
+                if (property.equals(IS_MANAGED_BY)) badState = false;
+            }
+        }
+
+        if (badState) throw new InvalidMetaGraphStateException(
+                "No relationship found for ontology-collector pair {" + u + " , " + c + "}");
+
+        synchronized (meta) {
+            if (collector instanceof OntologySpace) {
+                meta.remove(new TripleImpl(c, MANAGES, u));
+                meta.remove(new TripleImpl(u, IS_MANAGED_BY, c));
+            }
+        }
+    }
+
+    @Override
     public void scopeActivated(OntologyScope scope) {}
 
     @Override
@@ -868,55 +1121,21 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
     public void scopeDeactivated(OntologyScope scope) {}
 
     @Override
-    public void scopeDeregistered(OntologyScope scope) {
-        UriRef graphId = new UriRef(metaGraphId);
-        MGraph graph = store.getMGraph(graphId);
-        if (graph == null) try {
-            graph = store.createMGraph(graphId);
-        } catch (EntityAlreadyExistsException e) {
-            log.error("Could not get meta graph {} for writing scope registration. ", graphId);
-        }
-        boolean removable = false, conflict = false;
-        UriRef sid = new UriRef(scope.getNamespace() + scope.getID());
-        Set<Triple> removeUs = new HashSet<Triple>();
-        for (Iterator<Triple> it = graph.filter(sid, null, null); it.hasNext();) {
-            Triple t = it.next();
-            if (RDF.type.equals(t.getPredicate())) {
-                if (new UriRef(SCOPE).equals(t.getObject())) removable = true;
-                else conflict = true;
-            }
-            removeUs.add(t);
-        }
-        for (Iterator<Triple> it = graph.filter(null, null, sid); it.hasNext();)
-            removeUs.add(it.next());
-        if (!removable) log
-                .error(
-                    "Cannot write scope deregistration to persistence: resource {} is not typed as a {} in the meta-graph.",
-                    sid, SCOPE);
-        else if (conflict) log.error(
-            "Conflict upon scope deregistration: resource {} has incompatible types in the meta-graph.", sid,
-            SCOPE);
-        else {
-            log.info("Removing all triples for {}", sid);
-            graph.removeAll(removeUs);
-        }
+    public void scopeRegistered(OntologyScope scope) {
+        updateScopeRegistration(scope);
     }
 
     @Override
-    public void scopeRegistered(OntologyScope scope) {
-        UriRef graphId = new UriRef(metaGraphId);
-        MGraph graph = store.getMGraph(graphId);
-        if (graph == null) try {
-            graph = store.createMGraph(graphId);
-        } catch (EntityAlreadyExistsException e) {
-            log.error("Could not get meta graph {} for writing scope registration. ", graphId);
-        }
-        Triple t = new TripleImpl(new UriRef(scope.getNamespace() + scope.getID()), RDF.type, new UriRef(
-                SCOPE));
-        if (graph.contains(t)) log.info("Not adding triple {}", t);
-        else {
-            log.info("Adding triple {}", t);
-            graph.add(t);
+    public void scopeUnregistered(OntologyScope scope) {
+        updateScopeUnregistration(scope);
+    }
+
+    @Override
+    public void sessionChanged(SessionEvent event) {
+        if (event.getOperationType() == OperationType.CREATE) {
+            updateSessionRegistration(event.getSession());
+        } else if (event.getOperationType() == OperationType.KILL) {
+            updateSessionUnregistration(event.getSession());
         }
     }
 
@@ -1048,119 +1267,124 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         }
     }
 
-    @Override
-    public void onOntologyAdded(OntologyCollector collector, OWLOntologyID addedOntology) {
-
-        // When the ontology provider hears an ontology has been added to a collector, it has to register this
-        // into the metadata graph.
-
-        // log.info("Heard addition of ontology {} to collector {}", addedOntology, collector.getID());
-        // log.info("This ontology is stored as {}", getKey(addedOntology));
-        UriRef c = new UriRef(collector.getNamespace() + collector.getID());
-        UriRef u = keymap.buildResource(addedOntology);
-
-        // TODO OntologyProvider should not be aware of scopes, spaces or sessions. Move elsewhere.
-        MGraph meta = getMetaGraph(MGraph.class);
-        String sMan = "";
-        for (Iterator<Triple> it = meta.filter(u, new UriRef(IS_MANAGED_BY_CUSTOM), null); it.hasNext();)
-            sMan += it.next() + ", ";
-        for (Iterator<Triple> it = meta.filter(u, new UriRef(IS_MANAGED_BY_CORE), null); it.hasNext();)
-            sMan += it.next() + ", ";
-        for (Iterator<Triple> it = meta.filter(null, new UriRef(MANAGES_IN_CUSTOM), u); it.hasNext();)
-            sMan += it.next() + "(inverse), ";
-        for (Iterator<Triple> it = meta.filter(null, new UriRef(MANAGES_IN_CORE), u); it.hasNext();)
-            sMan += it.next() + "(inverse), ";
-        if (!sMan.isEmpty()) log.warn("Ontology {} is already managed by the following collectors : " + sMan,
-            addedOntology);
-
-        // Add both inverse triples. This graph has to be traversed efficiently, no need for reasoners.
-        UriRef predicate1 = null, predicate2 = null;
-        if (collector instanceof CoreOntologySpace) {
-            predicate1 = new UriRef(MANAGES_IN_CORE);
-            predicate2 = new UriRef(IS_MANAGED_BY_CORE);
-        } else if (collector instanceof CustomOntologySpace) {
-            predicate1 = new UriRef(MANAGES_IN_CUSTOM);
-            predicate2 = new UriRef(IS_MANAGED_BY_CUSTOM);
-        } else if (collector instanceof Session) {
-            // TODO implement model for sessions.
-        }
+    /**
+     * Write registration info for a new ontology scope and its spaces.
+     * 
+     * @param scope
+     *            the scope whose information needs to be updated.
+     */
+    private void updateScopeRegistration(OntologyScope scope) {
+        final TripleCollection meta = store.getTriples(new UriRef(metaGraphId));
+        final UriRef scopeur = getIRIforScope(scope);
+        final UriRef coreur = getIRIforSpace(scope.getCoreSpace());
+        final UriRef custur = getIRIforSpace(scope.getCustomSpace());
+        // If this method was called after a scope rebuild, the following will have little to no effect.
         synchronized (meta) {
-            Triple t;
-            if (predicate1 != null) {
-                t = new TripleImpl(c, predicate1, u);
-                boolean b = meta.add(t);
-                log.debug((b ? "Successful" : "Redundant") + " addition of meta triple {} ", t);
+            // Spaces are created along with the scope, so it is safe to add their triples.
+            meta.add(new TripleImpl(scopeur, RDF.type, SCOPE));
+            meta.add(new TripleImpl(coreur, RDF.type, SPACE));
+            meta.add(new TripleImpl(custur, RDF.type, SPACE));
+            meta.add(new TripleImpl(scopeur, HAS_SPACE_CORE, coreur));
+            meta.add(new TripleImpl(scopeur, HAS_SPACE_CUSTOM, custur));
+            // Add inverse predicates so we can traverse the graph in both directions.
+            meta.add(new TripleImpl(coreur, IS_SPACE_CORE_OF, scopeur));
+            meta.add(new TripleImpl(custur, IS_SPACE_CUSTOM_OF, scopeur));
+        }
+        log.debug("Ontology collector information triples added for scope \"{}\".", scope);
+    }
+
+    /**
+     * Remove all information on a deregistered ontology scope and its spaces.
+     * 
+     * @param scope
+     *            the scope whose information needs to be updated.
+     */
+    private void updateScopeUnregistration(OntologyScope scope) {
+        long before = System.currentTimeMillis();
+        final TripleCollection meta = store.getTriples(new UriRef(metaGraphId));
+        boolean removable = false, conflict = false;
+        final UriRef scopeur = getIRIforScope(scope);
+        final UriRef coreur = getIRIforSpace(scope.getCoreSpace());
+        final UriRef custur = getIRIforSpace(scope.getCustomSpace());
+        Set<Triple> removeUs = new HashSet<Triple>();
+        for (Iterator<Triple> it = meta.filter(scopeur, null, null); it.hasNext();) {
+            Triple t = it.next();
+            if (RDF.type.equals(t.getPredicate())) {
+                if (SCOPE.equals(t.getObject())) removable = true;
+                else conflict = true;
             }
-            if (predicate2 != null) {
-                t = new TripleImpl(u, predicate2, c);
-                boolean b = meta.add(t);
-                log.debug((b ? "Successful" : "Redundant") + " addition of meta triple {} ", t);
-            }
+            removeUs.add(t);
+        }
+        if (!removable) {
+            log.error("Cannot write scope deregistration to persistence:");
+            log.error("-- resource {}", scopeur);
+            log.error("-- is not typed as a {} in the meta-graph.", SCOPE);
+        } else if (conflict) {
+            log.error("Conflict upon scope deregistration:");
+            log.error("-- resource {}", scopeur);
+            log.error("-- has incompatible types in the meta-graph.");
+        } else {
+            log.debug("Removing all triples for scope \"{}\".", scope.getID());
+            Iterator<Triple> it;
+            for (it = meta.filter(null, null, scopeur); it.hasNext();)
+                removeUs.add(it.next());
+            for (it = meta.filter(null, null, coreur); it.hasNext();)
+                removeUs.add(it.next());
+            for (it = meta.filter(coreur, null, null); it.hasNext();)
+                removeUs.add(it.next());
+            for (it = meta.filter(null, null, custur); it.hasNext();)
+                removeUs.add(it.next());
+            for (it = meta.filter(custur, null, null); it.hasNext();)
+                removeUs.add(it.next());
+            meta.removeAll(removeUs);
+            log.debug("Done; removed {} triples in {} ms.", removeUs.size(), System.currentTimeMillis()
+                                                                             - before);
         }
     }
 
-    @Override
-    public void onOntologyRemoved(OntologyCollector collector, OWLOntologyID removedOntology) {
-        log.info("Heard removal of ontology {} from collector {}", removedOntology, collector.getID());
-
-        UriRef c = new UriRef(collector.getNamespace() + collector.getID());
-        UriRef u = keymap.buildResource(removedOntology);
-
-        // XXX condense the following code
-        MGraph meta = getMetaGraph(MGraph.class);
-        boolean badState = true;
-
-        log.debug("Checking ({},{}) pattern", c, u);
-
-        for (Iterator<Triple> it = meta.filter(c, null, u); it.hasNext();) {
-            UriRef property = it.next().getPredicate();
-
-            if (collector instanceof CoreOntologySpace) {
-                if (property.equals(new UriRef(MANAGES_IN_CORE))) badState = false;
-                if (property.equals(new UriRef(MANAGES_IN_CUSTOM))) log
-                        .warn("Ontology {} is still managed by custom space {}. "
-                              + "Removal from core space might alter axiom interpretation within the scope.");
-            }
-
-            if (collector instanceof CustomOntologySpace) {
-                if (property.equals(new UriRef(MANAGES_IN_CORE))) log
-                        .warn("Ontology {} is still managed by core space {}. "
-                              + "Removal from the custom space will most likely have no effect on the scope.");
-                if (property.equals(new UriRef(MANAGES_IN_CUSTOM))) badState = false;
-            }
-        }
-
-        log.debug("Checking ({},{}) pattern", u, c);
-
-        for (Iterator<Triple> it = meta.filter(u, null, c); it.hasNext();) {
-            UriRef property = it.next().getPredicate();
-
-            if (collector instanceof CoreOntologySpace) {
-                if (property.equals(new UriRef(IS_MANAGED_BY_CORE))) badState = false;
-                if (property.equals(new UriRef(IS_MANAGED_BY_CUSTOM))) log
-                        .warn("Ontology {} is still managed by custom space {}. "
-                              + "Removal from core space might alter axiom interpretation within the scope.");
-            }
-
-            if (collector instanceof CustomOntologySpace) {
-                if (property.equals(new UriRef(IS_MANAGED_BY_CORE))) log
-                        .warn("Ontology {} is still managed by core space {}. "
-                              + "Removal from the custom space will most likely have no effect on the scope.");
-                if (property.equals(new UriRef(IS_MANAGED_BY_CUSTOM))) badState = false;
-            }
-        }
-
-        if (badState) throw new InvalidMetaGraphStateException(
-                "No relationship found for ontology-collector pair {" + u + " , " + c + "}");
-
+    private void updateSessionRegistration(Session session) {
+        final TripleCollection meta = store.getTriples(new UriRef(metaGraphId));
+        final UriRef sesur = getIRIforSession(session);
+        // If this method was called after a session rebuild, the following will have little to no effect.
         synchronized (meta) {
-            if (collector instanceof CoreOntologySpace) {
-                meta.remove(new TripleImpl(c, new UriRef(MANAGES_IN_CORE), u));
-                meta.remove(new TripleImpl(u, new UriRef(IS_MANAGED_BY_CORE), c));
-            } else if (collector instanceof CustomOntologySpace) {
-                meta.remove(new TripleImpl(c, new UriRef(MANAGES_IN_CUSTOM), u));
-                meta.remove(new TripleImpl(u, new UriRef(IS_MANAGED_BY_CUSTOM), c));
+            // The only essential triple to add is typing
+            meta.add(new TripleImpl(sesur, RDF.type, SESSION));
+        }
+        log.debug("Ontology collector information triples added for session \"{}\".", sesur);
+    }
+
+    private void updateSessionUnregistration(Session session) {
+        long before = System.currentTimeMillis();
+        boolean removable = false, conflict = false;
+        final TripleCollection meta = store.getTriples(new UriRef(metaGraphId));
+        final UriRef sessionur = getIRIforSession(session);
+        Set<Triple> removeUs = new HashSet<Triple>();
+        for (Iterator<Triple> it = meta.filter(sessionur, null, null); it.hasNext();) {
+            Triple t = it.next();
+            if (RDF.type.equals(t.getPredicate())) {
+                if (SESSION.equals(t.getObject())) removable = true;
+                else conflict = true;
             }
+            removeUs.add(t);
+        }
+        if (!removable) {
+            log.error("Cannot write session deregistration to persistence:");
+            log.error("-- resource {}", sessionur);
+            log.error("-- is not typed as a {} in the meta-graph.", SESSION);
+        } else if (conflict) {
+            log.error("Conflict upon session deregistration:");
+            log.error("-- resource {}", sessionur);
+            log.error("-- has incompatible types in the meta-graph.");
+        } else {
+            log.debug("Removing all triples for session \"{}\".", session.getID());
+            Iterator<Triple> it;
+            for (it = meta.filter(null, null, sessionur); it.hasNext();)
+                removeUs.add(it.next());
+            for (it = meta.filter(sessionur, null, null); it.hasNext();)
+                removeUs.add(it.next());
+            meta.removeAll(removeUs);
+            log.debug("Done; removed {} triples in {} ms.", removeUs.size(), System.currentTimeMillis()
+                                                                             - before);
         }
     }
 

@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
+import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.ImportManagementPolicy;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -74,11 +75,34 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
+    public String getKey(OWLOntologyID ontologyId) {
+        return ontologyId.getDefaultDocumentIRI().toString();
+    }
+
+    @Override
     public Set<String> getKeys() {
         Set<String> result = new HashSet<String>();
         for (OWLOntology o : store.getOntologies())
             result.add(OWLUtils.guessOntologyIdentifier(o).toString());
         return result;
+    }
+
+    @Override
+    public <O extends TripleCollection> O getMetaGraph(Class<O> returnType) {
+        throw new UnsupportedOperationException(
+                "The OWL API implementation does not use a graph for storing correspondencies");
+    }
+
+    @Override
+    public OntologyNetworkConfiguration getOntologyNetworkConfiguration() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Set<String> getOntologyVersionKeys(IRI ontologyIRI) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
@@ -129,6 +153,11 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
+    public boolean hasOntology(IRI ontologyIri) {
+        return hasOntology(new OWLOntologyID(ontologyIri));
+    }
+
+    @Override
     public boolean hasOntology(OWLOntologyID id) {
         return store.contains(id);
     }
@@ -175,31 +204,9 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
-    public boolean hasOntology(IRI ontologyIri) {
-        return hasOntology(new OWLOntologyID(ontologyIri));
-    }
-
-    @Override
-    public <O extends TripleCollection> O getMetaGraph(Class<O> returnType) {
-        throw new UnsupportedOperationException(
-                "The OWL API implementation does not use a graph for storing correspondencies");
-    }
-
-    @Override
-    public String getKey(OWLOntologyID ontologyId) {
-        return ontologyId.getDefaultDocumentIRI().toString();
-    }
-
-    @Override
-    public Set<String> getOntologyVersionKeys(IRI ontologyIRI) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public void setLocatorMapping(IRI locator, String key) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

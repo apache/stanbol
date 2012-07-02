@@ -41,6 +41,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
  */
 public interface OntologyScope extends NamedResource, Lockable, OntologyCollectorListenable, OWLExportable {
 
+    static final String shortName = "scope";
+    
     /**
      * Returns the core ontology space for this ontology scope. The core space should never be null for any
      * scope.

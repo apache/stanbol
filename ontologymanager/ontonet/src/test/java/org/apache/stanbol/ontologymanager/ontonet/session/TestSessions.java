@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 package org.apache.stanbol.ontologymanager.ontonet.session;
-import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
+
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.ontologyProvider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -27,7 +28,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -72,8 +72,9 @@ public class TestSessions {
     public static void setup() {
         Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
         // An ONManagerImpl with no store and default settings
-        ONManager onm = new ONManagerImpl(ontologyProvider, new OfflineConfigurationImpl(onmconf), spaceFactory, onmconf);
-        sesmgr = new SessionManagerImpl(null, onmconf);
+        ONManager onm = new ONManagerImpl(ontologyProvider, new OfflineConfigurationImpl(onmconf),
+                spaceFactory, onmconf);
+        sesmgr = new SessionManagerImpl(ontologyProvider, onmconf);
         scopeFactory = onm;
         spaceFactory = onm.getOntologySpaceFactory();
         scopeRegistry = onm;
@@ -108,7 +109,7 @@ public class TestSessions {
         }
         Session ses = sesmgr.createSession();
         String sesid = ses.getID();
-        // FIXME replace with proper tests
+        // TODO replace with proper tests
         // assertFalse(scope1.getSessionSpaces().isEmpty());
         // assertNotNull(scope1.getSessionSpace(sesid));
         // assertFalse(scope3.getSessionSpaces().isEmpty());

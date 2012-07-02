@@ -23,15 +23,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcProvider;
-import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -45,10 +39,11 @@ import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary;
+import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
@@ -311,7 +306,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
             // Create and populate the scopes from the config ontology.
             bootstrapOntologyNetwork(oConf);
 
-        } else {
+        } else { // No ontology supplied. Access the local graph
             rebuildScopes();
         }
 
@@ -424,6 +419,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
     public OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?,?>... coreSources) throws DuplicateIDException {
         if (this.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
                 "Scope registry already contains ontology scope with ID " + scopeID);
+        // Scope constructor also creates core and custom spaces
         OntologyScope scope = new OntologyScopeImpl(scopeID, IRI.create(getOntologyNetworkNamespace()
                                                                         + scopeRegistryId + "/"),
                 getOntologySpaceFactory(), coreSources);
@@ -436,18 +432,6 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
             this.registerScope(scope);
         }
         return scope;
-    }
-
-    @Override
-    public synchronized void registerScope(OntologyScope scope) {
-        if (scope == null) throw new IllegalArgumentException("scope cannot be null.");
-        String id = scope.getID();
-        if (this.containsScope(id)) {
-            if (scope != getScope(id)) {
-                log.warn("Overriding different scope with same ID {}", id);
-                super.registerScope(scope);
-            } else log.warn("Ignoring unnecessary call to already registered scope {}", id);
-        } else super.registerScope(scope);
     }
 
     /**
@@ -545,6 +529,36 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         return offlineMode != null;
     }
 
+    private void rebuildScopes() {
+        OntologyNetworkConfiguration struct = ontologyProvider.getOntologyNetworkConfiguration();
+        for (String scopeId : struct.getScopeIDs()) {
+            Collection<String> coreOnts = struct.getCoreOntologyKeysForScope(scopeId);
+            OntologyInputSource<?,?>[] srcs = new OntologyInputSource<?,?>[coreOnts.size()];
+            int i = 0;
+            for (String coreOnt : coreOnts)
+                srcs[i++] = new GraphSource(coreOnt);
+            OntologyScope scope = new OntologyScopeImpl(scopeId, IRI.create(this
+                    .getOntologyNetworkNamespace()), this.getOntologySpaceFactory(), srcs);
+            OntologySpace custom = scope.getCustomSpace();
+            // Register even if some ontologies were to fail to be restored afterwards.
+            scopeMap.put(scopeId, scope);
+            for (String key : struct.getCustomOntologyKeysForScope(scopeId))
+                custom.addOntology(new GraphSource(key));
+        }
+    }
+
+    @Override
+    public synchronized void registerScope(OntologyScope scope) {
+        if (scope == null) throw new IllegalArgumentException("scope cannot be null.");
+        String id = scope.getID();
+        if (this.containsScope(id)) {
+            if (scope != getScope(id)) {
+                log.warn("Overriding different scope with same ID {}", id);
+                super.registerScope(scope);
+            } else log.warn("Ignoring unnecessary call to already registered scope {}", id);
+        } else super.registerScope(scope);
+    }
+
     @Override
     public void removeScopeEventListener(ScopeEventListener listener) {
         listeners.remove(listener);
@@ -561,30 +575,4 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         this.ontonetNS = namespace;
     }
 
-    private void rebuildScopes() {
-        TripleCollection meta = ontologyProvider.getMetaGraph(TripleCollection.class);
-        for (Iterator<Triple> it = meta.filter(null, RDF.type, new UriRef(Vocabulary.SCOPE)); it.hasNext();) {
-            NonLiteral sub = it.next().getSubject();
-            if (sub instanceof UriRef) {
-                String s = ((UriRef) sub).getUnicodeString(), prefix = getOntologyNetworkNamespace()
-                                                                       + scopeRegistryId + "/";
-                if (s.startsWith(prefix)) {
-                    String scopeId = s.substring(prefix.length());
-                    OntologyScope scope = new OntologyScopeImpl(scopeId, IRI.create(prefix),
-                            getOntologySpaceFactory());
-
-                    // retrieve the ontologies
-                    for (Iterator<Triple> it2 = meta.filter(sub, null, null); it2.hasNext();) {
-                        Triple t = it2.next();
-                        UriRef predicate = t.getPredicate();
-                        if (predicate.equals(new UriRef(Vocabulary.MANAGES_IN_CUSTOM))) {
-                            System.out.println(t.getObject());
-                        }
-                    }
-
-                    scopeMap.put(scopeId, scope);
-                }
-            }
-        }
-    }
 }

@@ -33,13 +33,19 @@ public class TimestampedSessionIDGenerator implements SessionIDGenerator {
 
     private IRI baseIRI;
 
+    public TimestampedSessionIDGenerator() {
+        this.baseIRI = null;
+    }
+
     public TimestampedSessionIDGenerator(IRI baseIRI) {
         this.baseIRI = baseIRI;
     }
 
     @Override
     public String createSessionID() {
-        return StringUtils.stripIRITerminator(baseIRI) + "/session/" + new Date().getTime();
+        String id = "";
+        if (baseIRI != null) id += StringUtils.stripIRITerminator(baseIRI) + "/session/";
+        return id + new Date().getTime();
     }
 
     @Override

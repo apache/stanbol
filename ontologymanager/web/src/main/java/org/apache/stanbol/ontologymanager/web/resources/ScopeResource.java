@@ -16,6 +16,11 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.OPTIONS;
+import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -224,6 +229,10 @@ public class ScopeResource extends BaseStanbolResource {
         return rb.build();
     }
 
+    public Set<Library> getLibraries() {
+        return regMgr.getLibraries();
+    }
+
     /*
      * Needed for freemarker
      */
@@ -231,14 +240,18 @@ public class ScopeResource extends BaseStanbolResource {
         return scope;
     }
 
-    public Set<Library> getLibraries() {
-        return regMgr.getLibraries();
-    }
-
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers);
+        enableCORS(servletContext, rb, headers, GET, POST, PUT, DELETE, OPTIONS);
+        return rb.build();
+    }
+
+    @OPTIONS
+    @Path("/{ontologyId:.+}")
+    public Response handleCorsPreflightOntology(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers, GET, DELETE, OPTIONS);
         return rb.build();
     }
 
@@ -686,7 +699,7 @@ public class ScopeResource extends BaseStanbolResource {
             throw new WebApplicationException(ex, INTERNAL_SERVER_ERROR);
         }
 
-        ResponseBuilder rb = Response.ok();
+        ResponseBuilder rb = Response.created(uriInfo.getAbsolutePath());
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
