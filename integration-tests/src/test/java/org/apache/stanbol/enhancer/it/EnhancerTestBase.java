@@ -41,7 +41,7 @@ public class EnhancerTestBase extends StanbolTestBase {
     boolean enginesReady;
     boolean timedOut;
 
-    protected final String endpoint;
+    protected String endpoint;
     /*  List of expected engines could be made configurable via system
      *  properties, but we don't expect it to change often. 
      */
