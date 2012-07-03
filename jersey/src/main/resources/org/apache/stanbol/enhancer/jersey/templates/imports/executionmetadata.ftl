@@ -42,8 +42,8 @@
          <span>
       </#if>
       <strong>${it.chainExecution.chainName}</strong> 
-      ${it.chainExecution.statusText} </span>
-      in <strong>${it.chainExecution.durationText}</strong>.
+      ${it.getExecutionStatusText(it.chainExecution)} </span>
+      in <strong>${it.getExecutionDurationText(it.chainExecution)}</strong>.
     </p>
     <div class="collapsable">
     <ul>
