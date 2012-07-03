@@ -46,7 +46,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -94,9 +93,9 @@ import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.execution.ChainExecution;
+import org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
-import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,7 +132,10 @@ public class ContentItemResource extends BaseStanbolResource {
     protected final Serializer serializer;
 
     protected String serializationFormat = SupportedFormat.RDF_XML;
-
+    /**
+     * Used to format dates on the UI
+     */
+    protected DateFormat format = new SimpleDateFormat("HH-mm-ss.SSS");
 
     /**
      * Map holding the extraction mapped by {@link Properties#DC_TYPE} and the
@@ -147,7 +149,7 @@ public class ContentItemResource extends BaseStanbolResource {
 
     private ChainExecution chainExecution;
 
-    private ArrayList<org.apache.stanbol.enhancer.jersey.resource.ContentItemResource.Execution> engineExecutions;
+    private ArrayList<org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution> engineExecutions;
 
     private EnhancementException enhancementException;
     
@@ -396,8 +398,51 @@ public class ContentItemResource extends BaseStanbolResource {
     public Collection<Execution> getEngineExecutions(){
         return engineExecutions;
     }
-    
-    
+    public String getExecutionOffsetText(Execution ex){
+        if(ex.getChain() == null || ex.getChain().getStarted() == null || ex.getStarted() == null){
+            return null;
+        } else {
+            return String.format("%6dms",ex.getStarted().getTime() - ex.getChain().getStarted().getTime());
+        }
+    }
+    public String getExecutionDurationText(Execution ex){
+        if(ex.getDuration() == null){
+            return "[duration not available]";
+        } else if(ex.getDuration() < 1025){
+            return ex.getDuration()+"ms";
+        } else {
+            return String.format("%.2fsec",(ex.getDuration().floatValue()/1000));
+        }
+    }
+    public String getExecutionStartTime(Execution ex){
+        if(ex.getStarted() != null){
+            return format.format(ex.getStarted());
+        } else {
+            return "unknown";
+        }
+    }
+    public String getExecutionCompletionTime(Execution ex){
+        if(ex.getCompleted() != null){
+            return format.format(ex.getCompleted());
+        } else {
+            return "unknown";
+        }
+    }    
+    public String getExecutionStatusText(Execution ex){
+        if(ExecutionMetadata.STATUS_COMPLETED.equals(ex.getStatus())){
+            return "completed";
+        } else if(ExecutionMetadata.STATUS_FAILED.equals(ex.getStatus())){
+            return "failed";
+        } else if(ExecutionMetadata.STATUS_IN_PROGRESS.equals(ex.getStatus())){
+            return "in-progress";
+        } else if(ExecutionMetadata.STATUS_SCHEDULED.equals(ex.getStatus())){
+            return "scheduled";
+        } else if(ExecutionMetadata.STATUS_SKIPPED.equals(ex.getStatus())){
+            return "skipped";
+        } else {
+            return "unknown";
+        }
+    }    
     public static class EntityExtractionSummary implements Comparable<EntityExtractionSummary> {
 
         protected final String name;
@@ -656,184 +701,6 @@ public class ContentItemResource extends BaseStanbolResource {
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
         addCORSOrigin(servletContext,rb, headers);
         return rb.build();
-    }
-    
-    public class ExecutionNode {
-        
-        private final NonLiteral node;
-        private final TripleCollection ep;
-        private final boolean optional;
-        private final String engineName;
-        
-        public ExecutionNode(TripleCollection executionPlan, NonLiteral node) {
-            this.node = node;
-            this.ep = executionPlan;
-            this.optional = ExecutionPlanHelper.isOptional(ep, node);
-            this.engineName = ExecutionPlanHelper.getEngine(ep, node);
-        }
-        
-        public boolean isOptional() {
-            return optional;
-        }
-        public String getEngineName() {
-            return engineName;
-        }
-        
-        @Override
-        public int hashCode() {
-            return node.hashCode();
-        }
-        @Override
-        public boolean equals(Object o) {
-            return o instanceof ExecutionNode && ((ExecutionNode)o).node.equals(node);
-        }
-    }
-    public class Execution implements Comparable<Execution>{
-        
-        protected DateFormat format = new SimpleDateFormat("HH-mm-ss.SSS");
-        protected final NonLiteral node;
-        private final ExecutionNode executionNode;
-        private final UriRef status;
-        protected final TripleCollection graph;
-        private final Date started;
-        private final Date completed;
-        private final Long duration;
-        private ChainExecution chain;
-        public Execution(ChainExecution parent, TripleCollection graph, NonLiteral node) {
-            this.chain = parent;
-            this.graph = graph;
-            this.node = node;
-            NonLiteral executionNode = ExecutionMetadataHelper.getExecutionNode(graph, node);
-            if(executionNode != null){
-                this.executionNode = new ExecutionNode(graph, executionNode);
-            } else {
-                this.executionNode = null;
-            }
-            this.status = getReference(graph, node, ExecutionMetadata.STATUS);
-            this.started = ExecutionMetadataHelper.getStarted(graph, node);
-            this.completed = ExecutionMetadataHelper.getCompleted(graph, node);
-            if(started != null && completed != null){
-                this.duration = completed.getTime() - started.getTime();
-            } else {
-                this.duration = null;
-            }
-        }
-
-        /**
-         * @return the executionNode
-         */
-        public ExecutionNode getExecutionNode() {
-            return executionNode;
-        }
-        public String getStatusText(){
-            if(ExecutionMetadata.STATUS_COMPLETED.equals(status)){
-                return "completed";
-            } else if(ExecutionMetadata.STATUS_FAILED.equals(status)){
-                return "failed";
-            } else if(ExecutionMetadata.STATUS_IN_PROGRESS.equals(status)){
-                return "in-progress";
-            } else if(ExecutionMetadata.STATUS_SCHEDULED.equals(status)){
-                return "scheduled";
-            } else if(ExecutionMetadata.STATUS_SKIPPED.equals(status)){
-                return "skipped";
-            } else {
-                return "unknown";
-            }
-        }
-        public Date getStart(){
-            return started;
-        }
-        public Date getCompleted(){
-            return completed;
-        }
-        public boolean isFailed(){
-            return ExecutionMetadata.STATUS_FAILED.equals(status);
-        }
-        public boolean isCompleted(){
-            return ExecutionMetadata.STATUS_COMPLETED.equals(status);
-        }
-        public String getOffsetText(){
-            if(chain == null || chain.getStart() == null || started == null){
-                return null;
-            } else {
-                return String.format("%6dms",started.getTime() - chain.getStart().getTime());
-            }
-        }
-        public String getDurationText(){
-            if(duration == null){
-                return "[duration not available]";
-            } else if(duration < 1025){
-                return duration+"ms";
-            } else {
-                return String.format("%.2fsec",(duration.floatValue()/1000));
-            }
-        }
-        public String getStartTime(){
-            if(started != null){
-                return format.format(started);
-            } else {
-                return "unknown";
-            }
-        }
-        public String getCompletionTime(){
-            if(completed != null){
-                return format.format(completed);
-            } else {
-                return "unknown";
-            }
-        }
-        @Override
-        public int hashCode() {
-            return node.hashCode();
-        }
-        @Override
-        public boolean equals(Object o) {
-            return o instanceof ExecutionNode && ((ExecutionNode)o).node.equals(node);
-        }
-        @Override
-        public int compareTo(Execution e2) {
-            if(started != null && e2.started != null){
-                int result = started.compareTo(e2.started);
-                if(result == 0){
-                    if(completed != null && e2.completed != null){
-                        result = started.compareTo(e2.completed);
-                        if(result == 0){
-                            return node.toString().compareTo(e2.toString());
-                        } else {
-                            return result;
-                        }
-                    } else if (completed == null && e2.completed == null){
-                        return node.toString().compareTo(e2.toString());
-                    } else {
-                        return completed == null ? -1 : 1;
-                    }
-                } else {
-                    return result;
-                }
-            } else if (started == null && e2.started == null){
-                return node.toString().compareTo(e2.toString());
-            } else {
-                return started == null ? -1 : 1;
-            }
-        }
-    }
-    public class ChainExecution extends Execution {
-        
-        private final String chainName;
-        
-        public ChainExecution(TripleCollection graph, NonLiteral node) {
-            super(null,graph,node);
-            NonLiteral ep = ExecutionMetadataHelper.getExecutionPlanNode(graph, node);
-            if(ep != null){
-                chainName = EnhancementEngineHelper.getString(graph, ep, ExecutionPlan.CHAIN);
-            } else {
-                chainName = null;
-            }
-        }
-        
-        public String getChainName(){
-            return chainName;
-        }
     }
     
 }

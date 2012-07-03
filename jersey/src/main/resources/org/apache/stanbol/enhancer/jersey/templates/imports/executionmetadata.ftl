@@ -48,7 +48,7 @@
     <div class="collapsable">
     <ul>
       <#list it.engineExecutions as node>
-        <li><#if node.offsetText??>${node.offsetText}<#else>${node.startTime}</#if>:
+        <li><#if node.offsetText??>${it.getExecutionOffsetText(node)}<#else>${it.getExecutionStartTime(node)}</#if>:
         <#if node.completed>
           <span style="color:#006600">
         <#elseif node.failed && node.executionNode.optional>
@@ -58,12 +58,12 @@
         <#else>
            <span>
         </#if>
-          <b>${node.statusText}</b></span> 
-          in ${node.durationText} :
+          <b>${it.getExecutionStatusText(node)}</b></span> 
+          in ${it.getExecutionDurationText(node)} :
           <b>${node.executionNode.engineName}</b>
           <small>(
           <#if node.executionNode.optional> optional <#else> required </#if>, 
-          start: ${node.startTime}, completion: ${node.completionTime})
+          start: ${it.getExecutionStartTime(node)}, completion: ${it.getExecutionCompletionTime(node)})
           </small>
           </span>
           </li>
