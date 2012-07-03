@@ -66,7 +66,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
@@ -75,14 +74,11 @@ import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.ontologies.RDF;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -127,8 +123,6 @@ public class ContentItemResource extends BaseStanbolResource {
 
     protected URI metadataHref;
 
-    protected final TcManager tcManager;
-
     protected final Serializer serializer;
 
     protected String serializationFormat = SupportedFormat.RDF_XML;
@@ -157,14 +151,12 @@ public class ContentItemResource extends BaseStanbolResource {
                                ContentItem ci,
                                UriInfo uriInfo,
                                String storePath,
-                               TcManager tcManager,
                                Serializer serializer,
                                ServletContext servletContext,
                                EnhancementException enhancementException) throws IOException {
         this.contentItem = ci;
         this.localId = localId;
         this.uriInfo = uriInfo;
-        this.tcManager = tcManager;
         this.serializer = serializer;
         this.servletContext = servletContext;
         this.enhancementException = enhancementException;
