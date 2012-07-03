@@ -347,6 +347,12 @@ public class EntityhubRootResource extends BaseStanbolResource {
                     it.remove(); //not the Entity nor the metadata of the parsed ID
                 }
             }
+            if(parsed.isEmpty()){
+                return Response.status(Status.BAD_REQUEST)
+                .entity(String.format("Parsed RDF data do not contain any "
+                    + "Information about the parsed id '%s'",id))
+                    .header(HttpHeaders.ACCEPT, accepted).build();
+            }
         }
         //First check if all parsed Representation can be created/updated
         if(!(create && update)){ //if both create and update are enabled skip this
