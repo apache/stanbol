@@ -42,6 +42,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -99,7 +100,8 @@ public final class EnhancerRootResource extends AbstractEnhancerUiResource {
     @Path("/sparql")
     @Consumes(APPLICATION_FORM_URLENCODED)
     @Produces({TEXT_HTML + ";qs=2", "application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
-    public Object sparql(@QueryParam(value = "query") String sparqlQuery) throws ParseException {
+    public Object sparql(@QueryParam(value = "query") String sparqlQuery,
+                         @Context HttpHeaders headers) throws ParseException {
         if (sparqlQuery == null) {
             return Response.ok(new Viewable("sparql", this), TEXT_HTML).build();
         }
@@ -108,16 +110,25 @@ public final class EnhancerRootResource extends AbstractEnhancerUiResource {
         if (query instanceof DescribeQuery || query instanceof ConstructQuery) {
             mediaType = "application/rdf+xml";
         }
-        Object result = tcManager.executeSparqlQuery(query, getEnhancerConfigGraph());
-        return Response.ok(result, mediaType).build();
+        ResponseBuilder responseBuilder;
+        if(queryEngine != null){
+            Object result = queryEngine.execute(null, getEnhancerConfigGraph(), query);
+            responseBuilder = Response.ok(result, mediaType);
+        } else {
+            responseBuilder = Response.status(Status.SERVICE_UNAVAILABLE)
+                    .entity("No SPRAQL query engine available");
+        }
+        addCORSOrigin(servletContext, responseBuilder, headers);
+        return responseBuilder.build();
     }
 
     @POST
     @Path("/sparql")
     @Consumes(APPLICATION_FORM_URLENCODED)
     @Produces({"application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
-    public Object postSparql(@FormParam("query") String sparqlQuery) throws ParseException {
-        return sparql(sparqlQuery);
+    public Object postSparql(@FormParam("query") String sparqlQuery,
+                             @Context HttpHeaders headers) throws ParseException {
+        return sparql(sparqlQuery, headers);
     }
 
 }

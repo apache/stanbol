@@ -29,7 +29,9 @@ import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHe
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.createExecutionPlan;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.writeExecutionNode;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata.CHAIN_EXECUTION;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -18,11 +18,9 @@ package org.apache.stanbol.enhancer.jersey.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -42,13 +40,12 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
@@ -70,7 +67,10 @@ import com.sun.jersey.api.view.Viewable;
 public abstract class AbstractEnhancerUiResource extends AbstractEnhancerResource {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    protected final TcManager tcManager;
+    /**
+     * Optional dependency - might be <code>null</code>
+     */
+    protected QueryEngine queryEngine;
     protected final Serializer serializer;
     private LinkedHashSet<ExecutionNode> _executionNodes;
     private LinkedHashSet<ExecutionNode> _activeNodes;
@@ -79,7 +79,7 @@ public abstract class AbstractEnhancerUiResource extends AbstractEnhancerResourc
     public AbstractEnhancerUiResource(String chainName,ServletContext context) {
         super(context);
         serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
-        tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
+        queryEngine = ContextHelper.getServiceFromContext(QueryEngine.class, context);
         if(chainName == null){
             chain = chainManager.getDefault();
         } else {
@@ -129,7 +129,7 @@ public abstract class AbstractEnhancerUiResource extends AbstractEnhancerResourc
                 enhancementException = e;
             }
             ContentItemResource contentItemResource = new ContentItemResource(null, ci, uriInfo, "",
-                    tcManager, serializer, servletContext, enhancementException);
+                    serializer, servletContext, enhancementException);
             contentItemResource.setRdfSerializationFormat(format);
             Viewable ajaxView = new Viewable("/ajax/contentitem", contentItemResource);
             ResponseBuilder rb = Response.ok(ajaxView);

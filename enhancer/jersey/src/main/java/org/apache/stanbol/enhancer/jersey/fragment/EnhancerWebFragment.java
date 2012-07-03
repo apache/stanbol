@@ -22,11 +22,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
@@ -35,10 +36,10 @@ import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.enhancer.jersey.reader.ContentItemReader;
 import org.apache.stanbol.enhancer.jersey.resource.ChainsRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnginesRootResource;
+import org.apache.stanbol.enhancer.jersey.resource.EnhancementChainResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnhancementEngineResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnhancementEnginesRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnhancerRootResource;
-import org.apache.stanbol.enhancer.jersey.resource.EnhancementChainResource;
 import org.apache.stanbol.enhancer.jersey.writers.ContentItemWriter;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.osgi.framework.BundleContext;
@@ -65,9 +66,11 @@ public class EnhancerWebFragment implements WebFragment {
 
     @Reference
     EnhancementJobManager jobManager;
-
-    @Reference
-    TcManager tcManager;
+    /**
+     * Optional to have SPARQL support for the Stanbol Enhancer Config
+     */
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+    QueryEngine queryEngine;
 
     @Reference
     Serializer serializer;
