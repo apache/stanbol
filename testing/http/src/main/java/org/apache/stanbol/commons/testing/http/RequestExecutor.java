@@ -21,13 +21,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -46,11 +51,14 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.ExecutionContext;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.junit.Assert;
 
 /**
  * Executes a Request and provides convenience methods
@@ -62,7 +70,10 @@ public class RequestExecutor {
     private HttpUriRequest request;
     private HttpResponse response;
     private HttpEntity entity;
-    private String content;
+    private String contentString;
+    private byte[] content;
+    private ContentType contentType;
+    private Charset charset;
 
     /**
      * HttpRequestInterceptor for preemptive authentication, based on httpclient
@@ -85,8 +96,7 @@ public class RequestExecutor {
 
                 // If found, generate BasicScheme preemptively
                 if (creds != null) {
-                    authState.setAuthScheme(new BasicScheme());
-                    authState.setCredentials(creds);
+                    authState.update(new BasicScheme(), creds);
                 }
             }
         }
@@ -102,7 +112,14 @@ public class RequestExecutor {
         }
         return request.getMethod() + " request to " + request.getURI();
     }
-
+    /**
+     * Executes a {@link Request} using this executor. <p>
+     * Note that this cleans up all data of the previous executed request.
+     * @param r the request to execute
+     * @return this
+     * @throws ClientProtocolException
+     * @throws IOException
+     */
     public RequestExecutor execute(Request r) throws ClientProtocolException, IOException {
         clear();
         request = r.getRequest();
@@ -129,8 +146,12 @@ public class RequestExecutor {
             // We fully read the content every time, not super efficient but
             // how can we read it on demand while avoiding a (boring) cleanup() 
             // method on this class?
-            content = EntityUtils.toString(entity);
-            entity.consumeContent();
+            content = EntityUtils.toByteArray(entity);
+            contentType = ContentType.getOrDefault(entity);
+            charset = contentType.getCharset();
+            contentString = new String(content, charset != null ? charset : HTTP.DEF_CONTENT_CHARSET);
+            //and close the stream
+            entity.getContent().close();
         }
         return this;
     }
@@ -138,8 +159,11 @@ public class RequestExecutor {
     protected void clear() {
         request = null;
         entity = null;
-        response = null;
+        contentType = null;
+        charset = null;
         content = null;
+        contentString = null;
+        response = null;
     }
 
     /**
@@ -149,7 +173,7 @@ public class RequestExecutor {
         assertNotNull(this.toString(), response);
         int status = response.getStatusLine().getStatusCode();
         assertEquals(this + ": expecting status " + expected 
-            + " (content: "+content+")", expected, status);
+            + " (content: "+contentString+")", expected, status);
         return this;
     }
 
@@ -162,14 +186,20 @@ public class RequestExecutor {
             fail(this + ": no entity in response, cannot check content type");
         }
 
-        // Remove whatever follows semicolon in content-type
-        String contentType = entity.getContentType().getValue();
-        if (contentType != null) {
-            contentType = contentType.split(";")[0].trim();
-        }
-
         // And check for match
-        assertEquals(this + ": expecting content type " + expected, expected, contentType);
+        assertEquals(this + ": expecting content type " + expected, expected, contentType.getMimeType());
+        return this;
+    }
+    /**
+     * Verify that response matches supplied charset
+     */
+    public RequestExecutor assertCharset(String expected) {
+        assertNotNull(this.toString(), response);
+        if (entity == null) {
+            fail(this + ": no entity in response, cannot check content type");
+        }
+        assertEquals(this + ": expecting charset " + expected, 
+            expected, charset == null ? null : charset.name());
         return this;
     }
     
@@ -222,18 +252,18 @@ public class RequestExecutor {
         nextPattern:
         for (String expr : regexp) {
             final Pattern p = Pattern.compile(".*" + expr + ".*");
-            final LineIterator it = new LineIterator(new StringReader(content));
+            final LineIterator it = new LineIterator(new StringReader(contentString));
             while (it.hasNext()) {
                 final String line = it.nextLine();
                 if (expected & p.matcher(line).matches()) {
                     continue nextPattern;
                 }
                 if(!expected & p.matcher(line).matches()) {
-                    fail(this + ": match found for regexp '" + expr + "', content=\n" + content);
+                    fail(this + ": match found for regexp '" + expr + "', content=\n" + contentString);
                 }
             }
             if(expected){
-                fail(this + ": no match for regexp '" + expr + "', content=\n" + content);
+                fail(this + ": no match for regexp '" + expr + "', content=\n" + contentString);
             }
         }
         return this;
@@ -245,8 +275,8 @@ public class RequestExecutor {
     public RequestExecutor assertContentContains(String... expected) throws ParseException {
         assertNotNull(this.toString(), response);
         for (String exp : expected) {
-            if (!content.contains(exp)) {
-                fail(this + ": content does not contain '" + exp + "', content=\n" + content);
+            if (!contentString.contains(exp)) {
+                fail(this + ": content does not contain '" + exp + "', content=\n" + contentString);
             }
         }
         return this;
@@ -256,19 +286,50 @@ public class RequestExecutor {
         documentor.generateDocumentation(this, metadata);
     }
 
-    HttpUriRequest getRequest() {
+    public HttpUriRequest getRequest() {
         return request;
     }
 
-    HttpResponse getResponse() {
+    public HttpResponse getResponse() {
         return response;
     }
 
-    HttpEntity getEntity() {
+    public HttpEntity getEntity() {
         return entity;
     }
-
+    /**
+     * Getter for an {@link InputStream} over the byte array containing the
+     * data of the {@link HttpEntity}. This means that this method can be
+     * called multiple times and the streams need not to be closed as
+     * {@link ByteArrayInputStream} does not consume any System resources.
+     * @return
+     */
+    public InputStream getStream() {
+        return new ByteArrayInputStream(content);
+    }
+    
+    /**
+     * Getter for the String content of the HttpEntity.
+     * @return
+     */
     public String getContent() {
-        return content;
+        if(contentString == null){
+            contentString = new String(content, charset);
+        }
+        return contentString;
+    }
+
+    /**
+     * @return the contentType
+     */
+    public final ContentType getContentType() {
+        return contentType;
+    }
+
+    /**
+     * @return the charset
+     */
+    public final Charset getCharset() {
+        return charset;
     }
 }
