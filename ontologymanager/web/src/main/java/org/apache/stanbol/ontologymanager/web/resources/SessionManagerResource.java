@@ -18,6 +18,7 @@ package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
@@ -30,6 +31,7 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +39,7 @@ import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
@@ -51,6 +54,7 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
@@ -77,6 +81,23 @@ public class SessionManagerResource extends BaseStanbolResource {
         this.servletContext = servletContext;
         this.sessionManager = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
             servletContext);
+    }
+
+    @POST
+    public Response createSessionWithAutomaticId(@Context UriInfo uriInfo, @Context HttpHeaders headers) {
+        Session s;
+        try {
+            s = sessionManager.createSession();
+        } catch (SessionLimitException e) {
+            throw new WebApplicationException(e, FORBIDDEN);
+        }
+        String uri = uriInfo.getRequestUri().toString();
+        while (uri.endsWith("/"))
+            uri = uri.substring(0, uri.length() - 1);
+        uri += "/" + s.getID();
+        ResponseBuilder rb = Response.created(URI.create(uri));
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     @GET

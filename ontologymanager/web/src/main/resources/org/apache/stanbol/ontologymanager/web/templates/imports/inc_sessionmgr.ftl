@@ -17,12 +17,52 @@
 <h4>Subresource ontonet/session</h4>
 <p>Service to manage the set of active OntoNet sessions.
 
+<h4> GET ontonet/session</h4>
+<table>
+  <tbody>
+    <tr>
+      <th>Description</th>
+      <td>Gets an RDF graph that describes the registered sessions.</td>
+    </tr>
+    <tr>
+      <th>Request</th>
+      <td>GET <code>/ontonet/session</code></td>
+    </tr>
+    <tr>
+      <th>Parameters</th>
+      <td><i>none</i></td>
+    </tr>
+    <tr>
+      <th>Produces</th>
+      <td>
+        <tt>application/owl+xml</tt>,
+        <tt>application/rdf+json</tt>,
+        <tt>application/rdf+xml</tt>,
+        <tt>application/x-turtle</tt>,
+        <tt>text/owl+functional</tt>,
+        <tt>text/owl+manchester</tt>,
+        <tt>text/plain</tt>,
+        <tt>text/rdf+n3</tt>, 
+        <tt>text/rdf+n3</tt>,
+        <tt>text/turtle</tt>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h5>Example</h5>
+
+<pre>curl -X GET -H "Accept: text/turtle" ${it.publicBaseUri}ontonet/session</pre>
+
+<h4> PUT ontonet/session/[id]</h4>
+Creates a session with the specified ID, if not used already.
+
 <h4> POST ontonet/session</h4>
 <table>
   <tbody>
     <tr>
       <th>Description</th>
-      <td>Service to add an ontology to a session space, creating the session if it does not exist.</td>
+      <td>Creates a session and lets Stanbol choose its identifier.</td>
     </tr>
     <tr>
       <th>Request</th>
@@ -30,32 +70,27 @@
     </tr>
     <tr>
       <th>Parameters</th>
-      <td><code>input</code>: the OWL file to be loaded. This parameter is mutually exclusive with <code>location</code>.</td>
-    </tr>
-    <tr>
-      <th></th>
-      <td><code>location</code>: the physical URL of the OWL file to be loaded. This parameter is mutually exclusive with <code>input</code>.</td>
-    </tr>
-    <tr>
-      <th></th>
-      <td><code>scope</code>: the ID of the scope whose session space will contain the ontology.</td>
-    </tr>
-    <tr>
-      <th></th>
-      <td><code>session</code>: the ID of the session to add the ontology. If it does not exist it will be created, along with corresponding session spaces for all active scopes.</td>
+      <td><i>none</i></td>
     </tr>
     <tr>
       <th>Produces</th>
-      <td>Nothing. Returns Status 200 if successful, 500 otherwise.</td>
+      <td><ul>
+      <li>201 CREATED, with the session URI in the Location response header.
+      <li>503 FORBIDDEN if the session could not be created due to session quota exceeded.
+      </ul></td>
     </tr>
   </tbody>
 </table>
 
 <h5>Example</h5>
 
-<pre>curl -X POST "${it.publicBaseUri}ontonet/session?scope=[scope_id]&session=[session_id]&location=[location]"</pre>
+<pre>curl -X POST ${it.publicBaseUri}ontonet/session
 
+HTTP/1.1 201 Created
+Location: ${it.publicBaseUri}ontonet/session/1341413780858
+</pre>
 
+<!--
 <h4> DELETE ontonet/session</h4>
 <table>
   <tbody>
@@ -89,3 +124,4 @@
 <h5>Example</h5>
 
 <pre>curl -X DELETE "${it.publicBaseUri}ontonet/session?scope=[scope_id]&session=[session_id]&delete=[ontology_id]"</pre>
+-->
