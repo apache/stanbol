@@ -27,7 +27,7 @@
 <li> service.id : ${it.id}
 <li> service.ranking: ${it.ranking}
 </ul>
-<p class="note"> You can <a href="/system/console/configMgr/${it.pid}">
+<p class="note"> You can <a href=${it.consoleBaseUri}/configMgr/${it.pid}">
 configure this engine</a> by using the the Configuration Tab of the OSGi console.</p>
 
 <#--

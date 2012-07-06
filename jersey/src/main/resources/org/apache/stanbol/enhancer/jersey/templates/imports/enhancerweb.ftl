@@ -18,11 +18,11 @@
 <#if !it.executionNodes??>
   <p><em>There seams to be a problem with the Enhancement Chain <b>${it.chain.name}</b>. 
    To fix this an Administrator needs to install, configure and enable enhancement 
-   chains and -engines by using the <a href="/system/console">OSGi console</a>.</em></p>
+   chains and -engines by using the <a href="${it.consoleBaseUri}">OSGi console</a>.</em></p>
 <#elseif it.executionNodes?size == 0>
   <p><em>There is no active engines for Enhancement Chain <b>${it.chain.name}</b>. 
    Administrators can install, configure and enable enhancement chains and 
-   -engines by using the <a href="/system/console">OSGi console</a>.</em></p>
+   -engines by using the <a href="${it.consoleBaseUri}">OSGi console</a>.</em></p>
 <#else>
   <#assign executionNodes = it.executionNodes>
   <div class="enginelisting">

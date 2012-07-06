@@ -29,7 +29,7 @@
     (id: ${it.getServiceId(name)}, ranking: ${it.getServiceRanking(name)}, 
     impl: ${engine.class.simpleName}
     )<#if it.getServicePid(name)??>: 
-    <a href="/system/console/configMgr/${it.getServicePid(name)}">configure</a></#if>
+    <a href="${it.consoleBaseUri}/configMgr/${it.getServicePid(name)}">configure</a></#if>
   </#list>
 </ul>
 <p>
@@ -37,7 +37,7 @@ EnhancementEngines are used to define <a href="${it.publicBaseUri}enhancer/chain
 Enhancement Chains</a> that can than be used to enhance content parsed to the
 Stanbol Enhancer.</p>
 <p class="note"> You can configure Chains by using the the
-<a href="/system/console/configMgr">Configuration Tab</a> of the OSGi console.</p>
+<a href="${it.consoleBaseUri}/configMgr">Configuration Tab</a> of the OSGi console.</p>
 </div>
 
 <div class="panel" id="restapi" style="display: none;">
