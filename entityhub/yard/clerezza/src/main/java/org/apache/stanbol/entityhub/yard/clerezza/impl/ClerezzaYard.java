@@ -224,13 +224,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      * @return the Representation
      */
     protected final Representation getRepresentation(UriRef uri, boolean check) {
-        final Lock readLock;
-        if(graph instanceof LockableMGraph){
-            readLock = ((LockableMGraph)graph).getLock().readLock();
-            readLock.lock();
-        } else {
-            readLock = null;
-        }
+        final Lock readLock = readLockGraph();
         try {
             if(!check || isRepresentation(uri)){
                 MGraph nodeGraph = createRepresentationGraph(uri, graph);
@@ -247,6 +241,19 @@ public class ClerezzaYard extends AbstractYard implements Yard {
                 readLock.unlock();
             }
         }
+    }
+    /**
+     * @return the readLock or <code>null</code>if no read lock is needed
+     */
+    private Lock readLockGraph() {
+        final Lock readLock;
+        if(graph instanceof LockableMGraph){
+            readLock = ((LockableMGraph)graph).getLock().readLock();
+            readLock.lock();
+        } else {
+            readLock = null;
+        }
+        return readLock;
     }
     /**
      * Extracts the triples that belong to the {@link Representation} with the
@@ -314,22 +321,35 @@ public class ClerezzaYard extends AbstractYard implements Yard {
             throw new IllegalArgumentException("The parsed Representation id MUST NOT be NULL!");
         }
         UriRef resource = new UriRef(id);
+        final Lock writeLock = writeLockGraph();
+        try {
+            Iterator<Triple> it = graph.filter(resource, null, null);
+            while(it.hasNext()){
+                it.next();
+                it.remove();
+            }
+//            if(isRepresentation(resource)){
+//                graph.removeAll(createRepresentationGraph(resource, graph));
+//            } //else not found  -> nothing to do
+        }finally {
+            writeLock.unlock();
+        }
+    }
+    /**
+     * @return
+     * @throws YardException
+     */
+    private Lock writeLockGraph() throws YardException {
         final Lock writeLock;
         if(graph instanceof LockableMGraph){
             writeLock = ((LockableMGraph)graph).getLock().writeLock();
             writeLock.lock();
         } else {
-            throw new YardException("Unable to remove Entity '"+id
+            throw new YardException("Unable modify data in ClerezzaYard '"+getId()
                 + "' because the backing RDF graph '"+yardGraphUri
                 + "' is read-only!");
         }
-        try {
-            if(isRepresentation(resource)){
-                graph.removeAll(createRepresentationGraph(resource, graph));
-            } //else not found  -> nothing to do
-        }finally {
-            writeLock.unlock();
-        }
+        return writeLock;
     }
     @Override
     public final void remove(Iterable<String> ids) throws IllegalArgumentException, YardException {
@@ -344,15 +364,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     }
     @Override
     public final void removeAll() throws YardException {
-        final Lock writeLock;
-        if(graph instanceof LockableMGraph){
-            writeLock = ((LockableMGraph)graph).getLock().writeLock();
-            writeLock.lock();
-        } else {
-            throw new YardException("Unable to remove all Entities"
-                + "because the backing RDF graph '"+yardGraphUri
-                + "' is read-only!");
-        }
+        final Lock writeLock = writeLockGraph();
         try {
             graph.clear();
         } finally {
@@ -407,42 +419,40 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         if(representation == null) {
             return null;
         }
-        log.info("store Representation " + representation.getId());
-        if(isRepresentation(representation.getId())){
-            remove(representation.getId());
-        } else if(!allowCreate){
-            if(canNotCreateIsError) {
-                throw new IllegalArgumentException("Parsed Representation "+representation.getId()+" in not managed by this Yard "+getName()+"(id="+getId()+")");
-            } else {
-                return null;
-            }
-        }
-        //get the graph for the Representation and add it to the store
-        RdfRepresentation toAdd = ((RdfValueFactory)getValueFactory()).toRdfRepresentation(representation);
-//        log.info("  > add "+toAdd.size()+" triples to Yard "+getId());
-        final Lock writeLock;
-        if(graph instanceof LockableMGraph){
-            writeLock = ((LockableMGraph)graph).getLock().writeLock();
-            writeLock.lock();
-        } else {
-            throw new YardException("Unable to store Entity '"+representation.getId()
-                + "' because the backing RDF graph '"+yardGraphUri
-                + "' is read-only!");
-        }
-        writeLock.lock();
+        log.debug("store Representation " + representation.getId());
+        UriRef id = new UriRef(representation.getId());
+        final Lock writeLock = writeLockGraph();
         try {
-            graph.addAll(toAdd.getRdfGraph());
-            //also add the representation type within the Representation
-            //TODO: Note somewhere that this Triple is reserved and MUST NOT
-            //      be used by externally.
-            if(!toAdd.getRdfGraph().filter(toAdd.getNode(), null, null).hasNext()){
-                graph.add(new TripleImpl(toAdd.getNode(), MANAGED_REPRESENTATION, TRUE_LITERAL));
+            Iterator<Triple> current = graph.filter(id, null, null);
+            boolean contains = current.hasNext();
+            while(current.hasNext()){ //delete current
+                current.next();
+                current.remove();
             }
+            if(!contains && !allowCreate){
+                if(canNotCreateIsError) {
+                    throw new IllegalArgumentException("Parsed Representation "+representation.getId()+" in not managed by this Yard "+getName()+"(id="+getId()+")");
+                } else {
+                    return null;
+                }
+            }
+            //get the graph for the Representation and add it to the store
+            RdfRepresentation toAdd = ((RdfValueFactory)getValueFactory()).toRdfRepresentation(representation);
+            //log.info("  > add "+toAdd.size()+" triples to Yard "+getId());
+            Iterator<Triple> it = toAdd.getRdfGraph().filter(toAdd.getNode(), null, null);
+            if(!it.hasNext()){
+                //TODO: Note somewhere that this Triple is reserved and MUST NOT
+                //      be used by externally.
+                graph.add(new TripleImpl(toAdd.getNode(), MANAGED_REPRESENTATION, TRUE_LITERAL));
+            } else {
+                while(it.hasNext()){
+                    graph.add(it.next());
+                }
+            }
+            return toAdd;
         } finally {
             writeLock.unlock();
         }
-//        log.info("  > currently "+graph.size()+" triples in Yard "+getId());
-        return toAdd;
     }
 
     @Override
