@@ -23,8 +23,10 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
@@ -45,6 +47,8 @@ public class BaseStanbolResource {
     public static final String NAVIGATION_LINKS = "org.apache.stanbol.commons.web.base.navigation.link";
 
     public static final String ROOT_URL = "org.apache.stanbol.commons.web.base.root";
+    
+    public static final String SYSTEM_CONSOLE = "system/console";
 
     @Context
     protected UriInfo uriInfo;
@@ -58,6 +62,31 @@ public class BaseStanbolResource {
     
     public URI getPublicBaseUri() {
         return uriInfo.getBaseUri();
+    }
+    /**
+     * The Apache Felix Webconsole base URL does not depend on alias configured
+     * for the Stanbol JerseyEndpoint. However they is affected by the base
+     * path of the Servlet when Stanbol is running as WAR within a web container.<p>
+     * <i>LIMITATION</i> this does not take into account the path configured
+     * for the Apache Felix Webconsole (property: <code>manager.root</code> 
+     * class: <code>org.apache.felix.webconsole.internal.servlet.OsgiManager</code>)
+     * Because of this it will only work with the default {@link #SYSTEM_CONSOLE}.
+     * @return The URI for the Apache Felix Webconsole
+     */
+    public URI getConsoleBaseUri() {
+        String root = getRootUrl();
+        UriBuilder consolePathBuilder;
+        if(root != null && !root.isEmpty() && !"/".equals(root)){
+            String request = uriInfo.getRequestUri().toString();
+            int alaiasIndex = request.lastIndexOf(root);
+            if(alaiasIndex > 0){
+                request = request.substring(0,request.lastIndexOf(root));
+            }
+            consolePathBuilder = UriBuilder.fromUri(request);
+        } else {
+            consolePathBuilder = uriInfo.getRequestUriBuilder();
+        }
+    	return consolePathBuilder.path(SYSTEM_CONSOLE).build();
     }
 
     /**
