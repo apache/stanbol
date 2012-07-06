@@ -31,7 +31,7 @@ Currently the following Chains are available:
     id: ${it.getServiceId(name)}, ranking: ${it.getServiceRanking(name)},
     impl: ${chain.class.simpleName}
     )<#if it.getServicePid(name)??>: 
-    <a href="/system/console/configMgr/${it.getServicePid(name)}">configure</a></#if>
+    <a href="${it.consoleBaseUri}/configMgr/${it.getServicePid(name)}">configure</a></#if>
   </#list>
 </ul>
 <p>Enhancement Request for the <a href="${it.publicBaseUri}enhancer">
@@ -44,7 +44,7 @@ and the highest <code>service.ranking</code> or (2) if no Chain has the name
 (regardless of the name).<p>
 
 <p class="note">
-You can configure Chains by using the the <a href="/system/console/configMgr">
+You can configure Chains by using the the <a href="${it.consoleBaseUri}/configMgr">
 Configuration Tab</a> of the OSGi console.</p>
 
 </div>

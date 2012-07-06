@@ -38,7 +38,7 @@ view that documents the matching RESTful API for applications:</p>
   </#if>
   </#list>
 
-  <dt><a href="system/console">/system/console</a><dt>
+  <dt><a href="${it.consoleBaseUri}">/system/console</a><dt>
   <dd>
     <p>This is the OSGi administration console (for administrators and developers). The initial
        username / password is set to <em>admin / admin</em>.</p>
@@ -48,7 +48,7 @@ view that documents the matching RESTful API for applications:</p>
        source folder and run the following command:</p>
 <pre>
 mvn install -o -DskipTests -PinstallBundle \
-    -Dsling.url=${it.publicBaseUri}system/console
+    -Dsling.url=${it.consoleBaseUri}
 </pre>
   </dd>
 
