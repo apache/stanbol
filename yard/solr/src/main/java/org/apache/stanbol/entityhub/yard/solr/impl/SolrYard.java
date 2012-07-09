@@ -138,6 +138,7 @@ import org.xml.sax.SAXException;
          @Property(name = AbstractYard.MAX_QUERY_RESULT_NUMBER, intValue = -1),
          // BEGIN SolrYard specific Properties
          @Property(name = SolrYard.SOLR_SERVER_LOCATION),
+         @Property(name = SolrYard.SOLR_INDEX_DEFAULT_CONFIG,boolValue=SolrYard.DEFAULT_SOLR_INDEX_DEFAULT_CONFIG_STATE),
          @Property(name = SolrYard.MULTI_YARD_INDEX_LAYOUT,boolValue=false),
          @Property(name = SolrYard.MAX_BOOLEAN_CLAUSES, intValue = SolrYard.defaultMaxBooleanClauses)})
 public class SolrYard extends AbstractYard implements Yard {
