@@ -17,7 +17,9 @@
 package org.apache.stanbol.entityhub.yard.clerezza.impl;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -71,6 +73,8 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -129,6 +133,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      * The TRUE value used as object for the property {@link #MANAGED_REPRESENTATION}.
      */
     private static final Literal TRUE_LITERAL = LiteralFactory.getInstance().createTypedLiteral(Boolean.FALSE);
+    
     //public static final String YARD_URI_PREFIX = "urn:org.apache.stanbol:entityhub.yard:rdf.clerezza:";
 //    public static final UriRef REPRESENTATION = new UriRef(RdfResourceEnum.Representation.getUri());
 //    protected ComponentContext context;
@@ -136,7 +141,11 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     @Reference
     private TcManager tcManager;
     private UriRef yardGraphUri;
-    TripleCollection graph;
+    private TripleCollection graph;
+    
+    private ServiceRegistration graphRegistration;
+    private ComponentContext context;
+    
     //private LockableMGraph graph;
 
     public ClerezzaYard() {
@@ -153,6 +162,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         if(context == null || context.getProperties() == null){
             throw new IllegalStateException("No valid"+ComponentContext.class+" parsed in activate!");
         }
+        this.context = context;
         activate(new ClerezzaYardConfig(context.getProperties()));
     }
     /**
@@ -187,14 +197,30 @@ public class ClerezzaYard extends AbstractYard implements Yard {
             log.info("   ... create new Graph {} for Yard {}",yardGraphUri,config.getName());
             this.graph =  tcManager.createMGraph(yardGraphUri);
         }
-
+        if(context != null){ //within an OSGI environment
+            //Register the graph with the Stanbol SPARQL endpoint (STANBOL-677)
+            Dictionary<String,Object> graphRegProp = new Hashtable<String,Object>();
+            graphRegProp.put("graph.uri", yardGraphUri.getUnicodeString());
+            graphRegProp.put(Constants.SERVICE_RANKING, new Integer(-100));
+            graphRegProp.put("graph.name", getConfig().getName());
+            if(getConfig().getDescription() != null){
+                graphRegProp.put("graph.description", getConfig().getDescription());
+            }
+            graphRegistration = context.getBundleContext().registerService(
+                TripleCollection.class.getName(), graph, graphRegProp);
+        } //else do not register when running outside OSGI
     }
     @Deactivate
     protected final void deactivate(ComponentContext context) {
         log.info("in "+ClerezzaYard.class.getSimpleName()+" deactivate with context "+context);
+        if(graphRegistration != null){
+            graphRegistration.unregister();
+            graphRegistration = null;
+        }
         this.yardGraphUri = null;
         this.graph = null;
         super.deactivate();
+        this.context = null;
     }
     /**
      * Getter for the URI used for the named graph. The returned value is
