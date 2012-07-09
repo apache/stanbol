@@ -97,8 +97,8 @@ public final class QueryUtils {
         if (IndexDataTypeEnum.TXT.getIndexType().equals(indexValue.getType())) {
             if(escape) { 
                 //value does not contain '*' and '?' as they would be escaped.
-                queryConstraints = new String[] { value.indexOf(' ')>=0 ?
-                        '"'+value+'"' : value
+                queryConstraints = new String[] {
+                    new StringBuilder(value).insert(0, '"').append('"').toString()
                 };
             } else { //non escaped strings might contain wildcard chars '*', '?'
                 //those need to be treated specially (STANBOL-607)
