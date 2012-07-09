@@ -25,7 +25,7 @@ semantic content management.
 To build Stanbol you need a JDK 1.6 and Maven 2.2.1 installed. You probably
 need
 
-    $ export MAVEN_OPTS="-Xmx512M -XX:MaxPermSize=128M"
+    $ export MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256M
 
 If you want to skip the tests, add `-DskipTests` to the Maven command.
 
