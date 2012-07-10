@@ -18,7 +18,9 @@
 
 <#escape x as x?html>
   <@common.page title="${it.session.ID} : an Apache Stanbol OntoNet session" hasrestapi=false>
-		
+	
+	<a href="${it.publicBaseUri}ontonet/session">Session Manager</a> &gt; Session <tt>${it.session.ID}</tt>
+	
     <div class="panel" id="webview">
   
     <h3>Load an ontology</h3>

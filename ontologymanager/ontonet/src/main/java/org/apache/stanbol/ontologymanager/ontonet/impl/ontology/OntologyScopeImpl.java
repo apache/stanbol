@@ -297,12 +297,12 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     }
 
     @Override
-    public OntologySpace getCoreSpace() {
+    public CoreOntologySpace getCoreSpace() {
         return coreSpace;
     }
 
     @Override
-    public OntologySpace getCustomSpace() {
+    public CustomOntologySpace getCustomSpace() {
         return customSpace;
     }
 
@@ -350,7 +350,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     }
 
     @Override
-    public synchronized void setCustomSpace(OntologySpace customSpace) throws UnmodifiableOntologyCollectorException {
+    public synchronized void setCustomSpace(CustomOntologySpace customSpace) throws UnmodifiableOntologyCollectorException {
         if (this.customSpace != null && this.customSpace.isLocked()) throw new UnmodifiableOntologyCollectorException(
                 getCustomSpace());
         else if (!(customSpace instanceof CustomOntologySpace)) throw new ClassCastException(

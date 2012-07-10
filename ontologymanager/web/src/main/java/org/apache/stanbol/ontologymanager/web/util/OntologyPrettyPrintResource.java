@@ -20,6 +20,7 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
 
 /**
  * This is a dummy resource to be used for human-readable HTML output.
@@ -29,12 +30,26 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
  */
 public class OntologyPrettyPrintResource extends BaseStanbolResource {
 
+    private NamedResource owner = null;
+
     private Object result;
 
     public OntologyPrettyPrintResource(ServletContext context, UriInfo uriInfo, Object result) {
         this.result = result;
         this.servletContext = context;
         this.uriInfo = uriInfo;
+    }
+
+    public OntologyPrettyPrintResource(ServletContext context,
+                                       UriInfo uriInfo,
+                                       Object result,
+                                       NamedResource owner) {
+        this(context, uriInfo, result);
+        this.owner = owner;
+    }
+
+    public NamedResource getOwner() {
+        return this.owner;
     }
 
     public Object getResult() {

@@ -30,6 +30,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -47,6 +48,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.NoSuchScopeException;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScopeFactory;
@@ -127,12 +129,22 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
     }
 
     public static final String _CONFIG_ONTOLOGY_PATH_DEFAULT = "";
+    public static final String _CONNECTIVITY_POLICY_DEFAULT = "TIGHT";
     public static final String _ID_DEFAULT = "ontonet";
     public static final String _ID_SCOPE_REGISTRY_DEFAULT = "ontology";
     public static final String _ONTOLOGY_NETWORK_NS_DEFAULT = "http://localhost:8080/ontonet/";
 
     @Property(name = ONManager.CONFIG_ONTOLOGY_PATH, value = _CONFIG_ONTOLOGY_PATH_DEFAULT)
     private String configPath;
+
+    @Property(name = ONManager.CONNECTIVITY_POLICY, options = {
+                                                               @PropertyOption(value = '%'
+                                                                                       + ONManager.CONNECTIVITY_POLICY
+                                                                                       + ".option.tight", name = "TIGHT"),
+                                                               @PropertyOption(value = '%'
+                                                                                       + ONManager.CONNECTIVITY_POLICY
+                                                                                       + ".option.loose", name = "LOOSE")}, value = _CONNECTIVITY_POLICY_DEFAULT)
+    private String connectivityPolicyString;
 
     private Helper helper = null;
 
@@ -259,6 +271,13 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         /*
          * If there is no configuration file, just start with an empty scope set
          */
+
+        Object connectivityPolicy = configuration.get(ONManager.CONNECTIVITY_POLICY);
+        if (connectivityPolicy == null) {
+            this.connectivityPolicyString = _CONNECTIVITY_POLICY_DEFAULT;
+        } else {
+            this.connectivityPolicyString = connectivityPolicy.toString();
+        }
 
         String configPath = getOntologyNetworkConfigurationPath();
 
@@ -423,9 +442,22 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         OntologyScope scope = new OntologyScopeImpl(scopeID, IRI.create(getOntologyNetworkNamespace()
                                                                         + scopeRegistryId + "/"),
                 getOntologySpaceFactory(), coreSources);
+        if (scope.getCustomSpace() != null) {
+            CustomOntologySpace.ConnectivityPolicy policy;
+            try {
+                policy = CustomOntologySpace.ConnectivityPolicy.valueOf(connectivityPolicyString);
+            } catch (IllegalArgumentException e) {
+                log.warn("The value \""
+                         + connectivityPolicyString
+                         + "\" configured as default ConnectivityPolicy does not match any value of the Enumeration! "
+                         + "Setting the default policy as defined by the "
+                         + CustomOntologySpace.ConnectivityPolicy.class + ".");
+                policy = CustomOntologySpace.ConnectivityPolicy.valueOf(_CONNECTIVITY_POLICY_DEFAULT);
+            }
+            scope.getCustomSpace().setConnectivityPolicy(policy);
+        }
         if (scope != null) {
             // Commented out: for the time being we try not to propagate additions to scopes.
-
             // if (ontologyProvider instanceof OntologyCollectorListener) scope
             // .addOntologyCollectorListener((OntologyCollectorListener) ontologyProvider);
             fireScopeCreated(scope);
@@ -532,18 +564,31 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
     private void rebuildScopes() {
         OntologyNetworkConfiguration struct = ontologyProvider.getOntologyNetworkConfiguration();
         for (String scopeId : struct.getScopeIDs()) {
+            long before = System.currentTimeMillis();
+            log.debug("Rebuilding scope with ID \"{}\".", scopeId);
             Collection<String> coreOnts = struct.getCoreOntologyKeysForScope(scopeId);
             OntologyInputSource<?,?>[] srcs = new OntologyInputSource<?,?>[coreOnts.size()];
             int i = 0;
-            for (String coreOnt : coreOnts)
+            for (String coreOnt : coreOnts) {
+                log.debug("Core ontology key : {}", coreOnts);
                 srcs[i++] = new GraphSource(coreOnt);
-            OntologyScope scope = new OntologyScopeImpl(scopeId, IRI.create(this
-                    .getOntologyNetworkNamespace()), this.getOntologySpaceFactory(), srcs);
+            }
+            OntologyScope scope;
+            try {
+                scope = createOntologyScope(scopeId, srcs);
+            } catch (DuplicateIDException e) {
+                String dupe = e.getDuplicateID();
+                log.warn("Tried to rebuild existing scope \"{}\". Reusing.", dupe);
+                scope = getScope(dupe);
+            }
             OntologySpace custom = scope.getCustomSpace();
             // Register even if some ontologies were to fail to be restored afterwards.
             scopeMap.put(scopeId, scope);
-            for (String key : struct.getCustomOntologyKeysForScope(scopeId))
+            for (String key : struct.getCustomOntologyKeysForScope(scopeId)) {
+                log.debug("Core ontology key : {}", key);
                 custom.addOntology(new GraphSource(key));
+            }
+            log.info("Scope \"{}\" rebuilt in {} ms.", scopeId, System.currentTimeMillis() - before);
         }
     }
 

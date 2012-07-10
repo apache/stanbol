@@ -16,11 +16,13 @@
 -->
 <#import "/imports/common.ftl" as common>
 <#escape x as x?html>
-<@common.page title="Ontology Manager : Ontology Detail" hasrestapi=false>	
- <div class="panel">
-<pre>
-${it.result}
-</pre>
- </div>
+  <@common.page title="Ontology Manager : Ontology Detail" hasrestapi=false>
+ 
+  <a href="${it.publicBaseUri}ontonet/ontology">Scope Manager</a> &gt; <a href="${it.publicBaseUri}ontonet/ontology/${it.owner.ID}">Scope <tt>${it.owner.ID}</tt></a> &gt; Ontology
+
+  <div class="panel">
+    <pre>${it.result}</pre>
+  </div>
+ 
   </@common.page>
 </#escape>

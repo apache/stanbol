@@ -39,7 +39,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.CoreOntologySpaceImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.CoreSpaceImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -87,7 +87,7 @@ public class TestClerezzaInputSources {
         for (UriRef name : tcManager.listTripleCollections())
             log.info("-- {} (a {})", name, tcManager.getTriples(name).getClass().getSimpleName());
         assertEquals(1, tcManager.listTripleCollections().size());
-        OntologySpace spc = new CoreOntologySpaceImpl(TestClerezzaInputSources.class.getSimpleName(),
+        OntologySpace spc = new CoreSpaceImpl(TestClerezzaInputSources.class.getSimpleName(),
                 IRI.create("http://stanbol.apache.org/ontologies/"), provider);
         spc.addOntology(src);
         log.info("After addition to space, TcManager has {} graphs. ", tcManager.listTripleCollections()

@@ -94,7 +94,7 @@ public class TestOntologyCollectors {
 
         OWLOntology original = src.getRootOntology();
         Assert.assertNotNull(original);
-        OntologySpace spc = new CustomOntologySpaceImpl("Test", scopeNs, ontologyProvider);
+        OntologySpace spc = new CustomSpaceImpl("Test", scopeNs, ontologyProvider);
         spc.addOntology(src);
 
     }

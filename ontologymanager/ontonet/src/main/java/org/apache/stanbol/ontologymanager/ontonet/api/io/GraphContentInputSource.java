@@ -16,9 +16,11 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
@@ -29,6 +31,7 @@ import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
+import org.apache.stanbol.ontologymanager.ontonet.api.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,14 +90,17 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
 
     /**
      * Creates a new graph input source by parsing <code>content</code> (using the supplied {@link Parser})
-     * into a graph created using the supplied {@link TcProvider}, assuming it has the given format.
+     * into a graph created using the supplied {@link TcProvider}, assuming it has the given format. An
+     * {@link OntologyLoadingException} will be thrown if the parser fails.
      * 
      * @param content
      *            the serialized graph content.
      * @param formatIdentifier
-     *            the format to parse the content as.
+     *            the format to parse the content as. It cannot be null or blank.
      * @param tcProvider
-     *            the provider that will create the graph where the triples will be stored.
+     *            the provider that will create the graph where the triples will be stored. If null, an
+     *            in-memory graph will be created, in which case any ontology collectors using this input
+     *            source will most likely have to copy it to persistent storage.
      * @param parser
      *            the parser to use for creating the graph. If null, the default one will be used.
      */
@@ -106,11 +112,12 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
 
         if (content == null) throw new IllegalArgumentException("No content supplied");
         if (parser == null) parser = Parser.getInstance();
+
         // No physical IRI
         bindPhysicalIri(null);
         bindTriplesProvider(tcProvider);
         boolean loaded = false;
-
+        if (content.markSupported()) content.mark(Integer.MAX_VALUE);
         Collection<String> formats;
         if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = OntologyUtils
                 .getPreferredSupportedFormats(parser.getSupportedFormats());
@@ -120,23 +127,46 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
             UriRef name = new UriRef(getClass().getCanonicalName() + "-" + System.currentTimeMillis());
             graph = tcProvider.createMGraph(name);
         } else graph = new IndexedMGraph();
-        for (String format : formats) {
+
+        Iterator<String> itf = formats.iterator();
+        if (itf.hasNext()) {
+            String f = itf.next();
             try {
-                parser.parse((MGraph) graph, content, format);
+                parser.parse((MGraph) graph, content, f);
                 loaded = true;
-                break;
             } catch (UnsupportedFormatException e) {
-                log.debug("Parsing format {} failed.", format);
-                continue;
+                log.debug("Parsing format {} failed.", f);
             } catch (Exception e) {
-                log.error("Error parsing " + format, e);
-                continue;
+                log.debug("Error parsing format " + f, e);
             }
+        } else throw new OntologyLoadingException("No suitable format defined.");
+
+        // If the first attempt failed, try all other formats if the streams allows it.
+        if (!loaded) {
+            if (content.markSupported()) for (String format : formats)
+                try {
+                    content.reset();
+                    parser.parse((MGraph) graph, content, format);
+                    loaded = true;
+                    break;
+                } catch (UnsupportedFormatException e) {
+                    log.debug("Parsing format {} failed.", format);
+                    continue;
+                } catch (IOException e) {
+                    log.debug("Failed to reset data stream while parsing format {}.", format);
+                    continue;
+                } catch (Exception e) {
+                    log.debug("Error parsing format " + format, e);
+                    continue;
+                }
+            else throw new OntologyLoadingException(
+                    "First parsing attempt failed and data stream cannot be reset. Giving up.");
         }
+
         if (loaded) {
             bindRootOntology(graph);
             log.debug("Root ontology is a {}.", getRootOntology().getClass().getCanonicalName());
-        }
+        } else throw new OntologyLoadingException("All parsers failed. Giving up.");
         log.debug("Input source initialization completed in {} ms.", (System.currentTimeMillis() - before));
     }
 

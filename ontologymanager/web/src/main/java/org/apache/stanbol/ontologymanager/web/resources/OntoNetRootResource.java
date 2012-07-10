@@ -51,6 +51,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -91,7 +93,7 @@ import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.web.util.OntologyPrettyPrintResource;
-import org.coode.owlapi.turtle.TurtleOntologyFormat;
+import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -369,7 +371,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
     @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
     public Response postOntology(FormDataMultiPart data, @Context HttpHeaders headers) {
         log.debug(" post(FormDataMultiPart data)");
-        ResponseBuilder rb;
+        ResponseBuilder rb = null;
 
         IRI location = null;
         File file = null; // If found, it takes precedence over location.
@@ -393,19 +395,45 @@ public class OntoNetRootResource extends BaseStanbolResource {
         // Then add the file
         String key = null;
         if (file != null && file.canRead() && file.exists()) {
-            try {
-                InputStream content = new FileInputStream(file);
-                key = ontologyProvider.loadInStore(content, format, true);
-            } catch (UnsupportedFormatException e) {
-                log.warn(
-                    "POST method failed for media type {}. This should not happen (should fail earlier)",
-                    headers.getMediaType());
-                rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
-            } catch (IOException e) {
-                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+
+            /*
+             * Because the ontology provider's load method could fail after only one attempt without resetting
+             * the stream, we might have to do that ourselves.
+             */
+
+            List<String> formats;
+            if (format != null && !format.trim().isEmpty()) formats = Collections.singletonList(format);
+            else // The RESTful API has its own list of preferred formats
+            formats = Arrays.asList(new String[] {RDF_XML, TURTLE, X_TURTLE, N3, N_TRIPLE, OWL_XML,
+                                                  FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON});
+            int unsupported = 0, failed = 0;
+            for (String f : formats)
+                try {
+                    // Re-instantiate the stream on every attempt
+                    InputStream content = new FileInputStream(file);
+                    key = ontologyProvider.loadInStore(content, f, true);
+                } catch (UnsupportedFormatException e) {
+                    log.warn(
+                        "POST method failed for media type {}. This should not happen (should fail earlier)",
+                        headers.getMediaType());
+                    // rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
+                    unsupported++;
+                    continue;
+                } catch (IOException e) {
+                    log.debug(">>> FAILURE format {} (I/O error)", f);
+                    failed++;
+                    continue;
+                } catch (Exception e) { // SAXParseException and others
+                    log.debug(">>> FAILURE format {} (parse error)", f);
+                    failed++;
+                    continue;
+                }
+            if (key == null || key.trim().isEmpty()) {
+                if (failed > 0) throw new WebApplicationException(BAD_REQUEST);
+                else if (unsupported > 0) throw new WebApplicationException(UNSUPPORTED_MEDIA_TYPE);
             }
         } else if (location != null) {
-            try {
+            try { // Here we try every format supported by the Java API
                 key = ontologyProvider.loadInStore(location, null, true);
             } catch (Exception e) {
                 log.error("Failed to load ontology from " + location, e);
@@ -441,7 +469,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
             if (o == null) rb = Response.status(NOT_FOUND);
             else try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
-                o.getOWLOntologyManager().saveOntology(o, new TurtleOntologyFormat(), out);
+                o.getOWLOntologyManager().saveOntology(o, new ManchesterOWLSyntaxOntologyFormat(), out);
                 rb = Response.ok(new Viewable("ontology", new OntologyPrettyPrintResource(servletContext,
                         uriInfo, out)));
             } catch (OWLOntologyStorageException e) {
@@ -480,7 +508,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
                     headers.getMediaType());
                 rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
             } catch (IOException e) {
-                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+                throw new WebApplicationException(e, BAD_REQUEST);
             }
             // An exception should have been thrown earlier, but just in case.
             if (key == null || key.isEmpty()) rb = Response.status(Status.INTERNAL_SERVER_ERROR);

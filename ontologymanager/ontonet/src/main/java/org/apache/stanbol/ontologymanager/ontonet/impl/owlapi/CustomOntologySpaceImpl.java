@@ -34,12 +34,24 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implement
         return (scopeID != null ? scopeID : "") + "/" + SUFFIX;
     }
 
+    private ConnectivityPolicy policy;
+
     public CustomOntologySpaceImpl(String scopeID, IRI namespace) {
         super(buildId(scopeID), namespace, SpaceType.CUSTOM);
     }
 
     public CustomOntologySpaceImpl(String scopeID, IRI namespace, OWLOntologyManager ontologyManager) {
         super(buildId(scopeID), namespace, SpaceType.CUSTOM, ontologyManager);
+    }
+
+    @Override
+    public ConnectivityPolicy getConnectivityPolicy() {
+        return policy;
+    }
+
+    @Override
+    public void setConnectivityPolicy(ConnectivityPolicy policy) {
+        this.policy = policy;
     }
 
     /**

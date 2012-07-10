@@ -58,7 +58,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     public OntologySpaceFactoryImpl() {
         super();
-    };
+    }
 
     public OntologySpaceFactoryImpl(OntologyProvider<TcProvider> provider,
                                     Dictionary<String,Object> configuration) {
@@ -125,7 +125,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     @Override
     public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?,?>... coreSources) {
-        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, namespace, ontologyProvider);
+        CoreOntologySpace s = new CoreSpaceImpl(scopeId, namespace, ontologyProvider);
         configureSpace(s, scopeId, coreSources);
         return s;
     }
@@ -133,7 +133,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     @Override
     public CustomOntologySpace createCustomOntologySpace(String scopeId,
                                                          OntologyInputSource<?,?>... customSources) {
-        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, namespace, ontologyProvider);
+        CustomOntologySpace s = new CustomSpaceImpl(scopeId, namespace, ontologyProvider);
         configureSpace(s, scopeId, customSources);
         return s;
     }

@@ -26,7 +26,7 @@ import org.semanticweb.owlapi.model.IRI;
  * @author alexdma
  * 
  */
-public class CoreOntologySpaceImpl extends AbstractOntologySpaceImpl implements CoreOntologySpace {
+public class CoreSpaceImpl extends AbstractOntologySpaceImpl implements CoreOntologySpace {
 
     public static final String SUFFIX = SpaceType.CORE.getIRISuffix();
 
@@ -34,7 +34,7 @@ public class CoreOntologySpaceImpl extends AbstractOntologySpaceImpl implements 
         return (scopeID != null ? scopeID : "") + "/" + SUFFIX;
     }
 
-    public CoreOntologySpaceImpl(String scopeID, IRI namespace, OntologyProvider<?> ontologyProvider) {
+    public CoreSpaceImpl(String scopeID, IRI namespace, OntologyProvider<?> ontologyProvider) {
         super(buildId(scopeID), namespace, SpaceType.CORE, ontologyProvider);
     }
 

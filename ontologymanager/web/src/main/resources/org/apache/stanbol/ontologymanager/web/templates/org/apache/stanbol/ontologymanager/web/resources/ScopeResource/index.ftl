@@ -18,7 +18,9 @@
 
 <#escape x as x?html>
   <@common.page title="${it.scope.ID} : Apache Stanbol OntoNet scope" hasrestapi=false>
-		
+	
+	<a href="${it.publicBaseUri}ontonet/ontology">Scope Manager</a> &gt; Scope <tt>${it.scope.ID}</tt>
+	
     <div class="panel" id="webview">
   
     <h3>Load ontologies</h3>

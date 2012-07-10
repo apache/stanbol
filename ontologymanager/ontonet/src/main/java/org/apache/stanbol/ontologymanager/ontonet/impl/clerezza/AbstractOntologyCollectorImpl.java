@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
@@ -164,6 +165,8 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         if (key != null && !key.isEmpty()) {
             // add to index
             managedOntologies.add(id.getOntologyIRI());
+            // Always add sanitized version
+            managedOntologies.add(URIUtils.sanitizeID(id.getOntologyIRI()));
             // Note that imported ontologies are not considered as managed! TODO should we change this?
             log.debug("Add ontology completed in {} ms.", (System.currentTimeMillis() - before));
             // fire the event
@@ -272,8 +275,21 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
                     root.addAll(g);
 
                     it = g.filter(null, OWL.imports, null);
-                    while (it.hasNext())
-                        importTargets.add(it.next().getObject());
+                    while (it.hasNext()) {
+                        IRI tgt;
+                        Resource r = it.next().getObject();
+                        try {
+                            if (r instanceof UriRef) tgt = IRI.create(((UriRef) r).getUnicodeString());
+                            else if (r instanceof Literal) tgt = IRI.create(((Literal) r).getLexicalForm());
+                            else tgt = IRI.create(r.toString());
+                            tgt = URIUtils.sanitizeID(tgt);
+                            importTargets.add(new UriRef(tgt.toString()));
+                        } catch (Exception ex) {
+                            log.error("FAILED to obtain import target from resource {}", r);
+                            continue;
+                        }
+
+                    }
 
                     it = g.filter(null, RDF.type, OWL.Ontology);
                     while (it.hasNext()) {
@@ -387,7 +403,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
                 // The key set of managedOntologies contains the ontology IRIs, not their storage keys.
                 for (IRI ontologyIri : managedOntologies) {
-                    IRI physIRI = IRI.create(base + ontologyIri);
+                    IRI physIRI = URIUtils.sanitizeID(IRI.create(base + ontologyIri));
                     changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
                 }
 
@@ -552,7 +568,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         } else {
             // Rewrite import statements
             List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-            OWLDataFactory df = o.getOWLOntologyManager().getOWLDataFactory();
+            OWLDataFactory df = OWLManager.getOWLDataFactory();
 
             /*
              * TODO manage import rewrites better once the container ID is fully configurable (i.e. instead of

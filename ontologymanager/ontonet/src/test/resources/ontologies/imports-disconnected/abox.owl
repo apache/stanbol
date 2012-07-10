@@ -1,0 +1,14 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix : <http://www.ontologydesignpatterns.org/ont/test/ontonet#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.ontologydesignpatterns.org/ont/test/ontonet/imports-disconnected/abox.owl> .
+
+<http://www.ontologydesignpatterns.org/ont/test/ontonet/imports-disconnected/abox.owl> rdf:type owl:Ontology .
+
+:Alex a :Person ; 
+      :knows :Begona .
+      
+:Begona a :Person .

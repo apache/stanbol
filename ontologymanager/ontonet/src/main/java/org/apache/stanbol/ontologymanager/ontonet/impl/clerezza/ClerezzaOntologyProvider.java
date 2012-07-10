@@ -108,7 +108,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Clerezza-based ontology provider implementation. Whether it is persistent or in-memory depends on the
- * {@link TcProvider} used.
+ * {@link TcProvider} used.<br>
+ * <br>
+ * NOTE: in this implementation, the <code>preferredFormat</code> argument of the
+ * {@link #loadInStore(InputStream, String, boolean)} and {@link #loadInStore(IRI, String, boolean)} methods
+ * is not the only one to be tried when parsing an ontology, but merely the first one: should it fail, all
+ * other supported formats will be tried as a fallback.
  * 
  * @author alexdma
  * 
@@ -207,6 +212,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
          * @return
          */
         private OWLOntologyID buildOntologyId(UriRef resource) {
+            // TODO desanitize?
             IRI oiri = null, viri = null;
             Iterator<Triple> it = graph.filter(resource, new UriRef(Vocabulary.HAS_ONTOLOGY_IRI), null);
             if (it.hasNext()) {
@@ -233,8 +239,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             // The UriRef is of the form ontologyIRI[:::versionIRI] (TODO use something less conventional?)
             IRI ontologyIRI = ontologyReference.getOntologyIRI(), versionIri = ontologyReference
                     .getVersionIRI();
-            UriRef entry = new UriRef(ontologyIRI.toString()
-                                      + ((versionIri == null) ? "" : (":::" + versionIri.toString())));
+            UriRef entry = new UriRef(URIUtils.sanitizeID(ontologyIRI).toString()
+                                      + ((versionIri == null) ? "" : (":::" + URIUtils.sanitizeID(versionIri)
+                                              .toString())));
             return entry;
         }
 
@@ -243,10 +250,19 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         }
 
         UriRef getMapping(OWLOntologyID ontologyReference) {
-            Iterator<Triple> it = graph.filter(buildResource(ontologyReference), new UriRef(
-                    Vocabulary.MAPS_TO_GRAPH), null);
+            UriRef res = buildResource(ontologyReference);
+            // Logical mappings first.
+            Iterator<Triple> it = graph.filter(res, new UriRef(Vocabulary.MAPS_TO_GRAPH), null);
             while (it.hasNext()) {
                 Resource obj = it.next().getObject();
+                if (obj instanceof UriRef) return (UriRef) obj;
+            }
+            Literal litloc = LiteralFactory.getInstance().createTypedLiteral(
+                new UriRef(res.getUnicodeString()));
+            // Logical mappings failed, try physical mappings.
+            it = graph.filter(null, new UriRef(Vocabulary.RETRIEVED_FROM), litloc);
+            while (it.hasNext()) {
+                Resource obj = it.next().getSubject();
                 if (obj instanceof UriRef) return (UriRef) obj;
             }
             return null;
@@ -259,6 +275,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                 NonLiteral subj = it.next().getSubject();
                 if (subj instanceof UriRef) result.add(buildOntologyId((UriRef) subj));
             }
+            it = graph.filter(null, new UriRef(Vocabulary.RETRIEVED_FROM), null);
+            while (it.hasNext()) {
+                Resource subj = it.next().getObject();
+                if (subj instanceof UriRef) result.add(buildOntologyId((UriRef) subj));
+                else if (subj instanceof Literal) System.out.println(((Literal) subj).getLexicalForm());
+            }
             return result;
         }
 
@@ -266,7 +288,6 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             if (graphName == null) throw new IllegalArgumentException("A null graph name is not allowed.");
             // Null locator is a legal argument, will remove all locator mappings from the supplied graph
             UriRef retrieved_from = new UriRef(Vocabulary.RETRIEVED_FROM);
-            boolean isOntology = true;
             Set<Triple> remove = new HashSet<Triple>();
             for (Iterator<Triple> nodes = graph.filter(graphName, null, null); nodes.hasNext();) {
                 Triple t = nodes.next();
@@ -493,18 +514,21 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
      */
     private void fillImportsReverse(UriRef importing, List<UriRef> reverseImports, List<UriRef> level1Imports) {
         log.debug("Filling reverse imports for {}", importing);
+        // Add the importing ontology first
         reverseImports.add(importing);
         if (level1Imports != null) level1Imports.add(importing);
-
         // Get the graph and explore its imports
         TripleCollection graph = store.getTriples(importing);
         Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
-        if (it.hasNext()) {
-            Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
-            while (it2.hasNext()) {
-                Resource obj = it2.next().getObject();
-                if (obj instanceof UriRef) {
-                    UriRef key = new UriRef(getKey(IRI.create(((UriRef) obj).getUnicodeString())));
+        if (!it.hasNext()) return;
+        Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
+        while (it2.hasNext()) {
+            Resource obj = it2.next().getObject();
+            if (obj instanceof UriRef) {
+                UriRef key = new UriRef(getKey(IRI.create(((UriRef) obj).getUnicodeString())));
+                // Check used for breaking cycles in the import graph.
+                // (Unoptimized, should not use contains() for stacks.)
+                if (!reverseImports.contains(key)) {
                     if (level1Imports != null) level1Imports.add(key);
                     fillImportsReverse(key, reverseImports, null);
                 }
@@ -617,7 +641,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                             UriRef predicate = t.getPredicate();
                             if (predicate.equals(MANAGES)) {
                                 if (t.getObject() instanceof UriRef) coreOntologies.get(scopeId).add(
-                                  ((UriRef) t.getObject()).getUnicodeString());
+                                    ((UriRef) t.getObject()).getUnicodeString());
                             }
                         }
                         for (it2 = meta.filter(null, null, core_ur); it2.hasNext();) {
@@ -635,7 +659,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                             UriRef predicate = t.getPredicate();
                             if (predicate.equals(MANAGES)) {
                                 if (t.getObject() instanceof UriRef) customOntologies.get(scopeId).add(
-                                  ((UriRef) t.getObject()).getUnicodeString());
+                                    ((UriRef) t.getObject()).getUnicodeString());
                             }
                         }
                         for (it2 = meta.filter(null, null, custom_ur); it2.hasNext();) {
@@ -643,7 +667,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                             UriRef predicate = t.getPredicate();
                             if (predicate.equals(IS_MANAGED_BY)) {
                                 if (t.getSubject() instanceof UriRef) customOntologies.get(scopeId).add(
-                                  ((UriRef) t.getSubject()).getUnicodeString());
+                                    ((UriRef) t.getSubject()).getUnicodeString());
                             }
                         }
                     }
@@ -680,7 +704,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                             UriRef predicate = t.getPredicate();
                             if (predicate.equals(IS_MANAGED_BY)) {
                                 if (t.getSubject() instanceof UriRef) sessionOntologies.get(sessionId).add(
-                                   ((UriRef) t.getSubject()).getUnicodeString());
+                                    ((UriRef) t.getSubject()).getUnicodeString());
                             }
                         }
                     }
@@ -795,33 +819,15 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
 
     @Override
     public String loadInStore(InputStream data, String formatIdentifier, boolean force) {
-
         if (data == null) throw new IllegalArgumentException("No data to load ontologies from.");
+        if (formatIdentifier == null || formatIdentifier.trim().isEmpty()) throw new IllegalArgumentException(
+                "A non-null, non-blank format identifier is required for parsing the data stream.");
 
-        // Force is ignored for the content, but the imports?
-
-        // Get sorted list of supported formats, or use specified one.
-        Collection<String> formats;
-        if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = OntologyUtils
-                .getPreferredSupportedFormats(parser.getSupportedFormats());
-        else formats = Collections.singleton(formatIdentifier);
-
-        // Try each format, return on the first one that was parsed.
-        for (String format : formats) {
-            try {
-                TripleCollection rdfData = parser.parse(data, format);
-                return loadInStore(rdfData, force);
-            } catch (UnsupportedFormatException e) {
-                log.debug("Unsupported format format {}. Trying next one.", format);
-                continue;
-            } catch (Exception e) {
-                log.debug("Parsing format " + format + " failed. Trying next one.", e);
-                continue;
-            }
-        }
-        // No parser worked, return null.
-        log.error("All parsers failed, giving up.");
-        return null;
+        // This method only tries the supplied format once.
+        log.debug("Trying to parse data stream with format {}", formatIdentifier);
+        TripleCollection rdfData = parser.parse(data, formatIdentifier);
+        log.debug("SUCCESS format {}.", formatIdentifier);
+        return loadInStore(rdfData, force);
     }
 
     @Override
@@ -844,10 +850,18 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
 
         log.info("found {} in {}", ontologyIri, location);
 
-        Collection<String> formats;
-        if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = OntologyUtils
-                .getPreferredSupportedFormats(parser.getSupportedFormats());
-        else formats = Collections.singleton(formatIdentifier);
+        // Get ordered list of preferred/supported formats, or use the specified one.
+        List<String> supported = OntologyUtils.getPreferredSupportedFormats(parser.getSupportedFormats());
+        List<String> formats;
+        if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = supported;
+        else {
+            formats = new LinkedList<String>();
+            // Pre-check supported format
+            if (supported.contains(formatIdentifier)) formats.add(formatIdentifier);
+            for (String sup : supported)
+                if (sup != null && !formats.contains(sup)) formats.add(sup);
+        }
+
         for (String currentFormat : formats) {
             try {
                 final URLConnection con = location.toURI().toURL().openConnection();
@@ -865,10 +879,10 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                     return key;
                 }
             } catch (UnsupportedFormatException e) {
-                log.debug("Unsupported format format {}. Trying next one.", currentFormat);
+                log.debug("FAILURE format {} (unsupported). Trying next one.", currentFormat);
                 continue;
             } catch (Exception e) {
-                log.debug("Parsing format " + currentFormat + " failed. Trying next one.", e);
+                log.debug("FAILURE format {} (parse error). Will try next one.", currentFormat);
                 continue;
             }
         }
@@ -882,7 +896,6 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
     public String loadInStore(Object ontology, boolean force) {
 
         if (ontology == null) throw new IllegalArgumentException("No ontology supplied.");
-
         long before = System.currentTimeMillis();
 
         TripleCollection graph; // The final graph
@@ -933,6 +946,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
          */
         UriRef uriref = new UriRef(s);
         log.debug("Storing ontology with graph ID {}", uriref);
+
         // The policy here is to avoid copying the triples from a graph already in the store.
         // FIXME not a good policy for graphs that change
         if (!getStore().listTripleCollections().contains(uriref) || force) {
@@ -946,29 +960,6 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         } else {
             log.debug("Graph with ID {} already in store. Default action is to skip storage.", uriref);
             graph = store.getTriples(uriref);
-        }
-
-        if (resolveImports) {
-            // Scan resources of type owl:Ontology, but only get the first.
-            Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
-            if (it.hasNext()) {
-                // Scan import statements for the one owl:Ontology considered.
-                Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
-                while (it2.hasNext()) {
-                    Resource obj = it2.next().getObject();
-                    if (obj instanceof UriRef) try {
-                        // TODO try locals first
-                        if (isOfflineMode()) throw new RuntimeException(
-                                "Camnnot load imported ontology " + obj
-                                        + " while Stanbol is in offline mode.");
-                        else loadInStore(IRI.create(((UriRef) obj).getUnicodeString()), null, false);
-                    } catch (UnsupportedFormatException e) {
-                        log.warn("Failed to parse format for resource " + obj, e);
-                    } catch (IOException e) {
-                        log.warn("Failed to load ontology from resource " + obj, e);
-                    }
-                }
-            }
         }
 
         // All is already sanitized by the time we get here.
@@ -1002,7 +993,41 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             keymap.setMapping(unv, uriref);
             mappedIds += " , " + unv;
         }
-        log.debug("Ontology \n\t\t{}\n\tstored with key\n\t\t{}", mappedIds, s);
+
+        // Do this AFTER registering the ontology, otherwise import cycles will cause infinite loops.
+        if (resolveImports) {
+            // Scan resources of type owl:Ontology, but only get the first.
+            Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
+            if (it.hasNext()) {
+                // Scan import statements for the one owl:Ontology considered.
+                Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
+                while (it2.hasNext()) {
+                    Resource obj = it2.next().getObject();
+                    log.info("Resolving import {}", obj);
+                    if (obj instanceof UriRef) try {
+                        // TODO try locals first
+                        if (isOfflineMode()) throw new RuntimeException(
+                                "Cannot load imported ontology " + obj + " while Stanbol is in offline mode.");
+                        else {
+                            UriRef target = (UriRef) obj;
+                            OWLOntologyID id = new OWLOntologyID(IRI.create(target.getUnicodeString()));
+                            if (keymap.getMapping(id) == null) {
+                                loadInStore(IRI.create(((UriRef) obj).getUnicodeString()), null, false);
+                            }
+                        }
+                    } catch (UnsupportedFormatException e) {
+                        log.warn("Failed to parse format for resource " + obj, e);
+                    } catch (IOException e) {
+                        log.warn("Failed to load ontology from resource " + obj, e);
+                    }
+                }
+            }
+        }
+
+        log.debug("Ontology");
+        log.debug("--- {}", mappedIds);
+        log.debug("--- stored with key");
+        log.debug("--- {}", s);
         log.debug("Time: {} ms", (System.currentTimeMillis() - before));
         return s;
 

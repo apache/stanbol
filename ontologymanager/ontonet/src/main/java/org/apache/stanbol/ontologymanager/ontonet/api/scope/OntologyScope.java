@@ -49,14 +49,14 @@ public interface OntologyScope extends NamedResource, Lockable, OntologyCollecto
      * 
      * @return the core ontology space
      */
-    OntologySpace getCoreSpace();
+    CoreOntologySpace getCoreSpace();
 
     /**
      * Returns the custom ontology space for this ontology scope.
      * 
      * @return the custom ontology space, or null if no custom space is registered for this scope.
      */
-    OntologySpace getCustomSpace();
+    CustomOntologySpace getCustomSpace();
 
     /**
      * Sets an ontology space as the custom space for this scope.
@@ -66,7 +66,7 @@ public interface OntologyScope extends NamedResource, Lockable, OntologyCollecto
      * @throws UnmodifiableOntologyCollectorException
      *             if either the scope or the supplied space are locked.
      */
-    void setCustomSpace(OntologySpace customSpace) throws UnmodifiableOntologyCollectorException;
+    void setCustomSpace(CustomOntologySpace customSpace) throws UnmodifiableOntologyCollectorException;
 
     /**
      * Performs the operations required for activating the ontology scope. It should be possible to perform

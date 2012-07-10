@@ -30,7 +30,6 @@ import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
@@ -43,9 +42,11 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.HashSet;
@@ -75,10 +76,10 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.IrremovableOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
@@ -91,7 +92,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.web.util.OntologyPrettyPrintResource;
-import org.coode.owlapi.turtle.TurtleOntologyFormat;
+import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -300,8 +301,7 @@ public class SessionResource extends BaseStanbolResource {
                                             @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
         Graph o = session.getOntology(IRI.create(ontologyId), Graph.class, merge);
-        if (o == null) return Response.status(NOT_FOUND).build();
-        ResponseBuilder rb = Response.ok(o);
+        ResponseBuilder rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -330,12 +330,10 @@ public class SessionResource extends BaseStanbolResource {
         if (session == null) rb = Response.status(NOT_FOUND);
         else if (merge) {
             Graph g = session.getOntology(IRI.create(ontologyId), Graph.class, merge);
-            if (g == null) rb = Response.status(NOT_FOUND);
-            else rb = Response.ok(g);
+            rb = (g != null) ? Response.ok(g) : Response.status(NOT_FOUND);
         } else {
             OWLOntology o = session.getOntology(IRI.create(ontologyId), OWLOntology.class, merge);
-            if (o == null) rb = Response.status(NOT_FOUND);
-            else rb = Response.ok(o);
+            rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
         }
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -363,8 +361,7 @@ public class SessionResource extends BaseStanbolResource {
                                           @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
         OWLOntology o = session.getOntology(IRI.create(ontologyId), OWLOntology.class, merge);
-        if (o == null) return Response.status(NOT_FOUND).build();
-        ResponseBuilder rb = Response.ok(o);
+        ResponseBuilder rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -382,9 +379,9 @@ public class SessionResource extends BaseStanbolResource {
             if (o == null) rb = Response.status(NOT_FOUND);
             else try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
-                o.getOWLOntologyManager().saveOntology(o, new TurtleOntologyFormat(), out);
+                o.getOWLOntologyManager().saveOntology(o, new ManchesterOWLSyntaxOntologyFormat(), out);
                 rb = Response.ok(new Viewable("ontology", new OntologyPrettyPrintResource(servletContext,
-                        uriInfo, out)));
+                        uriInfo, out, session)));
             } catch (OWLOntologyStorageException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
@@ -415,20 +412,23 @@ public class SessionResource extends BaseStanbolResource {
                                           @PathParam("ontologyId") String ontologyId,
                                           @Context UriInfo uriInfo,
                                           @Context HttpHeaders headers) {
-        if (session == null) return Response.status(NOT_FOUND).build();
-        IRI iri = IRI.create(ontologyId);
-        OWLOntology o = session.getOntology(iri, OWLOntology.class);
-        if (o == null) return Response.notModified().build();
-        try {
-            session.removeOntology(iri);
-        } catch (IrremovableOntologyException e) {
-            throw new WebApplicationException(e, FORBIDDEN);
-        } catch (UnmodifiableOntologyCollectorException e) {
-            throw new WebApplicationException(e, FORBIDDEN);
-        } catch (OntologyCollectorModificationException e) {
-            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+        ResponseBuilder rb;
+        if (session == null) rb = Response.status(NOT_FOUND);
+        else {
+            IRI iri = IRI.create(ontologyId);
+            OWLOntology o = session.getOntology(iri, OWLOntology.class);
+            if (o == null) rb = Response.notModified();
+            else try {
+                session.removeOntology(iri);
+                rb = Response.ok();
+            } catch (IrremovableOntologyException e) {
+                throw new WebApplicationException(e, FORBIDDEN);
+            } catch (UnmodifiableOntologyCollectorException e) {
+                throw new WebApplicationException(e, FORBIDDEN);
+            } catch (OntologyCollectorModificationException e) {
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            }
         }
-        ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -493,6 +493,7 @@ public class SessionResource extends BaseStanbolResource {
         return rb.build();
     }
 
+    @SuppressWarnings("unused")
     @POST
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
@@ -531,15 +532,13 @@ public class SessionResource extends BaseStanbolResource {
             OntologyInputSource<?,?> src = null;
             if (fileOk) { // File first
                 try {
-                    InputStream content = new FileInputStream(file);
+                    // Use a buffered stream that can be reset for multiple attempts.
+                    InputStream content = new BufferedInputStream(new FileInputStream(file));
                     src = new GraphContentInputSource(content, format);
-                } catch (UnsupportedFormatException e) {
-                    log.warn(
-                        "POST method failed for media type {}. This should not happen (should fail earlier)",
-                        headers.getMediaType());
-                    rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
-                } catch (Exception e) {
-                    throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+                } catch (OntologyLoadingException e) {
+                    throw new WebApplicationException(e, BAD_REQUEST);
+                } catch (IOException e) {
+                    throw new WebApplicationException(e, BAD_REQUEST);
                 }
             } else if (location != null) {
                 try {
@@ -573,5 +572,4 @@ public class SessionResource extends BaseStanbolResource {
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
-
 }

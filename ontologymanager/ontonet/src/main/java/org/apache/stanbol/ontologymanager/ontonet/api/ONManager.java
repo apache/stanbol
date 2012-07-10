@@ -45,6 +45,11 @@ public interface ONManager extends ScopeRegistry, OntologyScopeFactory {
     String CONFIG_ONTOLOGY_PATH = "org.apache.stanbol.ontologymanager.ontonet.onconfig";
 
     /**
+     * The key used to configure the connectivity policy.
+     */
+    String CONNECTIVITY_POLICY = "org.apache.stanbol.ontologymanager.ontonet.connectivity";
+
+    /**
      * The key used to configure the ID of the ontology network manager.
      */
     String ID = "org.apache.stanbol.ontologymanager.ontonet.id";

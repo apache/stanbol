@@ -30,7 +30,6 @@ import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
@@ -43,9 +42,11 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
@@ -77,11 +78,12 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.IrremovableOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
@@ -96,7 +98,7 @@ import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
 import org.apache.stanbol.ontologymanager.web.util.OntologyPrettyPrintResource;
-import org.coode.owlapi.turtle.TurtleOntologyFormat;
+import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -211,11 +213,37 @@ public class ScopeResource extends BaseStanbolResource {
         return result;
     }
 
+    @GET
+    @Path("/core")
+    @Produces(value = {RDF_XML, TURTLE, X_TURTLE, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
+    public Response getCoreSpace(@DefaultValue("false") @QueryParam("merge") boolean merge,
+                                 @Context UriInfo uriInfo,
+                                 @Context HttpHeaders headers) {
+        OntologySpace space = scope.getCoreSpace();
+        OWLOntology o = space.export(OWLOntology.class, merge);
+        ResponseBuilder rb = Response.ok(o);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
     public SortedSet<String> getCustomOntologies() {
         SortedSet<String> result = new TreeSet<String>();
         for (IRI iri : scope.getCustomSpace().listManagedOntologies())
             result.add(iri.toString());
         return result;
+    }
+
+    @GET
+    @Path("/custom")
+    @Produces(value = {RDF_XML, TURTLE, X_TURTLE, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
+    public Response getCustomSpace(@DefaultValue("false") @QueryParam("merge") boolean merge,
+                                   @Context UriInfo uriInfo,
+                                   @Context HttpHeaders headers) {
+        OntologySpace space = scope.getCustomSpace();
+        OWLOntology o = space.export(OWLOntology.class, merge);
+        ResponseBuilder rb = Response.ok(o);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     @GET
@@ -248,6 +276,22 @@ public class ScopeResource extends BaseStanbolResource {
     }
 
     @OPTIONS
+    @Path("/core")
+    public Response handleCorsPreflightCore(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers, GET, OPTIONS);
+        return rb.build();
+    }
+
+    @OPTIONS
+    @Path("/custom")
+    public Response handleCorsPreflightCustom(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers, GET, OPTIONS);
+        return rb.build();
+    }
+
+    @OPTIONS
     @Path("/{ontologyId:.+}")
     public Response handleCorsPreflightOntology(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
@@ -274,45 +318,23 @@ public class ScopeResource extends BaseStanbolResource {
                                             @DefaultValue("false") @QueryParam("merge") boolean merge,
                                             @Context UriInfo uriInfo,
                                             @Context HttpHeaders headers) {
+        log.debug("Absolute URL Path {}", uriInfo.getRequestUri());
+        log.debug("Ontology ID {}", ontologyId);
         ResponseBuilder rb;
         if (scope == null) rb = Response.status(NOT_FOUND);
-
         else {
-            // First of all, it could be a simple request for the space root!
-
-            String absur = uriInfo.getRequestUri().toString();
-            log.debug("Absolute URL Path {}", absur);
-            log.debug("Ontology ID {}", ontologyId);
-
-            IRI ontiri = IRI.create(ontologyId);
-
-            // TODO: hack (ma anche no)
-            if (!ontiri.isAbsolute()) ontiri = IRI.create(absur);
-
-            // First of all, it could be a simple request for the space root!
-            String temp = scope.getID() + "/" + ontologyId;
-            OntologySpace space = scope.getCoreSpace();
-            if (temp.equals(space.getID())) rb = Response.ok(space.export(Graph.class, merge));
-            else {
-                space = scope.getCustomSpace();
-                if (temp.equals(space.getID())) rb = Response.ok(space.export(Graph.class, merge));
-                else {
-                    Graph o = null;
-                    IRI ontologyIri = IRI.create(ontologyId);
-                    OntologySpace spc = scope.getCustomSpace();
-                    if (spc != null && spc.hasOntology(ontologyIri)) {
-                        // o = spc.getOntology(ontologyIri, merge);
-                        o = spc.getOntology(ontologyIri, Graph.class, merge);
-                    } else {
-                        spc = scope.getCoreSpace();
-                        if (spc != null && spc.hasOntology(ontologyIri))
-                        // o = spc.getOntology(ontologyIri, merge);
-                        o = spc.getOntology(ontologyIri, Graph.class, merge);
-                    }
-                    if (o == null) return Response.status(NOT_FOUND).build();
-                    else rb = Response.ok(o);
-                }
+            Graph o = null;
+            IRI ontologyIri = IRI.create(ontologyId);
+            OntologySpace spc = scope.getCustomSpace();
+            if (spc != null && spc.hasOntology(ontologyIri)) {
+                o = spc.getOntology(ontologyIri, Graph.class, merge);
+            } else {
+                spc = scope.getCoreSpace();
+                if (spc != null && spc.hasOntology(ontologyIri)) o = spc.getOntology(ontologyIri,
+                    Graph.class, merge);
             }
+            if (o == null) rb = Response.status(NOT_FOUND);
+            else rb = Response.ok(o);
         }
 
         addCORSOrigin(servletContext, rb, headers);
@@ -338,53 +360,31 @@ public class ScopeResource extends BaseStanbolResource {
                                           @DefaultValue("false") @QueryParam("merge") boolean merge,
                                           @Context UriInfo uriInfo,
                                           @Context HttpHeaders headers) {
-
+        log.debug("Absolute URL Path {}", uriInfo.getRequestUri());
+        log.debug("Ontology ID {}", ontologyId);
         ResponseBuilder rb;
         if (scope == null) rb = Response.status(NOT_FOUND);
-
         else {
-            // First of all, it could be a simple request for the space root!
-
-            String absur = uriInfo.getRequestUri().toString();
-            log.debug("Absolute URL Path {}", absur);
-            log.debug("Ontology ID {}", ontologyId);
-
-            IRI ontiri = IRI.create(ontologyId);
-
-            // TODO: hack (ma anche no)
-            if (!ontiri.isAbsolute()) ontiri = IRI.create(absur);
-
-            // First of all, it could be a simple request for the space root!
-            String temp = scope.getID() + "/" + ontologyId;
-            OntologySpace space = scope.getCoreSpace();
-            if (temp.equals(space.getID())) rb = Response.ok(space.export(OWLOntology.class, merge));
-            else {
-                space = scope.getCustomSpace();
-                if (temp.equals(space.getID())) rb = Response.ok(space.export(OWLOntology.class, merge));
-                else {
-                    OWLOntology o = null;
-                    IRI ontologyIri = IRI.create(ontologyId);
-                    OntologySpace spc = scope.getCustomSpace();
-                    if (spc != null && spc.hasOntology(ontologyIri)) {
-                        o = spc.getOntology(ontologyIri, OWLOntology.class, merge);
-                    } else {
-                        spc = scope.getCoreSpace();
-                        if (spc != null && spc.hasOntology(ontologyIri)) o = spc.getOntology(ontologyIri,
-                            OWLOntology.class, merge);
-                    }
-                    if (o == null) return Response.status(NOT_FOUND).build();
-                    else rb = Response.ok(o);
-                }
+            OWLOntology o = null;
+            IRI ontologyIri = IRI.create(ontologyId);
+            OntologySpace spc = scope.getCustomSpace();
+            if (spc != null && spc.hasOntology(ontologyIri)) {
+                o = spc.getOntology(ontologyIri, OWLOntology.class, merge);
+            } else {
+                spc = scope.getCoreSpace();
+                if (spc != null && spc.hasOntology(ontologyIri)) o = spc.getOntology(ontologyIri,
+                    OWLOntology.class, merge);
             }
+            if (o == null) rb = Response.status(NOT_FOUND);
+            else rb = Response.ok(o);
         }
-
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
-    // @GET
-    // @Path("/{ontologyId:.+}")
-    // @Produces(TEXT_HTML)
+    @GET
+    @Path("/{ontologyId:.+}")
+    @Produces(TEXT_HTML)
     public Response managedOntologyShow(@PathParam("ontologyId") String ontologyId,
                                         @Context HttpHeaders headers) {
         ResponseBuilder rb;
@@ -398,9 +398,9 @@ public class ScopeResource extends BaseStanbolResource {
             if (o == null) rb = Response.status(NOT_FOUND);
             else try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
-                o.getOWLOntologyManager().saveOntology(o, new TurtleOntologyFormat(), out);
+                o.getOWLOntologyManager().saveOntology(o, new ManchesterOWLSyntaxOntologyFormat(), out);
                 rb = Response.ok(new Viewable("ontology", new OntologyPrettyPrintResource(servletContext,
-                        uriInfo, out)));
+                        uriInfo, out, scope)));
             } catch (OWLOntologyStorageException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
@@ -420,26 +420,30 @@ public class ScopeResource extends BaseStanbolResource {
      */
     @DELETE
     @Path("/{ontologyId:.+}")
-    public Response managedOntologyUnload(@PathParam("uri") String ontologyid,
+    public Response managedOntologyUnload(@PathParam("ontologyId") String ontologyId,
+                                          @PathParam("scopeid") String scopeId,
                                           @Context UriInfo uriInfo,
                                           @Context HttpHeaders headers) {
-
-        if (ontologyid != null && !ontologyid.equals("")) {
-            IRI ontIri = IRI.create(ontologyid);
-            String scopeId = scope.getID();
+        ResponseBuilder rb;
+        if (ontologyId != null && !ontologyId.equals("")) {
+            IRI ontIri = IRI.create(ontologyId);
             OntologySpace cs = scope.getCustomSpace();
             if (cs.hasOntology(ontIri)) {
                 try {
                     onm.setScopeActive(scopeId, false);
                     cs.removeOntology(ontIri);
-                    onm.setScopeActive(scopeId, true);
+                    rb = Response.ok();
+                } catch (IrremovableOntologyException e) {
+                    throw new WebApplicationException(e, FORBIDDEN);
+                } catch (UnmodifiableOntologyCollectorException e) {
+                    throw new WebApplicationException(e, FORBIDDEN);
                 } catch (OntologyCollectorModificationException e) {
-                    onm.setScopeActive(scopeId, true);
                     throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+                } finally {
+                    onm.setScopeActive(scopeId, true);
                 }
-            }
-        }
-        ResponseBuilder rb = Response.ok();
+            } else rb = Response.notModified(); // ontology not managed
+        } else rb = Response.status(BAD_REQUEST); // null/blank ontology ID
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -511,6 +515,7 @@ public class ScopeResource extends BaseStanbolResource {
         return rb.build();
     }
 
+    @SuppressWarnings("unused")
     @POST
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
@@ -551,16 +556,13 @@ public class ScopeResource extends BaseStanbolResource {
             OntologyInputSource<?,?> src = null;
             if (fileOk) {
                 try {
-
-                    InputStream content = new FileInputStream(file);
+                    // Use a buffered stream that can be reset for multiple attempts.
+                    InputStream content = new BufferedInputStream(new FileInputStream(file));
                     src = new GraphContentInputSource(content, format);
-                } catch (UnsupportedFormatException e) {
-                    log.warn(
-                        "POST method failed for media type {}. This should not happen (should fail earlier)",
-                        headers.getMediaType());
-                    rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
-                } catch (Exception e) {
-                    throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+                } catch (OntologyLoadingException e) {
+                    throw new WebApplicationException(e, BAD_REQUEST);
+                } catch (IOException e) {
+                    throw new WebApplicationException(e, BAD_REQUEST);
                 }
             } else if (location != null) {
                 try {
@@ -604,10 +606,10 @@ public class ScopeResource extends BaseStanbolResource {
      * @param scopeid
      * @param coreRegistry
      *            a. If it is a well-formed IRI it supersedes <code>coreOntology</code>.
-     * @param coreOntology
+     * @param coreOntologies
      * @param customRegistry
      *            a. If it is a well-formed IRI it supersedes <code>customOntology</code>.
-     * @param customOntology
+     * @param customOntologies
      * @param activate
      *            if true, the new scope will be activated upon creation.
      * @param uriInfo
@@ -617,77 +619,50 @@ public class ScopeResource extends BaseStanbolResource {
     @PUT
     @Consumes(MediaType.WILDCARD)
     public Response registerScope(@PathParam("scopeid") String scopeid,
-                                  @QueryParam("corereg") String coreRegistry,
-                                  @QueryParam("coreont") String coreOntology,
-                                  @QueryParam("customreg") String customRegistry,
-                                  @QueryParam("customont") String customOntology,
+                                  @QueryParam("corereg") final List<String> coreRegistries,
+                                  @QueryParam("coreont") final List<String> coreOntologies,
                                   @DefaultValue("false") @QueryParam("activate") boolean activate,
                                   @Context UriInfo uriInfo,
                                   @Context HttpHeaders headers,
                                   @Context ServletContext servletContext) {
         log.debug("Request URI {}", uriInfo.getRequestUri());
+        List<OntologyInputSource<?,?>> srcs = new ArrayList<OntologyInputSource<?,?>>(coreOntologies.size()
+                                                                                      + coreRegistries.size());
+        // First thing, check registry sources.
+        if (coreRegistries != null) for (String reg : coreRegistries)
+            if (reg != null && !reg.isEmpty()) try {
+                // Library IDs are sanitized differently
+                srcs.add(new LibrarySource(IRI.create(reg.replace("%23", "#")), regMgr));
+            } catch (Exception e1) {
+                throw new WebApplicationException(e1, BAD_REQUEST);
+                // Bad or not supplied core registry, try the ontology.
+            }
 
-        OntologyScope scope;
-        OntologyInputSource<?,?> coreSrc = null, custSrc = null;
-
-        // First thing, check the core source.
-        if (coreRegistry != null && !coreRegistry.isEmpty()) try {
-            coreSrc = new LibrarySource(IRI.create(coreRegistry.replace("%23", "#")), regMgr);
-        } catch (Exception e1) {
-            throw new WebApplicationException(e1, BAD_REQUEST);
-            // Bad or not supplied core registry, try the ontology.
-        }
-        else if (coreOntology != null && !coreOntology.isEmpty()) try {
-            coreSrc = new RootOntologyIRISource(IRI.create(coreOntology));
-        } catch (Exception e2) {
-            // If this fails too, throw a bad request.
-            throw new WebApplicationException(e2, BAD_REQUEST);
-        }
-
-        // Don't bother if no custom was supplied at all...
-        if (customRegistry != null && !customRegistry.isEmpty())
-        // ...but if it was, be prepared to throw exceptions.
-        try {
-            coreSrc = new LibrarySource(IRI.create(customRegistry.replace("%23", "#")), regMgr);
-        } catch (Exception e1) {
-            throw new WebApplicationException(e1, BAD_REQUEST);
-            // Bad or not supplied custom registry, try the ontology.
-        }
-        if (customOntology != null && !customOntology.isEmpty()) try {
-            custSrc = new RootOntologyIRISource(IRI.create(customOntology));
-        } catch (Exception e2) {
-            // If this fails too, throw a bad request.
-            throw new WebApplicationException(e2, BAD_REQUEST);
-        }
+        // Then ontology sources
+        if (coreOntologies != null) for (String ont : coreOntologies)
+            if (ont != null && !ont.isEmpty()) try {
+                srcs.add(new RootOntologyIRISource(IRI.create(ont)));
+            } catch (Exception e2) {
+                // If this fails too, throw a bad request.
+                throw new WebApplicationException(e2, BAD_REQUEST);
+            }
 
         // Now the creation.
         try {
             // Expand core sources
             List<OntologyInputSource<?,?>> expanded = new ArrayList<OntologyInputSource<?,?>>();
-            if (coreSrc != null) {
-                if (coreSrc instanceof SetInputSource) {
-                    for (Object o : ((SetInputSource<?>) coreSrc).getOntologies()) {
-                        OntologyInputSource<?,?> src = null;
-                        if (o instanceof OWLOntology) src = new RootOntologySource((OWLOntology) o);
-                        else if (o instanceof TripleCollection) src = new GraphSource((TripleCollection) o);
-                        if (src != null) expanded.add(src);
-                    }
-                } else expanded.add(coreSrc); // Must be denoting a single ontology
-            }
-            if (custSrc != null) {
-                if (custSrc instanceof SetInputSource) {
-                    for (Object o : ((SetInputSource<?>) custSrc).getOntologies()) {
-                        OntologyInputSource<?,?> src = null;
-                        if (o instanceof OWLOntology) src = new RootOntologySource((OWLOntology) o);
-                        else if (o instanceof TripleCollection) src = new GraphSource((TripleCollection) o);
-                        if (src != null) expanded.add(src);
-                    }
-                } else expanded.add(custSrc); // Must be denoting a single ontology
-            }
-            // Invoke the appropriate factory method depending on the
-            // availability of a custom source.
-            // scope = (custSrc != null) ? f.createOntologyScope(scopeid, coreSrc, custSrc) : f
-            // .createOntologyScope(scopeid, coreSrc);
+            for (OntologyInputSource<?,?> coreSrc : srcs)
+                if (coreSrc != null) {
+                    if (coreSrc instanceof SetInputSource) {
+                        for (Object o : ((SetInputSource<?>) coreSrc).getOntologies()) {
+                            OntologyInputSource<?,?> src = null;
+                            if (o instanceof OWLOntology) src = new RootOntologySource((OWLOntology) o);
+                            else if (o instanceof TripleCollection) src = new GraphSource(
+                                    (TripleCollection) o);
+                            if (src != null) expanded.add(src);
+                        }
+                    } else expanded.add(coreSrc); // Must be denoting a single ontology
+                }
             scope = onm.createOntologyScope(scopeid, expanded.toArray(new OntologyInputSource[0]));
             // Setup and register the scope. If no custom space was set, it will
             // still be open for modification.

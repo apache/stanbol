@@ -258,12 +258,9 @@ public interface OntologyProvider<S> {
      *            the ontology content.
      * @param formatIdentifier
      *            the MIME type of the expected serialization format of this ontology. If null, all supported
-     *            formats will be tried until all parsers fail or one succeeds.
-     * @param preferredKey
-     *            a string that should preferrably identify the ontology internally within the provider. It
-     *            will be ignored if null or empty. It is not guaranteed that the supplied key can be used,
-     *            e.g. if there is already a duplicate of the key and the policy does not allow duplicates. In
-     *            this case, a different key will be set and returned by this method.
+     *            formats will be tried until all parsers fail or one succeeds. Whether the supplied format
+     *            will be the only one to be attempted, or simply the preferred one, is left to arbitration
+     *            and is implementation-dependent.
      * @param force
      *            if true, all mappings provided by the offline configuration will be ignored (both for the
      *            root ontology and its recursive imports) and the provider will forcibly try to resolve the
@@ -288,12 +285,9 @@ public interface OntologyProvider<S> {
      *            the physical IRI where the ontology is located.
      * @param formatIdentifier
      *            the MIME type of the expected serialization format of this ontology. If null, all supported
-     *            formats will be tried until all parsers fail or one succeeds.
-     * @param preferredKey
-     *            a string that should preferrably identify the ontology internally within the provider. It
-     *            will be ignored if null or empty. It is not guaranteed that the supplied key can be used,
-     *            e.g. if there is already a duplicate of the key and the policy does not allow duplicates. In
-     *            this case, a different key will be set and returned by this method.
+     *            formats will be tried until all parsers fail or one succeeds. Whether the supplied format
+     *            will be the only one to be attempted, or simply the preferred one, is left to arbitration
+     *            and is implementation-dependent.
      * @param force
      *            if true, all mappings provided by the offline configuration will be ignored (both for the
      *            root ontology and its recursive imports) and the provider will forcibly try to resolve the
@@ -314,11 +308,6 @@ public interface OntologyProvider<S> {
      * 
      * @param ontology
      *            the ontology to be stored.
-     * @param preferredKey
-     *            a string that should preferrably identify the ontology internally within the provider. It
-     *            will be ignored if null or empty. It is not guaranteed that the supplied key can be used,
-     *            e.g. if there is already a duplicate of the key and the policy does not allow duplicates. In
-     *            this case, a different key will be set and returned by this method.
      * @param force
      *            if true, all mappings provided by the offline configuration will be ignored (both for the
      *            root ontology and its recursive imports) and the provider will forcibly try to resolve the
