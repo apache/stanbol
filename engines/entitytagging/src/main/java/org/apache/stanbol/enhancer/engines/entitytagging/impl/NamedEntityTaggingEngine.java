@@ -69,9 +69,9 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -79,7 +79,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Engine that uses a {@link ReferencedSite} to search for entities for existing TextAnnotations of an Content
+ * Engine that uses a {@link Site} to search for entities for existing TextAnnotations of an Content
  * Item.
  * 
  * @author ogrisel, rwesten
@@ -141,7 +141,7 @@ public class NamedEntityTaggingEngine
      * configured Referenced Site when we need to enhance a content item.
      */
     @Reference
-    protected ReferencedSiteManager siteManager;
+    protected SiteManager siteManager;
 
     /**
      * Used to lookup Entities if the {@link #REFERENCED_SITE_ID} property is
@@ -151,7 +151,7 @@ public class NamedEntityTaggingEngine
     protected Entityhub entityhub;
     
     /**
-     * This holds the id of the {@link ReferencedSite} used to lookup Entities
+     * This holds the id of the {@link Site} used to lookup Entities
      * or <code>null</code> if the {@link Entityhub} is used. 
      */
     protected String referencedSiteID;
@@ -212,7 +212,7 @@ public class NamedEntityTaggingEngine
 
     /**
      * The {@link OfflineMode} is used by Stanbol to indicate that no external service should be referenced.
-     * For this engine that means it is necessary to check if the used {@link ReferencedSite} can operate
+     * For this engine that means it is necessary to check if the used {@link Site} can operate
      * offline or not.
      * 
      * @see #enableOfflineMode(OfflineMode)
@@ -302,9 +302,9 @@ public class NamedEntityTaggingEngine
     }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        final ReferencedSite site;
+        final Site site;
         if(referencedSiteID != null) { //lookup the referenced site
-            site = siteManager.getReferencedSite(referencedSiteID);
+            site = siteManager.getSite(referencedSiteID);
             //ensure that it is present
             if (site == null) {
                 String msg = String.format(
@@ -401,7 +401,7 @@ public class NamedEntityTaggingEngine
 
     /**
      * Computes the Enhancements
-     * @param site The {@link ReferencedSiteException} id or <code>null</code> to
+     * @param site The {@link SiteException} id or <code>null</code> to
      * use the {@link Entityhub}
      * @param literalFactory the {@link LiteralFactory} used to create RDF Literals
      * @param contentItemId the id of the contentItem
@@ -413,7 +413,7 @@ public class NamedEntityTaggingEngine
      * @throws EntityhubException On any Error while looking up Entities via
      * the Entityhub
      */
-    protected final List<Suggestion> computeEntityRecommentations(ReferencedSite site,
+    protected final List<Suggestion> computeEntityRecommentations(Site site,
             NamedEntity namedEntity,
             List<UriRef> subsumedAnnotations, String language) throws EntityhubException {
         // First get the required properties for the parsed textAnnotation

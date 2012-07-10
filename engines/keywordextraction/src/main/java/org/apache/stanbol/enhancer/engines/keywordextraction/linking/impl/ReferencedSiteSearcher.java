@@ -28,19 +28,19 @@ import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
 import org.osgi.framework.BundleContext;
 
-public final class ReferencedSiteSearcher extends TrackingEntitySearcher<ReferencedSite> implements EntitySearcher {
+public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> implements EntitySearcher {
     
     
     private final String siteId;
     private final Integer limit;
 
     public ReferencedSiteSearcher(BundleContext context,String siteId, Integer limit) {
-        super(context, ReferencedSite.class, 
+        super(context, Site.class, 
             Collections.singletonMap(SiteConfiguration.ID,siteId));
         this.siteId = siteId;
         this.limit = limit != null && limit > 0 ? limit : null;
@@ -52,13 +52,13 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Referen
             return null;
         }
         Entity entity;
-        ReferencedSite site = getSearchService();
+        Site site = getSearchService();
         if(site == null){
             throw new IllegalStateException("ReferencedSite "+siteId+" is currently not available");
         }
         try {
             entity = site.getEntity(id);
-        }  catch (ReferencedSiteException e) {
+        }  catch (SiteException e) {
             throw new IllegalStateException("Exception while getting "+id+
                 " from the ReferencedSite "+site.getId(),e);
         }
@@ -71,7 +71,7 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Referen
                                            List<String> search,
                                            String... languages) throws IllegalStateException {
         //build the query and than return the result
-        ReferencedSite site = getSearchService();
+        Site site = getSearchService();
         if(site == null){
             throw new IllegalStateException("ReferencedSite "+siteId+" is currently not available");
         }
@@ -83,7 +83,7 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Referen
         QueryResultList<Representation> results;
         try {
             results = site.find(query);
-        } catch (ReferencedSiteException e) {
+        } catch (SiteException e) {
             throw new IllegalStateException("Exception while searchign for "+
                 search+'@'+Arrays.toString(languages)+"in the ReferencedSite "+
                 site.getId(), e);
@@ -93,7 +93,7 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Referen
 
     @Override
     public boolean supportsOfflineMode() {
-        ReferencedSite site = getSearchService();
+        Site site = getSearchService();
         //Do not throw an exception here if the site is not available. Just return false
         return site == null ? false : site.supportsLocalMode();
     }
