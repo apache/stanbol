@@ -44,9 +44,9 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,47 +57,47 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties(value={
 })
-public class ReferenceManagerImpl implements ReferencedSiteManager {
+public class SiteManagerImpl implements SiteManager {
 
     private final Logger log;
 
 //    private ComponentContext context;
-    public ReferenceManagerImpl(){
+    public SiteManagerImpl(){
         super();
-        log = LoggerFactory.getLogger(ReferenceManagerImpl.class);
-        log.info(" create instance of "+ReferenceManagerImpl.class);
+        log = LoggerFactory.getLogger(SiteManagerImpl.class);
+        log.info(" create instance of "+SiteManagerImpl.class);
     }
     @Reference(
             cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE,
-            referenceInterface=ReferencedSite.class,
+            referenceInterface=Site.class,
             strategy=ReferenceStrategy.EVENT,
             policy=ReferencePolicy.DYNAMIC,
             bind="bindReferencedSites",
             unbind="unbindReferencedSites")
-    List<ReferencedSite> referencedSites = new CopyOnWriteArrayList<ReferencedSite>();
+    List<Site> referencedSites = new CopyOnWriteArrayList<Site>();
     /**
      * Map holding the mapping of the site ID to the referencedSite Object
      * TODO: in principle it could be possible that two instances of
-     * {@link ReferencedSite} could be configured to use the same ID
+     * {@link Site} could be configured to use the same ID
      */
-    private final Map<String,ReferencedSite> idMap =
-        Collections.synchronizedMap(new HashMap<String,ReferencedSite>());
+    private final Map<String,Site> idMap =
+        Collections.synchronizedMap(new HashMap<String,Site>());
     /**
      * Map holding the mappings between entityPrefixes and referenced sites
      */
-    private final Map<String,Collection<ReferencedSite>> prefixMap =
-        Collections.synchronizedMap(new TreeMap<String, Collection<ReferencedSite>>());
+    private final Map<String,Collection<Site>> prefixMap =
+        Collections.synchronizedMap(new TreeMap<String, Collection<Site>>());
     /**
      * This List is used for binary searches within the prefixes to find the
-     * {@link ReferencedSite} to search for a {@link #getEntity(String)}
+     * {@link Site} to search for a {@link #getEntity(String)}
      * request.<b>
      * NOTE: Every access to this list MUST BE synchronised to {@link #prefixMap}
      * TODO: I am quite sure, that there is some ioUtils class that provides
      * both a Map and an sorted List over the keys!
      */
     private final List<String> prefixList = new ArrayList<String>();
-    private final Set<ReferencedSite> noPrefixSites = Collections.synchronizedSet(
-        new HashSet<ReferencedSite>());
+    private final Set<Site> noPrefixSites = Collections.synchronizedSet(
+        new HashSet<Site>());
 
     @Activate
     protected void activate(ComponentContext context) {
@@ -113,20 +113,14 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         }
         this.idMap.clear();
     }
-    @Override
-    public void addReferredSite(String baseUri, Dictionary<String,?> properties) {
-        //TODO: implement
-        throw new UnsupportedOperationException();
 
-    }
-
-    protected void bindReferencedSites(ReferencedSite referencedSite){
+    protected void bindReferencedSites(Site referencedSite){
         log.debug(" ... binding ReferencedSite {}",referencedSite.getId());
         referencedSites.add(referencedSite);
         idMap.put(referencedSite.getId(), referencedSite);
         addEntityPrefixes(referencedSite);
     }
-    protected void unbindReferencedSites(ReferencedSite referencedSite){
+    protected void unbindReferencedSites(Site referencedSite){
         log.debug(" ... unbinding ReferencedSite {}",referencedSite.getId());
         referencedSites.remove(referencedSite);
         idMap.remove(referencedSite.getId());
@@ -136,7 +130,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
      * Adds the prefixes of the parsed Site to the Map holding the according mappings
      * @param referencedSite
      */
-    private void addEntityPrefixes(ReferencedSite referencedSite) {
+    private void addEntityPrefixes(Site referencedSite) {
         String[] prefixArray = referencedSite.getConfiguration().getEntityPrefixes();
         if(prefixArray == null || prefixArray.length < 1){
             synchronized (prefixMap) {
@@ -146,9 +140,9 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
             //use a set to iterate to remove possible duplicates
             for(String prefix : new HashSet<String>(Arrays.asList(prefixArray))){
                 synchronized (prefixMap) {
-                    Collection<ReferencedSite> sites = prefixMap.get(prefix);
+                    Collection<Site> sites = prefixMap.get(prefix);
                     if(sites == null){
-                        sites = new CopyOnWriteArrayList<ReferencedSite>();
+                        sites = new CopyOnWriteArrayList<Site>();
                         prefixMap.put(prefix, sites);
                         //this also means that the prefix is not part of the prefixList
                         int pos = Collections.binarySearch(prefixList, prefix);
@@ -167,7 +161,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
      * Removes the prefixes of the parsed Site to the Map holding the according mappings
      * @param referencedSite
      */
-    private void removeEntityPrefixes(ReferencedSite referencedSite) {
+    private void removeEntityPrefixes(Site referencedSite) {
         String[] prefixes = referencedSite.getConfiguration().getEntityPrefixes();
         if(prefixes == null || prefixes.length < 1){
             synchronized (prefixMap) {
@@ -176,7 +170,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         } else {
             for(String prefix : prefixes){
                 synchronized (prefixMap) {
-                    Collection<ReferencedSite> sites = prefixMap.get(prefix);
+                    Collection<Site> sites = prefixMap.get(prefix);
                     if(sites != null){
                         sites.remove(referencedSite);
                         if(sites.isEmpty()){
@@ -191,11 +185,11 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         }
     }
     @Override
-    public ReferencedSite getReferencedSite(String id) {
+    public Site getSite(String id) {
         return idMap.get(id);
     }
     @Override
-    public Collection<String> getReferencedSiteIds() {
+    public Collection<String> getSiteIds() {
         return Collections.unmodifiableCollection(idMap.keySet());
     }
 
@@ -204,7 +198,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         return idMap.containsKey(id);
     }
     @Override
-    public Collection<ReferencedSite> getReferencedSitesByEntityPrefix(String entityUri) {
+    public Collection<Site> getSitesByEntityPrefix(String entityUri) {
         if(entityUri == null){
             log.warn("NULL value parsed for Parameter entityUri -> return emptyList!");
             return Collections.emptyList();
@@ -236,9 +230,9 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                 String prefix = prefixList.get(prefixPos);
                 if(entityUri.startsWith(prefix)){
                     log.debug("Found prefix {} for Entity {}",prefix,entityUri);
-                    Collection<ReferencedSite> prefixSites = prefixMap.get(prefix);
-                    Collection<ReferencedSite> sites = 
-                        new ArrayList<ReferencedSite>(noPrefixSites.size()+prefixSites.size());
+                    Collection<Site> prefixSites = prefixMap.get(prefix);
+                    Collection<Site> sites = 
+                        new ArrayList<Site>(noPrefixSites.size()+prefixSites.size());
                     sites.addAll(prefixSites);
                     sites.addAll(noPrefixSites);
                     return Collections.unmodifiableCollection(sites);
@@ -262,7 +256,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         //the first Site that contributes results
         FieldQuery processedQuery = null;
         FieldQuery queryWithResults = null; 
-        for(ReferencedSite site : referencedSites){
+        for(Site site : referencedSites){
             if(site.supportsSearch()){
                 log.debug(" > query site {}",site.getId());
                 try {
@@ -276,7 +270,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                     for(String entityId : results){
                         entityIds.add(entityId);
                     }
-                } catch (ReferencedSiteException e) {
+                } catch (SiteException e) {
                     log.warn("Unable to access Site "+site.getConfiguration().getName()+
                         " (id = "+site.getId()+")",e);
                 }
@@ -301,7 +295,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         //the first Site that contributes results
         FieldQuery processedQuery = null;
         FieldQuery queryWithResults = null; 
-        for(ReferencedSite site : referencedSites){
+        for(Site site : referencedSites){
             if(site.supportsSearch()){
                 log.debug(" > query site {}",site.getId());
                 try {
@@ -321,7 +315,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                             		rep.getId(),site.getConfiguration().getName());
                         }
                     }
-                } catch (ReferencedSiteException e) {
+                } catch (SiteException e) {
                     log.warn("Unable to access Site "+site.getConfiguration().getName()+
                         " (id = "+site.getId()+")",e);
                 }
@@ -346,7 +340,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         FieldQuery processedQuery = null;
         FieldQuery queryWithResults = null; 
         Set<Entity> entities = new HashSet<Entity>();
-        for(ReferencedSite site : referencedSites){
+        for(Site site : referencedSites){
             if(site.supportsSearch()){ //do not search on sites that do not support it
                 log.debug(" > query site {}",site.getId());
                 try {
@@ -368,7 +362,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                             		rep.getId(),site.getConfiguration().getName());
                         }
                     }
-                } catch (ReferencedSiteException e) {
+                } catch (SiteException e) {
                     log.warn("Unable to access Site "+site.getConfiguration().getName()+
                         " (id = "+site.getId()+")",e);
                 }
@@ -384,13 +378,13 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
     }
     @Override
     public InputStream getContent(String entityId, String contentType) {
-        Collection<ReferencedSite> sites = getReferencedSitesByEntityPrefix(entityId);
+        Collection<Site> sites = getSitesByEntityPrefix(entityId);
         if(sites.isEmpty()){
             log.info("No Referenced Site registered for Entity {}",entityId);
             log.debug("Registered Prefixes {}",prefixList);
             return null;
         }
-        for(ReferencedSite site : sites){
+        for(Site site : sites){
             InputStream content;
             try {
                 content = site.getContent(entityId, contentType);
@@ -399,7 +393,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                         new Object[]{contentType,entityId,site.getConfiguration().getName()});
                     return content;
                 }
-            } catch (ReferencedSiteException e) {
+            } catch (SiteException e) {
                 log.warn("Unable to access Site "+site.getConfiguration().getName()+
                     " (id = "+site.getId()+")",e);
             }
@@ -410,13 +404,13 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
     }
     @Override
     public Entity getEntity(String entityId) {
-        Collection<ReferencedSite> sites = getReferencedSitesByEntityPrefix(entityId);
+        Collection<Site> sites = getSitesByEntityPrefix(entityId);
         if(sites.isEmpty()){
             log.info("No Referenced Site registered for Entity {}",entityId);
             log.debug("Registered Prefixes {}",prefixList);
             return null;
         }
-        for(ReferencedSite site : sites){
+        for(Site site : sites){
             Entity entity;
             try {
                 entity = site.getEntity(entityId);
@@ -425,7 +419,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                         site.getConfiguration().getName(),entityId);
                     return entity;
                 }
-            } catch (ReferencedSiteException e) {
+            } catch (SiteException e) {
                 log.warn("Unable to access Site "+site.getConfiguration().getName()+
                     " (id = "+site.getId()+")",e);
             }

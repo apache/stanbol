@@ -54,8 +54,11 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.ManagedSiteConfiguration;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
+import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
@@ -102,7 +105,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
      * The site manager is used to search for entities within the Entityhub framework
      */
     @Reference // 1..1, static
-    private ReferencedSiteManager siteManager;
+    private SiteManager siteManager;
 
     private static final String DEFAULT_MANAGED_ENTITY_PREFIX = "entity";
     private static final String DEFAULT_MAPPING_PREFIX = "mapping";
@@ -442,7 +445,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         if(remoteEntity == null){
             return null;
         }
-        ReferencedSite site = siteManager.getReferencedSite(remoteEntity.getSite());
+        Site site = siteManager.getSite(remoteEntity.getSite());
         if(site == null){
             log.warn("Unable to import Entity {} because the ReferencedSite {} is currently not active -> return null",
                 remoteEntity.getId(),remoteEntity.getSite());
@@ -467,7 +470,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         return localEntity;
     }
     /**
-     * Imports a {@link Entity} from a {@link ReferencedSite}. This Method imports
+     * Imports a {@link Entity} from a {@link Site}. This Method imports
      * the {@link Representation} by applying all configured mappings. It also
      * sets the {@link ManagedEntityState} to the configured default value by the 
      * referenced site of the imported entity or the default for the Entityhub 
@@ -478,11 +481,13 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
      * @param valueFactory the valusFactory used to create instance while importing
      */
     private void importEntity(Entity remoteEntity,
-                              ReferencedSite site,
+                              Site site,
                               Entity localEntity,
                               ValueFactory valueFactory) {
         
-        ManagedEntityState state = site.getConfiguration().getDefaultManagedEntityState();
+        SiteConfiguration siteConfig = site.getConfiguration();
+        ManagedEntityState state;
+        state = siteConfig.getDefaultManagedEntityState();
         if(state == null){
             state =  config.getDefaultManagedEntityState();
         }
@@ -518,18 +523,19 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
      */
     private EntityMapping establishMapping(Entity localEntity,
                                            Entity remoteEntity,
-                                           ReferencedSite site,
+                                           Site site,
                                            Entity entityMappingEntity) {
         EntityMapping entityMapping = EntityMapping.init(entityMappingEntity);
         //now init the mappingState and the expireDate based on the config of the
         //ReferencedSite of the source entity (considering also the defaults of the entityhub)
-        MappingState mappingState = site.getConfiguration().getDefaultMappedEntityState();
+        SiteConfiguration siteConfig = site.getConfiguration();
+        MappingState mappingState = siteConfig.getDefaultMappedEntityState();
         if(mappingState == null){
             mappingState = config.getDefaultMappingState();
         }
         entityMapping.setState(mappingState);
-        long expireDuration = site.getConfiguration().getDefaultExpireDuration();
-        if(expireDuration < 0){
+        long expireDuration = siteConfig.getDefaultExpireDuration();
+        if(expireDuration > 0){
             Date expireDate = new Date(System.currentTimeMillis()+expireDuration);
             entityMapping.setExpires(expireDate);
         }

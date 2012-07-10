@@ -23,9 +23,11 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -76,7 +78,7 @@ import org.slf4j.LoggerFactory;
             //finally this also supports sending the data as form and mime multipart
             MediaType.APPLICATION_FORM_URLENCODED, 
             MediaType.MULTIPART_FORM_DATA})
-public class RepresentationReader implements MessageBodyReader<Set<Representation>> {
+public class RepresentationReader implements MessageBodyReader<Map<String,Representation>> {
     
     private static final Logger log = LoggerFactory.getLogger(RepresentationReader.class);
     @Context
@@ -99,7 +101,8 @@ public class RepresentationReader implements MessageBodyReader<Set<Representatio
     
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        boolean typeOK;
+        boolean keyOK;
+        boolean valueOK;
         String mediaTypeWithoutParameter = 
             mediaType.getType().toLowerCase()+'/'+
             mediaType.getSubtype().toLowerCase();
@@ -107,17 +110,20 @@ public class RepresentationReader implements MessageBodyReader<Set<Representatio
             genericType,mediaTypeWithoutParameter);
         //first check the parsed type
         if(genericType instanceof ParameterizedType && 
-                ((ParameterizedType)genericType).getActualTypeArguments().length > 0){
+                ((ParameterizedType)genericType).getActualTypeArguments().length > 1){
             //both the raw type MUST BE compatible with Set and the
             //generic type MUST BE compatible with Representation
             //e.g to support method declarations like
             // public <T extends Collection> store(T<? extends Representation> representations){...}
-            typeOK = JerseyUtils.testType(Set.class, ((ParameterizedType)genericType).getRawType()) &&
-                JerseyUtils.testType(Representation.class, ((ParameterizedType)genericType).getActualTypeArguments()[0]);
+            keyOK = JerseyUtils.testType(Map.class, ((ParameterizedType)genericType).getRawType()) &&
+                JerseyUtils.testType(String.class, ((ParameterizedType)genericType).getActualTypeArguments()[0]);
+            valueOK = JerseyUtils.testType(Representation.class, ((ParameterizedType)genericType).getActualTypeArguments()[1]);
         } else if(genericType instanceof Class<?>){
-            typeOK = Set.class.isAssignableFrom((Class<?>)genericType);
+            keyOK = Map.class.isAssignableFrom((Class<?>)genericType);
+            valueOK = true; //not needed
         } else {//No Idea what that means
-            typeOK = false;
+            keyOK = false;
+            valueOK = false;
         }
         //second the media type
         boolean mediaTypeOK = (//the MimeTypes of Representations
@@ -126,17 +132,19 @@ public class RepresentationReader implements MessageBodyReader<Set<Representatio
                 MediaType.APPLICATION_FORM_URLENCODED.equals(mediaTypeWithoutParameter) ||
                 //and mime multipart
                 MediaType.MULTIPART_FORM_DATA.equals(mediaTypeWithoutParameter));
-        log.debug("  > java-type: {}, media-type {}",typeOK,mediaTypeOK);
-        return typeOK && mediaTypeOK;
+        log.debug("  > java-type: {}, media-type {}",keyOK,mediaTypeOK);
+        return keyOK && valueOK && mediaTypeOK;
     }
 
     @Override
-    public Set<Representation> readFrom(Class<Set<Representation>> type,
+    public Map<String,Representation> readFrom(Class<Map<String,Representation>> type,
                                    Type genericType,
                                    Annotation[] annotations,
                                    MediaType mediaType,
                                    MultivaluedMap<String,String> httpHeaders,
                                    InputStream entityStream) throws IOException, WebApplicationException {
+        log.info("Read Representations from Request Data");
+        long start = System.currentTimeMillis();
         //(1) get the charset and the acceptedMediaType
         String charset = "UTF-8";
         if(mediaType.getParameters().containsKey("charset")){
@@ -233,17 +241,22 @@ public class RepresentationReader implements MessageBodyReader<Set<Representatio
         } else {
             content = new RequestData(mediaType, null, entityStream);
         }
-        return parseFromContent(content,acceptedMediaType);
+        long readingCompleted = System.currentTimeMillis();
+        log.info("   ... reading request data {}ms",readingCompleted-start);
+        Map<String,Representation> parsed = parseFromContent(content,acceptedMediaType);
+        long parsingCompleted = System.currentTimeMillis();
+        log.info("   ... parsing data {}ms",parsingCompleted-readingCompleted);
+        return parsed;
     }
     
-    public Set<Representation> parseFromContent(RequestData content, MediaType acceptedMediaType){
+    public Map<String,Representation> parseFromContent(RequestData content, MediaType acceptedMediaType){
         // (3) Parse the Representtion(s) form the entity stream
         if(content.getMediaType().isCompatible(MediaType.APPLICATION_JSON_TYPE)){
             //parse from json
             throw new UnsupportedOperationException("Parsing of JSON not yet implemented :(");
        } else if(isSupported(content.getMediaType())){ //from RDF serialisation
             RdfValueFactory valueFactory = RdfValueFactory.getInstance();
-            Set<Representation> representations = new HashSet<Representation>();
+            Map<String,Representation> representations = new HashMap<String,Representation>();
             Set<NonLiteral> processed = new HashSet<NonLiteral>();
             Parser parser = ContextHelper.getServiceFromContext(Parser.class, servletContext);
             MGraph graph = new IndexedMGraph();
@@ -276,7 +289,7 @@ public class RepresentationReader implements MessageBodyReader<Set<Representatio
                 NonLiteral resource = st.next().getSubject();
                 if(resource instanceof UriRef && processed.add(resource)){
                     //build a new representation
-                    representations.add(
+                    representations.put(((UriRef)resource).getUnicodeString(),
                         valueFactory.createRdfRepresentation((UriRef)resource, graph));
                 }
             }

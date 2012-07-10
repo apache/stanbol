@@ -16,9 +16,25 @@
  */
 package org.apache.stanbol.entityhub.core.impl;
 
+import static java.util.Collections.singletonMap;
+import static org.apache.stanbol.entityhub.core.utils.SiteUtils.extractSiteMetadata;
+import static org.apache.stanbol.entityhub.core.utils.SiteUtils.initEntityMetadata;
+import static org.apache.stanbol.entityhub.servicesapi.site.Site.PROHIBITED_SITE_IDS;
+import static org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration.ACCESS_URI;
+import static org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration.CACHE_ID;
+import static org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration.CACHE_STRATEGY;
+import static org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration.DEFAULT_EXPIRE_DURATION;
+import static org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration.DEFAULT_MAPPING_STATE;
+import static org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration.DEFAULT_SYMBOL_STATE;
+import static org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration.ENTITY_DEREFERENCER_TYPE;
+import static org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration.ENTITY_SEARCHER_TYPE;
+import static org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration.QUERY_URI;
+import static org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration.SITE_FIELD_MAPPINGS;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -46,7 +62,9 @@ import org.apache.stanbol.entityhub.core.model.EntityImpl;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
+import org.apache.stanbol.entityhub.core.site.ReferencedSiteConfigurationImpl;
 import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
+import org.apache.stanbol.entityhub.core.utils.SiteUtils;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
@@ -60,8 +78,9 @@ import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.site.EntityDereferencer;
 import org.apache.stanbol.entityhub.servicesapi.site.EntitySearcher;
 import org.apache.stanbol.entityhub.servicesapi.site.License;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
+import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.yard.Cache;
 import org.apache.stanbol.entityhub.servicesapi.yard.CacheStrategy;
@@ -83,11 +102,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This in the Default implementation of the {@link ReferencedSite} interface.
+ * This in the Default implementation of the {@link Site} interface.
  * However this implementation forwards calls to methods defined within the
  * {@link EntityDereferencer} and {@link EntitySearcher} to sub components
  * (See the detailed description below).<p>
- * Each {@link ReferencedSite} with an {@link CacheStrategy} other than
+ * Each {@link Site} with an {@link CacheStrategy} other than
  * {@link CacheStrategy#none} needs an associated {@link Cache}.
  * <p>
  * The Initialisation of the sub-components:
@@ -137,92 +156,92 @@ import org.slf4j.LoggerFactory;
         metatype = true,
         immediate = true
         )
-@Service(value=ReferencedSite.class)
+@Service(value=Site.class)
 @Properties(value={
         @Property(name=SiteConfiguration.ID),
         @Property(name=SiteConfiguration.NAME),
         @Property(name=SiteConfiguration.DESCRIPTION),
         @Property(name=SiteConfiguration.ENTITY_PREFIX, cardinality=1000),
-        @Property(name=SiteConfiguration.ACCESS_URI),
-        @Property(name=SiteConfiguration.ENTITY_DEREFERENCER_TYPE,
+        @Property(name=ACCESS_URI),
+        @Property(name=ENTITY_DEREFERENCER_TYPE,
             options={
                 @PropertyOption(
-                        value='%'+SiteConfiguration.ENTITY_DEREFERENCER_TYPE+".option.none",
+                        value='%'+ENTITY_DEREFERENCER_TYPE+".option.none",
                         name=""),
                 @PropertyOption(
-                    value='%'+SiteConfiguration.ENTITY_DEREFERENCER_TYPE+".option.sparql",
+                    value='%'+ENTITY_DEREFERENCER_TYPE+".option.sparql",
                     name="org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer"),
                 @PropertyOption(
-                        value='%'+SiteConfiguration.ENTITY_DEREFERENCER_TYPE+".option.coolUri",
+                        value='%'+ReferencedSiteConfiguration.ENTITY_DEREFERENCER_TYPE+".option.coolUri",
                         name="org.apache.stanbol.entityhub.dereferencer.CoolUriDereferencer")
             },value="org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer"),
-        @Property(name=SiteConfiguration.QUERY_URI), //the deri server has better performance
-        @Property(name=SiteConfiguration.ENTITY_SEARCHER_TYPE,
+        @Property(name=QUERY_URI), //the deri server has better performance
+        @Property(name=ENTITY_SEARCHER_TYPE,
             options={
                 @PropertyOption(
-                        value='%'+SiteConfiguration.ENTITY_SEARCHER_TYPE+".option.none",
+                        value='%'+ENTITY_SEARCHER_TYPE+".option.none",
                         name=""),
                 @PropertyOption(
-                    value='%'+SiteConfiguration.ENTITY_SEARCHER_TYPE+".option.sparql",
+                    value='%'+ENTITY_SEARCHER_TYPE+".option.sparql",
                     name="org.apache.stanbol.entityhub.searcher.SparqlSearcher"),
                 @PropertyOption(
-                        value='%'+SiteConfiguration.ENTITY_SEARCHER_TYPE+".option.sparql-virtuoso",
+                        value='%'+ENTITY_SEARCHER_TYPE+".option.sparql-virtuoso",
                         name="org.apache.stanbol.entityhub.searcher.VirtuosoSearcher"),
                 @PropertyOption(
-                        value='%'+SiteConfiguration.ENTITY_SEARCHER_TYPE+".option.sparql-larq",
+                        value='%'+ENTITY_SEARCHER_TYPE+".option.sparql-larq",
                         name="org.apache.stanbol.entityhub.searcher.LarqSearcher")
             },value="org.apache.stanbol.entityhub.searcher.SparqlSearcher"),
-        @Property(name=SiteConfiguration.DEFAULT_SYMBOL_STATE,
+        @Property(name=DEFAULT_SYMBOL_STATE,
             options={
                 @PropertyOption( //seems, that name and value are exchanged ...
-                        value='%'+SiteConfiguration.DEFAULT_SYMBOL_STATE+".option.proposed",
+                        value='%'+DEFAULT_SYMBOL_STATE+".option.proposed",
                         name="proposed"),
                 @PropertyOption(
-                        value='%'+SiteConfiguration.DEFAULT_SYMBOL_STATE+".option.active",
+                        value='%'+DEFAULT_SYMBOL_STATE+".option.active",
                         name="active")
                 //the other states make no sense for new symbols
             }, value="proposed"),
-        @Property(name=SiteConfiguration.DEFAULT_MAPPING_STATE,
+        @Property(name=DEFAULT_MAPPING_STATE,
             options={
                 @PropertyOption(
-                        value='%'+SiteConfiguration.DEFAULT_MAPPING_STATE+".option.proposed",
+                        value='%'+DEFAULT_MAPPING_STATE+".option.proposed",
                         name="proposed"),
                 @PropertyOption(
-                        value='%'+SiteConfiguration.DEFAULT_MAPPING_STATE+".option.confirmed",
+                        value='%'+DEFAULT_MAPPING_STATE+".option.confirmed",
                         name="confirmed")
                 //the other states make no sense for new symbols
             }, value="proposed"),
-        @Property(name=SiteConfiguration.DEFAULT_EXPIRE_DURATION,
+        @Property(name=DEFAULT_EXPIRE_DURATION,
             options={
                 @PropertyOption(
-                        value='%'+SiteConfiguration.DEFAULT_EXPIRE_DURATION+".option.oneMonth",
+                        value='%'+DEFAULT_EXPIRE_DURATION+".option.oneMonth",
                         name=""+(1000L*60*60*24*30)),
                 @PropertyOption(
-                        value='%'+SiteConfiguration.DEFAULT_EXPIRE_DURATION+".option.halfYear",
+                        value='%'+DEFAULT_EXPIRE_DURATION+".option.halfYear",
                         name=""+(1000L*60*60*24*183)),
                 @PropertyOption(
-                        value='%'+SiteConfiguration.DEFAULT_EXPIRE_DURATION+".option.oneYear",
+                        value='%'+DEFAULT_EXPIRE_DURATION+".option.oneYear",
                         name=""+(1000L*60*60*24*365)),
                 @PropertyOption(
-                        value='%'+SiteConfiguration.DEFAULT_EXPIRE_DURATION+".option.none",
+                        value='%'+DEFAULT_EXPIRE_DURATION+".option.none",
                         name="0")
             }, value="0"),
-        @Property(name=SiteConfiguration.CACHE_STRATEGY,
+        @Property(name=CACHE_STRATEGY,
             options={
                 @PropertyOption(
-                        value='%'+SiteConfiguration.CACHE_STRATEGY+".option.none",
+                        value='%'+CACHE_STRATEGY+".option.none",
                         name="none"),
                 @PropertyOption(
-                        value='%'+SiteConfiguration.CACHE_STRATEGY+".option.used",
+                        value='%'+CACHE_STRATEGY+".option.used",
                         name="used"),
                 @PropertyOption(
-                        value='%'+SiteConfiguration.CACHE_STRATEGY+".option.all",
+                        value='%'+CACHE_STRATEGY+".option.all",
                         name="all")
             }, value="none"),
-        @Property(name=SiteConfiguration.CACHE_ID),
-        @Property(name=SiteConfiguration.SITE_FIELD_MAPPINGS,cardinality=1000)
+        @Property(name=CACHE_ID),
+        @Property(name=SITE_FIELD_MAPPINGS,cardinality=1000)
         })
-public class ReferencedSiteImpl implements ReferencedSite {
+public class ReferencedSiteImpl implements Site {
     static final int maxInt = Integer.MAX_VALUE;
     private final Logger log;
     private ComponentContext context;
@@ -243,7 +262,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
 
     private ServiceTracker cacheTracker;
     
-    private SiteConfiguration siteConfiguration;
+    private ReferencedSiteConfiguration siteConfiguration;
     /**
      * Stores keys -> values to be added to the metadata of {@link Entity Entities}
      * created by this site.
@@ -281,7 +300,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
         return siteConfiguration.getId();
     }
     @Override
-    public QueryResultList<Entity> findEntities(FieldQuery query) throws ReferencedSiteException {
+    public QueryResultList<Entity> findEntities(FieldQuery query) throws SiteException {
         List<Entity> results;
         if(siteConfiguration.getCacheStrategy() == CacheStrategy.all){
             //TODO: check if query can be executed based on the base configuration of the Cache
@@ -294,12 +313,13 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     for(Representation result : representations){
                         Entity entity = new EntityImpl(getId(),result,null);
                         results.add(entity);
-                        initEntityMetadata(entity,true);
+                        initEntityMetadata(entity, siteMetadata,
+                            singletonMap(RdfResourceEnum.isChached.getUri(), (Object)Boolean.TRUE));
                     }
                     return new QueryResultListImpl<Entity>(query, results, Entity.class);
                 } catch (YardException e) {
                     if(siteConfiguration.getEntitySearcherType()==null || isOfflineMode()){
-                        throw new ReferencedSiteException("Unable to execute query on Cache "+siteConfiguration.getCacheId(),e);
+                        throw new SiteException("Unable to execute query on Cache "+siteConfiguration.getCacheId(),e);
                     } else {
                         log.warn(String.format("Error while performing query on Cache %s! Try to use remote site %s as fallback!",
                             siteConfiguration.getCacheId(),siteConfiguration.getQueryUri()),e);
@@ -307,7 +327,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 }
             } else {
                 if(siteConfiguration.getEntitySearcherType()==null || isOfflineMode()){
-                    throw new ReferencedSiteException(String.format("Unable to execute query on Cache %s because it is currently not active",
+                    throw new SiteException(String.format("Unable to execute query on Cache %s because it is currently not active",
                         siteConfiguration.getCacheId()));
                 } else {
                     log.warn(String.format("Cache %s currently not active will query remote Site %s as fallback",
@@ -317,7 +337,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
         QueryResultList<String> entityIds;
         if(entitySearcher == null) {
-            throw new ReferencedSiteException(
+            throw new SiteException(
                 String.format("EntitySearcher %s not available for remote site %s!",siteConfiguration.getEntitySearcherType(),
                     siteConfiguration.getQueryUri()));
         }
@@ -325,13 +345,13 @@ public class ReferencedSiteImpl implements ReferencedSite {
         try {
             entityIds = entitySearcher.findEntities(query);
         } catch (IOException e) {
-            throw new ReferencedSiteException(String.format("Unable to execute query on remote site %s with entitySearcher %s!",
+            throw new SiteException(String.format("Unable to execute query on remote site %s with entitySearcher %s!",
                     siteConfiguration.getQueryUri(),siteConfiguration.getEntitySearcherType()), e);
         }
         int numResults = entityIds.size();
         List<Entity> entities = new ArrayList<Entity>(numResults);
         int errors = 0;
-        ReferencedSiteException lastError = null;
+        SiteException lastError = null;
         for(String id : entityIds){
             Entity entity;
             try {
@@ -342,7 +362,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 entities.add(entity);
                 //use the position in the list as resultSocre
                 entity.getRepresentation().set(RdfResourceEnum.resultScore.getUri(), Float.valueOf((float)numResults));
-            } catch (ReferencedSiteException e) {
+            } catch (SiteException e) {
                 lastError = e;
                 errors++;
                 log.warn(String.format("Unable to get Representation for Entity %s. -> %d Error%s for %d Entities in QueryResult (Reason:%s)",
@@ -353,7 +373,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
         if(lastError != null){
             if(entities.isEmpty()){
-                throw new ReferencedSiteException("Unable to get anly Representations for Entities selected by the parsed Query (Root-Cause is the last Exception trown)",lastError);
+                throw new SiteException("Unable to get anly Representations for Entities selected by the parsed Query (Root-Cause is the last Exception trown)",lastError);
             } else {
                 log.warn(String.format("Unable to get %d/%d Represetnations for selected Entities.",errors,entityIds.size()));
                 log.warn("Stack trace of the last Exception:",lastError);
@@ -362,7 +382,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
         return new QueryResultListImpl<Entity>(query, entities,Entity.class);
     }
     @Override
-    public QueryResultList<Representation> find(FieldQuery query) throws ReferencedSiteException{
+    public QueryResultList<Representation> find(FieldQuery query) throws SiteException{
         if(siteConfiguration.getCacheStrategy() == CacheStrategy.all){
             //TODO: check if query can be executed based on the base configuration of the Cache
             Cache cache = getCache();
@@ -371,7 +391,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     return cache.find(query);
                 } catch (YardException e) {
                     if(siteConfiguration.getEntitySearcherType()==null || isOfflineMode()){
-                        throw new ReferencedSiteException("Unable to execute query on Cache "+siteConfiguration.getCacheId(),e);
+                        throw new SiteException("Unable to execute query on Cache "+siteConfiguration.getCacheId(),e);
                     } else {
                         log.warn(String.format("Error while performing query on Cache %s! Try to use remote site %s as fallback!",
                             siteConfiguration.getCacheId(),siteConfiguration.getQueryUri()),e);
@@ -379,7 +399,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 }
             } else {
                 if(siteConfiguration.getEntitySearcherType()==null || isOfflineMode()){
-                    throw new ReferencedSiteException(String.format("Unable to execute query because Cache %s is currently not active",
+                    throw new SiteException(String.format("Unable to execute query because Cache %s is currently not active",
                         siteConfiguration.getCacheId()));
                 } else {
                     log.warn(String.format("Cache %s currently not active will query remote Site %s as fallback",
@@ -388,7 +408,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
             }
         }
         if(entitySearcher == null){
-            throw new ReferencedSiteException(
+            throw new SiteException(
                 String.format("EntitySearcher %s not available for remote site %s!",siteConfiguration.getEntitySearcherType(),
                     siteConfiguration.getQueryUri()));
         }
@@ -396,12 +416,12 @@ public class ReferencedSiteImpl implements ReferencedSite {
         try {
             return entitySearcher.find(query);
         } catch (IOException e) {
-            throw new ReferencedSiteException("Unable execute Query on remote site "+
+            throw new SiteException("Unable execute Query on remote site "+
                 siteConfiguration.getQueryUri(),e);
         }
     }
     @Override
-    public QueryResultList<String> findReferences(FieldQuery query) throws ReferencedSiteException {
+    public QueryResultList<String> findReferences(FieldQuery query) throws SiteException {
         if(siteConfiguration.getCacheStrategy() == CacheStrategy.all){
             //TODO: check if query can be executed based on the base configuration of the Cache
             Cache cache = getCache();
@@ -410,7 +430,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     return cache.findReferences(query);
                 } catch (YardException e) {
                     if(siteConfiguration.getEntitySearcherType()==null || isOfflineMode()){
-                        throw new ReferencedSiteException("Unable to execute query on Cache "+siteConfiguration.getCacheId(),e);
+                        throw new SiteException("Unable to execute query on Cache "+siteConfiguration.getCacheId(),e);
                     } else {
                         log.warn(String.format("Error while performing query on Cache %s! Try to use remote site %s as fallback!",
                             siteConfiguration.getCacheId(),siteConfiguration.getQueryUri()),e);
@@ -418,7 +438,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 }
             } else {
                 if(siteConfiguration.getEntitySearcherType()==null  || isOfflineMode()){
-                    throw new ReferencedSiteException(
+                    throw new SiteException(
                         String.format("Unable to execute query on Cache %s because it is currently not active",
                             siteConfiguration.getCacheId()));
                 } else {
@@ -428,7 +448,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
             }
         }
         if(entitySearcher == null){
-            throw new ReferencedSiteException(
+            throw new SiteException(
                 String.format("EntitySearcher %s not available for remote site %s!",siteConfiguration.getEntitySearcherType(),
                     siteConfiguration.getQueryUri()));
         }
@@ -436,19 +456,19 @@ public class ReferencedSiteImpl implements ReferencedSite {
         try {
             return entitySearcher.findEntities(query);
         } catch (IOException e) {
-            throw new ReferencedSiteException("Unable execute Query on remote site "+
+            throw new SiteException("Unable execute Query on remote site "+
                 siteConfiguration.getQueryUri(),e);
         }
     }
     @Override
-    public InputStream getContent(String id, String contentType) throws ReferencedSiteException {
+    public InputStream getContent(String id, String contentType) throws SiteException {
         if(siteConfiguration.getEntityDereferencerType() == null){
-            throw new ReferencedSiteException(
+            throw new SiteException(
                 String.format("Unable to get Content for Entity %s because No dereferencer configured for ReferencedSite %s",
                     id,getId()));
         }
         if(dereferencer == null){
-            throw new ReferencedSiteException(
+            throw new SiteException(
                 String.format("Dereferencer %s for remote site %s is not available",siteConfiguration.getEntityDereferencerType(),
                 siteConfiguration.getAccessUri()));
         }
@@ -456,13 +476,13 @@ public class ReferencedSiteImpl implements ReferencedSite {
         try {
             return dereferencer.dereference(id, contentType);
         } catch (IOException e) {
-            throw new ReferencedSiteException(
+            throw new SiteException(
                 String.format("Unable to load content for Entity %s and mediaType %s from remote site %s by using dereferencer %s",
                     id,contentType,siteConfiguration.getAccessUri(),siteConfiguration.getEntityDereferencerType()),e);
         }
     }
     @Override
-    public Entity getEntity(String id) throws ReferencedSiteException {
+    public Entity getEntity(String id) throws SiteException {
         Cache cache = getCache();
         Entity entity = null;
         long start = System.currentTimeMillis();
@@ -471,13 +491,14 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 Representation rep = cache.getRepresentation(id);
                 if(rep != null){
                    entity = new EntityImpl(getId(), rep, null);
-                   initEntityMetadata(entity, true);
+                   initEntityMetadata(entity, siteMetadata,
+                       singletonMap(RdfResourceEnum.isChached.getUri(), (Object)Boolean.TRUE));
                 } else if(siteConfiguration.getCacheStrategy() == CacheStrategy.all){
                     return null; //do no remote lokkups on CacheStrategy.all!!
                 }
             } catch (YardException e) {
                 if (siteConfiguration.getEntityDereferencerType() == null || isOfflineMode()) {
-                    throw new ReferencedSiteException(String.format("Unable to get Represetnation %s form Cache %s",
+                    throw new SiteException(String.format("Unable to get Represetnation %s form Cache %s",
                         id, siteConfiguration.getCacheId()), e);
                 } else {
                     log.warn(String.format("Unable to get Represetnation %s form Cache %s. Will dereference from remote site %s",
@@ -486,7 +507,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
             }
         } else {
             if (siteConfiguration.getEntityDereferencerType() == null || isOfflineMode()) {
-                throw new ReferencedSiteException(String.format("Unable to get Represetnation %s because configured Cache %s is currently not available",
+                throw new SiteException(String.format("Unable to get Represetnation %s because configured Cache %s is currently not available",
                         id, siteConfiguration.getCacheId()));
             } else {
                 log.warn(String.format("Cache %s is currently not available. Will use remote site %s to load Representation %s",
@@ -495,7 +516,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
         if (entity == null) { // no cache or not found in cache
             if(dereferencer == null){
-                throw new ReferencedSiteException(String.format("Entity Dereferencer %s for accessing remote site %s is not available",
+                throw new SiteException(String.format("Entity Dereferencer %s for accessing remote site %s is not available",
                     siteConfiguration.getEntityDereferencerType(),siteConfiguration.getAccessUri()));
             }
             ensureOnline(siteConfiguration.getAccessUri(), dereferencer.getClass());
@@ -503,7 +524,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
             try {
                 rep = dereferencer.dereference(id);
             } catch (IOException e) {
-                throw new ReferencedSiteException(
+                throw new SiteException(
                     String.format("Unable to load Representation for entity %s form remote site %s with dereferencer %s",
                         id, siteConfiguration.getAccessUri(), siteConfiguration.getEntityDereferencerType()), e);
             }
@@ -523,7 +544,8 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     }
                 }
                 entity = new EntityImpl(getId(), rep, null);
-                initEntityMetadata(entity, cachedVersion);
+                initEntityMetadata(entity, siteMetadata,
+                	singletonMap(RdfResourceEnum.isChached.getUri(), (Object)cachedVersion));
             }
         } else {
             log.debug("  - loaded Representation {} from Cache in {} ms",
@@ -531,22 +553,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
         return entity;
     }
-    /**
-     * Initialises the {@link Entity#getMetadata()} with the properties
-     * configured for this site (attribution and license information)
-     * @param entity the entity
-     * @param of this Entity is locally cached or not. If <code>null</code>
-     * this information is not set in the metadata.
-     */
-    private void initEntityMetadata(Entity entity, Boolean isChached) {
-        Representation metadata = entity.getMetadata();
-        if(isChached != null){
-            metadata.set(RdfResourceEnum.isChached.getUri(), isChached);
-        }
-        for(Entry<String,Object> entry : siteMetadata.entrySet()){
-            metadata.add(entry.getKey(), entry.getValue());
-        }
-    }
+
     @Override
     public SiteConfiguration getConfiguration() {
         return siteConfiguration;
@@ -562,8 +569,8 @@ public class ReferencedSiteImpl implements ReferencedSite {
     }
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof ReferencedSite) {
-            SiteConfiguration osc = ((ReferencedSite)obj).getConfiguration();
+        if(obj instanceof Site) {
+            SiteConfiguration osc = ((Site)obj).getConfiguration();
             //this will return false if one of the two sites is not activated
             // -> this should be OK
             return siteConfiguration != null && osc != null &&
@@ -640,15 +647,8 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
         this.context = context;
         //create the SiteConfiguration based on the parsed properties
-        Map<String,Object> config = new HashMap<String,Object>();
-        Dictionary<String,Object> properties = (Dictionary<String,Object>)context.getProperties();
-        //copy the properties to a map
-        for(Enumeration<String> e = properties.keys();e.hasMoreElements();){
-            String key = e.nextElement();
-            config.put(key, properties.get(key));
-        }
         //NOTE that the constructor also validation of the parsed configuration
-        siteConfiguration = new DefaultSiteConfiguration(config);
+        siteConfiguration = new ReferencedSiteConfigurationImpl(context.getProperties());
         if(PROHIBITED_SITE_IDS.contains(siteConfiguration.getId().toLowerCase())){
             throw new ConfigurationException(SiteConfiguration.ID, String.format(
                 "The ID '%s' of this Referenced Site is one of the following " +
@@ -656,34 +656,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 PROHIBITED_SITE_IDS));
         }
         log.info(" > initialise Referenced Site {}",siteConfiguration.getName());
-        siteMetadata = new HashMap<String,Object>();
-        ValueFactory vf = InMemoryValueFactory.getInstance();
-        if(siteConfiguration.getAttribution() != null){
-            siteMetadata.put(NamespaceEnum.cc.getNamespace()+"attributionName", 
-                vf.createText(siteConfiguration.getAttribution()));
-        }
-        if(siteConfiguration.getAttributionUrl() != null){
-            siteMetadata.put(NamespaceEnum.cc.getNamespace()+"attributionURL", 
-                vf.createReference(siteConfiguration.getAttributionUrl()));
-        }
-        //add the licenses
-        if(siteConfiguration.getLicenses() != null){
-            for(License license : siteConfiguration.getLicenses()){
-                if(license.getUrl() != null){
-                    siteMetadata.put(NamespaceEnum.cc.getNamespace()+"license", 
-                        vf.createReference(license.getUrl()));
-                } else if(license.getText() != null){
-                    siteMetadata.put(NamespaceEnum.cc.getNamespace()+"license", 
-                        vf.createText(license.getText()));
-                }
-                //if defined add the name to dc:license
-                if(license.getName() != null){
-                    siteMetadata.put(NamespaceEnum.dcTerms.getNamespace()+"license", 
-                        vf.createText(license.getName()));
-                }
-                //link to the license via cc:license
-            }
-        }
+        this.siteMetadata = extractSiteMetadata(siteConfiguration);
         
         //if the accessUri is the same as the queryUri and both the dereferencer and
         //the entitySearcher uses the same component, than we need only one component
@@ -722,6 +695,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
             cacheTracker.open();
         }
     }
+
 
     /**
      * Initialise the dereferencer and searcher component as soon as the according
@@ -774,7 +748,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
     }
     /**
-     * Creates the entity searcher component used by this {@link ReferencedSite}
+     * Creates the entity searcher component used by this {@link Site}
      * (and configured via the {@link SiteConfiguration#ENTITY_SEARCHER_TYPE} property).<p>
      * If the {@link SiteConfiguration#ENTITY_DEREFERENCER_TYPE} is set to the same vale
      * and the {@link #accessUri} also equals the {@link #queryUri}, than the
@@ -797,7 +771,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
     }
     /**
-     * Creates the entity dereferencer component used by this {@link ReferencedSite}.
+     * Creates the entity dereferencer component used by this {@link Site}.
      * The implementation used as the dereferencer is configured by the
      * {@link SiteConfiguration#ENTITY_DEREFERENCER_TYPE} property.
      * @param factory the component factory used to create the {@link #dereferencer}
@@ -913,17 +887,17 @@ public class ReferencedSiteImpl implements ReferencedSite {
         return offlineMode != null;
     }
     /**
-     * Basically this Method throws an {@link ReferencedSiteException} in case
+     * Basically this Method throws an {@link SiteException} in case
      * Stanbol operates in offline mode
      * @param uri the URI of the remote service
      * @param clazz the clazz of the service that would like to refer the remote
      * service
-     * @throws ReferencedSiteException in case {@link #isOfflineMode()} returns
+     * @throws SiteException in case {@link #isOfflineMode()} returns
      * <code>true</code>
      */
-    private void ensureOnline(String uri, Class<?> clazz) throws ReferencedSiteException {
+    private void ensureOnline(String uri, Class<?> clazz) throws SiteException {
         if(isOfflineMode()){
-            throw new ReferencedSiteException(String.format(
+            throw new SiteException(String.format(
                 "Unable to access remote Service %s by using %s because Stanbol runs in OfflineMode",
                 uri,clazz.getSimpleName()));
         }

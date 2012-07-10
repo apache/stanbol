@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntitySearcher;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;

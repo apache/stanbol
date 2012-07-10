@@ -52,7 +52,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,12 +73,12 @@ public class RelatedKeywordResource extends BaseStanbolResource {
 
     private static String DEFAULT_AUTOCOMPLETE_SEARCH_FIELD = RDFS.label.getUnicodeString();
 
-    private ReferencedSiteManager referencedSiteManager;
+    private SiteManager referencedSiteManager;
 
     private RelatedKeywordSearchManager relatedKeywordSearchManager;
 
     public RelatedKeywordResource(@Context ServletContext context) {
-        referencedSiteManager = ContextHelper.getServiceFromContext(ReferencedSiteManager.class, context);
+        referencedSiteManager = ContextHelper.getServiceFromContext(SiteManager.class, context);
         relatedKeywordSearchManager = ContextHelper.getServiceFromContext(RelatedKeywordSearchManager.class,
             context);
     }

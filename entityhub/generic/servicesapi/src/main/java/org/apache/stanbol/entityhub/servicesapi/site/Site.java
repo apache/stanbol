@@ -30,8 +30,19 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.yard.Cache;
 
-public interface ReferencedSite {
-
+/**
+ * A site that provides Entities for the Entityhub. Sites are read-only and
+ * do support {@link #getEntity(String) dereferencing} of {@link Entity entities}. 
+ * They optionally can {@link #supportsSearch() support search}.<p>
+ * {@link ManagedSite}s do also support create/update/delete on
+ * managed entities. They are also required to support the query.
+ * 
+ * <i>NOTE:</i> this interface replaces ReferencedSite in versions
+ * later than 0.10.0-incubating.
+ * 
+ * @author Rupert Westenthaler
+ */
+public interface Site {
     /**
      * List of {@link #getId() ids} that are not allowed to be used (case
      * insensitive) for referenced sites.
@@ -50,13 +61,13 @@ public interface ReferencedSite {
      * the references (ids). Note that selected fields of the query are ignored.
      * @param query the query
      * @return the references of the found entities
-     * @throws ReferencedSiteException If the request can not be executed both on
+     * @throws SiteException If the request can not be executed both on
      * the {@link Cache} and by using the {@link EntityDereferencer}/
      * {@link EntitySearcher} accessing the remote site. For errors with the
      * remote site the cause will always be a Yard Exceptions. Errors for remote
      * Sites are usually IOExceptions.
      */
-    QueryResultList<String> findReferences(FieldQuery query) throws ReferencedSiteException;
+    QueryResultList<String> findReferences(FieldQuery query) throws SiteException;
     /**
      * Searches for entities based on the parsed {@link FieldQuery} and returns
      * representations as defined by the selected fields of the query. Note that
@@ -66,51 +77,51 @@ public interface ReferencedSite {
      * @param query the query
      * @return the found entities as representation containing only the selected
      * fields and there values.
-     * @throws ReferencedSiteException If the request can not be executed both on
+     * @throws SiteException If the request can not be executed both on
      * the {@link Cache} and by using the {@link EntityDereferencer}/
      * {@link EntitySearcher} accessing the remote site. For errors with the
      * remote site the cause will always be a Yard Exceptions. Errors for remote
      * Sites are usually IOExceptions.
      */
-    QueryResultList<Representation> find(FieldQuery query) throws ReferencedSiteException;
+    QueryResultList<Representation> find(FieldQuery query) throws SiteException;
     /**
      * Searches for Entities based on the parsed {@link FieldQuery} and returns
      * the selected Entities including the whole representation. Note that selected
      * fields of the query are ignored.
      * @param query the query
      * @return All Entities selected by the Query.
-     * @throws ReferencedSiteException If the request can not be executed both on
+     * @throws SiteException If the request can not be executed both on
      * the {@link Cache} and by using the {@link EntityDereferencer}/
      * {@link EntitySearcher} accessing the remote site. For errors with the
      * remote site the cause will always be a Yard Exceptions. Errors for remote
      * Sites are usually IOExceptions.
      */
-    QueryResultList<Entity> findEntities(FieldQuery query) throws ReferencedSiteException;
+    QueryResultList<Entity> findEntities(FieldQuery query) throws SiteException;
 
     /**
      * Getter for the Entity by the id
      * @param id the id of the entity
      * @return the entity or <code>null</code> if not found
-     * @throws ReferencedSiteException If the request can not be executed both on
+     * @throws SiteException If the request can not be executed both on
      * the {@link Cache} and by using the {@link EntityDereferencer}/
      * {@link EntitySearcher} accessing the remote site. For errors with the
      * remote site the cause will always be a Yard Exceptions. Errors for remote
      * Sites are usually IOExceptions.
      */
-    Entity getEntity(String id) throws ReferencedSiteException;
+    Entity getEntity(String id) throws SiteException;
     /**
      * Getter for the Content of the Entity
      * @param id the id of the Entity
      * @param contentType the requested contentType
      * @return the content or <code>null</code> if no entity with the parsed id
      * was found or the parsed ContentType is not supported for this Entity
-     * @throws ReferencedSiteException If the request can not be executed both on
+     * @throws SiteException If the request can not be executed both on
      * the {@link Cache} and by using the {@link EntityDereferencer}/
      * {@link EntitySearcher} accessing the remote site. For errors with the
      * remote site the cause will always be a Yard Exceptions. Errors for remote
      * Sites are usually IOExceptions.
      */
-    InputStream getContent(String id,String contentType) throws ReferencedSiteException;
+    InputStream getContent(String id,String contentType) throws SiteException;
     /**
      * Getter for the FieldMappings configured for this Site
      * @return The {@link FieldMapping} present for this Site.
@@ -159,5 +170,6 @@ public interface ReferencedSite {
      * @return if this referenced site supports queries for entities.
      */
     boolean supportsSearch();
+
 
 }

@@ -57,7 +57,7 @@ import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
@@ -169,7 +169,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
     Refactorer refactorer;
 
     @Reference
-    ReferencedSiteManager referencedSiteManager;
+    SiteManager referencedSiteManager;
 
     @Reference
     RuleStore ruleStore;

@@ -22,8 +22,8 @@ import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 
 
 /**
@@ -35,11 +35,11 @@ import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
  *
  * <p>The Idea is not to have one big Yard that caches all the representations, but
  * to provide the possibility to use different caches. This means, that each
- * {@link ReferencedSite} can have its own Yard instance. However
+ * {@link Site} can have its own Yard instance. However
  * several Sites might also use the same Yard.</p>
  * <p>The {@link YardManager} is an singleton services that manages the different
  * Yard instances and provides an central point of access for the {@link Entityhub}
- * and the {@link ReferencedSiteManager}.</p>
+ * and the {@link SiteManager}.</p>
  *
  * <p> This should also allow for implementing Yards that are based on
  * <ul>

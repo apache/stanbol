@@ -22,14 +22,14 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.10.1-incubating-SNAPSHOT</version>
+    <version>0.11.0-incubating-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.indexing.geonames</artifactId>
   <packaging>jar</packaging>
-  <version>0.10.1-incubating-SNAPSHOT</version>
+  <version>0.11.0-incubating-SNAPSHOT</version>
   
   <name>Apache Stanbol Entityhub Indexing for geonames.org</name>
   

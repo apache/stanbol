@@ -44,7 +44,7 @@ import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
 import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -83,7 +83,7 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     private ManagedSolrServer managedSolrServer;
 
     @Reference
-    private ReferencedSiteManager referencedSiteManager;
+    private SiteManager referencedSiteManager;
 
     @Activate
     public void activator(ComponentContext cc) throws LDPathException, IOException {

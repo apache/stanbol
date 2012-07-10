@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.10.1-incubating-SNAPSHOT</version>
+    <version>0.11.0-incubating-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-  <version>0.10.1-incubating-SNAPSHOT</version>
+  <version>0.11.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Entityhub Generic Service API</name>

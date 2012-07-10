@@ -18,11 +18,11 @@ package org.apache.stanbol.entityhub.servicesapi.yard;
 
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
 
 /**
  * The Cache is a mediator between a {@link Yard} storing the cached information
- * and the {@link ReferencedSite} acting as access point to a referenced
+ * and the {@link Site} acting as access point to a referenced
  * information source.<p>
  * This interface provides also access to the configuration of the cache.
  * This includes meta data needed to decide if requested information can be
@@ -35,7 +35,7 @@ import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
  * BE possible to copy&paste cached information to an other Entityhub instance. This
  * requirements enables the initialisation of a Cache only based on the
  * information stored within the cache.<p>
- * Cache instances should be instantiated automatically by {@link ReferencedSite}s
+ * Cache instances should be instantiated automatically by {@link Site}s
  * based on there configuration. The only parameter needed for the initialisation
  * of a {@link Cache} is the id of the yard ({@link Yard#getId()}). However
  * note that the Cache is not responsible to create, configure nor activate the
@@ -172,7 +172,7 @@ public interface Cache extends Yard {
      * However changes to this configuration can not affect the base configuration
      * of the cache, because base mappings cannot be undone by this configuration.
      * <p>
-     * Note that typically Caches used for {@link ReferencedSite}s using the
+     * Note that typically Caches used for {@link Site}s using the
      * {@link CacheStrategy#used} do not define any base configuration. Also note
      * that setting the additional mappings to <code>null</code> means:<ul>
      * <li> using the base configuration if one is present or

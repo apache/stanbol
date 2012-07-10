@@ -24,7 +24,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 
 /**
  * Interface used to provide service/technology specific implementation of the
- * search interface provided by {@link ReferencedSite}.
+ * search interface provided by {@link Site}.
  * @author Rupert Westenthaler
  *
  */
@@ -35,7 +35,7 @@ public interface EntitySearcher {
      * implementation of this interface.<br>
      * This constants actually uses the value of {@link SiteConfiguration#QUERY_URI}
      */
-    String QUERY_URI = SiteConfiguration.QUERY_URI;
+    String QUERY_URI = ReferencedSiteConfiguration.QUERY_URI;
     /**
      * Searches for Entities based on the parsed {@link FieldQuery}
      * @param query the query

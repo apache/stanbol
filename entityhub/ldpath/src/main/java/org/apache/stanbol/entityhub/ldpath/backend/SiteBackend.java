@@ -24,21 +24,21 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
 
 
 public class SiteBackend extends AbstractBackend {
 
-    protected final ReferencedSite site;
+    protected final Site site;
     private final ValueFactory vf;
     
-    public SiteBackend(ReferencedSite site) {
+    public SiteBackend(Site site) {
         this(site,null,null);
     }
-    public SiteBackend(ReferencedSite site,ValueFactory vf) {
+    public SiteBackend(Site site,ValueFactory vf) {
         this(site,vf,null);
     }
-    public SiteBackend(ReferencedSite site,ValueFactory vf,ValueConverterFactory valueConverter) {
+    public SiteBackend(Site site,ValueFactory vf,ValueConverterFactory valueConverter) {
         super(valueConverter);
         if(site == null){
             throw new IllegalArgumentException("The parsed ReferencedSite MUST NOT be NULL");

@@ -21,7 +21,7 @@ import java.util.Collection;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
 import org.apache.stanbol.entityhub.servicesapi.model.MappingState;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
 /**
@@ -92,7 +92,7 @@ public interface EntityhubConfiguration {
     String FIELD_MAPPINGS = "org.apache.stanbol.entityhub.mapping.entityhub";
     /**
      * Getter for the FieldMapping configuration of the {@link Entityhub}. 
-     * These Mappings are used for every {@link ReferencedSite} of the 
+     * These Mappings are used for every {@link Site} of the 
      * {@link Entityhub}.<br>
      * Note that {@link FieldMapping#parseFieldMapping(String)} is used to
      * parsed the values returned by this Method

@@ -30,19 +30,19 @@ import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
 /**
  * <p>The Entityhub defines an interface that allows to manage Entities. 
  * Entities managed by the Entityhub are often referred by "locally managed
  * Entities" to differentiate them form entities managed by 
- * {@link ReferencedSite}s.<p>
+ * {@link Site}s.<p>
  * The Entityhub supports full CRUD support for Entities and also allows to 
  * import Entities from Referenced sites.<p>
  * In addition to Entities the Entityhub also allows to work with mappings
- * between Entities of {@link ReferencedSite}s with locally managed Entities.
+ * between Entities of {@link Site}s with locally managed Entities.
  * 
  * @author Rupert Westenthaler
  *
@@ -52,8 +52,8 @@ public interface Entityhub {
     String DEFAUTL_ENTITYHUB_PREFIX = "urn:org.apache.stanbol:entityhub";
     /**
      * Protected keys to be used as name for the Entityhub. Such keys MUST NOT
-     * be used as {@link ReferencedSite#getId() id}s for 
-     * {@link ReferencedSite}s. (case insensitive)<p>
+     * be used as {@link Site#getId() id}s for 
+     * {@link Site}s. (case insensitive)<p>
      * The protected values are <ul>
      * <li><code>"local"</code>
      * <li><code>"entityhub"</code>

@@ -45,7 +45,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
 import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,7 +130,7 @@ public class LDPathUtils {
 
     private Bundle bundle;
 
-    private ReferencedSiteManager referencedSiteManager;
+    private SiteManager referencedSiteManager;
 
     /**
      * Constructor taking a {@link Bundle} parameter. This bundle is used when obtaining Solr schema template.
@@ -138,7 +138,7 @@ public class LDPathUtils {
      * @param bundle
      *            From which the template Solr schema is obtained.
      */
-    public LDPathUtils(Bundle bundle, ReferencedSiteManager referencedSiteManager) {
+    public LDPathUtils(Bundle bundle, SiteManager referencedSiteManager) {
         this.bundle = bundle;
         this.referencedSiteManager = referencedSiteManager;
     }
