@@ -66,7 +66,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint.MODE;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -152,7 +152,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
                 throw new WebApplicationException(
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                         String.format("Error while searching on %s (%s: %s)",
-                            getSiteName(),ReferencedSiteException.class.getSimpleName(),e.getMessage())).build());
+                            getSiteName(),SiteException.class.getSimpleName(),e.getMessage())).build());
             }
         } else if(queries != null){
             log.debug("multi-query: {}",queries);
@@ -167,7 +167,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
                 throw new WebApplicationException(
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                         String.format("Error while searching on %s (%s: %s)",
-                            getSiteName(),ReferencedSiteException.class.getSimpleName(),e.getMessage())).build());
+                            getSiteName(),SiteException.class.getSimpleName(),e.getMessage())).build());
             }
         } else {
             if(MediaTypeUtil.isAcceptableMediaType(header,MediaType.TEXT_HTML_TYPE)){
@@ -251,7 +251,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
     /**
      * @param query
      * @return
-     * @throws ReferencedSiteException
+     * @throws SiteException
      */
     protected abstract QueryResultList<Representation> performQuery(FieldQuery query) throws EntityhubException;
     

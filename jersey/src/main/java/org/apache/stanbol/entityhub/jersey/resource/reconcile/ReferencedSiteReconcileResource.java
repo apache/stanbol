@@ -26,9 +26,9 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class ReferencedSiteReconcileResource extends BaseGoogleRefineReconcileResource {
     
     private final Logger log = LoggerFactory.getLogger(ReferencedSiteReconcileResource.class);
-    private ReferencedSiteManager _siteManager;
+    private SiteManager _siteManager;
     private final String siteId;
     
     
@@ -49,16 +49,16 @@ public class ReferencedSiteReconcileResource extends BaseGoogleRefineReconcileRe
        }
        this.siteId = siteId;
     }
-    private ReferencedSite getSite() throws WebApplicationException {
+    private Site getSite() throws WebApplicationException {
         if(_siteManager == null){
             _siteManager = ContextHelper.getServiceFromContext(
-                ReferencedSiteManager.class, servletContext);
+                SiteManager.class, servletContext);
             if(_siteManager == null){
                 throw new IllegalStateException("Unable to lookup ReferencedSite '"
                         +siteId+"' because ReferencedSiteManager service is unavailable!");
             }
         }
-        ReferencedSite site = _siteManager.getReferencedSite(siteId);
+        Site site = _siteManager.getSite(siteId);
         if (site == null) {
             String message = String.format("ReferencedSite '%s' not acitve!",siteId);
             log.error(message);
@@ -70,9 +70,9 @@ public class ReferencedSiteReconcileResource extends BaseGoogleRefineReconcileRe
     /**
      * @param query
      * @return
-     * @throws ReferencedSiteException
+     * @throws SiteException
      */
-    protected QueryResultList<Representation> performQuery(FieldQuery query) throws ReferencedSiteException {
+    protected QueryResultList<Representation> performQuery(FieldQuery query) throws SiteException {
         return getSite().find(query);
     }
     @Override

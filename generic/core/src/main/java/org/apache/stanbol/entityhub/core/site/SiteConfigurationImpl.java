@@ -14,119 +14,105 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.entityhub.core.impl;
+package org.apache.stanbol.entityhub.core.site;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
 import org.apache.stanbol.entityhub.servicesapi.model.MappingState;
-import org.apache.stanbol.entityhub.servicesapi.site.EntityDereferencer;
-import org.apache.stanbol.entityhub.servicesapi.site.EntitySearcher;
 import org.apache.stanbol.entityhub.servicesapi.site.License;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
+import org.apache.stanbol.entityhub.servicesapi.site.ManagedSiteConfiguration;
+import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
-import org.apache.stanbol.entityhub.servicesapi.yard.CacheStrategy;
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Default implementation of the {@link SiteConfiguration} interface with
- * getter and setters.<p>
- * Site configurations are read only and usually set during the activation and
- * through accessible via the {@link ReferencedSite} interface they MUST NOT
- * be changed by other components. Because of this there is the possibility to
- * create readonly instances of this class. In this case all setter methods will
- * throw {@link UnsupportedOperationException}s.
+ * Implementation of the {@link SiteConfiguration} interface.<p>
+ * While this implementation also provides setter methods when used within an
+ * OSGI environment configurations are typically read only as the configuration
+ * is provided as parameter to the component activation method.
  * 
  * @author Rupert Westenthaler
  *
  */
-public class DefaultSiteConfiguration implements SiteConfiguration {
+public class SiteConfigurationImpl implements SiteConfiguration {
     /**
      * The logger
      */
     @SuppressWarnings("unused")
-    private final static Logger log = LoggerFactory.getLogger(DefaultSiteConfiguration.class);
+    private final static Logger log = LoggerFactory.getLogger(SiteConfigurationImpl.class);
 
     /**
      * Internally used to store the configuration.
      */
-    private Map<String,Object> config;
-    /**
-     * The readonly switch (only set by the constructor
-     */
-    private final boolean readonly;
+    protected final Dictionary<String,Object> config;
     
-    private DefaultSiteConfiguration(boolean readonly){
-        this.readonly = readonly;
-        this.config = new HashMap<String,Object>();
-    }
     /**
      * Creates a configuration based on the parsed parameter. The parsed 
      * configuration is validated.<p>
      * Changes to the parsed configuration do have no affect on the state of 
-     * the created instance.
-     * @param readonly if <code>true</code> the configuration can not be
-     * be modified after creation. Calling any setter method will result in
-     * {@link UnsupportedOperationException}s to be thrown
+     * the created instance.<p>
+     * OSGI specific metadata are removed from the parsed configuration.
      * @param parsed the configuration used for the initialisation.
      * @throws ConfigurationException if the parsed properties are not valid
      */
-    public DefaultSiteConfiguration(boolean readonly,Map<String,Object> parsed) throws ConfigurationException {
-        this(readonly);
+    protected SiteConfigurationImpl(Dictionary<String,Object> parsed) throws ConfigurationException {
+        this();
         //now add the parsed configuration
         if(parsed != null){
-            //use local variable because the field might be a read only wrapper!
-            config.putAll(parsed);
+            //copy over the elements
+            for(Enumeration<String> it = parsed.keys();it.hasMoreElements();) {
+                String key = it.nextElement();
+                config.put(key,parsed.get(key));
+            }
+            //Remove OSGI specific metadata
+            config.remove(Constants.SERVICE_ID);
+            config.remove(Constants.SERVICE_PID);
+            config.remove(Constants.OBJECTCLASS);
+            config.remove(Constants.SYSTEM_BUNDLE_LOCATION);
+            config.remove(Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
         }
-        //validate the configuration and transform values to the preferred
-        //type (e.g. strings to enums)
         validateConfiguration();
-        //if readonly replace with an unmodifiable map
-        if(readonly){
-            this.config = Collections.unmodifiableMap(config);
-        }
     }
     /**
-     * Constructs an empty read/write configuration
+     * Constructs an empty configuration
      */
-    public DefaultSiteConfiguration(){
-       this(false);
-    }
-    /**
-     * Constructs an readonly instance based on the parsed configuration. The parsed 
-     * configuration is validated.<p>
-     * Changes to the parsed configuration do have no affect on the state of 
-     * the created instance.
-     * @param config the configuration to use
-     * @throws ConfigurationException if the parsed properties are not valid
-     */
-    public DefaultSiteConfiguration(Map<String,Object> config) throws ConfigurationException {
-        this(true,config);
+    protected SiteConfigurationImpl(){
+       this.config = new Hashtable<String,Object>();
     }
     /**
      * Validates if the current configuration is valid and also perform type
      * transformations on values (e.g. converting string values to the enumerated 
-     * types).<p>
-     * This Method requires write access to the configuration and will therefore
-     * fail in case this instance is readonly. Constructors that do have an
-     * config as parameter call this method to validate the configuration.
-     * @throws ConfigurationException if the validation of an property fails 
-     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
+     * types). if the validation fails an Exception MUST BE thrown.<p>
+     * @throws ConfigurationException if the validation fails 
      */
-    public void validateConfiguration() throws ConfigurationException, UnsupportedOperationException {
+    protected void validateConfiguration() throws ConfigurationException {
         if(getId() == null || getId().isEmpty()){
             throw new ConfigurationException(ID, "The id of a ReferencedSite configuration MUST NOT be NULL nor empty!");
         }
-        //check if all the Enumerated values are valid strings and convert them
-        //to enumeration instances
+        //check if the prefixes can be converted to an String[]
+        try {
+            setEntityPrefixes(getEntityPrefixes());
+        } catch (IllegalArgumentException e) {
+            throw new ConfigurationException(ENTITY_PREFIX, e.getMessage(),e);
+        }
+        //check the configured licenses and create the License array
+        setLicenses(getLicenses());
+        //check if the fieldMappings can be converted to an String[]
+        try {
+            setFieldMappings(getFieldMappings());
+        } catch (IllegalArgumentException e) {
+            throw new ConfigurationException(SITE_FIELD_MAPPINGS, e.getMessage(),e);
+        }
         try {
             setDefaultMappedEntityState(getDefaultMappedEntityState());
         } catch (IllegalArgumentException e) {
@@ -136,20 +122,12 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
                         Arrays.toString(MappingState.values())),e);
         }
         try {
-            setDefaultSymbolState(getDefaultManagedEntityState());
+            setDefaultManagedEntityState(getDefaultManagedEntityState());
         } catch (IllegalArgumentException e) {
             throw new ConfigurationException(DEFAULT_SYMBOL_STATE, 
                 String.format("Unknown default SymbolState (%s=%s) for Site %s! Valid values are %s ",
                     DEFAULT_SYMBOL_STATE,config.get(DEFAULT_SYMBOL_STATE),getId(),
                         Arrays.toString(ManagedEntityState.values()),e));
-        }
-        try {
-            setCacheStrategy(getCacheStrategy());
-        } catch (IllegalArgumentException e) {
-            throw new ConfigurationException(CACHE_STRATEGY, 
-                String.format("Unknown CachStrategy (%s=%s) for Site %s! Valid values are %s ",
-                    CACHE_STRATEGY,config.get(CACHE_STRATEGY),getId(),
-                        Arrays.toString(CacheStrategy.values()),e));
         }
         //check if the default expire duration is a number
         try {
@@ -159,153 +137,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
                 String.format("Unable to parse Number for %s=%s. Will return -1 (no expire duration)",
                     DEFAULT_EXPIRE_DURATION,config.get(DEFAULT_EXPIRE_DURATION)),e);
         }
-        //check if the prefixes can be converted to an String[]
-        try {
-            setEntityPrefixes(getEntityPrefixes());
-        } catch (IllegalArgumentException e) {
-            throw new ConfigurationException(ENTITY_PREFIX, e.getMessage(),e);
-        }
-        //check if the fieldMappings can be converted to an String[]
-        try {
-            setFieldMappings(getFieldMappings());
-        } catch (IllegalArgumentException e) {
-            throw new ConfigurationException(SITE_FIELD_MAPPINGS, e.getMessage(),e);
-        }
-        //check that a cacheId is set if the CacheStrategy != none
-        if(CacheStrategy.none != getCacheStrategy() && getCacheId() == null){
-            throw new ConfigurationException(CACHE_ID, 
-                String.format("The CacheID (%s) MUST NOT be NULL nor empty if the the CacheStrategy != %s",
-                    CACHE_ID,CacheStrategy.none));
-        }
-        //check that a accessUri and an entity dereferencer is set if the 
-        //cacheStrategy != CacheStrategy.all
-        if(CacheStrategy.all != getCacheStrategy()){
-            if(getAccessUri() == null){
-                throw new ConfigurationException(ACCESS_URI, 
-                    String.format("An AccessUri (%s) MUST be configured if the CacheStrategy != %s",
-                        ACCESS_URI,CacheStrategy.all));
-            }
-            if(getEntityDereferencerType() == null){
-                throw new ConfigurationException(ENTITY_DEREFERENCER_TYPE, 
-                    String.format("An EntityDereferencer (%s) MUST be configured if the CacheStrategy != %s",
-                        ENTITY_DEREFERENCER_TYPE,CacheStrategy.all));
-            }
-        }
-        //check the configured licenses and create the License array
-        setLicenses(getLicenses());
     }
-    /**
-     * Getter for the readonly state.
-     * @return if <code>true</code> this configuration is readonly and all
-     * setter methods will throw {@link UnsupportedOperationException}s.
-     */
-    public final boolean isReadonly() {
-        return readonly;
-    }
-    
-    @Override
-    public final String getAccessUri() {
-        Object accessUri = config.get(ACCESS_URI);
-        return accessUri == null?null:accessUri.toString();
-    }
-    /**
-     * 
-     * @param uri
-     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getAccessUri()
-     */
-    public final void setAccessUri(String uri) throws UnsupportedOperationException{
-        if(uri == null || uri.isEmpty()){
-            config.remove(ACCESS_URI);
-        } else {
-            config.put(ACCESS_URI, uri);
-        }
-    }
-    
-    @Override
-    public final String getAttribution() {
-        Object attribution = config.get(SITE_ATTRIBUTION);
-        return attribution == null || attribution.toString().isEmpty() ?
-                null : attribution.toString();
-    }
-    /**
-     * 
-     * @param attribution
-     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getAttribution()
-     */
-    public final void setAttribution(String attribution) throws UnsupportedOperationException {
-        if(attribution == null  || attribution.isEmpty()){
-            config.remove(SITE_ATTRIBUTION);
-        } else {
-            config.put(SITE_ATTRIBUTION, attribution);
-        }
-    }
-    @Override
-    public String getAttributionUrl() {
-        Object attribution = config.get(SITE_ATTRIBUTION_URL);
-        return attribution == null || attribution.toString().isEmpty() ?
-                null : attribution.toString();
-    }
-    /**
-     * 
-     * @param attribution
-     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getAttribution()
-     */
-    public final void setAttributionUrl(String attributionUrl) throws UnsupportedOperationException {
-        if(attributionUrl == null || attributionUrl.isEmpty()){
-            config.remove(SITE_ATTRIBUTION_URL);
-        } else {
-            config.put(SITE_ATTRIBUTION_URL, attributionUrl);
-        }
-    }
-
-    @Override
-    public final String getCacheId() {
-        Object id = config.get(CACHE_ID);
-        return id == null || id.toString().isEmpty() ? 
-                null : id.toString();
-    }
-    /**
-     * 
-     * @param id
-     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getCacheId()
-     */
-    public final void setCacheId(String id) throws UnsupportedOperationException {
-        if(id == null || id.isEmpty()){
-            config.remove(CACHE_ID);
-        } else {
-            config.put(CACHE_ID, id);
-        }
-    }
-
-    @Override
-    public final CacheStrategy getCacheStrategy() {
-        Object cacheStrategy = config.get(CACHE_STRATEGY);
-        if(cacheStrategy == null){
-            return null;
-        } else if(cacheStrategy instanceof CacheStrategy){
-            return (CacheStrategy)cacheStrategy;
-        } else {
-            return CacheStrategy.valueOf(cacheStrategy.toString());
-        }
-    }
-    /**
-     * 
-     * @param strategy
-     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getCacheStrategy()
-     */
-    public final void setCacheStrategy(CacheStrategy strategy) throws UnsupportedOperationException {
-        if(strategy == null){
-            config.remove(CACHE_STRATEGY);
-        } else {
-            config.put(CACHE_STRATEGY, strategy);
-        }
-    }
-    
     @Override
     public final long getDefaultExpireDuration() {
         Object duration = config.get(DEFAULT_EXPIRE_DURATION);
@@ -330,7 +162,6 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
             config.put(DEFAULT_EXPIRE_DURATION, duration);
         }
     }
-    
     @Override
     public final MappingState getDefaultMappedEntityState() {
         Object defaultMappingState = config.get(DEFAULT_MAPPING_STATE);
@@ -378,40 +209,53 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
      * @see #getDefaultManagedEntityState()
      */
-    public final void setDefaultSymbolState(ManagedEntityState state) throws UnsupportedOperationException {
+    public final void setDefaultManagedEntityState(ManagedEntityState state) throws UnsupportedOperationException {
         if(state == null){
             config.remove(DEFAULT_SYMBOL_STATE);
         } else {
             config.put(DEFAULT_SYMBOL_STATE, state);
         }
-    }
+    }    
     @Override
-    public final String getEntityDereferencerType() {
-        Object dereferencer = config.get(ENTITY_DEREFERENCER_TYPE);
-        return dereferencer == null ||dereferencer.toString().isEmpty() ?
-                null : dereferencer.toString();
+    public final String getAttribution() {
+        Object attribution = config.get(SITE_ATTRIBUTION);
+        return attribution == null || attribution.toString().isEmpty() ?
+                null : attribution.toString();
     }
     /**
-     * Setter for the type of the {@link EntityDereferencer} to be used by
-     * this site or <code>null</code> to remove the current configuration. <p>
-     * Note that the {@link EntityDereferencer} is only initialised of a valid
-     * {@link #getAccessUri() access URI} is configured. If the dereferencer is
-     * set to <code>null</code> dereferencing Entities will not be supported by
-     * this site. Entities might still be available form a local
-     * {@link #getCacheId() cache}.
-     * @param entityDereferencerType the key (OSGI name) of the component used
-     * to dereference Entities. This component must have an {@link ComponentFactory}
-     * and provide the {@link EntityDereferencer} service-
+     * 
+     * @param attribution
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getEntityDereferencerType()
+     * @see #getAttribution()
      */
-    public final void setEntityDereferencerType(String entityDereferencerType) throws UnsupportedOperationException {
-        if(entityDereferencerType == null){
-            config.remove(entityDereferencerType);
+    public final void setAttribution(String attribution) throws UnsupportedOperationException {
+        if(attribution == null  || attribution.isEmpty()){
+            config.remove(SITE_ATTRIBUTION);
         } else {
-            config.put(ENTITY_DEREFERENCER_TYPE, entityDereferencerType);
+            config.put(SITE_ATTRIBUTION, attribution);
         }
     }
+    @Override
+    public String getAttributionUrl() {
+        Object attribution = config.get(SITE_ATTRIBUTION_URL);
+        return attribution == null || attribution.toString().isEmpty() ?
+                null : attribution.toString();
+    }
+    /**
+     * 
+     * @param attribution
+     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
+     * @see #getAttribution()
+     */
+    public final void setAttributionUrl(String attributionUrl) throws UnsupportedOperationException {
+        if(attributionUrl == null || attributionUrl.isEmpty()){
+            config.remove(SITE_ATTRIBUTION_URL);
+        } else {
+            config.put(SITE_ATTRIBUTION_URL, attributionUrl);
+        }
+    }
+
+
     
     @Override
     public final String getDescription() {
@@ -420,7 +264,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
                 null : description.toString();
     }
     /**
-     * Setter for the description of the {@link ReferencedSite}. If set to
+     * Setter for the description of the {@link Site}. If set to
      * <code>null</code> or an empty string this configuration will be removed.
      * @param description the description
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
@@ -431,24 +275,6 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
             config.remove(DESCRIPTION);
         } else {
             config.put(DESCRIPTION, description);
-        }
-    }
-    @Override
-    public String[] getFieldMappings() {
-        return getStringValues(SITE_FIELD_MAPPINGS);
-    }
-    /**
-     * Setter for the mappings of a site. This mappings are used in case an 
-     * Entity of this site is imported to the Entityhub. Parsing <code>null</code>
-     * or an empty array will cause all existing mappings to be removed.
-     * @param mappings the mappings
-     * @throws UnsupportedOperationException
-     */
-    public final void setFieldMappings(String[] mappings) throws UnsupportedOperationException {
-        if(mappings == null || mappings.length < 1){
-            config.remove(SITE_FIELD_MAPPINGS);
-        } else {
-            config.put(SITE_FIELD_MAPPINGS, mappings);
         }
     }
     
@@ -611,59 +437,33 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
         }
     }
 
-    @Override
-    public String getEntitySearcherType() {
-        Object type = config.get(ENTITY_SEARCHER_TYPE);
-        return type == null || type.toString().isEmpty() ? null : type.toString();
-    }
-    /**
-     * Setter for the type of the {@link EntitySearcher} used to query for
-     * Entities by accessing a external service available at 
-     * {@link #getQueryUri()}. <p>
-     * Note that the {@link EntitySearcher} will only be initialised of the
-     * {@link #getQueryUri() Query URI} is defined.
-     * @param entitySearcherType The string representing the {@link EntitySearcher}
-     * (the name of the OSGI component) or <code>null</code> to remove this
-     * configuration. The referenced component MUST have an {@link ComponentFactory}
-     * and provide the {@link EntitySearcher} service.
-     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getEntitySearcherType()
-     */
-    public final void setEntitySearcherType(String entitySearcherType) throws UnsupportedOperationException {
-        if(entitySearcherType == null){
-            config.remove(ENTITY_SEARCHER_TYPE);
-        } else {
-            config.put(ENTITY_SEARCHER_TYPE, entitySearcherType);
-        }
-    }
-    @Override
-    public String getQueryUri() {
-        Object uri = config.get(QUERY_URI);
-        return uri == null || uri.toString().isEmpty() ? null : uri.toString();
-    }
-    /**
-     * Setter for the uri of the remote service used to query for entities. If
-     * set to <code>null</code> this indicates that no such external service is
-     * available for this referenced site
-     * @param queryUri the uri of the external service used to query for entities
-     * or <code>null</code> if none.
-     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getQueryUri()
-     */
-    public final void setQueryUri(String queryUri) throws UnsupportedOperationException {
-        if(queryUri == null  || queryUri.isEmpty()){
-            config.remove(QUERY_URI);
-        } else {
-            config.put(QUERY_URI, queryUri);
-        }
-    }
     /**
      * Provides direct access to the internal configuration
      * @return the configuration wrapped by this class
      */
-    protected final Map<String,Object> getConfiguration(){
+    public final Dictionary<String,Object> getConfiguration(){
         return config;
     }
+    
+    @Override
+    public String[] getFieldMappings() {
+        return getStringValues(SITE_FIELD_MAPPINGS);
+    }
+    /**
+     * Setter for the mappings of a site. This mappings are used in case an 
+     * Entity of this site is imported to the Entityhub. Parsing <code>null</code>
+     * or an empty array will cause all existing mappings to be removed.
+     * @param mappings the mappings
+     * @throws UnsupportedOperationException
+     */
+    public final void setFieldMappings(String[] mappings) throws UnsupportedOperationException {
+        if(mappings == null || mappings.length < 1){
+            config.remove(SITE_FIELD_MAPPINGS);
+        } else {
+            config.put(SITE_FIELD_MAPPINGS, mappings);
+        }
+    }
+    
     /**
      * Internally used to parse String[] based on key values. This method
      * supports Stirng, Stirng[] and Iterables&lt;?&gt;. For Iterables&lt;?&gt;
@@ -671,7 +471,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
      * kept.
      * @return
      */
-    private String[] getStringValues(String key) {
+    protected final String[] getStringValues(String key) {
         Object values = config.get(key);
         if(values == null){
             return null;

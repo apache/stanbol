@@ -16,12 +16,12 @@
  */
 package org.apache.stanbol.entityhub.servicesapi.query;
 
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
 /**
  * Common interfaces for all supported queries. The idea is that some query
- * types MUST BE supported by the Entityhub. However some {@link ReferencedSite} and
+ * types MUST BE supported by the Entityhub. However some {@link Site} and
  * {@link Yard} implementations may support additional query types.<p>
  *
  * @author Rupert Westenthaler

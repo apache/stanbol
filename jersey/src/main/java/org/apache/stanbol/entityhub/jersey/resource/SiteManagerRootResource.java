@@ -78,7 +78,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.codehaus.jettison.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +89,7 @@ import at.newmedialab.ldpath.model.programs.Program;
 import com.sun.jersey.api.view.Viewable;
 
 /**
- * Resource to provide a REST API for the {@link ReferencedSiteManager}.
+ * Resource to provide a REST API for the {@link SiteManager}.
  * 
  * TODO: add description
  */
@@ -177,10 +177,10 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         } else {
-            ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-                ReferencedSiteManager.class, servletContext);
+            SiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
+                SiteManager.class, servletContext);
             JSONArray referencedSites = new JSONArray();
-            for (String site : referencedSiteManager.getReferencedSiteIds()) {
+            for (String site : referencedSiteManager.getSiteIds()) {
                 referencedSites.put(String.format("%sentityhub/site/%s/", uriInfo.getBaseUri(), site));
             }
             ResponseBuilder rb =  Response.ok(referencedSites);
@@ -228,8 +228,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
-        ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-            ReferencedSiteManager.class, servletContext);
+        SiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
+            SiteManager.class, servletContext);
         Entity sign = referencedSiteManager.getEntity(id);
         if (sign != null) {
             ResponseBuilder rb = Response.ok(sign);
@@ -306,7 +306,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language,
             limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset,ldpath);
         return executeQuery(ContextHelper.getServiceFromContext(
-            ReferencedSiteManager.class, servletContext), query, acceptedMediaType, headers);
+            SiteManager.class, servletContext), query, acceptedMediaType, headers);
     }
     @GET
     @Path("/query")
@@ -350,7 +350,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             }
         } else {
             return executeQuery(ContextHelper.getServiceFromContext(
-                ReferencedSiteManager.class, servletContext), query, acceptedMediaType, headers);
+                SiteManager.class, servletContext), query, acceptedMediaType, headers);
         }
     }
     /*
@@ -377,8 +377,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
              @FormParam(value = "context")Set<String> contexts,
              @FormParam(value = "ldpath")String ldpath,
              @Context HttpHeaders headers){
-        ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-            ReferencedSiteManager.class, servletContext);
+        SiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
+            SiteManager.class, servletContext);
         return handleLDPathRequest(this,new SiteManagerBackend(referencedSiteManager), 
             ldpath, contexts, headers, servletContext);
     }
@@ -386,13 +386,13 @@ public class SiteManagerRootResource extends BaseStanbolResource {
      * Executes the query parsed by {@link #queryEntities(String, File, HttpHeaders)} or created based
      * {@link #findEntity(String, String, String, int, int, HttpHeaders)}
      * 
-     * @param manager The {@link ReferencedSiteManager}
+     * @param manager The {@link SiteManager}
      * @param query
      *            The query to execute
      * @param headers the request headers
      * @return the response (results of error)
      */
-    private Response executeQuery(ReferencedSiteManager manager,
+    private Response executeQuery(SiteManager manager,
                                   FieldQuery query, MediaType mediaType, 
                                   HttpHeaders headers) throws WebApplicationException {
         if(query instanceof LDPathSelect && ((LDPathSelect)query).getLDPathSelect() != null){
@@ -415,7 +415,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
      * @param headers the http headers of the request
      * @return the response
      */
-    private Response executeLDPathQuery(ReferencedSiteManager manager,FieldQuery query, String ldpathProgramString, MediaType mediaType, HttpHeaders headers) {
+    private Response executeLDPathQuery(SiteManager manager,FieldQuery query, String ldpathProgramString, MediaType mediaType, HttpHeaders headers) {
         QueryResultList<Representation> result;
         ValueFactory vf = new RdfValueFactory(new IndexedMGraph());
         SiteManagerBackend backend = new SiteManagerBackend(manager);

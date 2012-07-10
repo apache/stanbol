@@ -46,10 +46,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -243,8 +245,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @Consumes(MediaType.WILDCARD)
     public Response createEntity(@QueryParam(value = "id") String id,
                                  @QueryParam(value = "update") boolean allowUpdate,
-                               Set<Representation> parsed,
-                               @Context HttpHeaders headers){
+                                 Map<String,Representation> parsed,
+                                 @Context HttpHeaders headers){
         //Set<Representation> representations = Collections.emptySet();
         //log.info("Test: "+test);
         log.info("Headers: "+headers.getRequestHeaders());
@@ -258,8 +260,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @Consumes(MediaType.WILDCARD)
     public Response updateEntity(@QueryParam(value = "id") String id, 
                                  @QueryParam(value = "create") @DefaultValue("true") boolean allowCreate,
-                               Set<Representation> parsed,
-                               @Context HttpHeaders headers){
+                                 Map<String,Representation> parsed,
+                                 @Context HttpHeaders headers){
         //Set<Representation> representations = Collections.emptySet();
         //log.info("Test: "+test);
         log.info("Headers: "+headers.getRequestHeaders());
@@ -320,7 +322,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
      * @param headers the HTTP headers of the request
      * @return the created/updated representation as response
      */
-    private Response updateOrCreateEntity(String id,Set<Representation> parsed, 
+    private Response updateOrCreateEntity(String id,Map<String,Representation> parsed, 
                                           String method,
                                           boolean create, 
                                           boolean update,
@@ -334,49 +336,43 @@ public class EntityhubRootResource extends BaseStanbolResource {
                 entity("The Entityhub is currently unavailable.")
                 .header(HttpHeaders.ACCEPT, accepted).build();
         }
-        if("*".equals(id)){ //also support '*' to import all
-            id = null;
-        }
-        //(1) if an id is parsed we need to filter parsed Representations
-        if(id != null){
-            for(Iterator<Representation> it = parsed.iterator(); it.hasNext();){
-                Representation rep = it.next();
-                String aboutId = ModelUtils.getAboutRepresentation(rep);
-                if(!(id.equals(rep.getId()) ||
-                        id.equals(aboutId))){
-                    it.remove(); //not the Entity nor the metadata of the parsed ID
-                }
-            }
-            if(parsed.isEmpty()){
+        //(1) if an id is parsed we need to ignore all other representations
+        if(id != null && !"*".equals(id)){
+            Representation r = parsed.get(id);
+            if(r == null){
                 return Response.status(Status.BAD_REQUEST)
                 .entity(String.format("Parsed RDF data do not contain any "
                     + "Information about the parsed id '%s'",id))
                     .header(HttpHeaders.ACCEPT, accepted).build();
+            } else {
+                parsed = Collections.singletonMap(id, r);
             }
         }
         //First check if all parsed Representation can be created/updated
         if(!(create && update)){ //if both create and update are enabled skip this
-            for(Representation representation : parsed){
+            long start = System.currentTimeMillis();
+            log.debug("   ... validate parsed Representation state (create: {}| update: {})",
+                create,update);
+            for(Entry<String,Representation> entry : parsed.entrySet()){
                 boolean exists;
                 try {
-                    exists = entityhub.isRepresentation(representation.getId());
+                    exists = entityhub.isRepresentation(entry.getKey());
                 } catch (EntityhubException e) {
                     log.error(String.format("Exception while checking the existance " +
                         "of an Entity with id  %s in the Entityhub.",
-                        representation.getId()),e);
+                        entry.getKey()),e);
                     return Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity(String.format("Unable to process Entity %s because of" +
                             "an Error while checking the current version of that" +
                             "Entity within the Entityhub (Message: %s)",
-                            representation.getId(),e.getMessage()))
+                            entry.getKey(),e.getMessage()))
                             .header(HttpHeaders.ACCEPT, accepted).build();
                 }
                 if((exists && !update) || (!exists && !create)){
                     return Response.status(Status.BAD_REQUEST).entity(String.format(
                         "Unable to %s an Entity %s becuase it %s and %s is deactivated. " +
                         " You might want to set the '%s' parameter to TRUE in your Request",
-                        exists ? "update" : "create",
-                        representation.getId(),
+                        exists ? "update" : "create", entry.getKey(),
                         exists ? "does already exists " : "does not",
                         exists ? "updateing existing" : "creating new",
                         exists ? "does already" : "does not exists",
@@ -384,6 +380,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
                         .header(HttpHeaders.ACCEPT, accepted).build();
                 }
             }
+            log.debug("      > checked {} entities in {}ms",
+                parsed.size(),System.currentTimeMillis()-start);
         }
         //store the Representations
         //If someone parses data for more than a single Entity, but does not
@@ -394,7 +392,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
         //for remote Entiteis as suggested by
         // http://incubator.apache.org/stanbol/docs/trunk/entityhub/entityhubandlinkeddata.html
         Map<String,Entity> updated = new HashMap<String,Entity>();
-        for(Representation representation : parsed){
+        for(Representation representation : parsed.values()){
             try {
                 Entity entity = entityhub.store(representation);
                 updated.put(entity.getId(), entity);

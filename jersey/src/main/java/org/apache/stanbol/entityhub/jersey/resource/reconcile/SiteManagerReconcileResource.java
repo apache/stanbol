@@ -23,22 +23,22 @@ import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 
 @Path("/entityhub/sites/reconcile")
 public class SiteManagerReconcileResource extends BaseGoogleRefineReconcileResource {
 
-    ReferencedSiteManager _siteManager;
+    SiteManager _siteManager;
     
     public SiteManagerReconcileResource() {
         super();
     }
 
-    private ReferencedSiteManager getSiteManager(){
+    private SiteManager getSiteManager(){
         if(_siteManager == null){
             _siteManager = ContextHelper.getServiceFromContext(
-                ReferencedSiteManager.class, servletContext);
+                SiteManager.class, servletContext);
             if(_siteManager == null){
                 throw new IllegalStateException("ReferencedSiteManager service is unavailable!");
             }
@@ -46,7 +46,7 @@ public class SiteManagerReconcileResource extends BaseGoogleRefineReconcileResou
         return _siteManager;
     }
     @Override
-    protected QueryResultList<Representation> performQuery(FieldQuery query) throws ReferencedSiteException {
+    protected QueryResultList<Representation> performQuery(FieldQuery query) throws SiteException {
         return getSiteManager().find(query);
     }
 

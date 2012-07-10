@@ -19,7 +19,7 @@ package org.apache.stanbol.entityhub.servicesapi.mapping;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
 /**
  * Intended to define the configuration of the fieldMapper.
  *
@@ -27,13 +27,13 @@ import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
  * @deprecated unsure - Currently the functionality of this service is part of
  * the {@link EntityhubConfiguration} and the {@link SiteConfiguration} interfaces. 
  * Access Methods for the {@link FieldMapper} are defined by the 
- * {@link Entityhub} and the {@link ReferencedSite} interfaces
+ * {@link Entityhub} and the {@link Site} interfaces
  */
 @Deprecated
 public interface FieldMapperConfig {
     /**
      * The property used to configure the default mappings used by all
-     * {@link ReferencedSite} instances active within the Entityhub
+     * {@link Site} instances active within the Entityhub
      */
     String DEFAULT_MAPPINGS = "org.apache.stanbol.entityhub.mapping.default";
     /**

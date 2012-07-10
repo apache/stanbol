@@ -22,7 +22,7 @@ import java.io.InputStream;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 
 /**
- * Service used by {@link ReferencedSite} to dereference {@link Representation}
+ * Service used by {@link Site} to dereference {@link Representation}
  * for entity ids. Implementations of this interface are dependent on the
  * service provided by the referenced site.
  * @author Rupert Westenthaler
@@ -34,7 +34,7 @@ public interface EntityDereferencer {
      * implementation of this interface.<br>
      * This constants actually uses the value of {@link SiteConfiguration#ACCESS_URI}
      */
-    String ACCESS_URI = SiteConfiguration.ACCESS_URI;
+    String ACCESS_URI = ReferencedSiteConfiguration.ACCESS_URI;
 
     /**
      * The base uri used to access this site

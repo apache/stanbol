@@ -25,7 +25,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 
-public interface ReferencedSiteManager {
+public interface SiteManager {
 
 
     /**
@@ -39,23 +39,11 @@ public interface ReferencedSiteManager {
     /**
      * Getter for the referenced site based on the id
      * @param baseUri the base URI of the referred Site
-     * @return the {@link ReferencedSite} or <code>null</code> if no site is
+     * @return the {@link Site} or <code>null</code> if no site is
      * present for the parsed base ID.
      */
-    ReferencedSite getReferencedSite(String id);
+    Site getSite(String id);
 
-    /**
-     * TODO's:
-     * <ul>
-     *  <li> use the ReferenceManager specific Exception to this Method
-     *  <li> maybe use an own data structure instead of the generic Dictionary class
-     *  <li> review the API based creation of Sites
-     *  </ul>
-     * @param baseUri
-     * @param properties
-     * @deprecated Not yet clear how to add referred sites via an API
-     */
-    void addReferredSite(String baseUri,Dictionary<String,?> properties);
     /**
      * Getter for Sites that manages entities with the given ID. A Site can
      * define a list of prefixes of Entities ID it manages. This method can
@@ -64,7 +52,7 @@ public interface ReferencedSiteManager {
      * @param entityUri the ID of the entity
      * @return A list of referenced sites that may manage the entity in question.
      */
-    Collection<ReferencedSite> getReferencedSitesByEntityPrefix(String entityUri);
+    Collection<Site> getSitesByEntityPrefix(String entityUri);
 
     /**
      * Getter for the Entity referenced by the parsed ID. This method will search
@@ -106,12 +94,6 @@ public interface ReferencedSiteManager {
      * Getter for the Id's of all active referenced sites
      * @return Unmodifiable collections of the id#s of all referenced sites
      */
-    Collection<String> getReferencedSiteIds();
-
-    /*
-     * NOTE: We need a way to add/remove referred sites. But this may be done
-     * via the OSGI ManagedServiceFactory interface. Implementations of the
-     * Site Interface would than also implement the ManagedService interface
-     */
+    Collection<String> getSiteIds();
 
 }

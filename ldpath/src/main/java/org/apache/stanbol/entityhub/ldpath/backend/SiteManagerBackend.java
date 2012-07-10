@@ -26,18 +26,18 @@ import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 
 public class SiteManagerBackend extends AbstractBackend {
 
-    protected final ReferencedSiteManager siteManager;
+    protected final SiteManager siteManager;
     private ValueFactory vf = InMemoryValueFactory.getInstance();
     private FieldQueryFactory qf = DefaultQueryFactory.getInstance();
     
-    public SiteManagerBackend(ReferencedSiteManager siteManager) {
+    public SiteManagerBackend(SiteManager siteManager) {
         this(siteManager,null);
     }
-    public SiteManagerBackend(ReferencedSiteManager siteManager,ValueConverterFactory valueConverter) {
+    public SiteManagerBackend(SiteManager siteManager,ValueConverterFactory valueConverter) {
         super(valueConverter);
         if(siteManager == null){
             throw new IllegalArgumentException("The parsed ReferencedSiteManager MUST NOT be NULL");
