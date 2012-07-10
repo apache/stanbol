@@ -101,7 +101,7 @@ import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -226,7 +226,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     protected Entityhub entityhub;
 
     @Reference
-    protected ReferencedSiteManager referencedSiteManager;
+    protected SiteManager referencedSiteManager;
 
     // TODO: make the following fields configurable
 

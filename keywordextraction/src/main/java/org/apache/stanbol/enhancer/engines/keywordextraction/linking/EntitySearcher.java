@@ -24,7 +24,6 @@ import java.util.Set;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 
 /**
  * Interface used to search for Entities (e.g. as defined by a Controlled
