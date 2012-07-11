@@ -117,6 +117,8 @@ import org.slf4j.LoggerFactory;
         },value="IGNORE"),
     @Property(name=KeywordLinkingEngine.MIN_SEARCH_TOKEN_LENGTH,
         intValue=EntityLinkerConfig.DEFAULT_MIN_SEARCH_TOKEN_LENGTH),
+    @Property(name=KeywordLinkingEngine.MIN_TOKEN_MATCH_FACTOR,floatValue=
+            EntityLinkerConfig.DEFAULT_MIN_TOKEN_MATCH_FACTOR),
     @Property(name=KeywordLinkingEngine.KEYWORD_TOKENIZER,boolValue=false),
     @Property(name=KeywordLinkingEngine.MAX_SUGGESTIONS,
         intValue=EntityLinkerConfig.DEFAULT_SUGGESTIONS),
@@ -164,6 +166,7 @@ public class KeywordLinkingEngine
     public static final String MIN_POS_TAG_PROBABILITY = "org.apache.stanbol.enhancer.engines.keywordextraction.minPosTagProbability";
     public static final String TYPE_MAPPINGS = "org.apache.stanbol.enhancer.engines.keywordextraction.typeMappings";
     public static final String KEYWORD_TOKENIZER = "org.apache.stanbol.enhancer.engines.keywordextraction.keywordTokenizer";
+    public static final String MIN_TOKEN_MATCH_FACTOR = "org.apache.stanbol.enhancer.engines.keywordextraction.minTokenMatchFactor";
 //  public static final String ENABLE_CHUNKER = "org.apache.stanbol.enhancer.engines.keywordextraction.enableChunker";
     /**
      * Adds the dereference feature (STANBOL-333) also to this engine.
@@ -192,7 +195,7 @@ public class KeywordLinkingEngine
      * language are processed. 
      */
     public static final Set<String> DEFAULT_LANGUAGES = Collections.emptySet();
-    public static final double DEFAULT_MIN_POS_TAG_PROBABILITY = 0.8;
+    public static final double DEFAULT_MIN_POS_TAG_PROBABILITY = 0.6667;
     /**
      * The languages this engine is configured to enhance. An empty List is
      * considered as active for any language
@@ -611,6 +614,7 @@ public class KeywordLinkingEngine
                 "The configured min POS tag probability MUST BE in the range [0..1] " +
                 "or < 0 to deactivate this feature (parsed value "+value+")!");
         }
+        nlpConfig.setMinPosTagProbability(minPosTagProb);
         value = configuration.get(KEYWORD_TOKENIZER);
         //the keyword tokenizer config
         if(value instanceof Boolean){
@@ -618,7 +622,8 @@ public class KeywordLinkingEngine
         } else if(value != null && !value.toString().isEmpty()){
             nlpConfig.forceKeywordTokenizer(Boolean.valueOf(value.toString()));
         }
-        nlpConfig.setMinPosTagProbability(minPosTagProb);
+        //nlpConfig.enablePosTypeChunker(false);
+        //nlpConfig.enableChunker(false);
         analysedContentFactory = OpenNlpAnalysedContentFactory.getInstance(openNLP,nlpConfig);
     }
 
@@ -632,6 +637,7 @@ public class KeywordLinkingEngine
      * <li>{@link #MAX_SUGGESTIONS}
      * <li>{@link #MIN_SEARCH_TOKEN_LENGTH}
      * <li>{@link #MIN_FOUND_TOKENS}
+     * <li> {@link #MIN_TOKEN_MATCH_FACTOR}
      * </ul>
      * This Method create an new {@link EntityLinkerConfig} instance only if
      * <code>{@link #linkerConfig} == null</code>. If the instance is already initialised
@@ -760,6 +766,30 @@ public class KeywordLinkingEngine
                 linkerConfig.setDefaultLanguage(defaultLang);
             }
         }
+        // init MIN_TOKEN_MATCH_FACTOR
+        value=configuration.get(MIN_TOKEN_MATCH_FACTOR);
+        float minTokenMatchFactor;
+        if(value instanceof Number){
+            minTokenMatchFactor = ((Number)value).floatValue();
+        } else if(value != null){
+            try {
+                minTokenMatchFactor = Float.valueOf(value.toString());
+            } catch (NumberFormatException e) {
+                throw new ConfigurationException(MIN_TOKEN_MATCH_FACTOR, 
+                    "Unable to parse the minimum token match factor from the parsed value "+value,e);
+            }
+            if(minTokenMatchFactor < 0){
+                minTokenMatchFactor = EntityLinkerConfig.DEFAULT_MIN_TOKEN_MATCH_FACTOR;
+            }
+        } else {
+            minTokenMatchFactor = EntityLinkerConfig.DEFAULT_MIN_TOKEN_MATCH_FACTOR;
+        }
+        if(minTokenMatchFactor == 0 || minTokenMatchFactor > 1){
+            throw new ConfigurationException(MIN_TOKEN_MATCH_FACTOR, 
+                "The minimum token match factor MUST be > 0 and <= 1 (negative values for the default)");
+        }
+        linkerConfig.setMinTokenMatchFactor(minTokenMatchFactor);
+
         //init type mappings
         value = configuration.get(TYPE_MAPPINGS);
         if(value instanceof String[]){ //support array

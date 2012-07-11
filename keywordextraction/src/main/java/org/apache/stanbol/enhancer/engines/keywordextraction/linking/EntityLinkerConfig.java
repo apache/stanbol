@@ -211,6 +211,45 @@ public class EntityLinkerConfig {
      * detected for the text.
      */
     private String defaultLanguage = DEFAULT_LANGUAGE;
+    
+    /**
+     * Default for the maximum number of non-processable tokens that are 
+     * allowed to not match before no further tokens are matched against a label 
+     * of an Entity. <p>
+     * This allows e.g. to match "Dr. Richard Dogles" with "Dr Richard Dogles"
+     * as '.' is a non-processable token in the text that is missing in the
+     * label.<p>
+     * The default is set to <code>1</code>
+     */
+    public final static int DEFAULT_MAX_NOT_FOUND = 1; 
+    /**
+     * Value of the maximum number of non-processable tokens that are 
+     * allowed to not match before no further tokens are matched against a label 
+     * of an Entity. <p>
+     * This allows e.g. to match "Dr. Richard Dogles" with "Dr Richard Dogles"
+     * as '.' is a non-processable token in the text that is missing in the
+     * label.
+    */
+    private int maxNotFound;
+    /**
+     * Default value for the minimum token match factor.
+     * If Tokens match is determined by comparing them using some algorithm.
+     * Results need to be in the range [0..1]. This factor defines the minimum
+     * similarity value so that a match is assumed. Not that this factor only
+     * is used for filtering out non-matching tokens. The similarity value will
+     * still used for calculating the confidence.<p>
+     * The default is set to <code>0.7</code>.
+     */
+    public final static float DEFAULT_MIN_TOKEN_MATCH_FACTOR = 0.7f;
+    /**
+     * If Tokens match is determined by comparing them using some algorithm.
+     * Results need to be in the range [0..1]. This factor defines the minimum
+     * similarity value so that a match is assumed. Not that this factor only
+     * is used for filtering out non-matching tokens. The similarity value will
+     * still used for calculating the confidence
+     */
+    private float minTokenMatchFactor;
+    
     /**
      * Default constructor the initialises the configuration with the 
      * default values
@@ -226,6 +265,8 @@ public class EntityLinkerConfig {
         setNameField(DEFAULT_NAME_FIELD);
         setRedirectField(DEFAULT_REDIRECT_FIELD);
         setTypeField(DEFAULT_TYPE_FIELD);
+        setMaxNotFound(DEFAULT_MAX_NOT_FOUND);
+        setMinTokenMatchFactor(DEFAULT_MIN_TOKEN_MATCH_FACTOR);
     }
     /**
      * Getter for the uri of the field used for the names in the taxonomy
@@ -482,5 +523,63 @@ public class EntityLinkerConfig {
      */
     public String getDefaultLanguage() {
         return defaultLanguage;
+    }
+    /**
+     * Getter for the maximum number of non-processable tokens that are 
+     * allowed to not match before no further tokens are matched against a label 
+     * of an Entity. <p>
+     * This allows e.g. to match "Dr. Richard Dogles" with "Dr Richard Dogles"
+     * as '.' is a non-processable token in the text that is missing in the
+     * label.
+     * @return the maxNotFound
+     */
+    public int getMaxNotFound() {
+        return maxNotFound;
+    }
+    /**
+     * Setter for the maximum number of non-processable tokens that are 
+     * allowed to not match before no further tokens are matched against a label 
+     * of an Entity. <p>
+     * This allows e.g. to match "Dr. Richard Dogles" with "Dr Richard Dogles"
+     * as '.' is a non-processable token in the text that is missing in the
+     * label.
+     * @param maxNotFound the maxNotFound to set
+     */
+    public void setMaxNotFound(int maxNotFound) {
+        if(maxNotFound < 0){
+            this.maxNotFound = DEFAULT_MAX_NOT_FOUND;
+        } else {
+            this.maxNotFound = maxNotFound;
+        }
+    }
+    /**
+     * Getter for the minimum token match Factor.
+     * If Tokens match is determined by comparing them using some algorithm.
+     * Results need to be in the range [0..1]. This factor defines the minimum
+     * similarity value so that a match is assumed. Not that this factor only
+     * is used for filtering out non-matching tokens. The similarity value will
+     * still used for calculating the confidence
+     * @return the minTokenMatchFactor
+     */
+    public float getMinTokenMatchFactor() {
+        return minTokenMatchFactor;
+    }
+    /**
+     * Setter for the minimum token match Factor.
+     * If Tokens match is determined by comparing them using some algorithm.
+     * Results need to be in the range [0..1]. This factor defines the minimum
+     * similarity value so that a match is assumed. Not that this factor only
+     * is used for filtering out non-matching tokens. The similarity value will
+     * still used for calculating the confidence
+     * @param minTokenMatchFactor the minTokenMatchFactor to set
+     */
+    public void setMinTokenMatchFactor(float minTokenMatchFactor) {
+        if(minTokenMatchFactor < 0 ){
+            this.minTokenMatchFactor = DEFAULT_MIN_TOKEN_MATCH_FACTOR;
+        } else if(minTokenMatchFactor == 0 || minTokenMatchFactor > 1){
+            throw new IllegalArgumentException("minimum Token Match Facter MUST be > 0 <= 1 (parsed: "+minTokenMatchFactor+")!");
+        } else {
+            this.minTokenMatchFactor = minTokenMatchFactor;
+        }
     }
 }
