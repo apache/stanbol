@@ -84,7 +84,16 @@ public class EntityLinker {
      * Steps over the sentences, chunks, tokens of the {@link #sentences}
      */
     public void process() throws EngineException {
+        int debugedIndex = 0;
         while(state.next()) {
+            if(log.isDebugEnabled() && (state.getTokenIndex() > debugedIndex || state.getTokenIndex() ==  0)){
+                debugedIndex = state.getTokenIndex();
+                Token token = state.getToken();
+                log.debug(" {} {} (pos:{}|prop:{})",new Object[]{
+                    isProcessableToken(token)? '+':'-',
+                    token.getText(),token.getPosTags(),token.getPosProbabilities()
+                });
+            }
             if(isProcessableToken(state.getToken())){
                 List<String> searchStrings = new ArrayList<String>(config.getMaxSearchTokens());
                 searchStrings.add(state.getToken().getText());
@@ -96,6 +105,13 @@ public class EntityLinker {
                                 state.getChunk().getEnd() : //the chunk
                                     state.getSentence().getTokens().size()-1))){ //or sentence
                     Token included = state.getSentence().getTokens().get(includeTokenIndex);
+                    if(log.isDebugEnabled()  && includeTokenIndex > debugedIndex){
+                        debugedIndex = includeTokenIndex;
+                        log.debug(" {} {} (pos:{}|prop:{})",new Object[]{
+                            isProcessableToken(included)? '+':'-',
+                            included.getText(),included.getPosTags(),included.getPosProbabilities()
+                        });
+                    }
                     includeTokenIndex++;
                     if(isProcessableToken(included)){
                         searchStrings.add(included.getText());
@@ -355,20 +371,7 @@ public class EntityLinker {
         }
         return match;
     }
-
-    /**
-     * The default value for the maximum number or non-processable tokens
-     * allowed to be not matching with a label of an entity before the matching
-     * is stopped.
-     */
-    private static int DEFAULT_MAX_NOT_FOUND = 1; 
-    /**
-    * The value for the maximum number or non-processable tokens
-    * allowed to be not matching with a label of an entity before the matching
-    * is stopped.
-     * TODO: make configurable!
-    */
-    private int maxNotFound = DEFAULT_MAX_NOT_FOUND;
+    
     /**
      * @param match
      * @param label
@@ -414,6 +417,7 @@ public class EntityLinker {
         String currentTokenText;
         int currentTokenLength;
         int notFound = 0;
+        float minTokenMatchFactor = config.getMinTokenMatchFactor();
         //search for matches within the correct order
         for(int currentIndex = state.getTokenIndex();
                 currentIndex < state.getSentence().getTokens().size() 
@@ -435,9 +439,9 @@ public class EntityLinker {
                     int labelTokenLength = labelTokenText.length();
                     float maxLength = currentTokenLength > labelTokenLength ? currentTokenLength : labelTokenLength;
                     float lengthDif = Math.abs(currentTokenLength - labelTokenLength);
-                    if((lengthDif/maxLength)<=0.3f){ //this prevents unnecessary string comparison 
-                        int matchCount = compairTokens(currentTokenText, labelTokenText);
-                        if(matchCount/maxLength >= 0.7f){
+                    if((lengthDif/maxLength)<=(1-minTokenMatchFactor)){ //this prevents unnecessary string comparison 
+                        int matchCount = compareTokens(currentTokenText, labelTokenText);
+                        if(matchCount/maxLength >= minTokenMatchFactor){
                             lastfoundLabelIndex = i; //set the last found index to the current position
                             found = true; //set found to true -> stops iteration
                             matchFactor = matchCount/maxLength; //how good is the match
@@ -468,7 +472,7 @@ public class EntityLinker {
                     lastFoundIndex = currentIndex;
                 } else { //not found
                     notFound++;
-                    if(isProcessable || notFound > maxNotFound){
+                    if(isProcessable || notFound > config.getMaxNotFound()){
                         //stop as soon as a token that needs to be processed is
                         //not found in the label or the maximum number of tokens
                         //that are not processable are not found
@@ -498,9 +502,9 @@ public class EntityLinker {
                 int labelTokenLength = labelTokenText.length();
                 float maxLength = currentTokenLength > labelTokenLength ? currentTokenLength : labelTokenLength;
                 float lengthDif = Math.abs(currentTokenLength - labelTokenLength);
-                if((lengthDif/maxLength)<=0.3f){ //this prevents unnecessary string comparison 
-                    int matchCount = compairTokens(currentTokenText, labelTokenText);
-                    if(matchCount/maxLength >= 0.7f){
+                if((lengthDif/maxLength)<=(1-minTokenMatchFactor)){ //this prevents unnecessary string comparison 
+                    int matchCount = compareTokens(currentTokenText, labelTokenText);
+                    if(matchCount/maxLength >= minTokenMatchFactor){
                         found = true; //set found to true -> stops iteration
                         matchFactor = matchCount/maxLength; //how good is the match
                     }
@@ -515,7 +519,7 @@ public class EntityLinker {
                     currentIndex --;
                 } else {
                     notFound++;
-                    if(isProcessable || notFound > maxNotFound){
+                    if(isProcessable || notFound > config.getMaxNotFound()){
                         //stop as soon as a token that needs to be processed is
                         //not found in the label or the maximum number of tokens
                         //that are not processable are not found
@@ -577,7 +581,7 @@ public class EntityLinker {
      * @param token2 the second token
      * @return the number of matching chars
      */
-    private int compairTokens(String token1,String token2){
+    private int compareTokens(String token1,String token2){
         int l1 = token1.length(); //length of the first token
         int l2 = token2.length(); //length of the second token
         //in case of same length check for equals first
@@ -626,7 +630,7 @@ public class EntityLinker {
             do {
                 processToken = content.processPOS(posTags[i],posProb[i]);
                 i++;
-            } while(processToken != null && processToken.equals(Boolean.FALSE) && i<posTags.length);
+            } while(processToken == null && i<posTags.length);
         }
         if(processToken == null) {
              processToken = token.getText().length() >= config.getMinSearchTokenLength();

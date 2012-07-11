@@ -113,6 +113,7 @@ public class OpenNlpAnalysedContentFactory {
     private class OpenNlpAnalysedContent implements AnalysedContent{
         private final TextAnalyzer analyzer;
         private final double minPosTagProbability;
+        private final double minExcludePosTagProbability;
         private final Iterator<AnalysedText> sentences;
         private final Set<String> posTags;
         private final Tokenizer tokenizer;
@@ -124,6 +125,7 @@ public class OpenNlpAnalysedContentFactory {
                 analyzer.getLanguage(), PosTypeCollectionType.NOUN);
             this.tokenizer = analyzer.getTokenizer();
             this.minPosTagProbability = analyzer.getConfig().getMinPosTypeProbability();
+            this.minExcludePosTagProbability = minPosTagProbability/2;
         }
         
         /**
@@ -135,19 +137,45 @@ public class OpenNlpAnalysedContentFactory {
             return sentences;
         }
         /**
-         * Called to check if a {@link Token} should be used to search for
-         * Concepts within the Taxonomy based on the POS tag of the Token.
-         * @param posTag the POS tag to check
-         * @param posProb the probability of the parsed POS tag
-         * @return <code>true</code> if Tokens with this POS tag should be
-         * included in searches. Otherwise <code>false</code>. Also returns
-         * <code>true</code> if no POS type configuration is available for the
-         * language parsed in the constructor
+         * This uses now two Tag Probabilities<ul>
+         * <li> {@link TextAnalyzerConfig#getMinPosTypeProbability()} for
+         * accepting POS tags that represent Nouns and
+         * <li> <code>minPosTypeProb/2</code> for rejecting POS tags that 
+         * are not nouns
+         * </ul>
+         * Assuming that the <code>minPosTypePropb=0.667</code> a<ul>
+         * <li> noun with the prop 0.8 would result in returning <code>true</code>
+         * <li> noun with prop 0.5 would return <code>null</code>
+         * <li> verb with prop 0.4 would return <code>false</code>
+         * <li> verb with prop 0.3 would return <code>null</code>
+         * </ul>
+         * This new algorithm makes it less likely that non nouns are processed
+         * by the KeywordLinkingEngine as returning <code>null</code> as the
+         * minimum probability requirement is now much lower.<p> 
+         * <i>NOTE:</i> Returning <code>null</code> usually results in using
+         * the fall-back (typically minTokenLnegh = 3) so most of those tokens
+         * where processed by the KeywordLinkingEngine.
+         * (see also STANBOL-685)
          */
         @Override
         public Boolean processPOS(String posTag, double posProb) {
-            return posTags != null && posProb > minPosTagProbability ? 
-                    Boolean.valueOf(posTags.contains(posTag)) : null;
+            if(posTags != null){
+                if(posTags.contains(posTag)){
+                    if(posProb >= minPosTagProbability){
+                        return Boolean.TRUE;
+                    } else {
+                        return null; //probability to low
+                    }
+                } else {
+                    if(posProb >= minExcludePosTagProbability){
+                        return Boolean.FALSE;
+                    } else {
+                        return null; //probability to low
+                    }
+                }
+            } else {
+                return null;
+            }
         }
         /**
          * Not yet implemented.
