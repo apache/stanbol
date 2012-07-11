@@ -1226,6 +1226,13 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
         }
         try {
             server.swap(core1, core2);
+            IndexMetadata core1Metadata = getIndexMetadata(core1);
+            IndexMetadata core2Metadata = getIndexMetadata(core2);
+            String core2Directory = core2Metadata.getDirectory();
+            core2Metadata.setDirectory(core1Metadata.getDirectory());
+            core1Metadata.setDirectory(core2Directory);
+            managedCores.store(core1Metadata);
+            managedCores.store(core2Metadata);
         } finally {
             synchronized (serverInUser) {
                 serverInUser.remove(token);
