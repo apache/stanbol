@@ -1220,6 +1220,15 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
      *            name of the second core
      */
     public void swapCores(String core1, String core2) {
+        if (!(isManagedIndex(core1) && isManagedIndex(core2))) {
+            throw new IllegalArgumentException(String.format(
+                "Both core names (%s,%s) must correspond to a managed index", core1, core2));
+        }
+        if (!(managedCores.isInState(ManagedIndexState.ACTIVE, core1) && managedCores.isInState(
+            ManagedIndexState.ACTIVE, core2))) {
+            throw new IllegalStateException(String.format(
+                "Both cores (%s,%s) should be in ManagedIndexState.ACTIVE state", core1, core2));
+        }
         Object token = new Object();
         synchronized (serverInUser) {
             serverInUser.add(token);
