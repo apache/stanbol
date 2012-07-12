@@ -46,6 +46,11 @@
       <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
       <version>1.0.2-incubating-SNAPSHOT</version>
     </bundle>
+    <bundle> <!-- Spanish POS tagging support (STANBOL-688) -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.opennlp.lang.es</artifactId>
+      <version>1.0.0-incubating-SNAPSHOT</version>
+    </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.da</artifactId>
