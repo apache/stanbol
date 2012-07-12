@@ -92,6 +92,7 @@
         <module>opennlp/lang/da</module>
         <module>opennlp/lang/de</module>
         <module>opennlp/lang/en</module>
+        <module>opennlp/lang/es</module>
         <module>opennlp/lang/nl</module>
         <module>opennlp/lang/pt</module>
         <module>opennlp/lang/sv</module>
