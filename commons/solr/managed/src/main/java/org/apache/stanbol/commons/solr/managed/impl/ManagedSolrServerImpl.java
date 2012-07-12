@@ -1210,33 +1210,25 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
         }
     }
 
-    /**
-     * Swaps Solr cores identified by the given names. The swap operation is realized by 
-     * the underlying {@link SolrServerAdapter#swap(String, String)}.
-     * 
-     * @param core1
-     *            name of the first core
-     * @param core2
-     *            name of the second core
-     */
-    public void swapCores(String core1, String core2) {
-        if (!(isManagedIndex(core1) && isManagedIndex(core2))) {
+    @Override
+    public void swapIndexes(String indexName1, String indexName2) {
+        if (!(isManagedIndex(indexName1) && isManagedIndex(indexName2))) {
             throw new IllegalArgumentException(String.format(
-                "Both core names (%s,%s) must correspond to a managed index", core1, core2));
+                "Both core names (%s,%s) must correspond to a managed index", indexName1, indexName2));
         }
-        if (!(managedCores.isInState(ManagedIndexState.ACTIVE, core1) && managedCores.isInState(
-            ManagedIndexState.ACTIVE, core2))) {
+        if (!(managedCores.isInState(ManagedIndexState.ACTIVE, indexName1) && managedCores.isInState(
+            ManagedIndexState.ACTIVE, indexName2))) {
             throw new IllegalStateException(String.format(
-                "Both cores (%s,%s) should be in ManagedIndexState.ACTIVE state", core1, core2));
+                "Both cores (%s,%s) should be in ManagedIndexState.ACTIVE state", indexName1, indexName2));
         }
         Object token = new Object();
         synchronized (serverInUser) {
             serverInUser.add(token);
         }
         try {
-            server.swap(core1, core2);
-            IndexMetadata core1Metadata = getIndexMetadata(core1);
-            IndexMetadata core2Metadata = getIndexMetadata(core2);
+            server.swap(indexName1, indexName2);
+            IndexMetadata core1Metadata = getIndexMetadata(indexName1);
+            IndexMetadata core2Metadata = getIndexMetadata(indexName2);
             String core2Directory = core2Metadata.getDirectory();
             core2Metadata.setDirectory(core1Metadata.getDirectory());
             core1Metadata.setDirectory(core2Directory);

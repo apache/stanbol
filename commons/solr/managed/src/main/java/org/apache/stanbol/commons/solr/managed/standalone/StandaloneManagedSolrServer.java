@@ -540,5 +540,13 @@ public class StandaloneManagedSolrServer implements ManagedSolrServer {
     public CoreContainer getCoreContainer() {
         return server;
     }
-    
+
+    @Override
+    public void swapIndexes(String indexName1, String indexName2) {
+        if (!(isManagedIndex(indexName1) && isManagedIndex(indexName2))) {
+            throw new IllegalArgumentException(String.format(
+                "Both core names (%s,%s) must correspond to a managed index", indexName1, indexName2));
+        }
+        server.swap(indexName1, indexName2);
+    }
 }

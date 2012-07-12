@@ -133,5 +133,9 @@ public class DefaultStandaloneManagedSolrServerWrapper implements ManagedSolrSer
                                                                                                       SAXException {
         return defaultServer.updateIndex(indexName, ais, archiveCoreName);
     }
-    
+ 
+    @Override
+    public void swapIndexes(String indexName1, String indexName2) {
+        defaultServer.swapIndexes(indexName1, indexName2);
+    }
 }
