@@ -180,7 +180,28 @@ public enum PosTagsCollectionEnum {
      * NOTES: this includes  prepositions, Part of idiom, Infinitive marker
      *  as well as all kinds of punctuations
      */
-    SV_FOLLOW("sv",PosTypeCollectionType.FOLLOW,"PR","ID","IM","I?","IC","IG","IK","IP","IQ","IR","IS","IT","IU");
+    SV_FOLLOW("sv",PosTypeCollectionType.FOLLOW,"PR","ID","IM","I?","IC","IG","IK","IP","IQ","IR","IS","IT","IU"),
+    /**
+     * Nouns related POS types for Spanish language.
+     * I was not able to find the list, so POS tag results where used to 
+     * create this configuration.
+     */
+    ES_NOUN("es",PosTypeCollectionType.NOUN,"NC","NP","Z"),
+    /**
+     * Verb related POS types for Spanish language.
+     * I was not able to find the list, so POS tag results where used to 
+     * create this configuration 
+     */
+    ES_VERB("es",PosTypeCollectionType.VERB,"VMI", "VMS", "VMM", "VMC", "VMN",
+        "VMG", "VMP", "VAI", "VAS","VAM", "VAC", "VAN", "VAG", "VAP"),
+    /**
+     * POS types one needs typically to follow to build {@link Chunk}s over 
+     * Nouns (e.g. "University_NN of_IN Otago_NNP" or "Geneva_NNP ,_, Ohio_NNP").
+     * I was not able to find the list, so POS tag results where used to 
+     * create this configuration.<p>
+     * For now "SP" and all "F*" tokens referring to '.', ';', ...
+     */
+    ES_FOLLOW("es",PosTypeCollectionType.FOLLOW,"AQ","SP","Fc","Ft","Fp","Fe","Fd","Fx","Fat","Fit","Fpa","Fpt","Fg","Faa","Ft");
     Set<String> tags;
     private String language;
     private PosTypeCollectionType type;
