@@ -265,4 +265,16 @@ public interface ManagedSolrServer {
      *             component is currently deactivated) or initialised.
      */
     File getManagedDirectory();
+    
+    /**
+     * Swaps the indexes through using the swap method of the underlying CoreContainer 
+     * ({@link CoreContainer#swap(String, String)}).  
+     * @param indexName1 the name of the first index
+     * @param indexName2 the name of the second index
+     * @throws IllegalArgumentException if one or both of the indexes is not managed i.e {@link #isManagedIndex(String)}
+     * returns {@code false}.
+     * @throws IllegalStateException if one or both of the index is not in {@link ManagedIndexState#ACTIVE}
+     * state.
+     */
+    void swapIndexes(String indexName1, String indexName2);
 }
