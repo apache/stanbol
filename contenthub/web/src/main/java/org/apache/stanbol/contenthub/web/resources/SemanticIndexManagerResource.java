@@ -19,6 +19,8 @@ package org.apache.stanbol.contenthub.web.resources;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.OPTIONS;
 
 import java.util.List;
 
@@ -91,6 +93,14 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
         return res.build();
     }
 
+    @OPTIONS
+    @Path("/program/{name}")
+    public Response handleCorsPreflightDeleteProgram(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers, DELETE, OPTIONS);
+        return res.build();
+    }
+    
     @OPTIONS
     @Path("/exists")
     public Response handleCorsPreflightExists(@Context HttpHeaders headers) {
@@ -187,6 +197,9 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     @DELETE
     @Path("/program/{name}")
     public Response deleteProgram(@PathParam(value = "name") String programName, @Context HttpHeaders headers) {
+    	if(!programManager.isManagedProgram(programName)){
+    	    throw new WebApplicationException(404);
+    	}
         programManager.deleteProgram(programName);
         ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
