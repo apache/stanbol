@@ -30,6 +30,9 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.OPTIONS;
+import static javax.ws.rs.HttpMethod.POST;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -227,7 +230,7 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/{uri:.+}")
     public Response handleCorsPreflightURI(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        enableCORS(servletContext, res, headers, POST, DELETE, OPTIONS);
         return res.build();
     }
 
@@ -780,6 +783,10 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/{uri:.+}")
     public Response deleteContentItem(@PathParam(value = "uri") String contentURI,
                                       @Context HttpHeaders headers) throws StoreException {
+        ContentItem ci = solrStore.get(contentURI, indexName);
+        if (ci == null) {
+            throw new WebApplicationException(404);
+        }
         solrStore.deleteById(contentURI, indexName);
         ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
