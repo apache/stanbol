@@ -64,6 +64,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOnto
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
@@ -123,7 +124,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
 
         public GraphContentSourceWithPhysicalIRI(InputStream content, IRI physicalIri) {
             super(content);
-            bindPhysicalIri(physicalIri);
+            bindPhysicalOrigin(Origin.create(physicalIri));
         }
 
     }
@@ -259,7 +260,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
                              + " New signatures will be discarded.");
                 }
             } else try {
-                OntologyInputSource<TripleCollection,?> source = new GraphContentSourceWithPhysicalIRI(
+                OntologyInputSource<TripleCollection> source = new GraphContentSourceWithPhysicalIRI(
                         dereferencer.resolve(entityReference), IRI.create(entityReference));
                 signaturesGraph.addAll(source.getRootOntology());
             } catch (FileNotFoundException e) {
