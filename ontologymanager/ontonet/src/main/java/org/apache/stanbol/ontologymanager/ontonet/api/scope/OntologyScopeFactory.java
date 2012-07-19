@@ -44,6 +44,6 @@ public interface OntologyScopeFactory extends ScopeEventListenable {
      *             if an ontology scope with the given identifier is already <i>registered</i>. The exception
      *             is not thrown if another scope with the same ID has been created but not registered.
      */
-    OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?,?>... coreSources) throws DuplicateIDException;
+    OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?>... coreSources) throws DuplicateIDException;
 
 }

@@ -48,15 +48,14 @@ public class RootOntologyIRISource extends AbstractOWLOntologyInputSource {
     }
 
     public RootOntologyIRISource(IRI rootPhysicalIri, OWLOntologyManager manager, boolean ignoreIriMappers) throws OWLOntologyCreationException {
-        bindPhysicalIri(rootPhysicalIri);
+        bindPhysicalOrigin(Origin.create(rootPhysicalIri));
         bindRootOntology(ignoreIriMappers ? manager.loadOntologyFromOntologyDocument(rootPhysicalIri)
                 : manager.loadOntology(rootPhysicalIri));
-        bindTriplesProvider(manager);
     }
 
     @Override
     public String toString() {
-        return "ROOT_ONT_IRI<" + getPhysicalIRI() + ">";
+        return "ROOT_ONT_IRI<" + getOrigin() + ">";
     }
 
 }

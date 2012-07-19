@@ -60,14 +60,13 @@ public class TestOntologySpaces {
             .create(Constants.PEANUTS_MINOR_BASE);
 
     private static OntologySpaceFactory factory;
-    private static OntologyInputSource<OWLOntology,?> inMemorySrc, minorSrc, dropSrc, nonexSrc;
+    private static OntologyInputSource<OWLOntology> inMemorySrc, minorSrc, dropSrc, nonexSrc;
     private static OWLAxiom linusIsHuman = null;
 
     private static OWLOntology ont = null, ont2 = null;
 
-    private static OntologyInputSource<OWLOntology,?> getLocalSource(String resourcePath,
-                                                                     OWLOntologyManager mgr) throws OWLOntologyCreationException,
-                                                                                            URISyntaxException {
+    private static OntologyInputSource<OWLOntology> getLocalSource(String resourcePath, OWLOntologyManager mgr) throws OWLOntologyCreationException,
+                                                                                                               URISyntaxException {
         URL url = TestOntologySpaces.class.getResource(resourcePath);
         File f = new File(url.toURI());
         return new ParentPathInputSource(f, mgr != null ? mgr
@@ -207,14 +206,14 @@ public class TestOntologySpaces {
         // Namespace ending with hash (invalid).
         factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology#"));
         try {
-            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
 
         // Namespace ending with neither (valid, should automatically add slash).
         factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology"));
-        shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+        shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
         assertNotNull(shouldBeNotNull);
         assertTrue(shouldBeNotNull.getNamespace().toString().endsWith("/"));
 
@@ -222,7 +221,7 @@ public class TestOntologySpaces {
 
         // Namespace ending with slash (valid).
         factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/"));
-        shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+        shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
         assertNotNull(shouldBeNotNull);
     }
 
@@ -237,8 +236,9 @@ public class TestOntologySpaces {
         space.addOntology(inMemorySrc);
         space.addOntology(nonexSrc);
         // The other remote ontologies may change base IRI...
-        assertTrue(space.hasOntology(ont.getOntologyID().getOntologyIRI()) && space.hasOntology(dropId)
-                   && space.hasOntology(nonexId));
+        assertTrue(space.hasOntology(ont.getOntologyID().getOntologyIRI()));
+        assertTrue(space.hasOntology(dropId));
+        assertTrue(space.hasOntology(nonexId));
 
         IRI bogus = IRI.create("http://www.example.org/ontology/bogus");
         space.removeOntology(bogus);

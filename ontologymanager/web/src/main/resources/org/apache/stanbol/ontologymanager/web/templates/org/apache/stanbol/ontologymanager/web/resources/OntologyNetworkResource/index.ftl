@@ -50,9 +50,9 @@
 		      <tr>
 			    <td>
 			    <#--
-                  <img src="${it.staticRootUrl}/contenthub/images/edit_icon_16.png" title="(not available yet) Edit this item" />
+                  <img src="${it.staticRootUrl}/ontonet/images/edit_icon_16.png" title="(not available yet) Edit this item" />
                 -->
-                  <img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="Delete this item" onClick="javascript:deleteScope('${scope.ID}')"/>
+                  <img src="${it.staticRootUrl}/ontonet/images/delete_icon_16.png" title="Delete this item" onClick="javascript:deleteScope('${scope.ID}')"/>
                 </td>
                 <td><a href="${it.publicBaseUri}ontonet/ontology/${scope.ID}" title="${scope.ID}">${scope.ID}</a></td>
                 <td>${scope.locked?string("locked", "modifiable")}</td>

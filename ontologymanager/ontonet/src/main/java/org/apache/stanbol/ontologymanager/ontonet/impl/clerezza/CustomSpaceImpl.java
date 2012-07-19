@@ -60,8 +60,8 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl implements Custom
     }
 
     @Override
-    protected MGraph getOntologyAsMGraph(IRI ontologyIri, boolean merge) {
-        MGraph o = super.getOntologyAsMGraph(ontologyIri, merge);
+    protected MGraph getOntologyAsMGraph(IRI ontologyIri, boolean merge, IRI universalPrefix) {
+        MGraph o = super.getOntologyAsMGraph(ontologyIri, merge, universalPrefix);
         switch (getConnectivityPolicy()) {
             case LOOSE:
                 break;
@@ -75,7 +75,7 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl implements Custom
                 String s = getID();
                 s = s.substring(0, s.indexOf(SUFFIX)); // strip "custom"
                 s += SpaceType.CORE.getIRISuffix(); // concatenate "core"
-                UriRef target = new UriRef(getNamespace() + s);
+                UriRef target = new UriRef(universalPrefix + s);
                 for (NonLiteral subject : onts)
                     o.add(new TripleImpl(subject, OWL.imports, target));
                 break;
@@ -87,8 +87,8 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl implements Custom
     }
 
     @Override
-    protected OWLOntology getOntologyAsOWLOntology(IRI ontologyIri, boolean merge) {
-        OWLOntology o = super.getOntologyAsOWLOntology(ontologyIri, merge);
+    protected OWLOntology getOntologyAsOWLOntology(IRI ontologyIri, boolean merge, IRI universalPrefix) {
+        OWLOntology o = super.getOntologyAsOWLOntology(ontologyIri, merge, universalPrefix);
         switch (getConnectivityPolicy()) {
             case LOOSE:
                 break;
@@ -96,7 +96,7 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl implements Custom
                 String s = getID();
                 s = s.substring(0, s.indexOf(SUFFIX)); // strip "custom"
                 s += SpaceType.CORE.getIRISuffix(); // concatenate "core"
-                IRI target = IRI.create(getNamespace() + s);
+                IRI target = IRI.create(universalPrefix + s);
                 o.getOWLOntologyManager().applyChange(
                     new AddImport(o, OWLManager.getOWLDataFactory().getOWLImportsDeclaration(target)));
                 break;

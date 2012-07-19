@@ -50,20 +50,10 @@ public interface ONManager extends ScopeRegistry, OntologyScopeFactory {
     String CONNECTIVITY_POLICY = "org.apache.stanbol.ontologymanager.ontonet.connectivity";
 
     /**
-     * The key used to configure the ID of the ontology network manager.
-     */
-    String ID = "org.apache.stanbol.ontologymanager.ontonet.id";
-
-    /**
      * The key used to configure the simple identifier of the scope registry (which should also be
      * concatenated with the base namespace to obtain the registry's HTTP endpoint URI).
      */
     String ID_SCOPE_REGISTRY = "org.apache.stanbol.ontologymanager.ontonet.scopeRegistry.id";
-
-    /**
-     * The key used to configure the base namespace of the ontology network.
-     */
-    String ONTOLOGY_NETWORK_NS = "org.apache.stanbol.ontologymanager.ontonet.ns";
 
     /**
      * Returns the offline configuration set for this ontology network manager, if any.
@@ -90,7 +80,7 @@ public interface ONManager extends ScopeRegistry, OntologyScopeFactory {
     /**
      * Returns the ontology scope factory that was created along with the manager context.
      * 
-     * @deprecated returns this object, which is also an {@link OntologyScopeFactory}.
+     * @deprecated This methods now returns the current object, which is also an {@link OntologyScopeFactory}.
      * @return the default ontology scope factory
      */
     OntologyScopeFactory getOntologyScopeFactory();
@@ -107,7 +97,7 @@ public interface ONManager extends ScopeRegistry, OntologyScopeFactory {
     /**
      * Returns the unique ontology scope registry for this context.
      * 
-     * @deprecated returns this object, which is also a {@link ScopeRegistry}.
+     * @deprecated This methods now returns the current object, which is also a {@link ScopeRegistry}.
      * @return the ontology scope registry.
      */
     ScopeRegistry getScopeRegistry();

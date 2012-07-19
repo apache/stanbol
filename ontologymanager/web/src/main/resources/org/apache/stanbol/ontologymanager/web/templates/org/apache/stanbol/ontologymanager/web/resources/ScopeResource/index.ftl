@@ -23,7 +23,13 @@
 	
     <div class="panel" id="webview">
   
-    <h3>Load ontologies</h3>
+  <!-- FIXME class names should be generic, and not bound to a specific functionality (here engines->reasoning services)-->
+  <div class="enginelisting">
+    <div class="collapsed">
+      <p class="collapseheader"><b>Load an ontology</b></p>
+      <div class="collapsable">
+      <br/>
+      
     <form method="POST" enctype="multipart/form-data" accept-charset="utf-8">
     <fieldset>
       <legend>From a local file</legend>
@@ -62,9 +68,9 @@
       <legend>From a whole ontology library</legend>
       <p><b>Library ID:</b> 
         <select name="library">  
-        <option value="null">&lt;please select a library&gt;</option>
+          <option value="null">&lt;please select a library&gt;</option>
         <#list it.libraries as lib>
-        <option value="${lib.IRI}">${lib.name}</option>
+          <option value="${lib.IRI}">${lib.name}</option>
         </#list>
         </select>
         <input type="submit" value="Load"/>
@@ -74,6 +80,16 @@
   
   Note: OWL import targets will be included. Ontology loading is set to fail on missing imports.
 
+     </div>
+    </div> 
+  </div>
+
+  <script>
+    $(".enginelisting p").click(function () {
+      $(this).parents("div").toggleClass("collapsed");
+    });    
+  </script>
+  
   <h3>Stored ontologies</h3>
   <h4>Custom</h4>
   <#assign ontologies = it.customOntologies>

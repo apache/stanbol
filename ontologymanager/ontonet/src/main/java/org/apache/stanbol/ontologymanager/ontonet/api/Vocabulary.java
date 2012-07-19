@@ -34,6 +34,10 @@ public class Vocabulary {
      */
     public static final String _NS_STANBOL_INTERNAL = "http://stanbol.apache.org/ontology/.internal/";
 
+    public static final UriRef APPENDED_TO = new UriRef(_NS_ONTONET + "isAppendedTo");
+
+    public static final UriRef HAS_APPENDED = new UriRef(_NS_ONTONET + "hasAppended");
+
     public static final UriRef HAS_SPACE_CORE = new UriRef(_NS_ONTONET + "hasCoreSpace");
 
     public static final UriRef HAS_SPACE_CUSTOM = new UriRef(_NS_ONTONET + "hasCustomSpace");

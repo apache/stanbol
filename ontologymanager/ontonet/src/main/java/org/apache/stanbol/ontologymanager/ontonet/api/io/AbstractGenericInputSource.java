@@ -16,36 +16,35 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
-import org.semanticweb.owlapi.model.IRI;
-
 /**
+ * The abstract implementation of the {@link OntologyInputSource} interface which is inherited by all concrete
+ * implementations.
  * 
  * @author alexdma
  * 
  * @param <O>
- *            the ontologuy returned by this input source.
+ *            the ontology returned by this input source.
  */
-public abstract class AbstractGenericInputSource<O,P> implements OntologyInputSource<O,P> {
+public abstract class AbstractGenericInputSource<O> implements OntologyInputSource<O> {
 
-    protected String key;
-
-    protected IRI physicalIri = null;
-
-    private P provider;
+    /**
+     * Where the ontology object was retrieved from.
+     */
+    protected Origin<?> origin = null;
 
     protected O rootOntology = null;
 
     /**
-     * This method is used to remind developers to bind a physical IRI to the {@link OntologyInputSource} if
-     * intending to do so.
+     * This method is used to remind developers to bind a physical reference to the
+     * {@link OntologyInputSource} if intending to do so.
      * 
-     * Implementation should assign a value to {@link #physicalIri}.
+     * Implementations should assign a value to {@link #origin}.
      * 
-     * @param iri
-     *            the physical ontology IRI.
+     * @param origin
+     *            where the ontology object was obtained from.
      */
-    protected void bindPhysicalIri(IRI iri) {
-        this.physicalIri = iri;
+    protected void bindPhysicalOrigin(Origin<?> origin) {
+        this.origin = origin;
     }
 
     /**
@@ -61,25 +60,16 @@ public abstract class AbstractGenericInputSource<O,P> implements OntologyInputSo
         this.rootOntology = ontology;
     }
 
-    protected void bindStorageKey(String key) {
-        this.key = key;
-    }
-
-    protected void bindTriplesProvider(P provider) {
-        this.provider = provider;
-    }
-
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof OntologyInputSource<?,?>)) return false;
-        OntologyInputSource<?,?> src = (OntologyInputSource<?,?>) obj;
-        return this.physicalIri.equals(src.getPhysicalIRI())
-               && this.rootOntology.equals(src.getRootOntology());
+        if (!(obj instanceof OntologyInputSource<?>)) return false;
+        OntologyInputSource<?> src = (OntologyInputSource<?>) obj;
+        return this.origin.equals(src.getOrigin()) && this.rootOntology.equals(src.getRootOntology());
     }
 
     @Override
-    public IRI getPhysicalIRI() {
-        return physicalIri;
+    public Origin<?> getOrigin() {
+        return origin;
     }
 
     @Override
@@ -88,18 +78,8 @@ public abstract class AbstractGenericInputSource<O,P> implements OntologyInputSo
     }
 
     @Override
-    public String getStorageKey() {
-        return key;
-    }
-
-    @Override
-    public P getTriplesProvider() {
-        return provider;
-    }
-
-    @Override
-    public boolean hasPhysicalIRI() {
-        return physicalIri != null;
+    public boolean hasOrigin() {
+        return origin != null;
     }
 
     @Override

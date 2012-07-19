@@ -83,56 +83,9 @@ import org.slf4j.LoggerFactory;
 @Service(ONManager.class)
 public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
 
-    /**
-     * Utility class to speed up ontology network startup. <br>
-     * TODO: it's most likely useless, remove it.
-     * 
-     * @author enrico
-     * 
-     */
-    private class Helper {
-
-        /**
-         * Adds the ontology fromt he given iri to the custom space of the given scope
-         * 
-         * @param scopeID
-         * @param locationIri
-         */
-        public synchronized void addToCustomSpace(String scopeID, String[] locationIris) {
-            OntologyScope scope = ONManagerImpl.this.getScope(scopeID);
-
-            scope.getCustomSpace().tearDown();
-            for (String locationIri : locationIris) {
-                try {
-                    scope.getCustomSpace().addOntology(createOntologyInputSource(locationIri));
-                    log.debug("Added " + locationIri + " to scope " + scopeID + " in the custom space.", this);
-                } catch (UnmodifiableOntologyCollectorException e) {
-                    log.error("An error occurred while trying to add the ontology from location: "
-                              + locationIri, e);
-                }
-            }
-            scope.getCustomSpace().setUp();
-        }
-
-        private OntologyInputSource createOntologyInputSource(final String uri) {
-            try {
-                return new RootOntologyIRISource(IRI.create(uri));
-            } catch (OWLOntologyCreationException e) {
-                log.error("Cannot load the ontology {}", uri, e);
-                return null;
-            } catch (Exception e) {
-                log.error("Cannot load the ontology {}", uri, e);
-                return null;
-            }
-        }
-
-    }
-
     public static final String _CONFIG_ONTOLOGY_PATH_DEFAULT = "";
     public static final String _CONNECTIVITY_POLICY_DEFAULT = "TIGHT";
-    public static final String _ID_DEFAULT = "ontonet";
     public static final String _ID_SCOPE_REGISTRY_DEFAULT = "ontology";
-    public static final String _ONTOLOGY_NETWORK_NS_DEFAULT = "http://localhost:8080/ontonet/";
 
     @Property(name = ONManager.CONFIG_ONTOLOGY_PATH, value = _CONFIG_ONTOLOGY_PATH_DEFAULT)
     private String configPath;
@@ -145,8 +98,6 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
                                                                                        + ONManager.CONNECTIVITY_POLICY
                                                                                        + ".option.loose", name = "LOOSE")}, value = _CONNECTIVITY_POLICY_DEFAULT)
     private String connectivityPolicyString;
-
-    private Helper helper = null;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -170,11 +121,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
     @Reference
     private OntologySpaceFactory ontologySpaceFactory;
 
-    @Property(name = ONManager.ID, value = _ID_DEFAULT)
-    private String ontonetID;
-
-    @Property(name = ONManager.ONTOLOGY_NETWORK_NS, value = _ONTOLOGY_NETWORK_NS_DEFAULT)
-    private String ontonetNS;
+    private IRI ontonetNS = null;
 
     @Property(name = ONManager.ID_SCOPE_REGISTRY, value = _ID_SCOPE_REGISTRY_DEFAULT)
     private String scopeRegistryId;
@@ -236,19 +183,15 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
      */
     protected void activate(Dictionary<String,Object> configuration) throws IOException {
 
+        long before = System.currentTimeMillis();
+
         // Parse configuration
-        ontonetID = (String) configuration.get(ONManager.ID);
-        if (ontonetID == null) ontonetID = _ID_DEFAULT;
-        ontonetNS = (String) configuration.get(ONManager.ONTOLOGY_NETWORK_NS);
-        if (ontonetNS == null) ontonetNS = _ONTOLOGY_NETWORK_NS_DEFAULT;
+        if (offline != null) ontonetNS = offline.getDefaultOntologyNetworkNamespace();
+
         scopeRegistryId = (String) configuration.get(ONManager.ID_SCOPE_REGISTRY);
         if (scopeRegistryId == null) scopeRegistryId = _ID_SCOPE_REGISTRY_DEFAULT;
         configPath = (String) configuration.get(ONManager.CONFIG_ONTOLOGY_PATH);
         if (configPath == null) configPath = _CONFIG_ONTOLOGY_PATH_DEFAULT;
-
-        if (ontonetID == null || ontonetID.isEmpty()) {
-            log.warn("The Ontology Network Manager configuration does not define a ID for the Ontology Network Manager");
-        }
 
         // Bind components, starting with the local directories.
         List<String> dirs = new ArrayList<String>();
@@ -329,7 +272,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
             rebuildScopes();
         }
 
-        log.debug(ONManager.class + " activated.");
+        log.debug(ONManager.class + " activated. Time : {} ms.", System.currentTimeMillis() - before);
 
     }
 
@@ -338,16 +281,14 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         listeners.add(listener);
     }
 
+    @SuppressWarnings("unchecked")
     protected void bindResources() {
         if (ontologySpaceFactory == null) {
-            IRI ns = IRI.create(getOntologyNetworkNamespace());
             if (ontologyProvider.getStore() instanceof TcProvider) ontologySpaceFactory = new OntologySpaceFactoryImpl(
                     (OntologyProvider<TcProvider>) ontologyProvider, new Hashtable<String,Object>());
-            else ontologySpaceFactory = new org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.OntologySpaceFactoryImpl(
-                    this, offline, ns);
         }
         IRI iri = IRI.create(getOntologyNetworkNamespace() + scopeRegistryId + "/");
-        ontologySpaceFactory.setNamespace(iri);
+        ontologySpaceFactory.setDefaultNamespace(iri);
 
         // Add listeners
         if (ontologyProvider instanceof ScopeEventListener) this
@@ -364,25 +305,23 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
             /**
              * We create and register the scopes before activating
              */
-            for (String scopeIRI : OntologyNetworkConfigurationUtils.getScopes(configOntology)) {
+            for (String scopeId : OntologyNetworkConfigurationUtils.getScopes(configOntology)) {
 
-                String[] cores = OntologyNetworkConfigurationUtils
-                        .getCoreOntologies(configOntology, scopeIRI);
+                String[] cores = OntologyNetworkConfigurationUtils.getCoreOntologies(configOntology, scopeId);
                 String[] customs = OntologyNetworkConfigurationUtils.getCustomOntologies(configOntology,
-                    scopeIRI);
+                    scopeId);
 
                 // "Be a man. Use printf"
-                log.debug("Scope " + scopeIRI);
-                for (String s : cores) {
-                    log.debug("\tCore ontology " + s);
-                }
-                for (String s : customs) {
-                    log.debug("\tCustom ontology " + s);
-                }
+                log.debug("Detected scope \"{}\"", scopeId);
+                for (String s : cores)
+                    log.debug("\tDetected core ontology {}", s);
+                for (String s : customs)
+                    log.debug("\tDetected custom ontology {}", s);
 
                 // Create the scope
+                log.debug("Rebuilding scope \"{}\"", scopeId);
                 OntologyScope sc = null;
-                sc = createOntologyScope(scopeIRI, new BlankOntologySource());
+                sc = createOntologyScope(scopeId, new BlankOntologySource());
 
                 // Populate the core space
                 if (cores.length > 0) {
@@ -399,10 +338,19 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
 
                 sc.setUp();
                 registerScope(sc);
-
-                // getScopeHelper().createScope(scopeIRI);
-                // getScopeHelper().addToCoreSpace(scopeIRI, cores);
-                getScopeHelper().addToCustomSpace(scopeIRI, customs);
+                sc.getCustomSpace().tearDown();
+                for (String locationIri : customs) {
+                    try {
+                        OntologyInputSource<?> src = new RootOntologyIRISource(IRI.create(locationIri));
+                        sc.getCustomSpace().addOntology(src);
+                        log.debug("Added ontology from location {}", locationIri);
+                    } catch (UnmodifiableOntologyCollectorException e) {
+                        log.error("An error occurred while trying to add the ontology from location: "
+                                  + locationIri, e);
+                        continue;
+                    }
+                }
+                sc.getCustomSpace().setUp();
             }
 
             /**
@@ -435,7 +383,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
     }
 
     @Override
-    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?,?>... coreSources) throws DuplicateIDException {
+    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?>... coreSources) throws DuplicateIDException {
         if (this.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
                 "Scope registry already contains ontology scope with ID " + scopeID);
         // Scope constructor also creates core and custom spaces
@@ -471,7 +419,6 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
      */
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        ontonetID = null;
         ontonetNS = null;
         configPath = null;
         log.info("in " + ONManagerImpl.class + " deactivate with context " + context);
@@ -512,7 +459,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
 
     @Override
     public String getOntologyNetworkNamespace() {
-        return ontonetNS;
+        return ontonetNS.toString();
     }
 
     /**
@@ -540,13 +487,6 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         return listeners;
     }
 
-    public Helper getScopeHelper() {
-        if (helper == null) {
-            helper = new Helper();
-        }
-        return helper;
-    }
-
     @Override
     public ScopeRegistry getScopeRegistry() {
         return this;
@@ -567,7 +507,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
             long before = System.currentTimeMillis();
             log.debug("Rebuilding scope with ID \"{}\".", scopeId);
             Collection<String> coreOnts = struct.getCoreOntologyKeysForScope(scopeId);
-            OntologyInputSource<?,?>[] srcs = new OntologyInputSource<?,?>[coreOnts.size()];
+            OntologyInputSource<?>[] srcs = new OntologyInputSource<?>[coreOnts.size()];
             int i = 0;
             for (String coreOnt : coreOnts) {
                 log.debug("Core ontology key : {}", coreOnts);
@@ -585,7 +525,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
             // Register even if some ontologies were to fail to be restored afterwards.
             scopeMap.put(scopeId, scope);
             for (String key : struct.getCustomOntologyKeysForScope(scopeId)) {
-                log.debug("Core ontology key : {}", key);
+                log.debug("Custom ontology key : {}", key);
                 custom.addOntology(new GraphSource(key));
             }
             log.info("Scope \"{}\" rebuilt in {} ms.", scopeId, System.currentTimeMillis() - before);
@@ -617,7 +557,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
             log.warn("OntoNet namespaces must be slash URIs, adding '/'.");
             namespace += "/";
         }
-        this.ontonetNS = namespace;
+        this.ontonetNS = IRI.create(namespace);
     }
 
 }

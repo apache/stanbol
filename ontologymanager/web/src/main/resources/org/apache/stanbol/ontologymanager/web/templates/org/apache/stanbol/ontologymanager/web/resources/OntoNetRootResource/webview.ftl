@@ -15,7 +15,13 @@
   limitations under the License.
 -->
 
-  <h3>Load an ontology</h3>
+  <!-- FIXME class names should be generic, and not bound to a specific functionality (here engines->reasoning services)-->
+  <div class="enginelisting">
+    <div class="collapsed">
+      <p class="collapseheader"><b>Load an ontology</b></p>
+      <div class="collapsable">
+      <br/>
+      
   <form method="POST" enctype="multipart/form-data" accept-charset="utf-8">
     <fieldset>
       <legend>From a local file</legend>
@@ -26,7 +32,7 @@
           <option value="application/rdf+xml">RDF/XML</option>
           <option value="application/rdf+json">RDF/JSON</option>
           <option value="text/turtle">Turtle</option>
-          <option value="text/rdf+nt">N-TRIPLE</option>
+          <option value="text/rdf+nt">N-Triple</option>
           <option value="text/rdf+n3">N3</option>
           <!--
           <option value="application/owl+xml">OWL/XML</option>
@@ -51,17 +57,29 @@
   
   Note: OWL import targets will be included. Ontology loading is set to fail on missing imports.
 
+     </div>
+    </div> 
+  </div>
+
+  <script>
+    $(".enginelisting p").click(function () {
+      $(this).parents("div").toggleClass("collapsed");
+    });    
+  </script>
+
   <h3>Stored ontologies</h3>
   <#assign ontologies = it.ontologies>
   <div class="storeContents">
     <table id="allOntologies">
       <div>
         <tr>
-          <th>Name</th>
+          <th>ID</th>
+          <th>Direct handles</th>
         </tr>
         <#list it.ontologies as ontology>
           <tr>
             <td><a href="${it.publicBaseUri}ontonet/${ontology}">${ontology}</a></td>
+            <td>${it.getHandles(ontology)?size}</td>
           </tr>
         </#list>
       </div>

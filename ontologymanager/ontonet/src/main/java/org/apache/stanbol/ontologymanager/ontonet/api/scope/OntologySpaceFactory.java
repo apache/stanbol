@@ -42,7 +42,7 @@ public interface OntologySpaceFactory extends NamedResource {
      *            the sources of the optional ontologies to be immediately loaded upon space creation.
      * @return the generated ontology space.
      */
-    CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?,?>... coreSources);
+    CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?>... coreSources);
 
     /**
      * Creates and sets up a default custom ontology space. Equivalent to calling
@@ -55,7 +55,7 @@ public interface OntologySpaceFactory extends NamedResource {
      *            the sources of the optional ontologies to be immediately loaded upon space creation.
      * @return the generated ontology space.
      */
-    CustomOntologySpace createCustomOntologySpace(String scopeId, OntologyInputSource<?,?>... customSources);
+    CustomOntologySpace createCustomOntologySpace(String scopeId, OntologyInputSource<?>... customSources);
 
     /**
      * Creates an ontology space of the specified type.
@@ -71,6 +71,6 @@ public interface OntologySpaceFactory extends NamedResource {
      */
     OntologySpace createOntologySpace(String scopeId,
                                       SpaceType type,
-                                      OntologyInputSource<?,?>... ontologySources);
+                                      OntologyInputSource<?>... ontologySources);
 
 }

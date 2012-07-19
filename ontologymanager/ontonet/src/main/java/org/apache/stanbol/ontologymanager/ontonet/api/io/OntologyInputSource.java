@@ -18,15 +18,14 @@ package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
 import java.util.Set;
 
-import org.semanticweb.owlapi.model.IRI;
-
 /**
  * An ontology input source provides a point for loading an ontology. Currently it provides two ways of
  * obtaining an ontology document:
  * 
  * <ol>
  * <li>From an OWLOntology.
- * <li>By dereferencing an physical IRI.
+ * <li>By dereferencing a physical IRI.
+ * <li>By querying a triple store.
  * </ol>
  * 
  * Consumers that use an ontology input source will attempt to obtain a concrete representation of an ontology
@@ -37,7 +36,7 @@ import org.semanticweb.owlapi.model.IRI;
  * @author alexdma
  * 
  */
-public interface OntologyInputSource<O,P> {
+public interface OntologyInputSource<O> {
 
     /**
      * Gets the ontology network resulting from the transitive closure of import statements on the root
@@ -48,13 +47,14 @@ public interface OntologyInputSource<O,P> {
     Set<O> getImports(boolean recursive);
 
     /**
-     * Returns the IRI by dereferencing which it should be possible to obtain the ontology. This method is
-     * supposed to return null if the ontology lives in-memory and was not or is not going to be stored
-     * publicly.
+     * Returns a reference object that can be used for obtaining the supplied ontology. Depending on how the
+     * ontology was obtained, the origin can be a physical URL, the ID of a database or graph in the local
+     * storage, or something else.This method is supposed to return null if the ontology lives in-memory and
+     * was not or is not going to be stored publicly.
      * 
-     * @return the physical location for this ontology source, or null if unknown.
+     * @return a physical reference for this ontology source, or null if unknown.
      */
-    IRI getPhysicalIRI();
+    Origin<?> getOrigin();
 
     /**
      * Returns the OWL Ontology that imports the whole ontology network addressed by this input source.
@@ -63,18 +63,14 @@ public interface OntologyInputSource<O,P> {
      */
     O getRootOntology();
 
-    String getStorageKey();
-
-    P getTriplesProvider();
-
     /**
-     * Determines if a physical IRI is known for this ontology source. Note that an anonymous ontology may
-     * have been fetched from a physical location, just as a named ontology may have been stored in memory and
-     * have no physical location.
+     * Determines if a physical reference is known for this ontology source. Note that an anonymous ontology
+     * may have been fetched from a physical location, just as a named ontology may have been stored in memory
+     * and have no physical location.
      * 
-     * @return true if a physical location is known for this ontology source.
+     * @return true if a physical reference is known for this ontology source.
      */
-    boolean hasPhysicalIRI();
+    boolean hasOrigin();
 
     /**
      * Determines if a root ontology that imports the entire network is available.

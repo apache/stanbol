@@ -28,14 +28,20 @@ import java.util.Map;
 public class OntologyNetworkConfiguration {
 
     private Map<String,Collection<String>> coreOntologiesForScopes, customOntologiesForScopes,
-            ontologiesForSessions;
+            ontologiesForSessions, scopesForSessions;
 
     public OntologyNetworkConfiguration(Map<String,Collection<String>> coreOntologiesForScopes,
                                         Map<String,Collection<String>> customOntologiesForScopes,
-                                        Map<String,Collection<String>> ontologiesForSessions) {
+                                        Map<String,Collection<String>> ontologiesForSessions,
+                                        Map<String,Collection<String>> scopesForSessions) {
         this.coreOntologiesForScopes = coreOntologiesForScopes;
         this.customOntologiesForScopes = customOntologiesForScopes;
         this.ontologiesForSessions = ontologiesForSessions;
+        this.scopesForSessions = scopesForSessions;
+    }
+
+    public Collection<String> getAttachedScopes(String sessionId) {
+        return scopesForSessions.get(sessionId);
     }
 
     public Collection<String> getCoreOntologyKeysForScope(String scopeId) {

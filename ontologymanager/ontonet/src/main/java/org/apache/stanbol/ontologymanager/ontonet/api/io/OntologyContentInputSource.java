@@ -42,9 +42,8 @@ public class OntologyContentInputSource extends AbstractOWLOntologyInputSource {
 
     public OntologyContentInputSource(InputStream content, OWLOntologyManager manager) throws OWLOntologyCreationException {
         long before = System.currentTimeMillis();
-        bindPhysicalIri(null);
+        bindPhysicalOrigin(null);
         bindRootOntology(manager.loadOntologyFromOntologyDocument(content));
-        bindTriplesProvider(manager);
         log.debug("Input source initialization completed in {} ms.", (System.currentTimeMillis() - before));
     }
 

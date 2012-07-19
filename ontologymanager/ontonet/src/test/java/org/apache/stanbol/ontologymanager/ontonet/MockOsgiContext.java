@@ -50,7 +50,7 @@ public class MockOsgiContext {
 
     private static Dictionary<String,Object> config;
 
-    private static OfflineConfiguration offline;
+    public static OfflineConfiguration offline;
 
     public static ONManager onManager;
 
@@ -66,8 +66,7 @@ public class MockOsgiContext {
 
     static {
         config = new Hashtable<String,Object>();
-        config.put(ONManager.ONTOLOGY_NETWORK_NS, "http://stanbol.apache.org/scope/");
-        config.put(SessionManager.SESSIONS_NS, "http://stanbol.apache.org/session/");
+        config.put(OfflineConfiguration.DEFAULT_NS, "http://stanbol.apache.org/test/");
         config.put(SessionManager.MAX_ACTIVE_SESSIONS, "-1");
         offline = new OfflineConfigurationImpl(new Hashtable<String,Object>());
         reset();
@@ -95,7 +94,7 @@ public class MockOsgiContext {
     public static void resetManagers() {
         OntologySpaceFactory factory = new OntologySpaceFactoryImpl(ontologyProvider, config);
         onManager = new ONManagerImpl(ontologyProvider, offline, factory, config);
-        sessionManager = new SessionManagerImpl(ontologyProvider, config);
+        sessionManager = new SessionManagerImpl(ontologyProvider, offline, config);
     }
 
 }

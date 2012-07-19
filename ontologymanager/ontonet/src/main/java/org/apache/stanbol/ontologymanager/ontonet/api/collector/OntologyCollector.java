@@ -43,7 +43,7 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedRes
      *            the ontology to be added
      * @return the key that can be used for accessing the stored ontology directly
      */
-    String addOntology(OntologyInputSource<?,?> ontologySource);
+    String addOntology(OntologyInputSource<?> ontologySource);
 
     /**
      * Returns the ontologies managed by this ontology space. This is a shortcut method for iterating
@@ -55,13 +55,6 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedRes
      * @return the set of ontologies in the ontology space
      */
     <O> Set<O> getManagedOntologies(Class<O> returnType, boolean withClosure);
-
-    /**
-     * TODO replace with Ontology IDs
-     * 
-     * @return
-     */
-    Set<IRI> listManagedOntologies();
 
     <O> O getOntology(IRI ontologyIri, Class<O> returnType);
 
@@ -75,6 +68,10 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedRes
      */
     <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge);
 
+    <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge, IRI universalPrefix);
+
+    <O> O getOntology(IRI ontologyIri, Class<O> returnType, IRI universalPrefix);
+
     /**
      * Determines if the ontology identified by the supplied <i>logical</i> IRI has been loaded in this space.<br>
      * <br>
@@ -87,6 +84,13 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedRes
      * @return true if an ontology with this ID has been loaded in this space.
      */
     boolean hasOntology(IRI ontologyIri);
+
+    /**
+     * TODO replace with Ontology IDs
+     * 
+     * @return
+     */
+    Set<IRI> listManagedOntologies();
 
     /**
      * Removes the given ontology from the ontology space, if the ontology is a direct child of the top

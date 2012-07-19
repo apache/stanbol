@@ -18,9 +18,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
 import java.util.Set;
 
-
 /**
- * 
  * An object that can manipulate {@link OntologyInputSource} objects;
  * 
  * @author alexdma

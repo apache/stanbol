@@ -21,7 +21,6 @@ import java.util.Set;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.Lockable;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 
 /**
  * Note that sessions are possibly disjoint with HTTP sessions or the like.
@@ -63,7 +62,7 @@ public interface Session extends OntologyCollector, OWLExportable, Lockable, Ses
      * @param scope
      *            the ontology scope to be referenced.
      */
-    void attachScope(OntologyScope scope);
+    void attachScope(String scopeId);
 
     /**
      * Removes all references to ontology scopes, thus leaving the session data as standalone.

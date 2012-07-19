@@ -27,7 +27,6 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.slf4j.Logger;
@@ -43,8 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
-public abstract class AbstractClerezzaGraphInputSource extends
-        AbstractGenericInputSource<TripleCollection,TcProvider> {
+public abstract class AbstractClerezzaGraphInputSource extends AbstractGenericInputSource<TripleCollection> {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -60,8 +58,7 @@ public abstract class AbstractClerezzaGraphInputSource extends
 
     protected Set<TripleCollection> getImportedGraphs(TripleCollection g, boolean recursive) {
         Set<TripleCollection> result = new HashSet<TripleCollection>();
-        UriRef u = 
-                null;
+        UriRef u = null;
 
         Iterator<Triple> it = g.filter(null, RDF.type, OWL.Ontology);
         if (it.hasNext()) {

@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.session;
 
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.offline;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.ontologyProvider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,7 +44,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session.State;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,9 +56,9 @@ public class TestSessions {
     public static IRI baseIri = IRI.create(Constants.PEANUTS_MAIN_BASE), baseIri2 = IRI
             .create(Constants.PEANUTS_MINOR_BASE);
 
-    public static String scopeId1 = "Ranma12", scopeId2 = "HokutoNoKen", scopeId3 = "Doraemon";
-
     private static OntologyScopeFactory scopeFactory = null;
+
+    public static String scopeId1 = "Ranma12", scopeId2 = "HokutoNoKen", scopeId3 = "Doraemon";
 
     private static ScopeRegistry scopeRegistry = null;
 
@@ -66,15 +66,14 @@ public class TestSessions {
 
     private static OntologySpaceFactory spaceFactory = null;
 
-    private static OntologyInputSource src1 = null, src2 = null;
+    private static OntologyInputSource<?> src1 = null, src2 = null;
 
     @BeforeClass
     public static void setup() {
         Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
         // An ONManagerImpl with no store and default settings
-        ONManager onm = new ONManagerImpl(ontologyProvider, new OfflineConfigurationImpl(onmconf),
-                spaceFactory, onmconf);
-        sesmgr = new SessionManagerImpl(ontologyProvider, onmconf);
+        ONManager onm = new ONManagerImpl(ontologyProvider, offline, spaceFactory, onmconf);
+        sesmgr = new SessionManagerImpl(ontologyProvider, offline, onmconf);
         scopeFactory = onm;
         spaceFactory = onm.getOntologySpaceFactory();
         scopeRegistry = onm;
@@ -107,8 +106,8 @@ public class TestSessions {
         } catch (DuplicateIDException e) {
             fail("Unexpected DuplicateIDException was caught while testing scope " + e.getDuplicateID());
         }
-        Session ses = sesmgr.createSession();
-        String sesid = ses.getID();
+        // Session ses = sesmgr.createSession();
+        // String sesid = ses.getID();
         // TODO replace with proper tests
         // assertFalse(scope1.getSessionSpaces().isEmpty());
         // assertNotNull(scope1.getSessionSpace(sesid));

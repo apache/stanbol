@@ -21,8 +21,7 @@ import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.ontolog
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.HashSet;
@@ -67,7 +66,7 @@ public class TestStorage {
 
         assertEquals(1, ontologyProvider.getStore().listTripleCollections().size());
         // This one has an import that we want to hijack locally, so we use the ParentPathInputSource.
-        OntologyInputSource<?,?> ois = new ParentPathInputSource(new File(getClass().getResource(
+        OntologyInputSource<?> ois = new ParentPathInputSource(new File(getClass().getResource(
             "/ontologies/minorcharacters.owl").toURI()));
 
         OntologyScope sc = onManager.createOntologyScope(scopeId, ois);
@@ -95,22 +94,22 @@ public class TestStorage {
     @Test
     public void storedOntologyOutlivesScope() throws Exception {
         String ephemeralScopeId = "CaducousScope";
-        OntologyInputSource<OWLOntology,?> ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
+        OntologyInputSource<OWLOntology> ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
             "/ontologies/nonexistentcharacters.owl")));
         IRI ontologyId = ois.getRootOntology().getOntologyID().getOntologyIRI();
         OntologyScope scope = onManager.createOntologyScope(ephemeralScopeId);
         // Initially, the ontology is not there
-        assertNull(ontologyProvider.getKey(ontologyId));
+        assertFalse(ontologyProvider.hasOntology(ontologyId));
         // Once added, the ontology is there
         scope.getCustomSpace().addOntology(ois);
-        assertNotNull(ontologyProvider.getKey(ontologyId));
+        assertTrue(ontologyProvider.hasOntology(ontologyId));
         // Once removed from the scope, the ontology is still there
         scope.getCustomSpace().removeOntology(ontologyId);
-        assertNotNull(ontologyProvider.getKey(ontologyId));
+        assertTrue(ontologyProvider.hasOntology(ontologyId));
         // Once the scope is killed, the ontology is still there
         // TODO find a more appropriate method to kill scopes?
         scope.tearDown();
-        assertNotNull(ontologyProvider.getKey(ontologyId));
+        assertTrue(ontologyProvider.hasOntology(ontologyId));
     }
 
 }

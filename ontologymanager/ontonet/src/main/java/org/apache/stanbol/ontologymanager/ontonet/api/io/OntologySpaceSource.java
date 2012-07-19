@@ -34,10 +34,10 @@ public class OntologySpaceSource extends AbstractOWLOntologyInputSource {
         this(space, null);
     }
 
-    public OntologySpaceSource(OntologySpace space, Set<OntologyInputSource<?,?>> subtrees) {
+    public OntologySpaceSource(OntologySpace space, Set<OntologyInputSource<?>> subtrees) {
         this.space = space;
         if (subtrees != null) try {
-            for (OntologyInputSource<?,?> st : subtrees)
+            for (OntologyInputSource<?> st : subtrees)
                 appendSubtree(st);
         } catch (UnmodifiableOntologyCollectorException e) {
             log.error(
@@ -47,7 +47,7 @@ public class OntologySpaceSource extends AbstractOWLOntologyInputSource {
         bindRootOntology(space.export(OWLOntology.class, false));
     }
 
-    protected void appendSubtree(OntologyInputSource<?,?> subtree) throws UnmodifiableOntologyCollectorException {
+    protected void appendSubtree(OntologyInputSource<?> subtree) throws UnmodifiableOntologyCollectorException {
         space.addOntology(subtree);
     }
 
@@ -62,7 +62,7 @@ public class OntologySpaceSource extends AbstractOWLOntologyInputSource {
 
     @Override
     public String toString() {
-        return "SCOPE_ONT_IRI<" + getPhysicalIRI() + ">";
+        return "SCOPE_ONT_IRI<" + getOrigin() + ">";
     }
 
 }

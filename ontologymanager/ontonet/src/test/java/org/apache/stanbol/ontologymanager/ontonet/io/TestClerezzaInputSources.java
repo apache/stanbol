@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.io;
 
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.ontologyProvider;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.parser;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.tcManager;
@@ -30,7 +31,6 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
-import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.Locations;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
@@ -57,7 +57,7 @@ public class TestClerezzaInputSources {
         reset();
     }
 
-    private OntologyInputSource<TripleCollection,?> gis;
+    private OntologyInputSource<TripleCollection> gis;
 
     @Before
     public void bind() throws Exception {
@@ -76,17 +76,17 @@ public class TestClerezzaInputSources {
 
         OntologyProvider<TcProvider> provider = new ClerezzaOntologyProvider(tcManager,
                 new OfflineConfigurationImpl(new Hashtable<String,Object>()), parser);
-
+        int tcs = tcManager.listTripleCollections().size();
         InputStream content = TestClerezzaInputSources.class
                 .getResourceAsStream("/ontologies/droppedcharacters.owl");
-        OntologyInputSource<?,TcProvider> src = new GraphContentInputSource(content, SupportedFormat.RDF_XML,
-            new SimpleTcProvider(), parser);
-        
+        OntologyInputSource<?> src = new GraphContentInputSource(content, SupportedFormat.RDF_XML,
+                ontologyProvider.getStore(), parser);
+
         log.info("After input source creation, TcManager has {} graphs. ", tcManager.listTripleCollections()
                 .size());
         for (UriRef name : tcManager.listTripleCollections())
             log.info("-- {} (a {})", name, tcManager.getTriples(name).getClass().getSimpleName());
-        assertEquals(1, tcManager.listTripleCollections().size());
+        assertEquals(tcs + 1, tcManager.listTripleCollections().size());
         OntologySpace spc = new CoreSpaceImpl(TestClerezzaInputSources.class.getSimpleName(),
                 IRI.create("http://stanbol.apache.org/ontologies/"), provider);
         spc.addOntology(src);
@@ -95,8 +95,9 @@ public class TestClerezzaInputSources {
 
         for (UriRef name : tcManager.listTripleCollections())
             log.info("-- {} (a {})", name, tcManager.getTriples(name).getClass().getSimpleName());
-        assertEquals(2, tcManager.listTripleCollections().size());
-    
+        // Adding the ontology from the same storage should not create new graphs
+        assertEquals(tcs + 1, tcManager.listTripleCollections().size());
+
     }
 
     @Test

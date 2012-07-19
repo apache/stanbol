@@ -25,17 +25,16 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 /**
  * Abstract OWL API implementation of {@link OntologyInputSource} with the basic methods for obtaining root
  * ontologies and their physical IRIs where applicable.<br/>
- * </br> Implementations should either invoke abstract methods {@link #bindPhysicalIri(IRI)} and
+ * </br> Implementations should either invoke abstract methods {@link #bindPhysicalOrigin(IRI)} and
  * {@link #bindRootOntology(OWLOntology)} in their constructors, or override them.
  * 
  */
-public abstract class AbstractOWLOntologyInputSource extends AbstractGenericInputSource<OWLOntology,OWLOntologyManager> {
+public abstract class AbstractOWLOntologyInputSource extends AbstractGenericInputSource<OWLOntology> {
 
     @Override
     public Set<OWLOntology> getImports(boolean recursive) {
         OWLOntologyManager mgr = rootOntology.getOWLOntologyManager();
         return (recursive ? mgr.getImportsClosure(rootOntology) : mgr.getDirectImports(rootOntology));
-        // return rootOntology.getOWLOntologyManager().getImportsClosure(rootOntology);
     }
 
 }

@@ -29,8 +29,7 @@ public class RootOntologySource extends AbstractOWLOntologyInputSource {
     public RootOntologySource(OWLOntology rootOntology) {
         bindRootOntology(rootOntology);
         // Never bind logical IDs as physical IRIs, as they risk overwriting previous bindings.
-        bindPhysicalIri(null);
-        bindTriplesProvider(rootOntology.getOWLOntologyManager());
+        bindPhysicalOrigin(null);
     }
 
     /**
@@ -41,7 +40,7 @@ public class RootOntologySource extends AbstractOWLOntologyInputSource {
      */
     public RootOntologySource(OWLOntology rootOntology, IRI phyicalIRI) {
         this(rootOntology);
-        bindPhysicalIri(phyicalIRI);
+        bindPhysicalOrigin(phyicalIRI == null ? null : Origin.create(phyicalIRI));
     }
 
     /*

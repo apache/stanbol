@@ -40,7 +40,6 @@ import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
@@ -77,19 +76,19 @@ public class TestClerezzaSpaces {
 
     private static OntologySpaceFactory factory;
 
-    private static OntologyInputSource<TripleCollection,?> minorSrc, dropSrc, nonexSrc;
+    private static OntologyInputSource<TripleCollection> minorSrc, dropSrc, nonexSrc;
 
-    private static OntologyInputSource<OWLOntology,?> inMemorySrc;
+    private static OntologyInputSource<OWLOntology> inMemorySrc;
 
     private static OfflineConfiguration offline;
 
-    private static OntologyInputSource<TripleCollection,?> getLocalSource(String resourcePath) {
+    private static OntologyInputSource<TripleCollection> getLocalSource(String resourcePath) {
         InputStream is = TestOntologySpaces.class.getResourceAsStream(resourcePath);
         return new GraphSource(parser.parse(is, SupportedFormat.RDF_XML));
     }
 
-    private static OntologyInputSource<?,?> getLocalSource(String resourcePath, OWLOntologyManager mgr) throws OWLOntologyCreationException,
-                                                                                                       URISyntaxException {
+    private static OntologyInputSource<?> getLocalSource(String resourcePath, OWLOntologyManager mgr) throws OWLOntologyCreationException,
+                                                                                                     URISyntaxException {
         URL url = TestOntologySpaces.class.getResource(resourcePath);
         File f = new File(url.toURI());
         return new ParentPathInputSource(f, mgr != null ? mgr
@@ -196,14 +195,14 @@ public class TestClerezzaSpaces {
 
         // Null identifier (invalid).
         try {
-            shouldBeNull = factory.createOntologySpace(null, SpaceType.CORE, new BlankOntologySource());
+            shouldBeNull = factory.createOntologySpace(null, SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite null scope identifier.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
 
         // More than one slash in identifier (invalid).
         try {
-            shouldBeNull = factory.createOntologySpace("Sc0/p3", SpaceType.CORE, new BlankOntologySource());
+            shouldBeNull = factory.createOntologySpace("Sc0/p3", SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite null scope identifier.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
@@ -213,7 +212,7 @@ public class TestClerezzaSpaces {
         // Null namespace (invalid).
         factory.setNamespace(null);
         try {
-            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite null OntoNet namespace.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
@@ -221,7 +220,7 @@ public class TestClerezzaSpaces {
         // Namespace with query (invalid).
         factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/?query=true"));
         try {
-            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite query in OntoNet namespace.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
@@ -229,7 +228,7 @@ public class TestClerezzaSpaces {
         // Namespace with fragment (invalid).
         factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology#fragment"));
         try {
-            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
@@ -237,14 +236,14 @@ public class TestClerezzaSpaces {
         // Namespace ending with hash (invalid).
         factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology#"));
         try {
-            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
 
         // Namespace ending with neither (valid, should automatically add slash).
         factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology"));
-        shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+        shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
         assertNotNull(shouldBeNotNull);
         assertTrue(shouldBeNotNull.getNamespace().toString().endsWith("/"));
 
@@ -252,7 +251,7 @@ public class TestClerezzaSpaces {
 
         // Namespace ending with slash (valid).
         factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/"));
-        shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+        shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
         assertNotNull(shouldBeNotNull);
     }
 

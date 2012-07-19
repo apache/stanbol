@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.APPENDED_TO;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_APPENDED;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_SPACE_CORE;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_SPACE_CUSTOM;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_MANAGED_BY;
@@ -83,6 +85,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfigurati
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.ImportManagementPolicy;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
@@ -268,20 +271,24 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             return null;
         }
 
-        Set<OWLOntologyID> keys() {
-            Set<OWLOntologyID> result = new HashSet<OWLOntologyID>();
-            Iterator<Triple> it = graph.filter(null, new UriRef(Vocabulary.MAPS_TO_GRAPH), null);
+        OWLOntologyID getReverseMapping(UriRef graphName) {
+            // Logical mappings first.
+            Iterator<Triple> it = graph.filter(null, new UriRef(Vocabulary.MAPS_TO_GRAPH), graphName);
             while (it.hasNext()) {
-                NonLiteral subj = it.next().getSubject();
-                if (subj instanceof UriRef) result.add(buildOntologyId((UriRef) subj));
+                Resource obj = it.next().getSubject();
+                if (obj instanceof UriRef) return new OWLOntologyID(IRI.create(((UriRef) obj)
+                        .getUnicodeString()));
             }
-            it = graph.filter(null, new UriRef(Vocabulary.RETRIEVED_FROM), null);
+            Literal litloc = LiteralFactory.getInstance().createTypedLiteral(
+                new UriRef(graphName.getUnicodeString()));
+            // Logical mappings failed, try physical mappings.
+            it = graph.filter(null, new UriRef(Vocabulary.RETRIEVED_FROM), litloc);
             while (it.hasNext()) {
-                Resource subj = it.next().getObject();
-                if (subj instanceof UriRef) result.add(buildOntologyId((UriRef) subj));
-                else if (subj instanceof Literal) System.out.println(((Literal) subj).getLexicalForm());
+                Resource obj = it.next().getSubject();
+                if (obj instanceof UriRef) return new OWLOntologyID(IRI.create(((UriRef) obj)
+                        .getUnicodeString()));
             }
-            return result;
+            return null;
         }
 
         void mapLocator(IRI locator, UriRef graphName) {
@@ -317,9 +324,11 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
 
         Set<String> stringValues() {
             Set<String> result = new HashSet<String>();
-            Iterator<Triple> it = graph.filter(null, new UriRef(Vocabulary.MAPS_TO_GRAPH), null);
+            Iterator<Triple> it = graph.filter(
+            // null, new UriRef(Vocabulary.MAPS_TO_GRAPH), null
+                null, RDF.type, new UriRef(Vocabulary.ENTRY));
             while (it.hasNext()) {
-                Resource obj = it.next().getObject();
+                Resource obj = it.next().getSubject();
                 if (obj instanceof UriRef) result.add(((UriRef) obj).getUnicodeString());
             }
             return result;
@@ -549,9 +558,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         }
     }
 
-    private UriRef getIRIforScope(OntologyScope scope) {
+    private UriRef getIRIforScope(String scopeId) {
         // Use the Stanbol-internal namespace, so that the whole configuration can be ported.
-        return new UriRef(_NS_STANBOL_INTERNAL + OntologyScope.shortName + "/" + scope.getID());
+        return new UriRef(_NS_STANBOL_INTERNAL + OntologyScope.shortName + "/" + scopeId);
     }
 
     private UriRef getIRIforSession(Session session) {
@@ -567,19 +576,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
     @Override
     public String getKey(IRI ontologyIri) {
         ontologyIri = URIUtils.sanitizeID(ontologyIri);
-        return getKey(new OWLOntologyID(ontologyIri));
+        return getPublicKey(new OWLOntologyID(ontologyIri));
     }
 
     @Override
     public String getKey(OWLOntologyID ontologyId) {
-        UriRef ur = keymap.getMapping(ontologyId);
-        log.debug("key for {} is {}", ontologyId, ur);
-        return (ur == null) ? null : ur.getUnicodeString();
-    }
-
-    @Override
-    public Set<String> getKeys() {
-        return keymap.stringValues();
+        return getPublicKey(ontologyId);
     }
 
     @SuppressWarnings("unchecked")
@@ -590,8 +592,13 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         return (O) store.getTriples(new UriRef(metaGraphId));
     }
 
+    @Override
+    public OWLOntologyID getOntologyId(String storageKey) {
+        return keymap.getReverseMapping(new UriRef(storageKey));
+    }
+
     public OntologyNetworkConfiguration getOntologyNetworkConfiguration() {
-        Map<String,Collection<String>> coreOntologies = new HashMap<String,Collection<String>>(), customOntologies = new HashMap<String,Collection<String>>();
+        Map<String,Collection<String>> coreOntologies = new HashMap<String,Collection<String>>(), customOntologies = new HashMap<String,Collection<String>>(), attachedScopes = new HashMap<String,Collection<String>>();
         final TripleCollection meta = store.getTriples(new UriRef(metaGraphId));
 
         // Scopes first
@@ -689,22 +696,41 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                     String sessionId = s.substring(prefix.length());
                     log.info("Rebuilding session \"{}\".", sessionId);
                     sessionOntologies.put(sessionId, new HashSet<String>());
+                    attachedScopes.put(sessionId, new HashSet<String>());
                     // retrieve the ontologies
                     if (ses_ur != null) {
-                        for (Iterator<Triple> it2 = meta.filter(ses_ur, null, null); it2.hasNext();) {
-                            Triple t = it2.next();
-                            UriRef predicate = t.getPredicate();
-                            if (predicate.equals(MANAGES)) {
-                                if (t.getObject() instanceof UriRef) sessionOntologies.get(sessionId).add(
-                                    ((UriRef) t.getObject()).getUnicodeString());
+                        for (Iterator<Triple> it2 = meta.filter(ses_ur, MANAGES, null); it2.hasNext();) {
+                            Resource obj = it2.next().getObject();
+                            if (obj instanceof UriRef) sessionOntologies.get(sessionId).add(
+                                ((UriRef) obj).getUnicodeString());
+
+                        }
+                        for (Iterator<Triple> it2 = meta.filter(null, IS_MANAGED_BY, ses_ur); it2.hasNext();) {
+                            Resource subj = it2.next().getSubject();
+                            if (subj instanceof UriRef) sessionOntologies.get(sessionId).add(
+                                ((UriRef) subj).getUnicodeString());
+
+                        }
+                        for (Iterator<Triple> it2 = meta.filter(null, APPENDED_TO, ses_ur); it2.hasNext();) {
+                            Resource subj = it2.next().getSubject();
+                            if (subj instanceof UriRef) {
+                                String s1 = ((UriRef) subj).getUnicodeString();
+                                String prefix1 = _NS_STANBOL_INTERNAL + OntologyScope.shortName + "/";
+                                if (s1.startsWith(prefix1)) {
+                                    String scopeId = s1.substring(prefix1.length());
+                                    attachedScopes.get(sessionId).add(scopeId);
+                                }
                             }
                         }
-                        for (Iterator<Triple> it2 = meta.filter(null, null, ses_ur); it2.hasNext();) {
-                            Triple t = it2.next();
-                            UriRef predicate = t.getPredicate();
-                            if (predicate.equals(IS_MANAGED_BY)) {
-                                if (t.getSubject() instanceof UriRef) sessionOntologies.get(sessionId).add(
-                                    ((UriRef) t.getSubject()).getUnicodeString());
+                        for (Iterator<Triple> it2 = meta.filter(ses_ur, HAS_APPENDED, null); it2.hasNext();) {
+                            Resource obj = it2.next().getObject();
+                            if (obj instanceof UriRef) {
+                                String s1 = ((UriRef) obj).getUnicodeString();
+                                String prefix1 = _NS_STANBOL_INTERNAL + OntologyScope.shortName + "/";
+                                if (s1.startsWith(prefix1)) {
+                                    String scopeId = s1.substring(prefix1.length());
+                                    attachedScopes.get(sessionId).add(scopeId);
+                                }
                             }
                         }
                     }
@@ -712,12 +738,20 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             }
         }
 
-        return new OntologyNetworkConfiguration(coreOntologies, customOntologies, sessionOntologies);
+        return new OntologyNetworkConfiguration(coreOntologies, customOntologies, sessionOntologies,
+                attachedScopes);
     }
 
     @Override
-    public Set<String> getOntologyVersionKeys(IRI ontologyIRI) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+    public String getPublicKey(OWLOntologyID ontologyId) {
+        UriRef ur = keymap.getMapping(ontologyId);
+        log.debug("key for {} is {}", ontologyId, ur);
+        return (ur == null) ? null : ur.getUnicodeString();
+    }
+
+    @Override
+    public Set<String> getPublicKeys() {
+        return keymap.stringValues();
     }
 
     @Override
@@ -789,6 +823,11 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
     @Override
     public Class<?>[] getSupportedReturnTypes() {
         return supported;
+    }
+
+    @Override
+    public Set<String> getVersionKeys(IRI ontologyIRI) {
+        throw new UnsupportedOperationException("Method not implemented yet.");
     }
 
     @Override
@@ -893,7 +932,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
     }
 
     @Override
-    public String loadInStore(Object ontology, boolean force) {
+    public String loadInStore(Object ontology, final boolean force, Origin<?>... origins) {
 
         if (ontology == null) throw new IllegalArgumentException("No ontology supplied.");
         long before = System.currentTimeMillis();
@@ -911,26 +950,31 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
 
         // Force is ignored for the content, but the imports?
 
-        String s = prefix + "::"; // This will become the graph name
         IRI ontologyIri = null;
 
         // FIXME Profile this method. Are we getting rid of rdfData after adding its triples?
 
-        // preferredKey should be the "guessed" ontology id
         String iri = null;
-        OWLOntologyID realId = OWLUtils.guessOntologyIdentifier(rdfData);
+        OWLOntologyID realId = OWLUtils.guessOntologyIdentifier(rdfData); // used for public and storage key.
 
-        // String alternateId = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
-        if ((iri == null || iri.isEmpty()) && realId != null) {
+        if (realId == null) {
+            IRI z;
+            if (origins.length > 0 && origins[0] != null) {
+                Object reff = origins[0].getReference();
+                if (reff instanceof IRI) z = (IRI) reff; // No version IRI here
+                else if (reff instanceof UriRef) z = IRI.create(((UriRef) reff).getUnicodeString());
+                else z = IRI.create(getClass().getCanonicalName() + "-time:" + System.currentTimeMillis());
+            } else z = IRI.create(getClass().getCanonicalName() + "-time:" + System.currentTimeMillis());
+            realId = new OWLOntologyID(z);
+        }
+
+        if (realId != null) {
             if (realId.getOntologyIRI() != null) iri = realId.getOntologyIRI().toString();
             if (realId.getVersionIRI() != null) iri += ":::" + realId.getVersionIRI().toString();
         }
-        // else try {
-        // new UriRef(iri); // Can I make a UriRef from it?
-        // } catch (Exception ex) {
-        // iri = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
-        // }
 
+        // s will become the graph name
+        String s = (iri.startsWith(prefix + "::")) ? "" : (prefix + "::");
         ontologyIri = IRI.create(iri);
         while (s.endsWith("#"))
             s = s.substring(0, s.length() - 1);
@@ -944,12 +988,41 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
          * TODO this occupies twice as much space, which should not be necessary if the provider is the same
          * as the one used by the input source.
          */
-        UriRef uriref = new UriRef(s);
-        log.debug("Storing ontology with graph ID {}", uriref);
+
+        // Check if it is possible to avoid reloading the ontology content from its source.
+        boolean mustLoad = true;
+        if (!force) {
+            Set<UriRef> stored = store.listTripleCollections();
+            if (origins.length > 0 && origins[0] != null && origins[0].getReference() instanceof UriRef) {
+                UriRef ref = (UriRef) origins[0].getReference();
+
+                if (stored.contains(ref)) {
+                    boolean condition = true; // Any failed check will make it false
+
+                    /*
+                     * Check if the stored Ontology ID (versionIRI included) matches matches that of the
+                     * ontology source. XXX note that anonymous ontologies should be considered a match... or
+                     * should they not?
+                     */
+                    OWLOntologyID idFromSrc = OWLUtils.guessOntologyIdentifier(rdfData);
+                    OWLOntologyID idFromStore = OWLUtils.guessOntologyIdentifier(store.getTriples(ref));
+                    condition &= (idFromSrc == null && idFromStore == null) || idFromSrc.equals(idFromStore);
+
+                    // Finally, a size check
+                    if (condition && rdfData instanceof TripleCollection) condition &= store.getTriples(ref)
+                            .size() == rdfData.size();
+
+                    mustLoad &= !condition;
+                }
+            }
+        }
 
         // The policy here is to avoid copying the triples from a graph already in the store.
         // FIXME not a good policy for graphs that change
-        if (!getStore().listTripleCollections().contains(uriref) || force) {
+        UriRef uriref;
+        if (mustLoad) {
+            uriref = new UriRef(s);
+            log.debug("Storing ontology with graph ID {}", uriref);
             try {
                 graph = store.createMGraph(uriref);
             } catch (EntityAlreadyExistsException e) {
@@ -958,7 +1031,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             }
             graph.addAll(rdfData);
         } else {
-            log.debug("Graph with ID {} already in store. Default action is to skip storage.", uriref);
+            try {
+                uriref = (UriRef) origins[0].getReference();
+            } catch (ClassCastException cex) {
+                uriref = new UriRef(s);
+            }
+            log.debug("Graph with ID {} already in store. Default action is to skip storage.", origins[0]);
             graph = store.getTriples(uriref);
         }
 
@@ -971,14 +1049,17 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             // Versioned or not, the real ID mapping is always added
             keymap.setMapping(realId, uriref);
             mappedIds += realId;
-            if (realId.getVersionIRI() != null) {
-                // If the unversioned variant of a versioned ID wasn't mapped, map it too.
-                OWLOntologyID unvId = new OWLOntologyID(realId.getOntologyIRI());
-                if (keymap.getMapping(unvId) == null) {
-                    keymap.setMapping(unvId, uriref);
-                    mappedIds += realId;
-                }
-            }
+            /*
+             * TODO not sure I should always map the unversioned ID as a key too?
+             */
+            // if (realId.getVersionIRI() != null) {
+            // // If the unversioned variant of a versioned ID wasn't mapped, map it too.
+            // OWLOntologyID unvId = new OWLOntologyID(realId.getOntologyIRI());
+            // if (keymap.getMapping(unvId) == null) {
+            // keymap.setMapping(unvId, uriref);
+            // mappedIds += realId;
+            // }
+            // }
         }
         /*
          * Make an ontology ID out of the originally supplied IRI (which might be the physical one and differ
@@ -1012,6 +1093,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                             UriRef target = (UriRef) obj;
                             OWLOntologyID id = new OWLOntologyID(IRI.create(target.getUnicodeString()));
                             if (keymap.getMapping(id) == null) {
+                                // TODO manage origins for imported ontologies too?
                                 loadInStore(IRI.create(((UriRef) obj).getUnicodeString()), null, false);
                             }
                         }
@@ -1046,7 +1128,10 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         else if (collector instanceof OntologySpace) colltype = OntologySpace.shortName + "/";
         else if (collector instanceof Session) colltype = Session.shortName + "/";
         UriRef c = new UriRef(_NS_STANBOL_INTERNAL + colltype + collector.getID());
-        UriRef u = new UriRef(prefix + "::" + keymap.buildResource(addedOntology).getUnicodeString());
+        keymap.getMapping(addedOntology);
+        UriRef u =
+        // new UriRef(prefix + "::" + keymap.buildResource(addedOntology).getUnicodeString());
+        keymap.getMapping(addedOntology);
 
         // TODO OntologyProvider should not be aware of scopes, spaces or sessions. Move elsewhere.
         MGraph meta = getMetaGraph(MGraph.class);
@@ -1077,7 +1162,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                 collector.getID());
             return;
         }
-        synchronized (meta) {
+        if (u != null) synchronized (meta) {
             Triple t;
             if (predicate1 != null) {
                 t = new TripleImpl(c, predicate1, u);
@@ -1103,8 +1188,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         else if (collector instanceof OntologySpace) colltype = OntologySpace.shortName + "/";
         else if (collector instanceof Session) colltype = Session.shortName + "/";
         UriRef c = new UriRef(_NS_STANBOL_INTERNAL + colltype + collector.getID());
-        UriRef u = new UriRef(prefix + "::" + keymap.buildResource(removedOntology).getUnicodeString());
-
+        UriRef u =
+        // new UriRef(prefix + "::" + keymap.buildResource(removedOntology).getUnicodeString());
+        keymap.getMapping(removedOntology);
         // XXX condense the following code
         MGraph meta = getMetaGraph(MGraph.class);
         boolean badState = true;
@@ -1134,6 +1220,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                 meta.remove(new TripleImpl(u, IS_MANAGED_BY, c));
             }
         }
+    }
+
+    @Override
+    public boolean removeOntology(String publicKey) {
+        throw new UnsupportedOperationException(
+                "Not implemented yet. Must implement dependency management support first.");
     }
 
     @Override
@@ -1300,7 +1392,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
      */
     private void updateScopeRegistration(OntologyScope scope) {
         final TripleCollection meta = store.getTriples(new UriRef(metaGraphId));
-        final UriRef scopeur = getIRIforScope(scope);
+        final UriRef scopeur = getIRIforScope(scope.getID());
         final UriRef coreur = getIRIforSpace(scope.getCoreSpace());
         final UriRef custur = getIRIforSpace(scope.getCustomSpace());
         // If this method was called after a scope rebuild, the following will have little to no effect.
@@ -1328,7 +1420,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         long before = System.currentTimeMillis();
         final TripleCollection meta = store.getTriples(new UriRef(metaGraphId));
         boolean removable = false, conflict = false;
-        final UriRef scopeur = getIRIforScope(scope);
+        final UriRef scopeur = getIRIforScope(scope.getID());
         final UriRef coreur = getIRIforSpace(scope.getCoreSpace());
         final UriRef custur = getIRIforSpace(scope.getCustomSpace());
         Set<Triple> removeUs = new HashSet<Triple>();
@@ -1410,6 +1502,31 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             meta.removeAll(removeUs);
             log.debug("Done; removed {} triples in {} ms.", removeUs.size(), System.currentTimeMillis()
                                                                              - before);
+        }
+    }
+
+    @Override
+    public void scopeAppended(Session session, String scopeId) {
+        final TripleCollection meta = store.getTriples(new UriRef(metaGraphId));
+        final UriRef sessionur = getIRIforSession(session), scopeur = getIRIforScope(scopeId);
+        if (sessionur == null || scopeur == null) throw new IllegalArgumentException(
+                "UriRefs for scope and session cannot be null.");
+        if (meta instanceof MGraph) synchronized (meta) {
+            meta.add(new TripleImpl(sessionur, HAS_APPENDED, scopeur));
+            meta.add(new TripleImpl(scopeur, APPENDED_TO, sessionur));
+        }
+    }
+
+    @Override
+    public void scopeDetached(Session session, String scopeId) {
+        final TripleCollection meta = store.getTriples(new UriRef(metaGraphId));
+        final UriRef sessionur = getIRIforSession(session), scopeur = getIRIforScope(scopeId);
+        if (sessionur == null || scopeur == null) throw new IllegalArgumentException(
+                "UriRefs for scope and session cannot be null.");
+        if (meta instanceof MGraph) synchronized (meta) {
+            // TripleImpl implements equals() and hashCode() ...
+            meta.remove(new TripleImpl(sessionur, HAS_APPENDED, scopeur));
+            meta.remove(new TripleImpl(scopeur, APPENDED_TO, sessionur));
         }
     }
 

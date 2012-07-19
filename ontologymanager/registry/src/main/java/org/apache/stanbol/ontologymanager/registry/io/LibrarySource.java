@@ -98,7 +98,7 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Set
      */
     public LibrarySource(IRI libraryID,
                          RegistryManager registryManager,
-                         OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc) throws RegistryContentException {
+                         OntologyInputSource<OWLOntology> parentSrc) throws RegistryContentException {
         this(libraryID, registryManager, checkOntologyManager(registryManager), parentSrc);
     }
 
@@ -146,7 +146,7 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Set
     public LibrarySource(IRI libraryID,
                          RegistryManager registryManager,
                          OWLOntologyManager ontologyManager,
-                         OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc) throws RegistryContentException {
+                         OntologyInputSource<OWLOntology> parentSrc) throws RegistryContentException {
         if (registryManager == null) throw new IllegalArgumentException(
                 "A null registry manager is not allowed");
 
@@ -154,7 +154,7 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Set
 
         // The ontology that imports the whole network is created in-memory, therefore it has no physical IRI
         // unless it is borrowed from the supplied parent.
-        bindPhysicalIri(parentSrc != null ? parentSrc.getPhysicalIRI() : null);
+        bindPhysicalOrigin(parentSrc != null ? parentSrc.getOrigin() : null);
 
         Library lib = registryManager.getLibrary(libraryID);
         log.debug("Got library {}, expected {}", lib, libraryID);

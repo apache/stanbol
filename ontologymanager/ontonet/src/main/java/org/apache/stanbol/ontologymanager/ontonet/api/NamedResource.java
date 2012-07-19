@@ -29,6 +29,14 @@ import org.semanticweb.owlapi.model.IRI;
 public interface NamedResource {
 
     /**
+     * Returns the namespace that should prefix the ID of this resource and all the resources managed thereby.
+     * This is also used by ontology collectors to dynamically generate import statements.
+     * 
+     * @return the default namespace for this resources.
+     */
+    IRI getDefaultNamespace();
+
+    /**
      * Returns a string (assumed to be unique in the system) that identifies this resource. For instance, a
      * parent IRI of the base IRIs for the ontologies within an ontology space. Naming schemes are
      * implementation-dependent.<br>
@@ -44,10 +52,8 @@ public interface NamedResource {
     String getID();
 
     /**
-     * Returns the namespace that should prefix the ID of this resource and all the resources managed thereby.
-     * This is also used by ontology collectors to dynamically generate import statements.
-     * 
-     * @return the default namespace for this resources.
+     * @deprecated use {@link #getDefaultNamespace()} instead.
+     * @return
      */
     IRI getNamespace();
 
@@ -57,6 +63,12 @@ public interface NamedResource {
      * 
      * @param namespace
      *            the new default namespace for this resources.
+     */
+    void setDefaultNamespace(IRI namespace);
+
+    /**
+     * @deprecated use {@link #setDefaultNamespace(IRI)} instead.
+     * @param namespace
      */
     void setNamespace(IRI namespace);
 

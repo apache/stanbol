@@ -26,12 +26,11 @@ import static org.junit.Assert.fail;
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.CoreOntologySpaceImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.CustomOntologySpaceImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.CoreSpaceImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.CustomSpaceImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -81,14 +80,14 @@ public class TestOntologyScope {
 
         // Null identifier (invalid)
         try {
-            shouldBeNull = onManager.createOntologyScope(null, new BlankOntologySource());
+            shouldBeNull = onManager.createOntologyScope(null);
             fail("Expected IllegalArgumentException not thrown despite null scope identifier.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
 
         // Slash in identifier (invalid)
         try {
-            shouldBeNull = onManager.createOntologyScope("a0/b1", new BlankOntologySource());
+            shouldBeNull = onManager.createOntologyScope("a0/b1");
             fail("Expected IllegalArgumentException not thrown despite slash in scope identifier.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
@@ -98,7 +97,7 @@ public class TestOntologyScope {
         // Null namespace (invalid).
         try {
             onManager.setOntologyNetworkNamespace(null);
-            shouldBeNull = onManager.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+            shouldBeNull = onManager.createOntologyScope(scopeIdBlank);
             fail("Expected IllegalArgumentException not thrown despite null OntoNet namespace.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
@@ -106,7 +105,7 @@ public class TestOntologyScope {
         // Namespace with query (invalid).
         onManager.setOntologyNetworkNamespace("http://stanbol.apache.org/ontology/?query=true");
         try {
-            shouldBeNull = onManager.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+            shouldBeNull = onManager.createOntologyScope(scopeIdBlank);
             fail("Expected IllegalArgumentException not thrown despite query in OntoNet namespace.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
@@ -114,7 +113,7 @@ public class TestOntologyScope {
         // Namespace with fragment (invalid).
         onManager.setOntologyNetworkNamespace("http://stanbol.apache.org/ontology#fragment");
         try {
-            shouldBeNull = onManager.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+            shouldBeNull = onManager.createOntologyScope(scopeIdBlank);
             fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
@@ -122,14 +121,14 @@ public class TestOntologyScope {
         // Namespace ending with hash (invalid).
         onManager.setOntologyNetworkNamespace("http://stanbol.apache.org/ontology#");
         try {
-            shouldBeNull = onManager.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+            shouldBeNull = onManager.createOntologyScope(scopeIdBlank);
             fail("Expected IllegalArgumentException not thrown despite hash character in OntoNet namespace.");
         } catch (IllegalArgumentException ex) {}
         assertNull(shouldBeNull);
 
         // Namespace ending with slash (valid).
         onManager.setOntologyNetworkNamespace("http://stanbol.apache.org/ontology/");
-        shouldBeNotNull = onManager.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+        shouldBeNotNull = onManager.createOntologyScope(scopeIdBlank);
         assertNotNull(shouldBeNotNull);
 
         onManager.deregisterScope(shouldBeNotNull);
@@ -137,7 +136,7 @@ public class TestOntologyScope {
 
         // Namespace ending with neither (valid, should automatically add slash).
         onManager.setOntologyNetworkNamespace("http://stanbol.apache.org/ontology");
-        shouldBeNotNull = onManager.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+        shouldBeNotNull = onManager.createOntologyScope(scopeIdBlank);
         assertNotNull(shouldBeNotNull);
         assertTrue(shouldBeNotNull.getNamespace().toString().endsWith("/"));
 
@@ -152,10 +151,8 @@ public class TestOntologyScope {
                  + "with non-null parameters in a non-registered environment.");
         }
         boolean condition = shouldBeNotNull.getID().equals(scopeId1);
-        condition &= shouldBeNotNull.getCoreSpace().getID()
-                .equals(scopeId1 + "/" + CoreOntologySpaceImpl.SUFFIX);
-        condition &= shouldBeNotNull.getCustomSpace().getID()
-                .equals(scopeId1 + "/" + CustomOntologySpaceImpl.SUFFIX);
+        condition &= shouldBeNotNull.getCoreSpace().getID().equals(scopeId1 + "/" + CoreSpaceImpl.SUFFIX);
+        condition &= shouldBeNotNull.getCustomSpace().getID().equals(scopeId1 + "/" + CustomSpaceImpl.SUFFIX);
         assertTrue(condition);
     }
 

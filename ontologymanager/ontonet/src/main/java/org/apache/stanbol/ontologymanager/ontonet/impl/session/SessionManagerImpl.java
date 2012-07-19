@@ -31,6 +31,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
@@ -72,8 +73,7 @@ public class SessionManagerImpl implements SessionManager {
      * Concatenated with the sessionManager ID, it identifies the Web endpoint and default base URI for all
      * sessions.
      */
-    @Property(name = SessionManager.SESSIONS_NS, value = _ONTOLOGY_NETWORK_NS_DEFAULT)
-    private String baseNS;
+    private IRI baseNS;
 
     @Property(name = SessionManager.ID, value = _ID_DEFAULT)
     protected String id;
@@ -86,6 +86,9 @@ public class SessionManagerImpl implements SessionManager {
 
     @Property(name = SessionManager.MAX_ACTIVE_SESSIONS, intValue = _MAX_ACTIVE_SESSIONS_DEFAULT)
     private int maxSessions;
+
+    @Reference
+    private OfflineConfiguration offline;
 
     @Reference
     private OntologyProvider<?> ontologyProvider;
@@ -113,9 +116,12 @@ public class SessionManagerImpl implements SessionManager {
      *            ontology provider that will store and provide ontologies for this session manager.
      * @param configuration
      */
-    public SessionManagerImpl(OntologyProvider<?> ontologyProvider, Dictionary<String,Object> configuration) {
+    public SessionManagerImpl(OntologyProvider<?> ontologyProvider,
+                              OfflineConfiguration offline,
+                              Dictionary<String,Object> configuration) {
         this();
         this.ontologyProvider = ontologyProvider;
+        this.offline = offline;
         try {
             activate(configuration);
         } catch (IOException e) {
@@ -146,22 +152,25 @@ public class SessionManagerImpl implements SessionManager {
      */
     protected void activate(Dictionary<String,Object> configuration) throws IOException {
 
+        long before = System.currentTimeMillis();
+
         // Parse configuration
         id = (String) configuration.get(SessionManager.ID);
         if (id == null) id = _ID_DEFAULT;
         String s = null;
         try {
-            s = (String) configuration.get(SessionManager.SESSIONS_NS);
-            setNamespace(IRI.create(s));
+            setNamespace(offline.getDefaultOntologyNetworkNamespace());
         } catch (Exception e) {
-            log.warn("Invalid namespace {}. Setting to default value {}", s, _ONTOLOGY_NETWORK_NS_DEFAULT);
+            log.warn("Invalid namespace {}. Setting to default value {}",
+                offline.getDefaultOntologyNetworkNamespace(), _ONTOLOGY_NETWORK_NS_DEFAULT);
             setNamespace(IRI.create(_ONTOLOGY_NETWORK_NS_DEFAULT));
         }
         try {
             s = (String) configuration.get(SessionManager.MAX_ACTIVE_SESSIONS);
             maxSessions = Integer.parseInt(s);
         } catch (Exception e) {
-            log.warn("Invalid session limit {}. Setting to default value {}", s, _MAX_ACTIVE_SESSIONS_DEFAULT);
+            log.warn("Invalid session limit {}. Setting to default value {}",
+                configuration.get(SessionManager.MAX_ACTIVE_SESSIONS), _MAX_ACTIVE_SESSIONS_DEFAULT);
             maxSessions = _MAX_ACTIVE_SESSIONS_DEFAULT;
         }
 
@@ -178,7 +187,8 @@ public class SessionManagerImpl implements SessionManager {
         // Rebuild sessions
         rebuildSessions();
 
-        log.debug(SessionManager.class + " activated.");
+        log.debug(SessionManager.class + " activated. Time : {} ms.", System.currentTimeMillis() - before);
+
     }
 
     protected synchronized void addSession(Session session) {
@@ -230,6 +240,8 @@ public class SessionManagerImpl implements SessionManager {
         // Have the ontology provider listen to ontology events
         if (ontologyProvider instanceof OntologyCollectorListener) session
                 .addOntologyCollectorListener((OntologyCollectorListener) ontologyProvider);
+        if (ontologyProvider instanceof SessionListener) session
+                .addSessionListener((SessionListener) ontologyProvider);
 
         addSession(session);
         fireSessionCreated(session);
@@ -299,13 +311,18 @@ public class SessionManagerImpl implements SessionManager {
     }
 
     @Override
+    public IRI getDefaultNamespace() {
+        return baseNS;
+    }
+
+    @Override
     public String getID() {
         return id;
     }
 
     @Override
     public IRI getNamespace() {
-        return IRI.create(baseNS);
+        return getDefaultNamespace();
     }
 
     @Override
@@ -337,7 +354,15 @@ public class SessionManagerImpl implements SessionManager {
                 sessionsByID.put(sessionId, session);
                 session.setActive(false); // Restored sessions are inactive at first.
                 for (String key : struct.getOntologyKeysForSession(sessionId))
-                    session.addOntology(new GraphSource(key));
+                    session.addOntology(new GraphSource(key)); // TODO use the public key instead!
+                for (String scopeId : struct.getAttachedScopes(sessionId)) {
+                    /*
+                     * The scope is attached by reference, so we won't have to bother checking if the scope
+                     * has been rebuilt by then (which could not happen if the SessionManager is being
+                     * activated first).
+                     */
+                    session.attachScope(scopeId);
+                }
             } catch (DuplicateSessionIDException e) {
                 log.warn("Session \"{}\" already exists and will be reused.", sessionId);
                 session = getSession(sessionId);
@@ -365,7 +390,7 @@ public class SessionManagerImpl implements SessionManager {
     }
 
     @Override
-    public void setNamespace(IRI namespace) {
+    public void setDefaultNamespace(IRI namespace) {
         if (namespace == null) throw new IllegalArgumentException("Namespace cannot be null.");
         if (namespace.toURI().getQuery() != null) throw new IllegalArgumentException(
                 "URI Query is not allowed in OntoNet namespaces.");
@@ -376,10 +401,15 @@ public class SessionManagerImpl implements SessionManager {
         if (!namespace.toString().endsWith("/")) {
             log.warn("Namespace {} does not end with slash character ('/'). It will be added automatically.",
                 namespace);
-            this.baseNS = namespace + "/";
+            this.baseNS = IRI.create(namespace + "/");
             return;
         }
-        this.baseNS = namespace.toString();
+        this.baseNS = namespace;
+    }
+
+    @Override
+    public void setNamespace(IRI namespace) {
+        setDefaultNamespace(namespace);
     }
 
     @Override

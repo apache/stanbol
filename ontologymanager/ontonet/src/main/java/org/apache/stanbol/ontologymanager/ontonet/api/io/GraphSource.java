@@ -21,46 +21,83 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.access.TcProvider;
 
 /**
- * An {@link OntologyInputSource} that gets ontologies from either a stored Clerezza {@link Graph} (or
- * {@link MGraph} ), or its identifier and an optionally supplied triple collection manager.
+ * An {@link OntologyInputSource} that gets ontologies from either a stored {@link TripleCollection}, or its
+ * identifier and an optionally supplied triple collection manager.
  * 
  * @author alexdma
  * 
  */
 public class GraphSource extends AbstractClerezzaGraphInputSource {
 
+    /**
+     * Creates a new input source by querying the default triple collection manager for a graph named with the
+     * supplied <code>graphId</code>. A {@link UriRef} that represents the graph name will also be set as the
+     * graph origin.
+     * 
+     * @param graphId
+     *            the graph ID.
+     * @throws NullPointerException
+     *             if there is no default triple collection manager available.
+     * @throws org.apache.clerezza.rdf.core.access.NoSuchEntityException
+     *             if no such graph can be found.
+     */
+    public GraphSource(String graphId) {
+        this(new UriRef(graphId));
+    }
+
+    /**
+     * Wraps the supplied <code>graph</code> into a new input source. No origin will be set.
+     * 
+     * @param graph
+     *            the RDF graph
+     * @throws IllegalArgumentException
+     *             if <code>graph</code> is neither a {@link Graph} nor a {@link MGraph}.
+     */
     public GraphSource(TripleCollection graph) {
         if (graph instanceof Graph) bindRootOntology((Graph) graph);
         else if (graph instanceof MGraph) bindRootOntology(((MGraph) graph).getGraph());
         else throw new IllegalArgumentException("GraphSource supports only Graph and MGraph types. "
                                                 + graph.getClass() + " is not supported.");
-        bindPhysicalIri(null);
+        bindPhysicalOrigin(null);
     }
 
-    public GraphSource(String graphId) {
-        this(new UriRef(graphId));
-    }
-
+    /**
+     * Creates a new input source by querying the default triple collection manager for a graph named with the
+     * supplied <code>graphId</code>. The supplied ID will also be set as the graph origin.
+     * 
+     * @param graphId
+     *            the graph ID.
+     * @throws NullPointerException
+     *             if there is no default triple collection manager available.
+     * @throws org.apache.clerezza.rdf.core.access.NoSuchEntityException
+     *             if no such graph can be found.
+     */
     public GraphSource(UriRef graphId) {
         this(graphId, TcManager.getInstance());
     }
 
     /**
-     * This constructor can be used to hijack ontologies using a physical IRI other than their default one.
+     * Creates a new input source by querying the supplied triple collection provider for a graph named with
+     * the supplied <code>graphId</code>. The supplied ID will also be set as the graph origin.
      * 
-     * @param rootOntology
-     * @param phyicalIRI
+     * @param graphId
+     *            the graph ID.
+     * @throws NullPointerException
+     *             if <code>tcProvider</code> is null.
+     * @throws org.apache.clerezza.rdf.core.access.NoSuchEntityException
+     *             if no such graph can be found in <code>tcProvider</code>.
      */
-    public GraphSource(UriRef graphId, TcManager tcManager) {
-        this(tcManager.getTriples(graphId));
-        bindTriplesProvider(tcManager);
+    public GraphSource(UriRef graphId, TcProvider tcProvider) {
+        this(tcProvider.getTriples(graphId));
+        bindPhysicalOrigin(Origin.create(graphId));
     }
 
     @Override
     public String toString() {
-        return "GRAPH<" + rootOntology + ">";
+        return "GRAPH<" + rootOntology.getClass() + "," + getOrigin() + ">";
     }
 
 }

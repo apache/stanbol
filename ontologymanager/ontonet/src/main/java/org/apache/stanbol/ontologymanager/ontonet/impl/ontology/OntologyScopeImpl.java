@@ -42,6 +42,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
@@ -95,13 +96,13 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     public OntologyScopeImpl(String id,
                              IRI namespace,
                              OntologySpaceFactory factory,
-                             OntologyInputSource<?,?>... coreOntologies) {
+                             OntologyInputSource<?>... coreOntologies) {
         setID(id);
         setNamespace(namespace);
 
         this.coreSpace = factory.createCoreOntologySpace(id/* , coreOntologies */);
         this.coreSpace.addOntologyCollectorListener(this); // Set listener before adding core ontologies
-        for (OntologyInputSource<?,?> src : coreOntologies)
+        for (OntologyInputSource<?> src : coreOntologies)
             this.coreSpace.addOntology(src);
         // let's just lock it. Once the core space is done it's done.
         this.coreSpace.setUp();
@@ -129,14 +130,19 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
         listeners.clear();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <O> O export(Class<O> returnType, boolean merge) {
+        return export(returnType, merge, getNamespace());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O> O export(Class<O> returnType, boolean merge, IRI universalPrefix) {
         if (OWLOntology.class.isAssignableFrom(returnType)) {
-            return (O) exportToOWLOntology(merge);
+            return (O) exportToOWLOntology(merge, universalPrefix);
         }
         if (TripleCollection.class.isAssignableFrom(returnType)) {
-            TripleCollection root = exportToMGraph(merge);
+            TripleCollection root = exportToMGraph(merge, universalPrefix);
             // A Clerezza graph has to be cast properly.
             if (returnType == Graph.class) root = ((MGraph) root).getGraph();
             else if (returnType == MGraph.class) {}
@@ -153,11 +159,11 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
      *            otherwise owl:imports statements will be added.
      * @return the RDF representation of the scope as a modifiable graph.
      */
-    protected MGraph exportToMGraph(boolean merge) {
+    protected MGraph exportToMGraph(boolean merge, IRI universalPrefix) {
 
         // No need to store, give it a name, or anything.
         MGraph root = new SimpleMGraph();
-        UriRef iri = new UriRef(getNamespace() + getID());
+        UriRef iri = new UriRef(universalPrefix + getID());
 
         if (root != null) {
             // Set the ontology ID
@@ -210,9 +216,11 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
                     root.add(new TripleImpl(iri, OWL.imports, target));
 
             } else {
-                UriRef physIRI = new UriRef(this.getCustomSpace().getDocumentIRI().toString());
+                UriRef physIRI = new UriRef(universalPrefix.toString() + this.getID() + "/"
+                                            + SpaceType.CUSTOM.getIRISuffix());
                 root.add(new TripleImpl(iri, OWL.imports, physIRI));
-                physIRI = new UriRef(this.getCoreSpace().getDocumentIRI().toString());
+                physIRI = new UriRef(universalPrefix.toString() + this.getID() + "/"
+                                     + SpaceType.CORE.getIRISuffix());
                 root.add(new TripleImpl(iri, OWL.imports, physIRI));
             }
         }
@@ -228,7 +236,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
      *            otherwise owl:imports statements will be added.
      * @return the OWL representation of the scope.
      */
-    protected OWLOntology exportToOWLOntology(boolean merge) {
+    protected OWLOntology exportToOWLOntology(boolean merge, IRI universalPrefix) {
         // if (merge) throw new UnsupportedOperationException(
         // "Ontology merging only implemented for managed ontologies, not for collectors. "
         // + "Please set merge parameter to false.");
@@ -263,12 +271,12 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
                 }
             } else {
                 // The root ontology ID is in the form [namespace][scopeId]
-                ont = mgr.createOntology(IRI.create(getNamespace() + getID()));
+                ont = mgr.createOntology(IRI.create(universalPrefix + getID()));
                 List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
                 // Add the import statement for the custom space, if existing and not empty
                 OntologySpace spc = getCustomSpace();
                 if (spc != null && spc.listManagedOntologies().size() > 0) {
-                    IRI spaceIri = IRI.create(getNamespace() + spc.getID());
+                    IRI spaceIri = IRI.create(universalPrefix + spc.getID());
                     additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
                 }
                 // Add the import statement for the core space, if existing and not empty
@@ -307,8 +315,8 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     }
 
     @Override
-    public IRI getDocumentIRI() {
-        return IRI.create(getNamespace() + getID());
+    public IRI getDefaultNamespace() {
+        return this.namespace;
     }
 
     @Override
@@ -318,7 +326,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
 
     @Override
     public IRI getNamespace() {
-        return this.namespace;
+        return getDefaultNamespace();
     }
 
     @Override
@@ -361,16 +369,6 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
         }
     }
 
-    protected void setID(String id) {
-        if (id == null) throw new IllegalArgumentException("Scope ID cannot be null.");
-        id = id.trim();
-        if (id.isEmpty()) throw new IllegalArgumentException("Scope ID cannot be empty.");
-        if (!id.matches("[\\w-\\.]+")) throw new IllegalArgumentException(
-                "Illegal scope ID " + id
-                        + " - Must be an alphanumeric sequence, with optional underscores, dots or dashes.");
-        this.id = id;
-    }
-
     /**
      * @param namespace
      *            The OntoNet namespace that will prefix the scope ID in Web references. This implementation
@@ -381,7 +379,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
      * @see OntologyScope#setNamespace(IRI)
      */
     @Override
-    public void setNamespace(IRI namespace) {
+    public void setDefaultNamespace(IRI namespace) {
         if (namespace == null) throw new IllegalArgumentException("Namespace cannot be null.");
         if (namespace.toURI().getQuery() != null) throw new IllegalArgumentException(
                 "URI Query is not allowed in OntoNet namespaces.");
@@ -395,6 +393,21 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
             namespace = IRI.create(namespace + "/");
         }
         this.namespace = namespace;
+    }
+
+    protected void setID(String id) {
+        if (id == null) throw new IllegalArgumentException("Scope ID cannot be null.");
+        id = id.trim();
+        if (id.isEmpty()) throw new IllegalArgumentException("Scope ID cannot be empty.");
+        if (!id.matches("[\\w-\\.]+")) throw new IllegalArgumentException(
+                "Illegal scope ID " + id
+                        + " - Must be an alphanumeric sequence, with optional underscores, dots or dashes.");
+        this.id = id;
+    }
+
+    @Override
+    public void setNamespace(IRI namespace) {
+        setDefaultNamespace(namespace);
     }
 
     @Override

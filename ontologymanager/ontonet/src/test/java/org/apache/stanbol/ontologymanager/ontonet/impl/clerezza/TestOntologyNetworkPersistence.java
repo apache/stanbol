@@ -194,7 +194,7 @@ public class TestOntologyNetworkPersistence {
          * characters_all, main, minor + mockfoaf (note: imports are available only because the xml:base is
          * set to be the same as the import target)
          */
-        assertEquals(total, ontologyProvider.getKeys().size());
+        assertEquals(total, ontologyProvider.getPublicKeys().size());
 
         // Check that each imported ontology is stored
         oAll = ontologyProvider.getStoredOntology(ontologyProvider.getKey(all), OWLOntology.class, false);
@@ -216,7 +216,7 @@ public class TestOntologyNetworkPersistence {
 
         log.info("Stanbol going down...");
         resetOntologyProvider(); // but keep the TcProvider
-        assertEquals(total, ontologyProvider.getKeys().size());
+        assertEquals(total, ontologyProvider.getPublicKeys().size());
 
         // The OWL API implements OWLOntology#equals()
         assertEquals(oAll,
@@ -243,7 +243,7 @@ public class TestOntologyNetworkPersistence {
         assertFalse(key.isEmpty());
 
         // Retrieve the stored fake FOAF
-        assertEquals(1, ontologyProvider.getKeys().size());
+        assertEquals(1, ontologyProvider.getPublicKeys().size());
         o1 = ontologyProvider.getStoredOntology(key, OWLOntology.class, false);
         OWLOntologyID id = o1.getOntologyID();
         assertNotNull(id);
@@ -256,7 +256,7 @@ public class TestOntologyNetworkPersistence {
 
         log.info("Stanbol going down...");
         resetOntologyProvider(); // but keep the TcProvider
-        assertEquals(1, ontologyProvider.getKeys().size());
+        assertEquals(1, ontologyProvider.getPublicKeys().size());
 
         // Check again for the FOAF key
         key = ontologyProvider.getKey(foaf);

@@ -87,7 +87,7 @@ public class TestOntologyCollectors {
         mgr.addIRIMapper(new PhonyIRIMapper(null));
 
         File f = new File(url.toURI());
-        OntologyInputSource<OWLOntology,?> src = new ParentPathInputSource(f, mgr);
+        OntologyInputSource<OWLOntology> src = new ParentPathInputSource(f, mgr);
         // OntologyInputSource<OWLOntology> src = new RootOntologyIRISource(IRI.create(f), mgr);
 
         // OntologyInputSource<OWLOntology> src = new OntologyContentInputSource(content,mgr);

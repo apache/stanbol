@@ -45,11 +45,6 @@ public interface SessionManager extends NamedResource, SessionListenable {
     String MAX_ACTIVE_SESSIONS = "org.apache.stanbol.ontologymanager.ontonet.session_limit";
 
     /**
-     * The key used to configure the base namespace of the ontology network.
-     */
-    String SESSIONS_NS = "org.apache.stanbol.ontologymanager.ontonet.session_ns";
-
-    /**
      * Generates <b>and registers</b> a new session and assigns a unique session ID generated internally. This
      * will not cause {@link DuplicateSessionIDException}s to be thrown.
      * 
@@ -114,6 +109,9 @@ public interface SessionManager extends NamedResource, SessionListenable {
 
     /**
      * Stores the session identified by <code>sessionID</code> using the output stream <code>out</code>.
+     * 
+     * @deprecated As of now, session contents are always stored. Deprecation will be removed if a new policy
+     *             is implemented.
      * 
      * @param sessionID
      *            the IRI that uniquely identifies the session

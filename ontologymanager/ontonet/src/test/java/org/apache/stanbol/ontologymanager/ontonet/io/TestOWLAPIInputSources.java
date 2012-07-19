@@ -117,7 +117,7 @@ public class TestOWLAPIInputSources {
         assertNotNull(url);
         File f = new File(url.toURI());
         assertNotNull(f);
-        OntologyInputSource<OWLOntology,?> coreSource = new ParentPathInputSource(f);
+        OntologyInputSource<OWLOntology> coreSource = new ParentPathInputSource(f);
 
         // Check that all the imports closure is made of local files
         Set<OWLOntology> closure = coreSource.getImports(true);
@@ -147,7 +147,7 @@ public class TestOWLAPIInputSources {
     public void testOfflineSingleton() throws Exception {
         URL url = getClass().getResource("/ontologies/mockfoaf.rdf");
         assertNotNull(url);
-        OntologyInputSource<OWLOntology,?> coreSource = new RootOntologyIRISource(IRI.create(url));
+        OntologyInputSource<OWLOntology> coreSource = new RootOntologyIRISource(IRI.create(url));
         assertNotNull(df);
         /*
          * To check it fetched the correct ontology, we look for a declaration of the bogus class foaf:Perzon

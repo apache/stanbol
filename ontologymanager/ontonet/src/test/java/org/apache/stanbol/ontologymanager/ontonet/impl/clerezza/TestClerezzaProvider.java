@@ -39,7 +39,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -98,7 +97,7 @@ public class TestClerezzaProvider {
 
         // Must be 2 different graphs
         assertFalse(key1.equals(key2));
-        assertEquals(2, ontologyProvider.getKeys().size());
+        assertEquals(2, ontologyProvider.getPublicKeys().size());
 
         // Ontologies must not be tainting each other
         OWLOntology o1 = ontologyProvider.getStoredOntology(key1, OWLOntology.class, true);
@@ -111,7 +110,5 @@ public class TestClerezzaProvider {
             assertFalse(t1.containsAll(t2));
             assertFalse(t2.containsAll(t1));
         }
-
-        log.info("{}", ontologyProvider.getKey(IRI.create(oiri)));
     }
 }

@@ -43,12 +43,12 @@ public class TestAxiomInterpretation {
         String path = "/ontologies/imports-disconnected";
 
         InputStream content = getClass().getResourceAsStream(path + "/abox.owl");
-        OntologyInputSource<?,?> coreSrc = new GraphContentInputSource(content, SupportedFormat.TURTLE);
+        OntologyInputSource<?> coreSrc = new GraphContentInputSource(content, SupportedFormat.TURTLE);
         OntologyScope scope = onManager.createOntologyScope("imports-disconnected", coreSrc);
         assertNotNull(scope);
 
         content = getClass().getResourceAsStream(path + "/tbox.owl");
-        OntologyInputSource<?,?> custSrc = new GraphContentInputSource(content, SupportedFormat.TURTLE);
+        OntologyInputSource<?> custSrc = new GraphContentInputSource(content, SupportedFormat.TURTLE);
         scope.getCustomSpace().addOntology(custSrc);
 
         Graph g = scope.export(Graph.class, true);

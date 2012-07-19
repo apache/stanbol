@@ -102,7 +102,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
      * @param scopeID
      * @param rootSource
      */
-    private void configureSpace(OntologySpace s, String scopeID, OntologyInputSource<?,?>... ontologySources) {
+    private void configureSpace(OntologySpace s, String scopeID, OntologyInputSource<?>... ontologySources) {
         // // FIXME: ensure that this is not null AND convert to using Strings for scope IDs
         // OntologyScope parentScope = registry.getScope(scopeID);
         //
@@ -115,7 +115,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
         // Set the supplied ontology's parent as the root for this space.
         if (ontologySources != null) try {
-            for (OntologyInputSource<?,?> src : ontologySources)
+            for (OntologyInputSource<?> src : ontologySources)
                 s.addOntology(src);
         } catch (UnmodifiableOntologyCollectorException e) {
             log.error("Ontology space " + s.getID() + " was found locked at creation time!", e);
@@ -124,7 +124,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     }
 
     @Override
-    public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?,?>... coreSources) {
+    public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?>... coreSources) {
         CoreOntologySpace s = new CoreSpaceImpl(scopeId, namespace, ontologyProvider);
         configureSpace(s, scopeId, coreSources);
         return s;
@@ -132,7 +132,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     @Override
     public CustomOntologySpace createCustomOntologySpace(String scopeId,
-                                                         OntologyInputSource<?,?>... customSources) {
+                                                         OntologyInputSource<?>... customSources) {
         CustomOntologySpace s = new CustomSpaceImpl(scopeId, namespace, ontologyProvider);
         configureSpace(s, scopeId, customSources);
         return s;
@@ -141,7 +141,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     @Override
     public OntologySpace createOntologySpace(String scopeId,
                                              SpaceType type,
-                                             OntologyInputSource<?,?>... ontologySources) {
+                                             OntologyInputSource<?>... ontologySources) {
         switch (type) {
             case CORE:
                 return createCoreOntologySpace(scopeId, ontologySources);
@@ -162,18 +162,28 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     }
 
     @Override
+    public IRI getDefaultNamespace() {
+        return this.namespace;
+    }
+
+    @Override
     public String getID() {
         return this.toString();
     }
 
     @Override
     public IRI getNamespace() {
-        return this.namespace;
+        return getDefaultNamespace();
+    }
+
+    @Override
+    public void setDefaultNamespace(IRI namespace) {
+        this.namespace = namespace;
     }
 
     @Override
     public void setNamespace(IRI namespace) {
-        this.namespace = namespace;
+        setDefaultNamespace(namespace);
     }
 
 }

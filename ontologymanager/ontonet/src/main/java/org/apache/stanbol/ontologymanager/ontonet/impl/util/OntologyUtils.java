@@ -66,21 +66,24 @@ public class OntologyUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(OntologyUtils.class);
 
-    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc,
-                                             OntologyInputSource<OWLOntology,OWLOntologyManager> childSrc,
-                                             OWLOntologyManager ontologyManager) {
-        return appendOntology(parentSrc, childSrc, ontologyManager, null);
-    }
+    private static String[] preferredFormats = {RDF_XML, TURTLE, X_TURTLE, RDF_JSON, N3, N_TRIPLE,
+                                                MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML};
 
-    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc,
-                                             OntologyInputSource<OWLOntology,OWLOntologyManager> childSrc) {
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
+                                             OntologyInputSource<OWLOntology> childSrc) {
         return appendOntology(parentSrc, childSrc, null, null);
     }
 
-    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc,
-                                             OntologyInputSource<OWLOntology,OWLOntologyManager> childSrc,
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
+                                             OntologyInputSource<OWLOntology> childSrc,
                                              IRI rewritePrefix) {
         return appendOntology(parentSrc, childSrc, null, rewritePrefix);
+    }
+
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
+                                             OntologyInputSource<OWLOntology> childSrc,
+                                             OWLOntologyManager ontologyManager) {
+        return appendOntology(parentSrc, childSrc, ontologyManager, null);
     }
 
     /**
@@ -102,8 +105,8 @@ public class OntologyUtils {
      *            ontology document file elsewhere.
      * @return the parent with the appended child
      */
-    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc,
-                                             OntologyInputSource<OWLOntology,OWLOntologyManager> childSrc,
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
+                                             OntologyInputSource<OWLOntology> childSrc,
                                              OWLOntologyManager ontologyManager,
                                              IRI rewritePrefix) {
 
@@ -121,8 +124,9 @@ public class OntologyUtils {
             ontologyManager.applyChange(new AddImport(oParent, imp));
         }
         // Anonymous, with physicalIRI. A plain import statement is added.
-        else if (childSrc.hasPhysicalIRI()) {
-            OWLImportsDeclaration imp = factory.getOWLImportsDeclaration(childSrc.getPhysicalIRI());
+        else if (childSrc.hasOrigin() && childSrc.getOrigin().getReference() instanceof IRI) {
+            OWLImportsDeclaration imp = factory.getOWLImportsDeclaration((IRI) (childSrc.getOrigin()
+                    .getReference()));
             ontologyManager.applyChange(new AddImport(oParent, imp));
         }
 
@@ -137,7 +141,7 @@ public class OntologyUtils {
         return oParent;
     }
 
-    public static OWLOntology buildImportTree(OntologyInputSource<OWLOntology,OWLOntologyManager> rootSrc,
+    public static OWLOntology buildImportTree(OntologyInputSource<OWLOntology> rootSrc,
                                               Set<OWLOntology> subtrees) {
 
         return buildImportTree(rootSrc.getRootOntology(), subtrees, OWLManager.createOWLOntologyManager());
@@ -151,7 +155,7 @@ public class OntologyUtils {
      * @param mgr
      * @return
      */
-    public static OWLOntology buildImportTree(OntologyInputSource<OWLOntology,OWLOntologyManager> rootSrc,
+    public static OWLOntology buildImportTree(OntologyInputSource<OWLOntology> rootSrc,
                                               Set<OWLOntology> subtrees,
                                               OWLOntologyManager mgr) {
 
@@ -288,6 +292,16 @@ public class OntologyUtils {
 
     }
 
+    public static List<String> getPreferredSupportedFormats(Collection<String> supported) {
+        List<String> result = new ArrayList<String>();
+        for (String f : preferredFormats)
+            if (supported.contains(f)) result.add(f);
+        // The non-preferred supported formats on the tail in any order
+        for (String f : supported)
+            if (!result.contains(f)) result.add(f);
+        return result;
+    }
+
     public static void printOntology(OWLOntology o, PrintStream printer) {
 
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
@@ -299,19 +313,6 @@ public class OntologyUtils {
         }
         printer.println(tgt.toString());
 
-    }
-
-    private static String[] preferredFormats = {RDF_XML, TURTLE, X_TURTLE, RDF_JSON, N3, N_TRIPLE,
-                                                MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML};
-
-    public static List<String> getPreferredSupportedFormats(Collection<String> supported) {
-        List<String> result = new ArrayList<String>();
-        for (String f : preferredFormats)
-            if (supported.contains(f)) result.add(f);
-        // The non-preferred supported formats on the tail in any order
-        for (String f : supported)
-            if (!result.contains(f)) result.add(f);
-        return result;
     }
 
 }

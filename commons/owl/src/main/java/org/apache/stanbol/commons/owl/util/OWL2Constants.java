@@ -16,10 +16,22 @@
  */
 package org.apache.stanbol.commons.owl.util;
 
+/**
+ * A collection of OWL 2 vocabulary terms that integrates those provided by Clerezza.
+ * 
+ * @author alexdma
+ * 
+ */
 public class OWL2Constants {
 
+    /**
+     * The namespace for the OWL language vocabulary.
+     */
     public static final String _OWL_NS = "http://www.w3.org/2002/07/owl#";
 
+    /**
+     * The owl:versionIRI annotation property that applies to resources of type owl:Ontology in OWL 2.
+     */
     public static final String OWL_VERSION_IRI = _OWL_NS + "versionIRI";
 
 }

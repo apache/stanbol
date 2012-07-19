@@ -30,7 +30,6 @@ import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
-import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.ontologymanager.ontonet.api.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.slf4j.Logger;
@@ -96,13 +95,14 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
      * @param content
      *            the serialized graph content.
      * @param formatIdentifier
-     *            the format to parse the content as. It cannot be null or blank.
+     *            the format to parse the content as. Blank or null values are allowed, but could cause
+     *            exceptions to be thrown if the supplied input stream cannot be reset.
      * @param tcProvider
      *            the provider that will create the graph where the triples will be stored. If null, an
      *            in-memory graph will be created, in which case any ontology collectors using this input
      *            source will most likely have to copy it to persistent storage.
      * @param parser
-     *            the parser to use for creating the graph. If null, the default one will be used.
+     *            the parser to use for creating the graph. If null, the default one will be used. * @deprecated
      */
     public GraphContentInputSource(InputStream content,
                                    String formatIdentifier,
@@ -112,61 +112,67 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
 
         if (content == null) throw new IllegalArgumentException("No content supplied");
         if (parser == null) parser = Parser.getInstance();
-
-        // No physical IRI
-        bindPhysicalIri(null);
-        bindTriplesProvider(tcProvider);
         boolean loaded = false;
-        if (content.markSupported()) content.mark(Integer.MAX_VALUE);
+
+        // Check if we can make multiple attempts at parsing the data stream.
+        if (content.markSupported()) {
+            log.debug("Stream mark/reset supported. Can try multiple formats if necessary.");
+            content.mark(Integer.MAX_VALUE);
+        }
+
+        // Check for supported formats to try.
         Collection<String> formats;
         if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = OntologyUtils
                 .getPreferredSupportedFormats(parser.getSupportedFormats());
         else formats = Collections.singleton(formatIdentifier);
+
+        // TODO guess/lookahead the ontology ID and use it in the graph name.
+        UriRef name = new UriRef("ontonet" + "::" + getClass().getCanonicalName() + "-"
+                                 + System.currentTimeMillis());
+
         TripleCollection graph = null;
-        if (tcProvider != null) {
-            UriRef name = new UriRef(getClass().getCanonicalName() + "-" + System.currentTimeMillis());
+        if (tcProvider != null && tcProvider != null) {
+            // Graph directly stored in the TcProvider prior to using the source
             graph = tcProvider.createMGraph(name);
-        } else graph = new IndexedMGraph();
+            bindPhysicalOrigin(Origin.create(name));
+            // XXX if addition fails, should rollback procedures also delete the graph?
+        } else {
+            // In memory graph, will most likely have to be copied afterwards.
+            graph = new IndexedMGraph();
+            bindPhysicalOrigin(null);
+        }
 
         Iterator<String> itf = formats.iterator();
-        if (itf.hasNext()) {
+        if (!itf.hasNext()) throw new OntologyLoadingException("No suitable format found or defined.");
+        do {
             String f = itf.next();
+            log.debug("Parsing with format {}", f);
             try {
                 parser.parse((MGraph) graph, content, f);
                 loaded = true;
+                log.info("Graph parsed, has {} triples", graph.size());
             } catch (UnsupportedFormatException e) {
                 log.debug("Parsing format {} failed.", f);
             } catch (Exception e) {
                 log.debug("Error parsing format " + f, e);
-            }
-        } else throw new OntologyLoadingException("No suitable format defined.");
-
-        // If the first attempt failed, try all other formats if the streams allows it.
-        if (!loaded) {
-            if (content.markSupported()) for (String format : formats)
-                try {
+            } finally {
+                if (!loaded && content.markSupported()) try {
                     content.reset();
-                    parser.parse((MGraph) graph, content, format);
-                    loaded = true;
-                    break;
-                } catch (UnsupportedFormatException e) {
-                    log.debug("Parsing format {} failed.", format);
-                    continue;
                 } catch (IOException e) {
-                    log.debug("Failed to reset data stream while parsing format {}.", format);
-                    continue;
-                } catch (Exception e) {
-                    log.debug("Error parsing format " + format, e);
-                    continue;
+                    log.debug("Failed to reset data stream while parsing format {}.", f);
                 }
-            else throw new OntologyLoadingException(
-                    "First parsing attempt failed and data stream cannot be reset. Giving up.");
-        }
+            }
+        } while (!loaded && itf.hasNext());
 
         if (loaded) {
             bindRootOntology(graph);
             log.debug("Root ontology is a {}.", getRootOntology().getClass().getCanonicalName());
-        } else throw new OntologyLoadingException("All parsers failed. Giving up.");
+        } else {
+            // Rollback graph creation, if any
+            if (tcProvider != null && tcProvider != null) tcProvider.deleteTripleCollection(name);
+            throw new OntologyLoadingException("All parsers failed. Giving up.");
+        }
+
         log.debug("Input source initialization completed in {} ms.", (System.currentTimeMillis() - before));
     }
 
@@ -178,6 +184,7 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
      *            the serialized graph content.
      * @param tcProvider
      *            the provider that will create the graph where the triples will be stored.
+     * 
      */
     public GraphContentInputSource(InputStream content, TcProvider tcProvider) {
         this(content, null, tcProvider);
@@ -185,7 +192,7 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
 
     @Override
     public String toString() {
-        return "<GRAPH_CONTENT>" + OWLUtils.guessOntologyIdentifier(getRootOntology());
+        return "<GRAPH_CONTENT>" + getOrigin();
     }
 
 }

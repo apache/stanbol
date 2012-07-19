@@ -30,9 +30,16 @@ import org.semanticweb.owlapi.model.IRI;
 public interface OfflineConfiguration {
 
     /**
+     * The key used to configure the base namespace of the ontology network.
+     */
+    String DEFAULT_NS = "org.apache.stanbol.ontologymanager.ontonet.ns";
+
+    /**
      * The key used to configure the paths of local ontologies.
      */
     String ONTOLOGY_PATHS = "org.apache.stanbol.ontologymanager.ontonet.ontologypaths";
+
+    IRI getDefaultOntologyNetworkNamespace();
 
     /**
      * Returns the paths of all the directories where the ontology network manager will try to locate

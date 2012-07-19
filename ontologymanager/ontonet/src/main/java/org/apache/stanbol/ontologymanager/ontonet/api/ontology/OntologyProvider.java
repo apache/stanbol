@@ -27,6 +27,7 @@ import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.ImportManagementPolicy;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -76,28 +77,26 @@ public interface OntologyProvider<S> {
      * Gets a string that can be used to directly access the ontology whose logical identifier is
      * <tt>ontologyIRI</tt>.
      * 
-     * @param locator
+     * @deprecated Please use {@link #getPublicKey(OWLOntologyID)} instead. To obtain the public keys for all
+     *             the versions of ontologies with this ontology IRI, use {@link #getVersionKeys(IRI)}.
+     * 
+     * @param ontologyIri
      *            the logical identifier of the ontology.
-     * @return the key to access the ontology from the store.
+     * @return the public key (note that it might be different from the graph name).
      */
-    String getKey(IRI locator);
+    String getKey(IRI ontologyIri);
 
     /**
-     * Gets the key of the ontology with the supplied ontology ID. Note that both ontoloeyIRI and versionIRI
-     * (if present) must match, otherwise it will return null. To get the keys for a givemn ontologyIRI, no
-     * matte what its version is, use {@link #getOntologyVersionKeys(IRI)}.
+     * Gets a string that can be used to directly access the ontology whose logical identifier is
+     * <tt>ontologyId</tt>.
+     * 
+     * @deprecated Please use {@link #getPublicKey(OWLOntologyID)} instead.
      * 
      * @param ontologyId
-     * @return
+     *            the logical identifier of the ontology.
+     * @return the public key (note that it might be different from the graph name).
      */
     String getKey(OWLOntologyID ontologyId);
-
-    /**
-     * Gets the set of all the strings that can be used to access the ontologies stored by this provider.
-     * 
-     * @return the ontology key set.
-     */
-    Set<String> getKeys();
 
     /**
      * Returns the graph that stores all the information on stored ontologies. Whether the returned triple
@@ -109,17 +108,26 @@ public interface OntologyProvider<S> {
      */
     <O extends TripleCollection> O getMetaGraph(Class<O> returnType);
 
-    public OntologyNetworkConfiguration getOntologyNetworkConfiguration();
+    OWLOntologyID getOntologyId(String storageKey);
+
+    OntologyNetworkConfiguration getOntologyNetworkConfiguration();
 
     /**
-     * Will return the keys of all the ontologies whose ontologyIRI is the one provided. These include any
-     * ontologies with that ontologyIRI and a versionIRI, and one ontology with no version IRI (if it exists,
-     * it must be unique).
+     * Gets the key of the ontology with the supplied ontology ID. Note that both ontoloeyIRI and versionIRI
+     * (if present) must match, otherwise it will return null. To get the keys for a given ontologyIRI, no
+     * matte what its version is, use {@link #getVersionKeys(IRI)}.
      * 
-     * @param ontologyIRI
+     * @param ontologyId
      * @return
      */
-    Set<String> getOntologyVersionKeys(IRI ontologyIRI);
+    String getPublicKey(OWLOntologyID ontologyId);
+
+    /**
+     * Gets the set of all the strings that can be used to access the ontologies stored by this provider.
+     * 
+     * @return the ontology key set.
+     */
+    Set<String> getPublicKeys();
 
     /**
      * Returns the storage system used by this ontology provider (e.g. a {@link TcProvider} or an
@@ -212,6 +220,16 @@ public interface OntologyProvider<S> {
      * @return the supported ontology return types.
      */
     Class<?>[] getSupportedReturnTypes();
+
+    /**
+     * Will return the keys of all the ontologies whose ontologyIRI is the one provided. These include any
+     * ontologies with that ontologyIRI and a versionIRI, and one ontology with no version IRI (if it exists,
+     * it must be unique).
+     * 
+     * @param ontologyIRI
+     * @return
+     */
+    Set<String> getVersionKeys(IRI ontologyIRI);
 
     /**
      * A convenience method for checking the availability of an ontology given its (physical or logical) IRI.
@@ -315,7 +333,16 @@ public interface OntologyProvider<S> {
      *            set on offline mode, this method will fail.
      * @return
      */
-    String loadInStore(Object ontology, boolean force);
+    String loadInStore(Object ontology, boolean force, Origin<?>... references);
+
+    /**
+     * Removes the ontology identified by the supplied public key.
+     * 
+     * @param publicKey
+     *            the public key for accessing the ontology.
+     * @return true iff an ontology with that public key existed and was removed.
+     */
+    boolean removeOntology(String publicKey);
 
     /**
      * Sets the policy adopted by this provider whenever an import statement is found in an ontology <i>that

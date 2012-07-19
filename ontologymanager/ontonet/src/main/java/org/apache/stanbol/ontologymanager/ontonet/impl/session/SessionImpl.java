@@ -17,11 +17,9 @@
 package org.apache.stanbol.ontologymanager.ontonet.impl.session;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
@@ -29,7 +27,6 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
@@ -53,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SessionImpl extends AbstractOntologyCollectorImpl implements Session {
 
-    protected Map<String,OntologyScope> attachedScopes;
+    protected Set<String> attachedScopes;
 
     protected Set<SessionListener> listeners;
 
@@ -73,7 +70,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
         super(sessionID, namespace, ontologyProvider);
         backwardPathLength = 0;
         // setNamespace(namespace);
-        attachedScopes = new HashMap<String,OntologyScope>();
+        attachedScopes = new HashSet<String>();
         listeners = new HashSet<SessionListener>();
     }
 
@@ -83,8 +80,9 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     }
 
     @Override
-    public void attachScope(OntologyScope scope) {
-        attachedScopes.put(scope.getID(), scope);
+    public void attachScope(String scopeId) {
+        attachedScopes.add(scopeId);
+        fireScopeAppended(scopeId);
     }
 
     @Override
@@ -108,15 +106,18 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     public void detachScope(String scopeId) {
         attachedScopes.remove(scopeId);
+        fireScopeDetached(scopeId);
     }
 
     @Override
-    protected MGraph exportToMGraph(boolean merge) {
-        MGraph mg = super.exportToMGraph(merge);
+    protected MGraph exportToMGraph(boolean merge, IRI universalPrefix) {
+        MGraph mg = super.exportToMGraph(merge, universalPrefix);
         // Add import declarations for attached scopes.
-        for (String scopeID : attachedScopes.keySet()) {
-            UriRef iri = new UriRef(namespace + _id);
-            UriRef physIRI = new UriRef(attachedScopes.get(scopeID).getDocumentIRI().toString());
+        UriRef iri = new UriRef(universalPrefix + _id);
+        String scopePrefix = universalPrefix.toString();
+        scopePrefix = scopePrefix.substring(0, scopePrefix.lastIndexOf("/" + shortName + "/")) + "/ontology/";
+        for (String scopeID : attachedScopes) {
+            UriRef physIRI = new UriRef(scopePrefix + scopeID);
             mg.add(new TripleImpl(iri, OWL.imports, physIRI));
         }
         return mg;
@@ -126,15 +127,18 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
      * TODO support merging for attached scopes as well?
      */
     @Override
-    protected OWLOntology exportToOWLOntology(boolean merge) {
-        OWLOntology o = super.exportToOWLOntology(merge);
+    protected OWLOntology exportToOWLOntology(boolean merge, IRI universalPrefix) {
+        OWLOntology o = super.exportToOWLOntology(merge, universalPrefix);
         if (!attachedScopes.isEmpty()) {
+            String scopePrefix = universalPrefix.toString();
+            scopePrefix = scopePrefix.substring(0, scopePrefix.lastIndexOf("/" + shortName + "/"))
+                          + "/ontology/";
             List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
             OWLOntologyManager ontologyManager = o.getOWLOntologyManager();
             OWLDataFactory df = ontologyManager.getOWLDataFactory();
             // Add import declarations for attached scopes.
-            for (String scopeID : attachedScopes.keySet()) {
-                IRI physIRI = attachedScopes.get(scopeID).getDocumentIRI();
+            for (String scopeID : attachedScopes) {
+                IRI physIRI = IRI.create(scopePrefix + scopeID);
                 changes.add(new AddImport(o, df.getOWLImportsDeclaration(physIRI)));
             }
             // Commit
@@ -155,9 +159,19 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
             l.sessionChanged(e);
     }
 
+    protected void fireScopeAppended(String scopeId) {
+        for (SessionListener l : listeners)
+            l.scopeAppended(this, scopeId);
+    }
+
+    protected void fireScopeDetached(String scopeId) {
+        for (SessionListener l : listeners)
+            l.scopeDetached(this, scopeId);
+    }
+
     @Override
     public Set<String> getAttachedScopes() {
-        return attachedScopes.keySet();
+        return attachedScopes;
     }
 
     @Override

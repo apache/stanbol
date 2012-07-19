@@ -39,15 +39,20 @@ import org.slf4j.LoggerFactory;
 @Service
 public class OfflineConfigurationImpl implements OfflineConfiguration {
 
+    public static final String _DEFAULT_NS_DEFAULT = "http://localhost:8080/ontonet/";
+
+    private List<IRI> locations = new ArrayList<IRI>();
+
     protected Logger log = LoggerFactory.getLogger(getClass());
+
+    @Property(name = OfflineConfiguration.DEFAULT_NS, value = _DEFAULT_NS_DEFAULT)
+    private String ns;
 
     /**
      * TODO how do you use array initializers in Property annotations without causing compile errors?
      */
     @Property(name = OfflineConfiguration.ONTOLOGY_PATHS, value = {".", "/ontologies"})
     private String[] ontologyDirs;
-
-    private List<IRI> locations = new ArrayList<IRI>();
 
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
@@ -80,7 +85,12 @@ public class OfflineConfigurationImpl implements OfflineConfiguration {
     }
 
     protected void activate(Dictionary<String,Object> configuration) {
+
         // Parse configuration.
+
+        ns = (String) configuration.get(OfflineConfiguration.DEFAULT_NS);
+        if (ns == null || ns.isEmpty()) ns = _DEFAULT_NS_DEFAULT;
+
         ontologyDirs = (String[]) configuration.get(OfflineConfiguration.ONTOLOGY_PATHS);
         if (ontologyDirs == null) ontologyDirs = new String[] {".", "/ontologies"};
 
@@ -112,6 +122,20 @@ public class OfflineConfigurationImpl implements OfflineConfiguration {
     protected void deactivate(ComponentContext context) {
         ontologyDirs = null;
         log.info("in {} deactivate with context {}", getClass(), context);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (!(obj instanceof OfflineConfiguration)) return false;
+        if (!this.ns.equals(((OfflineConfiguration) obj).getDefaultOntologyNetworkNamespace())) return false;
+        if (!this.locations.equals(((OfflineConfiguration) obj).getOntologySourceLocations())) return false;
+        return true;
+    }
+
+    @Override
+    public IRI getDefaultOntologyNetworkNamespace() {
+        return IRI.create(ns);
     }
 
     @Override

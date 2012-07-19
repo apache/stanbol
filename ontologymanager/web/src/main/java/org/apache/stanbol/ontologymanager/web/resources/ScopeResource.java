@@ -78,6 +78,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -92,6 +93,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.SetInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
@@ -127,6 +129,8 @@ public class ScopeResource extends BaseStanbolResource {
      */
     protected ONManager onm;
 
+    protected OntologyProvider<TcProvider> provider;
+
     /*
      * Placeholder for the RegistryManager to be fetched from the servlet context.
      */
@@ -142,6 +146,8 @@ public class ScopeResource extends BaseStanbolResource {
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
         this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
             servletContext);
+        this.provider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
+            OntologyProvider.class, servletContext);
 
         if (scopeId == null || scopeId.isEmpty()) {
             log.error("Missing path parameter scopeid={}", scopeId);
@@ -162,8 +168,9 @@ public class ScopeResource extends BaseStanbolResource {
                                     @DefaultValue("false") @QueryParam("merge") boolean merge,
                                     @Context HttpHeaders headers) {
         if (scope == null) return Response.status(NOT_FOUND).build();
+        IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         // Export to Clerezza Graph, which can be rendered as JSON-LD.
-        ResponseBuilder rb = Response.ok(scope.export(Graph.class, merge));
+        ResponseBuilder rb = Response.ok(scope.export(Graph.class, merge, prefix));
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -176,8 +183,9 @@ public class ScopeResource extends BaseStanbolResource {
         if (scope == null) return Response.status(NOT_FOUND).build();
         // Export smaller graphs to OWLOntology due to the more human-readable rendering.
         ResponseBuilder rb;
-        if (merge) rb = Response.ok(scope.export(Graph.class, merge));
-        else rb = Response.ok(scope.export(OWLOntology.class, merge));
+        IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
+        if (merge) rb = Response.ok(scope.export(Graph.class, merge, prefix));
+        else rb = Response.ok(scope.export(OWLOntology.class, merge, prefix));
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -188,8 +196,9 @@ public class ScopeResource extends BaseStanbolResource {
                                   @DefaultValue("false") @QueryParam("merge") boolean merge,
                                   @Context HttpHeaders headers) {
         if (scope == null) return Response.status(NOT_FOUND).build();
+        IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         // Export to OWLOntology due to the more human-readable rendering.
-        ResponseBuilder rb = Response.ok(scope.export(OWLOntology.class, merge));
+        ResponseBuilder rb = Response.ok(scope.export(OWLOntology.class, merge, prefix));
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -216,14 +225,20 @@ public class ScopeResource extends BaseStanbolResource {
     @GET
     @Path("/core")
     @Produces(value = {RDF_XML, TURTLE, X_TURTLE, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
-    public Response getCoreSpace(@DefaultValue("false") @QueryParam("merge") boolean merge,
+    public Response getCoreSpace(@PathParam("scopeid") String scopeid,
+                                 @DefaultValue("false") @QueryParam("merge") boolean merge,
                                  @Context UriInfo uriInfo,
                                  @Context HttpHeaders headers) {
         OntologySpace space = scope.getCoreSpace();
-        OWLOntology o = space.export(OWLOntology.class, merge);
+        IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
+        OWLOntology o = space.export(OWLOntology.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
+    }
+
+    private URI getCreatedResource(String ontologyIRI) {
+        return URI.create("/" + ontologyIRI);
     }
 
     public SortedSet<String> getCustomOntologies() {
@@ -236,11 +251,13 @@ public class ScopeResource extends BaseStanbolResource {
     @GET
     @Path("/custom")
     @Produces(value = {RDF_XML, TURTLE, X_TURTLE, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
-    public Response getCustomSpace(@DefaultValue("false") @QueryParam("merge") boolean merge,
+    public Response getCustomSpace(@PathParam("scopeid") String scopeid,
+                                   @DefaultValue("false") @QueryParam("merge") boolean merge,
                                    @Context UriInfo uriInfo,
                                    @Context HttpHeaders headers) {
         OntologySpace space = scope.getCustomSpace();
-        OWLOntology o = space.export(OWLOntology.class, merge);
+        IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
+        OWLOntology o = space.export(OWLOntology.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -323,15 +340,16 @@ public class ScopeResource extends BaseStanbolResource {
         ResponseBuilder rb;
         if (scope == null) rb = Response.status(NOT_FOUND);
         else {
+            IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
             Graph o = null;
             IRI ontologyIri = IRI.create(ontologyId);
             OntologySpace spc = scope.getCustomSpace();
             if (spc != null && spc.hasOntology(ontologyIri)) {
-                o = spc.getOntology(ontologyIri, Graph.class, merge);
+                o = spc.getOntology(ontologyIri, Graph.class, merge, prefix);
             } else {
                 spc = scope.getCoreSpace();
                 if (spc != null && spc.hasOntology(ontologyIri)) o = spc.getOntology(ontologyIri,
-                    Graph.class, merge);
+                    Graph.class, merge, prefix);
             }
             if (o == null) rb = Response.status(NOT_FOUND);
             else rb = Response.ok(o);
@@ -365,15 +383,16 @@ public class ScopeResource extends BaseStanbolResource {
         ResponseBuilder rb;
         if (scope == null) rb = Response.status(NOT_FOUND);
         else {
+            IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
             OWLOntology o = null;
             IRI ontologyIri = IRI.create(ontologyId);
             OntologySpace spc = scope.getCustomSpace();
             if (spc != null && spc.hasOntology(ontologyIri)) {
-                o = spc.getOntology(ontologyIri, OWLOntology.class, merge);
+                o = spc.getOntology(ontologyIri, OWLOntology.class, merge, prefix);
             } else {
                 spc = scope.getCoreSpace();
                 if (spc != null && spc.hasOntology(ontologyIri)) o = spc.getOntology(ontologyIri,
-                    OWLOntology.class, merge);
+                    OWLOntology.class, merge, prefix);
             }
             if (o == null) rb = Response.status(NOT_FOUND);
             else rb = Response.ok(o);
@@ -391,10 +410,11 @@ public class ScopeResource extends BaseStanbolResource {
         if (scope == null) rb = Response.status(NOT_FOUND);
         else if (ontologyId == null || ontologyId.isEmpty()) rb = Response.status(BAD_REQUEST);
         else {
+            IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
             OWLOntology o = scope.getCustomSpace().getOntology(IRI.create(ontologyId), OWLOntology.class,
-                false);
+                false, prefix);
             if (o == null) o = scope.getCoreSpace().getOntology(IRI.create(ontologyId), OWLOntology.class,
-                false);
+                false, prefix);
             if (o == null) rb = Response.status(NOT_FOUND);
             else try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -465,24 +485,37 @@ public class ScopeResource extends BaseStanbolResource {
                        RDF_JSON})
     public Response manageOntology(InputStream content, @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
-        if (scope == null) return Response.status(NOT_FOUND).build();
-        try {
-            scope.getCustomSpace().addOntology(
+        ResponseBuilder rb;
+        if (scope == null) rb = Response.status(NOT_FOUND); // Always check session first
+        else try {
+            MediaType mt = headers.getMediaType();
+            log.debug("POST content claimed to be of type {}.", mt);
+            String key = scope.getCustomSpace().addOntology(
             /*
              * For the time being, REST services operate in-memory (i.e. no TcProvider is supplied to the
              * input source). This means that only the final processed graph is stored.
              * 
              * TODO : we might find a reason to change that in the future.
              */
-            new GraphContentInputSource(content, headers.getMediaType().toString())
-            // new OntologyContentInputSource(content)
-                    );
+            new GraphContentInputSource(content, mt.toString(), provider.getStore()));
+            if (key == null || key.isEmpty()) {
+                log.error("FAILED parse with media type {}.", mt);
+                throw new WebApplicationException(INTERNAL_SERVER_ERROR);
+            }
+            // FIXME ugly but will have to do for the time being
+            log.debug("SUCCESS parse with media type {}.", mt);
+            String uri = key.split("::")[1];
+            URI created = null;
+            if (uri != null && !uri.isEmpty()) {
+                created = getCreatedResource(uri);
+                rb = Response.created(created);
+            } else rb = Response.ok();
+            log.info("POST request for ontology addition completed in {} ms.",
+                (System.currentTimeMillis() - before));
+            log.info("New resource URL is {}", created);
         } catch (UnmodifiableOntologyCollectorException e) {
             throw new WebApplicationException(e, FORBIDDEN);
         }
-        log.debug("POST request for ontology addition completed in {} ms.",
-            (System.currentTimeMillis() - before));
-        ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -553,12 +586,12 @@ public class ScopeResource extends BaseStanbolResource {
         boolean fileOk = file != null && file.canRead() && file.exists();
         if (fileOk || location != null || library != null) { // File and location take precedence
             // Then add the file
-            OntologyInputSource<?,?> src = null;
+            OntologyInputSource<?> src = null;
             if (fileOk) {
                 try {
                     // Use a buffered stream that can be reset for multiple attempts.
                     InputStream content = new BufferedInputStream(new FileInputStream(file));
-                    src = new GraphContentInputSource(content, format);
+                    src = new GraphContentInputSource(content, format, provider.getStore());
                 } catch (OntologyLoadingException e) {
                     throw new WebApplicationException(e, BAD_REQUEST);
                 } catch (IOException e) {
@@ -590,7 +623,7 @@ public class ScopeResource extends BaseStanbolResource {
                 // FIXME ugly but will have to do for the time being
                 String uri = key.split("::")[1];
                 if (uri != null && !uri.isEmpty()) {
-                    rb = Response.seeOther(URI.create("/ontonet/ontology/" + scope.getID() + "/" + uri));
+                    rb = Response.created(getCreatedResource(uri));
                 } else rb = Response.ok();
             } else rb = Response.status(INTERNAL_SERVER_ERROR);
         } else throw new WebApplicationException(BAD_REQUEST);
@@ -626,8 +659,8 @@ public class ScopeResource extends BaseStanbolResource {
                                   @Context HttpHeaders headers,
                                   @Context ServletContext servletContext) {
         log.debug("Request URI {}", uriInfo.getRequestUri());
-        List<OntologyInputSource<?,?>> srcs = new ArrayList<OntologyInputSource<?,?>>(coreOntologies.size()
-                                                                                      + coreRegistries.size());
+        List<OntologyInputSource<?>> srcs = new ArrayList<OntologyInputSource<?>>(coreOntologies.size()
+                                                                                  + coreRegistries.size());
         // First thing, check registry sources.
         if (coreRegistries != null) for (String reg : coreRegistries)
             if (reg != null && !reg.isEmpty()) try {
@@ -650,12 +683,12 @@ public class ScopeResource extends BaseStanbolResource {
         // Now the creation.
         try {
             // Expand core sources
-            List<OntologyInputSource<?,?>> expanded = new ArrayList<OntologyInputSource<?,?>>();
-            for (OntologyInputSource<?,?> coreSrc : srcs)
+            List<OntologyInputSource<?>> expanded = new ArrayList<OntologyInputSource<?>>();
+            for (OntologyInputSource<?> coreSrc : srcs)
                 if (coreSrc != null) {
                     if (coreSrc instanceof SetInputSource) {
                         for (Object o : ((SetInputSource<?>) coreSrc).getOntologies()) {
-                            OntologyInputSource<?,?> src = null;
+                            OntologyInputSource<?> src = null;
                             if (o instanceof OWLOntology) src = new RootOntologySource((OWLOntology) o);
                             else if (o instanceof TripleCollection) src = new GraphSource(
                                     (TripleCollection) o);

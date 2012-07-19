@@ -86,9 +86,12 @@ import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
@@ -101,7 +104,6 @@ import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.RemoveImport;
 import org.slf4j.Logger;
@@ -137,11 +139,18 @@ public class OntoNetRootResource extends BaseStanbolResource {
      */
     protected RegistryManager registryManager;
 
+    protected ONManager onManager;
+
+    protected SessionManager sessionManager;
+
     public OntoNetRootResource(@Context ServletContext servletContext) {
         super();
         this.servletContext = servletContext;
         this.ontologyProvider = (OntologyProvider<?>) ContextHelper.getServiceFromContext(
             OntologyProvider.class, servletContext);
+        this.onManager = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        this.sessionManager = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
+            servletContext);
         this.registryManager = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
             servletContext);
     }
@@ -299,11 +308,22 @@ public class OntoNetRootResource extends BaseStanbolResource {
 
     public Set<String> getOntologies() {
         Set<String> filtered = new HashSet<String>();
-        for (String s : ontologyProvider.getKeys()) {
-            String s1 = s.split("::")[1];
-            if (s1 != null && !s1.isEmpty()) filtered.add(s1);
+        for (String s : ontologyProvider.getPublicKeys()) {
+            // String s1 = s.split("::")[1];
+            if (s != null && !s.isEmpty()) filtered.add(s);
         }
         return filtered;
+    }
+
+    public Set<String> getHandles(String ontologyId) {
+        Set<String> handles = new HashSet<String>();
+        IRI ontologyIri = IRI.create(ontologyId);
+        if (onManager != null) for (OntologyScope scope : onManager.getRegisteredScopes())
+            if (scope.getCoreSpace().hasOntology(ontologyIri)
+                || scope.getCustomSpace().hasOntology(ontologyIri)) handles.add(scope.getID());
+        if (sessionManager != null) for (String sesId : sessionManager.getRegisteredSessionIDs())
+            if (sessionManager.getSession(sesId).hasOntology(ontologyIri)) handles.add(sesId);
+        return handles;
     }
 
     private OWLOntology getOntology(String ontologyId, boolean merge) {
@@ -515,8 +535,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
         } else if (OWL_XML_TYPE.equals(mt) || FUNCTIONAL_OWL_TYPE.equals(mt)
                    || MANCHESTER_OWL_TYPE.equals(mt)) {
             try {
-                OntologyInputSource<OWLOntology,OWLOntologyManager> src = new OntologyContentInputSource(
-                        content);
+                OntologyInputSource<OWLOntology> src = new OntologyContentInputSource(content);
                 ontologyProvider.loadInStore(src.getRootOntology(), true);
                 rb = Response.ok();
             } catch (OWLOntologyCreationException e) {
