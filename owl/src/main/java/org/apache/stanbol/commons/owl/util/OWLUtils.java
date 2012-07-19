@@ -22,7 +22,6 @@ import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.semanticweb.owlapi.model.IRI;
@@ -48,11 +47,10 @@ public class OWLUtils {
      * @return
      */
     public static OWLOntologyID guessOntologyIdentifier(OWLOntology o) {
-
         String oiri;
         IRI viri = null;
-        // For named OWL ontologies it is their ontology ID. For anonymous ontologies, it is the URI they were
-        // fetched from, if any.
+        // For named OWL ontologies it is their ontology ID.
+        // For anonymous ontologies, it is the URI they were fetched from, if any.
         if (o.isAnonymous()) oiri = o.getOWLOntologyManager().getOntologyDocumentIRI(o).toString();
         else {
             OWLOntologyID id = o.getOntologyID();
@@ -62,44 +60,41 @@ public class OWLUtils {
         // Strip fragment or query tokens. TODO do proper URL Encoding.
         while (oiri.endsWith("#") || oiri.endsWith("?"))
             oiri = oiri.substring(0, oiri.length() - 1);
-        // try {
-        // if (originalIri.endsWith("#")) originalIri = originalIri.substring(0,
-        // originalIri.length() - 1) + URLEncoder.encode("#", "UTF-8");
-        // else if (originalIri.endsWith("?")) originalIri = originalIri.substring(0,
-        // originalIri.length() - 1)
-        // + URLEncoder.encode("?", "UTF-8");
-        // } catch (UnsupportedEncodingException e) {
-        // // That cannot be.
-        // }
-
         if (viri != null) return new OWLOntologyID(IRI.create(oiri), viri);
         else return new OWLOntologyID(IRI.create(oiri));
     }
 
-    public static OWLOntologyID guessOntologyIdentifier(TripleCollection g) {
+    /**
+     * Returns the logical identifier of the supplied RDF graph, which is interpreted as an OWL ontology.
+     * 
+     * @param graph
+     *            the RDF graph
+     * @return the OWL ontology ID of the supplied graph, or null if it denotes an anonymous ontology.
+     */
+    public static OWLOntologyID guessOntologyIdentifier(TripleCollection graph) {
         IRI ontologyIri = null, versionIri = null;
-        Iterator<Triple> it = g.filter(null, RDF.type, OWL.Ontology);
+        Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
         if (it.hasNext()) {
             NonLiteral subj = it.next().getSubject();
-            if (it.hasNext()) log.warn(
-                "RDF Graph {} has multiple OWL ontology definitions! Ignoring all but {}", g, subj);
+            if (it.hasNext()) {
+                log.warn("Multiple OWL ontology definitions found.");
+                log.warn("Ignoring all but {}", subj);
+            }
             if (subj instanceof UriRef) {
                 ontologyIri = IRI.create(((UriRef) subj).getUnicodeString());
-                Iterator<Triple> it2 = g.filter((UriRef) subj, new UriRef(OWL2Constants.OWL_VERSION_IRI),
+                Iterator<Triple> it2 = graph.filter((UriRef) subj, new UriRef(OWL2Constants.OWL_VERSION_IRI),
                     null);
                 if (it2.hasNext()) versionIri = IRI.create(((UriRef) it2.next().getObject())
                         .getUnicodeString());
             }
         }
         if (ontologyIri == null) {
-            ontologyIri = IRI.create(NS_STANBOL + System.currentTimeMillis());
-            log.debug("Ontology is anonymous. Returning generated ID <{}> .", ontologyIri);
+            // Note that OWL 2 does not allow ontologies with a version IRI and no ontology IRI.
+            log.debug("Ontology is anonymous. Returning null ID.");
+            return null;
         }
         if (versionIri == null) return new OWLOntologyID(ontologyIri);
         else return new OWLOntologyID(ontologyIri, versionIri);
     }
 
-    public static OWLOntologyID guessOntologyIdentifier(UriRef key, TcProvider store) {
-        return guessOntologyIdentifier(store.getTriples(key));
-    }
 }

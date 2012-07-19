@@ -17,6 +17,7 @@
 package org.apache.stanbol.commons.owl.util;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.InputStream;
 
@@ -54,8 +55,7 @@ public class TestOWLUtils {
         InputStream inputStream = getClass().getResourceAsStream("/owl/nameless_ontology.owl");
         MGraph mg = TcManager.getInstance().createMGraph(uri);
         pp.parse(mg, inputStream, "application/rdf+xml", uri);
-        // No longer null!
-        assertNotNull(OWLUtils.guessOntologyIdentifier(mg.getGraph()));
+        assertNull(OWLUtils.guessOntologyIdentifier(mg.getGraph()));
     }
 
     @After
