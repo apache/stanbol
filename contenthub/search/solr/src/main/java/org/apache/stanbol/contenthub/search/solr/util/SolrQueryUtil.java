@@ -58,15 +58,17 @@ public class SolrQueryUtil {
     public final static List<Character> queryDelimiters = Arrays.asList(' ', ',');
 
     private static String getFacetFieldType(String fieldName, List<FacetResult> allAvailableFacets) {
-    	for(FacetResult fr : allAvailableFacets) {
-    		if(fieldName.equals(fr.getFacetField().getName())) {
-    			return fr.getType();
-    		}
-    	}
-    	return "";
+        for (FacetResult fr : allAvailableFacets) {
+            if (fieldName.equals(fr.getFacetField().getName())) {
+                return fr.getType();
+            }
+        }
+        return "";
     }
-    
-    private static SolrQuery keywordQueryWithFacets(String keyword, List<FacetResult> allAvailableFacets, Map<String,List<Object>> constraints) {
+
+    private static SolrQuery keywordQueryWithFacets(String keyword,
+                                                    List<FacetResult> allAvailableFacets,
+                                                    Map<String,List<Object>> constraints) {
         SolrQuery query = new SolrQuery();
         query.setQuery(keyword);
         if (constraints != null) {
@@ -158,29 +160,30 @@ public class SolrQueryUtil {
                 } else {
                     facetName = facet.toString();
                 }
-                if (SolrFieldName.CREATIONDATE.toString().equals(facetName)
-                    || (!SolrFieldName.isNameReserved(facetName) && !SolrVocabulary.isNameExcluded(facetName))) {
+                if (!SolrFieldName.isNameReserved(facetName) && !SolrVocabulary.isNameExcluded(facetName)) {
                     solrQuery.addFacetField(facetName);
                 }
             }
         }
     }
 
-    public static SolrQuery prepareDefaultSolrQuery(SolrServer solrServer, String queryTerm) throws SolrServerException,
-                                                                                            IOException {
+    public static SolrQuery prepareSolrQuery(SolrServer solrServer, String queryTerm) throws SolrServerException,
+                                                                                     IOException {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setQuery(queryTerm);
         setDefaultQueryParameters(solrQuery, getAllFacetNames(solrServer));
         return solrQuery;
     }
 
-    public static SolrQuery prepareDefaultSolrQuery(String queryTerm) {
+    public static SolrQuery prepareSolrQuery(String queryTerm) {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setQuery(queryTerm);
         return solrQuery;
     }
 
-    public static SolrQuery prepareFacetedSolrQuery(String queryTerm, List<FacetResult> allAvailableFacets, Map<String,List<Object>> constraints) {
+    public static SolrQuery prepareSolrQuery(String queryTerm,
+                                             List<FacetResult> allAvailableFacets,
+                                             Map<String,List<Object>> constraints) {
         SolrQuery solrQuery = keywordQueryWithFacets(queryTerm, allAvailableFacets, constraints);
         return solrQuery;
     }

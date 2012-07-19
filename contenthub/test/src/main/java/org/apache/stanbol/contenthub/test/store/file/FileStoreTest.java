@@ -72,8 +72,9 @@ public class FileStoreTest {
 
     @Test
     public void storeFolderTest() {
-        String stanbolHome = bundleContext.getProperty("sling.home");
-        File storeFolder = new File(stanbolHome + "/filestore");
+        String fileStoreFolder = bundleContext.getProperty("sling.home") + "/"
+                                 + FileStore.FILE_STORE_FOLDER_PATH + "/" + FileStore.FILE_STORE_NAME;
+        File storeFolder = new File(fileStoreFolder);
         assertTrue("No store folder exists", storeFolder.exists());
     }
 
@@ -86,8 +87,9 @@ public class FileStoreTest {
             id = store.put(ci);
 
             // check zip file
-            String stanbolHome = bundleContext.getProperty("sling.home");
-            File storeFolder = new File(stanbolHome + "/filestore");
+            String fileStoreFolder = bundleContext.getProperty("sling.home") + "/"
+                                     + FileStore.FILE_STORE_FOLDER_PATH + "/" + FileStore.FILE_STORE_NAME;
+            File storeFolder = new File(fileStoreFolder);
             String[] fileNames = storeFolder.list();
             boolean zipExists = false;
             for (String fileName : fileNames) {
@@ -147,7 +149,8 @@ public class FileStoreTest {
 
     private void clearTestContentItem(String id) throws StoreException {
         // delete the file
-        String fileStoreFolder = bundleContext.getProperty("sling.home") + "/" + FileStore.FILE_STORE_NAME;
+        String fileStoreFolder = bundleContext.getProperty("sling.home") + "/"
+                                 + FileStore.FILE_STORE_FOLDER_PATH + "/" + FileStore.FILE_STORE_NAME;
         File f = new File(fileStoreFolder + "/" + encodeId(id) + ".zip");
         f.delete();
 

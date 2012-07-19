@@ -39,12 +39,13 @@
     <module>parent</module>
     <module>servicesapi</module>
     <module>store/file</module>
-<!--     <module>store/solr</module> -->
-<!--     <module>search</module> -->
+    <module>search/solr</module>
+    <module>search/featured</module>
+    <module>search/related</module>
+    <module>index</module>
     <module>web</module>
-    <module>bundlelist</module>
-<!--     <module>index</module> -->
     <module>test</module>
+    <module>bundlelist</module>
   </modules>
 
-</project>
+</project>  	

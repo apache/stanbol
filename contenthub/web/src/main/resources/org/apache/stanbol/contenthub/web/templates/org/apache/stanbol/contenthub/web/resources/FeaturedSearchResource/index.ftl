@@ -22,6 +22,7 @@
     <fieldset>
       <legend>Keyword Based Search</legend>
       
+      <!-- Index selection combobox-->
       <p>
         Select an index: <div id="indexDiv"><#--this div will be populated by ajax--></div>
       </p>
@@ -64,7 +65,6 @@
   <script language="javascript">
   
       function init() {
-        
           //accordion
           $(".keywords").accordion({collapsible: true});
           //if a GET gets a parameters, then does the search with that parameter
@@ -74,12 +74,16 @@
               getResults(null,null,'first');
           }
           
-          $.get("${it.publicBaseUri}contenthub/ldpath", function(indexes) {
-              innerStr = "<select id='indexSelect' onChange='javascript:redirectIndex();'>" + "<option value='contenthub'>contenthub</option>"
-              for(var index in indexes) {
-                  innerStr += "<option value=" + index + ">" + index + "</option>";
+          $.get("${it.publicBaseUri}contenthub/index?multiple=true", function(indexes) {
+              if(jQuery.isEmptyObject(indexes)){
+                  innerStr = "You should submit an index to search";
+              } else {
+                  innerStr = "<select id='indexSelect' onChange='javascript:redirectIndex();'>";
+                  for(var index in indexes) {
+                      innerStr += "<option value=" + index + ">" + index + "</option>";
+                  }
+                  innerStr += "</select>";
               }
-              innerStr += "</select>";
               $("#indexDiv").html(innerStr);
               $("#indexSelect").val("${it.indexName}");
           });
@@ -87,33 +91,25 @@
     
       $(document).ready(init);
    
-      function hideDiv() {
-          $('#facets').hide("slow");
-      }
-      
-      function showDiv() {
-          $('#facets').show("slow");
-      }
-    
       function redirectIndex() {
           var index = $("#indexSelect").val();
           window.location.replace("${it.publicBaseUri}contenthub/" + index + "/search/featured");
       }
-    
-      function completePattern() {
-          var pattern = $("#keywordIn").val();
-          $.get("${it.publicBaseUri}contenthub/${it.indexName}/search/related/autocomplete?pattern="+pattern, function(data) {
-              var jsonSource = JSON.parse(data);
-              $(".autoCompleteText").autocomplete({
-                  source: jsonSource['completedKeywords']
-              });         
-          });
-      }
-
+      
       function getResults(facetName,facetValue,operation,voffset,vpageSize) {
         
+          $("#keywordIn").val($.trim($("#keywordIn").val()));  
           //clears the content of div because it'll be filled by explorer posts
           var keywordToSearch = $("#keywordIn").val();
+          
+          if(keywordToSearch == null || $.trim(keywordToSearch).length == 0) {
+              alert("You should enter keyword(s) for search");
+              return;
+          }
+          
+          if($("#keywordIn").val() == "*" || $("#keywordIn").val() == "?"){
+              $("#keywordIn").val("*:*");
+          }
           
           jsonCons = $("#chosenFacetsHidden").attr("value");
           if(typeof(jsonCons) == "undefined") {
@@ -266,6 +262,28 @@
           });
       }
       
+      function hideDiv() {
+          $('#facets').hide("slow");
+      }
+      
+      function showDiv() {
+          $('#facets').show("slow");
+      }
+    
+
+    
+      function completePattern() {
+          var pattern = $("#keywordIn").val();
+          $.get("${it.publicBaseUri}contenthub/${it.indexName}/search/related/autocomplete?pattern="+pattern, function(data) {
+              var jsonSource = JSON.parse(data);
+              $(".autoCompleteText").autocomplete({
+                  source: jsonSource['completedKeywords']
+              });         
+          });
+      }
+
+
+      
       function setChosenFacet(JSONObject) {
           var resultString = "";
           var chosenCons = $("#chosenFacetsHidden").attr("value");
@@ -299,7 +317,7 @@
       }
         
       function isReserved(str) {
-          return str.indexOf("stanbolreserved_") == 0; 
+          return str.indexOf("contenthubreserved_") == 0; 
       }
     
       function getHtmlName(name) {
@@ -315,7 +333,6 @@
           }
           return name;
       }
-      
   </script>
 </@common.page>
 </#escape>

@@ -33,38 +33,18 @@ import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
 public interface SolrSearch {
 
     /**
-     * Queries the default Solr core of Contenthub with the given <code>queryTerm</code>.
-     * 
-     * @param queryTerm
-     *            Query term to be searched
-     * @return the {@link QueryResponse} as is obtained from Solr.
-     * @throws SearchException
-     */
-    QueryResponse search(String queryTerm) throws SearchException;
-
-    /**
      * Queries the Solr core corresponding to the given <code>ldProgramName</code> of Contenthub with the
      * given <code>queryTerm</code>.
      * 
      * @param queryTerm
      *            Query term to be searched
      * @param indexName
-     *            LDPath program name (Solr core/index name) to obtain the corresponding Solr core to be
+     *            Index(Solr core) name to obtain the corresponding Solr core to be
      *            searched
      * @return the {@link QueryResponse} as is obtained from Solr.
      * @throws SearchException
      */
     QueryResponse search(String queryTerm, String indexName) throws SearchException;
-
-    /**
-     * Executes the given <code>solrQuery</code> on the default Solr core of Contenthub.
-     * 
-     * @param solrQuery
-     *            {@link SolrParams} to be executed
-     * @return the {@link QueryResponse} as is obtained from Solr.
-     * @throws SearchException
-     */
-    QueryResponse search(SolrParams solrQuery) throws SearchException;
 
     /**
      * Executes the given <code>solrQuery</code> on the Solr core corresponding to the given

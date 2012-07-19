@@ -31,39 +31,34 @@ import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.common.util.NamedList;
-import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
-import org.apache.stanbol.contenthub.search.featured.util.SolrContentItemConverter;
+import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex;
 import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
+import org.apache.stanbol.contenthub.servicesapi.index.IndexException;
+import org.apache.stanbol.contenthub.servicesapi.index.IndexManagementException;
+import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
-import org.apache.stanbol.contenthub.servicesapi.index.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
 import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeywordSearchManager;
 import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrSearch;
-import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
-import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
+import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
+import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,25 +97,23 @@ public class FeaturedSearchImpl implements FeaturedSearch {
     private SolrSearch solrSearch;
 
     @Reference
-    private RelatedKeywordSearchManager relatedKeywordSearchManager;
+    private SemanticIndexManager semanticIndexManager;
 
     @Reference
-    private ManagedSolrServer managedSolrServer;
+    private RelatedKeywordSearchManager relatedKeywordSearchManager;
 
     @Reference
     private EnhancementJobManager enhancementJobManager;
 
-    private BundleContext bundleContext;
+    @Reference
+    private ContentItemFactory contentItemFactory;
 
-    @Activate
-    public void activate(ComponentContext context) {
-        this.bundleContext = context.getBundleContext();
-    }
-
-    @Override
-    public SearchResult search(String queryTerm) throws SearchException {
-        return search(queryTerm, null, null);
-    }
+    // private BundleContext bundleContext;
+    //
+    // @Activate
+    // public void activate(ComponentContext context) {
+    // this.bundleContext = context.getBundleContext();
+    // }
 
     private List<FacetResult> convertFacetFields(List<FacetField> facetFields, List<FacetResult> allFacets) {
         List<FacetResult> facets = new ArrayList<FacetResult>();
@@ -145,20 +138,22 @@ public class FeaturedSearchImpl implements FeaturedSearch {
     }
 
     @Override
-    public SearchResult search(String queryTerm, String ontologyURI, String ldProgramName) throws SearchException {
-        QueryResponse queryResponse = solrSearch.search(queryTerm, ldProgramName);
-        return search(queryTerm, queryResponse, ontologyURI, ldProgramName, null);
+    public SearchResult search(String queryTerm, String ontologyURI, String indexName) throws SearchException {
+        QueryResponse queryResponse = solrSearch.search(queryTerm, indexName);
+        return search(queryTerm, queryResponse, ontologyURI, indexName, null);
     }
 
     private SearchResult search(String queryTerm,
                                 QueryResponse queryResponse,
                                 String ontologyURI,
-                                String ldProgramName,
+                                String indexName,
                                 List<FacetResult> allFacets) throws SearchException {
-        List<DocumentResult> resultantDocuments = new ArrayList<DocumentResult>();
+        List<String> resultantDocuments = new ArrayList<String>();
         for (SolrDocument solrDocument : queryResponse.getResults()) {
-            resultantDocuments.add(SolrContentItemConverter.solrDocument2solrContentItem(solrDocument,
-                ldProgramName));
+            Object uri = solrDocument.getFieldValue(SolrFieldName.ID.toString());
+            if (uri != null) {
+                resultantDocuments.add(uri.toString());
+            }
         }
         Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords = new HashMap<String,Map<String,List<RelatedKeyword>>>();
         List<String> queryTerms = tokenizeEntities(queryTerm);
@@ -172,66 +167,43 @@ public class FeaturedSearchImpl implements FeaturedSearch {
     }
 
     @Override
-    public SearchResult search(SolrParams solrQuery) throws SearchException {
-        return search(solrQuery, null, null);
-    }
-
-    @Override
-    public SearchResult search(SolrParams solrParams, String ontologyURI, String ldProgramName) throws SearchException {
+    public SearchResult search(SolrParams solrParams, String ontologyURI, String indexName) throws SearchException {
         /*
          * RESTful services uses search method with "SolrParams" argument. For those operations
          */
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.add(solrParams);
-        List<FacetResult> allFacets = getAllFacetResults(ldProgramName);
+        List<FacetResult> allFacets = getAllFacetResults(indexName);
         SolrQueryUtil.setDefaultQueryParameters(solrQuery, allFacets);
-        QueryResponse queryResponse = solrSearch.search(solrQuery, ldProgramName);
+        QueryResponse queryResponse = solrSearch.search(solrQuery, indexName);
         String queryTerm = SolrQueryUtil.extractQueryTermFromSolrQuery(solrParams);
-        return search(queryTerm, queryResponse, ontologyURI, ldProgramName, allFacets);
+        return search(queryTerm, queryResponse, ontologyURI, indexName, allFacets);
     }
 
     @Override
-    public List<FacetResult> getAllFacetResults() throws SearchException {
-        return getAllFacetResults(null);
-    }
-
-    @Override
-    public List<FacetResult> getAllFacetResults(String ldProgramName) throws SearchException {
-        SolrServer solrServer = getSolrServer(ldProgramName);
-        List<FacetResult> facetResults = new ArrayList<FacetResult>();
-        NamedList<Object> fieldsList;
+    public List<FacetResult> getAllFacetResults(String indexName) throws SearchException {
+        LDPathSemanticIndex semanticIndex = null;
         try {
-            fieldsList = SolrQueryUtil.getAllFacetFields(solrServer);
-            for (int i = 0; i < fieldsList.size(); i++) {
-                String fn = fieldsList.getName(i);
-                @SuppressWarnings("unchecked")
-                NamedList<Object> values = (NamedList<Object>) fieldsList.getVal(i);
-                String type = (String) values.get("type");
+            semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(indexName);
+        } catch (IndexManagementException e) {
+            log.error("Failed to get index {}", indexName, e);
+            throw new SearchException("Failed to get index " + indexName, e);
+        }
+        List<FacetResult> facetResults = new ArrayList<FacetResult>();
+        List<String> fieldsNames = new ArrayList<String>();
+        try {
+            fieldsNames = semanticIndex.getFieldsNames();
+            for (int i = 0; i < fieldsNames.size(); i++) {
+                String fn = fieldsNames.get(i);
+                String type = (String) semanticIndex.getFieldProperties(fn).get("type");
                 facetResults.add(new FacetResultImpl(new FacetField(fn), type.trim()));
             }
-        } catch (SolrServerException e) {
-            String msg = "SolrSearchImpl.getFacetNames: Failed to execute solr query";
-            log.error(msg, e);
-            throw new SearchException(msg, e);
-        } catch (IOException e) {
+        } catch (IndexException e) {
+            log.error(e.getMessage(), e);
             throw new SearchException(e.getMessage(), e);
         }
 
         return facetResults;
-    }
-
-    private SolrServer getSolrServer(String ldProgramName) throws SearchException {
-        try {
-            SolrServer solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(
-                ldProgramName);
-            return solrServer;
-        } catch (StoreException e) {
-            String msg = String
-                    .format("SolrSearchImpl.getFacetNames: Failed to obtain solr server for ldprogram: %s",
-                        ldProgramName);
-            log.error(msg, e);
-            throw new SearchException(msg, e);
-        }
     }
 
     @Override
@@ -240,13 +212,17 @@ public class FeaturedSearchImpl implements FeaturedSearch {
         ContentItem ci = null;
         boolean error = false;
         try {
-            ci = new InMemoryContentItem(queryTerm.getBytes(Constants.DEFAULT_ENCODING), "text/plain");
+            ci = contentItemFactory.createContentItem(new ByteArraySource(queryTerm
+                    .getBytes(Constants.DEFAULT_ENCODING), "text/plain"));
             enhancementJobManager.enhanceContent(ci);
         } catch (UnsupportedEncodingException e) {
             log.error("Failed to get bytes of query term: {}", queryTerm, e);
             error = true;
         } catch (EnhancementException e) {
             log.error("Failed to get enmancements for the query term: {}", queryTerm, e);
+            error = true;
+        } catch (IOException e) {
+            log.error("Failed to get bytes of query term: {}", queryTerm, e);
             error = true;
         }
 

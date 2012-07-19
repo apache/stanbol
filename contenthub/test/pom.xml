@@ -54,10 +54,9 @@
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.contenthub.store.file</artifactId>
+        <artifactId>org.apache.stanbol.contenthub.index</artifactId>
         <version>0.10.0-incubating-SNAPSHOT</version>
       </dependency>
-      
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core</artifactId>

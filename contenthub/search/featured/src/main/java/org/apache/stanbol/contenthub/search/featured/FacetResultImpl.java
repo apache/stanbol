@@ -24,31 +24,31 @@ import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FacetResu
 
 public class FacetResultImpl implements FacetResult {
 
-	private FacetField facetField;
+    private FacetField facetField;
 
-	private String type;
+    private String type;
 
-	public FacetResultImpl(FacetField facetField) {
-		this.facetField = facetField;
-		this.type = "UNKNOWN";
-	}
-	
-	public FacetResultImpl(FacetField facetField, String type) {
-		this.facetField = facetField;
-		this.type = type;
-	}
+    public FacetResultImpl(FacetField facetField) {
+        this.facetField = facetField;
+        this.type = "UNKNOWN";
+    }
 
-	@Override
-	public FacetField getFacetField() {
-		return this.facetField;
-	}
+    public FacetResultImpl(FacetField facetField, String type) {
+        this.facetField = facetField;
+        this.type = type;
+    }
 
-	@Override
-	public String getType() {
-		return this.type;
-	}
-	
-	public String getHtmlName() {
+    @Override
+    public FacetField getFacetField() {
+        return this.facetField;
+    }
+
+    @Override
+    public String getType() {
+        return this.type;
+    }
+
+    public String getHtmlName() {
         String name = getFacetField().getName();
         if (name.startsWith(STANBOLRESERVED_PREFIX)) {
             return name.substring(STANBOLRESERVED_PREFIX.length());

@@ -375,7 +375,7 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
 </table>
 <h4>Example</h4>
 <pre>curl http://localhost:8080/contenthub/store/download/metadata/5d85e7c63cc48c0985?format=application%2Fjson</pre>
-<pre>curl http://localhost:8080/contenthub/store/download/raw/5d85e7c63cc48c01b8d4?format=application%2Frdf%2Bxml</pre>
+<pre>curl http://localhost:8080/contenthub/store/download/raw/5d85e7c63cc48c01b8d4</pre>
 
 <hr>
 

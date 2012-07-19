@@ -19,7 +19,7 @@
 <@common.page title="Contenthub" hasrestapi=true> 
 
 <div class="panel" id="webview">
-
+<b>Store</b> | <a href="${it.publicBaseUri}contenthub/index">Index</a>
   <div id="searchResult" class="invisible"></div>
 
   <h3>Recently uploaded Content Items</h3>
@@ -103,6 +103,11 @@
       </p>
     </fieldset>
   </form>
+  
+  <div class="waitingDiv">
+    <p>Stanbol is storing your content...</p>
+    <p><img alt="Waiting..." src="http://localhost:8080/static/home/images/ajax-loader.gif"></p>
+  </div>
 </div>
 
 <div class="panel" id="restapi" style="display: none;">
@@ -113,7 +118,7 @@
 
     var counter = 0;
     
-    function setConstraints() {
+    function setConstraints() { 
         var titleStr = document.getElementById("valueTitle").value;
         var fileStr = document.getElementById("file").value;
         if((!fileStr || fileStr == "") && (!titleStr || titleStr == "")) {
@@ -121,6 +126,7 @@
             alert('You should enter title for your content');
             return false;
         }
+        $(".waitingDiv").show();
         
         var i;
         var result = JSON.parse("{}");

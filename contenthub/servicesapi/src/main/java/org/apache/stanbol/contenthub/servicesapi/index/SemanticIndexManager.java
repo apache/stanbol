@@ -16,46 +16,84 @@
  */
 package org.apache.stanbol.contenthub.servicesapi.index;
 
-import java.io.Reader;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathException;
-import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathProgramCollection;
+import org.osgi.framework.Constants;
 
-import at.newmedialab.ldpath.model.programs.Program;
-
+/**
+ * Provides methods to access to managed {@link SemanticIndex}es by different means such name,
+ * {@link EndpointType} or both.
+ * 
+ */
 public interface SemanticIndexManager {
-    SemanticIndex getIndex(String name);
+    /**
+     * Retrieves the {@link SemanticIndex} instance with the given name and having highest
+     * {@link Constants#SERVICE_RANKING} value.
+     * 
+     * @param name
+     *            Name of the {@link SemanticIndex} to be retrieved
+     * @return the {@link SemanticIndex} instance with the given name if there is any, otherwise {@code null}
+     * @throws IndexManagementException
+     */
+    SemanticIndex getIndex(String name) throws IndexManagementException;
 
-    List<SemanticIndex> getIndexes(String name);
+    /**
+     * Retrieves the {@link SemanticIndex} instances with the given name.
+     * 
+     * @param name
+     *            Name of the {@link SemanticIndex}es to be retrieved
+     * @return the {@link SemanticIndex}es with the given name if there is any, otherwise an empty list
+     * @throws IndexManagementException
+     */
+    List<SemanticIndex> getIndexes(String name) throws IndexManagementException;
 
-    SemanticIndex getIndex(EndpointType endpointType);
+    /**
+     * Retrieves the {@link SemanticIndex} instance with the given {@link EndpointType} and having highest
+     * {@link Constants#SERVICE_RANKING} value.
+     * 
+     * @param endpointType
+     *            REST {@link EndpointType} of the {@link SemanticIndex} to be retrieved
+     * @return the {@link SemanticIndex} instance with the given {@link EndpointType} if there is any,
+     *         otherwise {@code null}
+     * @throws IndexManagementException
+     */
+    SemanticIndex getIndex(EndpointType endpointType) throws IndexManagementException;
 
-    List<SemanticIndex> getIndexes(EndpointType endpointType);
+    /**
+     * Retrieves the {@link SemanticIndex}es with the given {@link EndpointType}.
+     * 
+     * @param endpointType
+     *            REST {@link EndpointType} of the {@link SemanticIndex}es to be retrieved
+     * @return the {@link SemanticIndex}es instances with the given {@link EndpointType} if there is any,
+     *         otherwise an empty list
+     * @throws IndexManagementException
+     */
+    List<SemanticIndex> getIndexes(EndpointType endpointType) throws IndexManagementException;
 
-    SemanticIndex getIndex(String name, EndpointType endpointType);
+    /**
+     * Retrieves the {@link SemanticIndex} instance with the given name, {@link EndpointType} and highest
+     * {@link Constants#SERVICE_RANKING} value.
+     * 
+     * @param name
+     *            Name of the {@link SemanticIndex}es to be retrieved
+     * @param endpointType
+     *            REST {@link EndpointType} of the {@link SemanticIndex} to be retrieved
+     * @return the {@link SemanticIndex} instance with the given name, {@link EndpointType} if there is any,
+     *         otherwise {@code null}
+     * @throws IndexManagementException
+     */
+    SemanticIndex getIndex(String name, EndpointType endpointType) throws IndexManagementException;
 
-    List<SemanticIndex> getIndexes(String name, EndpointType endpointType);
-
-	String getProgramByName(String programName);
-
-	Program<Object> getParsedProgramByName(String programName);
-
-	void deleteProgram(String programName);
-
-	boolean isManagedProgram(String programName);
-
-	void submitProgram(String programName, String ldPathProgram)
-			throws LDPathException;
-
-	void submitProgram(String programName, Reader ldPathProgramReader)
-			throws LDPathException;
-
-	LDPathProgramCollection retrieveAllPrograms();
-
-	Map<String, Collection<?>> executeProgram(String programName,
-			Set<String> contexts) throws LDPathException;
+    /**
+     * Retrieves the {@link SemanticIndex}es instance with the given name and {@link EndpointType}.
+     * 
+     * @param name
+     *            Name of the {@link SemanticIndex}es to be retrieved
+     * @param endpointType
+     *            REST {@link EndpointType} of the {@link SemanticIndex} to be retrieved
+     * @return the {@link SemanticIndex} instance with the given name and {@link EndpointType} if there is
+     *         any, otherwise an empty list
+     * @throws IndexManagementException
+     */
+    List<SemanticIndex> getIndexes(String name, EndpointType endpointType) throws IndexManagementException;
 }

@@ -44,7 +44,7 @@ public interface SearchResult {
      * 
      * @return {@link List} of {@link DocumentResult} encapsulated in this search result
      */
-    List<DocumentResult> getDocuments();
+    List<String> getDocuments();
 
     /**
      * Returns the facets generated as a result of the search operations. Each search result has its own
@@ -69,7 +69,7 @@ public interface SearchResult {
      * 
      * @param documentResults
      */
-    void setDocuments(List<DocumentResult> documentResults);
+    void setDocuments(List<String> documentResults);
 
     /**
      * Setter for the facets list

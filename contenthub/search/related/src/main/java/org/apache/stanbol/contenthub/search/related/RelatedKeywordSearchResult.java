@@ -19,8 +19,6 @@ package org.apache.stanbol.contenthub.search.related;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.stanbol.contenthub.servicesapi.index.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
@@ -42,7 +40,7 @@ public class RelatedKeywordSearchResult implements SearchResult {
     }
 
     @Override
-    public List<DocumentResult> getDocuments() {
+    public List<String> getDocuments() {
         log.warn("RelatedKeywordSearchResult does not contain any ResultantDocument");
         return null;
     }
@@ -59,17 +57,17 @@ public class RelatedKeywordSearchResult implements SearchResult {
     }
 
     @Override
-    public void setDocuments(List<DocumentResult> resultantDocuments) {
-        String msg = "RelatedKeywordSearchResult cannot contain any ResultantDocument";
-        log.error(msg);
-        throw new NotImplementedException(msg);
+    public void setDocuments(List<String> resultantDocuments) {
+        // String msg = "RelatedKeywordSearchResult cannot contain any ResultantDocument";
+        // log.error(msg);
+        // throw new NotImplementedException(msg);
     }
 
     @Override
     public void setFacets(List<FacetResult> facets) {
-        String msg = "RelatedKeywordSearchResult cannot contain any FacetField";
-        log.error(msg);
-        throw new NotImplementedException(msg);
+        // String msg = "RelatedKeywordSearchResult cannot contain any FacetField";
+        // log.error(msg);
+        // throw new NotImplementedException(msg);
     }
 
     @Override

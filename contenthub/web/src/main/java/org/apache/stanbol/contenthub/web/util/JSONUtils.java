@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.contenthub.web.util;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,14 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.stanbol.contenthub.servicesapi.Constants;
-import org.apache.stanbol.contenthub.servicesapi.index.ldpath.LDPathProgramCollection;
-import org.apache.stanbol.contenthub.servicesapi.index.search.featured.DocumentResult;
+import org.apache.stanbol.contenthub.servicesapi.index.IndexException;
+import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndex;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
-import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -114,14 +110,10 @@ public class JSONUtils {
         return jObject.toString();
     }
 
-    private static JSONObject toJSON(DocumentResult resultantDocument) throws JSONException {
+    private static JSONObject toJSON(String resultantDocument) throws JSONException {
         JSONObject jObj = new JSONObject();
         if (resultantDocument != null) {
-            jObj.put("uri", resultantDocument.getDereferencableURI());
-            jObj.put("localid", resultantDocument.getLocalId());
-            jObj.put("mimetype", resultantDocument.getMimetype());
-            jObj.put("title", resultantDocument.getTitle());
-            jObj.put("enhancementcount", resultantDocument.getEnhancementCount());
+            jObj.put("uri", resultantDocument);
         }
         return jObj;
     }
@@ -130,14 +122,14 @@ public class JSONUtils {
         JSONArray jArr = new JSONArray();
         if (list != null) {
             for (T element : list) {
-                if (DocumentResult.class.isAssignableFrom(element.getClass())) {
-                    jArr.put(toJSON((DocumentResult) element));
-                } else if (FacetField.class.isAssignableFrom(element.getClass())) {
+                if (FacetField.class.isAssignableFrom(element.getClass())) {
                     jArr.put(toJSON((FacetField) element));
                 } else if (FacetField.Count.class.isAssignableFrom(element.getClass())) {
                     jArr.put(toJSON((FacetField.Count) element));
                 } else if (RelatedKeyword.class.isAssignableFrom(element.getClass())) {
                     jArr.put(toJSON((RelatedKeyword) element));
+                } else if (String.class.isAssignableFrom(element.getClass())) {
+                    jArr.put(toJSON((String) element));
                 }
             }
         }
@@ -200,28 +192,26 @@ public class JSONUtils {
         return jObj.toString(4);
     }
 
-    public static String createJSONString(SolrContentItem sci) throws JSONException {
-        String content = null;
-        try {
-            content = IOUtils.toString(sci.getStream(), Constants.DEFAULT_ENCODING);
-        } catch (IOException ex) {
-            logger.error("Cannot read the content.", ex);
-        }
-
-        JSONObject jObj = new JSONObject(sci.getConstraints());
-        jObj.put("content", content);
-        jObj.put("mimeType", sci.getMimeType());
-        // jObj.put("uri", ContentItemIDOrganizer.detachBaseURI(sci.getUri().getUnicodeString()));
-        jObj.put("title", sci.getTitle());
-        return jObj.toString(4);
-    }
-
-    public static String createJSONString(LDPathProgramCollection ldpc) throws JSONException {
+    public static String createJSONString(List<SemanticIndex> semanticIndexes) throws JSONException,
+                                                                              IndexException {
         JSONObject jObj = new JSONObject();
-        for (Map.Entry<String,String> entry : ldpc.asMap().entrySet()) {
-            jObj.put(entry.getKey(), entry.getValue());
+        for (SemanticIndex semanticIndex : semanticIndexes) {
+            JSONObject siRep = new JSONObject();
+            siRep.put("name", semanticIndex.getName());
+            siRep.put("description", semanticIndex.getDescription());
+            siRep.put("revision", semanticIndex.getRevision());
+            siRep.put("fieldNames", semanticIndex.getFieldsNames());
+
+            JSONObject fieldProperties = new JSONObject();
+            for (String fieldName : semanticIndex.getFieldsNames()) {
+                Map<String,Object> singleFieldProperties = semanticIndex.getFieldProperties(fieldName);
+                fieldProperties.put(fieldName, singleFieldProperties);
+            }
+            siRep.put("fieldProperties", fieldProperties);
+            siRep.put("restEndpoints", semanticIndex.getRESTSearchEndpoints());
+
+            jObj.put(semanticIndex.getName(), siRep);
         }
         return jObj.toString(4);
     }
-
 }

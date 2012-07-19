@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class SolrVocabulary {
 
-    public static final String STANBOLRESERVED_PREFIX = "stanbolreserved_";
+    public static final String STANBOLRESERVED_PREFIX = "contenthubreserved_";
 
     public enum SolrFieldName {
 
@@ -54,6 +54,16 @@ public class SolrVocabulary {
          */
         ID(STANBOLRESERVED_PREFIX + "id"),
 
+        /**
+         * Revision of index
+         */
+        REVISION(STANBOLRESERVED_PREFIX + "revision"),
+        
+        /**
+         * ID field of revision document to be kept in solr
+         */
+        REVISIONID(STANBOLRESERVED_PREFIX + "contenthub_ldpath_semantic_index_revision_id"),
+        
         /**
          * Name of the field which holds the title of the content.
          */

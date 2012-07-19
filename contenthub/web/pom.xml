@@ -70,7 +70,7 @@
             <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/style/jquery-ui-1.8.11.custom.css</exclude>
             <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jquery-ui-1.8.11.custom.min.js</exclude>
             <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jquery-1.5.1.min.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jquery-1.4.2.js</exclude>            
+            <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jquery-1.4.2.js</exclude>
 
             <!-- BSD License -->
             <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jit.js</exclude>
@@ -93,11 +93,16 @@
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.contenthub.index</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.store.file</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
 
-<!--     needed for ContentItemResource -->
+    <!-- needed for ContentItemResource -->
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>jaxrs.rdf.providers</artifactId>
@@ -110,7 +115,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.10.1-incubating-SNAPSHOT</version>
+      <version>0.11.0-incubating-SNAPSHOT</version>
     </dependency>
 
     <!-- Jersey -->
@@ -175,7 +180,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+      <artifactId>org.apache.stanbol.contenthub.search.solr</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>

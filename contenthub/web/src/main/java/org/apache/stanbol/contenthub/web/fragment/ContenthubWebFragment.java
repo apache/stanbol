@@ -30,11 +30,13 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.apache.stanbol.contenthub.web.resources.FeaturedSearchResource;
+import org.apache.stanbol.contenthub.web.resources.LDPathSemanticIndexResource;
 import org.apache.stanbol.contenthub.web.resources.RootResource;
 import org.apache.stanbol.contenthub.web.resources.SemanticIndexManagerResource;
 import org.apache.stanbol.contenthub.web.resources.StoreResource;
-import org.apache.stanbol.contenthub.web.writers.LDProgramCollectionWriter;
 import org.apache.stanbol.contenthub.web.writers.SearchResultWriter;
+import org.apache.stanbol.contenthub.web.writers.SemanticIndexWriter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -71,9 +73,11 @@ public class ContenthubWebFragment implements WebFragment {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(RootResource.class);
         classes.add(StoreResource.class);
-        classes.add(SemanticIndexManagerResource.class);
-        classes.add(LDProgramCollectionWriter.class);
+        classes.add(LDPathSemanticIndexResource.class);
+        classes.add(SemanticIndexWriter.class);
         classes.add(SearchResultWriter.class);
+        classes.add(SemanticIndexManagerResource.class);
+        classes.add(FeaturedSearchResource.class);
 
         return classes;
     }

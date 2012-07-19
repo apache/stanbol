@@ -19,18 +19,17 @@ package org.apache.stanbol.contenthub.search.featured;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.stanbol.contenthub.servicesapi.index.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
 
 public class FeaturedSearchResult implements SearchResult {
 
-    private List<DocumentResult> documentResults;
+    private List<String> documentResults;
     private List<FacetResult> facetResults;
     private Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords;
 
-    public FeaturedSearchResult(List<DocumentResult> documentResults,
+    public FeaturedSearchResult(List<String> documentResults,
                                 List<FacetResult> facetResults,
                                 Map<String,Map<String,List<RelatedKeyword>>> relatedKeywords) {
         this.documentResults = documentResults;
@@ -39,7 +38,7 @@ public class FeaturedSearchResult implements SearchResult {
     }
 
     @Override
-    public List<DocumentResult> getDocuments() {
+    public List<String> getDocuments() {
         return this.documentResults;
     }
 
@@ -54,7 +53,7 @@ public class FeaturedSearchResult implements SearchResult {
     }
 
     @Override
-    public void setDocuments(List<DocumentResult> documentresults) {
+    public void setDocuments(List<String> documentresults) {
         this.documentResults = documentresults;
     }
 

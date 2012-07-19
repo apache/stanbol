@@ -118,7 +118,9 @@ public class FileStore implements Store {
     public static final String FIELD_TITLE = "title";
 
     public static final String FIELD_ID = "id";
-    
+
+    public static final String FILE_STORE_FOLDER_PATH = "datafiles/contenthub";
+
     public static final String FILE_STORE_NAME = "filestore";
 
     private static final String SELECT_RECENTLY_ENHANCED_ITEMS = "SELECT t1.id, mimeType, enhancementCount, title FROM "
@@ -176,7 +178,7 @@ public class FileStore implements Store {
     protected void activate(ComponentContext componentContext) throws StoreException {
         // check store folder
         String stanbolHome = componentContext.getBundleContext().getProperty("sling.home");
-        storeFolder = new File(stanbolHome + "/" + FILE_STORE_NAME);
+        storeFolder = new File(stanbolHome + "/" + FILE_STORE_FOLDER_PATH + "/" + FILE_STORE_NAME);
         if (!storeFolder.exists()) {
             storeFolder.mkdirs();
         }

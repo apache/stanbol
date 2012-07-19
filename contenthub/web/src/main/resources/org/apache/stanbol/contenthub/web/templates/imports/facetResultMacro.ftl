@@ -24,14 +24,14 @@
   <#if facetField?exists>
     <#if facetField.values?exists && facetField.values?size != 0>
       <#assign facetNameEscaped = facetField.name?url("UTF-8")?js_string/>
-      <#if facetField.name == "stanbolreserved_creationdate">
+      <#if facetField.name == "contenthubreserved_creationdate">
         ${facetHtmlName}
         <br/>
         <#assign orderedList = facetField.values?sort_by("name") />
         <p>
           <input id="dateFrom" class="facetText" type="text" value="${orderedList[0].name?substring(0,10)}" readonly="true"/> 
           to <input id="dateTo" class="facetText" type="text" value="${orderedList[orderedList?size-1].name?substring(0,10)}" readonly="true"/>
-          <a href="javascript:getResults('stanbolreserved_creationdate','','date')"><input type="button" value=">" /></a>
+          <a href="javascript:getResults('contenthubreserved_creationdate','','date')"><input type="button" value=">" /></a>
         </p>
       <#else>
         ${facetHtmlName}

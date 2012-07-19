@@ -99,3 +99,40 @@ H3.ui-accordion-header{
 .curlLine{
   display: none;
 }
+
+.index {
+  padding: 0.5em;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.index .collapseheader {
+  margin: 0.1em;
+  cursor: pointer;
+  background: url("../images/foldable_unfolded.png") no-repeat scroll right center transparent;
+}
+
+.index .collapsed .collapseheader {
+  background: url("../images/foldable_folded.png") no-repeat scroll right center transparent;
+}
+
+.index .collapsed .collapsable {
+  display: none;
+}
+
+.index ul {
+  padding-left: 0;
+}
+
+.index ul li {
+  list-style: none;
+  padding-left: 20px; 
+}
+
+.waitingDiv{
+  position: fixed; 
+  top: 42%; 
+  left: 42%; 
+  text-align: center;
+  display: none;
+}

@@ -15,10 +15,9 @@ import org.apache.clerezza.rdf.core.UriRef;
  *     SemanticIndex index; //the index to apply the changes
  *     long revision = Long.MIN_VALUE; //start from scratch
  *     int batchSize = 1000;
- *     int offset = 0;
  *     ChangeSet cs;
  *     do {
- *         cs = store.changes(revision, offset, batchSize);
+ *         cs = store.changes(revision, batchSize);
  *         for(UriRef changed : cs.changed()){
  *             ContentItem ci = store.get(changed);
  *             if(ci == null){
@@ -27,7 +26,6 @@ import org.apache.clerezza.rdf.core.UriRef;
  *                 index.index(ci);
  *             }
  *         }
- *         offset+=cs.changed().size(); 
  *     while(!cs.changed().isEmpty());
  *     index.persist(cs.fromRevision());
  * </pre></code>

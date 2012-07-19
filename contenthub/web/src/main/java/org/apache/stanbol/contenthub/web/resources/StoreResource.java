@@ -17,6 +17,9 @@
 
 package org.apache.stanbol.contenthub.web.resources;
 
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.OPTIONS;
+import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -236,7 +239,7 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/{uri:.+}")
     public Response handleCorsPreflightURI(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        enableCORS(servletContext, res, headers, POST, DELETE, OPTIONS);
         return res.build();
     }
 
@@ -582,7 +585,8 @@ public class StoreResource extends BaseStanbolResource {
 
         ContentItem ci = null;
         try {
-            ci = cif.createContentItem(contentURI, new ByteArraySource(content, mediaType.toString()));
+            ci = cif.createContentItem(new UriRef(contentURI),
+                new ByteArraySource(content, mediaType.toString()));
             if (constraints != null && !constraints.trim().equals("")) {
                 ci.addPart(FileStore.CONSTRAINTS_URI, cif.createBlob(new StringSource(constraints)));
             }

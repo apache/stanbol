@@ -72,7 +72,7 @@ public class FileStoreDBManager {
     @Activate
     protected void activate(ComponentContext componentContext) throws StoreException {
         String stanbolHome = componentContext.getBundleContext().getProperty("sling.home");
-        DB_URL = "jdbc:derby:" + stanbolHome + "/filestore/filestorerevisions;create=true";
+        DB_URL = "jdbc:derby:" + stanbolHome + "/datafiles/contenthub/filestore/filestorerevisions;create=true";
         log.info("Initializing file store revision database");
         Connection con = getConnection();
         Statement stmt = null;
