@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.contenthub.test.store.file;
 
 import static org.junit.Assert.assertEquals;
@@ -29,55 +45,52 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(SlingAnnotationsTestRunner.class)
 public class ContentPartSerializerTest {
-	private static final Logger log = LoggerFactory
-			.getLogger(FileStoreDBManagerTest.class);
+    private static final Logger log = LoggerFactory.getLogger(FileStoreDBManagerTest.class);
 
-	@TestReference
-	ContentPartSerializer contentPartSerializer;
+    @TestReference
+    ContentPartSerializer contentPartSerializer;
 
-	@TestReference
-	ContentItemFactory contentItemFactory;
+    @TestReference
+    ContentItemFactory contentItemFactory;
 
-	@TestReference
-	private Parser parser;
+    @TestReference
+    private Parser parser;
 
-	@Test
-	public void testBlobSerializerProvider() throws StoreException {
-		String strExpected = "I live in Paris.";
-		Blob blob = null;
-		try {
-			blob = contentItemFactory.createBlob(new StringSource(strExpected));
-		} catch (IOException e) {
-			log.error("Blob cannot be created.");
-		}
+    @Test
+    public void testBlobSerializerProvider() throws StoreException {
+        String strExpected = "I live in Paris.";
+        Blob blob = null;
+        try {
+            blob = contentItemFactory.createBlob(new StringSource(strExpected));
+        } catch (IOException e) {
+            log.error("Blob cannot be created.");
+        }
 
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		contentPartSerializer.serializeContentPart(os, blob);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        contentPartSerializer.serializeContentPart(os, blob);
 
-		String strActual = new String(os.toByteArray());
-		assertEquals(strExpected, strActual);
-	}
+        String strActual = new String(os.toByteArray());
+        assertEquals(strExpected, strActual);
+    }
 
-	@Test
-	public void testTripleCollectionSerializerProvider() throws StoreException {
-		TripleCollection tcExpected = new SimpleMGraph();
-		tcExpected.add(new TripleImpl(new UriRef(
-				"http://dbpedia.org/resource/Paris"), new UriRef(
-				"http://dbpedia.org/ontology/label"), new UriRef(
-				"http://www.w3.org/2000/01/rdf-schema#label/Paris")));
-		tcExpected.add(new TripleImpl(new UriRef(
-				"http://dbpedia.org/resource/Paris"), new UriRef(
-				"http://dbpedia.org/ontology/populationTotal"), new UriRef(
-				"http://www.w3.org/2001/XMLSchema#long/2193031")));
+    @Test
+    public void testTripleCollectionSerializerProvider() throws StoreException {
+        TripleCollection tcExpected = new SimpleMGraph();
+        tcExpected.add(new TripleImpl(new UriRef("http://dbpedia.org/resource/Paris"), new UriRef(
+                "http://dbpedia.org/ontology/label"), new UriRef(
+                "http://www.w3.org/2000/01/rdf-schema#label/Paris")));
+        tcExpected.add(new TripleImpl(new UriRef("http://dbpedia.org/resource/Paris"), new UriRef(
+                "http://dbpedia.org/ontology/populationTotal"), new UriRef(
+                "http://www.w3.org/2001/XMLSchema#long/2193031")));
 
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		contentPartSerializer.serializeContentPart(os, tcExpected);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        contentPartSerializer.serializeContentPart(os, tcExpected);
 
-		InputStream is = new ByteArrayInputStream(os.toByteArray());
-		MGraph tcActual = new SimpleMGraph();
-		parser.parse(tcActual, is, SupportedFormat.RDF_XML);
+        InputStream is = new ByteArrayInputStream(os.toByteArray());
+        MGraph tcActual = new SimpleMGraph();
+        parser.parse(tcActual, is, SupportedFormat.RDF_XML);
 
-		assertTrue(tcExpected.containsAll(tcActual));
-		assertTrue(tcActual.containsAll(tcExpected));
-	}
+        assertTrue(tcExpected.containsAll(tcActual));
+        assertTrue(tcActual.containsAll(tcExpected));
+    }
 }

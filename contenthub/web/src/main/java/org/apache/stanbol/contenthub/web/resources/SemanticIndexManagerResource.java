@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.contenthub.web.resources;
 
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
@@ -113,52 +129,60 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     //
     // HTML view
     //
-    
+
     public class IndexView {
         private String name;
         private String description;
         private String state;
         private long revision;
         private Map<String,String> endpoints;
-        
-        public IndexView(String name,String description, String state,long revision, Map<String,String> endpoints){
+
+        public IndexView(String name,
+                         String description,
+                         String state,
+                         long revision,
+                         Map<String,String> endpoints) {
             this.name = name;
             this.description = description;
             this.state = state;
             this.revision = revision;
             this.endpoints = endpoints;
         }
-        
-        public String getName(){
+
+        public String getName() {
             return name;
         }
-        public String getDescription(){
+
+        public String getDescription() {
             return description;
         }
-        public String getState(){
+
+        public String getState() {
             return state;
         }
-        public long getRevision(){
+
+        public long getRevision() {
             return revision;
         }
-        public Map<String,String> getEndpoints(){
+
+        public Map<String,String> getEndpoints() {
             return endpoints;
         }
     }
-    
+
     public List<IndexView> getSemanticIndexes() throws IndexManagementException {
         List<IndexView> indexView = new ArrayList<IndexView>();
         List<SemanticIndex> indexes = semanticIndexManager.getIndexes(null, null);
-        for(SemanticIndex index : indexes){
+        for (SemanticIndex index : indexes) {
             Map<EndpointType,String> restEndpoints = index.getRESTSearchEndpoints();
             Map<String,String> endpoints = new HashMap<String,String>();
-            for(Entry<EndpointType,String> restEndpoint : restEndpoints.entrySet()){
+            for (Entry<EndpointType,String> restEndpoint : restEndpoints.entrySet()) {
                 endpoints.put(restEndpoint.getKey().name(), restEndpoint.getValue());
             }
-            indexView.add(new IndexView(index.getName(), index.getDescription(), index.getState().name(), index.getRevision(),endpoints));
+            indexView.add(new IndexView(index.getName(), index.getDescription(), index.getState().name(),
+                    index.getRevision(), endpoints));
         }
         return indexView;
     }
-    
 
 }

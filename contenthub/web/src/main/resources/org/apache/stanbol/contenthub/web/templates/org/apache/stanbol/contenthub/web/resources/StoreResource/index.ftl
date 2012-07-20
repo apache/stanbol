@@ -111,7 +111,7 @@
 </div>
 
 <div class="panel" id="restapi" style="display: none;">
-  <#include "/imports/storeRestApi.ftl">
+  <#include "/imports/doc/storeRestApi.ftl">
 </div>
 
 <script language="javascript">

@@ -48,6 +48,20 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 licensed -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+
+            <!-- AL20 licensed files. See src/main/resources/README -->
+            <exclude>src/main/resources/config/org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex-default.config</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.commons.solr.managed.impl.ManagedSolrServerImpl-contenthub.config</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
     </plugins>
   </build>
   <dependencies>
