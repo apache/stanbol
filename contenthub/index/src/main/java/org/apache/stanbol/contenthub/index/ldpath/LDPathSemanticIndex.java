@@ -897,7 +897,7 @@ public class LDPathSemanticIndex implements SemanticIndex {
         @Override
         public void run() {
             while (!deactivate) {
-                logger.debug("Pooling thread for index: {} will check the changes", name);
+                logger.info("Pooling thread for index: {} will check the changes", name);
                 // if the polling thread is interrupted i.e the parent index component is deactivated,
                 // stop polling
                 if (Thread.currentThread().isInterrupted()) {
@@ -951,7 +951,7 @@ public class LDPathSemanticIndex implements SemanticIndex {
                 try {
                     Thread.sleep(1000 * storeCheckPeriod);
                 } catch (InterruptedException e) {
-                    logger.error(
+                    logger.info(
                         "Store Checker for index: {} is interrupted while sleeping. Closing the thread", name);
                     return;
                 }

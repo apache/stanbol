@@ -44,6 +44,7 @@
     <module>search/related</module>
     <module>index</module>
     <module>web</module>
+    <module>defaults</module>
     <module>test</module>
     <module>bundlelist</module>
   </modules>

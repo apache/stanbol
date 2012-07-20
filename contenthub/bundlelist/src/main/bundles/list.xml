@@ -53,6 +53,11 @@
       <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.contenthub.defaults</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.junit.core</artifactId>
       <version>1.0.6</version>
