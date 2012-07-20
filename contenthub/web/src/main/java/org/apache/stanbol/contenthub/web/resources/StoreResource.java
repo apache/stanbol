@@ -636,6 +636,9 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/{uri:.+}")
     public Response deleteContentItem(@PathParam(value = "uri") String contentURI,
                                       @Context HttpHeaders headers) throws StoreException {
+        if(store.get(new UriRef(contentURI)) == null){
+            throw new WebApplicationException(404);
+        }
         store.remove(new UriRef(contentURI));
         ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);

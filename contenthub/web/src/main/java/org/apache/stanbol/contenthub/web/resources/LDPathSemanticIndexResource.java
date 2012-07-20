@@ -97,7 +97,7 @@ public class LDPathSemanticIndexResource extends BaseStanbolResource {
     }
 
     /**
-     * HTTP POST method which saves an LDPath program into the persistent store of Contenthub.
+     * HTTP POST method which saves an {@link LDPathSemanticIndex} into the persistent store of Contenthub.
      * 
      * @param name
      *            The name identifying the index

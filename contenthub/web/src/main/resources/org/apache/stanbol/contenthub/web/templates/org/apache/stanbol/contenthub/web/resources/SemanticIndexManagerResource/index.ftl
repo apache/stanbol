@@ -16,9 +16,9 @@
 -->
 <#import "/imports/common.ftl" as common>
 <#escape x as x?html>
-<@common.page title="Contenthub" hasrestapi=false>
-<div class="panel" id="webview">
-<a href="${it.publicBaseUri}contenthub/store">Store</a> | <b>Index</b><a href="${it.publicBaseUri}contenthub/index/ldpath">/ldpath</a>
+<@common.page title="Contenthub" hasrestapi=true>
+  <div class="panel" id="webview">
+  <a href="${it.publicBaseUri}contenthub/store">Store</a> | <b>Index</b><a href="${it.publicBaseUri}contenthub/index/ldpath">/ldpath</a>
     <h3>Submitted Indexes: </h3>
     <#if it.semanticIndexes?size &gt; 0>
       <#list it.semanticIndexes as index>
@@ -64,7 +64,10 @@
     <#else>
       There is no submitted index.
     </#if>
-</div>
+  </div>
+  <div class="panel" id="restapi" style="display: none;">
+    <#include "/imports/doc/indexRestApi.ftl">
+  </div>
   <script>
     $(".index p").click(function () {
       $(this).parents("div").toggleClass("collapsed");

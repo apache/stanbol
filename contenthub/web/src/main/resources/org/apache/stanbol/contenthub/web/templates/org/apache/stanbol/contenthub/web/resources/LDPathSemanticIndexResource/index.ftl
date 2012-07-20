@@ -16,9 +16,9 @@
 -->
 <#import "/imports/common.ftl" as common>
 <#escape x as x?html>
-<@common.page title="Contenthub" hasrestapi=false>
+<@common.page title="Contenthub" hasrestapi=true>
 <div class="panel" id="webview">
-<a href="${it.publicBaseUri}contenthub/store">Store</a> | <a href="${it.publicBaseUri}contenthub/index">Index</a><b>/ldpath</b>
+  <a href="${it.publicBaseUri}contenthub/store">Store</a> | <a href="${it.publicBaseUri}contenthub/index">Index</a><b>/ldpath</b>
 
   <h3>Recently Submitted LD Path Semantic Indexes</h3>
   <div id="storeContents" class="storeContents">
@@ -103,7 +103,10 @@
     <p>Stanbol is creating your index...</p>
     <p><img alt="Waiting..." src="http://localhost:8080/static/home/images/ajax-loader.gif"></p>
   </div>
-</div>  
+</div>
+<div class="panel" id="restapi" style="display: none;">
+  <#include "/imports/doc/indexLdpathRestApi.ftl">
+</div>
   <script language="javascript">
       function submitProgram() {
           var name = $.trim($("#nameText").val());

@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
@@ -73,7 +74,7 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
 
     /**
      * This method returns the {@link SemanticIndex} representations according to the given parameters in
-     * <b>application/json</b> format.
+     * <b>application/json</b> format or HTML view.
      * 
      * @param name
      *            Name of the indexes to be returned
@@ -90,7 +91,7 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
     public Response getIndexes(@QueryParam(value = "name") String name,
                                @QueryParam(value = "endpointType") String endpointType,
-                               @QueryParam(value = "multiple") boolean multiple,
+                               @QueryParam(value = "multiple") @DefaultValue("true") boolean multiple,
                                @Context HttpHeaders headers) throws IndexManagementException {
         MediaType acceptedHeader = RestUtil.getAcceptedMediaType(headers);
         if (acceptedHeader.isCompatible(MediaType.TEXT_HTML_TYPE)) {
