@@ -124,11 +124,11 @@ public class SparqlSearcher extends AbstractEntitySearcher implements EntitySear
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
         String sparqlQuery = query.toSparqlConstruct();
         long initEnd = System.currentTimeMillis();
-        log.info("  > InitTime: "+(initEnd-start));
-        log.info("  > SPARQL query:\n"+sparqlQuery);
+        log.debug("  > InitTime: "+(initEnd-start));
+        log.debug("  > SPARQL query:\n"+sparqlQuery);
         InputStream in = SparqlEndpointUtils.sendSparqlRequest(getQueryUri(), sparqlQuery, DEFAULT_RDF_CONTENT_TYPE);
         long queryEnd = System.currentTimeMillis();
-        log.info("  > QueryTime: "+(queryEnd-initEnd));
+        log.debug("  > QueryTime: "+(queryEnd-initEnd));
         if(in != null){
             MGraph graph;
             TripleCollection rdfData = parser.parse(in, DEFAULT_RDF_CONTENT_TYPE,
@@ -139,7 +139,7 @@ public class SparqlSearcher extends AbstractEntitySearcher implements EntitySear
                 graph = new IndexedMGraph(rdfData);
             }
             long parseEnd = System.currentTimeMillis();
-            log.info("  > ParseTime: "+(parseEnd-queryEnd));
+            log.debug("  > ParseTime: "+(parseEnd-queryEnd));
             return new RdfQueryResultList(query, graph);
         } else {
             return null;

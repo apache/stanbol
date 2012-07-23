@@ -65,11 +65,11 @@ public class LarqSearcher extends AbstractEntitySearcher implements EntitySearch
         query.setEndpointType(EndpointTypeEnum.LARQ);
         String sparqlQuery = query.toSparqlConstruct();
         long initEnd = System.currentTimeMillis();
-        log.info("  > InitTime: "+(initEnd-start));
-        log.info("  > SPARQL query:\n"+sparqlQuery);
+        log.debug("  > InitTime: "+(initEnd-start));
+        log.debug("  > SPARQL query:\n"+sparqlQuery);
         InputStream in = SparqlEndpointUtils.sendSparqlRequest(getQueryUri(), sparqlQuery, SparqlSearcher.DEFAULT_RDF_CONTENT_TYPE);
         long queryEnd = System.currentTimeMillis();
-        log.info("  > QueryTime: "+(queryEnd-initEnd));
+        log.debug("  > QueryTime: "+(queryEnd-initEnd));
         if(in != null){
             MGraph graph;
             TripleCollection rdfData = parser.parse(in, SparqlSearcher.DEFAULT_RDF_CONTENT_TYPE,
@@ -80,7 +80,7 @@ public class LarqSearcher extends AbstractEntitySearcher implements EntitySearch
                 graph = new IndexedMGraph(rdfData);
             }
             long parseEnd = System.currentTimeMillis();
-            log.info("  > ParseTime: "+(parseEnd-queryEnd));
+            log.debug("  > ParseTime: "+(parseEnd-queryEnd));
             return new RdfQueryResultList(query, graph);
         } else {
             return null;
