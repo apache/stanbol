@@ -127,7 +127,9 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
         else formats = Collections.singleton(formatIdentifier);
 
         // TODO guess/lookahead the ontology ID and use it in the graph name.
-        UriRef name = new UriRef("ontonet" + "::" + getClass().getCanonicalName() + "-"
+        UriRef name = new UriRef(
+         //   "ontonet" + "::" + 
+        getClass().getCanonicalName() + "-"
                                  + System.currentTimeMillis());
 
         TripleCollection graph = null;

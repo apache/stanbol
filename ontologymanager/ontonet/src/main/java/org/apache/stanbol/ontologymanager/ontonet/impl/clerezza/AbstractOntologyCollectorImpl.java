@@ -623,7 +623,8 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
             for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
                 changes.add(new RemoveImport(o, oldImp));
                 String s = oldImp.getIRI().toString();
-                s = s.substring(s.indexOf("::") + 2, s.length());
+                // FIXME Ugly way to check, but we'll get through with it
+                if (s.contains("::")) s = s.substring(s.indexOf("::") + 2, s.length());
                 boolean managed = managedOntologies.contains(oldImp.getIRI());
                 // For space, always go up at least one
 

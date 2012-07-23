@@ -23,8 +23,15 @@
 	
     <div class="panel" id="webview">
   
-    <h3>Load an ontology</h3>
-    <form method="POST" enctype="multipart/form-data" accept-charset="utf-8">
+  <br/>
+  <!-- FIXME class names should be generic, and not bound to a specific functionality (here engines->reasoning services)-->
+  <div class="enginelisting">
+    <div class="collapsed">
+      <p class="collapseheader"><b>Load an ontology</b></p>
+      <div class="collapsable">
+      <br/>
+      
+    <form id="loadfromfile" method="POST" enctype="multipart/form-data" accept-charset="utf-8">
     <fieldset>
       <legend>From a local file</legend>
       <p><b>File:</b> <input type="file" name="file"/> 
@@ -56,24 +63,19 @@
       </p>
     </fieldset>
     </form>
-    
-    <form method="POST" enctype="multipart/form-data" accept-charset="utf-8">
-    <fieldset>
-      <legend>Append a scope</legend>
-      <p><b>Scope ID:</b> 
-        <select name="scope">  
-        <option value="null">&lt;please select a scope&gt;</option>
-        <#list it.appendableScopes as scope>
-        <option value="${scope.ID}">${scope.ID}</option>
-        </#list>
-        </select>
-        <input type="submit" value="Append"/>
-      </p>
-    </fieldset>
-    </form>
   
   Note: OWL import targets will be included. Ontology loading is set to fail on missing imports.
 
+     </div>
+    </div> 
+  </div>
+
+  <script>
+    $(".collapseheader").click(function () {
+      $(this).parents("div").toggleClass("collapsed");
+    });    
+  </script>
+  
   <h3>Stored ontologies</h3>
   <#assign ontologies = it.ontologies>
   <div class="storeContents">
@@ -84,28 +86,34 @@
         </tr>
         <#list ontologies as ontology>
           <tr>
-            <td><a href="/ontonet/session/${it.session.ID}/${ontology}">${ontology}</a></td>
+            <td><a href="${it.publicBaseUri}ontonet/session/${it.session.ID}/${ontology}">${ontology}</a></td>
           </tr>
         </#list>
       </div>
     </table> <!-- allOntologies -->
   </div>
   
-  <h3>Appended Scopes</h3>
+  <form method="POST" enctype="multipart/form-data" accept-charset="utf-8">
+  <input type="hidden" name="sessionid" value="${it.session.ID}"/>
+  <h3>Appendable Scopes</h3>
   <div class="storeContents">
     <table id="appSc">
       <div>
         <tr>
-          <th>Name</th>
+          <th width="1%">Appended</th><th>Name</th>
         </tr>
-        <#list it.appendedScopes as appended>
+        <#assign scs = it.appendedScopes>
+        <#list it.allScopes as sc>
           <tr>
-            <td><a href="/ontonet/ontology/${appended.ID}">${appended.ID}</a></td>
+            <td><input type="checkbox" name="scope" value="${sc.ID}"${scs?seq_contains(sc.ID)?string(" checked", "")}/></td>
+            <td><a href="/ontonet/ontology/${sc.ID}">${sc.ID}</a></td>
           </tr>
         </#list>
       </div>
     </table> <!-- appSc -->
+    <input type="submit" value="Update"/>
   </div>
+  </form>
   
   </div> <!-- web view -->
 

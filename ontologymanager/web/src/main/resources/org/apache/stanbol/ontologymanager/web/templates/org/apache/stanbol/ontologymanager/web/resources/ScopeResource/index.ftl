@@ -23,6 +23,7 @@
 	
     <div class="panel" id="webview">
   
+  <br/>
   <!-- FIXME class names should be generic, and not bound to a specific functionality (here engines->reasoning services)-->
   <div class="enginelisting">
     <div class="collapsed">
@@ -85,7 +86,7 @@
   </div>
 
   <script>
-    $(".enginelisting p").click(function () {
+    $(".collapseheader").click(function () {
       $(this).parents("div").toggleClass("collapsed");
     });    
   </script>
@@ -101,7 +102,7 @@
         </tr>
         <#list ontologies as ontology>
           <tr>
-            <td><a href="/ontonet/ontology/${it.scope.ID}/${ontology}">${ontology}</a></td>
+            <td><a href="${it.publicBaseUri}ontonet/ontology/${it.scope.ID}/${ontology}">${ontology}</a></td>
           </tr>
         </#list>
       </div>

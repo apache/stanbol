@@ -25,6 +25,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static javax.ws.rs.core.MediaType.WILDCARD;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
@@ -49,6 +50,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
@@ -94,6 +97,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionID
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.web.util.OntologyPrettyPrintResource;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
@@ -232,6 +236,13 @@ public class SessionResource extends BaseStanbolResource {
     /*
      * Needed for freemarker
      */
+    public Set<OntologyScope> getAllScopes() {
+        return onMgr.getRegisteredScopes();
+    }
+
+    /*
+     * Needed for freemarker
+     */
     public Set<OntologyScope> getAppendableScopes() {
         Set<OntologyScope> notAppended = new HashSet<OntologyScope>();
         for (OntologyScope sc : onMgr.getRegisteredScopes())
@@ -242,10 +253,10 @@ public class SessionResource extends BaseStanbolResource {
     /*
      * Needed for freemarker
      */
-    public Set<OntologyScope> getAppendedScopes() {
-        Set<OntologyScope> appended = new HashSet<OntologyScope>();
+    public Set<String> getAppendedScopes() {
+        Set<String> appended = new HashSet<String>();
         for (OntologyScope sc : onMgr.getRegisteredScopes())
-            if (session.getAttachedScopes().contains(sc.getID())) appended.add(sc);
+            if (session.getAttachedScopes().contains(sc.getID())) appended.add(sc.getID());
         return appended;
     }
 
@@ -536,10 +547,25 @@ public class SessionResource extends BaseStanbolResource {
         return rb.build();
     }
 
-    @SuppressWarnings("unused")
+    @POST
+    @Produces({WILDCARD})
+    public Response emptyPost(@Context HttpHeaders headers) {
+        log.debug(" post(no data)");
+        for (OntologyScope sc : getAllScopes()) { // First remove appended scopes not in the list
+            String scid = sc.getID();
+            if (getAppendedScopes().contains(scid)) {
+                session.detachScope(scid);
+                log.info("Removed scope \"{]\".", scid);
+            }
+        }
+        ResponseBuilder rb = Response.ok();
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
     @POST
     @Consumes({MULTIPART_FORM_DATA})
-    @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
+    @Produces({WILDCARD})
     public Response postOntology(FormDataMultiPart data, @Context HttpHeaders headers) {
         log.debug(" post(FormDataMultiPart data)");
         long before = System.currentTimeMillis();
@@ -548,7 +574,7 @@ public class SessionResource extends BaseStanbolResource {
         IRI location = null;
         File file = null; // If found, it takes precedence over location.
         String format = null;
-        OntologyScope scope = null;
+        Set<String> toAppend = new HashSet<String>();
 
         for (BodyPart bpart : data.getBodyParts()) {
             log.debug("Found body part of type {}", bpart.getClass());
@@ -566,7 +592,8 @@ public class SessionResource extends BaseStanbolResource {
                     throw new WebApplicationException(ex, BAD_REQUEST);
                 }
                 if (name.equals("scope")) {
-                    scope = onMgr.getScope(dbp.getValue());
+                    log.info("Request to append scope \"{}\".", dbp.getValue());
+                    toAppend.add(dbp.getValue());
                 }
             }
         }
@@ -575,24 +602,30 @@ public class SessionResource extends BaseStanbolResource {
             // Then add the file
             OntologyInputSource<?> src = null;
             if (fileOk) { // File first
-                try {
-                    // Use a buffered stream that can be reset for multiple attempts.
-                    long b4buf = System.currentTimeMillis();
-                    InputStream content = new BufferedInputStream(new FileInputStream(file));
-                    // new FileInputStream(file);
-                    log.debug("Streams created in {} ms", System.currentTimeMillis() - b4buf);
-                    log.debug("Creating ontology input source...");
-                    b4buf = System.currentTimeMillis();
-                    src = new GraphContentInputSource(content, format, provider.getStore());
-                    log.debug("Done in {} ms", System.currentTimeMillis() - b4buf);
-                    log.debug("SUCCESS parse with format {}.", format);
-                } catch (OntologyLoadingException e) {
-                    log.error("FAILURE parse with format {}.", format);
-                    throw new WebApplicationException(e, BAD_REQUEST);
-                } catch (IOException e) {
-                    log.error("FAILURE parse with format {}.", format);
-                    throw new WebApplicationException(e, BAD_REQUEST);
-                }
+                Collection<String> formats;
+                if (format == null || "".equals(format.trim())) formats = OntologyUtils.getPreferredFormats();
+                else formats = Collections.singleton(format);
+
+                for (String f : formats)
+                    try {
+                        log.debug("Trying format {}.", f);
+                        long b4buf = System.currentTimeMillis();
+                        // Recreate the stream on each attempt
+                        InputStream content = new BufferedInputStream(new FileInputStream(file));
+                        log.debug("Streams created in {} ms", System.currentTimeMillis() - b4buf);
+                        log.debug("Creating ontology input source...");
+                        b4buf = System.currentTimeMillis();
+                        src = new GraphContentInputSource(content, f, provider.getStore());
+                        log.debug("Done in {} ms", System.currentTimeMillis() - b4buf);
+                        log.info("SUCCESS parse with format {}.", f);
+                    } catch (OntologyLoadingException e) {
+                        log.debug("FAILURE parse with format {}.", f);
+                        continue;
+                    } catch (IOException e) {
+                        log.debug("FAILURE parse with format {} (I/O error).", f);
+                        continue;
+                    }
+                log.debug("No more formats to try.");
             } else if (location != null) {
                 try {
                     src = new RootOntologyIRISource(location);
@@ -615,15 +648,30 @@ public class SessionResource extends BaseStanbolResource {
                 log.debug("Addition done in {} ms.", System.currentTimeMillis() - b4add);
                 log.debug("Storage key : {}", key);
                 String uri = key.split("::")[1];
-                if (uri != null && !uri.isEmpty()) rb = Response.created(URI.create("/" + uri));
-                else rb = Response.ok();
+                if (uri != null && !uri.isEmpty()) rb = Response.seeOther(URI.create("/ontonet/session/"
+                                                                                     + session.getID() + "/"
+                                                                                     + uri));
+                else rb = Response.seeOther(URI.create("/ontonet/session/" + session.getID()));
             } else rb = Response.status(INTERNAL_SERVER_ERROR);
-        } else if (scope != null) { // Scope comes next
-            log.info("Attaching scope \"{}\" to session \"{}\".", scope.getID(), session.getID());
-            session.attachScope(scope.getID());
+        } else // Now check scopes
+        if (!toAppend.isEmpty() || (toAppend.isEmpty() && !getAppendedScopes().isEmpty())) {
+            for (OntologyScope sc : getAllScopes()) { // First remove appended scopes not in the list
+                String scid = sc.getID();
+                if (!toAppend.contains(scid) && getAppendedScopes().contains(scid)) {
+                    session.detachScope(scid);
+                    log.info("Removed scope \"{}\".", scid);
+                }
+            }
+            for (String scid : toAppend) { // Then add all the scopes in the list
+                if (!getAppendedScopes().contains(scid)) {
+                    log.info("Appending scope \"{}\" to session \"{}\".", scid, session.getID());
+                    session.attachScope(scid);
+                    log.info("Appended scope \"{}\".", scid);
+                }
+            }
             rb = Response.seeOther(URI.create("/ontonet/session/" + session.getID()));
         } else {
-            log.error("Nothing to add to session {}.", session.getID());
+            log.error("Nothing to do with session {}.", session.getID());
             throw new WebApplicationException(BAD_REQUEST);
         }
         // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");

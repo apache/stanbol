@@ -50,6 +50,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -96,6 +98,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.SetInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
@@ -224,11 +227,26 @@ public class ScopeResource extends BaseStanbolResource {
 
     @GET
     @Path("/core")
+    @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON})
+    public Response getCoreSpaceGraph(@PathParam("scopeid") String scopeid,
+                                      @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                      @Context UriInfo uriInfo,
+                                      @Context HttpHeaders headers) {
+        OntologySpace space = scope.getCoreSpace();
+        IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
+        Graph o = space.export(Graph.class, merge, prefix);
+        ResponseBuilder rb = Response.ok(o);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    @GET
+    @Path("/core")
     @Produces(value = {RDF_XML, TURTLE, X_TURTLE, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
-    public Response getCoreSpace(@PathParam("scopeid") String scopeid,
-                                 @DefaultValue("false") @QueryParam("merge") boolean merge,
-                                 @Context UriInfo uriInfo,
-                                 @Context HttpHeaders headers) {
+    public Response getCoreSpaceOWL(@PathParam("scopeid") String scopeid,
+                                    @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                    @Context UriInfo uriInfo,
+                                    @Context HttpHeaders headers) {
         OntologySpace space = scope.getCoreSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         OWLOntology o = space.export(OWLOntology.class, merge, prefix);
@@ -250,11 +268,26 @@ public class ScopeResource extends BaseStanbolResource {
 
     @GET
     @Path("/custom")
+    @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON})
+    public Response getCustomSpaceGraph(@PathParam("scopeid") String scopeid,
+                                        @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                        @Context UriInfo uriInfo,
+                                        @Context HttpHeaders headers) {
+        OntologySpace space = scope.getCustomSpace();
+        IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
+        Graph o = space.export(Graph.class, merge, prefix);
+        ResponseBuilder rb = Response.ok(o);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    @GET
+    @Path("/custom")
     @Produces(value = {RDF_XML, TURTLE, X_TURTLE, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
-    public Response getCustomSpace(@PathParam("scopeid") String scopeid,
-                                   @DefaultValue("false") @QueryParam("merge") boolean merge,
-                                   @Context UriInfo uriInfo,
-                                   @Context HttpHeaders headers) {
+    public Response getCustomSpaceOWL(@PathParam("scopeid") String scopeid,
+                                      @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                      @Context UriInfo uriInfo,
+                                      @Context HttpHeaders headers) {
         OntologySpace space = scope.getCustomSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         OWLOntology o = space.export(OWLOntology.class, merge, prefix);
@@ -588,15 +621,22 @@ public class ScopeResource extends BaseStanbolResource {
             // Then add the file
             OntologyInputSource<?> src = null;
             if (fileOk) {
-                try {
-                    // Use a buffered stream that can be reset for multiple attempts.
-                    InputStream content = new BufferedInputStream(new FileInputStream(file));
-                    src = new GraphContentInputSource(content, format, provider.getStore());
-                } catch (OntologyLoadingException e) {
-                    throw new WebApplicationException(e, BAD_REQUEST);
-                } catch (IOException e) {
-                    throw new WebApplicationException(e, BAD_REQUEST);
-                }
+                Collection<String> formats;
+                if (format == null || "".equals(format.trim())) formats = OntologyUtils.getPreferredFormats();
+                else formats = Collections.singleton(format);
+
+                for (String f : formats)
+                    try {
+                        // Use a buffered stream that can be reset for multiple attempts.
+                        InputStream content = new BufferedInputStream(new FileInputStream(file));
+                        src = new GraphContentInputSource(content, format, provider.getStore());
+                    } catch (OntologyLoadingException e) {
+                        // throw new WebApplicationException(e, BAD_REQUEST);
+                        continue;
+                    } catch (IOException e) {
+                        // throw new WebApplicationException(e, BAD_REQUEST);
+                        continue;
+                    }
             } else if (location != null) {
                 try {
                     src = new RootOntologyIRISource(location);
@@ -623,7 +663,11 @@ public class ScopeResource extends BaseStanbolResource {
                 // FIXME ugly but will have to do for the time being
                 String uri = key.split("::")[1];
                 if (uri != null && !uri.isEmpty()) {
-                    rb = Response.created(getCreatedResource(uri));
+                    rb = Response.seeOther(URI.create("/ontonet/ontology/" + scope.getID() + "/" + uri)/*
+                                                                                                        * getCreatedResource
+                                                                                                        * (
+                                                                                                        * uri)
+                                                                                                        */);
                 } else rb = Response.ok();
             } else rb = Response.status(INTERNAL_SERVER_ERROR);
         } else throw new WebApplicationException(BAD_REQUEST);

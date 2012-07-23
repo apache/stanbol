@@ -521,25 +521,34 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
      *            a second list that will store the level 1 import target keys, and is not passed to recursive
      *            calls. Will be ignored if null.
      */
-    private void fillImportsReverse(UriRef importing, List<UriRef> reverseImports, List<UriRef> level1Imports) {
+    private void fillImportsReverse(OWLOntologyID importing,
+                                    List<OWLOntologyID> reverseImports,
+                                    List<OWLOntologyID> level1Imports) {
         log.debug("Filling reverse imports for {}", importing);
+
         // Add the importing ontology first
         reverseImports.add(importing);
         if (level1Imports != null) level1Imports.add(importing);
+
         // Get the graph and explore its imports
-        TripleCollection graph = store.getTriples(importing);
+        TripleCollection graph // store.getTriples(importing);
+        = getStoredOntology(getPublicKey(importing), MGraph.class, false);
         Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
         if (!it.hasNext()) return;
         Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
         while (it2.hasNext()) {
+            // obj is the *original* import target
             Resource obj = it2.next().getObject();
             if (obj instanceof UriRef) {
-                UriRef key = new UriRef(getKey(IRI.create(((UriRef) obj).getUnicodeString())));
+                // Right now getKey() is returning the "private" storage ID
+                String key = getKey(IRI.create(((UriRef) obj).getUnicodeString()));
+                // TODO this will not be needed when getKey() and getPublicKey() return the proper public key.
+                OWLOntologyID oid = keymap.getReverseMapping(new UriRef(key));
                 // Check used for breaking cycles in the import graph.
                 // (Unoptimized, should not use contains() for stacks.)
-                if (!reverseImports.contains(key)) {
-                    if (level1Imports != null) level1Imports.add(key);
-                    fillImportsReverse(key, reverseImports, null);
+                if (!reverseImports.contains(oid)) {
+                    if (level1Imports != null) level1Imports.add(oid);
+                    fillImportsReverse(oid, reverseImports, null);
                 }
             }
         }
@@ -1290,7 +1299,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         // Never try to import
         mgr.addIRIMapper(new PhonyIRIMapper(Collections.<IRI> emptySet()));
 
-        Set<UriRef> loaded = new HashSet<UriRef>();
+        Set<OWLOntologyID> loaded = new HashSet<OWLOntologyID>();
 
         TripleCollection graph = store.getTriples(graphName);
 
@@ -1302,9 +1311,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             NonLiteral nl = itt.next().getSubject();
             if (nl instanceof UriRef) ontologyId = (UriRef) nl;
         }
-        List<UriRef> revImps = new Stack<UriRef>();
-        List<UriRef> lvl1 = new Stack<UriRef>();
-        fillImportsReverse(graphName, revImps, lvl1);
+        List<OWLOntologyID> revImps = new Stack<OWLOntologyID>();
+        List<OWLOntologyID> lvl1 = new Stack<OWLOntologyID>();
+        fillImportsReverse(keymap.getReverseMapping(graphName), revImps, lvl1);
 
         // If not set to merge (either by policy of by force), adopt the set import policy.
         if (!forceMerge && !ImportManagementPolicy.MERGE.equals(getImportManagementPolicy())) {
@@ -1314,7 +1323,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
             OWLDataFactory df = OWLManager.getOWLDataFactory();
 
-            List<UriRef> listToUse;
+            List<OWLOntologyID> listToUse;
             switch (getImportManagementPolicy()) {
                 case FLATTEN:
                     listToUse = revImps;
@@ -1327,10 +1336,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                     break;
             }
 
-            for (UriRef ref : listToUse)
-                if (!loaded.contains(ref) && !ref.equals(graphName)) {
-                    changes.add(new AddImport(o, df.getOWLImportsDeclaration(IRI.create(ref
-                            .getUnicodeString()))));
+            for (OWLOntologyID ref : listToUse)
+                if (!loaded.contains(ref) && !ref.equals(keymap.getReverseMapping(graphName))) {
+                    changes.add(new AddImport(o, df.getOWLImportsDeclaration(ref.getOntologyIRI())));
                     loaded.add(ref);
                 }
             o.getOWLOntologyManager().applyChanges(changes);
@@ -1349,10 +1357,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             // The set of triples that will be excluded from the merge
             Set<Triple> exclusions = new HashSet<Triple>();
             // Examine all reverse imports
-            for (UriRef ref : revImps)
+            for (OWLOntologyID ref : revImps)
                 if (!loaded.contains(ref)) {
                     // Get the triples
-                    TripleCollection imported = store.getTriples(ref);
+                    TripleCollection imported =
+                    // store.getTriples(ref);
+                    getStoredOntology(getKey(ref), MGraph.class, false);
                     // For each owl:Ontology
                     Iterator<Triple> remove = imported.filter(null, RDF.type, OWL.Ontology);
                     while (remove.hasNext()) {

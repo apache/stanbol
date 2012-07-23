@@ -302,6 +302,13 @@ public class OntologyUtils {
         return result;
     }
 
+    public static List<String> getPreferredFormats() {
+        List<String> result = new ArrayList<String>();
+        for (String f : preferredFormats)
+            result.add(f);
+        return result;
+    }
+
     public static void printOntology(OWLOntology o, PrintStream printer) {
 
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
