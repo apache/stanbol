@@ -76,6 +76,8 @@ import org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution;
 import org.apache.stanbol.enhancer.servicesapi.helper.execution.ExecutionMetadata;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -229,6 +231,20 @@ public class MultiThreadedTest extends EnhancerTestBase {
             new Object[]{tracker.getNumCompleted(),tracker.getFailed().size(),numThreads});
         tracker.printStatistics();
         Assert.assertTrue(tracker.getFailed()+"/"+numThreads+" failed", tracker.getFailed().isEmpty());
+        tracker = null;
+    }
+    
+    @After
+    public final void close(){
+        httpParams = null;
+        pooledHttpClient = null;
+        connectionManager.shutdown();
+        connectionManager = null;
+    }
+    
+    @AfterClass
+    public static final void cleanup(){
+        testDataIterator = null;
     }
     
     /* -------------------------------------------------------------
@@ -347,6 +363,7 @@ public class MultiThreadedTest extends EnhancerTestBase {
                 + "correctly detected you can use the System property '"
                 + PROPERTY_TEST_DATA_TYPE + "' to manually parse the Media-Type!");
         }
+        IOUtils.closeQuietly(is);
         return new Iterator<String>() {
             Iterator<Triple> it = null;
             String next = null;
@@ -518,6 +535,7 @@ public class MultiThreadedTest extends EnhancerTestBase {
 
         void succeed(Request request, UriRef contentItemUri, TripleCollection results,Long rtt) {
             ExecutionMetadata em = ExecutionMetadata.parseFrom(results, (UriRef)contentItemUri);
+            results.clear(); //we no longer need the results
             if(em != null){
                 synchronized (statistics) {
                     statistics.addResult(em,rtt);
