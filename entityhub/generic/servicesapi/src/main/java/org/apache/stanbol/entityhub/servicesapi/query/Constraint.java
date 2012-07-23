@@ -16,27 +16,28 @@
  */
 package org.apache.stanbol.entityhub.servicesapi.query;
 
-
 /**
  * Abstract base class for all types of Constraints.
+ * 
  * @author Rupert Westenthaler
- *
+ * 
  */
 public abstract class Constraint {
     /**
-     * Defines the enumeration of available Constraints.
-     * TODO Maybe we need a more "extensible" way to define different constraints
-     * in future
+     * Defines the enumeration of available Constraints. TODO Maybe we need a more "extensible" way to define
+     * different constraints in future
+     * 
      * @author Rupert Westenthaler
-     *
+     * 
      */
-    public enum ConstraintType{
-// NOTE (2010-Nov-09,rw) Because a reference constraint is now a special kind of
-//                       a value constraint.
-//        /**
-//         * Constraints a field to have a specific reference
-//         */
-//        reference,
+    public enum ConstraintType {
+        // NOTE (2010-Nov-09,rw) Because a reference constraint is now a special
+        // kind of
+        // a value constraint.
+        // /**
+        // * Constraints a field to have a specific reference
+        // */
+        // reference,
         /**
          * Constraints the value and possible the dataType
          */
@@ -55,19 +56,28 @@ public abstract class Constraint {
          */
         similarity
     }
+
     private final ConstraintType type;
-    protected Constraint(ConstraintType type){
-        if(type == null){
+
+    protected Constraint(ConstraintType type) {
+        if (type == null) {
             throw new IllegalArgumentException("The ConstraintType MUST NOT be NULL");
         }
         this.type = type;
     }
+
     /**
      * Getter for the type of the constraint.
+     * 
      * @return The type of the constraint
      */
-    public final ConstraintType getType(){
+    public final ConstraintType getType() {
         return type;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Constraint [type :: %s][class :: %s]", type, getClass().toString());
     }
 
 }

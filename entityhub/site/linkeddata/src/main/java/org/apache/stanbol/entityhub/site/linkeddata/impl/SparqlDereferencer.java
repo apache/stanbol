@@ -87,11 +87,11 @@ public class SparqlDereferencer extends AbstractEntityDereferencer {
         String format = SupportedFormat.RDF_XML;
         InputStream in = dereference(uri, format);
         long queryEnd = System.currentTimeMillis();
-        log.info("  > DereferenceTime: "+(queryEnd-start));
+        log.debug("  > DereferenceTime: {}",(queryEnd-start));
         if(in != null){
             MGraph rdfData = new IndexedMGraph(parser.parse(in, format,new UriRef(getBaseUri())));
             long parseEnd = System.currentTimeMillis();
-            log.info("  > ParseTime: "+(parseEnd-queryEnd));
+            log.debug("  > ParseTime: {}",(parseEnd-queryEnd));
             return valueFactory.createRdfRepresentation(new UriRef(uri), rdfData);
         } else {
             return null;

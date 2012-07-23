@@ -44,14 +44,16 @@ import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.site.EntitySearcher;
 import org.slf4j.LoggerFactory;
 
-
-@Component(
-        name="org.apache.stanbol.entityhub.searcher.VirtuosoSearcher",
-        factory="org.apache.stanbol.entityhub.searcher.VirtuosoSearcherFactory",
-        policy=ConfigurationPolicy.REQUIRE, //the queryUri and the SPARQL Endpoint are required
-        specVersion="1.1"
-        )
-public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySearcher{
+@Component(name = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcher", factory = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcherFactory", policy = ConfigurationPolicy.REQUIRE, // the
+// queryUri
+// and
+// the
+// SPARQL
+// Endpoint
+// are
+// required
+specVersion = "1.1")
+public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySearcher {
     @Reference
     private Parser parser;
 
@@ -66,22 +68,23 @@ public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySe
         query.setEndpointType(EndpointTypeEnum.Virtuoso);
         String sparqlQuery = query.toSparqlConstruct();
         long initEnd = System.currentTimeMillis();
-        log.info("  > InitTime: "+(initEnd-start));
-        log.info("  > SPARQL query:\n"+sparqlQuery);
-        InputStream in = SparqlEndpointUtils.sendSparqlRequest(getQueryUri(), sparqlQuery, SparqlSearcher.DEFAULT_RDF_CONTENT_TYPE);
+        log.info("  > InitTime: " + (initEnd - start));
+        log.info("  > SPARQL query:\n" + sparqlQuery);
+        InputStream in = SparqlEndpointUtils.sendSparqlRequest(getQueryUri(), sparqlQuery,
+            SparqlSearcher.DEFAULT_RDF_CONTENT_TYPE);
         long queryEnd = System.currentTimeMillis();
-        log.info("  > QueryTime: "+(queryEnd-initEnd));
-        if(in != null){
+        log.info("  > QueryTime: " + (queryEnd - initEnd));
+        if (in != null) {
             MGraph graph;
-            TripleCollection rdfData = parser.parse(in, SparqlSearcher.DEFAULT_RDF_CONTENT_TYPE,
-                new UriRef(getBaseUri()));
-            if(rdfData instanceof MGraph){
+            TripleCollection rdfData = parser.parse(in, SparqlSearcher.DEFAULT_RDF_CONTENT_TYPE, new UriRef(
+                    getBaseUri()));
+            if (rdfData instanceof MGraph) {
                 graph = (MGraph) rdfData;
             } else {
                 graph = new IndexedMGraph(rdfData);
             }
             long parseEnd = System.currentTimeMillis();
-            log.info("  > ParseTime: "+(parseEnd-queryEnd));
+            log.info("  > ParseTime: " + (parseEnd - queryEnd));
             return new RdfQueryResultList(query, graph);
         } else {
             return null;
@@ -93,10 +96,12 @@ public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySe
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
         query.setEndpointType(EndpointTypeEnum.Virtuoso);
         String sparqlQuery = query.toSparqlSelect(false);
-        InputStream in = sendSparqlRequest(getQueryUri(), sparqlQuery, SparqlSearcher.DEFAULT_SPARQL_RESULT_CONTENT_TYPE);
-        //Move to util class!
-        final List<String> entities = extractEntitiesFromJsonResult(in,query.getRootVariableName());
-        return new QueryResultListImpl<String>(query, entities.iterator(),String.class);
+        log.trace("Sending Sparql request [{}].", sparqlQuery);
+        InputStream in = sendSparqlRequest(getQueryUri(), sparqlQuery,
+            SparqlSearcher.DEFAULT_SPARQL_RESULT_CONTENT_TYPE);
+        // Move to util class!
+        final List<String> entities = extractEntitiesFromJsonResult(in, query.getRootVariableName());
+        return new QueryResultListImpl<String>(query, entities.iterator(), String.class);
     }
 
 }
