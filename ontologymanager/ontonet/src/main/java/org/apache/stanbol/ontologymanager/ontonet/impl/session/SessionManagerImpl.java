@@ -31,11 +31,14 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeEventListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
@@ -63,7 +66,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true, metatype = true)
 @Service(SessionManager.class)
-public class SessionManagerImpl implements SessionManager {
+public class SessionManagerImpl implements SessionManager, ScopeEventListener {
 
     public static final String _ID_DEFAULT = "session";
     public static final int _MAX_ACTIVE_SESSIONS_DEFAULT = -1;
@@ -86,6 +89,9 @@ public class SessionManagerImpl implements SessionManager {
 
     @Property(name = SessionManager.MAX_ACTIVE_SESSIONS, intValue = _MAX_ACTIVE_SESSIONS_DEFAULT)
     private int maxSessions;
+
+    @Reference
+    private ONManager onManager;
 
     @Reference
     private OfflineConfiguration offline;
@@ -119,8 +125,23 @@ public class SessionManagerImpl implements SessionManager {
     public SessionManagerImpl(OntologyProvider<?> ontologyProvider,
                               OfflineConfiguration offline,
                               Dictionary<String,Object> configuration) {
+        this(ontologyProvider, null, offline, configuration);
+    }
+
+    /**
+     * To be invoked by non-OSGi environments.
+     * 
+     * @param the
+     *            ontology provider that will store and provide ontologies for this session manager.
+     * @param configuration
+     */
+    public SessionManagerImpl(OntologyProvider<?> ontologyProvider,
+                              ONManager onManager,
+                              OfflineConfiguration offline,
+                              Dictionary<String,Object> configuration) {
         this();
         this.ontologyProvider = ontologyProvider;
+        this.onManager = onManager;
         this.offline = offline;
         try {
             activate(configuration);
@@ -183,6 +204,8 @@ public class SessionManagerImpl implements SessionManager {
         // Add listeners
         if (ontologyProvider instanceof SessionListener) this
                 .addSessionListener((SessionListener) ontologyProvider);
+
+        if (onManager != null) onManager.addScopeRegistrationListener(this);
 
         // Rebuild sessions
         rebuildSessions();
@@ -418,5 +441,26 @@ public class SessionManagerImpl implements SessionManager {
         throw new UnsupportedOperationException(
                 "Not necessary. Session content is always stored by default in the current implementation.");
     }
+
+    @Override
+    public void scopeActivated(OntologyScope scope) {}
+
+    @Override
+    public void scopeCreated(OntologyScope scope) {}
+
+    @Override
+    public void scopeDeactivated(OntologyScope scope) {
+        for (String sid : getRegisteredSessionIDs())
+            getSession(sid).detachScope(scope.getID());
+    }
+
+    @Override
+    public void scopeUnregistered(OntologyScope scope) {
+        for (String sid : getRegisteredSessionIDs())
+            getSession(sid).detachScope(scope.getID());
+    }
+
+    @Override
+    public void scopeRegistered(OntologyScope scope) {}
 
 }

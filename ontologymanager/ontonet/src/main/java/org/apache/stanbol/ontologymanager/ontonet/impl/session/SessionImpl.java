@@ -105,6 +105,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
 
     @Override
     public void detachScope(String scopeId) {
+        if (!attachedScopes.contains(scopeId)) return;
         attachedScopes.remove(scopeId);
         fireScopeDetached(scopeId);
     }
