@@ -122,7 +122,9 @@
             <server.ready.path.6>/ontonet:Apache Stanbol OntoNet</server.ready.path.6>
             <server.ready.path.7>/reasoners:The Stanbol Reasoners provides</server.ready.path.7>
           </systemPropertyVariables>
-          <excludes></excludes>
+          <excludes>
+            <exclude>**/DefaultConfigTest.java</exclude>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>
