@@ -16,26 +16,43 @@
  */
 package org.apache.stanbol.contenthub.servicesapi.store;
 
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-
 /**
- * Interface to store and retrieve ContentItem instances persistently.
+ * Interface to store and retrieve Items instances persistently.
  */
-public interface Store {
+public interface Store<Item> {
 
-    ContentItem remove(UriRef id) throws StoreException;
+	/**
+	 * Getter for the type of Items managed by this Store
+	 * @return
+	 */
+	Class<Item> getItemType();
+	
+	/**
+	 * Removes an item with the given uri from the  store
+	 * @param uri
+	 * @return
+	 * @throws StoreException
+	 */
+	Item remove(String uri) throws StoreException;
 
     /**
-     * Stores supplied {@link ContentItem} and return its id, which is assigned by the store if not defined
+     * Stores supplied item and return its uri, which is assigned by the store if not defined
      * yet.
      * 
      * If the {@link ContentItem} already exists, it is overwritten.
+     * @param item the item to store
+     * @param the URI of the stored item
+     * @throws StoreException on any error while storing the item
      */
-    String put(ContentItem ci) throws StoreException;
+    String put(Item item) throws StoreException;
 
-    /** Gets a {@link ContentItem} by id, null if non-existing */
-    ContentItem get(UriRef id) throws StoreException;
+    /** 
+     * Gets a Item by uri, null if non-existing 
+     * @param uri the uri of the item
+     * @return the item or <code>null</code> if not present
+     * @throws StoreException on any error while retrieving the item
+     */
+    Item get(String uri) throws StoreException;
 
     /**
      * Requests the next <code>batchSize</code> changes starting from <code>revision</code>. If there are no
@@ -53,5 +70,5 @@ public interface Store {
      *             On any error while accessing the store.
      * @see ChangeSet
      */
-    ChangeSet changes(long revision, int batchSize) throws StoreException;
+    ChangeSet<Item> changes(long revision, int batchSize) throws StoreException;
 }

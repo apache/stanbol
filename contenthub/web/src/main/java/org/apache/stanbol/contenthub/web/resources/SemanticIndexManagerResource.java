@@ -41,7 +41,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.contenthub.servicesapi.index.EndpointType;
+import org.apache.stanbol.contenthub.servicesapi.index.EndpointTypeEnum;
 import org.apache.stanbol.contenthub.servicesapi.index.IndexException;
 import org.apache.stanbol.contenthub.servicesapi.index.IndexManagementException;
 import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndex;
@@ -79,7 +79,7 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
      * @param name
      *            Name of the indexes to be returned
      * @param endpointType
-     *            String representation of the {@link EndpointType} of indexes to be returned
+     *            String representation of the {@link EndpointTypeEnum} of indexes to be returned
      * @param multiple
      *            If this parameter is set to {@code true} it returns one or more indexes matching the given
      *            conditions, otherwise it returns only one index representation it there is any satisfying
@@ -100,15 +100,11 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
             // if (name == null && endpointType == null) {
             // throw new IllegalArgumentException("At least an index name or an endpoint type must be given");
             // }
-            EndpointType epType = null;
-            if (endpointType != null) {
-                epType = EndpointType.valueOf(endpointType);
-            }
-            List<SemanticIndex> semanticIndexes = new ArrayList<SemanticIndex>();
+            List<SemanticIndex<?>> semanticIndexes = new ArrayList<SemanticIndex<?>>();
             if (multiple) {
-                semanticIndexes = semanticIndexManager.getIndexes(name, epType);
+                semanticIndexes = semanticIndexManager.getIndexes(name, endpointType);
             } else {
-                SemanticIndex semanticIndex = semanticIndexManager.getIndex(name, epType);
+                SemanticIndex<?> semanticIndex = semanticIndexManager.getIndex(name, endpointType);
                 semanticIndexes.add(semanticIndex);
             }
             ResponseBuilder rb = null;
@@ -173,12 +169,12 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
 
     public List<IndexView> getSemanticIndexes() throws IndexManagementException {
         List<IndexView> indexView = new ArrayList<IndexView>();
-        List<SemanticIndex> indexes = semanticIndexManager.getIndexes(null, null);
-        for (SemanticIndex index : indexes) {
-            Map<EndpointType,String> restEndpoints = index.getRESTSearchEndpoints();
+        List<SemanticIndex<?>> indexes = semanticIndexManager.getIndexes(null, null);
+        for (SemanticIndex<?> index : indexes) {
+            Map<String,String> restEndpoints = index.getRESTSearchEndpoints();
             Map<String,String> endpoints = new HashMap<String,String>();
-            for (Entry<EndpointType,String> restEndpoint : restEndpoints.entrySet()) {
-                endpoints.put(restEndpoint.getKey().name(), restEndpoint.getValue());
+            for (Entry<String,String> restEndpoint : restEndpoints.entrySet()) {
+                endpoints.put(restEndpoint.getKey(), restEndpoint.getValue());
             }
             indexView.add(new IndexView(index.getName(), index.getDescription(), index.getState().name(),
                     index.getRevision(), endpoints));

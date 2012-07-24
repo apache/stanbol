@@ -54,7 +54,7 @@ public class FileStoreTest {
     private static final Logger log = LoggerFactory.getLogger(FileStoreTest.class);
 
     @TestReference(name = "FileStore")
-    private Store store;
+    private Store<ContentItem> store;
 
     @TestReference()
     private BundleContext bundleContext;
@@ -145,7 +145,7 @@ public class FileStoreTest {
             id = store.put(ci);
 
             // check metadata
-            ci = store.get(new UriRef(id));
+            ci = store.get(id);
             assertTrue("Failed to find metadata of retrieved content item", ci.getMetadata() != null);
 
             // check main blob

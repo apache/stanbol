@@ -25,7 +25,7 @@ import org.apache.stanbol.contenthub.servicesapi.store.Store;
 public class ChangeSetImpl implements ChangeSet {
     private long from;
     private long to;
-    private Set<UriRef> changedUris;
+    private Set<String> changedUris;
     private Store store;
 
     @Override
@@ -39,7 +39,7 @@ public class ChangeSetImpl implements ChangeSet {
     }
 
     @Override
-    public Set<UriRef> changed() {
+    public Set<String> changed() {
         return changedUris;
     }
 
@@ -56,7 +56,7 @@ public class ChangeSetImpl implements ChangeSet {
         this.to = to;
     }
 
-    public void setChangedUris(Set<UriRef> changedUris) {
+    public void setChangedUris(Set<String> changedUris) {
         this.changedUris = changedUris;
     }
 

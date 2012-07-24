@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.net.ssl.SSLEngineResult.Status;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -123,7 +124,8 @@ public class StoreResource extends BaseStanbolResource {
 
     private TcManager tcManager;
 
-    private Store store;
+    //TODO: make shure that the store is of typeContentItem
+    private Store<ContentItem> store;
 
     private ContentItemFactory cif;
 
@@ -185,15 +187,21 @@ public class StoreResource extends BaseStanbolResource {
     public StoreResource(@Context ServletContext context, @Context UriInfo uriInfo) {
 
         this.tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
+        //TODO: this has the assumption that there is only a single Store instance.
+        //      The store should be referenced by a name
         this.store = ContextHelper.getServiceFromContext(Store.class, context);
-        this.cif = ContextHelper.getServiceFromContext(ContentItemFactory.class, context);
-        this.serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
-        this.uriInfo = uriInfo;
-
         if (this.store == null) {
             log.error("Missing Store Service");
             throw new WebApplicationException(404);
         }
+        if(ContentItem.class.isAssignableFrom(store.getClass())){
+        	throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+        			.entity("Store instance is not compatible with ContentItem!").build());
+        }
+        this.cif = ContextHelper.getServiceFromContext(ContentItemFactory.class, context);
+        this.serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
+        this.uriInfo = uriInfo;
+
     }
 
     @OPTIONS
@@ -260,7 +268,7 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/content/{uri:.+}")
     public Response getContent(@PathParam(value = "uri") String contentURI, @Context HttpHeaders headers) throws StoreException {
 
-        ContentItem ci = store.get(new UriRef(contentURI));
+        ContentItem ci = store.get(contentURI);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
@@ -313,7 +321,7 @@ public class StoreResource extends BaseStanbolResource {
                                         @QueryParam(value = "format") String format,
                                         @Context HttpHeaders headers) throws IOException, StoreException {
 
-        ContentItem ci = store.get(new UriRef(contentURI));
+        ContentItem ci = store.get(contentURI);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
@@ -355,7 +363,7 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/metadata/{uri:.+}")
     public Response getContentItemMetaData(@PathParam(value = "uri") String contentURI,
                                            @Context HttpHeaders headers) throws IOException, StoreException {
-        ContentItem ci = store.get(new UriRef(contentURI));
+        ContentItem ci = store.get(contentURI);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
@@ -380,7 +388,7 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/raw/{uri:.+}")
     public Response getRawContent(@PathParam(value = "uri") String contentURI, @Context HttpHeaders headers) throws IOException,
                                                                                                             StoreException {
-        ContentItem ci = store.get(new UriRef(contentURI));
+        ContentItem ci = store.get(contentURI);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
@@ -636,10 +644,10 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/{uri:.+}")
     public Response deleteContentItem(@PathParam(value = "uri") String contentURI,
                                       @Context HttpHeaders headers) throws StoreException {
-        if(store.get(new UriRef(contentURI)) == null){
+        if(store.get(contentURI) == null){
             throw new WebApplicationException(404);
         }
-        store.remove(new UriRef(contentURI));
+        store.remove(contentURI);
         ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -703,7 +711,7 @@ public class StoreResource extends BaseStanbolResource {
     @Produces(TEXT_HTML)
     public ContentItemResource getContentItemView(@PathParam(value = "uri") String contentURI) throws IOException,
                                                                                               StoreException {
-        ContentItem ci = store.get(new UriRef(contentURI));
+        ContentItem ci = store.get(contentURI);
         if (ci == null) {
             throw new WebApplicationException(404);
         }

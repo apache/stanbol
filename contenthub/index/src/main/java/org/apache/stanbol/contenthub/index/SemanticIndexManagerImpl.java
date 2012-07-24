@@ -25,7 +25,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.solr.utils.ServiceReferenceRankingComparator;
-import org.apache.stanbol.contenthub.servicesapi.index.EndpointType;
+import org.apache.stanbol.contenthub.servicesapi.index.EndpointTypeEnum;
 import org.apache.stanbol.contenthub.servicesapi.index.IndexManagementException;
 import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndex;
 import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndexManager;
@@ -51,28 +51,28 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     }
 
     @Override
-    public SemanticIndex getIndex(String name) throws IndexManagementException {
+    public SemanticIndex<?> getIndex(String name) throws IndexManagementException {
         return getIndex(name, null);
     }
 
     @Override
-    public List<SemanticIndex> getIndexes(String name) throws IndexManagementException {
+    public List<SemanticIndex<?>> getIndexes(String name) throws IndexManagementException {
         return getIndexes(name, null);
     }
 
     @Override
-    public SemanticIndex getIndex(EndpointType endpointType) throws IndexManagementException {
+    public SemanticIndex<?> getIndexByEndpointType(String endpointType) throws IndexManagementException {
         return getIndex(null, endpointType);
     }
 
     @Override
-    public List<SemanticIndex> getIndexes(EndpointType endpointType) throws IndexManagementException {
+    public List<SemanticIndex<?>> getIndexesByEndpointType(String endpointType) throws IndexManagementException {
         return getIndexes(null, endpointType);
     }
 
     @Override
-    public SemanticIndex getIndex(String name, EndpointType endpointType) throws IndexManagementException {
-        List<SemanticIndex> result = getIndexList(name, endpointType, false);
+    public SemanticIndex<?> getIndex(String name, String endpointType) throws IndexManagementException {
+        List<SemanticIndex<?>> result = getIndexList(name, endpointType, false);
         if(result.size() == 0){
             return null;
         } else {
@@ -82,28 +82,37 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     }
 
     @Override
-    public List<SemanticIndex> getIndexes(String name, EndpointType endpointType) throws IndexManagementException {
+    public List<SemanticIndex<?>> getIndexes(String name, String endpointType) throws IndexManagementException {
         return getIndexList(name, endpointType, true);
     }
 
-    private List<SemanticIndex> getIndexList(String name, EndpointType endpointType, boolean multiple) {
+    private List<SemanticIndex<?>> getIndexList(String name, String endpointType, boolean multiple) {
         BundleContext bundleContext = componentContext.getBundleContext();
-        List<SemanticIndex> results = new ArrayList<SemanticIndex>();
+        List<SemanticIndex<?>> results = new ArrayList<SemanticIndex<?>>();
         try {
             ServiceReference[] refs = bundleContext.getServiceReferences(SemanticIndex.class.getName(), null);
             if (refs != null) {
                 if (refs.length > 1) {
+                	//TODO: rw move the ServiceReferenceRankingComperator to a utils module
                     Arrays.sort(refs, ServiceReferenceRankingComparator.INSTANCE);
                 }
                 for (ServiceReference ref : refs) {
-                    SemanticIndex si = (SemanticIndex) bundleContext.getService(ref);
+                    SemanticIndex<?> si = (SemanticIndex<?>) bundleContext.getService(ref);
                     if (name == null || name.equals(si.getName())) {
                         if (endpointType == null) {
                             results.add(si);
                         } else {
-                            Set<EndpointType> endpointTypes = si.getRESTSearchEndpoints().keySet();
+                        	//search both the RESTful and the JAVA interfaces
+                            Set<String> endpointTypes = si.getRESTSearchEndpoints().keySet();
                             if (endpointTypes != null && endpointTypes.contains(endpointType)) {
                                 results.add(si);
+                            } else {
+                            	endpointTypes = si.getSearchEndPoints().keySet();
+                            	if(endpointTypes != null && endpointTypes.contains(endpointType)){
+                            		results.add(si);
+                            	} else { //service does not match requirements -> unget the service
+                            		bundleContext.ungetService(ref);
+                            	}
                             }
                         }
                     }

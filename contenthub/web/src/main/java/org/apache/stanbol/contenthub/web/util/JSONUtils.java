@@ -192,10 +192,10 @@ public class JSONUtils {
         return jObj.toString(4);
     }
 
-    public static String createJSONString(List<SemanticIndex> semanticIndexes) throws JSONException,
+    public static String createJSONString(List<SemanticIndex<?>> semanticIndexes) throws JSONException,
                                                                               IndexException {
         JSONObject jObj = new JSONObject();
-        for (SemanticIndex semanticIndex : semanticIndexes) {
+        for (SemanticIndex<?> semanticIndex : semanticIndexes) {
             JSONObject siRep = new JSONObject();
             siRep.put("name", semanticIndex.getName());
             siRep.put("description", semanticIndex.getDescription());

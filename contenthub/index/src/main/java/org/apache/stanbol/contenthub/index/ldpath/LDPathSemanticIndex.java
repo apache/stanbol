@@ -51,7 +51,7 @@ import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
-import org.apache.stanbol.contenthub.servicesapi.index.EndpointType;
+import org.apache.stanbol.contenthub.servicesapi.index.EndpointTypeEnum;
 import org.apache.stanbol.contenthub.servicesapi.index.IndexException;
 import org.apache.stanbol.contenthub.servicesapi.index.IndexManagementException;
 import org.apache.stanbol.contenthub.servicesapi.index.IndexState;
@@ -109,7 +109,7 @@ import at.newmedialab.ldpath.model.programs.Program;
  * <li><b>Solr Server Check Time:</b> Maximum time in seconds to wait for the availability of the Solr core
  * associated with this index</li>
  * <li><b>Service Ranking:</b> To be able adjust priorities of {@link SemanticIndex}es with same name or same
- * {@link EndpointType}, this property is used. The higher value of this property, the higher priority of the
+ * {@link EndpointTypeEnum}, this property is used. The higher value of this property, the higher priority of the
  * {@link SemanticIndex} instance.</li>
  * </ul>
  * 
@@ -127,7 +127,7 @@ import at.newmedialab.ldpath.model.programs.Program;
                      @Property(name = LDPathSemanticIndex.PROP_STORE_CHECK_PERIOD, intValue = 10),
                      @Property(name = LDPathSemanticIndex.PROP_SOLR_CHECK_TIME, intValue = 5),
                      @Property(name = Constants.SERVICE_RANKING, intValue = 0)})
-public class LDPathSemanticIndex implements SemanticIndex {
+public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
 
     public static final String PROP_LD_PATH_PROGRAM = "org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex.ldPathProgram";
     public static final String PROP_INDEX_CONTENT = "org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex.indexContent";
@@ -143,8 +143,11 @@ public class LDPathSemanticIndex implements SemanticIndex {
     @Reference(target = "(org.apache.solr.core.CoreContainer.name=contenthub)")
     private ManagedSolrServer managedSolrServer;
 
+    //TODO: this assumes that only a single Store instance is active!
+    //      Semantic Indexes should be connected to stores based on the
+    //      name of the Store!
     @Reference
-    private Store store;
+    private Store<ContentItem> store;
 
     @Reference
     private SiteManager siteManager;
@@ -299,6 +302,11 @@ public class LDPathSemanticIndex implements SemanticIndex {
     @Override
     public String getName() {
         return this.name;
+    }
+    
+    @Override
+    public Class<ContentItem> getIntdexType() {
+    	return ContentItem.class;
     }
 
     @Override
@@ -482,7 +490,7 @@ public class LDPathSemanticIndex implements SemanticIndex {
     }
 
     @Override
-    public void remove(UriRef ciURI) throws IndexException {
+    public void remove(String uri) throws IndexException {
         if (this.state == IndexState.REINDEXING) {
             throw new IndexException(String.format(
                 "The index '%s' is read-only as it is in reindexing state.", name));
@@ -490,23 +498,23 @@ public class LDPathSemanticIndex implements SemanticIndex {
 
         semUp();
         try {
-            performRemove(ciURI);
+            performRemove(uri);
         } finally {
             semDown();
         }
     }
 
-    private void performRemove(UriRef ciURI) throws IndexException {
-        if (ciURI == null || ciURI.getUnicodeString().trim().isEmpty()) {
+    private void performRemove(String ciURI) throws IndexException {
+        if (ciURI == null || ciURI.isEmpty()) {
             return;
         }
 
         SolrServer solrServer = null;
         try {
             solrServer = getServer();
-            solrServer.deleteById(ciURI.getUnicodeString());
+            solrServer.deleteById(ciURI);
             solrServer.commit();
-            logger.info("Given Uri {} is removed from index successfully", ciURI.getUnicodeString());
+            logger.info("Given Uri {} is removed from index successfully", ciURI);
         } catch (SolrServerException e) {
             logger.error("Given SolrInputDocument cannot be added to Solr Server with name " + this.name, e);
             throw new IndexException("Given SolrInputDocument cannot be added to Solr Server with name "
@@ -601,26 +609,26 @@ public class LDPathSemanticIndex implements SemanticIndex {
     }
 
     @Override
-    public Map<EndpointType,String> getRESTSearchEndpoints() {
-        Map<EndpointType,String> searchEndpoints = new HashMap<EndpointType,String>();
-        searchEndpoints.put(EndpointType.CONTENTHUB, "contenthub/" + this.name + "/search/featured");
-        searchEndpoints.put(EndpointType.SOLR, "solr/" + managedSolrServer.getServerName() + "/" + this.name);
+    public Map<String,String> getRESTSearchEndpoints() {
+        Map<String,String> searchEndpoints = new HashMap<String,String>();
+        searchEndpoints.put(EndpointTypeEnum.CONTENTHUB.getUri(), "contenthub/" + this.name + "/search/featured");
+        searchEndpoints.put(EndpointTypeEnum.SOLR.getUri(), "solr/" + managedSolrServer.getServerName() + "/" + this.name);
         return searchEndpoints;
     }
 
     @Override
-    public Map<Class<?>,ServiceReference> getSearchEndPoints() {
+    public Map<String,ServiceReference> getSearchEndPoints() {
         BundleContext bundleContext = this.componentContext.getBundleContext();
-        Map<Class<?>,ServiceReference> serviceEndPoints = new HashMap<Class<?>,ServiceReference>();
+        Map<String,ServiceReference> serviceEndPoints = new HashMap<String,ServiceReference>();
         ServiceReference serviceReference = null;
 
         serviceReference = bundleContext.getServiceReference(SolrSearch.class.getName());
         if (serviceReference != null) {
-            serviceEndPoints.put(SolrSearch.class, serviceReference);
+            serviceEndPoints.put(SolrSearch.class.getName(), serviceReference);
         }
         serviceReference = bundleContext.getServiceReference(FeaturedSearch.class.getName());
         if (serviceReference != null) {
-            serviceEndPoints.put(FeaturedSearch.class, serviceReference);
+            serviceEndPoints.put(FeaturedSearch.class.getName(), serviceReference);
         }
 
         return serviceEndPoints;
@@ -865,12 +873,12 @@ public class LDPathSemanticIndex implements SemanticIndex {
         }
 
         private long indexDocuments() throws StoreException, IndexException {
-            ChangeSet cs;
+            ChangeSet<ContentItem> cs;
             long revision = Long.MIN_VALUE;
             boolean noChange = false;
             do {
                 cs = store.changes(revision, batchSize);
-                for (UriRef changed : cs.changed()) {
+                for (String changed : cs.changed()) {
                     ContentItem ci = store.get(changed);
                     if (ci == null) {
                         performRemove(changed);
@@ -904,7 +912,7 @@ public class LDPathSemanticIndex implements SemanticIndex {
                     return;
                 }
 
-                ChangeSet changeSet = null;
+                ChangeSet<ContentItem> changeSet = null;
                 try {
                     changeSet = store.changes(revision, batchSize);
                 } catch (StoreException e) {
@@ -913,17 +921,17 @@ public class LDPathSemanticIndex implements SemanticIndex {
                         revision, batchSize);
                 }
                 if (changeSet != null) {
-                    Iterator<UriRef> changedItems = changeSet.changed().iterator();
+                    Iterator<String> changedItems = changeSet.changed().iterator();
                     boolean persist = true;
                     while (changedItems.hasNext()) {
-                        UriRef changedItem = changedItems.next();
+                        String changedItem = changedItems.next();
                         ContentItem ci;
                         try {
                             ci = store.get(changedItem);
                             if (ci != null) {
                                 index(ci);
                                 logger.info("ContentItem with Uri {} is indexed to {}",
-                                    changedItem.getUnicodeString(), name);
+                                    changedItem, name);
                             } else {
                                 remove(changedItem);
                             }

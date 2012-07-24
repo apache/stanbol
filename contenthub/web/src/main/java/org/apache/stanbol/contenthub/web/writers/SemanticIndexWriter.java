@@ -46,7 +46,7 @@ import org.codehaus.jettison.json.JSONException;
  * 
  */
 @Provider
-public class SemanticIndexWriter implements MessageBodyWriter<List<SemanticIndex>> {
+public class SemanticIndexWriter implements MessageBodyWriter<List<SemanticIndex<?>>> {
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
@@ -66,7 +66,7 @@ public class SemanticIndexWriter implements MessageBodyWriter<List<SemanticIndex
     }
 
     @Override
-    public long getSize(List<SemanticIndex> t,
+    public long getSize(List<SemanticIndex<?>> t,
                         Class<?> type,
                         Type genericType,
                         Annotation[] annotations,
@@ -75,7 +75,7 @@ public class SemanticIndexWriter implements MessageBodyWriter<List<SemanticIndex
     }
 
     @Override
-    public void writeTo(List<SemanticIndex> t,
+    public void writeTo(List<SemanticIndex<?>> t,
                         Class<?> type,
                         Type genericType,
                         Annotation[] annotations,

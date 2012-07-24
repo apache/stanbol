@@ -101,7 +101,7 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 @Service
 @Properties(value = {@Property(name = Constants.SERVICE_RANKING, intValue = 100)})
-public class FileStore implements Store {
+public class FileStore implements Store<ContentItem> {
     // @Property(name = Constants.SERVICE_RANKING)
     // private int ranking;
 
@@ -185,9 +185,14 @@ public class FileStore implements Store {
     }
 
     @Override
-    public ContentItem remove(UriRef id) throws StoreException {
+    public Class<ContentItem> getItemType() {
+    	return ContentItem.class;
+    }
+    
+    @Override
+    public ContentItem remove(String id) throws StoreException {
         checkStoreFolder();
-        String urlEncodedId = encodeId(id.getUnicodeString());
+        String urlEncodedId = encodeId(id);
         File f = new File(storeFolder.getPath() + "/" + urlEncodedId + ".zip");
         ContentItem ci = null;
         if (f.exists()) {
@@ -195,16 +200,16 @@ public class FileStore implements Store {
             f.delete();
             updateTablesForDelete(id);
         } else {
-            log.warn("There is no file corresponding to the id: {}", id.getUnicodeString());
+            log.warn("There is no file corresponding to the id: {}", id);
         }
         return ci;
     }
 
-    private void updateTablesForDelete(UriRef id) throws StoreException {
+    private void updateTablesForDelete(String id) throws StoreException {
         // update revision
-        revisionManager.updateRevision(id.getUnicodeString());
+        revisionManager.updateRevision(id);
         // update recently_enhanced table
-        removeFromRecentlyEnhancedTable(id.getUnicodeString());
+        removeFromRecentlyEnhancedTable(id);
     }
 
     private void removeFromRecentlyEnhancedTable(String contentItemID) throws StoreException {
@@ -537,9 +542,9 @@ public class FileStore implements Store {
     }
 
     @Override
-    public ContentItem get(UriRef id) throws StoreException {
+    public ContentItem get(String id) throws StoreException {
         // get the zip file
-        String fileName = encodeId(id.getUnicodeString());
+        String fileName = encodeId(id);
         File file = new File(storeFolder.getPath() + "/" + fileName + ".zip");
         if (!file.exists()) {
             log.info("Failed to get file for the given id: {}", id);
@@ -566,11 +571,11 @@ public class FileStore implements Store {
         } catch (IOException e) {
             throw new StoreException(
                     String.format("Failed to get header entry from the zip for of the content item: %s",
-                        id.getUnicodeString()), e);
+                        id), e);
         } catch (JSONException e) {
             throw new StoreException(
                     String.format("Failed to get header entry from the zip for of the content item: %s",
-                        id.getUnicodeString()), e);
+                        id), e);
         }
 
         // deserialize metadata
@@ -594,10 +599,10 @@ public class FileStore implements Store {
                     mainBlobMetadata.getString("mimetype"));
         } catch (JSONException e) {
             throw new StoreException(String.format(
-                "Failed to obtain main blob from the zip of the content item: %s", id.getUnicodeString()), e);
+                "Failed to obtain main blob from the zip of the content item: %s", id), e);
         } catch (IOException e) {
             throw new StoreException(String.format(
-                "Failed to obtain main blob from the zip of the content item: %s", id.getUnicodeString()), e);
+                "Failed to obtain main blob from the zip of the content item: %s", id), e);
         }
 
         // create content item using the metadata and main blob

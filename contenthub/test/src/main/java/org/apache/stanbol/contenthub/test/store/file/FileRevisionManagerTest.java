@@ -25,7 +25,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
 import org.apache.stanbol.contenthub.servicesapi.store.ChangeSet;
@@ -139,11 +138,11 @@ public class FileRevisionManagerTest {
 
             // check changes
             ChangeSet changeSet = fileRevisionManager.getChanges(startRevision, 3);
-            Set<UriRef> changedItems = changeSet.changed();
+            Set<String> changedItems = changeSet.changed();
             assertTrue("Wrong number of changed items", (changedItems.size() == 3));
             for (int i = 0; i < 3; i++) {
                 assertTrue("Changes does not include correct URIs",
-                    changedItems.contains(new UriRef(contentItemID + i)));
+                    changedItems.contains(contentItemID + i));
             }
             assertTrue("Changes does not include correct fromRevision value",
                 (changeSet.fromRevision() == revision - 4));
@@ -155,7 +154,7 @@ public class FileRevisionManagerTest {
             assertTrue("Wrong number of changed items", (changedItems.size() == 2));
             for (int i = 0; i < 2; i++) {
                 assertTrue("Changes does not include correct URIs",
-                    changedItems.contains(new UriRef(contentItemID + (i + 3))));
+                    changedItems.contains(contentItemID + (i + 3)));
             }
             assertTrue("Changes does not include correct fromRevision value",
                 (changeSet.fromRevision() == revision - 1));
@@ -206,11 +205,11 @@ public class FileRevisionManagerTest {
             }
 
             // get changes
-            Set<UriRef> changedItems = fileRevisionManager.getChanges(revision, 1).changed();
+            Set<String> changedItems = fileRevisionManager.getChanges(revision, 1).changed();
             assertTrue("Wrong number of changed items", (changedItems.size() == 2));
             for (int i = 0; i < 2; i++) {
                 assertTrue("Changes does not include correct URIs",
-                    changedItems.contains(new UriRef(contentItemID + i)));
+                    changedItems.contains(contentItemID + i));
             }
         } finally {
             // clear test changes

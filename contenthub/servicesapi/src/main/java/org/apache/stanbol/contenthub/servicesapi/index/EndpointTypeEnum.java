@@ -17,28 +17,48 @@
 package org.apache.stanbol.contenthub.servicesapi.index;
 
 /**
- * Possible REST endpoint types for search operations offered by {@link SemanticIndex}.
- * 
+ * Well known RESTful endpoint types offered by {@link SemanticIndex}.
+ * Use {@link EndpointTypeEnum#getUri()} or {@link EndpointTypeEnum#toString()}
+ * to parse this endpoint types to the {@link SemanticIndexManager} interface.
  */
-public enum EndpointType {
-    /**
+public enum EndpointTypeEnum {
+   /**
      * RESTful endpoint of the Solr
      */
-    SOLR,
+    SOLR("http://lucene.apache.org/solr"),
     /**
      * RESTful search endpoint specific to the Contenthub
      */
-    CONTENTHUB;
+    CONTENTHUB("http://stanbol.apache.org/ontology/contenthub#endpointType_CONTENTHUB"),
+    /**
+     * RESTful search endpoint specific to the Entityhub /query interface
+     */
+    ENTITYHUB_QUERY("http://stanbol.apache.org/ontology/entityhub#endpointType_FIELD_QUERY"),
+    /**
+     * RESTful search endpoint specific to the Entityhub /find interface
+     */
+    ENTITYHUB_FIND("http://stanbol.apache.org/ontology/entityhub#endpointType_find"),
+    /**
+     * SPARQL query interface
+     */
+    SPARQL("http://www.w3.org/TR/rdf-sparql-query/");
 
-    private static final String prefix = "http://stanbol.apache.org/ontology/contenthub#endpointType_";
 
+    private final String uri;
+    
+    
+    EndpointTypeEnum(String uri){
+    	this.uri = uri;
+    }
+    
     public String getUri() {
-        return prefix + name().toLowerCase();
+        return uri;
     }
 
     @Override
     public String toString() {
-        return getUri();
+        return uri;
     }
+
 
 }

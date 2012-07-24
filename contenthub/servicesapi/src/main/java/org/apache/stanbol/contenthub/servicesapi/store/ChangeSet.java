@@ -18,23 +18,21 @@ package org.apache.stanbol.contenthub.servicesapi.store;
 
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
-
 /**
  * This interface represents a set of {@link #size()} changes starting {@link #fromRevision()}
- * {@link #toRevision()} affecting ContentItems with the {@link UriRef}s returned by {@link #changed()}.
+ * {@link #toRevision()} affecting items with the URIs returned by {@link #changed()}.
  * Instead of getting all changes as a whole, they can be retrieved iteratively through the {@link Store}
  * instance.
  * <p>
  * The intended usage of this class is <code><pre>
- *     Store store; //the store
+ *     Store&lt;ContentItem&gt; store; //the store
  *     SemanticIndex index; //the index to apply the changes
  *     long revision = Long.MIN_VALUE; //start from scratch
  *     int batchSize = 1000;
  *     ChangeSet cs;
  *     do {
  *         cs = store.changes(revision, batchSize);
- *         for(UriRef changed : cs.changed()){
+ *         for(String changed : cs.changed()){
  *             ContentItem ci = store.get(changed);
  *             if(ci == null){
  *                 index.remove(changed);
@@ -46,7 +44,7 @@ import org.apache.clerezza.rdf.core.UriRef;
  *     index.persist(cs.fromRevision());
  * </pre></code>
  */
-public interface ChangeSet {
+public interface ChangeSet<Item> {
     /**
      * The lowest revision number included in this ChangeSet
      * 
@@ -64,9 +62,9 @@ public interface ChangeSet {
     /**
      * The read only {@link Set} of changes ContentItems included in this ChangeSet.
      * 
-     * @return the {@link UriRef}s of the changed contentItems included in this ChangeSet
+     * @return the URIs of the changed contentItems included in this ChangeSet
      */
-    Set<UriRef> changed();
+    Set<String> changed();
 
     /**
      * The reference to the {@link Store} of this {@link ChangeSet}. This Store can be used to iterate on the
@@ -74,5 +72,5 @@ public interface ChangeSet {
      * 
      * @return
      */
-    Store getStore();
+    Store<Item> getStore();
 }

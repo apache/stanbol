@@ -158,7 +158,7 @@ public class FileRevisionManager {
             ps.setMaxRows(batchSize + 1);
             rs = ps.executeQuery();
 
-            Set<UriRef> changedUris = new LinkedHashSet<UriRef>();
+            Set<String> changedUris = new LinkedHashSet<String>();
 
             if(!rs.first()){
                 changes.setChangedUris(changedUris);
@@ -179,21 +179,21 @@ public class FileRevisionManager {
                     rs = ps.executeQuery();
 
                     while (rs.next()) {
-                        changedUris.add(new UriRef(rs.getString(1)));
+                        changedUris.add(new String(rs.getString(1)));
                     }
                 } else {
                     while (rs.next()) {
                         if (rs.isLast()) {
                             break;
                         }
-                        changedUris.add(new UriRef(rs.getString(1)));
+                        changedUris.add(new String(rs.getString(1)));
                     }
                 }
 
             } else {
                 rs.beforeFirst();
                 while (rs.next()) {
-                    changedUris.add(new UriRef(rs.getString(1)));
+                    changedUris.add(new String(rs.getString(1)));
                 }
             }
 

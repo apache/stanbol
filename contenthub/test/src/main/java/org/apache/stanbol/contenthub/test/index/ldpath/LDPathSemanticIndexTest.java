@@ -180,7 +180,7 @@ public class LDPathSemanticIndexTest {
             throw new IndexException("Test Document cannot be added to Solr Server with name " + name, e);
         }
 
-        semanticIndex.remove(new UriRef(id));
+        semanticIndex.remove(id);
 
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setQuery(SolrFieldName.ID.toString() + ":" + id);
@@ -275,10 +275,10 @@ public class LDPathSemanticIndexTest {
     // }
 
     @Test
-    public void testGetSearchEndPoints() {
-        Map<Class<?>,ServiceReference> searchEndpoints = semanticIndex.getSearchEndPoints();
-        for (Entry<Class<?>,ServiceReference> entry : searchEndpoints.entrySet()) {
-            Class<?> clazz = entry.getKey();
+    public void testGetSearchEndPoints() throws ClassNotFoundException {
+        Map<String,ServiceReference> searchEndpoints = semanticIndex.getSearchEndPoints();
+        for (Entry<String,ServiceReference> entry : searchEndpoints.entrySet()) {
+            Class<?> clazz = Class.forName(entry.getKey());
             ServiceReference serviceReference = entry.getValue();
             Object service = clazz.cast(bundleContext.getService(serviceReference));
             assertNotNull(String.format(

@@ -25,7 +25,12 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
-public interface SemanticIndex {
+/**
+ * A Semantic Index for Items
+ *
+ * @param <Item>
+ */
+public interface SemanticIndex<Item> {
     /**
      * Name property for a SemanticIndex
      */
@@ -56,6 +61,12 @@ public interface SemanticIndex {
     String getName();
 
     /**
+     * The type of Items indexed in this semantic Index
+     * @return the java {@link Class} of the Items provided by this index
+     */
+    Class<Item> getIntdexType();
+    
+    /**
      * The description for the Semantic Index. The same as configured by the {@link #PROP_DESCRIPTION}
      * property in the OSGI component configuration
      * 
@@ -78,18 +89,18 @@ public interface SemanticIndex {
      * @throws IndexException
      *             On any error while accessing the semantic index
      */
-    boolean index(ContentItem ci) throws IndexException;
+    boolean index(Item item) throws IndexException;
 
     /**
      * Removes the {@link ContentItem} with the parsed {@link UriRef} from this index. If the no content item
      * with the parsed uri is present in this index the call can be ignored.
      * 
-     * @param ciURI
-     *            the uri of the content item to remove
+     * @param uri
+     *            the uri of the item to remove
      * @throws IndexException
      *             On any error while accessing the semantic index
      */
-    void remove(UriRef ciURI) throws IndexException;
+    void remove(String uri) throws IndexException;
 
     /**
      * Persists all changes to the index and sets the revision to the parsed value if the operation succeeds.
@@ -136,13 +147,14 @@ public interface SemanticIndex {
     Map<String,Object> getFieldProperties(String name) throws IndexException;
 
     /**
-     * Getter for the RESTful search interfaces supported by this semantic index. The keys represent the types
-     * of the RESTful Interfaces. See the {@link EndpointType} enumeration for knows keys. The value is the
+     * Getter for the RESTful search interfaces supported by this semantic index. 
+     * The keys represent the types of the RESTful Interfaces. 
+     * See the {@link EndpointTypeEnum} enumeration for knows keys. The value is the
      * URL of that service relative to to the Stanbol base URI
      * 
      * @return the RESTful search interfaces supported by this semantic index.
      */
-    Map<EndpointType,String> getRESTSearchEndpoints();
+    Map<String,String> getRESTSearchEndpoints();
 
     /**
      * Getter for the Java search APIs supported by this semantic index. The keys are the java interfaces and
@@ -153,7 +165,9 @@ public interface SemanticIndex {
      * <li> {@link Constants#OBJECTCLASS} = {@link Class#getName()}
      * </ul>
      * 
-     * @return the Java search APIs supported by this semantic index. Also registered as OSGI services.
+     * @return the Java search APIs supported by this semantic index. 
+     * Also registered as OSGI services. The key is equals to the
+     * {@link Class#getName()} and {@link Constants#OBJECTCLASS}.
      */
-    Map<Class<?>,ServiceReference> getSearchEndPoints();
+    Map<String,ServiceReference> getSearchEndPoints();
 }
