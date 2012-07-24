@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -142,8 +141,8 @@ public class FileRevisionManager {
      * @return a {@link ChangeSet} including the changes in the store
      * @throws StoreException
      */
-    public ChangeSet getChanges(long revision, int batchSize) throws StoreException {
-        ChangeSetImpl changes = new ChangeSetImpl();
+    public ChangeSet<ContentItem> getChanges(long revision, int batchSize) throws StoreException {
+        ChangeSetImpl<ContentItem> changes = new ChangeSetImpl<ContentItem>();
 
         // get connection
         Connection con = dbManager.getConnection();

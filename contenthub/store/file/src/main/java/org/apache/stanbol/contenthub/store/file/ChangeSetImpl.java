@@ -22,11 +22,11 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.contenthub.servicesapi.store.ChangeSet;
 import org.apache.stanbol.contenthub.servicesapi.store.Store;
 
-public class ChangeSetImpl implements ChangeSet {
+public class ChangeSetImpl<Item> implements ChangeSet<Item> {
     private long from;
     private long to;
     private Set<String> changedUris;
-    private Store store;
+    private Store<Item> store;
 
     @Override
     public long fromRevision() {
@@ -44,7 +44,7 @@ public class ChangeSetImpl implements ChangeSet {
     }
 
     @Override
-    public Store getStore() {
+    public Store<Item> getStore() {
         return store;
     }
 
@@ -60,7 +60,7 @@ public class ChangeSetImpl implements ChangeSet {
         this.changedUris = changedUris;
     }
 
-    public void setStore(Store store) {
+    public void setStore(Store<Item> store) {
         this.store = store;
     }
 }
