@@ -18,7 +18,6 @@ package org.apache.stanbol.contenthub.store.file;
 
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.contenthub.servicesapi.store.ChangeSet;
 import org.apache.stanbol.contenthub.servicesapi.store.Store;
 

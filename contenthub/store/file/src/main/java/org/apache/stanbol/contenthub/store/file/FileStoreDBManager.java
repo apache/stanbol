@@ -16,8 +16,12 @@
  */
 package org.apache.stanbol.contenthub.store.file;
 
-import static org.apache.stanbol.contenthub.store.file.FileStore.*;
 import static org.apache.stanbol.contenthub.store.file.FileRevisionManager.REVISION_TABLE_NAME;
+import static org.apache.stanbol.contenthub.store.file.FileStore.FIELD_ENHANCEMENT_COUNT;
+import static org.apache.stanbol.contenthub.store.file.FileStore.FIELD_ID;
+import static org.apache.stanbol.contenthub.store.file.FileStore.FIELD_MIME_TYPE;
+import static org.apache.stanbol.contenthub.store.file.FileStore.FIELD_TITLE;
+import static org.apache.stanbol.contenthub.store.file.FileStore.RECENTLY_ENHANCED_TABLE_NAME;
 
 import java.net.ConnectException;
 import java.sql.Connection;
