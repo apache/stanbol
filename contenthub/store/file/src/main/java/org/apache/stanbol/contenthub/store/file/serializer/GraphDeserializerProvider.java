@@ -29,7 +29,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
-import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
+import org.apache.stanbol.commons.semanticindex.store.StoreException;
 
 /**
  * This {@link ContentPartDeserializerProvider} implementation supports {@link Graph} parts. As a result, an

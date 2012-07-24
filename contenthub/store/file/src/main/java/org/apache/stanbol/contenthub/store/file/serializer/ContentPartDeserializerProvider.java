@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
+import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentSource;
 

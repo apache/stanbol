@@ -30,7 +30,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
+import org.apache.stanbol.commons.semanticindex.store.StoreException;
 
 /**
  * This is the manager class delegating the content part serialize requests to the suitable

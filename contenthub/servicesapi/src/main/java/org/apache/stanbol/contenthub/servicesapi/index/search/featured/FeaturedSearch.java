@@ -19,7 +19,6 @@ package org.apache.stanbol.contenthub.servicesapi.index.search.featured;
 import java.util.List;
 
 import org.apache.solr.common.params.SolrParams;
-import org.apache.stanbol.contenthub.servicesapi.index.IndexManagementException;
 import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeywordSearch;
 import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrSearch;

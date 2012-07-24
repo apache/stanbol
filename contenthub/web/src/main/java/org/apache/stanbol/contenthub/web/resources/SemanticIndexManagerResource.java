@@ -39,13 +39,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.stanbol.commons.semanticindex.index.EndpointTypeEnum;
+import org.apache.stanbol.commons.semanticindex.index.IndexException;
+import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
+import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
+import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.contenthub.servicesapi.index.EndpointTypeEnum;
-import org.apache.stanbol.contenthub.servicesapi.index.IndexException;
-import org.apache.stanbol.contenthub.servicesapi.index.IndexManagementException;
-import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndex;
-import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndexManager;
 import org.apache.stanbol.contenthub.web.util.JSONUtils;
 import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.codehaus.jettison.json.JSONException;

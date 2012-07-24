@@ -36,7 +36,7 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
-import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
+import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.contenthub.store.file.serializer.ContentPartDeserializer;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;

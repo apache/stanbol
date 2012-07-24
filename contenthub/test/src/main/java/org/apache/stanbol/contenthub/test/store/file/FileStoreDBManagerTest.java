@@ -24,7 +24,7 @@ import java.sql.SQLException;
 
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
-import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
+import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.contenthub.store.file.FileStoreDBManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;

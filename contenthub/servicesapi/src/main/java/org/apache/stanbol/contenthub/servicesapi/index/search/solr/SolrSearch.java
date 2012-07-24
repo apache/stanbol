@@ -18,7 +18,6 @@ package org.apache.stanbol.contenthub.servicesapi.index.search.solr;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
 
 /**

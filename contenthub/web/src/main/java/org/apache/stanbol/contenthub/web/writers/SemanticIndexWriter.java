@@ -33,9 +33,9 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.commons.semanticindex.index.IndexException;
+import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
-import org.apache.stanbol.contenthub.servicesapi.index.IndexException;
-import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndex;
 import org.apache.stanbol.contenthub.web.util.JSONUtils;
 import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.codehaus.jettison.json.JSONException;

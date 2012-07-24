@@ -18,8 +18,8 @@ package org.apache.stanbol.contenthub.store.file;
 
 import java.util.Set;
 
-import org.apache.stanbol.contenthub.servicesapi.store.ChangeSet;
-import org.apache.stanbol.contenthub.servicesapi.store.Store;
+import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
+import org.apache.stanbol.commons.semanticindex.store.Store;
 
 public class ChangeSetImpl<Item> implements ChangeSet<Item> {
     private long from;

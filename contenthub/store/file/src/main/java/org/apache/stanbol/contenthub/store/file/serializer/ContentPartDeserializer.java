@@ -30,7 +30,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
+import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +107,7 @@ public class ContentPartDeserializer {
         }
         return deserializer.deserialize(is, mimeType);
     }
-    
+
     /**
      * Deserializes the content part which will be read from the given {@link InputStream} using a
      * {@link ContentPartDeserializerProvider} which will be obtained by the given class name. In the first

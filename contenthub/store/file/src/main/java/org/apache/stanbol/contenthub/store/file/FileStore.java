@@ -51,9 +51,9 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
-import org.apache.stanbol.contenthub.servicesapi.store.ChangeSet;
-import org.apache.stanbol.contenthub.servicesapi.store.Store;
-import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
+import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
+import org.apache.stanbol.commons.semanticindex.store.Store;
+import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.contenthub.store.file.serializer.ContentPartDeserializer;
 import org.apache.stanbol.contenthub.store.file.serializer.ContentPartSerializer;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
@@ -186,9 +186,9 @@ public class FileStore implements Store<ContentItem> {
 
     @Override
     public Class<ContentItem> getItemType() {
-    	return ContentItem.class;
+        return ContentItem.class;
     }
-    
+
     @Override
     public ContentItem remove(String id) throws StoreException {
         checkStoreFolder();
@@ -569,13 +569,11 @@ public class FileStore implements Store<ContentItem> {
             String headerString = writer.toString();
             header = new JSONObject(headerString);
         } catch (IOException e) {
-            throw new StoreException(
-                    String.format("Failed to get header entry from the zip for of the content item: %s",
-                        id), e);
+            throw new StoreException(String.format(
+                "Failed to get header entry from the zip for of the content item: %s", id), e);
         } catch (JSONException e) {
-            throw new StoreException(
-                    String.format("Failed to get header entry from the zip for of the content item: %s",
-                        id), e);
+            throw new StoreException(String.format(
+                "Failed to get header entry from the zip for of the content item: %s", id), e);
         }
 
         // deserialize metadata
@@ -691,7 +689,8 @@ public class FileStore implements Store<ContentItem> {
 
     @Override
     public ChangeSet<ContentItem> changes(long revision, int batchSize) throws StoreException {
-        ChangeSetImpl<ContentItem> changesSet = (ChangeSetImpl<ContentItem>) revisionManager.getChanges(revision, batchSize);
+        ChangeSetImpl<ContentItem> changesSet = (ChangeSetImpl<ContentItem>) revisionManager.getChanges(
+            revision, batchSize);
         changesSet.setStore(this);
         return changesSet;
     }

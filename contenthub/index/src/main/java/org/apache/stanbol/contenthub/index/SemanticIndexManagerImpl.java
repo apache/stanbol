@@ -24,11 +24,10 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
+import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
+import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
 import org.apache.stanbol.commons.solr.utils.ServiceReferenceRankingComparator;
-import org.apache.stanbol.contenthub.servicesapi.index.EndpointTypeEnum;
-import org.apache.stanbol.contenthub.servicesapi.index.IndexManagementException;
-import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndex;
-import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndexManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -73,12 +72,12 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     @Override
     public SemanticIndex<?> getIndex(String name, String endpointType) throws IndexManagementException {
         List<SemanticIndex<?>> result = getIndexList(name, endpointType, false);
-        if(result.size() == 0){
+        if (result.size() == 0) {
             return null;
         } else {
             return result.get(0);
         }
-        
+
     }
 
     @Override
@@ -93,7 +92,7 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
             ServiceReference[] refs = bundleContext.getServiceReferences(SemanticIndex.class.getName(), null);
             if (refs != null) {
                 if (refs.length > 1) {
-                	//TODO: rw move the ServiceReferenceRankingComperator to a utils module
+                    // TODO: rw move the ServiceReferenceRankingComperator to a utils module
                     Arrays.sort(refs, ServiceReferenceRankingComparator.INSTANCE);
                 }
                 for (ServiceReference ref : refs) {
@@ -102,17 +101,17 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
                         if (endpointType == null) {
                             results.add(si);
                         } else {
-                        	//search both the RESTful and the JAVA interfaces
+                            // search both the RESTful and the JAVA interfaces
                             Set<String> endpointTypes = si.getRESTSearchEndpoints().keySet();
                             if (endpointTypes != null && endpointTypes.contains(endpointType)) {
                                 results.add(si);
                             } else {
-                            	endpointTypes = si.getSearchEndPoints().keySet();
-                            	if(endpointTypes != null && endpointTypes.contains(endpointType)){
-                            		results.add(si);
-                            	} else { //service does not match requirements -> unget the service
-                            		bundleContext.ungetService(ref);
-                            	}
+                                endpointTypes = si.getSearchEndPoints().keySet();
+                                if (endpointTypes != null && endpointTypes.contains(endpointType)) {
+                                    results.add(si);
+                                } else { // service does not match requirements -> unget the service
+                                    bundleContext.ungetService(ref);
+                                }
                             }
                         }
                     }

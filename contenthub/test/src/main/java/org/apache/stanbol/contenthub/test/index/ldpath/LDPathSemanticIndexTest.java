@@ -21,9 +21,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
@@ -31,18 +33,22 @@ import org.apache.sling.junit.annotations.TestReference;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.stanbol.commons.semanticindex.index.IndexException;
+import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
+import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
+import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
+import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex;
 import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndexManager;
-import org.apache.stanbol.contenthub.servicesapi.index.IndexException;
-import org.apache.stanbol.contenthub.servicesapi.index.IndexManagementException;
-import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndex;
-import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndexManager;
+import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrSearch;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.junit.After;
 import org.junit.Before;
@@ -50,6 +56,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,16 +66,22 @@ public class LDPathSemanticIndexTest {
 
     private static Logger logger = LoggerFactory.getLogger(LDPathSemanticIndexTest.class);
 
-    private static final int TESTCOUNT = 12;
-
-    @TestReference
-    private ContentItemFactory contentItemFactory;
+    private static final int TESTCOUNT = 15;
 
     @TestReference
     private LDPathSemanticIndexManager ldPathSemanticIndexManager;
 
     @TestReference
+    private ContentItemFactory contentItemFactory;
+
+    @TestReference
     private SemanticIndexManager semanticIndexManager;
+
+    @TestReference
+    private SolrSearch solrSearch;
+
+    @TestReference
+    private EnhancementJobManager jobManager;
 
     @TestReference
     private BundleContext bundleContext;
@@ -108,8 +122,9 @@ public class LDPathSemanticIndexTest {
     }
 
     @Test
-    public void bundleContextTest() {
-        assertNotNull("Expecting BundleContext to be injected by Sling test runner", bundleContext);
+    public void ldPathSemanticIndexManagerTest() {
+        assertNotNull("Expecting LDPathSemanticIndexManager to be injected by Sling test runner",
+            ldPathSemanticIndexManager);
     }
 
     @Test
@@ -118,15 +133,24 @@ public class LDPathSemanticIndexTest {
     }
 
     @Test
-    public void ldPathSemanticIndexManagerTest() {
-        assertNotNull("Expecting LDPathSemanticIndexManager to be injected by Sling test runner",
-            ldPathSemanticIndexManager);
-    }
-
-    @Test
     public void semanticIndexManagerTest() {
         assertNotNull("Expecting SemanticIndexManager to be injected by Sling test runner",
             semanticIndexManager);
+    }
+
+    @Test
+    public void solrSearchTest() {
+        assertNotNull("Expecting SolrSearch to be injected by Sling test runner", solrSearch);
+    }
+
+    @Test
+    public void jobManagerTest() {
+        assertNotNull("Expecting EnhancementJobManager to be injected by Sling test runner", jobManager);
+    }
+
+    @Test
+    public void bundleContextTest() {
+        assertNotNull("Expecting BundleContext to be injected by Sling test runner", bundleContext);
     }
 
     @Test
@@ -200,23 +224,14 @@ public class LDPathSemanticIndexTest {
 
     @Test
     public void testPersist() throws IndexException {
-        String name = semanticIndex.getName();
         semanticIndex.persist(3);
         assertTrue("Revision cannot be persist with given value 3", semanticIndex.getRevision() == 3);
 
-        SolrQuery solrQuery = new SolrQuery();
-        solrQuery.setQuery(SolrFieldName.ID.toString() + ":" + SolrFieldName.REVISIONID.toString());
-        SolrDocumentList sdl = null;
-        try {
-            sdl = solrServer.query(solrQuery).getResults();
-        } catch (SolrServerException e) {
-            logger.error("Failed to get revision from solr for index " + name, e);
-            throw new IndexException("Failed to get revision from solr for index " + name, e);
-        }
-        SolrDocument solrDocument = sdl.get(0);
-        assertTrue("Return value of getRevision() is not match with the revision stored in Solr",
-            (semanticIndex.getRevision() == (Long) solrDocument.getFieldValue(SolrFieldName.REVISION
-                    .toString())));
+        Properties indexMetadata = ldPathSemanticIndexManager.getIndexMetadata(pid);
+        long revision = Long.parseLong((String) indexMetadata.get(SemanticIndex.PROP_REVISION));
+        assertTrue(
+            "Return value of getRevision() is not match with the revision stored in IndexMetadata File",
+            (semanticIndex.getRevision() == revision));
     }
 
     @Test
@@ -290,6 +305,69 @@ public class LDPathSemanticIndexTest {
                 service);
         }
 
+    }
+
+    @Test
+    public void testReindexingState() throws IndexManagementException,
+                                     InterruptedException,
+                                     IOException,
+                                     IndexException,
+                                     SearchException,
+                                     StoreException,
+                                     EnhancementException {
+        String name = "test_index_name_for_reindexing";
+        String program = "@prefix dbp-ont: <http://dbpedia.org/ontology/>; person_entities = .[rdf:type is dbp-ont:Person]:: xsd:anyURI (termVectors=\"true\");";
+        String newProgram = "@prefix dbp-ont: <http://dbpedia.org/ontology/>; place_entities = .[rdf:type is dbp-ont:Place]:: xsd:anyURI (termVectors=\"true\");";
+        String pid = ldPathSemanticIndexManager.createIndex(name, "", program);
+
+        try {
+            LDPathSemanticIndex semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+            int timeoutCount = 0;
+            while (semanticIndex == null) {
+                if (timeoutCount == 8) break;
+                Thread.sleep(500);
+                semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+                timeoutCount++;
+            }
+
+            ContentItem ci = contentItemFactory.createContentItem(new StringSource(
+                    "Michael Jackson is a very famous person, and he was born in Indiana."));
+            jobManager.enhanceContent(ci);
+            semanticIndex.index(ci);
+            String query = "person_entities:\"http://dbpedia.org/resource/Michael_Jackson\"";
+            SolrDocumentList sdl = solrSearch.search(query, name).getResults();
+            assertNotNull("Result must not be null for query " + query, sdl);
+
+            ServiceReference reference = bundleContext
+                    .getServiceReference(ConfigurationAdmin.class.getName());
+            ConfigurationAdmin configAdmin = (ConfigurationAdmin) bundleContext.getService(reference);
+            Configuration config = configAdmin.getConfiguration(pid);
+            Dictionary<String,String> properties = config.getProperties();
+            properties.put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM, newProgram);
+            properties.put(LDPathSemanticIndex.PROP_DESCRIPTION, "reindexing");
+            config.update(properties);
+
+            semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+            timeoutCount = 0;
+            while (!semanticIndex.getDescription().equals("reindexing")) {
+                if (timeoutCount == 8) break;
+                Thread.sleep(500);
+                semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+                timeoutCount++;
+            }
+            // index ci to new semantic index
+            semanticIndex.index(ci);
+
+            Properties indexMetadata = ldPathSemanticIndexManager.getIndexMetadata(pid);
+            assertTrue("LDPathSemanticIndex is changed, but it uses old program",
+                indexMetadata.get(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM).equals(newProgram));
+            query = "place_entities:\"http://dbpedia.org/resource/Indiana\"";
+            sdl = solrSearch.search(query, name).getResults();
+            assertNotNull("Result must not be null for query " + query, sdl);
+
+        } finally {
+            ldPathSemanticIndexManager.removeIndex(pid);
+        }
     }
 
     @After

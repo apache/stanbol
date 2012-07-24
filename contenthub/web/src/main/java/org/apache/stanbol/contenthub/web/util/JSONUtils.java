@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.stanbol.contenthub.servicesapi.index.IndexException;
-import org.apache.stanbol.contenthub.servicesapi.index.SemanticIndex;
+import org.apache.stanbol.commons.semanticindex.index.IndexException;
+import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
 import org.codehaus.jettison.json.JSONArray;

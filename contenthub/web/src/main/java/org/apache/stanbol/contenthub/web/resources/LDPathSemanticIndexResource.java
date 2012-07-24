@@ -44,12 +44,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.stanbol.commons.semanticindex.index.IndexException;
+import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex;
 import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndexManager;
-import org.apache.stanbol.contenthub.servicesapi.index.IndexException;
-import org.apache.stanbol.contenthub.servicesapi.index.IndexManagementException;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

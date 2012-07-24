@@ -24,7 +24,7 @@ import java.util.List;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
+import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 
 /**

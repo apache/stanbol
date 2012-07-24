@@ -27,7 +27,7 @@ import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
+import org.apache.stanbol.commons.semanticindex.store.StoreException;
 
 /**
  * {@link ContentPartSerializerProvider} for {@link TripleCollection} objects. It serializes
