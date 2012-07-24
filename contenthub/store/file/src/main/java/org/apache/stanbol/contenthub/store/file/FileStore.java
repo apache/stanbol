@@ -690,8 +690,8 @@ public class FileStore implements Store<ContentItem> {
     }
 
     @Override
-    public ChangeSet changes(long revision, int batchSize) throws StoreException {
-        ChangeSetImpl changesSet = (ChangeSetImpl) revisionManager.getChanges(revision, batchSize);
+    public ChangeSet<ContentItem> changes(long revision, int batchSize) throws StoreException {
+        ChangeSetImpl<ContentItem> changesSet = (ChangeSetImpl<ContentItem>) revisionManager.getChanges(revision, batchSize);
         changesSet.setStore(this);
         return changesSet;
     }
