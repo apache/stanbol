@@ -51,6 +51,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.semanticindex.core.store.ChangeSetImpl;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
