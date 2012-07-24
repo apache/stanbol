@@ -83,14 +83,18 @@ public class LDPathSemanticIndexTest {
         if (counter == 0) {
             String program = "@prefix dbp-ont : <http://dbpedia.org/ontology/>; city = dbp-ont:city / rdfs:label :: xsd:string; country = dbp-ont:country / rdfs:label :: xsd:string; ";
             pid = ldPathSemanticIndexManager.createIndex(name, "test_index_description", program);
-            SemanticIndex tempSemanticIndex = semanticIndexManager.getIndex(name);
+            SemanticIndex<ContentItem> tempSemanticIndex = (SemanticIndex<ContentItem>)semanticIndexManager.getIndex(name);
             int timeoutCount = 0;
             while (tempSemanticIndex == null) {
                 if (timeoutCount == 8) break;
                 Thread.sleep(500);
-                tempSemanticIndex = semanticIndexManager.getIndex(name);
+                tempSemanticIndex = (SemanticIndex<ContentItem>)semanticIndexManager.getIndex(name);
                 timeoutCount++;
             }
+            assertNotNull("SemanticIndex '"+name+"' not available after waiting 4sec!",tempSemanticIndex);
+            assertTrue("This tests assume that the Semantic Index with the name '"
+            		+ name +"' is of type "+LDPathSemanticIndex.class.getSimpleName(),
+            		tempSemanticIndex instanceof LDPathSemanticIndex);
             semanticIndex = (LDPathSemanticIndex) tempSemanticIndex;
             solrServer = semanticIndex.getServer();
         }

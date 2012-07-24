@@ -31,6 +31,7 @@ import org.apache.stanbol.contenthub.servicesapi.store.ChangeSet;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.store.file.FileRevisionManager;
 import org.apache.stanbol.contenthub.store.file.FileStoreDBManager;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -137,7 +138,7 @@ public class FileRevisionManagerTest {
             }
 
             // check changes
-            ChangeSet changeSet = fileRevisionManager.getChanges(startRevision, 3);
+            ChangeSet<ContentItem> changeSet = fileRevisionManager.getChanges(startRevision, 3);
             Set<String> changedItems = changeSet.changed();
             assertTrue("Wrong number of changed items", (changedItems.size() == 3));
             for (int i = 0; i < 3; i++) {
@@ -237,7 +238,7 @@ public class FileRevisionManagerTest {
     @Test
     public void emptyChangesTest() throws StoreException {
         long revision = System.currentTimeMillis();
-        ChangeSet changeSet = fileRevisionManager.getChanges(revision, 1);
+        ChangeSet<ContentItem> changeSet = fileRevisionManager.getChanges(revision, 1);
         assertTrue("There must be no changes", changeSet.changed().size() == 0);
         assertTrue("Wrong start version", changeSet.fromRevision() == -1);
         assertTrue("Wrong end version", changeSet.toRevision() == -1);
