@@ -53,7 +53,7 @@ import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.IndexState;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
-import org.apache.stanbol.commons.semanticindex.store.Store;
+import org.apache.stanbol.commons.semanticindex.store.IndexingSource;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
@@ -147,7 +147,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
     // Semantic Indexes should be connected to stores based on the
     // name of the Store!
     @Reference
-    private Store<ContentItem> store;
+    private IndexingSource<ContentItem> store;
 
     @Reference
     private SiteManager siteManager;

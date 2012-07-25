@@ -18,14 +18,11 @@ package org.apache.stanbol.commons.semanticindex.store;
 
 /**
  * Interface to store and retrieve Items instances persistently.
+ * This extends the {@link IndexingSource} interface to support
+ * full CRUD operations
  */
-public interface Store<Item> {
+public interface Store<Item> extends IndexingSource<Item>{
 
-	/**
-	 * Getter for the type of Items managed by this Store
-	 * @return
-	 */
-	Class<Item> getItemType();
 	
 	/**
 	 * Removes an item with the given uri from the  store
@@ -46,29 +43,4 @@ public interface Store<Item> {
      */
     String put(Item item) throws StoreException;
 
-    /** 
-     * Gets a Item by uri, null if non-existing 
-     * @param uri the uri of the item
-     * @return the item or <code>null</code> if not present
-     * @throws StoreException on any error while retrieving the item
-     */
-    Item get(String uri) throws StoreException;
-
-    /**
-     * Requests the next <code>batchSize</code> changes starting from <code>revision</code>. If there are no
-     * more revisions that a {@link ChangeSet} with an empty {@link ChangeSet#changed()} set. There can be
-     * more changes in the results than the given <code>batchSize</code> not to return a subset of changes
-     * regarding a specific revision. For instance, if the batch size is 5, given revision is 9 and there 15
-     * changes regarding revision 10. As a result, there will be 10 changed items in the returned change set.
-     * 
-     * @param revision
-     *            Starting revision number for the returned {@link ChangeSet}
-     * @param batchSize
-     *            Maximum number of changes to be returned
-     * @return the {@link ChangeSet} with a maximum of <code>batchSize</code> changes
-     * @throws StoreException
-     *             On any error while accessing the store.
-     * @see ChangeSet
-     */
-    ChangeSet<Item> changes(long revision, int batchSize) throws StoreException;
 }
