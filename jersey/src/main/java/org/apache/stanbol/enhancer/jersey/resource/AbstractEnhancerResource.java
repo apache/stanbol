@@ -172,7 +172,8 @@ public abstract class AbstractEnhancerResource extends BaseStanbolResource {
     @POST
     @Consumes(WILDCARD)
     public Response enhanceFromData(ContentItem ci,
-            @QueryParam(value = "uri") String uri,
+            //NOTE: The 'uri' parameter is already consumed by the ContentItemReader
+            //@QueryParam(value = "uri") String uri,
             @QueryParam(value = "executionmetadata") boolean inclExecMetadata,
             @QueryParam(value = "outputContent") Set<String> mediaTypes,
             @QueryParam(value = "omitParsed") boolean omitParsed,

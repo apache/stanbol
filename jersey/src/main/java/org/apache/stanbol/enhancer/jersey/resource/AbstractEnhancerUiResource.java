@@ -119,7 +119,7 @@ public abstract class AbstractEnhancerUiResource extends AbstractEnhancerResourc
         log.info("enhance from From: " + content);
         ContentItem ci = ciFactory.createContentItem(new StringSource(content));
         if(!buildAjaxview){ //rewrite to a normal EnhancementRequest
-            return enhanceFromData(ci, null, false, null, false, null, false, null, headers);
+            return enhanceFromData(ci, false, null, false, null, false, null, headers);
         } else { //enhance and build the AJAX response
             EnhancementException enhancementException;
             try {

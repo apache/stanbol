@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -73,7 +74,12 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
     private Parser __parser;
     private ServletContext context;
     private ContentItemFactory __ciFactory;
-    
+    /**
+     * Used to read the queryParameter with the ContentItem ID
+     */
+    @Context
+    private HttpServletRequest request;
+
     public static final MediaType MULTIPART = MediaType.valueOf(MediaType.MULTIPART_FORM_DATA_TYPE.getType()+"/*");
 
     public ContentItemReader(@Context ServletContext context) {
@@ -132,12 +138,12 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                                 InputStream entityStream) throws IOException, WebApplicationException {
         //boolean withMetadata = withMetadata(httpHeaders);
         ContentItem contentItem = null;
+        UriRef contentItemId = getContentItemId();
         Set<String> parsedContentIds = new HashSet<String>();
         if(mediaType.isCompatible(MULTIPART)){
             //try to read ContentItem from "multipart/from-data"
             MGraph metadata = null;
             FileItemIterator fileItemIterator;
-            String contentItemId = null;
             try {
                 fileItemIterator = fu.getItemIterator(new MessageBodyReaderContext(entityStream, mediaType));
                 while(fileItemIterator.hasNext()){
@@ -151,8 +157,9 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                                 		"'content'!").build());
                         }
                         //the metadata may define the ID for the contentItem
-                        if(fis.getName() != null && !fis.getName().isEmpty()){
-                            contentItemId = fis.getName();
+                        //only used if not parsed as query param
+                        if(contentItemId == null && fis.getName() != null && !fis.getName().isEmpty()){
+                            contentItemId = new UriRef(fis.getName());
                         }
                         metadata = new IndexedMGraph();
                         try {
@@ -251,7 +258,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
             }
         } else { //normal content
             ContentItemFactory ciFactory = getContentItemFactory();
-            contentItem = ciFactory.createContentItem(
+            contentItem = ciFactory.createContentItem(contentItemId,
                 new StreamSource(entityStream, mediaType.toString()));
             //add the URI of the main content
             parsedContentIds.add(contentItem.getPartUri(0).getUnicodeString());
@@ -260,6 +267,16 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
         getEnhancementProperties(contentItem).put(PARSED_CONTENT_URIS, 
             Collections.unmodifiableSet(parsedContentIds));
         return contentItem;
+    }
+    /**
+     * tries to retrieve the ContentItem from the 'uri' query parameter of the
+     * {@link #request}.
+     * @return the parsed URI or <code>null</code> if none
+     */
+    private UriRef getContentItemId() {
+        //NOTE: check for request NULL is needed because of unit tests
+        String ciUri = request == null ? null : request.getParameter("uri");
+        return ciUri == null ? null : new UriRef(ciUri);
     }
     /**
      * Creates a ContentItem
@@ -280,7 +297,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
      * @throws FileUploadException if the parsed contents are not correctly
      * encoded Multipoart MIME
      */
-    private ContentItem createContentItem(String id, MGraph metadata, FileItemStream content,Set<String> parsedContentParts) throws IOException, FileUploadException {
+    private ContentItem createContentItem(UriRef id, MGraph metadata, FileItemStream content,Set<String> parsedContentParts) throws IOException, FileUploadException {
         MediaType partContentType = MediaType.valueOf(content.getContentType());
         ContentItem contentItem = null;
         ContentItemFactory ciFactory = getContentItemFactory();
@@ -294,7 +311,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                 if(contentItem == null){
                     log.debug("create ContentItem {} for content (type:{})",
                         id,content.getContentType());
-                    contentItem = ciFactory.createContentItem(id != null ? new UriRef(id) : (UriRef)null,
+                    contentItem = ciFactory.createContentItem(id,
                         new StreamSource(fis.openStream(),fis.getContentType()), 
                         metadata);
                 } else {
@@ -316,7 +333,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
         } else {
             log.debug("create ContentItem {} for content (type:{})",
                 id,content.getContentType());
-            contentItem = ciFactory.createContentItem(new UriRef(id),
+            contentItem = ciFactory.createContentItem(id,
                 new StreamSource(content.openStream(),content.getContentType()), 
                 metadata);
         }
