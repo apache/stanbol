@@ -91,6 +91,25 @@ public class DefaultChainTest extends EnhancerTestBase {
                 + " of the POSTed text. Output format is defined by the Accept header."
         );
     }
+    /**
+     * Validates that parsed contentItem URIs are used by the Stanbol Enhancer
+     * (STANBOL-702)
+     * @throws Exception
+     */
+    @Test
+    public void testParsedContentItemUri() throws Exception {
+        String uri = "http://test.stanbol.org/uriTest/"
+                + Math.round(Math.random()*1000.0);
+        executor.execute(
+            builder.buildPostRequest(getEndpoint()+"?uri="+uri)
+            .withHeader("Accept","text/rdf+nt")
+            .withContent("The Stanbol enhancer can detect famous cities such as Paris and people such as Bob Marley.")
+        )
+        .assertStatus(200)
+        .assertContentRegexp(
+                "<http://fise.iks-project.eu/ontology/extracted-from> <"+uri+"> ."
+        );
+    }
     
     @Test
     public void testOutputFormats() throws Exception {
