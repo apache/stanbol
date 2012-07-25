@@ -18,6 +18,7 @@ package org.apache.stanbol.commons.semanticindex.core.index;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -28,8 +29,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
-import org.apache.stanbol.commons.solr.utils.ServiceReferenceRankingComparator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -43,8 +44,37 @@ import org.osgi.util.tracker.ServiceTracker;
 @Component(immediate = true)
 @Service
 public class SemanticIndexManagerImpl implements SemanticIndexManager {
-    private ComponentContext componentContext;
-
+    
+	private ComponentContext componentContext;
+	/**
+	 * Compares ServiceReferences based on their {@link Constants#SERVICE_RANKING} and
+	 * {@link Constants#SERVICE_ID}. This is internally used to ensure that methods that
+	 * return a single {@link SemanticIndex} do actually return the one with the highest
+	 * priority.
+	 */
+    private static final Comparator<ServiceReference> SERVICE_REFERENCE_COMPARATOR = new Comparator<ServiceReference> (){
+        
+        @Override
+        public int compare(ServiceReference ref1, ServiceReference ref2) {
+            int r1,r2;
+            Object tmp = ref1.getProperty(Constants.SERVICE_RANKING);
+            r1 = tmp != null ? ((Integer)tmp).intValue() : 0;
+            tmp = (Integer)ref2.getProperty(Constants.SERVICE_RANKING);
+            r2 = tmp != null ? ((Integer)tmp).intValue() : 0;
+            if(r1 == r2){
+                tmp = (Long)ref1.getProperty(Constants.SERVICE_ID);
+                long id1 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
+                tmp = (Long)ref2.getProperty(Constants.SERVICE_ID);
+                long id2 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
+                //the lowest id must be first -> id1 < id2 -> [id1,id2] -> return -1
+                return id1 < id2 ? -1 : id2 == id1 ? 0 : 1; 
+            } else {
+                //the highest ranking MUST BE first -> r1 < r2 -> [r2,r1] -> return 1
+                return r1 < r2 ? 1:-1;
+            }
+        }
+    };
+    
     private ServiceTracker semanticIndexTracker;
 
     @Activate
@@ -105,7 +135,7 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
         if (refs != null) {
             if (refs.length > 1) {
                 // TODO: rw move the ServiceReferenceRankingComperator to a utils module
-                Arrays.sort(refs, ServiceReferenceRankingComparator.INSTANCE);
+                Arrays.sort(refs, SERVICE_REFERENCE_COMPARATOR);
             }
             for (ServiceReference ref : refs) {
                 SemanticIndex<?> si = (SemanticIndex<?>) bundleContext.getService(ref);
