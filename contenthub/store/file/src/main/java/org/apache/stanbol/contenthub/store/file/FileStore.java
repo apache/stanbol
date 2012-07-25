@@ -607,7 +607,7 @@ public class FileStore implements Store<ContentItem> {
         // create content item using the metadata and main blob
         ContentItem ci;
         try {
-            ci = contentItemFactory.createContentItem(id, blobSource, metadata);
+            ci = contentItemFactory.createContentItem(new UriRef(id), blobSource, metadata);
         } catch (IOException e) {
             throw new StoreException("Failed to created the content item", e);
         }

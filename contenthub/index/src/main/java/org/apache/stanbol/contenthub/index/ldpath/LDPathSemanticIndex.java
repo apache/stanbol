@@ -109,8 +109,8 @@ import at.newmedialab.ldpath.model.programs.Program;
  * <li><b>Solr Server Check Time:</b> Maximum time in seconds to wait for the availability of the Solr core
  * associated with this index</li>
  * <li><b>Service Ranking:</b> To be able adjust priorities of {@link SemanticIndex}es with same name or same
- * {@link EndpointTypeEnum}, this property is used. The higher value of this property, the higher priority of the
- * {@link SemanticIndex} instance.</li>
+ * {@link EndpointTypeEnum}, this property is used. The higher value of this property, the higher priority of
+ * the {@link SemanticIndex} instance.</li>
  * </ul>
  * 
  * @author suat
@@ -143,9 +143,9 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
     @Reference(target = "(org.apache.solr.core.CoreContainer.name=contenthub)")
     private ManagedSolrServer managedSolrServer;
 
-    //TODO: this assumes that only a single Store instance is active!
-    //      Semantic Indexes should be connected to stores based on the
-    //      name of the Store!
+    // TODO: this assumes that only a single Store instance is active!
+    // Semantic Indexes should be connected to stores based on the
+    // name of the Store!
     @Reference
     private Store<ContentItem> store;
 
@@ -303,10 +303,10 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
     public String getName() {
         return this.name;
     }
-    
+
     @Override
     public Class<ContentItem> getIntdexType() {
-    	return ContentItem.class;
+        return ContentItem.class;
     }
 
     @Override
@@ -611,8 +611,10 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
     @Override
     public Map<String,String> getRESTSearchEndpoints() {
         Map<String,String> searchEndpoints = new HashMap<String,String>();
-        searchEndpoints.put(EndpointTypeEnum.CONTENTHUB.getUri(), "contenthub/" + this.name + "/search/featured");
-        searchEndpoints.put(EndpointTypeEnum.SOLR.getUri(), "solr/" + managedSolrServer.getServerName() + "/" + this.name);
+        searchEndpoints.put(EndpointTypeEnum.CONTENTHUB.getUri(), "contenthub/" + this.name
+                                                                  + "/search/featured");
+        searchEndpoints.put(EndpointTypeEnum.SOLR.getUri(), "solr/" + managedSolrServer.getServerName() + "/"
+                                                            + this.name);
         return searchEndpoints;
     }
 
@@ -765,7 +767,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
     }
 
     @Deactivate
-    protected void deactivate(ComponentContext context) {
+    protected void deactivate(ComponentContext context) throws IndexManagementException {
         // close store check thread and solr core tracker
         deactivate = true;
         if (pollingThread != null) {
@@ -782,13 +784,16 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                 .getService(reference);
         Configuration config;
         try {
-            config = configAdmin.getConfiguration(pid);
+            config = configAdmin.getConfiguration(this.pid);
             // if the configuration for the index has been removed, clear all files for this index
             if (config.getProperties() == null) {
                 logger.info(
                     "Configuration for the Semantic Index: {} has been deleted. All resources will be removed.",
                     this.name);
-                managedSolrServer.removeIndex(this.name, true);
+                if (ldpathSemanticIndexManager.isConfigured(pid)) {
+                    // this case is a check for the remove operation from the felix web console
+                    ldpathSemanticIndexManager.removeIndex(this.pid);
+                }
             } // the index is deactivated. do not nothing.
         } catch (IOException e) {
             logger.error("Failed to obtain configuration for the Semantic Index: {}.", this.name, e);
@@ -930,8 +935,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                             ci = store.get(changedItem);
                             if (ci != null) {
                                 index(ci);
-                                logger.info("ContentItem with Uri {} is indexed to {}",
-                                    changedItem, name);
+                                logger.info("ContentItem with Uri {} is indexed to {}", changedItem, name);
                             } else {
                                 remove(changedItem);
                             }

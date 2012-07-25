@@ -37,12 +37,14 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.stanbol.commons.semanticindex.index.IndexException;
 import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
+import org.apache.stanbol.commons.semanticindex.index.IndexState;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex;
 import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrSearch;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -97,18 +99,19 @@ public class LDPathSemanticIndexTest {
         if (counter == 0) {
             String program = "@prefix dbp-ont : <http://dbpedia.org/ontology/>; city = dbp-ont:city / rdfs:label :: xsd:string; country = dbp-ont:country / rdfs:label :: xsd:string; ";
             pid = ldPathSemanticIndexManager.createIndex(name, "test_index_description", program);
-            SemanticIndex<ContentItem> tempSemanticIndex = (SemanticIndex<ContentItem>)semanticIndexManager.getIndex(name);
+            SemanticIndex<ContentItem> tempSemanticIndex = (SemanticIndex<ContentItem>) semanticIndexManager
+                    .getIndex(name);
             int timeoutCount = 0;
             while (tempSemanticIndex == null) {
                 if (timeoutCount == 8) break;
                 Thread.sleep(500);
-                tempSemanticIndex = (SemanticIndex<ContentItem>)semanticIndexManager.getIndex(name);
+                tempSemanticIndex = (SemanticIndex<ContentItem>) semanticIndexManager.getIndex(name);
                 timeoutCount++;
             }
-            assertNotNull("SemanticIndex '"+name+"' not available after waiting 4sec!",tempSemanticIndex);
-            assertTrue("This tests assume that the Semantic Index with the name '"
-            		+ name +"' is of type "+LDPathSemanticIndex.class.getSimpleName(),
-            		tempSemanticIndex instanceof LDPathSemanticIndex);
+            assertNotNull("SemanticIndex '" + name + "' not available after waiting 4sec!", tempSemanticIndex);
+            assertTrue("This tests assume that the Semantic Index with the name '" + name + "' is of type "
+                       + LDPathSemanticIndex.class.getSimpleName(),
+                tempSemanticIndex instanceof LDPathSemanticIndex);
             semanticIndex = (LDPathSemanticIndex) tempSemanticIndex;
             solrServer = semanticIndex.getServer();
         }
@@ -296,15 +299,26 @@ public class LDPathSemanticIndexTest {
     @Test
     public void testGetSearchEndPoints() throws ClassNotFoundException {
         Map<String,ServiceReference> searchEndpoints = semanticIndex.getSearchEndPoints();
+        int serviceCount = 0;
         for (Entry<String,ServiceReference> entry : searchEndpoints.entrySet()) {
-            Class<?> clazz = Class.forName(entry.getKey());
+            String className = entry.getKey();
             ServiceReference serviceReference = entry.getValue();
-            Object service = clazz.cast(bundleContext.getService(serviceReference));
-            assertNotNull(String.format(
-                "Service cannot be retrieved by given %s Class and its Service Reference", clazz.getName()),
-                service);
+            Object service;
+            if (SolrSearch.class.getName().equals(className)) {
+                service = (SolrSearch) bundleContext.getService(serviceReference);
+                assertNotNull(String.format(
+                    "Service cannot be retrieved by given %s Class and its Service Reference", className),
+                    service);
+                serviceCount++;
+            } else if (FeaturedSearch.class.getName().equals(className)) {
+                service = (FeaturedSearch) bundleContext.getService(serviceReference);
+                assertNotNull(String.format(
+                    "Service cannot be retrieved by given %s Class and its Service Reference", className),
+                    service);
+                serviceCount++;
+            }
         }
-
+        assertTrue("One or more expected search service were not available", serviceCount == 2);
     }
 
     @Test
@@ -349,13 +363,16 @@ public class LDPathSemanticIndexTest {
 
             semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
             timeoutCount = 0;
-            while (!semanticIndex.getDescription().equals("reindexing")) {
+            while (semanticIndex == null || !semanticIndex.getDescription().equals("reindexing")) {
                 if (timeoutCount == 8) break;
                 Thread.sleep(500);
                 semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
                 timeoutCount++;
             }
             // index ci to new semantic index
+            while(semanticIndex.getState() != IndexState.ACTIVE) {
+                Thread.sleep(500);
+            }
             semanticIndex.index(ci);
 
             Properties indexMetadata = ldPathSemanticIndexManager.getIndexMetadata(pid);

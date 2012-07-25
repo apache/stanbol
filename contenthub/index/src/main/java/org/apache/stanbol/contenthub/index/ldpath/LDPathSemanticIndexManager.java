@@ -370,6 +370,7 @@ public class LDPathSemanticIndexManager {
         String indexMetadataFilePath = indexMetadataDirectory.getAbsolutePath() + File.separator + pid
                                        + ".props";
         File file = new File(indexMetadataFilePath);
+        logger.info("Index metadata file to be deleted: {}", file.getAbsolutePath());
         if (file.exists()) {
             file.delete();
         } else {
