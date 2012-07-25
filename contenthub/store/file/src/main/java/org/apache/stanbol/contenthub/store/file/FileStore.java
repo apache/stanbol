@@ -191,6 +191,18 @@ public class FileStore implements Store<ContentItem> {
     }
 
     @Override
+    public void remove(Iterable<String> uris)
+    		throws StoreException {
+    	List<ContentItem> removed = new ArrayList<ContentItem>();
+    	for(String uri : uris){
+    		ContentItem ci = remove(uri);
+    		if(ci != null){
+    			removed.add(ci);
+    		}
+    	}
+    }
+    
+    @Override
     public ContentItem remove(String id) throws StoreException {
         checkStoreFolder();
         String urlEncodedId = encodeId(id);
@@ -206,6 +218,12 @@ public class FileStore implements Store<ContentItem> {
         return ci;
     }
 
+    @Override
+    public void removeAll() throws StoreException {
+    	//TODO: implement
+    	throw new UnsupportedOperationException("TODO: implement!!");
+    }
+    
     private void updateTablesForDelete(String id) throws StoreException {
         // update revision
         revisionManager.updateRevision(id);
@@ -235,6 +253,15 @@ public class FileStore implements Store<ContentItem> {
         }
     }
 
+    @Override
+    public Iterable<String> put(Iterable<ContentItem> cis) throws StoreException {
+    	List<String> uris = new ArrayList<String>();
+    	for(ContentItem ci : cis){
+    		uris.add(put(ci));
+    	}
+    	return null;
+    }
+    
     @Override
     public String put(ContentItem ci) throws StoreException {
         try {
