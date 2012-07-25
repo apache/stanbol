@@ -29,7 +29,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -45,7 +44,6 @@ import org.osgi.util.tracker.ServiceTracker;
 @Service
 public class SemanticIndexManagerImpl implements SemanticIndexManager {
     
-	private ComponentContext componentContext;
 	/**
 	 * Compares ServiceReferences based on their {@link Constants#SERVICE_RANKING} and
 	 * {@link Constants#SERVICE_ID}. This is internally used to ensure that methods that
@@ -79,7 +77,6 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
 
     @Activate
     protected void activate(ComponentContext componentContext) {
-        this.componentContext = componentContext;
         semanticIndexTracker = new ServiceTracker(componentContext.getBundleContext(),
                 SemanticIndex.class.getName(), null);
         semanticIndexTracker.open();
@@ -129,7 +126,6 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     }
 
     private List<SemanticIndex<?>> getIndexList(String name, String endpointType, boolean multiple) {
-        BundleContext bundleContext = componentContext.getBundleContext();
         List<SemanticIndex<?>> results = new ArrayList<SemanticIndex<?>>();
         ServiceReference[] refs = semanticIndexTracker.getServiceReferences();
         if (refs != null) {
@@ -138,7 +134,7 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
                 Arrays.sort(refs, SERVICE_REFERENCE_COMPARATOR);
             }
             for (ServiceReference ref : refs) {
-                SemanticIndex<?> si = (SemanticIndex<?>) bundleContext.getService(ref);
+                SemanticIndex<?> si = (SemanticIndex<?>) semanticIndexTracker.getService(ref);
                 if (name == null || name.equals(si.getName())) {
                     if (endpointType == null) {
                         results.add(si);
@@ -151,8 +147,6 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
                             endpointTypes = si.getSearchEndPoints().keySet();
                             if (endpointTypes != null && endpointTypes.contains(endpointType)) {
                                 results.add(si);
-                            } else { // service does not match requirements -> unget the service
-                                bundleContext.ungetService(ref);
                             }
                         }
                     }
