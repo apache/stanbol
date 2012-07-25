@@ -23,15 +23,16 @@ import java.util.Set;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
 import org.apache.stanbol.commons.solr.utils.ServiceReferenceRankingComparator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Default implementation for {@link SemanticIndexManager}
@@ -44,9 +45,21 @@ import org.osgi.service.component.ComponentContext;
 public class SemanticIndexManagerImpl implements SemanticIndexManager {
     private ComponentContext componentContext;
 
+    private ServiceTracker semanticIndexTracker;
+
     @Activate
     protected void activate(ComponentContext componentContext) {
         this.componentContext = componentContext;
+        semanticIndexTracker = new ServiceTracker(componentContext.getBundleContext(),
+                SemanticIndex.class.getName(), null);
+        semanticIndexTracker.open();
+    }
+
+    @Deactivate
+    protected void deactivate(ComponentContext componentContext) {
+        if (semanticIndexTracker != null) {
+            semanticIndexTracker.close();
+        }
     }
 
     @Override
@@ -88,40 +101,36 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     private List<SemanticIndex<?>> getIndexList(String name, String endpointType, boolean multiple) {
         BundleContext bundleContext = componentContext.getBundleContext();
         List<SemanticIndex<?>> results = new ArrayList<SemanticIndex<?>>();
-        try {
-            ServiceReference[] refs = bundleContext.getServiceReferences(SemanticIndex.class.getName(), null);
-            if (refs != null) {
-                if (refs.length > 1) {
-                    // TODO: rw move the ServiceReferenceRankingComperator to a utils module
-                    Arrays.sort(refs, ServiceReferenceRankingComparator.INSTANCE);
-                }
-                for (ServiceReference ref : refs) {
-                    SemanticIndex<?> si = (SemanticIndex<?>) bundleContext.getService(ref);
-                    if (name == null || name.equals(si.getName())) {
-                        if (endpointType == null) {
+        ServiceReference[] refs = semanticIndexTracker.getServiceReferences();
+        if (refs != null) {
+            if (refs.length > 1) {
+                // TODO: rw move the ServiceReferenceRankingComperator to a utils module
+                Arrays.sort(refs, ServiceReferenceRankingComparator.INSTANCE);
+            }
+            for (ServiceReference ref : refs) {
+                SemanticIndex<?> si = (SemanticIndex<?>) bundleContext.getService(ref);
+                if (name == null || name.equals(si.getName())) {
+                    if (endpointType == null) {
+                        results.add(si);
+                    } else {
+                        // search both the RESTful and the JAVA interfaces
+                        Set<String> endpointTypes = si.getRESTSearchEndpoints().keySet();
+                        if (endpointTypes != null && endpointTypes.contains(endpointType)) {
                             results.add(si);
                         } else {
-                            // search both the RESTful and the JAVA interfaces
-                            Set<String> endpointTypes = si.getRESTSearchEndpoints().keySet();
+                            endpointTypes = si.getSearchEndPoints().keySet();
                             if (endpointTypes != null && endpointTypes.contains(endpointType)) {
                                 results.add(si);
-                            } else {
-                                endpointTypes = si.getSearchEndPoints().keySet();
-                                if (endpointTypes != null && endpointTypes.contains(endpointType)) {
-                                    results.add(si);
-                                } else { // service does not match requirements -> unget the service
-                                    bundleContext.ungetService(ref);
-                                }
+                            } else { // service does not match requirements -> unget the service
+                                bundleContext.ungetService(ref);
                             }
                         }
                     }
-                    if (multiple == false && results.size() == 1) {
-                        break;
-                    }
+                }
+                if (multiple == false && results.size() == 1) {
+                    break;
                 }
             }
-        } catch (InvalidSyntaxException e) {
-            // ignore as there is no filter
         }
         return results;
     }
