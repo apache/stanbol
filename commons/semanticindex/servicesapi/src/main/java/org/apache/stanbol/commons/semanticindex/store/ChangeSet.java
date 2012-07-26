@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.commons.semanticindex.store;
 
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -32,7 +33,7 @@ import java.util.Set;
  *     ChangeSet cs;
  *     do {
  *         cs = store.changes(revision, batchSize);
- *         for(String changed : cs.changed()){
+ *         for(String changed : cs){
  *             ContentItem ci = store.get(changed);
  *             if(ci == null){
  *                 index.remove(changed);
@@ -44,7 +45,7 @@ import java.util.Set;
  *     index.persist(cs.fromRevision());
  * </pre></code>
  */
-public interface ChangeSet<Item> {
+public interface ChangeSet<Item> extends Iterable<String>{
     /**
      * The lowest revision number included in this ChangeSet
      * 
@@ -58,19 +59,26 @@ public interface ChangeSet<Item> {
      * @return the highest revision number of this set
      */
     long toRevision();
-
+    
     /**
-     * The read only {@link Set} of changes ContentItems included in this ChangeSet.
+     * The epoch of this ChangeSet. Revisions are only valid within a given
+     * Epoch. If the {@link IndexingSource} increases the epoch indexing needs to start
+     * from scratch (see documentation of {@link IndexingSource} for details.
+     */
+    long getEpoch();
+    
+    /**
+     * The read only Iterator over the changed items of this ChangeSet
      * 
      * @return the URIs of the changed contentItems included in this ChangeSet
      */
-    Set<String> changed();
-
+    public Iterator<String> iterator();
+    
     /**
-     * The reference to the {@link Store} of this {@link ChangeSet}. This Store can be used to iterate on the
-     * changes.
+     * The reference to the {@link Store} of this {@link ChangeSet}. 
+     * This {@link IndexingSource} can be used to iterate on the changes.
      * 
-     * @return
+     * @return the IndexingSource of this {@link ChangeSet}
      */
-    Store<Item> getStore();
+    IndexingSource<Item> getIndexingSource();
 }
