@@ -29,10 +29,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -103,6 +106,17 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties(value = {@Property(name = Constants.SERVICE_RANKING, intValue = 100)})
 public class FileStore implements Store<ContentItem> {
+	//TODO: IMPORTANT
+	//  We need to move the Contenthub related business logic out of this class!
+	//  Otherwise one can not implement/use different store implementations.
+	//  
+	//  e.g. the  #put(..) method MUST NOT enhance the contentItem. It is only
+	//  expected to store the parsed content item (without modifications).
+	//  The logic if the Contenthub needs to enhance ContentItems needs to be
+	//  outside of the actual Store implementation
+	
+	
+	
     // @Property(name = Constants.SERVICE_RANKING)
     // private int ranking;
 
@@ -174,6 +188,8 @@ public class FileStore implements Store<ContentItem> {
 
     @Reference
     private EnhancementJobManager jobManager;
+    
+    Map<String,Object> storeProperties;
 
     @Activate
     protected void activate(ComponentContext componentContext) throws StoreException {
@@ -183,8 +199,40 @@ public class FileStore implements Store<ContentItem> {
         if (!storeFolder.exists()) {
             storeFolder.mkdirs();
         }
+        // init the store properties
+		Map<String,Object> properties = new HashMap<String, Object>();
+		properties.put(PROPERTY_NAME, getName());
+		properties.put(PROPERTY_DESCRIPTION, getDescription());
+		properties.put(PROPERTY_ITEM_TYPE, getItemType());
+		storeProperties = Collections.unmodifiableMap(properties);
     }
 
+    protected void deactivate(ComponentContext context) {
+    	storeProperties = null;
+    }
+    
+    /*
+     * NOTE: This implementation assume a single FileStore instance.
+     * If this is changed this implementations need to be adapted.
+     */
+    @Override
+    public String getName() {
+    	return "contenthubFileStore";
+    }
+    
+    /*
+     * NOTE: This implementation assume a single FileStore instance.
+     * If this is changed this implementations need to be adapted.
+     */
+    @Override
+    public String getDescription() {
+    	return "File based Store implementation for ContentItems used by the Stanbol Contenthub";
+    }
+    
+    @Override
+    public Map<String, Object> getProperties() {
+    	return storeProperties;
+    }
     @Override
     public Class<ContentItem> getItemType() {
         return ContentItem.class;

@@ -1,5 +1,7 @@
 package org.apache.stanbol.commons.semanticindex.store;
 
+import java.util.Map;
+
 
 /**
  * Minimal interface required by the Semantic Index as an indexing source.
@@ -9,10 +11,35 @@ package org.apache.stanbol.commons.semanticindex.store;
 public interface IndexingSource<Item> {
 
 	/**
+	 * The property used for {@link #getName()}
+	 */
+	String PROPERTY_NAME = "org.apache.stanbol.indexingsource.name";
+	String PROPERTY_DESCRIPTION = "org.apache.stanbol.indexingsource.description";
+	String PROPERTY_ITEM_TYPE = "org.apache.stanbol.indexingsource.itemtype";
+	/**
+	 * The name of the IndexingSource
+	 * @return the name. MUST NOT be <code>null</code> nor empty.
+	 */
+	String getName();
+	/**
+	 * An optional human readable description that provides some
+	 * additional information about this IndexingSource
+	 * @return the description
+	 */
+	String getDescription();
+	
+	/**
 	 * Getter for the type of Items managed by this Store
 	 * @return
 	 */
 	Class<Item> getItemType();
+
+	/**
+	 * Read-only map with additional properties about this IndexingSource
+	 * @return an read-only map with additional metadata available for
+	 * this indexing source.
+	 */
+	Map<String, Object> getProperties();
 
 	/** 
      * Gets a Item by uri, null if non-existing 
