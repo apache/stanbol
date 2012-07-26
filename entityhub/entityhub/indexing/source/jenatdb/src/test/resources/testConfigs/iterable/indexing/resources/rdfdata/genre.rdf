@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<rdf:RDF xmlns="http://iptc.org/std/nar/2006-10-01/"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:nar="http://iptc.org/std/nar/2006-10-01"
+         xmlns:owl="http://wwww.w3.org/2002/07/owl#"
+         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+
+
+
+
+
+
+<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/">
+<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme" />
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Actuality">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Advice">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/almanac">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Analysis">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Anniversary">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Archive_material">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Background">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Current">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Curtain_Raiser">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Daybook">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Exclusive">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Feature">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Fixture">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Forecast">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/From_the_Scene">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/History">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/horoscope">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Interview">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Music">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Obituary">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Opinion">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Polls_and_Surveys">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Press_Release">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Press-Digest">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Profile">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Program">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Question_and_Answer_Session">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Quote">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Raw_Sound">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Response_to_a_Question">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Results_Listings_and_Statistics">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Retrospective">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Review">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Scener">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Side_bar_and_supporting_information">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Special_Report">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Summary">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Synopsis">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Text_only">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Transcript_and_Verbatim">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Update">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Voicer">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Wrap">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+
+		<skos:HasTopConcept>
+			<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Wrapup">
+			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+			</rdf:Description>
+		</skos:HasTopConcept>
+</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Actuality">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Actuality</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains the recording of the event.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Advice">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Advice</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains advice, typically letters and answers about personal problems, that are publishable.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/almanac">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Almanac</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">List of data, including birthdays of famous people and items of historical significance, for a given day.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Analysis">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Analysis</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains data and conclusions drawn by a journalist who has researched the story in depth.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Anniversary">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Anniversary</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">Stories about the anniversary of some important event that took place in recent history, usually bringing a short review of the event itself.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Archive_material">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Archive material</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains material distributed previously that has been selected from the originator's archives.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Background">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Background</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object provides some scene setting and explanation for the event being reported.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Current">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Current</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object content is about events taking place at the time of the report.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Curtain_Raiser">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Curtain Raiser</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains information about the staging and outcome of an immediately upcoming event.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Daybook">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Daybook</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">Items filed on a regular basis that are lists of upcoming events with time and place, designed to inform others of events for planning purposes.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Exclusive">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Exclusive</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">Information content, in any form, that is unique to a specific information provider.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Feature">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Feature</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object content is about a particular event or individual that may not be significant to the current breaking news.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Fixture">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Fixture</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains data that occurs often and predictably.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Forecast">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Forecast</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains opinion as to the outcome of a future event.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/From_the_Scene">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">From the Scene</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a report from the scene of an event.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/History">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">History</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object content is based on previous rather than current events.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/horoscope">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Horoscope</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">Astrological forecasts</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Interview">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Interview</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a report of a dialogue with a news source that gives it significant voice (includes Q and A).</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Music">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Music</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains music alone.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Obituary">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Obituary</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a narrative about an individual's life and achievements for publication after his or her death.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Opinion">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Opinion</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains an editorial comment that reflects the views of the author.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Polls_and_Surveys">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Polls and Surveys</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains numeric or other information produced as a result of questionnaires or interviews.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Press_Release">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Press Release</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains promotional material or information provided to a news organisation.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Press-Digest">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Press-Digest</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains an editorial comment by another medium completely or in parts without significant journalistic changes.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Profile">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Profile</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a description of the life or activity of a news subject (often a living individual).</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Program">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Program</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">A news item giving lists of intended events and time to be covered by the news provider. Each program covers a day, a week, a month or a year. The covered period is referenced as a keyword.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Question_and_Answer_Session">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Question and Answer Session</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains the interviewer and subject questions and answers.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Quote">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Quote</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a one or two sentence verbatim in direct quote.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Raw_Sound">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Raw Sound</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains unedited sounds.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Response_to_a_Question">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Response to a Question</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a reply to a question.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Results_Listings_and_Statistics">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Results Listings and Statistics</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains alphanumeric data suitable for presentation in tabular form.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Retrospective">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Retrospective</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains material that looks back on a specific (generally long) period of time such as a season, quarter, year or decade.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Review">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Review</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a critique of a creative activity or service (for example a book, a film or a restaurant).</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Scener">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Scener</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a description of the event circumstances.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Side_bar_and_supporting_information">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Side bar and supporting information</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a related story that provides additional insight into the news event being reported</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Special_Report">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Special Report</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">In-depth examination of a single subject requiring extensive research and usually presented at great length, either as a single item or as a series of items.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Summary">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Summary</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a single item synopsis of a number of news stories (generally unrelated).</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Synopsis">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Synopsis</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a condensed version of a single news item.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Text_only">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Text only</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a transcription of text.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Transcript_and_Verbatim">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Transcript and Verbatim</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a word for word report of a discussion or briefing without significant journalistic intervention.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Update">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Update</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains an intraday snapshot (as for electronic services) of a single news subject.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Voicer">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Voicer</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains only voice.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Wrap">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Wrap</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a complete summary of the event.</skos:definition>
+  			
+  		</rdf:Description>
+			
+		<rdf:Description rdf:about="http://cv.iptc.org/newscodes/genre/Wrapup">
+  			<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept" />
+  			<skos:prefLabel xml:lang="en-GB">Wrapup</skos:prefLabel>
+  			<skos:definition xml:lang="en-GB">The object contains a recap of a running story (such as the end of the day).</skos:definition>
+  			
+  		</rdf:Description>
+  
+</rdf:RDF>
