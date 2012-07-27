@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.Language;
@@ -44,6 +45,7 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.LockableMGraph;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.SimpleLiteralFactory;
 import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
@@ -248,9 +250,16 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
         }
 
         Collection<Resource> result = new ArrayList<Resource>();
-        Iterator<Triple> triples = graph.filter((NonLiteral) subject, (UriRef) property, null);
-        while (triples.hasNext()) {
-            result.add(triples.next().getObject());
+        Lock readLock = readLockGraph();
+        try {
+            Iterator<Triple> triples = graph.filter((NonLiteral) subject, (UriRef) property, null);
+            while (triples.hasNext()) {
+                result.add(triples.next().getObject());
+            }
+        } finally {
+            if(readLock != null){ //will be null if #graph is a read-only graph instance
+                readLock.unlock();
+            }
         }
 
         return result;
@@ -263,11 +272,17 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
         }
 
         Collection<Resource> result = new ArrayList<Resource>();
-        Iterator<Triple> triples = graph.filter(null, (UriRef) property, object);
-        while (triples.hasNext()) {
-            result.add(triples.next().getSubject());
+        Lock readLock = readLockGraph();
+        try {
+            Iterator<Triple> triples = graph.filter(null, (UriRef) property, object);
+            while (triples.hasNext()) {
+                result.add(triples.next().getSubject());
+            }
+        } finally {
+            if(readLock != null){ //will be null if #graph is a read-only graph instance
+                readLock.unlock();
+            }
         }
-
         return result;
     }
 
@@ -370,4 +385,20 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
     public ThreadPoolExecutor getThreadPool() {
         return null;
     }
+    
+    /**
+     * @return the readLock or <code>null</code>if no read lock is needed
+     */
+    private Lock readLockGraph() {
+        final Lock readLock;
+        if(graph instanceof LockableMGraph){
+            readLock = ((LockableMGraph)graph).getLock().readLock();
+            readLock.lock();
+        } else {
+            readLock = null;
+        }
+        return readLock;
+    }
+
+    
 }
