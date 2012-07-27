@@ -145,10 +145,32 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
     
     private static LiteralFactory lf = LiteralFactory.getInstance();
 
+    /**
+     * Allows sub-classes to create a instance and setting the {@link #graph}
+     * later on by using {@link #setGraph(TripleCollection)}.
+     */
+    protected ClerezzaBackend() {
+    }
+    /**
+     * Constructs a Clerezza {@link RDFBackend} by using the parsed {@link TripleCollection}
+     * @param graph the {@link TripleCollection}
+     * @throws IllegalArgumentException if <code>null</code> is parsed as graph.
+     */
     public ClerezzaBackend(TripleCollection graph) {
+        if(graph == null){
+            throw new IllegalArgumentException("The parsed Graph MUST NOT be NULL!");
+        }
         this.graph = graph;
     }
+    
+    protected final TripleCollection getGraph(){
+        return this.graph;
+    }
 
+    protected final void setGraph(TripleCollection graph){
+        this.graph = graph;
+    }
+    
     @Override
     public Resource createLiteral(String content) {
         return createLiteral(content,null,null);
