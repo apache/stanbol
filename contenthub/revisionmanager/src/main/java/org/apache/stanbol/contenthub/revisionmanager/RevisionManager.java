@@ -249,12 +249,15 @@ public class RevisionManager {
     }
 
     private <Item> void updateEpoch(Store<Item> store, boolean insert) throws StoreException {
+        String storeID = getStoreID(store);
+        // truncate the revision table
+        dbManager.truncateTable(storeID);
+
         // get connection
         Connection con = dbManager.getConnection();
         PreparedStatement ps = null;
 
         // update the table
-        String storeID = getStoreID(store);
         try {
             long newEpoch = System.currentTimeMillis();
             if (!insert) {
