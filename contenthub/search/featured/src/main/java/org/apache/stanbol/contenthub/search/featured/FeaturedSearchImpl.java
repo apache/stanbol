@@ -44,8 +44,9 @@ import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
 import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex;
 import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
-import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.ConstrainedDocumentSet;
+import org.apache.stanbol.contenthub.servicesapi.index.search.featured.Constraint;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
@@ -57,7 +58,7 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
-import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
+import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,13 +108,6 @@ public class FeaturedSearchImpl implements FeaturedSearch {
 
     @Reference
     private ContentItemFactory contentItemFactory;
-
-    // private BundleContext bundleContext;
-    //
-    // @Activate
-    // public void activate(ComponentContext context) {
-    // this.bundleContext = context.getBundleContext();
-    // }
 
     private List<FacetResult> convertFacetFields(List<FacetField> facetFields, List<FacetResult> allFacets) {
         List<FacetResult> facets = new ArrayList<FacetResult>();
@@ -168,16 +162,30 @@ public class FeaturedSearchImpl implements FeaturedSearch {
 
     @Override
     public SearchResult search(SolrParams solrParams, String ontologyURI, String indexName) throws SearchException {
-        /*
-         * RESTful services uses search method with "SolrParams" argument. For those operations
-         */
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.add(solrParams);
         List<FacetResult> allFacets = getAllFacetResults(indexName);
-        SolrQueryUtil.setDefaultQueryParameters(solrQuery, allFacets);
+        SolrQueryUtil.setFacetFields(solrQuery, allFacets);
         QueryResponse queryResponse = solrSearch.search(solrQuery, indexName);
         String queryTerm = SolrQueryUtil.extractQueryTermFromSolrQuery(solrParams);
         return search(queryTerm, queryResponse, ontologyURI, indexName, allFacets);
+    }
+
+    @Override
+    public ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints, String indexName) throws SearchException {
+        return performSearch(keyword, constraints, indexName);
+    }
+
+    private ConstrainedDocumentSet performSearch(String keyword, Set<Constraint> constraints, String indexName) throws SearchException {
+        SolrQuery query = SolrQueryUtil.prepareSolrQuery(keyword);
+        SolrQueryUtil.addConstraintsToSolrQuery(constraints, query);
+        List<FacetResult> allFacets = getAllFacetResults(indexName);
+        SolrQueryUtil.setFacetFields(query, allFacets);
+        query.setRows(Integer.MAX_VALUE);
+        query.setFields(SolrFieldName.ID.toString(), SolrFieldName.ENHANCEMENTCOUNT.toString(),
+            SolrFieldName.TITLE.toString(), SolrFieldName.MIMETYPE.toString());
+        QueryResponse queryResponse = solrSearch.search(query, indexName);
+        return new DefaultConstrainedDocumentSet(keyword, queryResponse, constraints, indexName, this);
     }
 
     @Override
@@ -212,8 +220,7 @@ public class FeaturedSearchImpl implements FeaturedSearch {
         ContentItem ci = null;
         boolean error = false;
         try {
-            ci = contentItemFactory.createContentItem(new ByteArraySource(queryTerm
-                    .getBytes(Constants.DEFAULT_ENCODING), "text/plain"));
+            ci = contentItemFactory.createContentItem(new StringSource(queryTerm));
             enhancementJobManager.enhanceContent(ci);
         } catch (UnsupportedEncodingException e) {
             log.error("Failed to get bytes of query term: {}", queryTerm, e);

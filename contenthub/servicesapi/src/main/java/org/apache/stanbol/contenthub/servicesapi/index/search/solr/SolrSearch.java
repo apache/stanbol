@@ -38,7 +38,7 @@ public interface SolrSearch {
      * @param queryTerm
      *            Query term to be searched
      * @param indexName
-     *            Index(Solr core) name to obtain the corresponding Solr core to be
+     *            LDPath program name (Solr core/index name) to obtain the corresponding Solr core to be
      *            searched
      * @return the {@link QueryResponse} as is obtained from Solr.
      * @throws SearchException

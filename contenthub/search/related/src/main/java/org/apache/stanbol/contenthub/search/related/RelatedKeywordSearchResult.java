@@ -58,16 +58,16 @@ public class RelatedKeywordSearchResult implements SearchResult {
 
     @Override
     public void setDocuments(List<String> resultantDocuments) {
-        // String msg = "RelatedKeywordSearchResult cannot contain any ResultantDocument";
-        // log.error(msg);
-        // throw new NotImplementedException(msg);
+        String msg = "RelatedKeywordSearchResult cannot contain any ResultantDocument";
+        log.error(msg);
+        throw new UnsupportedOperationException(msg);
     }
 
     @Override
     public void setFacets(List<FacetResult> facets) {
-        // String msg = "RelatedKeywordSearchResult cannot contain any FacetField";
-        // log.error(msg);
-        // throw new NotImplementedException(msg);
+        String msg = "RelatedKeywordSearchResult cannot contain any FacetField";
+        log.error(msg);
+        throw new UnsupportedOperationException(msg);
     }
 
     @Override

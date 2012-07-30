@@ -17,6 +17,7 @@
 package org.apache.stanbol.contenthub.servicesapi.index.search.featured;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.solr.common.params.SolrParams;
 import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
@@ -52,8 +53,8 @@ public interface FeaturedSearch {
      * @param ontologyURI
      *            URI of an ontology in which related keywords will be searched
      * @param indexName
-     *            Name of the Solr core/index which is used to obtained the corresponding Solr core which will
-     *            be searched for the given query term
+     *            LDPath program name (name of the Solr core/index) which is used to obtained the
+     *            corresponding Solr core which will be searched for the given query term
      * @return {@link SearchResult} for the given query term. For details of the response see
      *         {@link SearchResult}.
      * @throws SearchException
@@ -73,16 +74,32 @@ public interface FeaturedSearch {
      * 
      * @param solrQuery
      *            for which the search results will be obtained
-     * @param ontologyURI
-     *            URI of an ontology in which related keywords will be searched
-     * @param indexName
-     *            Name of the Solr core/index which is used to obtained the corresponding Solr core which will
-     *            be searched for the given solrQuery
      * @return a unified response in a {@link SearchResult} containing actual content items, related keywords
      *         and facets for the obtained content items.
      * @throws SearchException
      */
     SearchResult search(SolrParams solrQuery, String ontologyURI, String indexName) throws SearchException;
+
+    /**
+     * This method searches the given <code>keyword</code> in the Solr index identified by the given
+     * <code>indexName</code> considering the given <code>constraints</code>. Results are returned in a
+     * {@link ConstrainedDocumentSet} instance and all search results are returned without considering any
+     * <i>offset</i> or <i>limit</i> value. Furthermore, returned {@link ConstrainedDocumentSet} contains
+     * {@link Constraint}s that were used to filter the results and all possible {@link Facet}s that can be
+     * used to filter results even more.
+     * 
+     * @param keyword
+     *            keyword to be searched
+     * @param constraints
+     *            a {@link Set} of {@link Constraint}s to be provided in addition to initial query
+     *            <code>keyword</code>
+     * @param indexName
+     *            name of the index (Solr core) on which search will be done
+     * @return an instance of {@link ConstrainedDocumentSet} including the search results and additional
+     *         {@link Constraint} and {@link Facet} information.
+     * @throws SearchException
+     */
+    ConstrainedDocumentSet search(String keyword, Set<Constraint> constraints, String indexName) throws SearchException;
 
     /**
      * This method obtains the available field names of the index, corresponding to the given
@@ -92,7 +109,6 @@ public interface FeaturedSearch {
      *            Name of the index for which the field names will be obtained.
      * @return {@link List} of field names related index
      * @throws SearchException
-     * @throws IndexManagementException
      */
     List<FacetResult> getAllFacetResults(String indexName) throws SearchException;
 

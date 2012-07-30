@@ -24,9 +24,9 @@
   <artifactId>org.apache.stanbol.contenthub.search.solr</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Search Solr Searcher</name>
+  <name>Apache Stanbol Contenthub Solr Search</name>
 
-  <description>Finds indexed document from Solr according to field constraints</description>
+  <description>Provides search over the underlying Solr cores used by Semantic Indexes</description>
   <build>
     <plugins>
       <plugin>

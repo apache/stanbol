@@ -29,7 +29,6 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.contenthub.search.related.ontologyresource.OntologyResourceSearch;
 import org.apache.stanbol.contenthub.search.related.referencedsite.ReferencedSiteSearch;
-import org.apache.stanbol.contenthub.search.related.wordnet.WordnetSearch;
 import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
@@ -82,11 +81,6 @@ public class RelatedKeywordSearchManagerImpl implements RelatedKeywordSearchMana
         Map<String,Map<String,List<RelatedKeyword>>> relatedKeywordsMap = new HashMap<String,Map<String,List<RelatedKeyword>>>();
         relatedKeywordsMap.put(keyword, relatedKeywords);
         return new RelatedKeywordSearchResult(relatedKeywordsMap);
-    }
-    
-    @Override
-    public SearchResult getRelatedKeywordsFromWordnet(String keyword) throws SearchException {
-        return getRelatedKeywordsFrom(keyword, WordnetSearch.class);
     }
 
     @Override

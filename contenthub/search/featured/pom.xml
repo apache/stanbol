@@ -24,7 +24,7 @@
   <artifactId>org.apache.stanbol.contenthub.search.featured</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Featured Search</name>
+  <name>Apache Stanbol Contenthub Featured Search</name>
 
   <description>Aggregates the results of SolrSearch and RelatedKeywordSearch</description>
   <build>

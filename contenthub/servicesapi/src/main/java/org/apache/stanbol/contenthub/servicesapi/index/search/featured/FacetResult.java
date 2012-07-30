@@ -28,8 +28,8 @@ import org.apache.solr.client.solrj.response.FacetField;
  */
 public interface FacetResult {
 
-	FacetField getFacetField();
-	
-	String getType();
-	
+    FacetField getFacetField();
+
+    String getType();
+
 }

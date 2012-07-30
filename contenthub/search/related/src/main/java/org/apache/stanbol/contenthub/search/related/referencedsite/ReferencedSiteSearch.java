@@ -45,7 +45,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +96,7 @@ public class ReferencedSiteSearch implements RelatedKeywordSearch {
     private Entityhub entityhub;
 
     @Reference
-    private ReferencedSiteManager referencedSiteManager;
+    private SiteManager referencedSiteManager;
 
     @Override
     public Map<String,List<RelatedKeyword>> search(String keyword) throws SearchException {
