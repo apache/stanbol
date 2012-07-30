@@ -116,7 +116,7 @@ public class TestClerezzaSpaces {
 
         factory = new OntologySpaceFactoryImpl(new ClerezzaOntologyProvider(tcManager, offline, parser),
                 new Hashtable<String,Object>());
-        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/"));
+        factory.setDefaultNamespace(IRI.create("http://stanbol.apache.org/ontology/"));
     }
 
     String scopeId = "Comics";
@@ -210,7 +210,7 @@ public class TestClerezzaSpaces {
         /* Now test namespaces. */
 
         // Null namespace (invalid).
-        factory.setNamespace(null);
+        factory.setDefaultNamespace(null);
         try {
             shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite null OntoNet namespace.");
@@ -218,7 +218,7 @@ public class TestClerezzaSpaces {
         assertNull(shouldBeNull);
 
         // Namespace with query (invalid).
-        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/?query=true"));
+        factory.setDefaultNamespace(IRI.create("http://stanbol.apache.org/ontology/?query=true"));
         try {
             shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite query in OntoNet namespace.");
@@ -226,7 +226,7 @@ public class TestClerezzaSpaces {
         assertNull(shouldBeNull);
 
         // Namespace with fragment (invalid).
-        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology#fragment"));
+        factory.setDefaultNamespace(IRI.create("http://stanbol.apache.org/ontology#fragment"));
         try {
             shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
@@ -234,7 +234,7 @@ public class TestClerezzaSpaces {
         assertNull(shouldBeNull);
 
         // Namespace ending with hash (invalid).
-        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology#"));
+        factory.setDefaultNamespace(IRI.create("http://stanbol.apache.org/ontology#"));
         try {
             shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
@@ -242,15 +242,15 @@ public class TestClerezzaSpaces {
         assertNull(shouldBeNull);
 
         // Namespace ending with neither (valid, should automatically add slash).
-        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology"));
+        factory.setDefaultNamespace(IRI.create("http://stanbol.apache.org/ontology"));
         shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
         assertNotNull(shouldBeNotNull);
-        assertTrue(shouldBeNotNull.getNamespace().toString().endsWith("/"));
+        assertTrue(shouldBeNotNull.getDefaultNamespace().toString().endsWith("/"));
 
         shouldBeNotNull = null;
 
         // Namespace ending with slash (valid).
-        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/"));
+        factory.setDefaultNamespace(IRI.create("http://stanbol.apache.org/ontology/"));
         shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
         assertNotNull(shouldBeNotNull);
     }

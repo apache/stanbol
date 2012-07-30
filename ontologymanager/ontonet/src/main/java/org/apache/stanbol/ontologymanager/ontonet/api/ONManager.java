@@ -73,6 +73,9 @@ public interface ONManager extends ScopeRegistry, OntologyScopeFactory {
      * Returns the base namespace to be used for the Stanbol ontology network (e.g. for the creation of new
      * scopes). For convenience, it is returned as a string so that it can be concatenated to form IRIs.
      * 
+     * @deprecated please use {@link OfflineConfiguration#getDefaultOntologyNetworkNamespace()} to obtain the
+     *             namespace
+     * 
      * @return the base namespace of the Stanbol ontology network.
      */
     String getOntologyNetworkNamespace();
@@ -105,6 +108,10 @@ public interface ONManager extends ScopeRegistry, OntologyScopeFactory {
     /**
      * Sets the IRI that will be the base namespace for all ontology scopes and collectors created by this
      * object.
+     * 
+     * @deprecated {@link ONManager} should set its namespace to be the same as
+     *             {@link OfflineConfiguration#getDefaultOntologyNetworkNamespace()} whenever it changes on
+     *             the object obtained by calling {@link #getOfflineConfiguration()}.
      * 
      * @param namespace
      *            the base namespace.

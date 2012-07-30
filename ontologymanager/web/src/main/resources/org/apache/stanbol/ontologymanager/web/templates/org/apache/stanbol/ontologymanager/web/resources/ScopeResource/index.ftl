@@ -30,6 +30,21 @@
       <p class="collapseheader"><b>Load an ontology</b></p>
       <div class="collapsable">
       <br/>
+
+    <form method="POST" enctype="multipart/form-data" accept-charset="utf-8">
+    <fieldset>
+      <legend>Manage stored ontology</legend>
+      <p><b>Ontology ID:</b> 
+        <select name="stored">  
+        <option value="null">&lt;please select an ontology&gt;</option>
+        <#list it.manageableOntologies as manageable>
+        <option value="${manageable}">${manageable}</option>
+        </#list>
+        </select>
+        <input type="submit" value="Manage"/>
+      </p>
+    </fieldset>
+    </form>
       
     <form method="POST" enctype="multipart/form-data" accept-charset="utf-8">
     <fieldset>
@@ -91,17 +106,19 @@
     });    
   </script>
   
-  <h3>Stored ontologies</h3>
+  <h3>Managed ontologies</h3>
   <h4>Custom</h4>
   <#assign ontologies = it.customOntologies>
-  <div class="storeContents">
+  <div class="storeContents" id="managed_custom">
     <table id="customOnt">
       <div>
         <tr>
+          <th></th>
           <th>Name</th>
         </tr>
         <#list ontologies as ontology>
           <tr>
+            <td><img src="${it.staticRootUrl}/ontonet/images/unload_icon_16.png" title="Unmanage this ontology" onClick="javascript:unload('${ontology}')"/></td>
             <td><a href="${it.publicBaseUri}ontonet/ontology/${it.scope.ID}/${ontology}">${ontology}</a></td>
           </tr>
         </#list>
@@ -110,14 +127,16 @@
   </div>
   <h4>Core</h4>
   <#assign ontologies2 = it.coreOntologies>
-  <div class="storeContents">
+  <div class="storeContents" id="managed_core">
     <table id="coreOnt">
       <div>
         <tr>
+          <th></th>
           <th>Name</th>
         </tr>
         <#list ontologies2 as ontology2>
           <tr>
+            <td><img src="${it.staticRootUrl}/ontonet/images/unload_icon_16.png" title="Unmanage this ontology" onClick="javascript:unload('${ontology2}')"/></td>
             <td><a href="/ontonet/ontology/${it.scope.ID}/${ontology2}">${ontology2}</a></td>
           </tr>
         </#list>
@@ -126,6 +145,27 @@
   </div>
   
     </div> <!-- web view -->
+
+  <script language="JavaScript">
+    
+    function unload(ontologyid) {
+      var lurl = "${it.publicBaseUri}ontonet/ontology/${it.scope.ID}" + "/" + ontologyid;
+      $.ajax({
+        url: lurl,
+        type: "DELETE",
+        async: true,
+        cache: false,
+        success: function(data, textStatus, xhr) {
+          $("#managed_custom").load("${it.publicBaseUri}ontonet/ontology/${it.scope.ID} #managed_custom>table");
+          $("#managed_core").load("${it.publicBaseUri}ontonet/ontology/${it.scope.ID} #managed_core>table");
+        },
+        error: function() {
+          alert(result.status + ' ' + result.statusText);
+        }
+      });
+    }
+    
+  </script>
 
   </@common.page>
 </#escape>

@@ -19,6 +19,8 @@ package org.apache.stanbol.ontologymanager.ontonet.api;
 import java.util.Collection;
 import java.util.Map;
 
+import org.semanticweb.owlapi.model.OWLOntologyID;
+
 /**
  * Contains ownership and collector information on all ontology networks currently configured.
  * 
@@ -27,12 +29,13 @@ import java.util.Map;
  */
 public class OntologyNetworkConfiguration {
 
-    private Map<String,Collection<String>> coreOntologiesForScopes, customOntologiesForScopes,
-            ontologiesForSessions, scopesForSessions;
+    private Map<String,Collection<String>> scopesForSessions;
+    private Map<String,Collection<OWLOntologyID>> coreOntologiesForScopes, customOntologiesForScopes,
+            ontologiesForSessions;
 
-    public OntologyNetworkConfiguration(Map<String,Collection<String>> coreOntologiesForScopes,
-                                        Map<String,Collection<String>> customOntologiesForScopes,
-                                        Map<String,Collection<String>> ontologiesForSessions,
+    public OntologyNetworkConfiguration(Map<String,Collection<OWLOntologyID>> coreOntologiesForScopes,
+                                        Map<String,Collection<OWLOntologyID>> customOntologiesForScopes,
+                                        Map<String,Collection<OWLOntologyID>> ontologiesForSessions,
                                         Map<String,Collection<String>> scopesForSessions) {
         this.coreOntologiesForScopes = coreOntologiesForScopes;
         this.customOntologiesForScopes = customOntologiesForScopes;
@@ -44,15 +47,15 @@ public class OntologyNetworkConfiguration {
         return scopesForSessions.get(sessionId);
     }
 
-    public Collection<String> getCoreOntologyKeysForScope(String scopeId) {
+    public Collection<OWLOntologyID> getCoreOntologyKeysForScope(String scopeId) {
         return coreOntologiesForScopes.get(scopeId);
     }
 
-    public Collection<String> getCustomOntologyKeysForScope(String scopeId) {
+    public Collection<OWLOntologyID> getCustomOntologyKeysForScope(String scopeId) {
         return customOntologiesForScopes.get(scopeId);
     }
 
-    public Collection<String> getOntologyKeysForSession(String sessionId) {
+    public Collection<OWLOntologyID> getOntologyKeysForSession(String sessionId) {
         return ontologiesForSessions.get(sessionId);
     }
 

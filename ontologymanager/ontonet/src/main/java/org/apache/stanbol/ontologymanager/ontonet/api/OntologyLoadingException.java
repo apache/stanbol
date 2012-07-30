@@ -18,7 +18,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api;
 
 /**
  * A runtime exception denoting that trying to load an ontology into the Ontology Manager has caused an
- * undesired status. Most of the time the reason is to be found in the cause registered with this exception.
+ * undesired status. The reason is most likely to be found in the cause registered with this exception.
  * 
  * @author alexdma
  * 

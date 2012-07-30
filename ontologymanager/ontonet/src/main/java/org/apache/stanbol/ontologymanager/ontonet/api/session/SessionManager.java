@@ -19,7 +19,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.session;
 import java.io.OutputStream;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
+import org.apache.stanbol.ontologymanager.ontonet.api.NamedArtifact;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 /**
@@ -32,7 +32,7 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
  * @author alexdma
  * 
  */
-public interface SessionManager extends NamedResource, SessionListenable {
+public interface SessionManager extends NamedArtifact, SessionListenable {
 
     /**
      * The key used to configure the base namespace of the ontology network.

@@ -20,7 +20,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.collector;
  * An object that supports locking mechanisms, thus allowing/preventing modifications of the resources
  * contained therein. Lock management is assumed to occur in methods inherited from implementations.<br>
  * 
- * TODO add public lock handling methods as well?
+ * XXX add public lock handling methods as well?
  * 
  * @author alexdma
  * 

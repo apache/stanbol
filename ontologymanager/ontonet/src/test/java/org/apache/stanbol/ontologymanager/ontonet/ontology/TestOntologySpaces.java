@@ -31,6 +31,7 @@ import java.net.URL;
 
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.MissingOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
@@ -53,6 +54,8 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestOntologySpaces {
 
@@ -62,6 +65,8 @@ public class TestOntologySpaces {
     private static OntologySpaceFactory factory;
     private static OntologyInputSource<OWLOntology> inMemorySrc, minorSrc, dropSrc, nonexSrc;
     private static OWLAxiom linusIsHuman = null;
+
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     private static OWLOntology ont = null, ont2 = null;
 
@@ -180,7 +185,7 @@ public class TestOntologySpaces {
         /* Now test namespaces. */
 
         // Null namespace (invalid).
-        factory.setNamespace(null);
+        factory.setDefaultNamespace(null);
         try {
             shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
             fail("Expected IllegalArgumentException not thrown despite null OntoNet namespace.");
@@ -188,7 +193,7 @@ public class TestOntologySpaces {
         assertNull(shouldBeNull);
 
         // Namespace with query (invalid).
-        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/?query=true"));
+        factory.setDefaultNamespace(IRI.create("http://stanbol.apache.org/ontology/?query=true"));
         try {
             shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
             fail("Expected IllegalArgumentException not thrown despite query in OntoNet namespace.");
@@ -196,7 +201,7 @@ public class TestOntologySpaces {
         assertNull(shouldBeNull);
 
         // Namespace with fragment (invalid).
-        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology#fragment"));
+        factory.setDefaultNamespace(IRI.create("http://stanbol.apache.org/ontology#fragment"));
         try {
             shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
             fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
@@ -204,7 +209,7 @@ public class TestOntologySpaces {
         assertNull(shouldBeNull);
 
         // Namespace ending with hash (invalid).
-        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology#"));
+        factory.setDefaultNamespace(IRI.create("http://stanbol.apache.org/ontology#"));
         try {
             shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
             fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
@@ -212,15 +217,15 @@ public class TestOntologySpaces {
         assertNull(shouldBeNull);
 
         // Namespace ending with neither (valid, should automatically add slash).
-        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology"));
+        factory.setDefaultNamespace(IRI.create("http://stanbol.apache.org/ontology"));
         shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
         assertNotNull(shouldBeNotNull);
-        assertTrue(shouldBeNotNull.getNamespace().toString().endsWith("/"));
+        assertTrue(shouldBeNotNull.getDefaultNamespace().toString().endsWith("/"));
 
         shouldBeNotNull = null;
 
         // Namespace ending with slash (valid).
-        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/"));
+        factory.setDefaultNamespace(IRI.create("http://stanbol.apache.org/ontology/"));
         shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE);
         assertNotNull(shouldBeNotNull);
     }
@@ -241,7 +246,12 @@ public class TestOntologySpaces {
         assertTrue(space.hasOntology(nonexId));
 
         IRI bogus = IRI.create("http://www.example.org/ontology/bogus");
-        space.removeOntology(bogus);
+        try {
+            space.removeOntology(bogus);
+            fail("Removing nonexisting ontology succeeded without an exception. This should not happen.");
+        } catch (MissingOntologyException mex) {
+            log.info("Expected exception caught when removing missing ontology {}", bogus);
+        }
 
         space.removeOntology(dropId);
         assertFalse(space.hasOntology(dropId));

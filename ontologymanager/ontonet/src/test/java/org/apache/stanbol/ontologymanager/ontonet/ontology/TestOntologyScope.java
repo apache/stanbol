@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
-import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.onManager;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -138,10 +138,10 @@ public class TestOntologyScope {
         onManager.setOntologyNetworkNamespace("http://stanbol.apache.org/ontology");
         shouldBeNotNull = onManager.createOntologyScope(scopeIdBlank);
         assertNotNull(shouldBeNotNull);
-        assertTrue(shouldBeNotNull.getNamespace().toString().endsWith("/"));
+        assertTrue(shouldBeNotNull.getDefaultNamespace().toString().endsWith("/"));
 
         // Now set again the correct namespace.
-        onManager.setOntologyNetworkNamespace(onManager.getOntologyNetworkNamespace());
+        onManager.setOntologyNetworkNamespace(offline.getDefaultOntologyNetworkNamespace().toString());
         shouldBeNotNull = null;
         try {
             shouldBeNotNull = onManager.createOntologyScope(scopeId1, src1, src2);

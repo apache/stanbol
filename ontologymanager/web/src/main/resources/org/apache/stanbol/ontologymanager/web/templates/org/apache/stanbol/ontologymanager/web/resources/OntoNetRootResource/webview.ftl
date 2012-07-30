@@ -62,7 +62,7 @@
   </div>
 
   <script>
-    $(".enginelisting p").click(function () {
+    $(".collapseheader").click(function () {
       $(this).parents("div").toggleClass("collapsed");
     });    
   </script>
@@ -73,12 +73,14 @@
     <table id="allOntologies">
       <div>
         <tr>
-          <th>ID</th>
-          <th>Direct handles</th>
+          <th width="90%">ID</th>
+          <th width="5%">Triples</th>
+          <th width="5%">Direct handles</th>
         </tr>
-        <#list it.ontologies as ontology>
+        <#list ontologies as ontology>
           <tr>
-            <td><a href="${it.publicBaseUri}ontonet/${ontology}">${ontology}</a></td>
+            <td><a href="${it.publicBaseUri}ontonet/${it.stringForm(ontology)}">${it.stringForm(ontology)}</a></td>
+            <td>${it.getSize(ontology)}</td>
             <td>${it.getHandles(ontology)?size}</td>
           </tr>
         </#list>

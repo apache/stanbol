@@ -39,6 +39,12 @@ public interface OfflineConfiguration {
      */
     String ONTOLOGY_PATHS = "org.apache.stanbol.ontologymanager.ontonet.ontologypaths";
 
+    /**
+     * Returns the namespace that will be used as the prefix for all named artifacts when exported to RDF/OWL,
+     * unless overridden manually (e.g. by calling the RESTful API on another base IRI).
+     * 
+     * @return the default ontology network namespace
+     */
     IRI getDefaultOntologyNetworkNamespace();
 
     /**

@@ -57,6 +57,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -76,6 +78,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
@@ -84,14 +87,19 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyNetworkMultiplexer;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.MGraphNetworkMultiplexer;
+import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
@@ -104,6 +112,7 @@ import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.RemoveImport;
 import org.slf4j.Logger;
@@ -129,6 +138,8 @@ public class OntoNetRootResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    protected ONManager onManager;
+
     /*
      * Placeholder for the OntologyProvider to be fetched from the servlet context.
      */
@@ -138,8 +149,6 @@ public class OntoNetRootResource extends BaseStanbolResource {
      * Placeholder for the OntologyProvider to be fetched from the servlet context.
      */
     protected RegistryManager registryManager;
-
-    protected ONManager onManager;
 
     protected SessionManager sessionManager;
 
@@ -178,7 +187,8 @@ public class OntoNetRootResource extends BaseStanbolResource {
     }
 
     private MGraph getGraph(String ontologyId, boolean merged) {
-        IRI iri = IRI.create(ontologyId);
+        long before = System.currentTimeMillis();
+        IRI iri = URIUtils.sanitize(IRI.create(ontologyId));
         log.debug("Will try to retrieve ontology {} from provider.", iri);
         /*
          * Export directly to MGraph since the OWLOntologyWriter uses (de-)serializing converters for the
@@ -190,7 +200,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
          */
         MGraph o = null, oTemp = null;
         try {
-            oTemp = ontologyProvider.getStoredOntology(iri, MGraph.class, merged);
+            oTemp = ontologyProvider.getStoredOntology(new OWLOntologyID(iri), MGraph.class, merged);
         } catch (Exception ex) {
             log.warn("Retrieval of ontology with ID " + iri + " failed.", ex);
         }
@@ -248,7 +258,19 @@ public class OntoNetRootResource extends BaseStanbolResource {
             // remove old statement
             o.remove(t);
         }
+        log.debug("Exported as Clerezza Graph in {} ms. Handing over to writer.", System.currentTimeMillis()
+                                                                                  - before);
         return o;
+    }
+
+    public Set<String> getHandles(OWLOntologyID ontologyId) {
+        Set<String> handles = new HashSet<String>();
+        if (onManager != null) for (OntologyScope scope : onManager.getRegisteredScopes())
+            if (scope.getCoreSpace().hasOntology(ontologyId)
+                || scope.getCustomSpace().hasOntology(ontologyId)) handles.add(scope.getID());
+        if (sessionManager != null) for (String sesId : sessionManager.getRegisteredSessionIDs())
+            if (sessionManager.getSession(sesId).hasOntology(ontologyId)) handles.add(sesId);
+        return handles;
     }
 
     @GET
@@ -306,33 +328,31 @@ public class OntoNetRootResource extends BaseStanbolResource {
         return rb.build();
     }
 
-    public Set<String> getOntologies() {
-        Set<String> filtered = new HashSet<String>();
-        for (String s : ontologyProvider.getPublicKeys()) {
-            // String s1 = s.split("::")[1];
-            if (s != null && !s.isEmpty()) filtered.add(s);
-        }
+    @GET
+    @Produces({RDF_XML, TURTLE, X_TURTLE, APPLICATION_JSON, RDF_JSON})
+    public Response getMetaGraph(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok(ontologyProvider.getMetaGraph(Graph.class));
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    public SortedSet<OWLOntologyID> getOntologies() {
+        SortedSet<OWLOntologyID> filtered = new TreeSet<OWLOntologyID>();
+        for (OWLOntologyID id : ontologyProvider.getPublicKeys())
+            if (id != null) filtered.add(id);
+
         return filtered;
     }
 
-    public Set<String> getHandles(String ontologyId) {
-        Set<String> handles = new HashSet<String>();
-        IRI ontologyIri = IRI.create(ontologyId);
-        if (onManager != null) for (OntologyScope scope : onManager.getRegisteredScopes())
-            if (scope.getCoreSpace().hasOntology(ontologyIri)
-                || scope.getCustomSpace().hasOntology(ontologyIri)) handles.add(scope.getID());
-        if (sessionManager != null) for (String sesId : sessionManager.getRegisteredSessionIDs())
-            if (sessionManager.getSession(sesId).hasOntology(ontologyIri)) handles.add(sesId);
-        return handles;
-    }
-
     private OWLOntology getOntology(String ontologyId, boolean merge) {
-        IRI iri = IRI.create(ontologyId);
+        long before = System.currentTimeMillis();
+        IRI iri = URIUtils.sanitize(IRI.create(ontologyId));
         log.debug("Will try to retrieve ontology {} from provider.", iri);
         // TODO be selective: if the ontology is small enough, use OWLOntology otherwise export to Graph.
         OWLOntology o = null;
         try {
-            o = (OWLOntology) ontologyProvider.getStoredOntology(iri, OWLOntology.class, merge);
+            o = (OWLOntology) ontologyProvider.getStoredOntology(new OWLOntologyID(iri), OWLOntology.class,
+                merge);
         } catch (Exception ex) {
             log.warn("Retrieval of ontology with ID " + iri + " failed.", ex);
         }
@@ -366,24 +386,29 @@ public class OntoNetRootResource extends BaseStanbolResource {
 
         log.debug("Retrieved ontology {} .", iri);
 
-        // Rewrite import statements
-        String uri = uriInfo.getRequestUri().toString();
-        URI base = URI.create(uri.substring(0, uri.lastIndexOf(ontologyId) - 1));
+        // Rewrite import statements - no ontology collector to do it for us here.
+        URI base = URI.create(getPublicBaseUri() + "ontonet/");
         List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
         OWLDataFactory df = o.getOWLOntologyManager().getOWLDataFactory();
-        /*
-         * TODO manage import rewrites better once the container ID is fully configurable (i.e. instead of
-         * going upOne() add "session" or "ontology" if needed).
-         */
+
+        // TODO manage import rewrites better once the container ID is fully configurable.
         for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
             changes.add(new RemoveImport(o, oldImp));
             String s = oldImp.getIRI().toString();
             if (s.contains("::")) s = s.substring(s.indexOf("::") + 2, s.length());
-            IRI target = IRI.create(base + "/" + s);
+            IRI target = IRI.create(base + s);
             changes.add(new AddImport(o, df.getOWLImportsDeclaration(target)));
         }
         o.getOWLOntologyManager().applyChanges(changes);
+        log.debug("Exported as Clerezza Graph in {} ms. Handing over to writer.", System.currentTimeMillis()
+                                                                                  - before);
         return o;
+    }
+
+    public int getSize(OWLOntologyID ontologyId) {
+        OntologyNetworkMultiplexer desc = new MGraphNetworkMultiplexer(
+                ontologyProvider.getMetaGraph(MGraph.class));
+        return desc.getSize(ontologyId);
     }
 
     @POST
@@ -427,10 +452,14 @@ public class OntoNetRootResource extends BaseStanbolResource {
             formats = Arrays.asList(new String[] {RDF_XML, TURTLE, X_TURTLE, N3, N_TRIPLE, OWL_XML,
                                                   FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON});
             int unsupported = 0, failed = 0;
-            for (String f : formats)
+            Iterator<String> itf = formats.iterator();
+            if (!itf.hasNext()) throw new OntologyLoadingException("No suitable format found or defined.");
+            do {
+                String f = itf.next();
                 try {
                     // Re-instantiate the stream on every attempt
                     InputStream content = new FileInputStream(file);
+                    // ClerezzaOWLUtils.guessOntologyID(new FileInputStream(file), Parser.getInstance(), f);
                     key = ontologyProvider.loadInStore(content, f, true);
                 } catch (UnsupportedFormatException e) {
                     log.warn(
@@ -438,16 +467,14 @@ public class OntoNetRootResource extends BaseStanbolResource {
                         headers.getMediaType());
                     // rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
                     unsupported++;
-                    continue;
                 } catch (IOException e) {
                     log.debug(">>> FAILURE format {} (I/O error)", f);
                     failed++;
-                    continue;
                 } catch (Exception e) { // SAXParseException and others
                     log.debug(">>> FAILURE format {} (parse error)", f);
                     failed++;
-                    continue;
                 }
+            } while ((key == null || key.trim().isEmpty()) && itf.hasNext());
             if (key == null || key.trim().isEmpty()) {
                 if (failed > 0) throw new WebApplicationException(BAD_REQUEST);
                 else if (unsupported > 0) throw new WebApplicationException(UNSUPPORTED_MEDIA_TYPE);
@@ -467,7 +494,9 @@ public class OntoNetRootResource extends BaseStanbolResource {
 
         if (key != null && !key.isEmpty()) {
             // FIXME ugly but will have to do for the time being
-            String uri = key.split("::")[1];
+            String uri
+            // = key.split("::")[1];
+            = key.substring((ontologyProvider.getGraphPrefix() + "::").length());
             if (uri != null && !uri.isEmpty()) rb = Response.seeOther(URI.create("/ontonet/" + uri));
             else rb = Response.ok();
         } else rb = Response.status(Status.INTERNAL_SERVER_ERROR);
@@ -548,5 +577,9 @@ public class OntoNetRootResource extends BaseStanbolResource {
         log.debug("POST request for ontology addition completed in {} ms with status {}.",
             (System.currentTimeMillis() - before), r.getStatus());
         return r;
+    }
+
+    public String stringForm(OWLOntologyID ontologyID) {
+        return OntologyUtils.encode(ontologyID);
     }
 }

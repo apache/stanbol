@@ -19,14 +19,14 @@ package org.apache.stanbol.ontologymanager.ontonet.api;
 import org.semanticweb.owlapi.model.IRI;
 
 /**
- * Denotes any OntoNet object that has an identifier. Both the identifier and the concatenation of the
+ * Denotes any API artifact that has an identifier. Both the identifier and the concatenation of the
  * namespace with the identifier should be unique in the system. Having both a non-null namespace and ID is
  * optional, but at least one of them should be non-null.
  * 
  * @author alexdma
  * 
  */
-public interface NamedResource {
+public interface NamedArtifact {
 
     /**
      * Returns the namespace that should prefix the ID of this resource and all the resources managed thereby.

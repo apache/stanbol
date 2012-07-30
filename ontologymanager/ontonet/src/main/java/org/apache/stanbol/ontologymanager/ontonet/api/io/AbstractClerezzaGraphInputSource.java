@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
@@ -33,7 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Default implementation of an {@link OntologyInputSource} that returns {@link Graph} objects as ontologies.
+ * Default implementation of an {@link OntologyInputSource} that returns {@link TripleCollection} objects as
+ * ontologies.
  * 
  * Subclasses must implement the {@link #getImports(boolean)} method, as the availability of imported
  * ontologies might depend on the input source being able to access the {@link TcManager} where they are

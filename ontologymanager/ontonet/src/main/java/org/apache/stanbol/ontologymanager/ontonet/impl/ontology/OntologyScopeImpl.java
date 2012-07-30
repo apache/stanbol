@@ -38,6 +38,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollecto
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
@@ -93,20 +94,60 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
 
     protected IRI namespace = null;
 
+    private OntologyScopeImpl(String id, IRI namespace) {
+        setID(id);
+        setNamespace(namespace);
+    }
+
+    public OntologyScopeImpl(String id, IRI namespace, OntologySpaceFactory factory) {
+        this(id, namespace);
+        configureCoreSpace(factory);
+        // let's just lock it. Once the core space is done it's done.
+        this.coreSpace.setUp();
+        configureCustomSpace(factory);
+    }
+
     public OntologyScopeImpl(String id,
                              IRI namespace,
                              OntologySpaceFactory factory,
                              OntologyInputSource<?>... coreOntologies) {
-        setID(id);
-        setNamespace(namespace);
-
-        this.coreSpace = factory.createCoreOntologySpace(id/* , coreOntologies */);
-        this.coreSpace.addOntologyCollectorListener(this); // Set listener before adding core ontologies
+        this(id, namespace);
+        configureCoreSpace(factory);
         for (OntologyInputSource<?> src : coreOntologies)
             this.coreSpace.addOntology(src);
         // let's just lock it. Once the core space is done it's done.
         this.coreSpace.setUp();
+        configureCustomSpace(factory);
+    }
 
+    public OntologyScopeImpl(String id, IRI namespace, OntologySpaceFactory factory, Origin<?>... coreOrigins) {
+        setID(id);
+        setNamespace(namespace);
+        configureCoreSpace(factory);
+        for (Origin<?> src : coreOrigins)
+            this.coreSpace.addOntology(src);
+        // let's just lock it. Once the core space is done it's done.
+        this.coreSpace.setUp();
+        configureCustomSpace(factory);
+    }
+
+    @Override
+    public void addOntologyCollectorListener(OntologyCollectorListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void clearOntologyCollectorListeners() {
+        listeners.clear();
+    }
+
+    private void configureCoreSpace(OntologySpaceFactory factory) {
+        this.coreSpace = factory.createCoreOntologySpace(id/* , coreOntologies */);
+        this.coreSpace.addOntologyCollectorListener(this); // Set listener before adding core ontologies
+
+    }
+
+    private void configureCustomSpace(OntologySpaceFactory factory) {
         try {
             setCustomSpace(factory.createCustomOntologySpace(id));
         } catch (UnmodifiableOntologyCollectorException e) {
@@ -121,18 +162,8 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     }
 
     @Override
-    public void addOntologyCollectorListener(OntologyCollectorListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
-    public void clearOntologyCollectorListeners() {
-        listeners.clear();
-    }
-
-    @Override
     public <O> O export(Class<O> returnType, boolean merge) {
-        return export(returnType, merge, getNamespace());
+        return export(returnType, merge, getDefaultNamespace());
     }
 
     @SuppressWarnings("unchecked")
@@ -264,7 +295,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
                 OWLOntologyMerger merger = new OWLOntologyMerger(provider);
                 try {
                     ont = merger.createMergedOntology(OWLManager.createOWLOntologyManager(),
-                        IRI.create(getNamespace() + getID()));
+                        IRI.create(getDefaultNamespace() + getID()));
                 } catch (OWLOntologyCreationException e) {
                     log.error("Failed to merge imports for ontology.", e);
                     ont = null;
@@ -435,7 +466,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
 
     @Override
     public String toString() {
-        return getNamespace() + getID();
+        return getDefaultNamespace() + getID();
     }
 
 }

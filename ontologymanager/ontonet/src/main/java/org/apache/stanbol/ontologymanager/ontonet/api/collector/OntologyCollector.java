@@ -18,10 +18,13 @@ package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
+import org.apache.stanbol.ontologymanager.ontonet.api.NamedArtifact;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSourceHandler;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 
 /**
  * It is not literally an ontology <i>collection</i>, in that it only collects references to ontologies, not
@@ -31,19 +34,34 @@ import org.semanticweb.owlapi.model.IRI;
  * @author alexdma
  * 
  */
-public interface OntologyCollector extends OntologyCollectorListenable, NamedResource,
+public interface OntologyCollector extends OntologyCollectorListenable, NamedArtifact,
         OntologyInputSourceHandler {
 
     /**
-     * Adds the given ontology to the ontology space. If the supplied ontology is not already present in
+     * Adds the given ontology to the ontology collector. If the supplied ontology is not already present in
      * storage and does not have an OWL version IRI of its own, this ontology collector will 'claim ownership'
      * of the ontology by setting its own logical ID as the version IRI of the new ontology.
+     * 
+     * TODO make this method return the public key as an {@link OWLOntologyID}.
      * 
      * @param ontology
      *            the ontology to be added
      * @return the key that can be used for accessing the stored ontology directly
      */
     String addOntology(OntologyInputSource<?> ontologySource);
+
+    /**
+     * Tells this ontology collector to manage the ontology referenced by <tt>origin</tt>. This method will
+     * try to <i>avoid</i> processing the ontology content whenever possible. For the example, if
+     * <tt>origin</tt> is an {@link Origin} that wraps an {@link OWLOntologyID}, it will assumed the wrapperd
+     * reference to be a public key for an already stored ontology.
+     * 
+     * TODO make this method return the public key as an {@link OWLOntologyID}.
+     * 
+     * @param origin
+     *            the origin of the ontology to be added.
+     */
+    void addOntology(Origin<?> origin);
 
     /**
      * Returns the ontologies managed by this ontology space. This is a shortcut method for iterating
@@ -56,7 +74,45 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedRes
      */
     <O> Set<O> getManagedOntologies(Class<O> returnType, boolean withClosure);
 
+    /**
+     * @deprecated
+     * @param ontologyIri
+     * @param returnType
+     * @return
+     */
     <O> O getOntology(IRI ontologyIri, Class<O> returnType);
+
+    /**
+     * TODO replace merge parameter with integer for merge level (-1 for infinite).
+     * 
+     * @deprecated
+     * @param ontologyIri
+     * @param returnType
+     * @param merge
+     * @return
+     */
+    <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge);
+
+    /**
+     * @deprecated
+     * @param ontologyIri
+     * @param returnType
+     * @param merge
+     * @param universalPrefix
+     * @return
+     */
+    <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge, IRI universalPrefix);
+
+    /**
+     * @deprecated
+     * @param ontologyIri
+     * @param returnType
+     * @param universalPrefix
+     * @return
+     */
+    <O> O getOntology(IRI ontologyIri, Class<O> returnType, IRI universalPrefix);
+
+    <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType);
 
     /**
      * TODO replace merge parameter with integer for merge level (-1 for infinite).
@@ -66,43 +122,80 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedRes
      * @param merge
      * @return
      */
-    <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge);
+    <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType, boolean merge);
 
-    <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge, IRI universalPrefix);
+    <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType, boolean merge, IRI universalPrefix);
 
-    <O> O getOntology(IRI ontologyIri, Class<O> returnType, IRI universalPrefix);
+    <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType, IRI universalPrefix);
 
     /**
-     * Determines if the ontology identified by the supplied <i>logical</i> IRI has been loaded in this space.<br>
+     * Determines if the ontology identified by the supplied public key is being managed by this collector.<br>
      * <br>
-     * Note that ontologies are not identified by physical IRI here. There's no need to ask KReS for
-     * ontologies by physical IRI, use a browser or some other program instead!
+     * Note that the public key will match the ontology's logical ID only if it has one. Otherwise it can be
+     * an {@link OWLOntologyID} that wraps either the physical URL or the identifier chosen by Stanbol as its
+     * ontologyIRI.
      * 
-     * @param ontologyIri
+     * @deprecated the usage of {@link IRI} to identify ontologies is reductive. Please create a new
+     *             {@link OWLOntologyID#OWLOntologyID(IRI)} from this IRI and use
+     *             {@link #hasOntology(OWLOntologyID)} with this new public key as a parameter.
+     * 
+     * @param publicKey
      *            the <i>logical</i> identifier of the ontology to query for.
      * 
-     * @return true if an ontology with this ID has been loaded in this space.
+     * @return true iff an ontology with this public key has been loaded in this collector.
      */
-    boolean hasOntology(IRI ontologyIri);
+    boolean hasOntology(IRI ontologyId);
 
     /**
-     * TODO replace with Ontology IDs
+     * Determines if the ontology identified by the supplied public key is being managed by this collector.<br>
+     * <br>
+     * Note that the public key will match the ontology's logical ID only if it has one. Otherwise it can be
+     * an {@link OWLOntologyID} that wraps either the physical URL or the identifier chosen by Stanbol as its
+     * ontologyIRI.
      * 
-     * @return
+     * @param publicKey
+     *            the <i>logical</i> identifier of the ontology to query for.
+     * 
+     * @return true iff an ontology with this public key has been loaded in this collector.
      */
-    Set<IRI> listManagedOntologies();
+    boolean hasOntology(OWLOntologyID publicKey);
 
     /**
-     * Removes the given ontology from the ontology space, if the ontology is a direct child of the top
-     * ontology.<br/>
-     * <u>Note</u> that this will NOT delete the ontology from the store! This method simply states that the
-     * ontology is no longer managed by this space and its axioms will no longer appear when the space is
-     * serialized as an ontology. To delete the ontology itself, please use the Ontology Manager Store.
+     * Gets the public key set of all the ontologies managed by this ontology collector.
+     * 
+     * @return the key set of managed ontologies.
+     */
+    Set<OWLOntologyID> listManagedOntologies();
+
+    /**
+     * Removes the given ontology from the ontology collector, if it was being managed. Otherwise, it should
+     * throw a {@link MissingOntologyException}.<br/>
+     * <u>Note</u> that this will NOT necessarily delete the ontology from the store! This method simply
+     * states that the ontology is no longer managed by this collectors and its axioms will no longer appear
+     * when the collector is serialized as an ontology. To make sure the ontology itself is deleted, please
+     * use the {@link OntologyProvider}.
+     * 
+     * @deprecated the usage of {@link IRI} to identify ontologies is reductive. Please create a new
+     *             {@link OWLOntologyID#OWLOntologyID(IRI)} from this IRI and use
+     *             {@link #removeOntology(OWLOntologyID)} with this new public key as a parameter.
      * 
      * @param ontologyIri
      *            the identifier of this ontology.
      */
     void removeOntology(IRI ontologyId);
+
+    /**
+     * Removes the given ontology from the ontology collector, if it was being managed. Otherwise, it should
+     * throw a {@link MissingOntologyException}.<br/>
+     * <u>Note</u> that this will NOT necessarily delete the ontology from the store! This method simply
+     * states that the ontology is no longer managed by this collectors and its axioms will no longer appear
+     * when the collector is serialized as an ontology. To make sure the ontology itself is deleted, please
+     * use the {@link OntologyProvider}.
+     * 
+     * @param ontologyIri
+     *            the identifier of this ontology.
+     */
+    void removeOntology(OWLOntologyID ontologyId);
 
     /**
      * Bootstraps the ontology space. In some cases (such as with core and custom spaces) this also implies

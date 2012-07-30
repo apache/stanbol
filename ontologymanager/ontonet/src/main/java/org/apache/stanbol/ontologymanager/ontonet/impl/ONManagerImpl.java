@@ -44,8 +44,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfigurati
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
@@ -68,6 +68,7 @@ import org.semanticweb.owlapi.io.StreamDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -382,35 +383,57 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         listeners.clear();
     }
 
-    @Override
-    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?>... coreSources) throws DuplicateIDException {
-        if (this.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
-                "Scope registry already contains ontology scope with ID " + scopeID);
-        // Scope constructor also creates core and custom spaces
-        OntologyScope scope = new OntologyScopeImpl(scopeID, IRI.create(getOntologyNetworkNamespace()
-                                                                        + scopeRegistryId + "/"),
-                getOntologySpaceFactory(), coreSources);
+    private void configureScope(OntologyScope scope) {
         if (scope.getCustomSpace() != null) {
             CustomOntologySpace.ConnectivityPolicy policy;
             try {
                 policy = CustomOntologySpace.ConnectivityPolicy.valueOf(connectivityPolicyString);
             } catch (IllegalArgumentException e) {
-                log.warn("The value \""
-                         + connectivityPolicyString
-                         + "\" configured as default ConnectivityPolicy does not match any value of the Enumeration! "
-                         + "Setting the default policy as defined by the "
-                         + CustomOntologySpace.ConnectivityPolicy.class + ".");
+                log.warn("The value {}", connectivityPolicyString);
+                log.warn(" -- configured as default ConnectivityPolicy does not match any value of the Enumeration!");
+                log.warn(" -- Setting the default policy as defined by the {}.",
+                    CustomOntologySpace.ConnectivityPolicy.class);
                 policy = CustomOntologySpace.ConnectivityPolicy.valueOf(_CONNECTIVITY_POLICY_DEFAULT);
             }
             scope.getCustomSpace().setConnectivityPolicy(policy);
         }
-        if (scope != null) {
-            // Commented out: for the time being we try not to propagate additions to scopes.
-            // if (ontologyProvider instanceof OntologyCollectorListener) scope
-            // .addOntologyCollectorListener((OntologyCollectorListener) ontologyProvider);
-            fireScopeCreated(scope);
-            this.registerScope(scope);
-        }
+        // Commented out: for the time being we try not to propagate additions to scopes.
+        // if (ontologyProvider instanceof OntologyCollectorListener) scope
+        // .addOntologyCollectorListener((OntologyCollectorListener) ontologyProvider);
+        fireScopeCreated(scope);
+        this.registerScope(scope);
+    }
+
+    @Override
+    public OntologyScope createOntologyScope(String scopeID) throws DuplicateIDException {
+        if (this.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
+                "Scope registry already contains ontology scope with ID " + scopeID);
+        IRI prefix = IRI.create(getOntologyNetworkNamespace() + scopeRegistryId + "/");
+        // Scope constructor also creates core and custom spaces
+        OntologyScope scope = new OntologyScopeImpl(scopeID, prefix, getOntologySpaceFactory());
+        configureScope(scope);
+        return scope;
+    }
+
+    @Override
+    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?>... coreSources) throws DuplicateIDException {
+        if (this.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
+                "Scope registry already contains ontology scope with ID " + scopeID);
+        IRI prefix = IRI.create(getOntologyNetworkNamespace() + scopeRegistryId + "/");
+        // Scope constructor also creates core and custom spaces
+        OntologyScope scope = new OntologyScopeImpl(scopeID, prefix, getOntologySpaceFactory(), coreSources);
+        configureScope(scope);
+        return scope;
+    }
+
+    @Override
+    public OntologyScope createOntologyScope(String scopeID, Origin<?>... coreOrigins) throws DuplicateIDException {
+        if (this.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
+                "Scope registry already contains ontology scope with ID " + scopeID);
+        IRI prefix = IRI.create(getOntologyNetworkNamespace() + scopeRegistryId + "/");
+        // Scope constructor also creates core and custom spaces
+        OntologyScope scope = new OntologyScopeImpl(scopeID, prefix, getOntologySpaceFactory(), coreOrigins);
+        configureScope(scope);
         return scope;
     }
 
@@ -506,12 +529,14 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         for (String scopeId : struct.getScopeIDs()) {
             long before = System.currentTimeMillis();
             log.debug("Rebuilding scope with ID \"{}\".", scopeId);
-            Collection<String> coreOnts = struct.getCoreOntologyKeysForScope(scopeId);
-            OntologyInputSource<?>[] srcs = new OntologyInputSource<?>[coreOnts.size()];
+            Collection<OWLOntologyID> coreOnts = struct.getCoreOntologyKeysForScope(scopeId);
+            Origin<?>[] srcs = new Origin<?>[coreOnts.size()];
             int i = 0;
-            for (String coreOnt : coreOnts) {
+            for (OWLOntologyID coreOnt : coreOnts) {
                 log.debug("Core ontology key : {}", coreOnts);
-                srcs[i++] = new GraphSource(coreOnt);
+                srcs[i++] = Origin.create(coreOnt)
+                // new GraphSource(coreOnt)
+                ;
             }
             OntologyScope scope;
             try {
@@ -524,9 +549,11 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
             OntologySpace custom = scope.getCustomSpace();
             // Register even if some ontologies were to fail to be restored afterwards.
             scopeMap.put(scopeId, scope);
-            for (String key : struct.getCustomOntologyKeysForScope(scopeId)) {
+            for (OWLOntologyID key : struct.getCustomOntologyKeysForScope(scopeId)) {
                 log.debug("Custom ontology key : {}", key);
-                custom.addOntology(new GraphSource(key));
+                custom.addOntology(Origin.create(key)
+                // new GraphSource(key)
+                );
             }
             log.info("Scope \"{}\" rebuilt in {} ms.", scopeId, System.currentTimeMillis() - before);
         }

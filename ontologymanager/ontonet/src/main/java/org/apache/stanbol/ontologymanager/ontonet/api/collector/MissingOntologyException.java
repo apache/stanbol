@@ -16,10 +16,10 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
-import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 
 /**
- * Thrown whenever an attempt to modify an ontology within an ontology space that does not contain it is
+ * Thrown whenever an attempt to modify an ontology within an ontology collector that does not contain it is
  * detected.
  * 
  * @author alexdma
@@ -27,9 +27,21 @@ import org.semanticweb.owlapi.model.IRI;
  */
 public class MissingOntologyException extends OntologyCollectorModificationException {
 
-    public MissingOntologyException(OntologyCollector collector, IRI ontologyId) {
+    /**
+	 * 
+	 */
+    private static final long serialVersionUID = -3449667155191079302L;
+
+    protected OWLOntologyID publicKey;
+
+    /**
+     * 
+     * @param collector
+     * @param ontologyId
+     */
+    public MissingOntologyException(OntologyCollector collector, OWLOntologyID publicKey) {
         super(collector);
-        this.ontologyId = ontologyId;
+        this.publicKey = publicKey;
     }
 
     /**
@@ -37,15 +49,8 @@ public class MissingOntologyException extends OntologyCollectorModificationExcep
      * 
      * @return the ID of the ontology that was not removed.
      */
-    public IRI getOntologyId() {
-        return ontologyId;
+    public OWLOntologyID getOntologyKey() {
+        return publicKey;
     }
-
-    protected IRI ontologyId;
-
-    /**
-	 * 
-	 */
-    private static final long serialVersionUID = -3449667155191079302L;
 
 }

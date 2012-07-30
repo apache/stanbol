@@ -22,7 +22,7 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
  * Objects that react to the addition or removal of ontologies to or from an ontology collector will implement
  * this interface.<br>
  * <br>
- * XXX add "before" methods.
+ * XXX add "before" methods and provide a way to abort the corresponding operation.
  * 
  * @author alexdma
  * 

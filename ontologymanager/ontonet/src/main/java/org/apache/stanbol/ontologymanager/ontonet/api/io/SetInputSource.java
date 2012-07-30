@@ -28,6 +28,11 @@ import java.util.Set;
  */
 public interface SetInputSource<O> {
 
+    /**
+     * Returns the ontologies in this input source
+     * 
+     * @return the ontologies.
+     */
     Set<O> getOntologies();
 
 }

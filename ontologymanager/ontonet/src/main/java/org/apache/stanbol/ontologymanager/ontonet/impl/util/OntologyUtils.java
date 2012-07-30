@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologySpaceSource;
@@ -50,6 +51,7 @@ import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.UnknownOWLOntologyException;
@@ -69,17 +71,20 @@ public class OntologyUtils {
     private static String[] preferredFormats = {RDF_XML, TURTLE, X_TURTLE, RDF_JSON, N3, N_TRIPLE,
                                                 MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML};
 
+    @Deprecated
     public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
                                              OntologyInputSource<OWLOntology> childSrc) {
         return appendOntology(parentSrc, childSrc, null, null);
     }
 
+    @Deprecated
     public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
                                              OntologyInputSource<OWLOntology> childSrc,
                                              IRI rewritePrefix) {
         return appendOntology(parentSrc, childSrc, null, rewritePrefix);
     }
 
+    @Deprecated
     public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
                                              OntologyInputSource<OWLOntology> childSrc,
                                              OWLOntologyManager ontologyManager) {
@@ -93,6 +98,7 @@ public class OntologyUtils {
      * parent. <br>
      * Note: the ontology manager will not load additional ontologies.
      * 
+     * @deprecated
      * @param parentSrc
      *            must exist!
      * @param childSrc
@@ -191,6 +197,56 @@ public class OntologyUtils {
 
         return buildImportTree(root, subtrees, OWLManager.createOWLOntologyManager());
 
+    }
+
+    /**
+     * Provides a standardized string format for an OWL Ontology ID. The string returned is of type
+     * <tt>ontologyIRI[:::versionIRI]</tt>. Any substring <tt>":::"</tt> present in <tt>ontologyIRI</tt> or
+     * <tt>versionIRI</tt> will be URL-encoded (i.e. converted to <tt>"%3A%3A%3A"</tt>).<br/>
+     * <br/>
+     * Also note that both <tt>ontologyIRI</tt> and <tt>versionIRI</tt> are sanitized in the process. No other
+     * URL encoding occurs.
+     * 
+     * @param id
+     *            the OWL ontology ID to encode
+     * @return the string form of this ID.
+     * @see URIUtils#sanitize(IRI)
+     */
+    public static String encode(OWLOntologyID id) {
+        if (id == null) throw new IllegalArgumentException("Cannot encode a null OWLOntologyID.");
+        if (id.getOntologyIRI() == null) throw new IllegalArgumentException(
+                "Cannot encode an OWLOntologyID that is missing an ontologyIRI.");
+        String s = "";
+        s += URIUtils.sanitize(id.getOntologyIRI()).toString().replace(":::", "%3A%3A%3A");
+        if (id.getVersionIRI() != null) s += (":::")
+                                             + URIUtils.sanitize(id.getVersionIRI()).toString()
+                                                     .replace(":::", "%3A%3A%3A");
+        return s;
+    }
+
+    /**
+     * Extracts an OWL Ontology ID from its standard string form. The string must be of type
+     * <tt>ontologyIRI[:::versionIRI]</tt>. Any substring <tt>"%3A%3A%3A"</tt> present in <tt>ontologyIRI</tt>
+     * or <tt>versionIRI</tt> will be URL-decoded (i.e. converted to <tt>":::"</tt>).<br/>
+     * <br/>
+     * Also note that both <tt>ontologyIRI</tt> and <tt>versionIRI</tt> are desanitized in the process.
+     * 
+     * @param stringForm
+     *            the string to decode
+     * @return the string form of this ID.
+     * @see URIUtils#desanitize(IRI)
+     */
+    public static OWLOntologyID decode(String stringForm) {
+        if (stringForm == null || stringForm.isEmpty()) throw new IllegalArgumentException(
+                "Supplied string form must be non-null and non-empty.");
+        IRI oiri, viri;
+        String[] split = stringForm.split(":::");
+        if (split.length >= 1) {
+            oiri = URIUtils.desanitize(IRI.create(split[0].replace("%3A%3A%3A", ":::")));
+            viri = (split.length > 1) ? URIUtils.desanitize(IRI.create(split[1].replace("%3A%3A%3A", ":::")))
+                    : null;
+            return (viri != null) ? new OWLOntologyID(oiri, viri) : new OWLOntologyID(oiri);
+        } else return null; // Anonymous but versioned ontologies are not acceptable.
     }
 
     /**

@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
+import org.apache.stanbol.ontologymanager.ontonet.api.NamedArtifact;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.Lockable;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListenable;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
@@ -39,7 +39,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
  * @author alexdma
  * 
  */
-public interface OntologyScope extends NamedResource, Lockable, OntologyCollectorListenable, OWLExportable {
+public interface OntologyScope extends NamedArtifact, Lockable, OntologyCollectorListenable, OWLExportable {
 
     static final String shortName = "scope";
     

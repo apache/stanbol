@@ -69,7 +69,7 @@ public class ScopeSetRenderer {
         additions.add(new AddImport(ont, __factory.getOWLImportsDeclaration(IRI
                 .create("http://www.ontologydesignpatterns.org/schemas/meta.owl"))));
         for (OntologyScope scope : scopes) {
-            OWLNamedIndividual iScope = __factory.getOWLNamedIndividual(IRI.create(scope.getNamespace()
+            OWLNamedIndividual iScope = __factory.getOWLNamedIndividual(IRI.create(scope.getDefaultNamespace()
                                                                                    + scope.getID()));
             OWLAxiom ax = __factory.getOWLClassAssertionAxiom(cScope, iScope);
             additions.add(new AddAxiom(ont, ax));

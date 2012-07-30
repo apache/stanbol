@@ -33,6 +33,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 
 /**
  * Default implementation of custom ontology space.
@@ -60,8 +61,8 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl implements Custom
     }
 
     @Override
-    protected MGraph getOntologyAsMGraph(IRI ontologyIri, boolean merge, IRI universalPrefix) {
-        MGraph o = super.getOntologyAsMGraph(ontologyIri, merge, universalPrefix);
+    protected MGraph getOntologyAsMGraph(OWLOntologyID ontologyId, boolean merge, IRI universalPrefix) {
+        MGraph o = super.getOntologyAsMGraph(ontologyId, merge, universalPrefix);
         switch (getConnectivityPolicy()) {
             case LOOSE:
                 break;
@@ -87,8 +88,10 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl implements Custom
     }
 
     @Override
-    protected OWLOntology getOntologyAsOWLOntology(IRI ontologyIri, boolean merge, IRI universalPrefix) {
-        OWLOntology o = super.getOntologyAsOWLOntology(ontologyIri, merge, universalPrefix);
+    protected OWLOntology getOntologyAsOWLOntology(OWLOntologyID ontologyId,
+                                                   boolean merge,
+                                                   IRI universalPrefix) {
+        OWLOntology o = super.getOntologyAsOWLOntology(ontologyId, merge, universalPrefix);
         switch (getConnectivityPolicy()) {
             case LOOSE:
                 break;

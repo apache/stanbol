@@ -129,7 +129,7 @@ public class SessionManagerResource extends BaseStanbolResource {
             o = ontMgr.createOntology(IRI.create(uriInfo.getRequestUri()));
             List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
             for (String id : sessionManager.getRegisteredSessionIDs()) {
-                IRI sessionid = IRI.create(sessionManager.getNamespace() + sessionManager.getID() + "/" + id);
+                IRI sessionid = IRI.create(sessionManager.getDefaultNamespace() + sessionManager.getID() + "/" + id);
                 OWLNamedIndividual ind = df.getOWLNamedIndividual(sessionid);
                 changes.add(new AddAxiom(o, df.getOWLClassAssertionAxiom(cSession, ind)));
             }

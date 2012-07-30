@@ -53,8 +53,20 @@ public class ClerezzaOWLUtils {
         return createOntology(id, TcManager.getInstance());
     }
 
+    /**
+     * Performs lookahead with a 100 kB limit.
+     * 
+     * @param content
+     * @param parser
+     * @param format
+     * @return
+     * @throws IOException
+     */
     public static OWLOntologyID guessOntologyID(InputStream content, Parser parser, String format) throws IOException {
-        int limit = 100 * 1024; // 100kB lookahead size
+        return guessOntologyID(content, parser, format, 100 * 1024);
+    }
+
+    public static OWLOntologyID guessOntologyID(InputStream content, Parser parser, String format, int limit) throws IOException {
         BufferedInputStream bIn = new BufferedInputStream(content);
         bIn.mark(limit); // set an appropriate limit
         OntologyLookaheadMGraph graph = new OntologyLookaheadMGraph();
@@ -69,6 +81,7 @@ public class ClerezzaOWLUtils {
             log.warn("No ontologyID found after {} bytes, ontology has a chance of being anonymous.", limit);
             return null;
         }
+
     }
 
 }

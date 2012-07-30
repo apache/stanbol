@@ -17,8 +17,8 @@
 package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
 /**
- * Thrown whenever an attempt to modify the ontology network within a read-only ontology space (e.g. a core or
- * custom space in a bootstrapped system) is detected and denied.
+ * Thrown whenever an attempt to modify the ontology network within a read-only ontology collector (e.g. a
+ * core or custom space in a bootstrapped system) is detected and denied.
  */
 public class UnmodifiableOntologyCollectorException extends OntologyCollectorModificationException {
 

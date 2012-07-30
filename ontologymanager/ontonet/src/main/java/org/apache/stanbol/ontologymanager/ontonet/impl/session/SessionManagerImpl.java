@@ -35,7 +35,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeEventListener;
@@ -51,6 +51,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -257,12 +258,13 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
          */
         if (sessionsByID.containsKey(sessionID)) throw new DuplicateSessionIDException(sessionID.toString());
         checkSessionLimit();
-        IRI ns = IRI.create(getNamespace() + getID() + "/");
+        IRI ns = IRI.create(getDefaultNamespace() + getID() + "/");
         Session session = new SessionImpl(sessionID, ns, ontologyProvider);
 
         // Have the ontology provider listen to ontology events
         if (ontologyProvider instanceof OntologyCollectorListener) session
                 .addOntologyCollectorListener((OntologyCollectorListener) ontologyProvider);
+        else session.addOntologyCollectorListener(ontologyProvider.getOntologyNetworkDescriptor());
         if (ontologyProvider instanceof SessionListener) session
                 .addSessionListener((SessionListener) ontologyProvider);
 
@@ -376,8 +378,11 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
                 // Register even if some ontologies were to fail to be restored afterwards.
                 sessionsByID.put(sessionId, session);
                 session.setActive(false); // Restored sessions are inactive at first.
-                for (String key : struct.getOntologyKeysForSession(sessionId))
-                    session.addOntology(new GraphSource(key)); // TODO use the public key instead!
+                for (OWLOntologyID key : struct.getOntologyKeysForSession(sessionId)) {
+                    session.addOntology(
+                    // new GraphSource(key)
+                    Origin.create(key)); // TODO use the public key instead!
+                }
                 for (String scopeId : struct.getAttachedScopes(sessionId)) {
                     /*
                      * The scope is attached by reference, so we won't have to bother checking if the scope

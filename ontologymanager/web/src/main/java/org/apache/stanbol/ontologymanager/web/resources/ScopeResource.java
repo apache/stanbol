@@ -52,6 +52,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -81,6 +82,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcProvider;
+import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -92,6 +94,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOnto
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.SetInputSource;
@@ -107,6 +110,7 @@ import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +136,7 @@ public class ScopeResource extends BaseStanbolResource {
      */
     protected ONManager onm;
 
-    protected OntologyProvider<TcProvider> provider;
+    protected OntologyProvider<TcProvider> ontologyProvider;
 
     /*
      * Placeholder for the RegistryManager to be fetched from the servlet context.
@@ -149,7 +153,7 @@ public class ScopeResource extends BaseStanbolResource {
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
         this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
             servletContext);
-        this.provider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
+        this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
             OntologyProvider.class, servletContext);
 
         if (scopeId == null || scopeId.isEmpty()) {
@@ -220,8 +224,8 @@ public class ScopeResource extends BaseStanbolResource {
 
     public SortedSet<String> getCoreOntologies() {
         SortedSet<String> result = new TreeSet<String>();
-        for (IRI iri : scope.getCoreSpace().listManagedOntologies())
-            result.add(iri.toString());
+        for (OWLOntologyID id : scope.getCoreSpace().listManagedOntologies())
+            result.add(OntologyUtils.encode(id));
         return result;
     }
 
@@ -261,8 +265,8 @@ public class ScopeResource extends BaseStanbolResource {
 
     public SortedSet<String> getCustomOntologies() {
         SortedSet<String> result = new TreeSet<String>();
-        for (IRI iri : scope.getCustomSpace().listManagedOntologies())
-            result.add(iri.toString());
+        for (OWLOntologyID id : scope.getCustomSpace().listManagedOntologies())
+            result.add(OntologyUtils.encode(id));
         return result;
     }
 
@@ -309,6 +313,21 @@ public class ScopeResource extends BaseStanbolResource {
 
     public Set<Library> getLibraries() {
         return regMgr.getLibraries();
+    }
+
+    public SortedSet<String> getManageableOntologies() {
+        SortedSet<String> result = new TreeSet<String>();
+        // for (String s : ontologyProvider.getPublicKeys()) {
+        // // String s1 = s.split("::")[1];
+        // if (s != null && !s.isEmpty()) result.add(s);
+        // }
+        for (OWLOntologyID id : ontologyProvider.listOntologies())
+            result.add(OntologyUtils.encode(id));
+        for (OWLOntologyID id : scope.getCoreSpace().listManagedOntologies())
+            result.remove(OntologyUtils.encode(id));
+        for (OWLOntologyID id : scope.getCustomSpace().listManagedOntologies())
+            result.remove(OntologyUtils.encode(id));
+        return result;
     }
 
     /*
@@ -478,24 +497,23 @@ public class ScopeResource extends BaseStanbolResource {
                                           @Context UriInfo uriInfo,
                                           @Context HttpHeaders headers) {
         ResponseBuilder rb;
-        if (ontologyId != null && !ontologyId.equals("")) {
-            IRI ontIri = IRI.create(ontologyId);
+        if (ontologyId != null && !ontologyId.trim().isEmpty()) {
+            OWLOntologyID id = OntologyUtils.decode(ontologyId);
             OntologySpace cs = scope.getCustomSpace();
-            if (cs.hasOntology(ontIri)) {
-                try {
-                    onm.setScopeActive(scopeId, false);
-                    cs.removeOntology(ontIri);
-                    rb = Response.ok();
-                } catch (IrremovableOntologyException e) {
-                    throw new WebApplicationException(e, FORBIDDEN);
-                } catch (UnmodifiableOntologyCollectorException e) {
-                    throw new WebApplicationException(e, FORBIDDEN);
-                } catch (OntologyCollectorModificationException e) {
-                    throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-                } finally {
-                    onm.setScopeActive(scopeId, true);
-                }
-            } else rb = Response.notModified(); // ontology not managed
+            if (!cs.hasOntology(id)) rb = Response.notModified(); // ontology not managed
+            else try {
+                onm.setScopeActive(scopeId, false);
+                cs.removeOntology(id);
+                rb = Response.ok();
+            } catch (IrremovableOntologyException e) {
+                throw new WebApplicationException(e, FORBIDDEN);
+            } catch (UnmodifiableOntologyCollectorException e) {
+                throw new WebApplicationException(e, FORBIDDEN);
+            } catch (OntologyCollectorModificationException e) {
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            } finally {
+                onm.setScopeActive(scopeId, true);
+            }
         } else rb = Response.status(BAD_REQUEST); // null/blank ontology ID
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -530,14 +548,15 @@ public class ScopeResource extends BaseStanbolResource {
              * 
              * TODO : we might find a reason to change that in the future.
              */
-            new GraphContentInputSource(content, mt.toString(), provider.getStore()));
+            new GraphContentInputSource(content, mt.toString(), ontologyProvider.getStore()));
             if (key == null || key.isEmpty()) {
                 log.error("FAILED parse with media type {}.", mt);
                 throw new WebApplicationException(INTERNAL_SERVER_ERROR);
             }
             // FIXME ugly but will have to do for the time being
             log.debug("SUCCESS parse with media type {}.", mt);
-            String uri = key.split("::")[1];
+            String uri = // key.split("::")[1];
+            key.substring((ontologyProvider.getGraphPrefix() + "::").length());
             URI created = null;
             if (uri != null && !uri.isEmpty()) {
                 created = getCreatedResource(uri);
@@ -589,29 +608,40 @@ public class ScopeResource extends BaseStanbolResource {
         log.debug(" post(FormDataMultiPart data)");
         ResponseBuilder rb;
 
+        // TODO remove and make sure it is set across the method
+        rb = Response.status(BAD_REQUEST);
+
         IRI location = null, library = null;
         File file = null; // If found, it takes precedence over location.
         String format = null;
+        Set<String> keys = new HashSet<String>();
         for (BodyPart bpart : data.getBodyParts()) {
             log.debug("is a {}", bpart.getClass());
             if (bpart instanceof FormDataBodyPart) {
                 FormDataBodyPart dbp = (FormDataBodyPart) bpart;
                 String name = dbp.getName();
                 if (name.equals("file")) file = bpart.getEntityAs(File.class);
-                else if (name.equals("format") && !dbp.getValue().equals("auto")) format = dbp.getValue();
-                else if (name.equals("url")) try {
-                    URI.create(dbp.getValue()); // To throw 400 if malformed.
-                    location = IRI.create(dbp.getValue());
-                } catch (Exception ex) {
-                    log.error("Malformed IRI for " + dbp.getValue(), ex);
-                    throw new WebApplicationException(ex, BAD_REQUEST);
-                }
-                else if (name.equals("library") && !"null".equals(dbp.getValue())) try {
-                    URI.create(dbp.getValue()); // To throw 400 if malformed.
-                    library = IRI.create(dbp.getValue());
-                } catch (Exception ex) {
-                    log.error("Malformed IRI for " + dbp.getValue(), ex);
-                    throw new WebApplicationException(ex, BAD_REQUEST);
+                else {
+                    String value = dbp.getValue();
+                    if (name.equals("format") && !value.equals("auto")) format = value;
+                    else if (name.equals("url")) try {
+                        URI.create(value); // To throw 400 if malformed.
+                        location = IRI.create(value);
+                    } catch (Exception ex) {
+                        log.error("Malformed IRI for " + value, ex);
+                        throw new WebApplicationException(ex, BAD_REQUEST);
+                    }
+                    else if (name.equals("library") && !"null".equals(value)) try {
+                        URI.create(value); // To throw 400 if malformed.
+                        library = IRI.create(value);
+                    } catch (Exception ex) {
+                        log.error("Malformed IRI for " + value, ex);
+                        throw new WebApplicationException(ex, BAD_REQUEST);
+                    }
+                    else if (name.equals("stored") && !"null".equals(value)) {
+                        log.info("Request to manage ontology with key {}", value);
+                        keys.add(value);
+                    }
                 }
 
             }
@@ -629,7 +659,8 @@ public class ScopeResource extends BaseStanbolResource {
                     try {
                         // Use a buffered stream that can be reset for multiple attempts.
                         InputStream content = new BufferedInputStream(new FileInputStream(file));
-                        src = new GraphContentInputSource(content, format, provider.getStore());
+                        src = new GraphContentInputSource(content, format, ontologyProvider.getStore());
+                        break;
                     } catch (OntologyLoadingException e) {
                         // throw new WebApplicationException(e, BAD_REQUEST);
                         continue;
@@ -661,7 +692,8 @@ public class ScopeResource extends BaseStanbolResource {
                 String key = scope.getCustomSpace().addOntology(src);
                 if (key == null || key.isEmpty()) throw new WebApplicationException(INTERNAL_SERVER_ERROR);
                 // FIXME ugly but will have to do for the time being
-                String uri = key.split("::")[1];
+                String uri = // key.split("::")[1];
+                key.substring((ontologyProvider.getGraphPrefix() + "::").length());
                 if (uri != null && !uri.isEmpty()) {
                     rb = Response.seeOther(URI.create("/ontonet/ontology/" + scope.getID() + "/" + uri)/*
                                                                                                         * getCreatedResource
@@ -670,9 +702,15 @@ public class ScopeResource extends BaseStanbolResource {
                                                                                                         */);
                 } else rb = Response.ok();
             } else rb = Response.status(INTERNAL_SERVER_ERROR);
-        } else throw new WebApplicationException(BAD_REQUEST);
+        }
+        if (!keys.isEmpty()) {
+            for (String key : keys)
+                scope.getCustomSpace().addOntology(Origin.create(OntologyUtils.decode(key)));
+            rb = Response.seeOther(URI.create("/ontonet/ontology/" + scope.getID()));
+        }
+        // else throw new WebApplicationException(BAD_REQUEST);
         // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        // FIXME return an appropriate response e.g. 303
+        // FIXME return an appropriate response e.g. 201
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -709,7 +747,7 @@ public class ScopeResource extends BaseStanbolResource {
         if (coreRegistries != null) for (String reg : coreRegistries)
             if (reg != null && !reg.isEmpty()) try {
                 // Library IDs are sanitized differently
-                srcs.add(new LibrarySource(IRI.create(reg.replace("%23", "#")), regMgr));
+                srcs.add(new LibrarySource(URIUtils.desanitize(IRI.create(reg)), regMgr));
             } catch (Exception e1) {
                 throw new WebApplicationException(e1, BAD_REQUEST);
                 // Bad or not supplied core registry, try the ontology.

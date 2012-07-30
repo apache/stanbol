@@ -27,12 +27,32 @@ import java.util.Collection;
  */
 public interface OntologyCollectorListenable {
 
+    /**
+     * Registers a new {@link OntologyCollectorListener} with this object.
+     * 
+     * @param listener
+     *            the listener to be registered.
+     */
     void addOntologyCollectorListener(OntologyCollectorListener listener);
 
+    /**
+     * Unregisters every {@link OntologyCollectorListener} from this object.
+     */
     void clearOntologyCollectorListeners();
 
+    /**
+     * Returns the list of {@link OntologyCollectorListener}s registered with this object.
+     * 
+     * @return the registered listeners.
+     */
     Collection<OntologyCollectorListener> getOntologyCollectorListeners();
 
+    /**
+     * Unregisters {@link OntologyCollectorListener} from this object.
+     * 
+     * @param listener
+     *            the listener to be unregistered.
+     */
     void removeOntologyCollectorListener(OntologyCollectorListener listener);
 
 }

@@ -68,106 +68,9 @@ public class TestOntologyNetworkPersistence {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private OntologyProvider<TcProvider> ontologyProvider;
-
     private ONManager onm;
 
-    @Test
-    public void updatesGraphOnSpaceModification() throws Exception {
-
-        // Ensure the metadata graph is there.
-        TripleCollection meta = ontologyProvider.getMetaGraph(TripleCollection.class);
-        assertNotNull(meta);
-
-        String scopeId = "updateTest";
-        OntologyScope scope = onm.createOntologyScope(scopeId, new GraphContentInputSource(getClass()
-                .getResourceAsStream("/ontologies/test1.owl")));
-
-        UriRef collector = new UriRef(_NS_STANBOL_INTERNAL + OntologySpace.shortName + "/"
-                                      + scope.getCoreSpace().getID());
-        UriRef test1id = new UriRef(ontologyProvider.getKey(IRI
-                .create("http://stanbol.apache.org/ontologies/test1.owl"))); // Has no versionIRI
-        // Be strict: the whole property pair must be there.
-        UriRef predicate = MANAGES;
-        assertTrue(meta.contains(new TripleImpl(collector, predicate, test1id)));
-        predicate = IS_MANAGED_BY;
-        assertTrue(meta.contains(new TripleImpl(test1id, predicate, collector)));
-
-        scope.tearDown(); // To modify the core space.
-
-        scope.getCoreSpace().addOntology(
-            new GraphContentInputSource(getClass().getResourceAsStream("/ontologies/minorcharacters.owl")));
-        UriRef minorId = new UriRef(ontologyProvider.getKey(IRI
-                .create("http://stanbol.apache.org/ontologies/pcomics/minorcharacters.owl")));
-        predicate = MANAGES;
-        assertTrue(meta.contains(new TripleImpl(collector, predicate, minorId)));
-        predicate = IS_MANAGED_BY;
-        assertTrue(meta.contains(new TripleImpl(minorId, predicate, collector)));
-
-        scope.getCustomSpace().addOntology(
-            new GraphContentInputSource(getClass().getResourceAsStream("/ontologies/test1.owl")));
-
-        scope.getCustomSpace().addOntology(
-            new GraphContentInputSource(getClass().getResourceAsStream("/ontologies/minorcharacters.owl")));
-    }
-
-    @Test
-    public void preservesManagedOntologies() throws Exception {
-        String id = "preserve";
-        OntologyScope scope = onManager.createOntologyScope(id, new GraphContentInputSource(getClass()
-                .getResourceAsStream("/ontologies/mockfoaf.rdf")));
-        scope.getCustomSpace().addOntology(
-            new GraphContentInputSource(getClass().getResourceAsStream(
-                "/ontologies/nonexistentcharacters.owl")));
-
-        // Simulate Stanbol going down.
-        log.info("Stanbol going down...");
-        resetOntologyProvider(); // but keep the TcProvider
-        resetManagers();
-
-        OntologyScope sc = onManager.getScope(id);
-        assertNotNull(sc);
-        // assertEquals(scope, sc); XXX should scopes be equal on ID + content?
-    }
-
-    @Test
-    public void scopesAndSessionsOutliveOntoNet() throws Exception {
-        /*
-         * Both scopes will be created, but scope1 will be unregistered and we expect not to be able to
-         * rebuild it.
-         */
-        String id1 = "scope1", id2 = "scope2", sid2 = "auto-" + System.currentTimeMillis();
-
-        // Setup a network
-        OntologyScope scope1 = onManager.createOntologyScope(id1);
-        assertNotNull(scope1);
-        OntologyScope scope2 = onManager.createOntologyScope(id2);
-        assertNotNull(scope2);
-        onManager.deregisterScope(scope1);
-
-        // A session with a system ID
-        Session ses1 = sessionManager.createSession();
-        String sid1 = ses1.getID();
-        assertNotNull(ses1);
-        assertNotNull(sid1);
-        assertFalse(sid1.isEmpty());
-        // A session with an ID chosen manually
-        Session ses2 = sessionManager.createSession(sid2);
-        assertNotNull(ses2);
-        assertNotNull(ses2.getID());
-        assertEquals(sid2, ses2.getID());
-
-        log.info("Stanbol going down...");
-        resetOntologyProvider(); // but keep the TcProvider
-        resetManagers();
-
-        // The unregistered scope should be missing.
-        assertNull(onManager.getScope(id1));
-        // The other collectors should have been rebuilt.
-        assertNotNull(onManager.getScope(id2));
-        assertNotNull(sessionManager.getSession(sid1));
-        assertNotNull(sessionManager.getSession(sid2));
-    }
+    private OntologyProvider<TcProvider> ontologyProvider;
 
     /*
      * Use a dedicated TC Provider that is setup once before the tests begin and never cleared.
@@ -279,6 +182,25 @@ public class TestOntologyNetworkPersistence {
                 new OntologySpaceFactoryImpl(ontologyProvider, empty), empty);
     }
 
+    @Test
+    public void preservesManagedOntologies() throws Exception {
+        String id = "preserve";
+        OntologyScope scope = onManager.createOntologyScope(id, new GraphContentInputSource(getClass()
+                .getResourceAsStream("/ontologies/mockfoaf.rdf")));
+        scope.getCustomSpace().addOntology(
+            new GraphContentInputSource(getClass().getResourceAsStream(
+                "/ontologies/nonexistentcharacters.owl")));
+
+        // Simulate Stanbol going down.
+        log.info("Stanbol going down...");
+        resetOntologyProvider(); // but keep the TcProvider
+        resetManagers();
+
+        OntologyScope sc = onManager.getScope(id);
+        assertNotNull(sc);
+        // assertEquals(scope, sc); XXX should scopes be equal on ID + content?
+    }
+
     /*
      * With this method, the ontology provider and all its internal indices are cleared. However, the Clerezza
      * persistence objects are not cleared, so we can check if we can still retrieve metadata from them.
@@ -286,6 +208,82 @@ public class TestOntologyNetworkPersistence {
     private void resetOntologyProvider() {
         ontologyProvider = new ClerezzaOntologyProvider(tcp, new OfflineConfigurationImpl(
                 new Hashtable<String,Object>()), parser);
+    }
+
+    @Test
+    public void scopesAndSessionsOutliveOntoNet() throws Exception {
+        /*
+         * Both scopes will be created, but scope1 will be unregistered and we expect not to be able to
+         * rebuild it.
+         */
+        String id1 = "scope1", id2 = "scope2", sid2 = "auto-" + System.currentTimeMillis();
+
+        // Setup a network
+        OntologyScope scope1 = onManager.createOntologyScope(id1);
+        assertNotNull(scope1);
+        OntologyScope scope2 = onManager.createOntologyScope(id2);
+        assertNotNull(scope2);
+        onManager.deregisterScope(scope1);
+
+        // A session with a system ID
+        Session ses1 = sessionManager.createSession();
+        String sid1 = ses1.getID();
+        assertNotNull(ses1);
+        assertNotNull(sid1);
+        assertFalse(sid1.isEmpty());
+        // A session with an ID chosen manually
+        Session ses2 = sessionManager.createSession(sid2);
+        assertNotNull(ses2);
+        assertNotNull(ses2.getID());
+        assertEquals(sid2, ses2.getID());
+
+        log.info("Stanbol going down...");
+        resetOntologyProvider(); // but keep the TcProvider
+        resetManagers();
+
+        // The unregistered scope should be missing.
+        assertNull(onManager.getScope(id1));
+        // The other collectors should have been rebuilt.
+        assertNotNull(onManager.getScope(id2));
+        assertNotNull(sessionManager.getSession(sid1));
+        assertNotNull(sessionManager.getSession(sid2));
+    }
+
+    @Test
+    public void updatesGraphOnSpaceModification() throws Exception {
+
+        // Ensure the metadata graph is there.
+        TripleCollection meta = ontologyProvider.getMetaGraph(TripleCollection.class);
+        assertNotNull(meta);
+
+        String scopeId = "updateTest";
+        OntologyScope scope = onm.createOntologyScope(scopeId, new GraphContentInputSource(getClass()
+                .getResourceAsStream("/ontologies/test1.owl")));
+
+        UriRef collector = new UriRef(_NS_STANBOL_INTERNAL + OntologySpace.shortName + "/"
+                                      + scope.getCoreSpace().getID());
+        UriRef test1id = new UriRef("http://stanbol.apache.org/ontologies/test1.owl"); // Has no versionIRI
+        // Be strict: the whole property pair must be there.
+        UriRef predicate = MANAGES;
+        assertTrue(meta.contains(new TripleImpl(collector, predicate, test1id)));
+        predicate = IS_MANAGED_BY;
+        assertTrue(meta.contains(new TripleImpl(test1id, predicate, collector)));
+
+        scope.tearDown(); // To modify the core space.
+
+        scope.getCoreSpace().addOntology(
+            new GraphContentInputSource(getClass().getResourceAsStream("/ontologies/minorcharacters.owl")));
+        UriRef minorId = new UriRef("http://stanbol.apache.org/ontologies/pcomics/minorcharacters.owl");
+        predicate = MANAGES;
+        assertTrue(meta.contains(new TripleImpl(collector, predicate, minorId)));
+        predicate = IS_MANAGED_BY;
+        assertTrue(meta.contains(new TripleImpl(minorId, predicate, collector)));
+
+        scope.getCustomSpace().addOntology(
+            new GraphContentInputSource(getClass().getResourceAsStream("/ontologies/test1.owl")));
+
+        scope.getCustomSpace().addOntology(
+            new GraphContentInputSource(getClass().getResourceAsStream("/ontologies/minorcharacters.owl")));
     }
 
 }

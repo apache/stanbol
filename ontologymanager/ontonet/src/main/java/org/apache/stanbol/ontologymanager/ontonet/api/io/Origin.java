@@ -19,6 +19,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.io;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 
 /**
  * A wrapper class for whatever can be used for physically referencing a resource (typically an ontology).
@@ -45,6 +46,18 @@ public class Origin<R> {
      */
     public static Origin<IRI> create(IRI physicalURL) {
         return new Origin<IRI>(physicalURL);
+    }
+
+    /**
+     * Creates a new Origin for a resource whose public key is known. What a "public key" is interpreted to be
+     * is implementation-dependent.
+     * 
+     * @param publicKey
+     *            the public key
+     * @return the origin that wraps this IRI.
+     */
+    public static Origin<OWLOntologyID> create(OWLOntologyID publicKey) {
+        return new Origin<OWLOntologyID>(publicKey);
     }
 
     /**

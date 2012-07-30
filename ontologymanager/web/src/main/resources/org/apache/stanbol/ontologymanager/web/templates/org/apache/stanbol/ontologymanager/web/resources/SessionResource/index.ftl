@@ -30,6 +30,21 @@
       <p class="collapseheader"><b>Load an ontology</b></p>
       <div class="collapsable">
       <br/>
+
+    <form method="POST" enctype="multipart/form-data" accept-charset="utf-8">
+    <fieldset>
+      <legend>Manage stored ontology</legend>
+      <p><b>Ontology ID:</b> 
+        <select name="stored">  
+        <option value="null">&lt;please select an ontology&gt;</option>
+        <#list it.manageableOntologies as manageable>
+        <option value="${manageable}">${manageable}</option>
+        </#list>
+        </select>
+        <input type="submit" value="Manage"/>
+      </p>
+    </fieldset>
+    </form>
       
     <form id="loadfromfile" method="POST" enctype="multipart/form-data" accept-charset="utf-8">
     <fieldset>
@@ -76,22 +91,24 @@
     });    
   </script>
   
-  <h3>Stored ontologies</h3>
+  <h3>Managed ontologies</h3>
   <#assign ontologies = it.ontologies>
-  <div class="storeContents">
+  <div class="storeContents" id="managed">
     <table id="onts">
       <div>
         <tr>
+          <th></th>
           <th>Name</th>
         </tr>
         <#list ontologies as ontology>
           <tr>
+            <td><img src="${it.staticRootUrl}/ontonet/images/unload_icon_16.png" title="Unmanage this ontology" onClick="javascript:unload('${ontology}')"/></td>
             <td><a href="${it.publicBaseUri}ontonet/session/${it.session.ID}/${ontology}">${ontology}</a></td>
           </tr>
         </#list>
       </div>
-    </table> <!-- allOntologies -->
-  </div>
+    </table> <!-- onts -->
+  </div> <!-- managed -->
   
   <form method="POST" enctype="multipart/form-data" accept-charset="utf-8">
   <input type="hidden" name="sessionid" value="${it.session.ID}"/>
@@ -111,11 +128,31 @@
         </#list>
       </div>
     </table> <!-- appSc -->
-    <input type="submit" value="Update"/>
+    <input type="submit" value="Update"${(it.allScopes?size==0)?string(" disabled=\"disabled\"", "")}/>
   </div>
   </form>
   
   </div> <!-- web view -->
+  
+  <script language="JavaScript">
+    
+    function unload(ontologyid) {
+      var lurl = "${it.publicBaseUri}ontonet/session/${it.session.ID}" + "/" + ontologyid;
+      $.ajax({
+        url: lurl,
+        type: "DELETE",
+        async: true,
+        cache: false,
+        success: function(data, textStatus, xhr) {
+          $("#managed").load("${it.publicBaseUri}ontonet/session/${it.session.ID} #managed>table");
+        },
+        error: function() {
+          alert(result.status + ' ' + result.statusText);
+        }
+      });
+    }
+    
+  </script>
 
   </@common.page>
 </#escape>
