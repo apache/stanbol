@@ -53,7 +53,7 @@
             <fileset>
               <directory>.</directory>
               <includes>
-                <include>sling/**</include>
+                <include>stanbol/**</include>
               </includes>
             </fileset>
           </filesets>
