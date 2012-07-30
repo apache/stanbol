@@ -177,6 +177,9 @@ public class FileStore implements Store<ContentItem> {
     private static final String REMOVE_RECENTLY_ENHANCED_ITEM = "DELETE FROM " + RECENTLY_ENHANCED_TABLE_NAME
                                                                 + " WHERE " + FIELD_ID + "=?";
 
+    private static final String SELECT_EPOCH = "SELECT epoch FROM " + StoreDBManager.EPOCH_TABLE_NAME
+                                               + " WHERE tableName = ?";
+
     private final Logger log = LoggerFactory.getLogger(FileStore.class);
 
     private File storeFolder;
@@ -253,9 +256,34 @@ public class FileStore implements Store<ContentItem> {
     }
 
     @Override
-    public long getEpoch() {
-        // TODO Auto-generated method stub
-        return 0;
+    public long getEpoch() throws StoreException {
+        // get connection
+        Connection con = dbManager.getConnection();
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        long epoch;
+        try {
+            ps = con.prepareStatement(SELECT_EPOCH);
+            ps.setString(1, revisionManager.getStoreID(this));
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                epoch = rs.getLong(1);
+            } else {
+                throw new StoreException(String.format("There is no an epoch record for the Store: %s",
+                    getName()));
+            }
+
+        } catch (SQLException e) {
+            log.error("Failed to execute query", e);
+            throw new StoreException("Failed to execute query", e);
+        } finally {
+            dbManager.closeResultSet(rs);
+            dbManager.closeStatement(ps);
+            dbManager.closeConnection(con);
+        }
+        return epoch;
     }
 
     @Override
@@ -297,6 +325,7 @@ public class FileStore implements Store<ContentItem> {
 
     @Override
     public void removeAll() throws StoreException {
+        // get changes to obtain identifier of the all changed ContentItems
         ChangeSet<ContentItem> changes = changes(Long.MIN_VALUE, Long.MIN_VALUE, Integer.MAX_VALUE);
         List<ContentItem> removed = new ArrayList<ContentItem>();
         Iterator<String> idIterator = changes.iterator();
@@ -307,6 +336,8 @@ public class FileStore implements Store<ContentItem> {
                 removed.add(ci);
             }
         }
+        // update the epoch of this Store. It will also clear the revision table
+        revisionManager.updateEpoch(this);
     }
 
     private void updateTablesForDelete(String id) throws StoreException {
