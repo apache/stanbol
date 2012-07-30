@@ -24,6 +24,11 @@
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.contenthub.revisionmanager</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.search.featured</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>

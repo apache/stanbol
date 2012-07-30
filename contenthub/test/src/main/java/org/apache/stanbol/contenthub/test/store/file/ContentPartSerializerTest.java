@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(SlingAnnotationsTestRunner.class)
 public class ContentPartSerializerTest {
-    private static final Logger log = LoggerFactory.getLogger(FileStoreDBManagerTest.class);
+    private static final Logger log = LoggerFactory.getLogger(ContentPartSerializerTest.class);
 
     @TestReference
     ContentPartSerializer contentPartSerializer;

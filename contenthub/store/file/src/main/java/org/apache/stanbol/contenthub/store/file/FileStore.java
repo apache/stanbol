@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,6 +50,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -56,8 +58,11 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.semanticindex.core.store.ChangeSetImpl;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
+import org.apache.stanbol.commons.semanticindex.store.EpochException;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
+import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
+import org.apache.stanbol.contenthub.revisionmanager.StoreDBManager;
 import org.apache.stanbol.contenthub.store.file.serializer.ContentPartDeserializer;
 import org.apache.stanbol.contenthub.store.file.serializer.ContentPartSerializer;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
@@ -106,19 +111,14 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties(value = {@Property(name = Constants.SERVICE_RANKING, intValue = 100)})
 public class FileStore implements Store<ContentItem> {
-	//TODO: IMPORTANT
-	//  We need to move the Contenthub related business logic out of this class!
-	//  Otherwise one can not implement/use different store implementations.
-	//  
-	//  e.g. the  #put(..) method MUST NOT enhance the contentItem. It is only
-	//  expected to store the parsed content item (without modifications).
-	//  The logic if the Contenthub needs to enhance ContentItems needs to be
-	//  outside of the actual Store implementation
-	
-	
-	
-    // @Property(name = Constants.SERVICE_RANKING)
-    // private int ranking;
+    // TODO: IMPORTANT
+    // We need to move the Contenthub related business logic out of this class!
+    // Otherwise one can not implement/use different store implementations.
+    //
+    // e.g. the #put(..) method MUST NOT enhance the contentItem. It is only
+    // expected to store the parsed content item (without modifications).
+    // The logic if the Contenthub needs to enhance ContentItems needs to be
+    // outside of the actual Store implementation
 
     public static final String RECENTLY_ENHANCED_TABLE_NAME = "recently_enhanced_content_items";
 
@@ -138,9 +138,19 @@ public class FileStore implements Store<ContentItem> {
 
     public static final String FILE_STORE_NAME = "filestore";
 
-    private static final String SELECT_RECENTLY_ENHANCED_ITEMS = "SELECT t1.id, mimeType, enhancementCount, title FROM "
-                                                                 + FileRevisionManager.REVISION_TABLE_NAME
-                                                                 + " t1, "
+    private static int MAX_ID_LENGTH = 1024;
+
+    private static final String CREATE_RECENTLY_ENHANCED_TABLE = "CREATE TABLE "
+                                                                 + RECENTLY_ENHANCED_TABLE_NAME + " ("
+                                                                 + FIELD_ID + " VARCHAR(" + MAX_ID_LENGTH
+                                                                 + " ) NOT NULL PRIMARY KEY,"
+                                                                 + FIELD_MIME_TYPE + " VARCHAR("
+                                                                 + MAX_ID_LENGTH + "),"
+                                                                 + FIELD_ENHANCEMENT_COUNT + " BIGINT,"
+                                                                 + FIELD_TITLE + " VARCHAR(" + MAX_ID_LENGTH
+                                                                 + "))";
+
+    private static final String SELECT_RECENTLY_ENHANCED_ITEMS = "SELECT t1.id, mimeType, enhancementCount, title FROM %s t1, "
                                                                  + RECENTLY_ENHANCED_TABLE_NAME
                                                                  + " t2 WHERE"
                                                                  + " t1.id=t2."
@@ -172,13 +182,13 @@ public class FileStore implements Store<ContentItem> {
     private File storeFolder;
 
     @Reference
-    ContentItemFactory contentItemFactory;
+    private ContentItemFactory contentItemFactory;
 
     @Reference
-    FileRevisionManager revisionManager;
+    private RevisionManager revisionManager;
 
     @Reference
-    FileStoreDBManager dbManager;
+    private StoreDBManager dbManager;
 
     @Reference
     private ContentPartSerializer contentPartSerializer;
@@ -188,7 +198,7 @@ public class FileStore implements Store<ContentItem> {
 
     @Reference
     private EnhancementJobManager jobManager;
-    
+
     Map<String,Object> storeProperties;
 
     @Activate
@@ -198,41 +208,61 @@ public class FileStore implements Store<ContentItem> {
         storeFolder = new File(stanbolHome + "/" + FILE_STORE_FOLDER_PATH + "/" + FILE_STORE_NAME);
         if (!storeFolder.exists()) {
             storeFolder.mkdirs();
+        } else {
+            if (!storeFolder.isDirectory()) {
+                log.error(String.format("There must be a directory in the path: %s",
+                    storeFolder.getAbsolutePath()));
+                throw new IllegalStateException(String.format("There must be a directory in the path: %s",
+                    storeFolder.getAbsolutePath()));
+            }
         }
+
         // init the store properties
-		Map<String,Object> properties = new HashMap<String, Object>();
-		properties.put(PROPERTY_NAME, getName());
-		properties.put(PROPERTY_DESCRIPTION, getDescription());
-		properties.put(PROPERTY_ITEM_TYPE, getItemType());
-		storeProperties = Collections.unmodifiableMap(properties);
+        Map<String,Object> properties = new HashMap<String,Object>();
+        properties.put(PROPERTY_NAME, getName());
+        properties.put(PROPERTY_DESCRIPTION, getDescription());
+        properties.put(PROPERTY_ITEM_TYPE, getItemType());
+        storeProperties = Collections.unmodifiableMap(properties);
+
+        // create file store revision and recentlyenhanced tables
+        revisionManager.initializeRevisionTables(this);
+        createRecentlyEnhancedTable();
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext context) {
-    	storeProperties = null;
+        storeProperties = null;
     }
-    
+
     /*
-     * NOTE: This implementation assume a single FileStore instance.
-     * If this is changed this implementations need to be adapted.
+     * NOTE: This implementation assume a single FileStore instance. If this is changed this implementations
+     * need to be adapted.
      */
     @Override
     public String getName() {
-    	return "contenthubFileStore";
+        return "contenthubFileStore";
     }
-    
+
     /*
-     * NOTE: This implementation assume a single FileStore instance.
-     * If this is changed this implementations need to be adapted.
+     * NOTE: This implementation assume a single FileStore instance. If this is changed this implementations
+     * need to be adapted.
      */
     @Override
     public String getDescription() {
-    	return "File based Store implementation for ContentItems used by the Stanbol Contenthub";
+        return "File based Store implementation for ContentItems used by the Stanbol Contenthub";
     }
-    
+
     @Override
-    public Map<String, Object> getProperties() {
-    	return storeProperties;
+    public long getEpoch() {
+        // TODO Auto-generated method stub
+        return 0;
     }
+
+    @Override
+    public Map<String,Object> getProperties() {
+        return storeProperties;
+    }
+
     @Override
     public Class<ContentItem> getItemType() {
         return ContentItem.class;
@@ -267,9 +297,11 @@ public class FileStore implements Store<ContentItem> {
 
     @Override
     public void removeAll() throws StoreException {
-        ChangeSet<ContentItem> changes = changes(Long.MIN_VALUE, Integer.MAX_VALUE);
+        ChangeSet<ContentItem> changes = changes(Long.MIN_VALUE, Long.MIN_VALUE, Integer.MAX_VALUE);
         List<ContentItem> removed = new ArrayList<ContentItem>();
-        for (String id : changes.changed()) {
+        Iterator<String> idIterator = changes.iterator();
+        while (idIterator.hasNext()) {
+            String id = idIterator.next();
             ContentItem ci = remove(id);
             if (ci != null) {
                 removed.add(ci);
@@ -279,7 +311,7 @@ public class FileStore implements Store<ContentItem> {
 
     private void updateTablesForDelete(String id) throws StoreException {
         // update revision
-        revisionManager.updateRevision(id);
+        revisionManager.updateRevision(this, id);
         // update recently_enhanced table
         removeFromRecentlyEnhancedTable(id);
     }
@@ -392,70 +424,11 @@ public class FileStore implements Store<ContentItem> {
             // ignore the exception
         }
         try {
-            revisionManager.updateRevision(htmlMetadata.getString(FIELD_ID));
+            revisionManager.updateRevision(this, htmlMetadata.getString(FIELD_ID));
             updateRecentlyEnhancedItem(htmlMetadata.getString(FIELD_ID), title,
                 htmlMetadata.getString(FIELD_MIME_TYPE), htmlMetadata.getLong(FIELD_ENHANCEMENT_COUNT));
         } catch (JSONException e) {
             throw new StoreException("Failed to read HTML metadata of content item", e);
-        }
-    }
-
-    private void updateRecentlyEnhancedItem(String contentItemID,
-                                            String title,
-                                            String mimeType,
-                                            long enhancementCount) throws StoreException {
-        // get connection
-        Connection con = dbManager.getConnection();
-
-        // check existence of record for the given content item id
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        boolean recordExist = false;
-        try {
-            ps = con.prepareStatement(SELECT_RECENTLY_ENHANCED_ITEM);
-            ps.setString(1, contentItemID);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                recordExist = true;
-            }
-
-        } catch (SQLException e) {
-            dbManager.closeConnection(con);
-            log.error("Failed to query information of content item", e);
-            throw new StoreException("Failed to query information of content item", e);
-        } finally {
-            dbManager.closeResultSet(rs);
-            dbManager.closeStatement(ps);
-        }
-
-        // update the table
-        try {
-            if (!recordExist) {
-                log.debug("Content item: {} will be added to recently_enhanced table", contentItemID);
-                ps = con.prepareStatement(INSERT_RECENTLY_ENHANCED_ITEM);
-                ps.setString(1, contentItemID);
-                ps.setString(2, title);
-                ps.setString(3, mimeType);
-                ps.setLong(4, enhancementCount);
-            } else {
-                log.debug("Content item: {} will be updated in recently_enhanced table", contentItemID);
-                ps = con.prepareStatement(UPDATE_RECENTLY_ENHANCED_ITEM);
-                ps.setString(1, mimeType);
-                ps.setString(2, title);
-                ps.setLong(3, enhancementCount);
-                ps.setString(4, contentItemID);
-            }
-            int updatedRecordNum = ps.executeUpdate();
-            // exactly one record should be affected
-            if (updatedRecordNum != 1) {
-                log.warn("Unexpected number of updated records: {}, should be 1", updatedRecordNum);
-            }
-        } catch (SQLException e) {
-            log.error("Failed to update recently_enhanced table", e);
-            throw new StoreException("Failed to update recently_enhanced table", e);
-        } finally {
-            dbManager.closeStatement(ps);
-            dbManager.closeConnection(con);
         }
     }
 
@@ -769,10 +742,12 @@ public class FileStore implements Store<ContentItem> {
     }
 
     @Override
-    public ChangeSet<ContentItem> changes(long revision, int batchSize) throws StoreException {
-        ChangeSetImpl<ContentItem> changesSet = (ChangeSetImpl<ContentItem>) revisionManager.getChanges(
+    public ChangeSet<ContentItem> changes(long epoch, long revision, int batchSize) throws StoreException {
+        if (getEpoch() != epoch) {
+            throw new EpochException(this, getEpoch(), epoch);
+        }
+        ChangeSetImpl<ContentItem> changesSet = (ChangeSetImpl<ContentItem>) revisionManager.getChanges(this,
             revision, batchSize);
-        changesSet.setStore(this);
         return changesSet;
     }
 
@@ -791,6 +766,65 @@ public class FileStore implements Store<ContentItem> {
         }
     }
 
+    private void updateRecentlyEnhancedItem(String contentItemID,
+                                            String title,
+                                            String mimeType,
+                                            long enhancementCount) throws StoreException {
+        // get connection
+        Connection con = dbManager.getConnection();
+
+        // check existence of record for the given content item id
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        boolean recordExist = false;
+        try {
+            ps = con.prepareStatement(SELECT_RECENTLY_ENHANCED_ITEM);
+            ps.setString(1, contentItemID);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                recordExist = true;
+            }
+
+        } catch (SQLException e) {
+            dbManager.closeConnection(con);
+            log.error("Failed to query information of content item", e);
+            throw new StoreException("Failed to query information of content item", e);
+        } finally {
+            dbManager.closeResultSet(rs);
+            dbManager.closeStatement(ps);
+        }
+
+        // update the table
+        try {
+            if (!recordExist) {
+                log.debug("Content item: {} will be added to recently_enhanced table", contentItemID);
+                ps = con.prepareStatement(INSERT_RECENTLY_ENHANCED_ITEM);
+                ps.setString(1, contentItemID);
+                ps.setString(2, title);
+                ps.setString(3, mimeType);
+                ps.setLong(4, enhancementCount);
+            } else {
+                log.debug("Content item: {} will be updated in recently_enhanced table", contentItemID);
+                ps = con.prepareStatement(UPDATE_RECENTLY_ENHANCED_ITEM);
+                ps.setString(1, mimeType);
+                ps.setString(2, title);
+                ps.setLong(3, enhancementCount);
+                ps.setString(4, contentItemID);
+            }
+            int updatedRecordNum = ps.executeUpdate();
+            // exactly one record should be affected
+            if (updatedRecordNum != 1) {
+                log.warn("Unexpected number of updated records: {}, should be 1", updatedRecordNum);
+            }
+        } catch (SQLException e) {
+            log.error("Failed to update recently_enhanced table", e);
+            throw new StoreException("Failed to update recently_enhanced table", e);
+        } finally {
+            dbManager.closeStatement(ps);
+            dbManager.closeConnection(con);
+        }
+    }
+
     public List<JSONObject> getRecentlyEnhancedItems(int limit, int offset) throws StoreException {
         // get connection
         Connection con = dbManager.getConnection();
@@ -799,7 +833,8 @@ public class FileStore implements Store<ContentItem> {
         ResultSet rs = null;
         List<JSONObject> recentlyEnhancedList = new ArrayList<JSONObject>();
         try {
-            ps = con.prepareStatement(SELECT_RECENTLY_ENHANCED_ITEMS);
+            ps = con.prepareStatement(String.format(SELECT_RECENTLY_ENHANCED_ITEMS,
+                revisionManager.getStoreID(this)));
             ps.setMaxRows(limit);
             ps.setInt(1, offset);
             rs = ps.executeQuery();
@@ -824,5 +859,26 @@ public class FileStore implements Store<ContentItem> {
         }
 
         return recentlyEnhancedList;
+    }
+
+    private void createRecentlyEnhancedTable() throws StoreException {
+        Connection con = dbManager.getConnection();
+        Statement stmt = null;
+        try {
+            // try to create recently_enhanced table
+            if (!dbManager.existsTable(RECENTLY_ENHANCED_TABLE_NAME)) {
+                stmt = con.createStatement();
+                stmt.executeUpdate(CREATE_RECENTLY_ENHANCED_TABLE);
+                log.info("RecentlyEnhanced table created.");
+            } else {
+                log.info("RecentlyEnhanced table already exists");
+            }
+        } catch (SQLException e) {
+            log.error("Failed to create recentlyenhanced table", e);
+            throw new StoreException("Failed to create recentlyenhanced table", e);
+        } finally {
+            dbManager.closeStatement(stmt);
+            dbManager.closeConnection(con);
+        }
     }
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.test.store.file;
+package org.apache.stanbol.contenthub.test.revisionmanager;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -23,34 +23,36 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Set;
+import java.util.Iterator;
 
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
+import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
-import org.apache.stanbol.contenthub.store.file.FileRevisionManager;
-import org.apache.stanbol.contenthub.store.file.FileStoreDBManager;
-import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
+import org.apache.stanbol.contenthub.revisionmanager.StoreDBManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(SlingAnnotationsTestRunner.class)
-public class FileRevisionManagerTest {
-    private static Logger log = LoggerFactory.getLogger(FileRevisionManagerTest.class);
+public class RevisionManagerTest {
+    private static Logger log = LoggerFactory.getLogger(RevisionManagerTest.class);
 
     @TestReference
-    FileRevisionManager fileRevisionManager;
+    private RevisionManager revisionManager;
 
     @TestReference
-    FileStoreDBManager dbManager;
+    private StoreDBManager dbManager;
+
+    @TestReference
+    private Store<?> store;
 
     @Test
-    public void fileRevisionManagerTest() {
-        assertNotNull("Expecting FileRevisionManager to be injected by Sling test runner",
-            fileRevisionManager);
+    public void revisionManagerTest() {
+        assertNotNull("Expecting revisionManager to be injected by Sling test runner", revisionManager);
     }
 
     @Test
@@ -62,10 +64,11 @@ public class FileRevisionManagerTest {
     public void updateChangeTest() throws StoreException, SQLException {
         // do the update
         String contentItemID = "contenthub_test_content_item_id";
-        fileRevisionManager.updateRevision(contentItemID);
+        revisionManager.updateRevision(store, contentItemID);
 
         // check the update
-        String query = "SELECT id, revision FROM content_item_revisions WHERE id = ?";
+        String query = String.format("SELECT id, revision FROM %s WHERE id = ?",
+            revisionManager.getStoreID(store));
         Connection con = dbManager.getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -88,7 +91,7 @@ public class FileRevisionManagerTest {
         assertTrue("wrong revision number", (revisionNumber <= System.currentTimeMillis()));
 
         // clear the update
-        query = "DELETE FROM content_item_revisions WHERE id = ?";
+        query = String.format("DELETE FROM %s WHERE id = ?", revisionManager.getStoreID(store));
         ps = null;
         try {
             ps = con.prepareStatement(query);
@@ -116,14 +119,14 @@ public class FileRevisionManagerTest {
      */
     @Test
     public void iterativeChangesTest() throws StoreException, InterruptedException, SQLException {
-        log.warn("DO NOT UPDATE REVISION MANAGER DURING EXECUTION OF THIS TEST");
+        log.warn("DO NOT UPDATE THE STORE: {}DURING EXECUTION OF THIS TEST", store.getName());
         Connection con = dbManager.getConnection();
         String contentItemID = "contenthub_test_content_item_id";
         PreparedStatement ps = null;
         int insertCount = 0;
         try {
             // do the update
-            String query = "INSERT INTO " + FileRevisionManager.REVISION_TABLE_NAME
+            String query = "INSERT INTO " + revisionManager.getStoreID(store)
                            + " (id, revision) VALUES (?,?)";
             long startRevision = System.currentTimeMillis();
             long revision = System.currentTimeMillis();
@@ -138,32 +141,57 @@ public class FileRevisionManagerTest {
             }
 
             // check changes
-            ChangeSet<ContentItem> changeSet = fileRevisionManager.getChanges(startRevision, 3);
-            Set<String> changedItems = changeSet.changed();
-            assertTrue("Wrong number of changed items", (changedItems.size() == 3));
+            ChangeSet<?> changeSet = revisionManager.getChanges(store, startRevision, 3);
+            Iterator<String> changedItems = changeSet.iterator();
+            int itemCount = 0;
+            while (changedItems.hasNext()) {
+                changedItems.next();
+                itemCount++;
+            }
+            assertTrue("Wrong number of changed items", (itemCount == 3));
             for (int i = 0; i < 3; i++) {
-                assertTrue("Changes does not include correct URIs",
-                    changedItems.contains(contentItemID + i));
+                changedItems = changeSet.iterator();
+                itemCount = 0;
+                while (changedItems.hasNext()) {
+                    String changedItem = changedItems.next();
+                    if (changedItem.equals(contentItemID + i)) break;
+                    itemCount++;
+                }
+                assertTrue("Changes does not include correct URIs", itemCount < 3);
             }
             assertTrue("Changes does not include correct fromRevision value",
                 (changeSet.fromRevision() == revision - 4));
             assertTrue("Changes does not include correct toRevision value",
                 (changeSet.toRevision() == revision - 2));
 
-            changeSet = fileRevisionManager.getChanges(revision - 2, 3);
-            changedItems = changeSet.changed();
-            assertTrue("Wrong number of changed items", (changedItems.size() == 2));
-            for (int i = 0; i < 2; i++) {
-                assertTrue("Changes does not include correct URIs",
-                    changedItems.contains(contentItemID + (i + 3)));
+            changeSet = revisionManager.getChanges(store, revision - 2, 3);
+            itemCount = 0;
+            changedItems = changeSet.iterator();
+            while (changedItems.hasNext()) {
+                changedItems.next();
+                itemCount++;
             }
+            assertTrue("Wrong number of changed items", (itemCount == 2));
+            for (int i = 0; i < 2; i++) {
+                changedItems = changeSet.iterator();
+                itemCount = 0;
+                while (changedItems.hasNext()) {
+                    String changedItem = changedItems.next();
+                    if (changedItem.equals(contentItemID + (i + 3))) break;
+                    itemCount++;
+                }
+                assertTrue("Changes does not include correct URIs", itemCount < 2);
+            }
+
             assertTrue("Changes does not include correct fromRevision value",
                 (changeSet.fromRevision() == revision - 1));
             assertTrue("Changes does not include correct toRevision value",
                 (changeSet.toRevision() == revision));
         } finally {
             // clear test changes
-            String query = "DELETE FROM content_item_revisions WHERE id = ? OR id = ? OR id = ? OR id = ? OR id = ?";
+            String query = String.format(
+                "DELETE FROM %s WHERE id = ? OR id = ? OR id = ? OR id = ? OR id = ?",
+                revisionManager.getStoreID(store));
             try {
                 ps = con.prepareStatement(query);
                 for (int i = 0; i < insertCount; i++) {
@@ -186,14 +214,14 @@ public class FileRevisionManagerTest {
 
     @Test
     public void batchSizeDoesNotFitToRevisionTest() throws StoreException, SQLException {
-        log.warn("DO NOT UPDATE REVISION MANAGER DURING EXECUTION OF THIS TEST");
+        log.warn("DO NOT UPDATE THE STORE: {} DURING EXECUTION OF THIS TEST", store.getName());
         Connection con = dbManager.getConnection();
         String contentItemID = "contenthub_test_content_item_id";
         PreparedStatement ps = null;
         int insertCount = 0;
         try {
             // do the update
-            String query = "INSERT INTO " + FileRevisionManager.REVISION_TABLE_NAME
+            String query = "INSERT INTO " + revisionManager.getStoreID(store)
                            + " (id, revision) VALUES (?,?)";
             long revision = System.currentTimeMillis();
             for (int i = 0; i < 2; i++) {
@@ -206,15 +234,28 @@ public class FileRevisionManagerTest {
             }
 
             // get changes
-            Set<String> changedItems = fileRevisionManager.getChanges(revision, 1).changed();
-            assertTrue("Wrong number of changed items", (changedItems.size() == 2));
+            ChangeSet<?> changeSet = revisionManager.getChanges(store, revision, 1);
+            int itemCount = 0;
+            Iterator<String> changedItems = changeSet.iterator();
+            while (changedItems.hasNext()) {
+                changedItems.next();
+                itemCount++;
+            }
+            assertTrue("Wrong number of changed items", (itemCount == 2));
             for (int i = 0; i < 2; i++) {
-                assertTrue("Changes does not include correct URIs",
-                    changedItems.contains(contentItemID + i));
+                changedItems = changeSet.iterator();
+                itemCount = 0;
+                while (changedItems.hasNext()) {
+                    String changedItem = changedItems.next();
+                    if (changedItem.equals(contentItemID + i)) break;
+                    itemCount++;
+                }
+                assertTrue("Changes does not include correct URIs", itemCount < 2);
             }
         } finally {
             // clear test changes
-            String query = "DELETE FROM content_item_revisions WHERE id = ? OR id = ?";
+            String query = String.format("DELETE FROM %s WHERE id = ? OR id = ?",
+                revisionManager.getStoreID(store));
             try {
                 ps = con.prepareStatement(query);
                 for (int i = 0; i < insertCount; i++) {
@@ -238,9 +279,7 @@ public class FileRevisionManagerTest {
     @Test
     public void emptyChangesTest() throws StoreException {
         long revision = System.currentTimeMillis();
-        ChangeSet<ContentItem> changeSet = fileRevisionManager.getChanges(revision, 1);
-        assertTrue("There must be no changes", changeSet.changed().size() == 0);
-        assertTrue("Wrong start version", changeSet.fromRevision() == -1);
-        assertTrue("Wrong end version", changeSet.toRevision() == -1);
+        ChangeSet<?> changeSet = revisionManager.getChanges(store, revision, 1);
+        assertTrue("There must be no changes", !changeSet.iterator().hasNext());
     }
 }

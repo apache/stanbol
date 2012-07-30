@@ -14,7 +14,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
--->
+-->	
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
@@ -27,10 +27,11 @@
     <relativePath>../parent</relativePath>
   </parent>
 
-  <artifactId>org.apache.stanbol.contenthub.index</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.contenthub.revisionmanager</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Contenthub LDPath Based Semantic Index</name>
+  <name>Apache Stanbol Contenthub Revision Manager</name>
 
   <build>
     <plugins>
@@ -38,6 +39,16 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
+          <configuration>
+          <instructions>
+            <!-- Derby is only used through the JDBC API but needs to be in
+            the classpath of the caller to be able to create a new DB. -->
+            <Import-Package>
+              org.apache.derby.jdbc,
+              *
+            </Import-Package>
+          </instructions>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -46,29 +57,10 @@
     </plugins>
   </build>
   <dependencies>
+    <!-- Apache Stanbol dependencies -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.contenthub.store.file</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.10.1-incubating-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+      <artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -78,35 +70,51 @@
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
-      <version>0.11.0-incubating-SNAPSHOT</version>
+      <artifactId>org.apache.stanbol.commons.semanticindex.core</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-api</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.cmsadapter.core</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core-bundle</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-compress</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>10.7.1.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.hp.hpl.jena</groupId>
+      <artifactId>jena</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-client</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
   </dependencies>
 </project>
+

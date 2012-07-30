@@ -48,8 +48,6 @@ import org.slf4j.LoggerFactory;
 public class LDPathSemanticIndexManagerTest {
     private static Logger logger = LoggerFactory.getLogger(LDPathSemanticIndexManagerTest.class);
 
-    private final static String INDEX_METADATA_FOLDER_PATH = "LDPathSemanticIndexMetadata";
-
     @TestReference
     private LDPathSemanticIndexManager ldPathSemanticIndexManager;
 
@@ -125,7 +123,7 @@ public class LDPathSemanticIndexManagerTest {
         // check IndexMetadata folder exists
         File indexMetadataDirectory = bundleContext
                 .getServiceReference(LDPathSemanticIndexManager.class.getName()).getBundle()
-                .getBundleContext().getDataFile(INDEX_METADATA_FOLDER_PATH);
+                .getBundleContext().getDataFile(LDPathSemanticIndexManager.class.getName());
         assertTrue("IndexMetadata Directory does not exist", indexMetadataDirectory.exists());
 
         // check IndexMetadata files of indexes before remove index
@@ -179,7 +177,7 @@ public class LDPathSemanticIndexManagerTest {
 
         File indexMetadataDirectory = bundleContext
                 .getServiceReference(LDPathSemanticIndexManager.class.getName()).getBundle()
-                .getBundleContext().getDataFile(INDEX_METADATA_FOLDER_PATH);
+                .getBundleContext().getDataFile(LDPathSemanticIndexManager.class.getName());
 
         Map<String,Properties> indexMetadataMap = new HashMap<String,Properties>();
         // load index metadata to memory

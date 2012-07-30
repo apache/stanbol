@@ -38,13 +38,14 @@
   <modules>
     <module>parent</module>
     <module>servicesapi</module>
+    <module>defaults</module>
+    <module>revisionmanager</module>
     <module>store/file</module>
+    <module>index</module>
     <module>search/solr</module>
     <module>search/featured</module>
     <module>search/related</module>
-    <module>index</module>
     <module>web</module>
-    <module>defaults</module>
     <module>test</module>
     <module>bundlelist</module>
   </modules>

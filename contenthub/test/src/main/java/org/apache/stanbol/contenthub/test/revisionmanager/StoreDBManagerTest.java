@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.test.store.file;
+package org.apache.stanbol.contenthub.test.revisionmanager;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -24,20 +24,29 @@ import java.sql.SQLException;
 
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
+import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
-import org.apache.stanbol.contenthub.store.file.FileStoreDBManager;
+import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
+import org.apache.stanbol.contenthub.revisionmanager.StoreDBManager;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(SlingAnnotationsTestRunner.class)
-public class FileStoreDBManagerTest {
-    private static final Logger log = LoggerFactory.getLogger(FileStoreDBManagerTest.class);
+public class StoreDBManagerTest {
+    private static final Logger log = LoggerFactory.getLogger(StoreDBManagerTest.class);
 
     @TestReference
-    FileStoreDBManager dbManager;
-    
+    private StoreDBManager dbManager;
+
+    @TestReference
+    private RevisionManager revisionManager;
+
+    @TestReference
+    private Store<ContentItem> store;
+
     @Test
     public void dbManagerTest() {
         assertNotNull("Expecting FileStoreDBManager to be injected by Sling test runner", dbManager);
@@ -58,7 +67,9 @@ public class FileStoreDBManagerTest {
 
     @Test
     public void testTables() throws StoreException {
-        assertTrue("recently_enhanced_content_items does not exist", dbManager.existsTable("recently_enhanced_content_items"));
-        assertTrue("content_item_revisions does not exist", dbManager.existsTable("content_item_revisions"));
+        assertTrue("recently_enhanced_content_items does not exist",
+            dbManager.existsTable("recently_enhanced_content_items"));
+        assertTrue(String.format("%s does not exist", revisionManager.getStoreID(store)),
+            dbManager.existsTable(revisionManager.getStoreID(store)));
     }
 }

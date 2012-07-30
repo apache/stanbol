@@ -882,8 +882,10 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
             long revision = Long.MIN_VALUE;
             boolean noChange = false;
             do {
-                cs = store.changes(revision, batchSize);
-                for (String changed : cs.changed()) {
+                cs = store.changes(store.getEpoch(), revision, batchSize);
+                Iterator<String> changedItr = cs.iterator();
+                while (changedItr.hasNext()) {
+                    String changed = changedItr.next();
                     ContentItem ci = store.get(changed);
                     if (ci == null) {
                         performRemove(changed);
@@ -891,7 +893,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                         performIndex(ci);
                     }
                 }
-                noChange = cs.changed().isEmpty() ? true : false;
+                noChange = cs.iterator().hasNext() ? false : true;
                 if (!noChange) {
                     revision = cs.toRevision();
                 }
@@ -919,14 +921,14 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
 
                 ChangeSet<ContentItem> changeSet = null;
                 try {
-                    changeSet = store.changes(revision, batchSize);
+                    changeSet = store.changes(store.getEpoch(), revision, batchSize);
                 } catch (StoreException e) {
                     logger.error(
                         "Failed to get changes from FileRevisionManager with start revision: {} and batch size: {}",
                         revision, batchSize);
                 }
                 if (changeSet != null) {
-                    Iterator<String> changedItems = changeSet.changed().iterator();
+                    Iterator<String> changedItems = changeSet.iterator();
                     boolean persist = true;
                     while (changedItems.hasNext()) {
                         String changedItem = changedItems.next();
@@ -952,7 +954,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                     }
                     if (persist) {
                         try {
-                            if (changeSet.changed().size() != 0) {
+                            if (changeSet.iterator().hasNext()) {
                                 persist(changeSet.toRevision());
                             }
                         } catch (IndexException e) {

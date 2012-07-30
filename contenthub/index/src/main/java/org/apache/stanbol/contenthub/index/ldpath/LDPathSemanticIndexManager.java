@@ -65,8 +65,6 @@ public class LDPathSemanticIndexManager {
 
     private final Logger logger = LoggerFactory.getLogger(LDPathSemanticIndexManager.class);
 
-    private final static String INDEX_METADATA_FOLDER_PATH = "LDPathSemanticIndexMetadata";
-
     private File indexMetadataDirectory;
 
     private Map<String,Properties> indexMetadataMap = new HashMap<String,Properties>();
@@ -86,7 +84,7 @@ public class LDPathSemanticIndexManager {
         this.bundleContext = context.getBundleContext();
         ldPathUtils = new LDPathUtils(bundleContext.getBundle(), siteManager);
 
-        indexMetadataDirectory = bundleContext.getDataFile(INDEX_METADATA_FOLDER_PATH);
+        indexMetadataDirectory = bundleContext.getDataFile(LDPathSemanticIndexManager.class.getName());
 
         // if directory for programs does not exist, create it
         if (!indexMetadataDirectory.exists()) {
@@ -165,7 +163,7 @@ public class LDPathSemanticIndexManager {
         props.put(LDPathSemanticIndex.PROP_DESCRIPTION, indexDescription);
         return createIndex(props);
     }
-    
+
     /**
      * Creates an {@link LDPathSemanticIndex} instance based on the given index metadata. However, provided
      * {@link Properties} must include the following items.

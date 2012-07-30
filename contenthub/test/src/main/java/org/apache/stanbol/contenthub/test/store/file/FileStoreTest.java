@@ -36,8 +36,9 @@ import org.apache.sling.junit.annotations.TestReference;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
+import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
+import org.apache.stanbol.contenthub.revisionmanager.StoreDBManager;
 import org.apache.stanbol.contenthub.store.file.FileStore;
-import org.apache.stanbol.contenthub.store.file.FileStoreDBManager;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
@@ -63,7 +64,10 @@ public class FileStoreTest {
     private ContentItemFactory contentItemFactory;
 
     @TestReference
-    private FileStoreDBManager dbManager;
+    private StoreDBManager dbManager;
+
+    @TestReference
+    private RevisionManager revisionManager;
 
     @Test
     public void fileStoreTest() {
@@ -171,7 +175,8 @@ public class FileStoreTest {
         f.delete();
 
         // delete the database records
-        String query = "DELETE FROM content_item_revisions WHERE id = ?";
+        String query = String.format("DELETE FROM %s WHERE id = ?",
+            revisionManager.getStoreID(store));
         Connection connection = dbManager.getConnection();
         PreparedStatement ps = null;
         try {
