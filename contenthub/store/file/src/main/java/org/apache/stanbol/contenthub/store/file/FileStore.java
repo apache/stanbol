@@ -271,7 +271,8 @@ public class FileStore implements Store<ContentItem> {
             if (rs.next()) {
                 epoch = rs.getLong(1);
             } else {
-                throw new StoreException(String.format("There is no an epoch record for the Store: %s",
+                log.error(String.format("There is not an epoch record for the Store: %s", getName()));
+                throw new StoreException(String.format("There is not an epoch record for the Store: %s",
                     getName()));
             }
 

@@ -250,8 +250,6 @@ public class RevisionManager {
 
     private <Item> void updateEpoch(Store<Item> store, boolean insert) throws StoreException {
         String storeID = getStoreID(store);
-        // truncate the revision table
-        dbManager.truncateTable(storeID);
 
         // get connection
         Connection con = dbManager.getConnection();
@@ -261,6 +259,9 @@ public class RevisionManager {
         try {
             long newEpoch = System.currentTimeMillis();
             if (!insert) {
+                // truncate the revision table
+                dbManager.truncateTable(storeID);
+
                 log.debug("New epoch: {} for the Store: {} will be updated", newEpoch, storeID);
                 ps = con.prepareStatement(UPDATE_EPOCH);
             } else {
@@ -276,7 +277,6 @@ public class RevisionManager {
                     }
 
                 } catch (SQLException e) {
-                    dbManager.closeConnection(con);
                     log.error("Failed to query revision of content item", e);
                     throw new StoreException("Failed to query revision of content item", e);
                 } finally {
@@ -284,12 +284,12 @@ public class RevisionManager {
                     dbManager.closeStatement(ps);
                 }
 
-                if (recordExist) {
+                if (!recordExist) {
                     log.debug("New epoch: {} for the Store: {} will be added", newEpoch, storeID);
                     ps = con.prepareStatement(INSERT_EPOCH);
                 } else {
-                    // if there already exists an entry in the "epochTable" for the given store, return from
-                    // the method
+                    // if there already exists an entry in the "epochTable"
+                    // for the given store, return from the method
                     return;
                 }
             }

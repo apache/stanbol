@@ -924,8 +924,9 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                     changeSet = store.changes(store.getEpoch(), revision, batchSize);
                 } catch (StoreException e) {
                     logger.error(
-                        "Failed to get changes from FileRevisionManager with start revision: {} and batch size: {}",
-                        revision, batchSize);
+                        String.format(
+                            "Failed to get changes from FileRevisionManager with start revision: %s and batch size: %s for Store: %s",
+                            revision, batchSize, store.getName()), e);
                 }
                 if (changeSet != null) {
                     Iterator<String> changedItems = changeSet.iterator();
