@@ -88,6 +88,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -342,12 +343,12 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
              * Clear contents before destroying (FIXME only do this until this is implemented in the
              * destroySession() method).
              */
-            for (IRI iri : session.listManagedOntologies()) {
+            for (OWLOntologyID id : session.listManagedOntologies()) {
                 try {
-                    String key = ontologyProvider.getKey(iri);
+                    String key = ontologyProvider.getKey(id.getOntologyIRI());
                     ontologyProvider.getStore().deleteTripleCollection(new UriRef(key));
                 } catch (Exception ex) {
-                    log.error("Failed to delete triple collection " + iri, ex);
+                    log.error("Failed to delete triple collection " + id, ex);
                     continue;
                 }
             }
