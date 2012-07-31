@@ -41,6 +41,9 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -54,6 +57,7 @@ import org.apache.stanbol.commons.semanticindex.index.IndexState;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
 import org.apache.stanbol.commons.semanticindex.store.IndexingSource;
+import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
@@ -143,10 +147,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
     @Reference(target = "(org.apache.solr.core.CoreContainer.name=contenthub)")
     private ManagedSolrServer managedSolrServer;
 
-    // TODO: this assumes that only a single Store instance is active!
-    // Semantic Indexes should be connected to stores based on the
-    // name of the Store!
-    @Reference
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY, referenceInterface = IndexingSource.class, policy = ReferencePolicy.DYNAMIC, bind = "bindIndexingSource", unbind = "unbindIndexingSource", strategy = ReferenceStrategy.EVENT)
     private IndexingSource<ContentItem> store;
 
     @Reference
@@ -764,6 +765,16 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
     private void startStoreCheckThread() {
         pollingThread = new Thread(new StoreUpdateChecker(), "StoreUpdateChecker");
         pollingThread.start();
+    }
+
+    protected void bindIndexingSource(IndexingSource<ContentItem> indexingSource) {
+        if (indexingSource.getName().equals("contenthubFileStore")) {
+            this.store = indexingSource;
+        }
+    }
+
+    protected void unbindIndexingSource(IndexingSource<ContentItem> indexingSource) {
+        this.store = null;
     }
 
     @Deactivate

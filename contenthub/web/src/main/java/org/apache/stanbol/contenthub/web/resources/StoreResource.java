@@ -43,6 +43,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -55,7 +57,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.net.ssl.SSLEngineResult.Status;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -90,12 +91,15 @@ import org.apache.stanbol.contenthub.store.file.FileStore;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,9 +126,10 @@ public class StoreResource extends BaseStanbolResource {
 
     private static final Logger log = LoggerFactory.getLogger(StoreResource.class);
 
+    private EnhancementJobManager enhancementJobManager;
+
     private TcManager tcManager;
 
-    //TODO: make shure that the store is of typeContentItem
     private Store<ContentItem> store;
 
     private ContentItemFactory cif;
@@ -185,23 +190,50 @@ public class StoreResource extends BaseStanbolResource {
      * @param uriInfo
      */
     public StoreResource(@Context ServletContext context, @Context UriInfo uriInfo) {
-
-        this.tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
-        //TODO: this has the assumption that there is only a single Store instance.
-        //      The store should be referenced by a name
-        this.store = ContextHelper.getServiceFromContext(Store.class, context);
-        if (this.store == null) {
-            log.error("Missing Store Service");
+        BundleContext bundleContext = ContextHelper.getBundleContext(context);
+        if (bundleContext == null) {
+            log.error("Missing BundleContext");
             throw new WebApplicationException(404);
         }
-        if(ContentItem.class.isAssignableFrom(store.getClass())){
-        	throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-        			.entity("Store instance is not compatible with ContentItem!").build());
-        }
+        this.tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
         this.cif = ContextHelper.getServiceFromContext(ContentItemFactory.class, context);
         this.serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
+        this.enhancementJobManager = ContextHelper.getServiceFromContext(EnhancementJobManager.class, context);
+        this.store = getStoreFromBundleContext(bundleContext);
+        if (this.store == null || this.cif == null || this.enhancementJobManager == null
+            || this.serializer == null || this.tcManager == null) {
+            log.error("Missing dependency");
+            throw new WebApplicationException(404);
+        }
         this.uriInfo = uriInfo;
 
+    }
+
+    @SuppressWarnings("unchecked")
+    private Store<ContentItem> getStoreFromBundleContext(BundleContext bundleContext) {
+        Store<ContentItem> contentHubStore = null;
+        try {
+            ServiceReference[] stores = bundleContext.getServiceReferences(Store.class.getName(), null);
+            for (ServiceReference serviceReference : stores) {
+                Object store = bundleContext.getService(serviceReference);
+                Type[] genericInterfaces = store.getClass().getGenericInterfaces();
+                if (genericInterfaces.length == 1 && genericInterfaces[0] instanceof ParameterizedType) {
+                    Type[] types = ((ParameterizedType) genericInterfaces[0]).getActualTypeArguments();
+                    try {
+                        @SuppressWarnings("unused")
+                        Class<ContentItem> contentItemClass = (Class<ContentItem>) types[0];
+                        if (((Store<ContentItem>) store).getName().equals("contenthubFileStore")) {
+                            contentHubStore = (Store<ContentItem>) store;
+                        }
+                    } catch (ClassCastException e) {
+                        // ignore
+                    }
+                }
+            }
+        } catch (InvalidSyntaxException e) {
+            // ignore as there is no filter
+        }
+        return contentHubStore;
     }
 
     @OPTIONS
@@ -644,7 +676,7 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/{uri:.+}")
     public Response deleteContentItem(@PathParam(value = "uri") String contentURI,
                                       @Context HttpHeaders headers) throws StoreException {
-        if(store.get(contentURI) == null){
+        if (store.get(contentURI) == null) {
             throw new WebApplicationException(404);
         }
         store.remove(contentURI);

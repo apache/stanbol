@@ -93,6 +93,7 @@ public class LDPathSemanticIndexTest {
     private static String pid;
     private static int counter = 0;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void before() throws IndexManagementException, IndexException, InterruptedException, IOException {
         String name = "test_index_name";
@@ -356,6 +357,7 @@ public class LDPathSemanticIndexTest {
                     .getServiceReference(ConfigurationAdmin.class.getName());
             ConfigurationAdmin configAdmin = (ConfigurationAdmin) bundleContext.getService(reference);
             Configuration config = configAdmin.getConfiguration(pid);
+            @SuppressWarnings("unchecked")
             Dictionary<String,String> properties = config.getProperties();
             properties.put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM, newProgram);
             properties.put(LDPathSemanticIndex.PROP_DESCRIPTION, "reindexing");
@@ -370,7 +372,7 @@ public class LDPathSemanticIndexTest {
                 timeoutCount++;
             }
             // index ci to new semantic index
-            while(semanticIndex.getState() != IndexState.ACTIVE) {
+            while (semanticIndex.getState() != IndexState.ACTIVE) {
                 Thread.sleep(500);
             }
             semanticIndex.index(ci);
