@@ -123,6 +123,11 @@
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
       <scope>test</scope>
+    </dependency>    
+	<dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
