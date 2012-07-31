@@ -43,6 +43,7 @@
 
   <modules>
     <module>opennlp-ner</module>
+	<module>langdetect</module>
     <module>langid</module>
     <module>topic</module>
     <module>metaxa</module>
