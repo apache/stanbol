@@ -60,7 +60,7 @@
 							org.apache.stanbol.enhancer.engines.langdetect;version=${project.version}
 						</Export-Package>
 						<Embed-Dependency>
-							langdetect;scope=compile
+							langdetect;scope=compile,jsonic;scope=compile
 						</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
@@ -95,7 +95,13 @@
       <artifactId>langdetect</artifactId>
       <version>1.1-20120112</version>
     </dependency>
-
+    <dependency>
+      <groupId>net.arnx</groupId>
+      <artifactId>jsonic</artifactId>
+      <version>1.2.7</version>
+      <type>jar</type>
+    </dependency>
+ 
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
