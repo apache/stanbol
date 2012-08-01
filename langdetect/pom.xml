@@ -63,6 +63,12 @@
 							langdetect;scope=compile,jsonic;scope=compile
 						</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
+						<Import-Package>
+							!com.google.inject.*,
+							!org.seasar.framework.*,
+							!org.springframework.*,
+							*
+						</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -100,8 +106,8 @@
       <artifactId>jsonic</artifactId>
       <version>1.2.7</version>
       <type>jar</type>
-    </dependency>
- 
+   </dependency>
+
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
