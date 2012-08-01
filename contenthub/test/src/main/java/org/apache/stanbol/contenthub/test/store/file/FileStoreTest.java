@@ -22,6 +22,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,6 +36,8 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.semanticindex.index.IndexException;
+import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
@@ -44,18 +48,18 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.codehaus.jettison.json.JSONException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(SlingAnnotationsTestRunner.class)
 public class FileStoreTest {
     private static final Logger log = LoggerFactory.getLogger(FileStoreTest.class);
-
-    @TestReference(name = "FileStore")
-    private Store<ContentItem> store;
 
     @TestReference()
     private BundleContext bundleContext;
@@ -68,6 +72,22 @@ public class FileStoreTest {
 
     @TestReference
     private RevisionManager revisionManager;
+
+    private Store<ContentItem> store;
+
+    @Before
+    public void before() throws IndexManagementException, IndexException, InterruptedException, IOException {
+        if (store == null) {
+            if (bundleContext != null) {
+                store = getContenthubStore(bundleContext);
+                if (store == null) {
+                    throw new IllegalStateException("Null Store");
+                }
+            } else {
+                throw new IllegalStateException("Null bundle context");
+            }
+        }
+    }
 
     @Test
     public void fileStoreTest() {
@@ -175,8 +195,7 @@ public class FileStoreTest {
         f.delete();
 
         // delete the database records
-        String query = String.format("DELETE FROM %s WHERE id = ?",
-            revisionManager.getStoreID(store));
+        String query = String.format("DELETE FROM %s WHERE id = ?", revisionManager.getStoreID(store));
         Connection connection = dbManager.getConnection();
         PreparedStatement ps = null;
         try {
@@ -218,5 +237,32 @@ public class FileStoreTest {
             log.error("Failed to encode id. {}", id, e);
             throw new StoreException("Failed to encode id: " + id, e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Store<ContentItem> getContenthubStore(BundleContext bundleContext) {
+        Store<ContentItem> contentHubStore = null;
+        try {
+            ServiceReference[] stores = bundleContext.getServiceReferences(Store.class.getName(), null);
+            for (ServiceReference serviceReference : stores) {
+                Object store = bundleContext.getService(serviceReference);
+                Type[] genericInterfaces = store.getClass().getGenericInterfaces();
+                if (genericInterfaces.length == 1 && genericInterfaces[0] instanceof ParameterizedType) {
+                    Type[] types = ((ParameterizedType) genericInterfaces[0]).getActualTypeArguments();
+                    try {
+                        @SuppressWarnings("unused")
+                        Class<ContentItem> contentItemClass = (Class<ContentItem>) types[0];
+                        if (((Store<ContentItem>) store).getName().equals("contenthubFileStore")) {
+                            contentHubStore = (Store<ContentItem>) store;
+                        }
+                    } catch (ClassCastException e) {
+                        // ignore
+                    }
+                }
+            }
+        } catch (InvalidSyntaxException e) {
+            // ignore as there is no filter
+        }
+        return contentHubStore;
     }
 }

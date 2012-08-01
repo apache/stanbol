@@ -56,6 +56,7 @@ import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.IndexState;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
+import org.apache.stanbol.commons.semanticindex.store.EpochException;
 import org.apache.stanbol.commons.semanticindex.store.IndexingSource;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
@@ -938,6 +939,18 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                         String.format(
                             "Failed to get changes from FileRevisionManager with start revision: %s and batch size: %s for Store: %s",
                             revision, batchSize, store.getName()), e);
+                } catch (EpochException e) {
+                    if (e.getActiveEpoch() > e.getRequestEpoch()) {
+                        // epoch of the store has increased. So, a reindexing is needed.
+                        // Start the reindexing thread and terminate this one
+                        logger.info(
+                            "Epoch of the Store: {} has increase. So, a reindexing will be in progress",
+                            store.getName());
+                        state = IndexState.REINDEXING;
+                        reindexerThread = new Thread(new Reindexer());
+                        reindexerThread.start();
+                        return;
+                    }
                 }
                 if (changeSet != null) {
                     Iterator<String> changedItems = changeSet.iterator();

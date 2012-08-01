@@ -68,6 +68,7 @@ import org.apache.stanbol.contenthub.store.file.serializer.ContentPartSerializer
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
@@ -380,12 +381,14 @@ public class FileStore implements Store<ContentItem> {
 
     @Override
     public String put(ContentItem ci) throws StoreException {
-        // try {
-        // jobManager.enhanceContent(ci);
-        // } catch (EnhancementException e) {
-        // throw new StoreException(String.format("Failed to enhance given content item with URI: %s",
-        // ci.getUri()), e);
-        // }
+        if (ci.getMetadata() == null || ci.getMetadata().size() == 0) {
+            try {
+                jobManager.enhanceContent(ci);
+            } catch (EnhancementException e) {
+                throw new StoreException(String.format("Failed to enhance given content item with URI: %s",
+                    ci.getUri()), e);
+            }
+        }
 
         long enhancementCount = getEnhancementCount(ci);
         JSONObject htmlMetadata = getHTMLMetadata(ci);

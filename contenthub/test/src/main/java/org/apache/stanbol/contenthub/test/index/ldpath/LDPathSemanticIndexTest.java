@@ -21,6 +21,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,7 @@ import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.IndexState;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
+import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex;
 import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndexManager;
@@ -57,6 +60,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -68,7 +72,7 @@ public class LDPathSemanticIndexTest {
 
     private static Logger logger = LoggerFactory.getLogger(LDPathSemanticIndexTest.class);
 
-    private static final int TESTCOUNT = 15;
+    private static final int TESTCOUNT = 16;
 
     @TestReference
     private LDPathSemanticIndexManager ldPathSemanticIndexManager;
@@ -84,6 +88,8 @@ public class LDPathSemanticIndexTest {
 
     @TestReference
     private EnhancementJobManager jobManager;
+
+    private Store<ContentItem> fileStore;
 
     @TestReference
     private BundleContext bundleContext;
@@ -115,6 +121,16 @@ public class LDPathSemanticIndexTest {
                 tempSemanticIndex instanceof LDPathSemanticIndex);
             semanticIndex = (LDPathSemanticIndex) tempSemanticIndex;
             solrServer = semanticIndex.getServer();
+        }
+        if (fileStore == null) {
+            if (bundleContext != null) {
+                fileStore = getContenthubStore(bundleContext);
+                if (fileStore == null) {
+                    throw new IllegalStateException("Null Store");
+                }
+            } else {
+                throw new IllegalStateException("Null bundle context");
+            }
         }
     }
 
@@ -389,6 +405,11 @@ public class LDPathSemanticIndexTest {
         }
     }
 
+    @Test
+    public void epochChangeTest() {
+
+    }
+
     @After
     public void after() throws IndexManagementException {
         counter++;
@@ -396,5 +417,32 @@ public class LDPathSemanticIndexTest {
             counter = 0;
             ldPathSemanticIndexManager.removeIndex(pid);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Store<ContentItem> getContenthubStore(BundleContext bundleContext) {
+        Store<ContentItem> contentHubStore = null;
+        try {
+            ServiceReference[] stores = bundleContext.getServiceReferences(Store.class.getName(), null);
+            for (ServiceReference serviceReference : stores) {
+                Object store = bundleContext.getService(serviceReference);
+                Type[] genericInterfaces = store.getClass().getGenericInterfaces();
+                if (genericInterfaces.length == 1 && genericInterfaces[0] instanceof ParameterizedType) {
+                    Type[] types = ((ParameterizedType) genericInterfaces[0]).getActualTypeArguments();
+                    try {
+                        @SuppressWarnings("unused")
+                        Class<ContentItem> contentItemClass = (Class<ContentItem>) types[0];
+                        if (((Store<ContentItem>) store).getName().equals("contenthubFileStore")) {
+                            contentHubStore = (Store<ContentItem>) store;
+                        }
+                    } catch (ClassCastException e) {
+                        // ignore
+                    }
+                }
+            }
+        } catch (InvalidSyntaxException e) {
+            // ignore as there is no filter
+        }
+        return contentHubStore;
     }
 }
