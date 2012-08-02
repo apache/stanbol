@@ -24,9 +24,17 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import opennlp.tools.chunker.Chunker;
+import opennlp.tools.chunker.ChunkerME;
 import opennlp.tools.chunker.ChunkerModel;
+import opennlp.tools.namefind.NameFinderME;
+import opennlp.tools.namefind.TokenNameFinder;
 import opennlp.tools.namefind.TokenNameFinderModel;
 import opennlp.tools.postag.POSModel;
+import opennlp.tools.postag.POSTagger;
+import opennlp.tools.postag.POSTaggerME;
+import opennlp.tools.sentdetect.SentenceDetector;
+import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.SimpleTokenizer;
 import opennlp.tools.tokenize.Tokenizer;
@@ -43,7 +51,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Core of our EnhancementEngine, separated from the OSGi service to make it easier to test this.
+ * OSGI service that let you load OpenNLP Models via the Stanbol 
+ * {@link DataFileProvider} infrastructure. This allows users to copy models
+ * to the 'datafiles' directory or developer to provide models via via OSGI
+ * bundles.<p>
+ * This service also provides methods that directly return the OpenNLP component
+ * wrapping the model.
  */
 @Component(immediate=true)
 @Service(value=OpenNLP.class)
@@ -95,6 +108,24 @@ public class OpenNLP {
         return initModel(String.format("%s-sent.bin", language),
             SentenceModel.class);
     }
+    
+    /**
+     * Getter for the sentence detector of the parsed language. 
+     * @param language the language
+     * @return the model or <code>null</code> if no model data are found
+     * @throws InvalidFormatException in case the found model data are in the wrong format
+     * @throws IOException on any error while reading the model data
+     */
+    public SentenceDetector getSentenceDetector(String language) throws IOException {
+        SentenceModel sentModel = getSentenceModel(language);
+        if(sentModel != null){
+            return new SentenceDetectorME(sentModel);
+        } else {
+            log.debug("No Sentence Detection Model for language '{}'",language);
+            return null;
+        }
+    }
+    
     /**
      * Getter for the named entity finder model for the parsed entity type and language.
      * If the model is not yet available a new one is built. The required data
@@ -109,6 +140,25 @@ public class OpenNLP {
         return initModel(String.format("%s-ner-%s.bin", language, type),
             TokenNameFinderModel.class);
     }
+    
+    /**
+     * Getter for the {@link TokenNameFinder} for the parsed entity type and language.
+     * @param type the type of the named entities to find (person, organization)
+     * @param language the language
+     * @return the model or <code>null</code> if no model data are found
+     * @throws InvalidFormatException in case the found model data are in the wrong format
+     * @throws IOException on any error while reading the model data
+     */
+    public TokenNameFinder getNameFinder(String type, String language) throws IOException {
+        TokenNameFinderModel model = getNameModel(type, language);
+        if(model != null){
+            return new NameFinderME(model);
+        } else {
+            log.debug("TokenNameFinder model for type {} and langauge {} not present",type,language);
+            return null;
+        }
+    }
+    
     /**
      * Getter for the tokenizer model for the parsed language.
      * If the model is not yet available a new one is built. The required data
@@ -155,7 +205,7 @@ public class OpenNLP {
         return tokenizer;
     }
     /**
-     * Getter for the "part-of-speach" model for the parsed language.
+     * Getter for the "part-of-speech" model for the parsed language.
      * If the model is not yet available a new one is built. The required data
      * are loaded by using the {@link DataFileProvider} service.  
      * @param language the language
@@ -190,6 +240,41 @@ public class OpenNLP {
         }
         return model;
     }
+    
+    /**
+     * Getter for the "part-of-speech" tagger for the parsed language.
+     * @param language the language
+     * @return the model or <code>null</code> if no model data are found
+     * @throws InvalidFormatException in case the found model data are in the wrong format
+     * @throws IOException on any error while reading the model data
+     */
+    public POSTagger getPartOfSpeechTagger(String language) throws IOException {
+        POSModel posModel = getPartOfSpeachModel(language);
+        if(posModel != null){
+            return new POSTaggerME(posModel);
+        } else {
+            log.debug("No POS Model for language '{}'",language);
+            return null;
+        }
+    }
+    
+    /**
+     * Getter for the Model with the parsed type, name and properties.
+     * @param modelType the type of the Model (e.g. {@link ChunkerModel})
+     * @param modelName the name of the model file. MUST BE available via the
+     * {@link DataFileProvider}.
+     * @param properties additional properties about the model (parsed to the
+     * {@link DataFileProvider}. NOTE that "Description", "Model Type" and
+     * "Download Location" are set to default values if not defined in the
+     * parsed value.
+     * @return the loaded (or cached) model
+     * @throws InvalidFormatException in case the found model data are in the wrong format
+     * @throws IOException on any error while reading the model data
+     */
+    public <T> T getModel(Class<T> modelType,String modelName, Map<String,String> properties) throws InvalidFormatException, IOException {
+        return initModel(modelName, modelType, properties);
+    }
+    
     /**
      * Getter for the chunker model for the parsed language.
      * If the model is not yet available a new one is built. The required data
@@ -201,6 +286,23 @@ public class OpenNLP {
      */
     public ChunkerModel getChunkerModel(String language) throws InvalidFormatException, IOException {
         return initModel(String.format("%s-chunker.bin", language), ChunkerModel.class);
+    }
+    
+    /**
+     * Getter for the {@link Chunker} for a given language
+     * @param language the language
+     * @return the {@link Chunker} or <code>null</code> if no model is present
+     * @throws InvalidFormatException in case the found model data are in the wrong format
+     * @throws IOException on any error while reading the model data
+     */
+    public Chunker getChunker(String language) throws IOException {
+        ChunkerModel chunkerModel = getChunkerModel(language);
+        if(chunkerModel != null){
+             return new ChunkerME(chunkerModel);
+        } else {
+            log.debug("No Chunker Model for language {}",language);
+            return null;
+        }
     }
     
 //    /**
@@ -330,8 +432,23 @@ public class OpenNLP {
      * @throws IOException on any error while loading the model data
      * @throws IllegalStateException on any Exception while creating the model
      */
-    @SuppressWarnings("unchecked")
     private <T> T initModel(String name,Class<T> modelType) throws InvalidFormatException, IOException {
+        return initModel(name, modelType,null);
+    }
+    /**
+     * Uses generics to build models of the parsed type. The {@link #models}
+     * map is used to lookup already created models.
+     * @param <T> the type of the model to create
+     * @param name the name of the file with the model data
+     * @param modelType the class object representing the model to create
+     * @param modelProperties additional metadata about the requested model
+     * @return the model or <code>null</code> if the model data where not found
+     * @throws InvalidFormatException if the model data are in an invalid format
+     * @throws IOException on any error while loading the model data
+     * @throws IllegalStateException on any Exception while creating the model
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T initModel(String name,Class<T> modelType, Map<String,String> modelProperties) throws InvalidFormatException, IOException {
         Object model = models.get(name);
         if(model != null) {
             if(modelType.isAssignableFrom(model.getClass())){
@@ -342,10 +459,20 @@ public class OpenNLP {
                     name,model.getClass(),modelType));
             }
         } else { //create new model
-            Map<String,String> modelProperties = new HashMap<String,String>();
-            modelProperties.put("Description", "Statistical model for OpenNLP");
-            modelProperties.put("Model Type:", modelType.getSimpleName());
-            modelProperties.put("Download Location", DOWNLOAD_ROOT+name);
+            if(modelProperties != null){ //copy the data to avoid external modifications
+                modelProperties = new HashMap<String,String>(modelProperties);
+            }else {
+                modelProperties = new HashMap<String,String>();
+            }
+            if(!modelProperties.containsKey("Description")){
+                modelProperties.put("Description", "Statistical model for OpenNLP");
+            }
+            if(!modelProperties.containsKey("Model Type")){
+                modelProperties.put("Model Type", modelType.getSimpleName());
+            }
+            if(!modelProperties.containsKey("Download Location")){
+                modelProperties.put("Download Location", DOWNLOAD_ROOT+name);
+            }
             InputStream modelDataStream;
             try {
                 modelDataStream = lookupModelStream(name,modelProperties);
