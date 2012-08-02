@@ -124,7 +124,7 @@ public class LDPathSemanticIndexTest {
         }
         if (fileStore == null) {
             if (bundleContext != null) {
-                fileStore = getContenthubStore(bundleContext);
+                fileStore = getContenthubStore();
                 if (fileStore == null) {
                     throw new IllegalStateException("Null Store");
                 }
@@ -406,8 +406,55 @@ public class LDPathSemanticIndexTest {
     }
 
     @Test
-    public void epochChangeTest() {
+    public void epochChangeTest() throws IndexManagementException,
+                                 InterruptedException,
+                                 IOException,
+                                 IndexException,
+                                 StoreException,
+                                 SearchException {
+        String name = "test_index_name_for_epoch";
+        String program = "@prefix dbp-ont: <http://dbpedia.org/ontology/>; person_entities = .[rdf:type is dbp-ont:Person]:: xsd:anyURI (termVectors=\"true\");";
+        Properties props = new Properties();
+        props.put(LDPathSemanticIndex.PROP_NAME, name);
+        props.put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM, program);
+        props.put(LDPathSemanticIndex.PROP_DESCRIPTION, "epoch program");
+        props.put(LDPathSemanticIndex.PROP_INDEX_CONTENT, false);
+        props.put(LDPathSemanticIndex.PROP_BATCH_SIZE, 10);
+        props.put(LDPathSemanticIndex.PROP_STORE_CHECK_PERIOD, 1);
+        props.put(LDPathSemanticIndex.PROP_SOLR_CHECK_TIME, 5);
+        String pid = ldPathSemanticIndexManager.createIndex(props);
 
+        try {
+            LDPathSemanticIndex semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+            int timeoutCount = 0;
+            while (semanticIndex == null) {
+                if (timeoutCount == 8) break;
+                Thread.sleep(500);
+                semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+                timeoutCount++;
+            }
+
+            ContentItem ci = contentItemFactory.createContentItem(new StringSource(
+                    "Michael Jackson is a very famous person, and he was born in Indiana."));
+            fileStore.put(ci);
+            fileStore.removeAll();
+
+            // make sure that the index will perform reindexing
+            Thread.sleep(1500);
+
+            // index ci to new semantic index
+            while (semanticIndex.getState() != IndexState.ACTIVE) {
+                Thread.sleep(500);
+            }
+
+            String query = "*:*";
+            SolrDocumentList sdl = solrSearch.search(query, name).getResults();
+            assertNotNull("Result must not be null for query " + query, sdl);
+            assertTrue("There should be no indexed item", sdl.size() == 0);
+
+        } finally {
+            ldPathSemanticIndexManager.removeIndex(pid);
+        }
     }
 
     @After
@@ -420,7 +467,7 @@ public class LDPathSemanticIndexTest {
     }
 
     @SuppressWarnings("unchecked")
-    private Store<ContentItem> getContenthubStore(BundleContext bundleContext) {
+    private Store<ContentItem> getContenthubStore() {
         Store<ContentItem> contentHubStore = null;
         try {
             ServiceReference[] stores = bundleContext.getServiceReferences(Store.class.getName(), null);

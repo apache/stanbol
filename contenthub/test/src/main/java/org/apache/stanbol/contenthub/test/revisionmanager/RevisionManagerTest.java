@@ -19,21 +19,33 @@ package org.apache.stanbol.contenthub.test.revisionmanager;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Iterator;
 
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
+import org.apache.stanbol.commons.semanticindex.index.IndexException;
+import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
 import org.apache.stanbol.contenthub.revisionmanager.StoreDBManager;
+import org.apache.stanbol.contenthub.store.file.FileStore;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,11 +60,27 @@ public class RevisionManagerTest {
     private StoreDBManager dbManager;
 
     @TestReference
+    private BundleContext bundleContext;
+
     private Store<?> store;
+
+    @Before
+    public void before() throws IndexManagementException, IndexException, InterruptedException, IOException {
+        if (store == null) {
+            if (bundleContext != null) {
+                store = getContenthubStore();
+                if (store == null) {
+                    throw new IllegalStateException("Null Store");
+                }
+            } else {
+                throw new IllegalStateException("Null bundle context");
+            }
+        }
+    }
 
     @Test
     public void revisionManagerTest() {
-        assertNotNull("Expecting revisionManager to be injected by Sling test runner", revisionManager);
+        assertNotNull("Expecting RevisionManager to be injected by Sling test runner", revisionManager);
     }
 
     @Test
@@ -61,20 +89,27 @@ public class RevisionManagerTest {
     }
 
     @Test
-    public void updateChangeTest() throws StoreException, SQLException {
-        // do the update
-        String contentItemID = "contenthub_test_content_item_id";
-        revisionManager.updateRevision(store, contentItemID);
+    public void bundleContextTest() {
+        assertNotNull("Expecting BundleContext to be injected by Sling test runner", bundleContext);
+    }
 
-        // check the update
-        String query = String.format("SELECT id, revision FROM %s WHERE id = ?",
-            revisionManager.getStoreID(store));
-        Connection con = dbManager.getConnection();
+    @Test
+    public void updateRevisionTest() throws StoreException, SQLException {
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
+        // do the update
+        String contentItemID = "contenthub_test_content_item_id";
+        long newRevision = revisionManager.updateRevision(store, contentItemID);
         boolean recordExist = false;
         long revisionNumber = Long.MAX_VALUE;
+        String query;
         try {
+            query = String.format("SELECT id, revision FROM %s WHERE id = ?",
+                revisionManager.getStoreID(store));
+
+            // check the update
+            con = dbManager.getConnection();
             ps = con.prepareStatement(query);
             ps.setString(1, contentItemID);
             rs = ps.executeQuery();
@@ -82,31 +117,30 @@ public class RevisionManagerTest {
                 recordExist = true;
                 revisionNumber = rs.getLong(2);
             }
-        } finally {
-            dbManager.closeResultSet(rs);
             dbManager.closeStatement(ps);
-        }
 
-        assertTrue("failed to obtain content item revision", recordExist);
-        assertTrue("wrong revision number", (revisionNumber <= System.currentTimeMillis()));
+            assertTrue("failed to obtain content item revision", recordExist);
+            assertTrue("wrong revision number", (revisionNumber == newRevision));
 
-        // clear the update
-        query = String.format("DELETE FROM %s WHERE id = ?", revisionManager.getStoreID(store));
-        ps = null;
-        try {
-            ps = con.prepareStatement(query);
-            ps.setString(1, contentItemID);
-            int result = ps.executeUpdate();
-            if (result != 1) {
-                log.warn(
-                    "Wrong number of updated records while removing the test record. Updated record number: {}",
-                    result);
-            }
         } catch (SQLException e) {
             log.warn("Failed to remove the test record", e);
         } finally {
-            dbManager.closeConnection(con);
-            dbManager.closeStatement(ps);
+            // clear the update
+            try {
+                query = String.format("DELETE FROM %s WHERE id = ?", revisionManager.getStoreID(store));
+                ps = con.prepareStatement(query);
+                ps.setString(1, contentItemID);
+                int result = ps.executeUpdate();
+                if (result != 1) {
+                    log.warn(
+                        "Wrong number of updated records while removing the test record. Updated record number: {}",
+                        result);
+                }
+            } finally {
+                dbManager.closeResultSet(rs);
+                dbManager.closeStatement(ps);
+                dbManager.closeConnection(con);
+            }
         }
     }
 
@@ -119,7 +153,7 @@ public class RevisionManagerTest {
      */
     @Test
     public void iterativeChangesTest() throws StoreException, InterruptedException, SQLException {
-        log.warn("DO NOT UPDATE THE STORE: {}DURING EXECUTION OF THIS TEST", store.getName());
+        log.warn("DO NOT UPDATE THE STORE: {} DURING EXECUTION OF THIS TEST", store.getName());
         Connection con = dbManager.getConnection();
         String contentItemID = "contenthub_test_content_item_id";
         PreparedStatement ps = null;
@@ -281,5 +315,95 @@ public class RevisionManagerTest {
         long revision = System.currentTimeMillis();
         ChangeSet<?> changeSet = revisionManager.getChanges(store, revision, 1);
         assertTrue("There must be no changes", !changeSet.iterator().hasNext());
+    }
+
+    @Test
+    public void getStoreIDTest() {
+        assertTrue("Store ID must be same with the name of the Store", revisionManager.getStoreID(store)
+                .equals(store.getName()));
+    }
+
+    @Test
+    public void initializeRevisionTablesTest() throws StoreException, SQLException {
+        FileStore fileStore = new FileStore("revisionManagerTestStore");
+        Connection con = null;
+        PreparedStatement ps = null;
+        String tableName = revisionManager.getStoreID(fileStore);
+        try {
+            revisionManager.initializeRevisionTables(fileStore);
+            // check table
+            assertTrue(String.format("There is no table having name: %s", tableName),
+                dbManager.existsTable(tableName));
+
+            // check epoch table entry
+            con = dbManager.getConnection();
+            ps = null;
+            ResultSet rs = null;
+            boolean recordExists = false;
+            try {
+                ps = con.prepareStatement("SELECT epoch FROM " + StoreDBManager.EPOCH_TABLE_NAME
+                                          + " WHERE tableName = ?");
+                ps.setString(1, tableName);
+                rs = ps.executeQuery();
+                if (rs.next()) {
+                    recordExists = true;
+                }
+
+                assertTrue(String.format("There is no entry for tableName: %s in epochTable", tableName),
+                    recordExists);
+            } finally {
+                dbManager.closeResultSet(rs);
+                dbManager.closeStatement(ps);
+            }
+        } finally {
+            // clear test data
+            Statement stmt = null;
+            try {
+                // first remove the the table
+                stmt = con.createStatement();
+                stmt.executeUpdate("DROP TABLE " + tableName);
+
+            } finally {
+                dbManager.closeStatement(stmt);
+            }
+            try {
+                // delete the entry from epoch table
+                ps = con.prepareStatement("DELETE FROM " + StoreDBManager.EPOCH_TABLE_NAME
+                                          + " WHERE tableName = ?");
+                ps.setString(1, tableName);
+                ps.executeUpdate();
+
+            } finally {
+                dbManager.closeStatement(ps);
+                dbManager.closeConnection(con);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Store<ContentItem> getContenthubStore() {
+        Store<ContentItem> contentHubStore = null;
+        try {
+            ServiceReference[] stores = bundleContext.getServiceReferences(Store.class.getName(), null);
+            for (ServiceReference serviceReference : stores) {
+                Object store = bundleContext.getService(serviceReference);
+                Type[] genericInterfaces = store.getClass().getGenericInterfaces();
+                if (genericInterfaces.length == 1 && genericInterfaces[0] instanceof ParameterizedType) {
+                    Type[] types = ((ParameterizedType) genericInterfaces[0]).getActualTypeArguments();
+                    try {
+                        @SuppressWarnings("unused")
+                        Class<ContentItem> contentItemClass = (Class<ContentItem>) types[0];
+                        if (((Store<ContentItem>) store).getName().equals("contenthubFileStore")) {
+                            contentHubStore = (Store<ContentItem>) store;
+                        }
+                    } catch (ClassCastException e) {
+                        // ignore
+                    }
+                }
+            }
+        } catch (InvalidSyntaxException e) {
+            // ignore as there is no filter
+        }
+        return contentHubStore;
     }
 }

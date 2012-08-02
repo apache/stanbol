@@ -138,6 +138,8 @@ public class FileStore implements Store<ContentItem> {
 
     public static final String FILE_STORE_NAME = "filestore";
 
+    private String name = "contenthubFileStore";
+
     private static int MAX_ID_LENGTH = 1024;
 
     private static final String CREATE_RECENTLY_ENHANCED_TABLE = "CREATE TABLE "
@@ -177,9 +179,6 @@ public class FileStore implements Store<ContentItem> {
     private static final String REMOVE_RECENTLY_ENHANCED_ITEM = "DELETE FROM " + RECENTLY_ENHANCED_TABLE_NAME
                                                                 + " WHERE " + FIELD_ID + "=?";
 
-    private static final String SELECT_EPOCH = "SELECT epoch FROM " + StoreDBManager.EPOCH_TABLE_NAME
-                                               + " WHERE tableName = ?";
-
     private final Logger log = LoggerFactory.getLogger(FileStore.class);
 
     private File storeFolder;
@@ -203,6 +202,20 @@ public class FileStore implements Store<ContentItem> {
     private EnhancementJobManager jobManager;
 
     Map<String,Object> storeProperties;
+
+    public FileStore() {
+
+    }
+
+    /**
+     * Public constructor which is intended to be used from the tests. This component is an OSGi based
+     * component, so this constructor MUST NOT be used to obtain a {@link FileStore} instance.
+     * 
+     * @param name
+     */
+    public FileStore(String name) {
+        this.name = name;
+    }
 
     @Activate
     protected void activate(ComponentContext componentContext) throws StoreException {
@@ -243,7 +256,7 @@ public class FileStore implements Store<ContentItem> {
      */
     @Override
     public String getName() {
-        return "contenthubFileStore";
+        return name;
     }
 
     /*
@@ -257,34 +270,7 @@ public class FileStore implements Store<ContentItem> {
 
     @Override
     public long getEpoch() throws StoreException {
-        // get connection
-        Connection con = dbManager.getConnection();
-
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        long epoch;
-        try {
-            ps = con.prepareStatement(SELECT_EPOCH);
-            ps.setString(1, revisionManager.getStoreID(this));
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                epoch = rs.getLong(1);
-            } else {
-                log.error(String.format("There is not an epoch record for the Store: %s", getName()));
-                throw new StoreException(String.format("There is not an epoch record for the Store: %s",
-                    getName()));
-            }
-
-        } catch (SQLException e) {
-            log.error("Failed to execute query", e);
-            throw new StoreException("Failed to execute query", e);
-        } finally {
-            dbManager.closeResultSet(rs);
-            dbManager.closeStatement(ps);
-            dbManager.closeConnection(con);
-        }
-        return epoch;
+        return revisionManager.getEpoch(this);
     }
 
     @Override
@@ -327,7 +313,7 @@ public class FileStore implements Store<ContentItem> {
     @Override
     public void removeAll() throws StoreException {
         // get changes to obtain identifier of the all changed ContentItems
-        ChangeSet<ContentItem> changes = changes(Long.MIN_VALUE, Long.MIN_VALUE, Integer.MAX_VALUE);
+        ChangeSet<ContentItem> changes = changes(getEpoch(), Long.MIN_VALUE, Integer.MAX_VALUE);
         List<ContentItem> removed = new ArrayList<ContentItem>();
         Iterator<String> idIterator = changes.iterator();
         while (idIterator.hasNext()) {

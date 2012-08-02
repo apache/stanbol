@@ -20,24 +20,24 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
-import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
 import org.apache.stanbol.contenthub.revisionmanager.StoreDBManager;
-import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(SlingAnnotationsTestRunner.class)
 public class StoreDBManagerTest {
-    private static final Logger log = LoggerFactory.getLogger(StoreDBManagerTest.class);
-
     @TestReference
     private StoreDBManager dbManager;
 
@@ -45,31 +45,105 @@ public class StoreDBManagerTest {
     private RevisionManager revisionManager;
 
     @TestReference
-    private Store<ContentItem> store;
+    private BundleContext bundleContext;
 
     @Test
     public void dbManagerTest() {
-        assertNotNull("Expecting FileStoreDBManager to be injected by Sling test runner", dbManager);
+        assertNotNull("Expecting StoreDBManager to be injected by Sling test runner", dbManager);
+    }
+
+    @Test
+    public void dbRevisionManagerTest() {
+        assertNotNull("Expecting RevisionManager to be injected by Sling test runner", revisionManager);
+    }
+
+    @Test
+    public void bundleContextTest() {
+        assertNotNull("Expecting BundleContext to be injected by Sling test runner", bundleContext);
     }
 
     @Test
     public void testConnection() throws StoreException {
-        Connection connection = dbManager.getConnection();
-        assertTrue("Null connection", connection != null);
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                log.warn("Failed to close test connection");
-            }
+        Connection con = dbManager.getConnection();
+        assertTrue("Null connection", con != null);
+        dbManager.closeConnection(con);
+    }
+
+    @Test
+    public void testEpochTable() throws StoreException {
+        assertTrue(StoreDBManager.EPOCH_TABLE_NAME + " has not been created",
+            dbManager.existsTable(StoreDBManager.EPOCH_TABLE_NAME));
+    }
+
+    @Test
+    public void testCreateRevisionTable() throws StoreException, SQLException {
+        String tableName = "StoreDBManagerRevisionTable";
+        dbManager.createRevisionTable(tableName);
+        assertTrue("Failed to create " + tableName, dbManager.existsTable(tableName));
+        // clear test data
+        Connection con = dbManager.getConnection();
+        Statement stmt = null;
+        try {
+            // first remove the the table
+            stmt = con.createStatement();
+            stmt.executeUpdate("DROP TABLE " + tableName);
+
+        } finally {
+            dbManager.closeStatement(stmt);
+            dbManager.closeConnection(con);
         }
     }
 
     @Test
-    public void testTables() throws StoreException {
-        assertTrue("recently_enhanced_content_items does not exist",
-            dbManager.existsTable("recently_enhanced_content_items"));
-        assertTrue(String.format("%s does not exist", revisionManager.getStoreID(store)),
-            dbManager.existsTable(revisionManager.getStoreID(store)));
+    public void testTruncateTable() throws StoreException, SQLException {
+        String tableName = "truncatetable";
+        // create dummy table
+        dbManager.createRevisionTable(tableName);
+
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            // put some value into it
+            String insertQuery = "INSERT INTO " + tableName + "(id, revision) VALUES(?,?)";
+            long initialRevision = System.currentTimeMillis();
+            con = dbManager.getConnection();
+            for (int i = 0; i < 5; i++) {
+                ps = con.prepareStatement(insertQuery);
+                ps.setString(1, "id" + i);
+                ps.setLong(2, initialRevision + i);
+                ps.executeUpdate();
+                ps.clearParameters();
+            }
+
+            // truncate table
+            ps.close();
+            dbManager.truncateTable(tableName);
+
+            // check the values
+            ps = con.prepareStatement("SELECT * FROM " + tableName);
+            rs = ps.executeQuery();
+
+            boolean recordExists = false;
+            if (rs.next()) {
+                recordExists = true;
+            }
+            assertTrue("There are still records after truncate", recordExists == false);
+        } finally {
+            dbManager.closeResultSet(rs);
+            dbManager.closeStatement(ps);
+
+            // clear test data
+            Statement stmt = null;
+            try {
+                // first remove the the table
+                stmt = con.createStatement();
+                stmt.executeUpdate("DROP TABLE " + tableName);
+
+            } finally {
+                dbManager.closeStatement(stmt);
+                dbManager.closeConnection(con);
+            }
+        }
     }
 }

@@ -109,33 +109,48 @@ public class LDPathSemanticIndexManagerTest {
         indexMetadata.put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM, program);
         String pid = ldPathSemanticIndexManager.createIndex(indexMetadata);
 
-        // create and retrieve LDPathSemanticIndex
-        LDPathSemanticIndex semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+        // retrieve LDPathSemanticIndex
+        LDPathSemanticIndex semanticIndex;
+        String indexMetadataFilePath;
+        File indexMetadataDirectory;
+        File file;
+        try {
+            semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+            int timeoutCount = 0;
+            while (semanticIndex == null) {
+                if (timeoutCount == 8) break;
+                Thread.sleep(500);
+                semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+                timeoutCount++;
+            }
+            assertNotNull("Failed to create LDPathSemanticIndex with name " + name, semanticIndex);
+
+            // check IndexMetadata folder exists
+            indexMetadataDirectory = bundleContext
+                    .getServiceReference(LDPathSemanticIndexManager.class.getName()).getBundle()
+                    .getBundleContext().getDataFile(LDPathSemanticIndexManager.class.getName());
+            assertTrue("IndexMetadata Directory does not exist", indexMetadataDirectory.exists());
+
+            // check IndexMetadata files of indexes before remove index
+            indexMetadataFilePath = indexMetadataDirectory.getAbsolutePath() + File.separator + pid
+                                    + ".props";
+            file = new File(indexMetadataFilePath);
+            assertTrue("IndexMetadata File cannot be found for pid: " + pid, file.exists());
+
+        } finally {
+            // remove LDPathSemanticIndex
+            ldPathSemanticIndexManager.removeIndex(pid);
+        }
+
+        // wait some time to let OSGi remove the configuration
         int timeoutCount = 0;
-        while (semanticIndex == null) {
+        semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+        while (semanticIndex != null) {
             if (timeoutCount == 8) break;
             Thread.sleep(500);
             semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
             timeoutCount++;
         }
-        assertNotNull("Failed to create LDPathSemanticIndex with name " + name, semanticIndex);
-
-        // check IndexMetadata folder exists
-        File indexMetadataDirectory = bundleContext
-                .getServiceReference(LDPathSemanticIndexManager.class.getName()).getBundle()
-                .getBundleContext().getDataFile(LDPathSemanticIndexManager.class.getName());
-        assertTrue("IndexMetadata Directory does not exist", indexMetadataDirectory.exists());
-
-        // check IndexMetadata files of indexes before remove index
-        String indexMetadataFilePath = indexMetadataDirectory.getAbsolutePath() + File.separator + pid
-                                       + ".props";
-        File file = new File(indexMetadataFilePath);
-        assertTrue("IndexMetadata File cannot be found for pid: " + pid, file.exists());
-
-        // remove LDPathSemanticIndex
-        ldPathSemanticIndexManager.removeIndex(pid);
-
-        semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
 
         assertNull(String.format("LDPathSemanticIndex with name %s cannot be removed", name), semanticIndex);
         if (semanticIndex == null) {
@@ -147,7 +162,6 @@ public class LDPathSemanticIndexManagerTest {
         indexMetadataFilePath = indexMetadataDirectory.getAbsolutePath() + File.separator + pid + ".props";
         file = new File(indexMetadataFilePath);
         assertFalse("IndexMetadata File cannot be removed for pid: " + pid, file.exists());
-
     }
 
     @Test
