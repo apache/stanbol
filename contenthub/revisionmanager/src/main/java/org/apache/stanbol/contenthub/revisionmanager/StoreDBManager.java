@@ -81,9 +81,8 @@ public class StoreDBManager {
         try {
             // try to create revision table
             if (!existsTable(tableName)) {
-                String createRevisionTable = "CREATE TABLE " + tableName + " (" + "id VARCHAR("
-                                             + MAX_ID_LENGTH + ") NOT NULL PRIMARY KEY,"
-                                             + "revision BIGINT NOT NULL)";
+                String createRevisionTable = "CREATE TABLE " + tableName + " (id VARCHAR(" + MAX_ID_LENGTH
+                                             + ") NOT NULL PRIMARY KEY," + "revision BIGINT NOT NULL)";
                 stmt = con.createStatement();
                 stmt.executeUpdate(createRevisionTable);
                 log.info("Revision table created for {}.", tableName);
@@ -106,7 +105,7 @@ public class StoreDBManager {
         try {
             // try to create revision table
             if (!existsTable(EPOCH_TABLE_NAME)) {
-                String createRevisionTable = "CREATE TABLE " + EPOCH_TABLE_NAME + " (" + "tableName VARCHAR("
+                String createRevisionTable = "CREATE TABLE " + EPOCH_TABLE_NAME + " (tableName VARCHAR("
                                              + MAX_ID_LENGTH + ") NOT NULL PRIMARY KEY,"
                                              + "epoch BIGINT NOT NULL)";
                 stmt = con.createStatement();
@@ -136,9 +135,9 @@ public class StoreDBManager {
     public boolean existsTable(String tableName) throws StoreException {
         boolean exists = false;
         ResultSet rs = null;
-        Connection con = getConnection();
+        Connection con = null;
         try {
-            con = DriverManager.getConnection(DB_URL);
+            con = getConnection();
             DatabaseMetaData meta = con.getMetaData();
             rs = meta.getTables(null, null, null, new String[] {"TABLE"});
             while (rs.next()) {
@@ -166,31 +165,12 @@ public class StoreDBManager {
      * @throws StoreException
      */
     public void truncateTable(String tableName) throws StoreException {
-        boolean exists = false;
-        ResultSet rs = null;
-        Connection con = getConnection();
-        try {
-            con = DriverManager.getConnection(DB_URL);
-            DatabaseMetaData meta = con.getMetaData();
-            rs = meta.getTables(null, null, null, new String[] {"TABLE"});
-            while (rs.next()) {
-                if (rs.getString("TABLE_NAME").equalsIgnoreCase(tableName)) {
-                    exists = true;
-                    break;
-                }
-            }
-        } catch (SQLException e) {
-            log.error("Failed to check existence of the table: {}", tableName);
-            throw new StoreException(String.format("Failed to check existence of the table: %s", tableName),
-                    e);
-        } finally {
-            closeResultSet(rs);
-            closeConnection(con);
-        }
+        boolean exists = existsTable(tableName);
         if (!exists) {
             throw new IllegalArgumentException(String.format("There is no table having name: %s", tableName));
         }
         String truncateTable = "TRUNCATE TABLE " + tableName;
+        Connection con = getConnection();
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -198,6 +178,9 @@ public class StoreDBManager {
         } catch (SQLException e) {
             log.error("Failed to truncate table: {}", tableName, e);
             throw new StoreException(String.format("Failed to truncate table: %s", tableName), e);
+        } finally {
+            closeStatement(stmt);
+            closeConnection(con);
         }
         log.debug("Table having name: {} has been truncated", tableName);
     }

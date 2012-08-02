@@ -65,7 +65,8 @@ public class RevisionManager {
 
     private String SELECT_MORECHANGES = "SELECT id, revision FROM %s WHERE revision >= ? ORDER BY revision ASC";
 
-    private String SELECT_EPOCH = "SELECT * FROM " + StoreDBManager.EPOCH_TABLE_NAME + " WHERE tableName = ?";
+    private String SELECT_EPOCH = "SELECT epoch FROM " + StoreDBManager.EPOCH_TABLE_NAME
+                                  + " WHERE tableName = ?";
 
     private String INSERT_EPOCH = "INSERT INTO " + StoreDBManager.EPOCH_TABLE_NAME
                                   + " (epoch, tableName) values (?, ?)";
@@ -86,9 +87,10 @@ public class RevisionManager {
      *            {@code contentItemID} is stored
      * @param contentItemID
      *            ID of the {@link ContentItem} of which revision to be updated
+     * @return the new revision
      * @throws StoreException
      */
-    public <Item> void updateRevision(Store<Item> store, String contentItemID) throws StoreException {
+    public <Item> long updateRevision(Store<Item> store, String contentItemID) throws StoreException {
         // get connection
         Connection con = dbManager.getConnection();
         String revisionTableName = getStoreID(store);
@@ -136,6 +138,7 @@ public class RevisionManager {
             if (updatedRecordNum != 1) {
                 log.warn("Unexpected number of updated records: {}, should be 1", updatedRecordNum);
             }
+            return newRevision;
         } catch (SQLException e) {
             log.error("Failed to update revision", e);
             throw new StoreException("Failed to update revision", e);
@@ -167,6 +170,7 @@ public class RevisionManager {
         // get connection
         Connection con = dbManager.getConnection();
         String revisionTableName = getStoreID(store);
+        batchSize = batchSize == Integer.MAX_VALUE ? batchSize - 1 : batchSize;
 
         // check existence of record for the given content item id
         PreparedStatement ps = null;
@@ -235,6 +239,37 @@ public class RevisionManager {
             dbManager.closeStatement(ps);
             dbManager.closeConnection(con);
         }
+    }
+
+    public <Item> long getEpoch(Store<Item> store) throws StoreException {
+        // get connection
+        Connection con = dbManager.getConnection();
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        long epoch;
+        try {
+            ps = con.prepareStatement(SELECT_EPOCH);
+            ps.setString(1, getStoreID(store));
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                epoch = rs.getLong(1);
+            } else {
+                log.error(String.format("There is not an epoch record for the Store: %s", store.getName()));
+                throw new StoreException(String.format("There is not an epoch record for the Store: %s",
+                    store.getName()));
+            }
+
+        } catch (SQLException e) {
+            log.error("Failed to execute query", e);
+            throw new StoreException("Failed to execute query", e);
+        } finally {
+            dbManager.closeResultSet(rs);
+            dbManager.closeStatement(ps);
+            dbManager.closeConnection(con);
+        }
+        return epoch;
     }
 
     /**
@@ -322,7 +357,7 @@ public class RevisionManager {
      */
     public <Item> void initializeRevisionTables(Store<Item> store) throws StoreException {
         // initialize tables if not already
-        dbManager.createRevisionTable(store.getName());
+        dbManager.createRevisionTable(getStoreID(store));
 
         // add initial epoch for the store
         updateEpoch(store, true);
