@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engines.langdetect;
 
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.DCTERMS_LINGUISTIC_SYSTEM;
 
 import java.io.IOException;
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
@@ -55,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cybozu.labs.langdetect.LangDetectException;
+import com.cybozu.labs.langdetect.Language;
 
 /**
  * {@link LanguageDetectionEnhancementEngine} provides functionality to enhance document
@@ -110,6 +113,12 @@ public class LanguageDetectionEnhancementEngine
      * is taken from the middle of the text. The default length is 1000.
      */
     private int probeLength = PROBE_LENGTH_DEFAULT;
+    
+    /**
+     * The literal factory
+     */
+    private final LiteralFactory literalFactory = LiteralFactory.getInstance();
+
     
     private LanguageIdentifier languageIdentifier;
     
@@ -170,10 +179,10 @@ public class LanguageDetectionEnhancementEngine
         if (checkLength > 0 && text.length() > checkLength) {
             text = text.substring(text.length() / 2 - checkLength / 2, text.length() / 2 + checkLength / 2);
         }
-        String language = null;
+        List<Language> languages = null;
         try {
-            language = languageIdentifier.getLanguage(text);
-            log.info("language identified as " + language);
+            languages = languageIdentifier.getLanguages(text);
+            log.info("language identified: {}",languages);
         }
         catch (LangDetectException e) {
             log.warn("Could not identify language");
@@ -181,40 +190,20 @@ public class LanguageDetectionEnhancementEngine
         }
         
         // add language to metadata
-        MGraph g = ci.getMetadata();
-        ci.getLock().writeLock().lock();
-        try {
-            UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
-            g.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl(language)));
-            g.add(new TripleImpl(textEnhancement, DC_TYPE, DCTERMS_LINGUISTIC_SYSTEM));
-        } finally {
-            ci.getLock().writeLock().unlock();
-        }
-    }
-
-    public List<String> loadProfiles(String folder, String configFile) throws Exception {
-        List<String> profiles = new ArrayList<String>();
-        java.util.Properties props = new java.util.Properties();
-        props.load(getClass().getClassLoader().getResourceAsStream(configFile));
-        String languages = props.getProperty("languages");
-        if (languages == null) {
-            throw new IOException("No languages defined");
-        }
-        for (String lang: languages.split(",")) {
-            String profileFile = folder+"/"+lang;
-            InputStream is = getClass().getClassLoader().getResourceAsStream(profileFile);
-            String profile;
+        if (languages.size() > 0) {
+            MGraph g = ci.getMetadata();
+            ci.getLock().writeLock().lock();
+            // add best hypothesis
+            Language oneLang = languages.get(0);
             try {
-                profile = IOUtils.toString(is, "UTF-8");
-                if (profile != null && profile.length() > 0) {
-                    profiles.add(profile);
-                }
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                g.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl(oneLang.lang)));
+                g.add(new TripleImpl(textEnhancement, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(oneLang.prob)));
+                g.add(new TripleImpl(textEnhancement, DC_TYPE, DCTERMS_LINGUISTIC_SYSTEM));
+            } finally {
+                ci.getLock().writeLock().unlock();
             }
         }
-        return profiles;
     }
     
     public int getProbeLength() {
