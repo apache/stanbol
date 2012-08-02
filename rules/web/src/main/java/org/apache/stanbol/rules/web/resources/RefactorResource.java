@@ -16,10 +16,20 @@
  */
 package org.apache.stanbol.rules.web.resources;
 
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
 import java.io.InputStream;
 
@@ -37,13 +47,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
@@ -83,16 +91,9 @@ public class RefactorResource extends BaseStanbolResource {
 
     public RefactorResource(@Context ServletContext servletContext) {
         refactorer = (Refactorer) ContextHelper.getServiceFromContext(Refactorer.class, servletContext);
-        if (refactorer == null) {
-            throw new IllegalStateException("Refactorer missing in ServletContext");
-        }
-
+        if (refactorer == null) throw new IllegalStateException("Refactorer missing in ServletContext");
         ruleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
-
-        if (ruleStore == null) {
-            throw new IllegalStateException("RuleStore missing in ServletContext");
-        }
-
+        if (ruleStore == null) throw new IllegalStateException("RuleStore missing in ServletContext");
     }
 
     /**
@@ -108,12 +109,11 @@ public class RefactorResource extends BaseStanbolResource {
     @POST
     @Path("/apply")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
-                       KRFormat.OWL_XML, KRFormat.RDF_JSON})
+    @Produces(value = {TURTLE, RDF_XML, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, RDF_JSON, X_TURTLE})
     public Response applyRefactoring(@FormDataParam("recipe") String recipe,
                                      @FormDataParam("input") InputStream input,
                                      @Context HttpHeaders headers) {
-
+        ResponseBuilder rb;
         OWLOntology output = null;
         try {
             output = doRefactoring(input,
@@ -121,19 +121,15 @@ public class RefactorResource extends BaseStanbolResource {
         } catch (OWLOntologyCreationException e1) {
             throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
         } catch (RefactoringException e1) {
-            throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
+            throw new WebApplicationException(e1, BAD_REQUEST);
         }
-        if (output == null) {
-            ResponseBuilder rb = Response.status(NOT_FOUND);
-            rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
-            return rb.build();
-        }
-        ResponseBuilder rb = Response.ok(output);
-        rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
+        if (output != null) {
+            rb = Response.ok(output);
+            MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+            if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+        } else rb = Response.status(NOT_FOUND);
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
-
     }
 
     /**
@@ -149,12 +145,11 @@ public class RefactorResource extends BaseStanbolResource {
     @POST
     @Path("/applyfile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
-                       KRFormat.OWL_XML, KRFormat.RDF_JSON})
+    @Produces(value = {TURTLE, RDF_XML, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, RDF_JSON, X_TURTLE})
     public Response applyRefactoringFromRuleFile(@FormDataParam("recipe") InputStream recipeStream,
                                                  @FormDataParam("input") InputStream input,
                                                  @Context HttpHeaders headers) {
-
+        ResponseBuilder rb;
         OWLOntology output = null;
         try {
             output = doRefactoring(input,
@@ -164,14 +159,11 @@ public class RefactorResource extends BaseStanbolResource {
         } catch (RefactoringException e1) {
             throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
         }
-        if (output == null) {
-            ResponseBuilder rb = Response.status(NOT_FOUND);
-            rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
-            return rb.build();
-        }
-        ResponseBuilder rb = Response.ok(output);
-        rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN + "; charset=utf-8");
+        if (output != null) {
+            rb = Response.ok(output);
+            MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+            if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
+        } else rb = Response.status(NOT_FOUND);
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
 
@@ -203,15 +195,38 @@ public class RefactorResource extends BaseStanbolResource {
         return OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tripleCollection);
     }
 
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    @OPTIONS
+    @Path("/apply")
+    public Response handleCorsPreflightApply(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    @OPTIONS
+    @Path("/applyfile")
+    public Response handleCorsPreflightApplyFile(@Context HttpHeaders headers) {
+        ResponseBuilder rb = Response.ok();
+        enableCORS(servletContext, rb, headers);
+        return rb.build();
+    }
+
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
-                       KRFormat.OWL_XML, KRFormat.RDF_JSON})
+    @Produces(value = {TURTLE, RDF_XML, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, RDF_JSON, X_TURTLE})
     public Response performRefactoring(@FormDataParam("recipe") String recipe,
-                                       @FormDataParam("input") InputStream input) {
+                                       @FormDataParam("input") InputStream input,
+                                       @Context HttpHeaders headers) {
 
         // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
-
+        ResponseBuilder rb;
         UriRef recipeID = new UriRef(recipe);
         Recipe rcp;
         try {
@@ -223,19 +238,21 @@ public class RefactorResource extends BaseStanbolResource {
                 OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology), rcp);
             OWLOntology outputOntology = OWLAPIToClerezzaConverter
                     .clerezzaGraphToOWLOntology(tripleCollection);
-
-            return Response.ok(outputOntology).build();
+            rb = Response.ok(outputOntology);
+            MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
+            if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
 
         } catch (NoSuchRecipeException e1) {
-            return Response.status(Status.NOT_FOUND).build();
+            rb = Response.status(NOT_FOUND);
         } catch (RecipeConstructionException e1) {
-            return Response.status(Status.NO_CONTENT).build();
+            rb = Response.status(NO_CONTENT);
         } catch (OWLOntologyCreationException e) {
-            return Response.status(Status.PRECONDITION_FAILED).build();
+            rb = Response.status(PRECONDITION_FAILED);
         } catch (RefactoringException e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            rb = Response.status(INTERNAL_SERVER_ERROR);
         }
-
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     @GET
@@ -271,13 +288,6 @@ public class RefactorResource extends BaseStanbolResource {
         if (mediaType != null) responseBuilder.header(HttpHeaders.CONTENT_TYPE, mediaType);
         addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
-    }
-
-    @OPTIONS
-    public Response handleCorsPreflight(@Context HttpHeaders headers) {
-        ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers);
-        return rb.build();
     }
 
 }
