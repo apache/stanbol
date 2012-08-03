@@ -167,77 +167,87 @@ public class RevisionManager {
      * @throws StoreException
      */
     public <Item> ChangeSet<Item> getChanges(Store<Item> store, long revision, int batchSize) throws StoreException {
-        // get connection
-        Connection con = dbManager.getConnection();
-        String revisionTableName = getStoreID(store);
-        batchSize = batchSize == Integer.MAX_VALUE ? batchSize - 1 : batchSize;
+        synchronized (RevisionManager.class) {
 
-        // check existence of record for the given content item id
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = con.prepareStatement(String.format(SELECT_CHANGES, revisionTableName),
-                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.setLong(1, revision);
-            ps.setMaxRows(batchSize + 1);
-            rs = ps.executeQuery();
+            // get connection
+            Connection con = dbManager.getConnection();
+            String revisionTableName = getStoreID(store);
+            batchSize = batchSize == Integer.MAX_VALUE ? batchSize - 1 : batchSize;
 
-            Set<String> changedUris = new LinkedHashSet<String>();
+            // check existence of record for the given content item id
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                ps = con.prepareStatement(String.format(SELECT_CHANGES, revisionTableName),
+                    ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                ps.setLong(1, revision);
+                ps.setMaxRows(batchSize + 1);
+                rs = ps.executeQuery();
 
-            if (!rs.first()) {
-                return new ChangeSetImpl<Item>(store, store.getEpoch(), Long.MIN_VALUE, Long.MAX_VALUE,
-                        changedUris);
-            }
-            if (rs.absolute(batchSize + 1)) {
-                long lastRowRevision = rs.getLong(2);
-                rs.previous();
-                long nextToLastRowRevision = rs.getLong(2);
-                rs.beforeFirst();
-                // if we are in the middle of a revision, add all changes in that revision to changedUris
-                if (lastRowRevision == nextToLastRowRevision) {
-                    ps = con.prepareStatement(String.format(SELECT_MORECHANGES, revisionTableName),
-                        ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                    ps.setLong(1, revision);
-                    rs = ps.executeQuery();
+                Set<String> changedUris = new LinkedHashSet<String>();
 
-                    while (rs.next()) {
-                        changedUris.add(rs.getString(1));
-                    }
-                } else {
-                    while (rs.next()) {
-                        if (rs.isLast()) {
-                            break;
+                if (!rs.first()) {
+                    return new ChangeSetImpl<Item>(store, store.getEpoch(), Long.MIN_VALUE, Long.MAX_VALUE,
+                            changedUris);
+                }
+                if (rs.absolute(batchSize + 1)) {
+                    long lastRowRevision = rs.getLong(2);
+                    rs.previous();
+                    long nextToLastRowRevision = rs.getLong(2);
+                    rs.beforeFirst();
+                    // if we are in the middle of a revision, add all changes in that revision to changedUris
+                    if (lastRowRevision == nextToLastRowRevision) {
+                        PreparedStatement ps2 = null;
+                        ResultSet rs2 = null;
+                        try {
+                            ps2 = con.prepareStatement(String.format(SELECT_MORECHANGES, revisionTableName),
+                                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                            ps2.setLong(1, revision);
+                            rs2 = ps2.executeQuery();
+
+                            while (rs2.next()) {
+                                changedUris.add(rs2.getString(1));
+                            }
+                        } finally {
+                            dbManager.closeResultSet(rs2);
+                            dbManager.closeStatement(ps2);
                         }
+                    } else {
+                        while (rs.next()) {
+                            if (rs.isLast()) {
+                                break;
+                            }
+                            changedUris.add(rs.getString(1));
+                        }
+                    }
+
+                } else {
+                    rs.beforeFirst();
+                    while (rs.next()) {
                         changedUris.add(rs.getString(1));
                     }
                 }
 
-            } else {
-                rs.beforeFirst();
-                while (rs.next()) {
-                    changedUris.add(rs.getString(1));
+                // set minimum and maximum revision numbers of the change set
+                if (rs.isLast()) {
+                    rs.previous();
+                } else {
+                    rs.last();
                 }
+                long to = rs.getLong(2);
+                rs.first();
+                long from = rs.getLong(2);
+
+                return new ChangeSetImpl<Item>(store, store.getEpoch(), from, to, changedUris);
+
+            } catch (SQLException e) {
+                log.error("Failed to get changes", e);
+                throw new StoreException("Failed to get changes", e);
+            } finally {
+                dbManager.closeResultSet(rs);
+                dbManager.closeStatement(ps);
+                dbManager.closeConnection(con);
             }
-
-            // set minimum and maximum revision numbers of the change set
-            if (rs.isLast()) {
-                rs.previous();
-            } else {
-                rs.last();
-            }
-            long to = rs.getLong(2);
-            rs.first();
-            long from = rs.getLong(2);
-
-            return new ChangeSetImpl<Item>(store, store.getEpoch(), from, to, changedUris);
-
-        } catch (SQLException e) {
-            log.error("Failed to get changes", e);
-            throw new StoreException("Failed to get changes", e);
-        } finally {
-            dbManager.closeResultSet(rs);
-            dbManager.closeStatement(ps);
-            dbManager.closeConnection(con);
         }
     }
 

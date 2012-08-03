@@ -825,7 +825,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
         @Override
         public void run() {
             // create temporary core
-            IndexMetadata temporaryCoreMetadata;
+            IndexMetadata temporaryCoreMetadata = null;
             try {
                 temporaryCoreMetadata = createTemporarySolrCore();
                 logger.info(
@@ -835,21 +835,28 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                 logger.error("Failed to create temporary Solr core while reindexing the index: {}", name, e);
                 return;
             }
-            // initialize solr server tracker for the temporary core
-            String temporaryCoreName = temporaryCoreMetadata.getIndexName();
-            initializeTracker(temporaryCoreName);
-
-            // index documents in the store according to the new configuration
+            String temporaryCoreName = temporaryCoreMetadata.getIndexName();;
             try {
+                // initialize solr server tracker for the temporary core
+                initializeTracker(temporaryCoreName);
+
+                // index documents in the store according to the new configuration
+
                 revision = indexDocuments();
                 logger.info(
                     "Documents have been re-indexed according to the new configuration of the Semantic Index: {}",
                     name);
             } catch (StoreException e) {
                 logger.error("Failed to obtain changes from Store while reindexing the index: {}", name, e);
+                managedSolrServer.removeIndex(temporaryCoreName, true);
                 return;
             } catch (IndexException e) {
                 logger.error("IndexException while reindexing the index: {}", name, e);
+                managedSolrServer.removeIndex(temporaryCoreName, true);
+                return;
+            } catch (Exception e) {
+                logger.error("Exception while reindexing the index: {}", name, e);
+                managedSolrServer.removeIndex(temporaryCoreName, true);
                 return;
             }
 

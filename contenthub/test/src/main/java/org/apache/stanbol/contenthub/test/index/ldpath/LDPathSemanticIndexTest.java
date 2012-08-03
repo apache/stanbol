@@ -99,23 +99,13 @@ public class LDPathSemanticIndexTest {
     private static String pid;
     private static int counter = 0;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void before() throws IndexManagementException, IndexException, InterruptedException, IOException {
         String name = "test_index_name";
         if (counter == 0) {
             String program = "@prefix dbp-ont : <http://dbpedia.org/ontology/>; city = dbp-ont:city / rdfs:label :: xsd:string; country = dbp-ont:country / rdfs:label :: xsd:string; ";
             pid = ldPathSemanticIndexManager.createIndex(name, "test_index_description", program);
-            SemanticIndex<ContentItem> tempSemanticIndex = (SemanticIndex<ContentItem>) semanticIndexManager
-                    .getIndex(name);
-            int timeoutCount = 0;
-            while (tempSemanticIndex == null) {
-                if (timeoutCount == 8) break;
-                Thread.sleep(500);
-                tempSemanticIndex = (SemanticIndex<ContentItem>) semanticIndexManager.getIndex(name);
-                timeoutCount++;
-            }
-            assertNotNull("SemanticIndex '" + name + "' not available after waiting 4sec!", tempSemanticIndex);
+            SemanticIndex<ContentItem> tempSemanticIndex = getLDPathSemanticIndex(name);
             assertTrue("This tests assume that the Semantic Index with the name '" + name + "' is of type "
                        + LDPathSemanticIndex.class.getSimpleName(),
                 tempSemanticIndex instanceof LDPathSemanticIndex);
@@ -352,15 +342,7 @@ public class LDPathSemanticIndexTest {
         String pid = ldPathSemanticIndexManager.createIndex(name, "", program);
 
         try {
-            LDPathSemanticIndex semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
-            int timeoutCount = 0;
-            while (semanticIndex == null) {
-                if (timeoutCount == 8) break;
-                Thread.sleep(500);
-                semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
-                timeoutCount++;
-            }
-
+            SemanticIndex<ContentItem> semanticIndex = getLDPathSemanticIndex(name);
             ContentItem ci = contentItemFactory.createContentItem(new StringSource(
                     "Michael Jackson is a very famous person, and he was born in Indiana."));
             jobManager.enhanceContent(ci);
@@ -378,15 +360,9 @@ public class LDPathSemanticIndexTest {
             properties.put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM, newProgram);
             properties.put(LDPathSemanticIndex.PROP_DESCRIPTION, "reindexing");
             config.update(properties);
+            Thread.sleep(1000);
 
-            semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
-            timeoutCount = 0;
-            while (semanticIndex == null || !semanticIndex.getDescription().equals("reindexing")) {
-                if (timeoutCount == 8) break;
-                Thread.sleep(500);
-                semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
-                timeoutCount++;
-            }
+            semanticIndex = getLDPathSemanticIndex(name);
             // index ci to new semantic index
             while (semanticIndex.getState() != IndexState.ACTIVE) {
                 Thread.sleep(500);
@@ -425,15 +401,7 @@ public class LDPathSemanticIndexTest {
         String pid = ldPathSemanticIndexManager.createIndex(props);
 
         try {
-            LDPathSemanticIndex semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
-            int timeoutCount = 0;
-            while (semanticIndex == null) {
-                if (timeoutCount == 8) break;
-                Thread.sleep(500);
-                semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
-                timeoutCount++;
-            }
-
+            SemanticIndex<ContentItem> semanticIndex = getLDPathSemanticIndex(name);
             ContentItem ci = contentItemFactory.createContentItem(new StringSource(
                     "Michael Jackson is a very famous person, and he was born in Indiana."));
             fileStore.put(ci);
@@ -464,6 +432,23 @@ public class LDPathSemanticIndexTest {
             counter = 0;
             ldPathSemanticIndexManager.removeIndex(pid);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private SemanticIndex<ContentItem> getLDPathSemanticIndex(String name) throws InterruptedException,
+                                                                          IndexManagementException {
+
+        SemanticIndex<ContentItem> tempSemanticIndex = (SemanticIndex<ContentItem>) semanticIndexManager
+                .getIndex(name);
+        int timeoutCount = 0;
+        while (tempSemanticIndex == null) {
+            if (timeoutCount == 8) break;
+            Thread.sleep(500);
+            tempSemanticIndex = (SemanticIndex<ContentItem>) semanticIndexManager.getIndex(name);
+            timeoutCount++;
+        }
+        assertNotNull("Failed to retrieve SemanticIndex: " + name, tempSemanticIndex);
+        return tempSemanticIndex;
     }
 
     @SuppressWarnings("unchecked")
