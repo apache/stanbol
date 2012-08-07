@@ -25,7 +25,7 @@
           (internal and external)
        ********************************************************************* -->
   <!-- General-purpose libraries -->
-  <startLevel level="10">
+  <startLevel level="20">
 <!-- 		<bundle> only used by the Contenthub -->
 <!-- 			<groupId>eu.medsea.mimeutil</groupId> -->
 <!-- 			<artifactId>mime-util</artifactId> -->
@@ -34,7 +34,7 @@
   </startLevel>
 
   <!-- Jersey -->
-  <startLevel level="15">
+  <startLevel level="25">
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
@@ -43,7 +43,7 @@
   </startLevel>
 
   <!-- Stanbol Commons -->
-  <startLevel level="17">
+  <startLevel level="27">
     <!-- The common web interface -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
@@ -59,7 +59,7 @@
 
   <!-- Stanbol OWL now part of commons -->
   <!--
-  <startLevel level="22">
+  <startLevel level="32">
   </startLevel>
   -->
   
@@ -68,7 +68,7 @@
           (currently the Enhancement Engines)
        ********************************************************************* -->
   
-  <startLevel level="26">
+  <startLevel level="36">
     <!-- The Content-Editable based UI for Enhancing Text written on a Webpage -->
     <bundle>
         <groupId>org.apache.stanbol</groupId>

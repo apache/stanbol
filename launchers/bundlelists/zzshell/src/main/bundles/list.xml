@@ -19,7 +19,7 @@
     
     
 	<!--  Scala -->
-	<startLevel level="22">
+	<startLevel level="32">
 		<bundle>
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.scala-library</artifactId>
@@ -43,7 +43,7 @@
 	</startLevel>
 	
 	<!-- Console Shell -->
-	<startLevel level="23">
+	<startLevel level="33">
 		<bundle>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>shell</artifactId>
@@ -67,7 +67,7 @@
 	</startLevel>
 	
 	<!-- SSH Shell access -->
-	<startLevel level="24">
+	<startLevel level="34">
 		<bundle>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>sshshell</artifactId>

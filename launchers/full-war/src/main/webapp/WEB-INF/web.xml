@@ -27,7 +27,11 @@
 		<display-name>Sling Servlet</display-name>
 		<servlet-name>sling</servlet-name>
 		<servlet-class>org.apache.sling.launchpad.webapp.SlingServlet</servlet-class>
-        <init-param> <!-- the default sling.home is set to stanbol -->
+        <init-param> <!-- the initial framework startlevel -->
+                <param-name>org.osgi.framework.startlevel.beginning</param-name> 
+                <param-value>40/</param-value> 
+        </init-param> 
+		<init-param> <!-- the default sling.home is set to stanbol -->
                 <param-name>sling.home</param-name> 
                 <param-value>stanbol/</param-value> 
         </init-param> 
