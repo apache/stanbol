@@ -35,6 +35,7 @@ import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,8 +162,8 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
                 IRI id = o.getIRI();
                 try {
                     // No preferred key, we don't have a prefix here.
-                    String key = loader.loadInStore(id, null, false);
-                    if (key == null || key.isEmpty()) log.error(
+                    OWLOntologyID key = loader.loadInStore(id, null, false);
+                    if (key == null || key.isAnonymous()) log.error(
                         "Empty storage key. Ontology {} was apparently not stored.", id);
                 } catch (IOException ex) {
                     log.error("I/O error occurred loading {}", id);

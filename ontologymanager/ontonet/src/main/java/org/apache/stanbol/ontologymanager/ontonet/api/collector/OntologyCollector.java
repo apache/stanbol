@@ -19,9 +19,8 @@ package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedArtifact;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSourceHandler;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyID;
@@ -48,20 +47,7 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedArt
      *            the ontology to be added
      * @return the key that can be used for accessing the stored ontology directly
      */
-    String addOntology(OntologyInputSource<?> ontologySource);
-
-    /**
-     * Tells this ontology collector to manage the ontology referenced by <tt>origin</tt>. This method will
-     * try to <i>avoid</i> processing the ontology content whenever possible. For the example, if
-     * <tt>origin</tt> is an {@link Origin} that wraps an {@link OWLOntologyID}, it will assumed the wrapperd
-     * reference to be a public key for an already stored ontology.
-     * 
-     * TODO make this method return the public key as an {@link OWLOntologyID}.
-     * 
-     * @param origin
-     *            the origin of the ontology to be added.
-     */
-    void addOntology(Origin<?> origin);
+    OWLOntologyID addOntology(OriginOrInputSource ontology);
 
     /**
      * Returns the ontologies managed by this ontology space. This is a shortcut method for iterating

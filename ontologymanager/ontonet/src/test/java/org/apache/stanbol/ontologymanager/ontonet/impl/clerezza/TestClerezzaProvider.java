@@ -26,9 +26,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.access.TcProvider;
@@ -42,6 +42,7 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,24 +86,30 @@ public class TestClerezzaProvider {
 
         // Check the first version
         InputStream data = getClass().getResourceAsStream(fn1);
-        String key1 = ontologyProvider.loadInStore(data, RDF_XML, true);
+        OWLOntologyID key1 = ontologyProvider.loadInStore(data, RDF_XML, true);
         assertNotNull(key1);
-        assertFalse(key1.isEmpty());
+        assertFalse(key1.isAnonymous());
 
         // Check the second version
         data = getClass().getResourceAsStream(fn2);
-        String key2 = ontologyProvider.loadInStore(data, RDF_XML, true);
+        OWLOntologyID key2 = ontologyProvider.loadInStore(data, RDF_XML, true);
         assertNotNull(key2);
-        assertFalse(key2.isEmpty());
+        assertFalse(key2.isAnonymous());
 
         // Must be 2 different graphs
         assertFalse(key1.equals(key2));
         assertEquals(2, ontologyProvider.getPublicKeys().size());
 
         // Ontologies must not be tainting each other
-        OWLOntology o1 = ontologyProvider.getStoredOntology(key1, OWLOntology.class, true);
-        OWLOntology o2 = ontologyProvider.getStoredOntology(key2, OWLOntology.class, true);
-        Set<OWLOntology> oAll = new HashSet<OWLOntology>(Arrays.asList(new OWLOntology[] {o1, o2}));
+        // Don't use keys any more here. They're not the real public keys!
+        Set<OWLOntology> oAll = new HashSet<OWLOntology>();
+        for (OWLOntologyID key : ontologyProvider.listOntologies()) {
+            log.info("Found public key {}", key);
+            oAll.add(ontologyProvider.getStoredOntology(key, OWLOntology.class, true));
+        }
+        Iterator<OWLOntology> it = oAll.iterator();
+        OWLOntology o1 = it.next();
+        OWLOntology o2 = it.next();
         for (OWLNamedIndividual i : o1.getIndividualsInSignature()) {
             Set<OWLClassExpression> tAll = i.getTypes(oAll), t1 = i.getTypes(o1), t2 = i.getTypes(o2);
             assertTrue(tAll.containsAll(t1)); // Should be obvious from the OWL API

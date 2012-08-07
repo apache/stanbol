@@ -37,8 +37,7 @@ import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
@@ -94,37 +93,14 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
 
     protected IRI namespace = null;
 
-    private OntologyScopeImpl(String id, IRI namespace) {
-        setID(id);
-        setNamespace(namespace);
-    }
-
-    public OntologyScopeImpl(String id, IRI namespace, OntologySpaceFactory factory) {
-        this(id, namespace);
-        configureCoreSpace(factory);
-        // let's just lock it. Once the core space is done it's done.
-        this.coreSpace.setUp();
-        configureCustomSpace(factory);
-    }
-
     public OntologyScopeImpl(String id,
                              IRI namespace,
                              OntologySpaceFactory factory,
-                             OntologyInputSource<?>... coreOntologies) {
-        this(id, namespace);
-        configureCoreSpace(factory);
-        for (OntologyInputSource<?> src : coreOntologies)
-            this.coreSpace.addOntology(src);
-        // let's just lock it. Once the core space is done it's done.
-        this.coreSpace.setUp();
-        configureCustomSpace(factory);
-    }
-
-    public OntologyScopeImpl(String id, IRI namespace, OntologySpaceFactory factory, Origin<?>... coreOrigins) {
+                             OriginOrInputSource... coreOntologies) {
         setID(id);
         setNamespace(namespace);
         configureCoreSpace(factory);
-        for (Origin<?> src : coreOrigins)
+        for (OriginOrInputSource src : coreOntologies)
             this.coreSpace.addOntology(src);
         // let's just lock it. Once the core space is done it's done.
         this.coreSpace.setUp();
@@ -313,7 +289,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
                 // Add the import statement for the core space, if existing and not empty
                 spc = getCoreSpace();
                 if (spc != null && spc.listManagedOntologies().size() > 0) {
-                    IRI spaceIri = IRI.create(getNamespace() + spc.getID());
+                    IRI spaceIri = IRI.create(universalPrefix + spc.getID());
                     additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
                 }
                 mgr.applyChanges(additions);

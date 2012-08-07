@@ -46,9 +46,11 @@ public class SessionEvent {
      * @param session
      *            the KReS session affected by this event
      */
-    public SessionEvent(Session session, OperationType operationType) throws Exception {
-        if (operationType == null) throw new Exception("No operation type specified for this session event.");
-        if (session == null) throw new Exception("No KReS session specified for this session event.");
+    public SessionEvent(Session session, OperationType operationType) {
+        if (operationType == null) throw new IllegalArgumentException(
+                "No operation type specified for this session event.");
+        if (session == null) throw new IllegalArgumentException(
+                "No session specified for this session event.");
         this.operationType = operationType;
         this.affectedSession = session;
     }

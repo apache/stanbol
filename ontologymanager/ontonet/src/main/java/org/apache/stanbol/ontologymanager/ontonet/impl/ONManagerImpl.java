@@ -46,6 +46,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOnto
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
@@ -405,34 +406,13 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
     }
 
     @Override
-    public OntologyScope createOntologyScope(String scopeID) throws DuplicateIDException {
+    public OntologyScope createOntologyScope(String scopeID, OriginOrInputSource... coreOntologies) throws DuplicateIDException {
         if (this.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
                 "Scope registry already contains ontology scope with ID " + scopeID);
         IRI prefix = IRI.create(getOntologyNetworkNamespace() + scopeRegistryId + "/");
         // Scope constructor also creates core and custom spaces
-        OntologyScope scope = new OntologyScopeImpl(scopeID, prefix, getOntologySpaceFactory());
-        configureScope(scope);
-        return scope;
-    }
-
-    @Override
-    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?>... coreSources) throws DuplicateIDException {
-        if (this.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
-                "Scope registry already contains ontology scope with ID " + scopeID);
-        IRI prefix = IRI.create(getOntologyNetworkNamespace() + scopeRegistryId + "/");
-        // Scope constructor also creates core and custom spaces
-        OntologyScope scope = new OntologyScopeImpl(scopeID, prefix, getOntologySpaceFactory(), coreSources);
-        configureScope(scope);
-        return scope;
-    }
-
-    @Override
-    public OntologyScope createOntologyScope(String scopeID, Origin<?>... coreOrigins) throws DuplicateIDException {
-        if (this.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
-                "Scope registry already contains ontology scope with ID " + scopeID);
-        IRI prefix = IRI.create(getOntologyNetworkNamespace() + scopeRegistryId + "/");
-        // Scope constructor also creates core and custom spaces
-        OntologyScope scope = new OntologyScopeImpl(scopeID, prefix, getOntologySpaceFactory(), coreOrigins);
+        OntologyScope scope = new OntologyScopeImpl(scopeID, prefix, getOntologySpaceFactory(),
+                coreOntologies);
         configureScope(scope);
         return scope;
     }

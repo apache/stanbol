@@ -18,27 +18,27 @@ div.indent {
 	margin-left: 20px;
 }
 
-input.hide-button{
+input.hide-button {
 	display: none;
 }
 
-span.red{
+span.red {
 	color: red;
 }
 
-div.active{
+div.active {
 	display: block;
 }
 
-div.inactive{
+div.inactive {
 	display: none;
 }
 
-div.arrows{
+div.arrows {
 	text-align: center;
 	display: block;
 }
 
-a#previous{
+a#previous {
 	display: none;
 }

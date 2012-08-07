@@ -17,8 +17,7 @@
 package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedArtifact;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace.SpaceType;
 
 /**
@@ -32,8 +31,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace.SpaceT
  */
 public interface OntologySpaceFactory extends NamedArtifact {
 
-    CoreOntologySpace createCoreOntologySpace(String scopeId);
-
     /**
      * Creates and sets up a default core ontology space. Equivalent to calling
      * <code>createOntologySpace(IRI, SpaceTypes.CORE, OntologyInputSource...)</code>.
@@ -45,11 +42,7 @@ public interface OntologySpaceFactory extends NamedArtifact {
      *            the sources of the optional ontologies to be immediately loaded upon space creation.
      * @return the generated ontology space.
      */
-    CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?>... coreSources);
-
-    CoreOntologySpace createCoreOntologySpace(String scopeId, Origin<?>... coreOrigins);
-
-    CustomOntologySpace createCustomOntologySpace(String scopeId);
+    CoreOntologySpace createCoreOntologySpace(String scopeId, OriginOrInputSource... coreOntologies);
 
     /**
      * Creates and sets up a default custom ontology space. Equivalent to calling
@@ -62,11 +55,7 @@ public interface OntologySpaceFactory extends NamedArtifact {
      *            the sources of the optional ontologies to be immediately loaded upon space creation.
      * @return the generated ontology space.
      */
-    CustomOntologySpace createCustomOntologySpace(String scopeId, OntologyInputSource<?>... customSources);
-
-    CustomOntologySpace createCustomOntologySpace(String scopeId, Origin<?>... customOrigins);
-
-    OntologySpace createOntologySpace(String scopeId, SpaceType type);
+    CustomOntologySpace createCustomOntologySpace(String scopeId, OriginOrInputSource... customOntologies);
 
     /**
      * Creates an ontology space of the specified type.
@@ -80,10 +69,6 @@ public interface OntologySpaceFactory extends NamedArtifact {
      *            the sources of the optional ontologies to be immediately loaded upon space creation.
      * @return the generated ontology space.
      */
-    OntologySpace createOntologySpace(String scopeId,
-                                      SpaceType type,
-                                      OntologyInputSource<?>... ontologySources);
-
-    OntologySpace createOntologySpace(String scopeId, SpaceType type, Origin<?>... origins);
+    OntologySpace createOntologySpace(String scopeId, SpaceType type, OriginOrInputSource... ontologySources);
 
 }

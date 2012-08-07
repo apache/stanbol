@@ -64,8 +64,6 @@ public interface OntologyProvider<S> {
      */
     public String RESOLVE_IMPORTS = "org.apache.stanbol.ontologymanager.ontonet.resolveImports";
 
-    String getGraphPrefix();
-
     /**
      * Gets the policy adopted by this provider whenever an import statement is found in an ontology <i>that
      * has already been loaded</i> (e.g. when exporting it). It does <b>not</b> influence how the system
@@ -79,8 +77,10 @@ public interface OntologyProvider<S> {
      * Gets a string that can be used to directly access the ontology whose logical identifier is
      * <tt>ontologyIRI</tt>.
      * 
-     * @deprecated
-     * 
+     * @deprecated public keys are now of type {@link OWLOntologyID} and should match ontologyIri, or
+     *             derivative versioned IDs, whenever possible.
+     * @see #listVersions(IRI)
+     * @see #listAliases(OWLOntologyID)
      * @param ontologyIri
      *            the logical identifier of the ontology.
      * @return the public key (note that it might be different from the graph name).
@@ -91,7 +91,11 @@ public interface OntologyProvider<S> {
      * Gets a string that can be used to directly access the ontology whose logical identifier is
      * <tt>ontologyId</tt>.
      * 
-     * @deprecated
+     * @deprecated public keys are now of type {@link OWLOntologyID} and should match ontologyId. To obtain
+     *             alternate public keys (aliases) or versioned public keys, see
+     *             {@link #listAliases(OWLOntologyID)} and {@link #listVersions(IRI)} respectively.
+     * @see #listVersions(IRI)
+     * @see #listAliases(OWLOntologyID)
      * 
      * @param ontologyId
      *            the logical identifier of the ontology.
@@ -115,13 +119,23 @@ public interface OntologyProvider<S> {
     @Deprecated
     OntologyNetworkConfiguration getOntologyNetworkConfiguration();
 
+    /**
+     * XXX This method is temporary until {@link OntologyNetworkMultiplexer} becomes an OSGi component.
+     * 
+     * @return
+     */
     OntologyNetworkMultiplexer getOntologyNetworkDescriptor();
 
     /**
      * Gets the key of the ontology with the supplied ontology ID. Note that both ontoloeyIRI and versionIRI
      * (if present) must match, otherwise it will return null.
      * 
-     * @deprecated
+     * @deprecated public keys are now of type {@link OWLOntologyID} and should match ontologyId. To obtain
+     *             alternate public keys (aliases) or versioned public keys, see
+     *             {@link #listAliases(OWLOntologyID)} and {@link #listVersions(IRI)} respectively.
+     * @see #listVersions(IRI)
+     * @see #listAliases(OWLOntologyID)
+     * 
      * @param ontologyId
      * @return
      */
@@ -129,6 +143,8 @@ public interface OntologyProvider<S> {
 
     /**
      * Gets the set of all the strings that can be used to access the ontologies stored by this provider.
+     * 
+     * @deprecated Please use {@link #listOntologies()} instead.
      * 
      * @return the ontology key set.
      */
@@ -251,15 +267,43 @@ public interface OntologyProvider<S> {
      * Implementations are typically faster than calling {@link #getStoredOntology(IRI, Class)} and checking
      * if the returned value is not null.
      * 
-     * @param id
+     * @param publicKey
      *            the ontology id. If there is both an ontology IRI and a version IRI, both must match the
      *            ontology provider's records in order to return true. Otherwise, it will return true iff
      *            <i>any</i> match with the ontology IIR is found, no matter its version IRI.
      * @return true iff an ontology with the supplied id is in the provider's store.
      */
-    boolean hasOntology(OWLOntologyID id);
+    boolean hasOntology(OWLOntologyID publicKey);
 
-    public Set<OWLOntologyID> listOntologies();
+    /**
+     * Returns all the alternate public keys of the ontology identified by the supplied public key. These
+     * could include, for example, the physical URLs they were, or can be, retrieved from. The supplied public
+     * key is not included in the returned set, and it needs not be the primary key. It can be an alias
+     * itself, in whih case the primary key will be included in the results.
+     * 
+     * @param publicKey
+     *            the public key of the ontology. It could be an alias itself.
+     * @return the matching versions of stored ontologies.
+     */
+    Set<OWLOntologyID> listAliases(OWLOntologyID publicKey);
+
+    /**
+     * Returns the public keys of all the ontologies stored by this provider. Only primary keys are returned:
+     * aliases are not included.
+     * 
+     * @return all the ontology public keys.
+     */
+    Set<OWLOntologyID> listOntologies();
+
+    /**
+     * Returns all the public keys of the ontologies whose ontology IRI matches the one supplied,a nd which
+     * differ by version IRI. Only primary keys are returned: aliases are not included.
+     * 
+     * @param ontologyIri
+     *            the ontology IRI to match
+     * @return the matching versions of stored ontologies.
+     */
+    Set<OWLOntologyID> listVersions(IRI ontologyIri);
 
     /**
      * Retrieves an ontology by reading its content from a data stream and stores it using the storage system
@@ -285,8 +329,10 @@ public interface OntologyProvider<S> {
      * @throws UnsupportedFormatException
      *             if no parsers are able to parse the supplied format (or the actual file format).
      */
-    String loadInStore(InputStream data, String formatIdentifier, boolean force, Origin<?>... references) throws IOException,
-                                                                                                         UnsupportedFormatException;
+    OWLOntologyID loadInStore(InputStream data,
+                              String formatIdentifier,
+                              boolean force,
+                              Origin<?>... references) throws IOException, UnsupportedFormatException;
 
     /**
      * Retrieves an ontology physically located at <code>location</code> (unless mapped otherwise by the
@@ -312,7 +358,7 @@ public interface OntologyProvider<S> {
      * @throws UnsupportedFormatException
      *             if no parsers are able to parse the supplied format (or the actual file format).
      */
-    String loadInStore(IRI location, String formatIdentifier, boolean force, Origin<?>... references) throws IOException;
+    OWLOntologyID loadInStore(IRI location, String formatIdentifier, boolean force, Origin<?>... references) throws IOException;
 
     /**
      * Stores an ontology that has already been loaded into an object. If the object is of a non-native yet
@@ -327,7 +373,7 @@ public interface OntologyProvider<S> {
      *            set on offline mode, this method will fail.
      * @return
      */
-    String loadInStore(Object ontology, boolean force, Origin<?>... references);
+    OWLOntologyID loadInStore(Object ontology, boolean force, Origin<?>... references);
 
     /**
      * Removes the ontology identified by the supplied public key.
@@ -337,8 +383,6 @@ public interface OntologyProvider<S> {
      * @return true iff an ontology with that public key existed and was removed.
      */
     boolean removeOntology(OWLOntologyID publicKey);
-
-    void setGraphPrefix(String prefix);
 
     /**
      * Sets the policy adopted by this provider whenever an import statement is found in an ontology <i>that
@@ -351,15 +395,19 @@ public interface OntologyProvider<S> {
     void setImportManagementPolicy(ImportManagementPolicy policy);
 
     /**
-     * Will not be checked by dereferencing
-     * 
-     * If the key does not exist in the provider, or if locator is already bound to a different key, an
-     * {@link IllegalArgumentException} will be thrown.
-     * 
+     * Tells this ontology provider that a stored ontology whose public key is <tt>publicKey</tt> can be (or
+     * was) retrieved by dereferencing <tt>locator</tt>. If <tt>publicKey</tt>does not exist in the provider,
+     * or if <tt>locator</tt> is already bound to an incompatible key, an {@link IllegalArgumentException}
+     * will be thrown.
      * 
      * @param locator
-     * @param key
+     *            a physical location for this ontology.
+     * @param publicKey
+     *            the public key of the stored ontology.
      */
+    void setLocatorMapping(IRI locator, OWLOntologyID publicKey);
+
+    @Deprecated
     void setLocatorMapping(IRI locator, String key);
 
 }

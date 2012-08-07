@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.clerezza.rdf.core.Graph;
@@ -40,7 +39,6 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
-import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.Lockable;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.MissingOntologyException;
@@ -52,6 +50,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSourceHandler;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
@@ -128,7 +127,16 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public synchronized String addOntology(OntologyInputSource<?> ontologySource) throws UnmodifiableOntologyCollectorException {
+    public OWLOntologyID addOntology(OriginOrInputSource ontology) {
+        if (ontology.isInputSource()) return addOntology(ontology.asInputSource());
+        if (ontology.isOrigin()) {
+            addOntology(ontology.asOrigin());
+            return null;
+        }
+        return null;
+    }
+
+    private synchronized OWLOntologyID addOntology(OntologyInputSource<?> ontologySource) throws UnmodifiableOntologyCollectorException {
 
         long before = System.currentTimeMillis();
 
@@ -142,7 +150,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         Object o = ontologySource.getRootOntology();
 
         // Now for the actual storage. We pass the ontology object directly.
-        String key = null;
+        OWLOntologyID key = null;
         // // FIXME restore ownership management, but maybe not by directly setting the versionIRI
         // if (ontologyProvider.hasOntology(id.getOntologyIRI())) if (o instanceof MGraph)
         // claimOwnership((MGraph) o);
@@ -156,46 +164,10 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
          * Actually we are not interested in knowing the key here (ontology collectors are not concerned with
          * them), but knowing it is non-null and non-empty indicates the operation was successful.
          */
-        if (key != null && !key.isEmpty()) {
-            if (ontologySource.hasOrigin() && ontologySource.getOrigin().getReference() instanceof IRI) ontologyProvider
-                    .setLocatorMapping((IRI) ontologySource.getOrigin().getReference(), key);
-
-            /*
-             * Used for mappings.
-             */
-            OWLOntologyID id;
-            if (o instanceof TripleCollection) {
-                id = OWLUtils.guessOntologyIdentifier((TripleCollection) o);
-            } else if (o instanceof OWLOntology) {
-                id = OWLUtils.guessOntologyIdentifier((OWLOntology) o);
-            } else throw new UnsupportedOperationException(
-                    "This ontology collector implementation cannot handle " + o.getClass().getCanonicalName()
-                            + " objects.");
-
-            // Null id? use the origin trick
-            if (id == null) {
-
-                if (ontologySource.hasOrigin()) {
-                    Origin<?> origin = ontologySource.getOrigin();
-                    Object reff = origin.getReference();
-                    if (reff instanceof IRI) id = new OWLOntologyID((IRI) reff); // No version IRI here
-                    else if (reff instanceof UriRef) id = new OWLOntologyID(IRI.create(((UriRef) reff)
-                            .getUnicodeString()));
-                    else {
-                        log.warn("Entering deprecated code block. Should not happen.");
-                        log.warn("Key : {}", key);
-                        id = ontologyProvider.getOntologyId(key);
-                    }
-
-                } else {
-                    log.warn("Entering deprecated code block. Should not happen.");
-                    log.warn("Key : {}", key);
-                    id = ontologyProvider.getOntologyId(key);
-                }
-            }
+        if (key != null) {
 
             // add to index
-            managedOntologies.add(id);
+            managedOntologies.add(key);
             // // Always add sanitized version
             // managedOntologies.add(id.getVersionIRI() == null ? new OWLOntologyID(URIUtils.sanitizeID(id
             // .getOntologyIRI())) : new OWLOntologyID(URIUtils.sanitizeID(id.getOntologyIRI()),
@@ -203,13 +175,12 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
             // Note that imported ontologies are not considered as managed! TODO should we change this?
             log.debug("Add ontology completed in {} ms.", (System.currentTimeMillis() - before));
             // fire the event
-            fireOntologyAdded(id);
+            fireOntologyAdded(key);
         }
         return key;
     }
 
-    @Override
-    public synchronized void addOntology(Origin<?> origin) throws UnmodifiableOntologyCollectorException {
+    private synchronized void addOntology(Origin<?> origin) throws UnmodifiableOntologyCollectorException {
         if (origin == null) throw new IllegalArgumentException("Origin cannot be null.");
         Object ref = origin.getReference();
         if (ref instanceof IRI) try {

@@ -36,7 +36,7 @@ import java.util.Set;
  * @author alexdma
  * 
  */
-public interface OntologyInputSource<O> {
+public interface OntologyInputSource<O> extends OriginOrInputSource {
 
     /**
      * Gets the ontology network resulting from the transitive closure of import statements on the root

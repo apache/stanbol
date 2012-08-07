@@ -34,6 +34,17 @@ public abstract class AbstractGenericInputSource<O> implements OntologyInputSour
 
     protected O rootOntology = null;
 
+    @Override
+    public OntologyInputSource<?> asInputSource() {
+        return this;
+    }
+
+    @Override
+    public Origin<?> asOrigin() {
+        throw new UnsupportedOperationException("Unsupported conversion from " + getClass() + " to "
+                                                + Origin.class);
+    }
+
     /**
      * This method is used to remind developers to bind a physical reference to the
      * {@link OntologyInputSource} if intending to do so.
@@ -85,6 +96,16 @@ public abstract class AbstractGenericInputSource<O> implements OntologyInputSour
     @Override
     public boolean hasRootOntology() {
         return rootOntology != null;
+    }
+
+    @Override
+    public boolean isInputSource() {
+        return true;
+    }
+
+    @Override
+    public boolean isOrigin() {
+        return false;
     }
 
     @Override

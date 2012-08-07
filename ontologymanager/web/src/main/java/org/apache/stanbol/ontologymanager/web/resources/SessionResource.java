@@ -362,7 +362,7 @@ public class SessionResource extends BaseStanbolResource {
                                             @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
-        Graph o = session.getOntology(IRI.create(ontologyId), Graph.class, merge, prefix);
+        Graph o = session.getOntology(OntologyUtils.decode(ontologyId), Graph.class, merge, prefix);
         ResponseBuilder rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -392,11 +392,12 @@ public class SessionResource extends BaseStanbolResource {
         if (session == null) rb = Response.status(NOT_FOUND);
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
+            OWLOntologyID id = OntologyUtils.decode(ontologyId);
             if (merge) {
-                Graph g = session.getOntology(IRI.create(ontologyId), Graph.class, merge, prefix);
+                Graph g = session.getOntology(id, Graph.class, merge, prefix);
                 rb = (g != null) ? Response.ok(g) : Response.status(NOT_FOUND);
             } else {
-                OWLOntology o = session.getOntology(IRI.create(ontologyId), OWLOntology.class, merge, prefix);
+                OWLOntology o = session.getOntology(id, OWLOntology.class, merge, prefix);
                 rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
             }
         }
@@ -426,7 +427,8 @@ public class SessionResource extends BaseStanbolResource {
                                           @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
-        OWLOntology o = session.getOntology(IRI.create(ontologyId), OWLOntology.class, merge, prefix);
+        OWLOntology o = session.getOntology(OntologyUtils.decode(ontologyId), OWLOntology.class, merge,
+            prefix);
         ResponseBuilder rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -442,7 +444,8 @@ public class SessionResource extends BaseStanbolResource {
         else if (ontologyId == null || ontologyId.isEmpty()) rb = Response.status(BAD_REQUEST);
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
-            OWLOntology o = session.getOntology(IRI.create(ontologyId), OWLOntology.class, false, prefix);
+            OWLOntology o = session.getOntology(OntologyUtils.decode(ontologyId), OWLOntology.class, false,
+                prefix);
             if (o == null) rb = Response.status(NOT_FOUND);
             else try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -527,8 +530,8 @@ public class SessionResource extends BaseStanbolResource {
             else // content = new BufferedInputStream(content);
             src = new GraphContentInputSource(content, mt, ontologyProvider.getStore());
             log.debug("SUCCESS parse with media type {}.", mt);
-            String key = session.addOntology(src);
-            if (key == null || key.isEmpty()) {
+            OWLOntologyID key = session.addOntology(src);
+            if (key == null || key.isAnonymous()) {
                 log.error("FAILED parse with media type {}.", mt);
                 throw new WebApplicationException(INTERNAL_SERVER_ERROR);
             }
@@ -536,7 +539,8 @@ public class SessionResource extends BaseStanbolResource {
             log.debug("SUCCESS add ontology to session {}.", session.getID());
             log.debug("Storage key : {}", key);
             String uri = // key.split("::")[1];
-            key.substring((ontologyProvider.getGraphPrefix() + "::").length());
+                    OntologyUtils.encode(key);
+//            uri = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
             URI created = null;
             if (uri != null && !uri.isEmpty()) {
                 created = getCreatedResource(uri);
@@ -687,13 +691,14 @@ public class SessionResource extends BaseStanbolResource {
             if (src != null) {
                 log.debug("Adding ontology from input source {}", src);
                 long b4add = System.currentTimeMillis();
-                String key = session.addOntology(src);
-                if (key == null || key.isEmpty()) throw new WebApplicationException(INTERNAL_SERVER_ERROR);
+                OWLOntologyID key = session.addOntology(src);
+                if (key == null || key.isAnonymous()) throw new WebApplicationException(INTERNAL_SERVER_ERROR);
                 // FIXME ugly but will have to do for the time being
                 log.debug("Addition done in {} ms.", System.currentTimeMillis() - b4add);
                 log.debug("Storage key : {}", key);
                 String uri = // key.split("::")[1];
-                key.substring((ontologyProvider.getGraphPrefix() + "::").length());
+                        OntologyUtils.encode(key);
+//                uri = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
                 if (uri != null && !uri.isEmpty()) rb = Response.seeOther(URI.create("/ontonet/session/"
                                                                                      + session.getID() + "/"
                                                                                      + uri));

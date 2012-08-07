@@ -35,7 +35,7 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
  * @param <R>
  *            the resource reference.
  */
-public class Origin<R> {
+public class Origin<R> implements OriginOrInputSource {
 
     /**
      * Creates a new Origin for a resource that can be retrieved by dereferencing the given IRI as an URL.
@@ -90,6 +90,17 @@ public class Origin<R> {
     }
 
     @Override
+    public OntologyInputSource<?> asInputSource() {
+        throw new UnsupportedOperationException("Unsupported conversion from " + getClass() + " to "
+                                                + OntologyInputSource.class);
+    }
+
+    @Override
+    public Origin<?> asOrigin() {
+        return this;
+    }
+
+    @Override
     public boolean equals(Object arg0) {
         if (arg0 == null) return false;
         if (!(arg0 instanceof Origin<?>)) return false;
@@ -103,6 +114,16 @@ public class Origin<R> {
      */
     public R getReference() {
         return ref;
+    }
+
+    @Override
+    public boolean isInputSource() {
+        return false;
+    }
+
+    @Override
+    public boolean isOrigin() {
+        return true;
     }
 
     @Override

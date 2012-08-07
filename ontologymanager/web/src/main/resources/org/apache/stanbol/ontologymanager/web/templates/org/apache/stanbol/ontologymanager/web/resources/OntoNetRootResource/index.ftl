@@ -26,9 +26,9 @@
   
 	<span style="font-style:italic">From here you can reach the following sub-endpoints:</span>
 	<ul>
-	  <li><a href="${it.publicBaseUri}ontonet/ontology" title="Apache Stanbol OntoNet Scope Manager">Scope Manager</a></li>
-	  <li><a href="${it.publicBaseUri}ontonet/session" title="Apache Stanbol OntoNet Session Manager">Session Manager</a></li>
-	  <li><a href="${it.publicBaseUri}ontonet/registry" title="Apache Stanbol OntoNet Ontology Libraries">Ontology Libraries</a></li>
+	  <li><b><a href="${it.publicBaseUri}ontonet/ontology" title="Apache Stanbol OntoNet Scope Manager">Scope Manager</a></b></li>
+	  <li><b><a href="${it.publicBaseUri}ontonet/session" title="Apache Stanbol OntoNet Session Manager">Session Manager</a></b></li>
+	  <li><b><a href="${it.publicBaseUri}ontonet/registry" title="Apache Stanbol OntoNet Ontology Libraries">Ontology Libraries</a></b></li>
 	</ul>
 	
     <div class="panel" id="webview"> 

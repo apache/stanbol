@@ -89,9 +89,9 @@ public class TestOntologyNetworkPersistence {
 
         // Load the Peanuts characters_all ontology (has 2 import levels)
         InputStream data = getClass().getResourceAsStream("/ontologies/characters_all.owl");
-        String key = ontologyProvider.loadInStore(data, SupportedFormat.RDF_XML, false);
+        OWLOntologyID key = ontologyProvider.loadInStore(data, SupportedFormat.RDF_XML, false);
         assertNotNull(key);
-        assertFalse(key.isEmpty());
+        assertFalse(key.isAnonymous());
 
         /*
          * characters_all, main, minor + mockfoaf (note: imports are available only because the xml:base is
@@ -141,9 +141,9 @@ public class TestOntologyNetworkPersistence {
         // Get the fake FOAF and load it into the ontology provider
         InputStream data = getClass().getResourceAsStream("/ontologies/mockfoaf.rdf");
         // Keep track of its storage key
-        String key = ontologyProvider.loadInStore(data, SupportedFormat.RDF_XML, false);
+        OWLOntologyID key = ontologyProvider.loadInStore(data, SupportedFormat.RDF_XML, false);
         assertNotNull(key);
-        assertFalse(key.isEmpty());
+        assertFalse(key.isAnonymous());
 
         // Retrieve the stored fake FOAF
         assertEquals(1, ontologyProvider.getPublicKeys().size());
@@ -153,19 +153,21 @@ public class TestOntologyNetworkPersistence {
         assertEquals(foaf, id);
 
         // Check there is a storage key for the (real) ID of the FOAF ontology
-        key = ontologyProvider.getKey(foaf);
-        assertNotNull(key);
-        assertFalse(key.isEmpty());
+//        key = ontologyProvider.getKey(foaf);
+//        assertNotNull(key);
+//        assertFalse(key.isAnonymous());
+        assertTrue(ontologyProvider.hasOntology(foaf));
 
         log.info("Stanbol going down...");
         resetOntologyProvider(); // but keep the TcProvider
         assertEquals(1, ontologyProvider.getPublicKeys().size());
 
         // Check again for the FOAF key
-        key = ontologyProvider.getKey(foaf);
-        assertNotNull(key);
-        assertFalse(key.isEmpty());
-
+//        key = ontologyProvider.getKey(foaf);
+//        assertNotNull(key);
+//        assertFalse(key.isAnonymous());
+        assertTrue(ontologyProvider.hasOntology(foaf));
+        
         // The OWL API implements OWLOntology#equals()
         assertEquals(o1, ontologyProvider.getStoredOntology(key, OWLOntology.class, false));
     }

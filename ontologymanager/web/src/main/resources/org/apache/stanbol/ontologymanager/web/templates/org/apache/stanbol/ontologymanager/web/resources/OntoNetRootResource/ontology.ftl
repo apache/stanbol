@@ -17,10 +17,30 @@
 <#import "/imports/common.ftl" as common>
 <#escape x as x?html>
 <@common.page title="Ontology Manager : Ontology Detail" hasrestapi=false>	
- <div class="panel">
-<pre>
-${it.result}
-</pre>
- </div>
-  </@common.page>
+
+  <div class="panel">
+    <div>
+      Aliases:
+      <ul>
+      <#list it.aliases as alias>
+        <li>${alias}</li>
+      </#list>
+      </ul>
+        
+      Handles:
+      <ul>
+      <#list it.scopeHandles as handle>
+        <li>${handle}</li>
+      </#list>
+      <#list it.sessionHandles as handle>
+        <li>Session ${handle}</li>
+      </#list>
+      </ul>
+    </div>
+    <#--
+    <pre>${it.result}</pre>
+    -->
+  </div>
+
+</@common.page>
 </#escape>

@@ -36,6 +36,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyNetworkMultiplexer;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeEventListener;
@@ -205,6 +206,7 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
         // Add listeners
         if (ontologyProvider instanceof SessionListener) this
                 .addSessionListener((SessionListener) ontologyProvider);
+        this.addSessionListener(ontologyProvider.getOntologyNetworkDescriptor());
 
         if (onManager != null) onManager.addScopeRegistrationListener(this);
 
@@ -264,9 +266,12 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
         // Have the ontology provider listen to ontology events
         if (ontologyProvider instanceof OntologyCollectorListener) session
                 .addOntologyCollectorListener((OntologyCollectorListener) ontologyProvider);
-        else session.addOntologyCollectorListener(ontologyProvider.getOntologyNetworkDescriptor());
         if (ontologyProvider instanceof SessionListener) session
                 .addSessionListener((SessionListener) ontologyProvider);
+
+        OntologyNetworkMultiplexer multiplexer = ontologyProvider.getOntologyNetworkDescriptor();
+        session.addOntologyCollectorListener(multiplexer);
+        session.addSessionListener(multiplexer);
 
         addSession(session);
         fireSessionCreated(session);
@@ -299,35 +304,22 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
                 fireSessionDestroyed(ses);
             }
         } catch (NonReferenceableSessionException e) {
-            log.warn("Tried to kick a dead horse on session " + sessionID
-                     + " which was already in a zombie state.", e);
+            log.warn("Tried to kick a dead horse on session \"{}\" which was already in a zombie state.",
+                sessionID);
         }
     }
 
     protected void fireSessionCreated(Session session) {
-        SessionEvent e;
-        try {
-            e = new SessionEvent(session, OperationType.CREATE);
-            for (SessionListener l : listeners)
-                l.sessionChanged(e);
-        } catch (Exception e1) {
-            log.error("An error occurred while attempting to fire session creation event for session "
-                      + session.getID(), e1);
-            return;
-        }
+        SessionEvent e = new SessionEvent(session, OperationType.CREATE);
+        for (SessionListener l : listeners)
+            l.sessionChanged(e);
+
     }
 
     protected void fireSessionDestroyed(Session session) {
-        SessionEvent e;
-        try {
-            e = new SessionEvent(session, OperationType.KILL);
-            for (SessionListener l : listeners)
-                l.sessionChanged(e);
-        } catch (Exception e1) {
-            log.error("An error occurred while attempting to fire session destruction event for session "
-                      + session.getID(), e1);
-            return;
-        }
+        SessionEvent e = new SessionEvent(session, OperationType.KILL);
+        for (SessionListener l : listeners)
+            l.sessionChanged(e);
     }
 
     @Override

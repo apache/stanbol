@@ -394,14 +394,13 @@ public class ScopeResource extends BaseStanbolResource {
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
             Graph o = null;
-            IRI ontologyIri = IRI.create(ontologyId);
+            OWLOntologyID id = OntologyUtils.decode(ontologyId);
             OntologySpace spc = scope.getCustomSpace();
-            if (spc != null && spc.hasOntology(ontologyIri)) {
-                o = spc.getOntology(ontologyIri, Graph.class, merge, prefix);
+            if (spc != null && spc.hasOntology(id)) {
+                o = spc.getOntology(id, Graph.class, merge, prefix);
             } else {
                 spc = scope.getCoreSpace();
-                if (spc != null && spc.hasOntology(ontologyIri)) o = spc.getOntology(ontologyIri,
-                    Graph.class, merge, prefix);
+                if (spc != null && spc.hasOntology(id)) o = spc.getOntology(id, Graph.class, merge, prefix);
             }
             if (o == null) rb = Response.status(NOT_FOUND);
             else rb = Response.ok(o);
@@ -437,14 +436,14 @@ public class ScopeResource extends BaseStanbolResource {
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
             OWLOntology o = null;
-            IRI ontologyIri = IRI.create(ontologyId);
+            OWLOntologyID id = OntologyUtils.decode(ontologyId);
             OntologySpace spc = scope.getCustomSpace();
-            if (spc != null && spc.hasOntology(ontologyIri)) {
-                o = spc.getOntology(ontologyIri, OWLOntology.class, merge, prefix);
+            if (spc != null && spc.hasOntology(id)) {
+                o = spc.getOntology(id, OWLOntology.class, merge, prefix);
             } else {
                 spc = scope.getCoreSpace();
-                if (spc != null && spc.hasOntology(ontologyIri)) o = spc.getOntology(ontologyIri,
-                    OWLOntology.class, merge, prefix);
+                if (spc != null && spc.hasOntology(id)) o = spc.getOntology(id, OWLOntology.class, merge,
+                    prefix);
             }
             if (o == null) rb = Response.status(NOT_FOUND);
             else rb = Response.ok(o);
@@ -541,7 +540,7 @@ public class ScopeResource extends BaseStanbolResource {
         else try {
             MediaType mt = headers.getMediaType();
             log.debug("POST content claimed to be of type {}.", mt);
-            String key = scope.getCustomSpace().addOntology(
+            OWLOntologyID key = scope.getCustomSpace().addOntology(
             /*
              * For the time being, REST services operate in-memory (i.e. no TcProvider is supplied to the
              * input source). This means that only the final processed graph is stored.
@@ -549,14 +548,15 @@ public class ScopeResource extends BaseStanbolResource {
              * TODO : we might find a reason to change that in the future.
              */
             new GraphContentInputSource(content, mt.toString(), ontologyProvider.getStore()));
-            if (key == null || key.isEmpty()) {
+            if (key == null || key.isAnonymous()) {
                 log.error("FAILED parse with media type {}.", mt);
                 throw new WebApplicationException(INTERNAL_SERVER_ERROR);
             }
             // FIXME ugly but will have to do for the time being
             log.debug("SUCCESS parse with media type {}.", mt);
             String uri = // key.split("::")[1];
-            key.substring((ontologyProvider.getGraphPrefix() + "::").length());
+                    OntologyUtils.encode(key);
+//            uri = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
             URI created = null;
             if (uri != null && !uri.isEmpty()) {
                 created = getCreatedResource(uri);
@@ -689,11 +689,12 @@ public class ScopeResource extends BaseStanbolResource {
             }
 
             if (src != null) {
-                String key = scope.getCustomSpace().addOntology(src);
-                if (key == null || key.isEmpty()) throw new WebApplicationException(INTERNAL_SERVER_ERROR);
+                OWLOntologyID key = scope.getCustomSpace().addOntology(src);
+                if (key == null || key.isAnonymous()) throw new WebApplicationException(INTERNAL_SERVER_ERROR);
                 // FIXME ugly but will have to do for the time being
                 String uri = // key.split("::")[1];
-                key.substring((ontologyProvider.getGraphPrefix() + "::").length());
+               OntologyUtils.encode(key);
+//                        uri =  uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
                 if (uri != null && !uri.isEmpty()) {
                     rb = Response.seeOther(URI.create("/ontonet/ontology/" + scope.getID() + "/" + uri)/*
                                                                                                         * getCreatedResource

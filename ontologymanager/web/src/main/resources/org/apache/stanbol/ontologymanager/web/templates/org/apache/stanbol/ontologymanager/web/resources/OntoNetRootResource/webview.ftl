@@ -75,12 +75,14 @@
         <tr>
           <th width="90%">ID</th>
           <th width="5%">Triples</th>
+          <th width="5%">Aliases</th>
           <th width="5%">Direct handles</th>
         </tr>
         <#list ontologies as ontology>
           <tr>
             <td><a href="${it.publicBaseUri}ontonet/${it.stringForm(ontology)}">${it.stringForm(ontology)}</a></td>
             <td>${it.getSize(ontology)}</td>
+            <td>${it.getAliases(ontology)?size}</td>
             <td>${it.getHandles(ontology)?size}</td>
           </tr>
         </#list>

@@ -18,7 +18,9 @@ package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 
 /**
@@ -28,7 +30,25 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
  * @author alexdma.
  * 
  */
-public interface OntologyNetworkMultiplexer extends OntologyCollectorListener {
+public interface OntologyNetworkMultiplexer extends OntologyCollectorListener, SessionListener {
+
+    /**
+     * Not just the IDs because spaces and sessions can share identifiers.
+     * 
+     * @param publicKey
+     * @return
+     */
+    Set<OntologyCollector> getHandles(OWLOntologyID publicKey);
+
+    /**
+     * An utility method that computes the public key of an ontology given a canonical string form. The result
+     * also depends on the stored ontologies, hence the inclusion of this non-static method with this class.
+     * 
+     * @param stringForm
+     *            the string form of the public key.
+     * @return the public key.
+     */
+    OWLOntologyID getPublicKey(String stringForm);
 
     /**
      * Returns the public keys of all the stored ontologies it is aware of.
@@ -46,15 +66,5 @@ public interface OntologyNetworkMultiplexer extends OntologyCollectorListener {
      * @return the size in triples of the ontology.
      */
     int getSize(OWLOntologyID publicKey);
-
-    /**
-     * An utility method that computes the public key of an ontology given a canonical string form. The result
-     * also depends on the stored ontologies, hence the inclusion of this non-static method with this class.
-     * 
-     * @param stringForm
-     *            the string form of the public key.
-     * @return the public key.
-     */
-    OWLOntologyID getPublicKey(String stringForm);
 
 }

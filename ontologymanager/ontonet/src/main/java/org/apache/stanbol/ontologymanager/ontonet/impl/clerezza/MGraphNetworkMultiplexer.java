@@ -16,11 +16,14 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.APPENDED_TO;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.ENTRY;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_APPENDED;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_ONTOLOGY_IRI;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_VERSION_IRI;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_MANAGED_BY;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.MANAGES;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SESSION;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SIZE_IN_TRIPLES;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary._NS_STANBOL_INTERNAL;
 
@@ -40,6 +43,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyNetworkMu
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyID;
@@ -167,6 +171,23 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
         if (match == null) return new UriRef(OntologyUtils.encode(publicKey));
         else return match;
 
+    }
+
+    private UriRef getIRIforScope(String scopeId) {
+        // Use the Stanbol-internal namespace, so that the whole configuration can be ported.
+        return new UriRef(_NS_STANBOL_INTERNAL + OntologyScope.shortName + "/" + scopeId);
+    }
+
+    private UriRef getIRIforSession(Session session) {
+        // Use the Stanbol-internal namespace, so that the whole configuration can be ported.
+        return new UriRef(_NS_STANBOL_INTERNAL + Session.shortName + "/" + session.getID());
+    }
+
+    @Override
+    public OWLOntologyID getPublicKey(String stringForm) {
+        if (stringForm == null || stringForm.trim().isEmpty()) throw new IllegalArgumentException(
+                "String form must not be null or empty.");
+        return buildPublicKey(new UriRef(stringForm));
     }
 
     @Override
@@ -306,10 +327,89 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
     }
 
     @Override
-    public OWLOntologyID getPublicKey(String stringForm) {
-        if (stringForm == null || stringForm.trim().isEmpty()) throw new IllegalArgumentException(
-                "String form must not be null or empty.");
-        return buildPublicKey(new UriRef(stringForm));
+    public void scopeAppended(Session session, String scopeId) {
+        final UriRef sessionur = getIRIforSession(session), scopeur = getIRIforScope(scopeId);
+        if (sessionur == null || scopeur == null) throw new IllegalArgumentException(
+                "UriRefs for scope and session cannot be null.");
+        if (meta instanceof MGraph) synchronized (meta) {
+            meta.add(new TripleImpl(sessionur, HAS_APPENDED, scopeur));
+            meta.add(new TripleImpl(scopeur, APPENDED_TO, sessionur));
+        }
+    }
+
+    @Override
+    public void scopeDetached(Session session, String scopeId) {
+        final UriRef sessionur = getIRIforSession(session), scopeur = getIRIforScope(scopeId);
+        if (sessionur == null || scopeur == null) throw new IllegalArgumentException(
+                "UriRefs for scope and session cannot be null.");
+        if (meta instanceof MGraph) synchronized (meta) {
+            // TripleImpl implements equals() and hashCode() ...
+            meta.remove(new TripleImpl(sessionur, HAS_APPENDED, scopeur));
+            meta.remove(new TripleImpl(scopeur, APPENDED_TO, sessionur));
+        }
+    }
+
+    @Override
+    public void sessionChanged(SessionEvent event) {
+        switch (event.getOperationType()) {
+            case CREATE:
+                updateSessionRegistration(event.getSession());
+                break;
+            case KILL:
+                updateSessionUnregistration(event.getSession());
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void updateSessionRegistration(Session session) {
+        final UriRef sesur = getIRIforSession(session);
+        // If this method was called after a session rebuild, the following will have little to no effect.
+        synchronized (meta) {
+            // The only essential triple to add is typing
+            meta.add(new TripleImpl(sesur, RDF.type, SESSION));
+        }
+        log.debug("Ontology collector information triples added for session \"{}\".", sesur);
+    }
+
+    private void updateSessionUnregistration(Session session) {
+        long before = System.currentTimeMillis();
+        boolean removable = false, conflict = false;
+        final UriRef sessionur = getIRIforSession(session);
+        Set<Triple> removeUs = new HashSet<Triple>();
+        for (Iterator<Triple> it = meta.filter(sessionur, null, null); it.hasNext();) {
+            Triple t = it.next();
+            if (RDF.type.equals(t.getPredicate())) {
+                if (SESSION.equals(t.getObject())) removable = true;
+                else conflict = true;
+            }
+            removeUs.add(t);
+        }
+        if (!removable) {
+            log.error("Cannot write session deregistration to persistence:");
+            log.error("-- resource {}", sessionur);
+            log.error("-- is not typed as a {} in the meta-graph.", SESSION);
+        } else if (conflict) {
+            log.error("Conflict upon session deregistration:");
+            log.error("-- resource {}", sessionur);
+            log.error("-- has incompatible types in the meta-graph.");
+        } else {
+            log.debug("Removing all triples for session \"{}\".", session.getID());
+            Iterator<Triple> it;
+            for (it = meta.filter(null, null, sessionur); it.hasNext();)
+                removeUs.add(it.next());
+            for (it = meta.filter(sessionur, null, null); it.hasNext();)
+                removeUs.add(it.next());
+            meta.removeAll(removeUs);
+            log.debug("Done; removed {} triples in {} ms.", removeUs.size(), System.currentTimeMillis()
+                                                                             - before);
+        }
+    }
+
+    @Override
+    public Set<OntologyCollector> getHandles(OWLOntologyID publicKey) {
+        throw new UnsupportedOperationException("Not implemented yet.");
     }
 
 }
