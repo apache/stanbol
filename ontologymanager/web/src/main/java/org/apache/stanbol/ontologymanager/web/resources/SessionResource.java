@@ -539,8 +539,8 @@ public class SessionResource extends BaseStanbolResource {
             log.debug("SUCCESS add ontology to session {}.", session.getID());
             log.debug("Storage key : {}", key);
             String uri = // key.split("::")[1];
-                    OntologyUtils.encode(key);
-//            uri = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
+            OntologyUtils.encode(key);
+            // uri = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
             URI created = null;
             if (uri != null && !uri.isEmpty()) {
                 created = getCreatedResource(uri);
@@ -609,21 +609,27 @@ public class SessionResource extends BaseStanbolResource {
             if (bpart instanceof FormDataBodyPart) {
                 FormDataBodyPart dbp = (FormDataBodyPart) bpart;
                 String name = dbp.getName();
+                log.debug("Detected form parameter \"{}\".", name);
                 if (name.equals("file")) {
                     file = bpart.getEntityAs(File.class);
                 } else {
                     String value = dbp.getValue();
-                    if (name.equals("format") && !value.equals("auto")) format = value;
-                    else if (name.equals("url")) try {
+                    if (name.equals("format") && !value.equals("auto")) {
+                        log.debug(" -- Expected format : {}", value);
+                        format = value;
+                    } else if (name.equals("url")) try {
                         URI.create(value); // To throw 400 if malformed.
                         location = IRI.create(value);
+                        log.debug(" -- Will load ontology from URL : {}", location);
                     } catch (Exception ex) {
                         log.error("Malformed IRI for " + value, ex);
                         throw new WebApplicationException(ex, BAD_REQUEST);
                     }
                     else if (name.equals("library") && !"null".equals(value)) try {
+                        log.debug(" -- Library ID : {}", value);
                         URI.create(value); // To throw 400 if malformed.
                         library = IRI.create(value);
+                        log.debug(" ---- (is well-formed URI)");
                     } catch (Exception ex) {
                         log.error("Malformed IRI for " + value, ex);
                         throw new WebApplicationException(ex, BAD_REQUEST);
@@ -677,7 +683,10 @@ public class SessionResource extends BaseStanbolResource {
                 }
             } else if (library != null) { // This comes last, since it will most likely have a value.
                 try {
+                    long beforeLib = System.currentTimeMillis();
+                    log.debug("Creating library source for {}", library);
                     src = new LibrarySource(library, regMgr);
+                    log.debug("Library source created in {} ms.", System.currentTimeMillis() - beforeLib);
                 } catch (Exception e) {
                     log.error("Failed to load ontology library " + library, e);
                     throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
@@ -697,8 +706,8 @@ public class SessionResource extends BaseStanbolResource {
                 log.debug("Addition done in {} ms.", System.currentTimeMillis() - b4add);
                 log.debug("Storage key : {}", key);
                 String uri = // key.split("::")[1];
-                        OntologyUtils.encode(key);
-//                uri = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
+                OntologyUtils.encode(key);
+                // uri = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
                 if (uri != null && !uri.isEmpty()) rb = Response.seeOther(URI.create("/ontonet/session/"
                                                                                      + session.getID() + "/"
                                                                                      + uri));
