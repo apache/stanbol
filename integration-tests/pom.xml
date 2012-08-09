@@ -119,7 +119,7 @@
             <server.ready.path.3>/factstore:What is the FactStore</server.ready.path.3>
             <server.ready.path.4>/contenthub:Recently uploaded Content Items</server.ready.path.4>
             <server.ready.path.5>/entityhub:The RESTful API of the Entityhub</server.ready.path.5>
-            <server.ready.path.6>/ontonet:Apache Stanbol OntoNet</server.ready.path.6>
+            <server.ready.path.6>/ontonet:Apache Stanbol OntoNet:Accept:text/html</server.ready.path.6>
             <server.ready.path.7>/reasoners:The Stanbol Reasoners provides</server.ready.path.7>
           </systemPropertyVariables>
           <excludes>
