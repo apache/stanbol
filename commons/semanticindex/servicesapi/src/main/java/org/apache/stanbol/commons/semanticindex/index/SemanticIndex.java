@@ -25,7 +25,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * A Semantic Index for Items
- *
+ * 
  * @param <Item>
  */
 public interface SemanticIndex<Item> {
@@ -46,6 +46,12 @@ public interface SemanticIndex<Item> {
     public static final String PROP_REVISION = "Semantic-Index-Revision";
 
     /**
+     * Epoch property for a Semantic Index. With this property, the epoch of the Semantic Index is kept. When
+     * the epoch of the Indexing Source, a reindexing must be performed in the Semantic Index.
+     */
+    public static final String PROP_EPOCH = "Semantic-Index-Epoch";
+
+    /**
      * State property for a Semantic Index
      */
     public static final String PROP_STATE = "Semantic-Index-State";
@@ -60,10 +66,11 @@ public interface SemanticIndex<Item> {
 
     /**
      * The type of Items indexed in this semantic Index
+     * 
      * @return the java {@link Class} of the Items provided by this index
      */
     Class<Item> getIntdexType();
-    
+
     /**
      * The description for the Semantic Index. The same as configured by the {@link #PROP_DESCRIPTION}
      * property in the OSGI component configuration
@@ -145,10 +152,9 @@ public interface SemanticIndex<Item> {
     Map<String,Object> getFieldProperties(String name) throws IndexException;
 
     /**
-     * Getter for the RESTful search interfaces supported by this semantic index. 
-     * The keys represent the types of the RESTful Interfaces. 
-     * See the {@link EndpointTypeEnum} enumeration for knows keys. The value is the
-     * URL of that service relative to to the Stanbol base URI
+     * Getter for the RESTful search interfaces supported by this semantic index. The keys represent the types
+     * of the RESTful Interfaces. See the {@link EndpointTypeEnum} enumeration for knows keys. The value is
+     * the URL of that service relative to to the Stanbol base URI
      * 
      * @return the RESTful search interfaces supported by this semantic index.
      */
@@ -163,9 +169,8 @@ public interface SemanticIndex<Item> {
      * <li> {@link Constants#OBJECTCLASS} = {@link Class#getName()}
      * </ul>
      * 
-     * @return the Java search APIs supported by this semantic index. 
-     * Also registered as OSGI services. The key is equals to the
-     * {@link Class#getName()} and {@link Constants#OBJECTCLASS}.
+     * @return the Java search APIs supported by this semantic index. Also registered as OSGI services. The
+     *         key is equals to the {@link Class#getName()} and {@link Constants#OBJECTCLASS}.
      */
     Map<String,ServiceReference> getSearchEndPoints();
 }

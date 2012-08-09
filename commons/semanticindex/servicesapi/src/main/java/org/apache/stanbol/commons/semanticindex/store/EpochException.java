@@ -18,6 +18,8 @@ public class EpochException extends RuntimeException {
     public EpochException(IndexingSource<?> source, long activeEpoch, long requestedEpoch) {
         super(String.format("The Epoch %s was requested but the %s '%s' uses %s as active Epoch",
             requestedEpoch, source.getClass().getSimpleName(), source.getName(), activeEpoch));
+        this.requestedEpoch = requestedEpoch;
+        this.activeEpoch = activeEpoch;
     }
 
     public long getRequestEpoch() {
