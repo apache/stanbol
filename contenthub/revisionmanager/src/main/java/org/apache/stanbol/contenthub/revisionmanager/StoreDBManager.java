@@ -60,6 +60,7 @@ public class StoreDBManager {
 
     @Activate
     protected void activate(ComponentContext componentContext) throws StoreException {
+        System.setProperty("derby.language.statementCacheSize", "0");
         String stanbolHome = componentContext.getBundleContext().getProperty("sling.home");
         DB_URL = "jdbc:derby:" + stanbolHome + "/contenthub/store/revisions;create=true";
         // initialize the epoch table

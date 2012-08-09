@@ -91,9 +91,9 @@ import org.slf4j.LoggerFactory;
  * suitable with the types of the parts.
  * </p>
  * <p>
- * Revisions of {@link ContentItem}s submitted to this store is managed through the
- * {@link FileRevisionManager}. Once a document added, updated or deleted the revision of the
- * {@link ContentItem} is set as {@link System#currentTimeMillis()}.
+ * Revisions of {@link ContentItem}s submitted to this store is managed through the {@link RevisionManager}.
+ * Once a document added, updated or deleted the revision of the {@link ContentItem} is set as
+ * {@link System#currentTimeMillis()}.
  * </p>
  * <p>
  * To be able to populate the HTML interface, this implementation also provides additional metadata regarding
@@ -213,8 +213,9 @@ public class FileStore implements Store<ContentItem> {
      * 
      * @param name
      */
-    public FileStore(String name) {
+    public FileStore(String name, RevisionManager revisionManager) {
         this.name = name;
+        this.revisionManager = revisionManager;
     }
 
     @Activate

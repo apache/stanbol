@@ -28,13 +28,10 @@ import java.sql.Statement;
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
-import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
 import org.apache.stanbol.contenthub.revisionmanager.StoreDBManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RunWith(SlingAnnotationsTestRunner.class)
 public class StoreDBManagerTest {
@@ -42,19 +39,11 @@ public class StoreDBManagerTest {
     private StoreDBManager dbManager;
 
     @TestReference
-    private RevisionManager revisionManager;
-
-    @TestReference
     private BundleContext bundleContext;
 
     @Test
     public void dbManagerTest() {
         assertNotNull("Expecting StoreDBManager to be injected by Sling test runner", dbManager);
-    }
-
-    @Test
-    public void dbRevisionManagerTest() {
-        assertNotNull("Expecting RevisionManager to be injected by Sling test runner", revisionManager);
     }
 
     @Test

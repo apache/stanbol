@@ -72,7 +72,7 @@ public class LDPathSemanticIndexTest {
 
     private static Logger logger = LoggerFactory.getLogger(LDPathSemanticIndexTest.class);
 
-    private static final int TESTCOUNT = 16;
+    private static final int TESTCOUNT = 15;
 
     @TestReference
     private LDPathSemanticIndexManager ldPathSemanticIndexManager;
@@ -89,8 +89,6 @@ public class LDPathSemanticIndexTest {
     @TestReference
     private EnhancementJobManager jobManager;
 
-    private Store<ContentItem> fileStore;
-
     @TestReference
     private BundleContext bundleContext;
 
@@ -98,6 +96,8 @@ public class LDPathSemanticIndexTest {
     private static SolrServer solrServer;
     private static String pid;
     private static int counter = 0;
+
+    private Store<ContentItem> store;
 
     @Before
     public void before() throws IndexManagementException, IndexException, InterruptedException, IOException {
@@ -112,10 +112,10 @@ public class LDPathSemanticIndexTest {
             semanticIndex = (LDPathSemanticIndex) tempSemanticIndex;
             solrServer = semanticIndex.getServer();
         }
-        if (fileStore == null) {
+        if (store == null) {
             if (bundleContext != null) {
-                fileStore = getContenthubStore();
-                if (fileStore == null) {
+                store = getContenthubStore();
+                if (store == null) {
                     throw new IllegalStateException("Null Store");
                 }
             } else {
@@ -375,50 +375,6 @@ public class LDPathSemanticIndexTest {
             query = "place_entities:\"http://dbpedia.org/resource/Indiana\"";
             sdl = solrSearch.search(query, name).getResults();
             assertNotNull("Result must not be null for query " + query, sdl);
-
-        } finally {
-            ldPathSemanticIndexManager.removeIndex(pid);
-        }
-    }
-
-    @Test
-    public void epochChangeTest() throws IndexManagementException,
-                                 InterruptedException,
-                                 IOException,
-                                 IndexException,
-                                 StoreException,
-                                 SearchException {
-        String name = "test_index_name_for_epoch";
-        String program = "@prefix dbp-ont: <http://dbpedia.org/ontology/>; person_entities = .[rdf:type is dbp-ont:Person]:: xsd:anyURI (termVectors=\"true\");";
-        Properties props = new Properties();
-        props.put(LDPathSemanticIndex.PROP_NAME, name);
-        props.put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM, program);
-        props.put(LDPathSemanticIndex.PROP_DESCRIPTION, "epoch program");
-        props.put(LDPathSemanticIndex.PROP_INDEX_CONTENT, false);
-        props.put(LDPathSemanticIndex.PROP_BATCH_SIZE, 10);
-        props.put(LDPathSemanticIndex.PROP_STORE_CHECK_PERIOD, 1);
-        props.put(LDPathSemanticIndex.PROP_SOLR_CHECK_TIME, 5);
-        String pid = ldPathSemanticIndexManager.createIndex(props);
-
-        try {
-            SemanticIndex<ContentItem> semanticIndex = getLDPathSemanticIndex(name);
-            ContentItem ci = contentItemFactory.createContentItem(new StringSource(
-                    "Michael Jackson is a very famous person, and he was born in Indiana."));
-            fileStore.put(ci);
-            fileStore.removeAll();
-
-            // make sure that the index will perform reindexing
-            Thread.sleep(1500);
-
-            // index ci to new semantic index
-            while (semanticIndex.getState() != IndexState.ACTIVE) {
-                Thread.sleep(500);
-            }
-
-            String query = "*:*";
-            SolrDocumentList sdl = solrSearch.search(query, name).getResults();
-            assertNotNull("Result must not be null for query " + query, sdl);
-            assertTrue("There should be no indexed item", sdl.size() == 0);
 
         } finally {
             ldPathSemanticIndexManager.removeIndex(pid);

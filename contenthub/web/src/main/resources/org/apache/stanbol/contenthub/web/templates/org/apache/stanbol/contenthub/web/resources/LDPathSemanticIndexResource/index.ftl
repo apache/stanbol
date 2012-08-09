@@ -29,7 +29,8 @@
           <th>Description</th>
           <th>Index Content</th>
           <th>Batch Size</th>
-          <th>Store Check Period</th>
+          <th>Indexing Source Name</th>
+          <th>Indexing Source Check Period</th>
           <th>Solr Check Time</th>
           <th>Program</th>
         </tr>
@@ -74,8 +75,14 @@
     <p><input type="text" id="batchsizeText" value="10" /></p>
     
     <p>
-      <b>Store Check Period: </b>
-      <font size=1>(Time to check changes in the Contenthub  Store in second units)</font>
+      <b>Indexing Source Name: </b>
+      <font size=1>(Name of the ndexingSource instance to be checked for updates)</font>
+    </p>
+    <p><input type="text" id="indexingSourceNameText" value="contenthubFileStore" /></p>
+    
+    <p>
+      <b>Indexing Source Check Period: </b>
+      <font size=1>(Time to check changes in the IndexingSource in second units)</font>
     </p>
     <p><input type="text" id="storecheckperiodText" value="20" /></p>
     
@@ -113,6 +120,7 @@
           var description = $.trim($("#descriptionText").val());
           var indexContent = $("#indexContentCheckBox").is(':checked');
           var batchsize = $.trim($("#batchsizeText").val());
+          var indexingSource = $.trim($("#indexingSourceNameText").val());
           var storecheckperiod = $.trim($("#storecheckperiodText").val());
           var solrchecktime = $.trim($("#solrchecktimeText").val());
           var ranking = $.trim($("#rankingText").val());
@@ -127,7 +135,7 @@
           $.ajax({
               url: "${it.publicBaseUri}contenthub/index/ldpath",
               type: "POST",
-              data: { name: name, description: description, indexContent: indexContent, batchsize: batchsize, storecheckperiod: storecheckperiod, solrchecktime: solrchecktime, ranking: ranking, program: program },
+              data: { name: name, description: description, indexContent: indexContent, batchSize: batchsize, indexingSourceName: indexingSource, indexingSourceCheckPeriod: storecheckperiod, solrCheckTime: solrchecktime, ranking: ranking, program: program },
               success: function() {
                   $(".waitingDiv").hide();
                   $("#submittedPrograms").load("${it.publicBaseUri}contenthub/index/ldpath #submittedPrograms>table");
@@ -135,6 +143,7 @@
                   $("#descriptionText").attr("value", "");
                   $("#indexContentCheckBox").attr("checked", true);
                   $("#batchsizeText").attr("value", "10");
+                  $("#indexingSourceNameText").attr("value", "contenthubFileStore");
                   $("#storecheckperiodText").attr("value", "20");
                   $("#solrchecktimeText").attr("value", "5");
                   $("#rankingText").attr("value", "0");

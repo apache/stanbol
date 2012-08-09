@@ -130,7 +130,7 @@ public class LDPathSemanticIndexManager {
      * <ul>
      * <li>{@link LDPathSemanticIndex#PROP_INDEX_CONTENT}: {@code true}</li>
      * <li>{@link LDPathSemanticIndex#PROP_BATCH_SIZE}: 10</li>
-     * <li>{@link LDPathSemanticIndex#PROP_STORE_CHECK_PERIOD}: 10</li>
+     * <li>{@link LDPathSemanticIndex#PROP_INDEXING_SOURCE_CHECK_PERIOD}: 10</li>
      * <li>{@link LDPathSemanticIndex#PROP_SOLR_CHECK_TIME}: 5</li>
      * <li>{@link Constants#SERVICE_RANKING}: 0</li>
      * </ul>
@@ -175,7 +175,7 @@ public class LDPathSemanticIndexManager {
      * <ul>
      * <li>{@link LDPathSemanticIndex#PROP_INDEX_CONTENT}: {@code true}</li>
      * <li>{@link LDPathSemanticIndex#PROP_BATCH_SIZE}: 10</li>
-     * <li>{@link LDPathSemanticIndex#PROP_STORE_CHECK_PERIOD}: 10</li>
+     * <li>{@link LDPathSemanticIndex#PROP_INDEXING_SOURCE_CHECK_PERIOD}: 10</li>
      * <li>{@link LDPathSemanticIndex#PROP_SOLR_CHECK_TIME}: 5</li>
      * <li>{@link Constants#SERVICE_RANKING}: 0</li>
      * </ul>
@@ -251,8 +251,11 @@ public class LDPathSemanticIndexManager {
         if (indexMetadata.get(LDPathSemanticIndex.PROP_BATCH_SIZE) == null) {
             indexMetadata.put(LDPathSemanticIndex.PROP_BATCH_SIZE, 10);
         }
-        if (indexMetadata.get(LDPathSemanticIndex.PROP_STORE_CHECK_PERIOD) == null) {
-            indexMetadata.put(LDPathSemanticIndex.PROP_STORE_CHECK_PERIOD, 10);
+        if (indexMetadata.get(LDPathSemanticIndex.PROP_INDEXING_SOURCE_NAME) == null) {
+            indexMetadata.put(LDPathSemanticIndex.PROP_INDEXING_SOURCE_NAME, "contenthubFileStore");
+        }
+        if (indexMetadata.get(LDPathSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD) == null) {
+            indexMetadata.put(LDPathSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD, 10);
         }
         if (indexMetadata.get(LDPathSemanticIndex.PROP_SOLR_CHECK_TIME) == null) {
             indexMetadata.put(LDPathSemanticIndex.PROP_SOLR_CHECK_TIME, 5);

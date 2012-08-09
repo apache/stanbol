@@ -46,10 +46,12 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.commons.semanticindex.index.IndexException;
 import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
+import org.apache.stanbol.commons.semanticindex.store.IndexingSource;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex;
 import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndexManager;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,10 +108,13 @@ public class LDPathSemanticIndexResource extends BaseStanbolResource {
      * @param program
      *            LDPath program that will be used as a source to create the semantic index. Index fields and
      *            Solr specific configurations regarding those index fields are given in this parameter.
+     * @param indexContent
+     *            If this configuration is true plain text content of the {@link ContentItem} is also indexed
+     *            to be used in the full text search
      * @param batchsize
      *            Maximum number of changes to be returned
-     * @param storecheckperiod
-     *            Time to check changes in the Contenthub Store in second units
+     * @param indexingSourceCheckperiod
+     *            Time to check changes in the {@link IndexingSource} in second units
      * @param solrchecktime
      *            Maximum time in seconds to wait for the availability of the Solr Server
      * @param ranking
@@ -128,9 +133,10 @@ public class LDPathSemanticIndexResource extends BaseStanbolResource {
                                   @FormParam("description") String description,
                                   @FormParam("program") String program,
                                   @FormParam("indexContent") boolean indexContent,
-                                  @FormParam("batchsize") @DefaultValue("10") int batchsize,
-                                  @FormParam("storecheckperiod") @DefaultValue("10") int storecheckperiod,
-                                  @FormParam("solrchecktime") @DefaultValue("5") int solrchecktime,
+                                  @FormParam("batchSize") @DefaultValue("10") int batchsize,
+                                  @FormParam("indexingSourceName") @DefaultValue("contenthubFileStore") String indexingSourceName,
+                                  @FormParam("indexingSourceCheckPeriod") @DefaultValue("10") int indexingSourceCheckperiod,
+                                  @FormParam("solrCheckTime") @DefaultValue("5") int solrchecktime,
                                   @FormParam("ranking") @DefaultValue("0") int ranking,
                                   @Context ServletContext context,
                                   @Context HttpHeaders headers) throws IndexManagementException,
@@ -143,7 +149,8 @@ public class LDPathSemanticIndexResource extends BaseStanbolResource {
         parameters.put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM, program);
         parameters.put(LDPathSemanticIndex.PROP_INDEX_CONTENT, indexContent);
         parameters.put(LDPathSemanticIndex.PROP_BATCH_SIZE, batchsize);
-        parameters.put(LDPathSemanticIndex.PROP_STORE_CHECK_PERIOD, storecheckperiod);
+        parameters.put(LDPathSemanticIndex.PROP_INDEXING_SOURCE_NAME, indexingSourceName);
+        parameters.put(LDPathSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD, indexingSourceCheckperiod);
         parameters.put(LDPathSemanticIndex.PROP_SOLR_CHECK_TIME, solrchecktime);
         parameters.put(Constants.SERVICE_RANKING, ranking);
         programManager.createIndex(parameters);
@@ -164,8 +171,10 @@ public class LDPathSemanticIndexResource extends BaseStanbolResource {
             indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_DESCRIPTION).toString());
             indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_INDEX_CONTENT).toString());
             indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_BATCH_SIZE).toString());
-            indexMetadataMapValues
-                    .add(properties.get(LDPathSemanticIndex.PROP_STORE_CHECK_PERIOD).toString());
+            indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_INDEXING_SOURCE_NAME)
+                    .toString());
+            indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD)
+                    .toString());
             indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_SOLR_CHECK_TIME).toString());
             indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM).toString());
             indexMetadataMap.put(indexMetadata.getKey(), indexMetadataMapValues);

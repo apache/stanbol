@@ -18,9 +18,11 @@
       <b>name:</b> The name identifying the index<br>
       <b>description:</b> Description of the index<br>
       <b>program:</b> LDPath program that will be used as a source to create the semantic index. Index fields and Solr specific configurations regarding those index fields are given in this parameter.<br>
-      <b>batchsize:</b> Maximum number of changes to be returned<br>
-      <b>storecheckperiod:</b> Time to check changes in the Contenthub Store in second units<br>
-      <b>solrchecktime:</b> Maximum time in seconds to wait for the availability of the Solr Server<br>
+      <b>indexContent:</b> If this configuration is true plain text content of the ContentItem is also indexed to be used in the full text search
+      <b>batchSize:</b> Maximum number of changes to be returned<br>
+      <b>indexingSourceName:</b> Name of the IndexingSource instance to be checked for updates<br>
+      <b>indexingSourceCheckPeriod:</b> Time to check changes in the Contenthub Store in second units<br>
+      <b>solrCheckTime:</b> Maximum time in seconds to wait for the availability of the Solr Server<br>
       <b>ranking:</b> To be able to use other SemanticIndex implementations rather than this, Service Ranking property of other implementations should be set higher than of this one
     </td>
   </tr>

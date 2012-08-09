@@ -51,8 +51,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -77,12 +79,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.rdf.core.LiteralFactory;
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.commons.web.base.ContextHelper;
@@ -95,6 +101,8 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.osgi.framework.BundleContext;
@@ -198,7 +206,8 @@ public class StoreResource extends BaseStanbolResource {
         this.tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
         this.cif = ContextHelper.getServiceFromContext(ContentItemFactory.class, context);
         this.serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
-        this.enhancementJobManager = ContextHelper.getServiceFromContext(EnhancementJobManager.class, context);
+        this.enhancementJobManager = ContextHelper
+                .getServiceFromContext(EnhancementJobManager.class, context);
         this.store = getStoreFromBundleContext(bundleContext);
         if (this.store == null || this.cif == null || this.enhancementJobManager == null
             || this.serializer == null || this.tcManager == null) {
@@ -628,7 +637,26 @@ public class StoreResource extends BaseStanbolResource {
             ci = cif.createContentItem(new UriRef(contentURI),
                 new ByteArraySource(content, mediaType.toString()));
             if (constraints != null && !constraints.trim().equals("")) {
-                ci.addPart(FileStore.CONSTRAINTS_URI, cif.createBlob(new StringSource(constraints)));
+                MGraph g = new IndexedMGraph();
+                UriRef uri = ci.getUri();
+                JSONObject cons = new JSONObject(constraints);
+                @SuppressWarnings("unchecked")
+                Iterator<String> keys = cons.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    String predicate = NamespaceEnum.getFullName(key);
+                    if (key.equals(predicate)) {
+                        log.error("Undefined namespace in predicate: {}", predicate);
+                        throw new StoreException(String.format("Undefined namespace in predicate: %s",
+                            predicate));
+                    }
+                    JSONArray jsonArray = cons.getJSONArray(key);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        g.add(new TripleImpl(uri, new UriRef(predicate), LiteralFactory.getInstance()
+                                .createTypedLiteral(inferObjectType(jsonArray.get(i)))));
+                    }
+                }
+                ci.addPart(FileStore.CONSTRAINTS_URI, g);
             }
             if (title != null && !title.trim().equals("")) {
                 JSONObject htmlMetadata = new JSONObject();
@@ -643,6 +671,9 @@ public class StoreResource extends BaseStanbolResource {
         } catch (IOException e) {
             log.error("Failed to create the ContentItem", e);
             throw new StoreException("Failed to create the ContentItem", e);
+        } catch (JSONException e) {
+            log.error("Failed to create JSONObject from constraints: {}", constraints);
+            throw new StoreException("Failed to create JSONObject from constraints", e);
         }
         store.put(ci);
 
@@ -692,6 +723,28 @@ public class StoreResource extends BaseStanbolResource {
                                                                   URISyntaxException,
                                                                   StoreException {
         return createEnhanceAndRedirect(data, mediaType, contentURI, false, null, null, headers);
+    }
+
+    private Object inferObjectType(Object val) {
+        Object ret = null;
+        try {
+            ret = DateFormat.getInstance().parse(val.toString());
+        } catch (Exception e) {
+            try {
+                ret = Long.valueOf(val.toString());
+            } catch (Exception e1) {
+                try {
+                    ret = Double.valueOf(val.toString());
+                } catch (Exception e2) {
+                    try {
+                        ret = String.valueOf(val.toString());
+                    } catch (Exception e3) {}
+                }
+            }
+        }
+
+        if (ret == null) ret = val;
+        return ret;
     }
 
     /*
