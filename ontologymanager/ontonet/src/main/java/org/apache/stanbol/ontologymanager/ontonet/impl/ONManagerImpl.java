@@ -42,6 +42,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.MissingOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
@@ -523,18 +524,28 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
                 scope = createOntologyScope(scopeId, srcs);
             } catch (DuplicateIDException e) {
                 String dupe = e.getDuplicateID();
-                log.warn("Tried to rebuild existing scope \"{}\". Reusing.", dupe);
+                log.warn("Scope \"{}\" already exists and will be reused.", dupe);
                 scope = getScope(dupe);
             }
             OntologySpace custom = scope.getCustomSpace();
             // Register even if some ontologies were to fail to be restored afterwards.
             scopeMap.put(scopeId, scope);
-            for (OWLOntologyID key : struct.getCustomOntologyKeysForScope(scopeId)) {
-                log.debug("Custom ontology key : {}", key);
-                custom.addOntology(Origin.create(key)
-                // new GraphSource(key)
-                );
-            }
+            for (OWLOntologyID key : struct.getCustomOntologyKeysForScope(scopeId))
+                try {
+                    log.debug("Custom ontology key : {}", key);
+                    custom.addOntology(Origin.create(key)
+                    // new GraphSource(key)
+                    );
+                } catch (MissingOntologyException ex) {
+                    log.error(
+                        "Could not find an ontology with public key {} to be managed by scope \"{}\". Proceeding to next ontology.",
+                        key, scopeId);
+                    continue;
+                } catch (Exception ex) {
+                    log.error("Exception caught while trying to add ontology with public key " + key
+                              + " to rebuilt scope \"" + scopeId + "\". proceeding to next ontology", ex);
+                    continue;
+                }
             log.info("Scope \"{}\" rebuilt in {} ms.", scopeId, System.currentTimeMillis() - before);
         }
     }

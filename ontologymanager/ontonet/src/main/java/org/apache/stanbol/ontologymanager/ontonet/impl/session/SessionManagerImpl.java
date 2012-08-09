@@ -34,6 +34,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.collector.MissingOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyNetworkMultiplexer;
@@ -364,32 +365,46 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
         }
         OntologyNetworkConfiguration struct = ontologyProvider.getOntologyNetworkConfiguration();
         for (String sessionId : struct.getSessionIDs()) {
+            long before = System.currentTimeMillis();
+            log.debug("Rebuilding session with ID \"{}\"", sessionId);
             Session session;
             try {
                 session = createSession(sessionId);
-                // Register even if some ontologies were to fail to be restored afterwards.
-                sessionsByID.put(sessionId, session);
-                session.setActive(false); // Restored sessions are inactive at first.
-                for (OWLOntologyID key : struct.getOntologyKeysForSession(sessionId)) {
-                    session.addOntology(
-                    // new GraphSource(key)
-                    Origin.create(key)); // TODO use the public key instead!
-                }
-                for (String scopeId : struct.getAttachedScopes(sessionId)) {
-                    /*
-                     * The scope is attached by reference, so we won't have to bother checking if the scope
-                     * has been rebuilt by then (which could not happen if the SessionManager is being
-                     * activated first).
-                     */
-                    session.attachScope(scopeId);
-                }
             } catch (DuplicateSessionIDException e) {
                 log.warn("Session \"{}\" already exists and will be reused.", sessionId);
                 session = getSession(sessionId);
             } catch (SessionLimitException e) {
                 log.error("Cannot create session {}. Session limit of {} reached.", sessionId,
                     getActiveSessionLimit());
+                break;
             }
+            // Register even if some ontologies were to fail to be restored afterwards.
+            sessionsByID.put(sessionId, session);
+            session.setActive(false); // Restored sessions are inactive at first.
+            for (OWLOntologyID key : struct.getOntologyKeysForSession(sessionId))
+                try {
+                    session.addOntology(
+                    // new GraphSource(key)
+                    Origin.create(key));
+                } catch (MissingOntologyException ex) {
+                    log.error(
+                        "Could not find an ontology with public key {} to be managed by session \"{}\". Proceeding to next ontology.",
+                        key, sessionId);
+                    continue;
+                } catch (Exception ex) {
+                    log.error("Exception caught while trying to add ontology with public key " + key
+                              + " to rebuilt session \"" + sessionId + "\". Proceeding to next ontology.", ex);
+                    continue;
+                }
+            for (String scopeId : struct.getAttachedScopes(sessionId)) {
+                /*
+                 * The scope is attached by reference, so we won't have to bother checking if the scope has
+                 * been rebuilt by then (which could not happen if the SessionManager is being activated
+                 * first).
+                 */
+                session.attachScope(scopeId);
+            }
+            log.info("Session \"{}\" rebuilt in {} ms.", sessionId, System.currentTimeMillis() - before);
         }
     }
 

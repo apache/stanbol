@@ -17,7 +17,7 @@
 <#import "/imports/common.ftl" as common>
 
 <#escape x as x?html>
-  <@common.page title="${it.scope.ID} : Apache Stanbol OntoNet scope" hasrestapi=false>
+  <@common.page title="${it.scope.ID} : Apache Stanbol OntoNet scope" hasrestapi=true>
 	
 	<a href="${it.publicBaseUri}ontonet/ontology">Scope Manager</a> &gt; Scope <tt>${it.scope.ID}</tt>
 	
@@ -145,6 +145,8 @@
   </div>
   
     </div> <!-- web view -->
+    
+    <#include "restapi.ftl"> <!-- REST API-->
 
   <script language="JavaScript">
     

@@ -555,8 +555,8 @@ public class ScopeResource extends BaseStanbolResource {
             // FIXME ugly but will have to do for the time being
             log.debug("SUCCESS parse with media type {}.", mt);
             String uri = // key.split("::")[1];
-                    OntologyUtils.encode(key);
-//            uri = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
+            OntologyUtils.encode(key);
+            // uri = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
             URI created = null;
             if (uri != null && !uri.isEmpty()) {
                 created = getCreatedResource(uri);
@@ -587,15 +587,18 @@ public class ScopeResource extends BaseStanbolResource {
     @POST
     @Consumes(value = MediaType.TEXT_PLAIN)
     public Response manageOntology(String iri, @Context HttpHeaders headers) {
-        if (scope == null) return Response.status(NOT_FOUND).build();
-        try {
-            scope.getCustomSpace().addOntology(new RootOntologyIRISource(IRI.create(iri)));
+        ResponseBuilder rb;
+        if (scope == null) rb = Response.status(NOT_FOUND);
+        else try {
+            OWLOntologyID key = scope.getCustomSpace()
+                    .addOntology(new RootOntologyIRISource(IRI.create(iri)));
+            URI created = getCreatedResource(OntologyUtils.encode(key));
+            rb = Response.created(created);
         } catch (UnmodifiableOntologyCollectorException e) {
             throw new WebApplicationException(e, FORBIDDEN);
         } catch (OWLOntologyCreationException e) {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
-        ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -693,8 +696,8 @@ public class ScopeResource extends BaseStanbolResource {
                 if (key == null || key.isAnonymous()) throw new WebApplicationException(INTERNAL_SERVER_ERROR);
                 // FIXME ugly but will have to do for the time being
                 String uri = // key.split("::")[1];
-               OntologyUtils.encode(key);
-//                        uri =  uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
+                OntologyUtils.encode(key);
+                // uri = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
                 if (uri != null && !uri.isEmpty()) {
                     rb = Response.seeOther(URI.create("/ontonet/ontology/" + scope.getID() + "/" + uri)/*
                                                                                                         * getCreatedResource
