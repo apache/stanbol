@@ -17,7 +17,7 @@
 -->
 <bundles>
   <!-- The default data expected by the default configuration of Stanbol -->
-  <startLevel level="19">
+  <startLevel level="29">
     
     <!-- NER models -->
     <!-- NOTE: the English model woudl be also included in the 
