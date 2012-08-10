@@ -37,7 +37,7 @@ import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
@@ -96,11 +96,11 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     public OntologyScopeImpl(String id,
                              IRI namespace,
                              OntologySpaceFactory factory,
-                             OriginOrInputSource... coreOntologies) {
+                             OntologyInputSource<?>... coreOntologies) {
         setID(id);
-        setNamespace(namespace);
+        setDefaultNamespace(namespace);
         configureCoreSpace(factory);
-        for (OriginOrInputSource src : coreOntologies)
+        for (OntologyInputSource<?> src : coreOntologies)
             this.coreSpace.addOntology(src);
         // let's just lock it. Once the core space is done it's done.
         this.coreSpace.setUp();
@@ -135,6 +135,16 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
                 e);
         }
         this.customSpace.addOntologyCollectorListener(this);
+    }
+
+    @Override
+    public boolean equals(Object arg0) {
+        if (arg0 == null) return false;
+        if (!(arg0 instanceof OntologyScope)) return false;
+        OntologyScope sc = (OntologyScope) arg0;
+        return this.getID().equals(sc.getID()) && this.getDefaultNamespace().equals(sc.getDefaultNamespace())
+               && this.getCoreSpace().equals(sc.getCoreSpace())
+               && this.getCustomSpace().equals(sc.getCustomSpace());
     }
 
     @Override
@@ -382,8 +392,6 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
      *            only allows non-null and non-empty IRIs, with no query or fragment. Hash URIs are not
      *            allowed, slash URIs are preferred. If neither, a slash will be concatenated and a warning
      *            will be logged.
-     * 
-     * @see OntologyScope#setNamespace(IRI)
      */
     @Override
     public void setDefaultNamespace(IRI namespace) {

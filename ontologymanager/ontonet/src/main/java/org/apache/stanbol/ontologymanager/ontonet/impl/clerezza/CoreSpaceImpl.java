@@ -38,6 +38,17 @@ public class CoreSpaceImpl extends AbstractOntologySpaceImpl implements CoreOnto
         super(buildId(scopeID), namespace, SpaceType.CORE, ontologyProvider);
     }
 
+    @Override
+    public boolean equals(Object arg0) {
+        if (arg0 == null) return false;
+        if (!(arg0 instanceof CoreOntologySpace)) return false;
+        if (this == arg0) return true;
+        log.warn(
+            "{} only implements weak equality, i.e. managed ontologies are only checked by public key, not by content.",
+            getClass());
+        return super.equals(arg0);
+    }
+
     /**
      * When set up, a core space is write-locked.
      */

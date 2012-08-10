@@ -27,7 +27,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
@@ -110,10 +110,10 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
      * @param scopeID
      * @param rootSource
      */
-    private void configureSpace(OntologySpace s, String scopeID, OriginOrInputSource... ontologySources) {
+    private void configureSpace(OntologySpace s, String scopeID, OntologyInputSource<?>... ontologySources) {
         configureSpace(s, scopeID);
         if (ontologySources != null) try {
-            for (OriginOrInputSource src : ontologySources)
+            for (OntologyInputSource<?> src : ontologySources)
                 s.addOntology(src);
         } catch (UnmodifiableOntologyCollectorException e) {
             log.error("Ontology space " + s.getID() + " was found locked at creation time!", e);
@@ -122,14 +122,15 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     }
 
     @Override
-    public CoreOntologySpace createCoreOntologySpace(String scopeId, OriginOrInputSource... coreSources) {
+    public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?>... coreSources) {
         CoreOntologySpace s = new CoreSpaceImpl(scopeId, namespace, ontologyProvider);
         configureSpace(s, scopeId, coreSources);
         return s;
     }
 
     @Override
-    public CustomOntologySpace createCustomOntologySpace(String scopeId, OriginOrInputSource... customSources) {
+    public CustomOntologySpace createCustomOntologySpace(String scopeId,
+                                                         OntologyInputSource<?>... customSources) {
         CustomOntologySpace s = new CustomSpaceImpl(scopeId, namespace, ontologyProvider);
         configureSpace(s, scopeId, customSources);
         return s;
@@ -138,7 +139,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     @Override
     public OntologySpace createOntologySpace(String scopeId,
                                              SpaceType type,
-                                             OriginOrInputSource... ontologySources) {
+                                             OntologyInputSource<?>... ontologySources) {
         switch (type) {
             case CORE:
                 return createCoreOntologySpace(scopeId, ontologySources);

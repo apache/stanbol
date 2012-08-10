@@ -20,8 +20,8 @@ import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.onManag
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.parser;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.resetManagers;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.sessionManager;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_MANAGED_BY;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.MANAGES;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_MANAGED_BY_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.MANAGES_URIREF;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary._NS_STANBOL_INTERNAL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,6 +30,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -97,39 +98,35 @@ public class TestOntologyNetworkPersistence {
          * characters_all, main, minor + mockfoaf (note: imports are available only because the xml:base is
          * set to be the same as the import target)
          */
-        assertEquals(total, ontologyProvider.getPublicKeys().size());
+        assertEquals(total, ontologyProvider.listOntologies().size());
 
         // Check that each imported ontology is stored
-        oAll = ontologyProvider.getStoredOntology(ontologyProvider.getKey(all), OWLOntology.class, false);
+        oAll = ontologyProvider.getStoredOntology(all, OWLOntology.class, false);
         OWLOntologyID id = oAll.getOntologyID();
         assertNotNull(id);
         assertEquals(all, id);
-        oMain = ontologyProvider.getStoredOntology(ontologyProvider.getKey(main), OWLOntology.class, false);
+        oMain = ontologyProvider.getStoredOntology(main, OWLOntology.class, false);
         id = oMain.getOntologyID();
         assertNotNull(id);
         assertEquals(main, id);
-        oMinor = ontologyProvider.getStoredOntology(ontologyProvider.getKey(minor), OWLOntology.class, false);
+        oMinor = ontologyProvider.getStoredOntology(minor, OWLOntology.class, false);
         id = oMinor.getOntologyID();
         assertNotNull(id);
         assertEquals(minor, id);
-        oFoaf = ontologyProvider.getStoredOntology(ontologyProvider.getKey(foaf), OWLOntology.class, false);
+        oFoaf = ontologyProvider.getStoredOntology(foaf, OWLOntology.class, false);
         id = oFoaf.getOntologyID();
         assertNotNull(id);
         assertEquals(foaf, id);
 
         log.info("Stanbol going down...");
         resetOntologyProvider(); // but keep the TcProvider
-        assertEquals(total, ontologyProvider.getPublicKeys().size());
+        assertEquals(total, ontologyProvider.listOntologies().size());
 
         // The OWL API implements OWLOntology#equals()
-        assertEquals(oAll,
-            ontologyProvider.getStoredOntology(ontologyProvider.getKey(all), OWLOntology.class, false));
-        assertEquals(oMain,
-            ontologyProvider.getStoredOntology(ontologyProvider.getKey(main), OWLOntology.class, false));
-        assertEquals(oMinor,
-            ontologyProvider.getStoredOntology(ontologyProvider.getKey(minor), OWLOntology.class, false));
-        assertEquals(oFoaf,
-            ontologyProvider.getStoredOntology(ontologyProvider.getKey(foaf), OWLOntology.class, false));
+        assertEquals(oAll, ontologyProvider.getStoredOntology(all, OWLOntology.class, false));
+        assertEquals(oMain, ontologyProvider.getStoredOntology(main, OWLOntology.class, false));
+        assertEquals(oMinor, ontologyProvider.getStoredOntology(minor, OWLOntology.class, false));
+        assertEquals(oFoaf, ontologyProvider.getStoredOntology(foaf, OWLOntology.class, false));
     }
 
     @Test
@@ -146,28 +143,28 @@ public class TestOntologyNetworkPersistence {
         assertFalse(key.isAnonymous());
 
         // Retrieve the stored fake FOAF
-        assertEquals(1, ontologyProvider.getPublicKeys().size());
+        assertEquals(1, ontologyProvider.listOntologies().size());
         o1 = ontologyProvider.getStoredOntology(key, OWLOntology.class, false);
         OWLOntologyID id = o1.getOntologyID();
         assertNotNull(id);
         assertEquals(foaf, id);
 
         // Check there is a storage key for the (real) ID of the FOAF ontology
-//        key = ontologyProvider.getKey(foaf);
-//        assertNotNull(key);
-//        assertFalse(key.isAnonymous());
+        // key = ontologyProvider.getKey(foaf);
+        // assertNotNull(key);
+        // assertFalse(key.isAnonymous());
         assertTrue(ontologyProvider.hasOntology(foaf));
 
         log.info("Stanbol going down...");
         resetOntologyProvider(); // but keep the TcProvider
-        assertEquals(1, ontologyProvider.getPublicKeys().size());
+        assertEquals(1, ontologyProvider.listOntologies().size());
 
         // Check again for the FOAF key
-//        key = ontologyProvider.getKey(foaf);
-//        assertNotNull(key);
-//        assertFalse(key.isAnonymous());
+        // key = ontologyProvider.getKey(foaf);
+        // assertNotNull(key);
+        // assertFalse(key.isAnonymous());
         assertTrue(ontologyProvider.hasOntology(foaf));
-        
+
         // The OWL API implements OWLOntology#equals()
         assertEquals(o1, ontologyProvider.getStoredOntology(key, OWLOntology.class, false));
     }
@@ -185,14 +182,15 @@ public class TestOntologyNetworkPersistence {
     }
 
     @Test
-    public void preservesManagedOntologies() throws Exception {
+    public void scopePreservesManagedOntologies() throws Exception {
         String id = "preserve";
         OntologyScope scope = onManager.createOntologyScope(id, new GraphContentInputSource(getClass()
                 .getResourceAsStream("/ontologies/mockfoaf.rdf")));
         scope.getCustomSpace().addOntology(
             new GraphContentInputSource(getClass().getResourceAsStream(
                 "/ontologies/nonexistentcharacters.owl")));
-
+        Collection<OWLOntologyID> cores = scope.getCoreSpace().listManagedOntologies();
+        Collection<OWLOntologyID> customs = scope.getCustomSpace().listManagedOntologies();
         // Simulate Stanbol going down.
         log.info("Stanbol going down...");
         resetOntologyProvider(); // but keep the TcProvider
@@ -200,7 +198,38 @@ public class TestOntologyNetworkPersistence {
 
         OntologyScope sc = onManager.getScope(id);
         assertNotNull(sc);
-        // assertEquals(scope, sc); XXX should scopes be equal on ID + content?
+        assertEquals(cores, sc.getCoreSpace().listManagedOntologies());
+        assertEquals(customs, sc.getCustomSpace().listManagedOntologies());
+        assertEquals(scope, sc); // XXX Remember that only weak equality is implemented.
+    }
+
+    @Test
+    public void sessionPreservesManagedOntologies() throws Exception {
+        String id = "12345"; // The kind of thing an idiot would have on his luggage.
+        Session session = sessionManager.createSession(id);
+        // Anonymous ontologies must preserve their public keys!
+        session.addOntology(new GraphContentInputSource(getClass().getResourceAsStream(
+            "/ontologies/nameless_ontology.owl")));
+        // Same for named ontologies...
+        session.addOntology(new GraphContentInputSource(getClass().getResourceAsStream(
+            "/ontologies/nonexistentcharacters.owl")));
+        // ... and versioned ontologies too.
+        session.addOntology(new GraphContentInputSource(getClass().getResourceAsStream(
+            "/ontologies/versiontest_v1.owl")));
+        session.addOntology(new GraphContentInputSource(getClass().getResourceAsStream(
+            "/ontologies/versiontest_v2.owl")));
+        Collection<OWLOntologyID> managed = session.listManagedOntologies();
+        assertEquals(4, managed.size());
+        
+        // Simulate Stanbol going down.
+        log.info("Stanbol going down...");
+        resetOntologyProvider(); // but keep the TcProvider
+        resetManagers();
+
+        Session ses = sessionManager.getSession(id);
+        assertNotNull(ses);
+        assertEquals(managed, ses.listManagedOntologies());
+        assertEquals(session, ses); // XXX Remember that only weak equality is implemented.
     }
 
     /*
@@ -266,9 +295,9 @@ public class TestOntologyNetworkPersistence {
                                       + scope.getCoreSpace().getID());
         UriRef test1id = new UriRef("http://stanbol.apache.org/ontologies/test1.owl"); // Has no versionIRI
         // Be strict: the whole property pair must be there.
-        UriRef predicate = MANAGES;
+        UriRef predicate = MANAGES_URIREF;
         assertTrue(meta.contains(new TripleImpl(collector, predicate, test1id)));
-        predicate = IS_MANAGED_BY;
+        predicate = IS_MANAGED_BY_URIREF;
         assertTrue(meta.contains(new TripleImpl(test1id, predicate, collector)));
 
         scope.tearDown(); // To modify the core space.
@@ -276,9 +305,9 @@ public class TestOntologyNetworkPersistence {
         scope.getCoreSpace().addOntology(
             new GraphContentInputSource(getClass().getResourceAsStream("/ontologies/minorcharacters.owl")));
         UriRef minorId = new UriRef("http://stanbol.apache.org/ontologies/pcomics/minorcharacters.owl");
-        predicate = MANAGES;
+        predicate = MANAGES_URIREF;
         assertTrue(meta.contains(new TripleImpl(collector, predicate, minorId)));
-        predicate = IS_MANAGED_BY;
+        predicate = IS_MANAGED_BY_URIREF;
         assertTrue(meta.contains(new TripleImpl(minorId, predicate, collector)));
 
         scope.getCustomSpace().addOntology(

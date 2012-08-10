@@ -26,6 +26,7 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
  * Currently the supported types are:
  * <ul>
  * <li> {@link IRI}, which is interpreted as the physical location of the resource.
+ * <li> {@link OWLOntologyID}, which is interpreted as the public key of an ontology already stored by Stanbol.
  * <li> {@link UriRef}, which is interpreted as the name of a graph to be retrieved from an underlying Clerezza
  * store (typically a {@link TcProvider}).
  * </ul>
@@ -35,7 +36,7 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
  * @param <R>
  *            the resource reference.
  */
-public class Origin<R> implements OriginOrInputSource {
+public class Origin<R> {
 
     /**
      * Creates a new Origin for a resource that can be retrieved by dereferencing the given IRI as an URL.
@@ -90,17 +91,6 @@ public class Origin<R> implements OriginOrInputSource {
     }
 
     @Override
-    public OntologyInputSource<?> asInputSource() {
-        throw new UnsupportedOperationException("Unsupported conversion from " + getClass() + " to "
-                                                + OntologyInputSource.class);
-    }
-
-    @Override
-    public Origin<?> asOrigin() {
-        return this;
-    }
-
-    @Override
     public boolean equals(Object arg0) {
         if (arg0 == null) return false;
         if (!(arg0 instanceof Origin<?>)) return false;
@@ -114,16 +104,6 @@ public class Origin<R> implements OriginOrInputSource {
      */
     public R getReference() {
         return ref;
-    }
-
-    @Override
-    public boolean isInputSource() {
-        return false;
-    }
-
-    @Override
-    public boolean isOrigin() {
-        return true;
     }
 
     @Override

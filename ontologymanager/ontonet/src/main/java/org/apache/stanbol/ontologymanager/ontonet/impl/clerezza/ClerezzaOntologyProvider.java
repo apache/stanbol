@@ -16,21 +16,23 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.APPENDED_TO;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.ENTRY;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_APPENDED;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_ONTOLOGY_IRI;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_SPACE_CORE;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_SPACE_CUSTOM;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_VERSION_IRI;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_MANAGED_BY;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_SPACE_CORE_OF;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_SPACE_CUSTOM_OF;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.MANAGES;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SCOPE;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SESSION;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SPACE;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary._NS_ONTONET;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.APPENDED_TO_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.ENTRY_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_APPENDED_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_ONTOLOGY_IRI_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_SPACE_CORE_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_SPACE_CUSTOM_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_VERSION_IRI_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_MANAGED_BY_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_SPACE_CORE_OF_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_SPACE_CUSTOM_OF_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.MANAGES_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.MAPS_TO_GRAPH_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.RETRIEVED_FROM_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SCOPE_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SESSION_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SIZE_IN_TRIPLES_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SPACE_URIREF;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary._NS_STANBOL_INTERNAL;
 
 import java.io.IOException;
@@ -59,6 +61,7 @@ import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
@@ -139,20 +142,6 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
      */
     private class OntologyToTcMapper {
 
-        /**
-         * The basic terms to use for the mapping graph.
-         * 
-         * @author alexdma
-         * 
-         */
-        private class Vocabulary {
-
-            static final String MAPS_TO_GRAPH = _NS_ONTONET + "mapsToGraph";
-
-            static final String RETRIEVED_FROM = _NS_ONTONET + "retrievedFrom";
-
-        }
-
         private MGraph graph;
 
         private UriRef graphId = new UriRef(metaGraphId);
@@ -182,11 +171,13 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             IRI ontologyIRI = ontologyReference.getOntologyIRI(), versionIri = ontologyReference
                     .getVersionIRI();
             UriRef entry = buildResource(ontologyReference);
-            tType = new TripleImpl(entry, RDF.type, ENTRY);
-            tMaps = new TripleImpl(entry, new UriRef(Vocabulary.MAPS_TO_GRAPH), graphName);
-            tHasOiri = new TripleImpl(entry, HAS_ONTOLOGY_IRI, new UriRef(ontologyIRI.toString()));
-            if (versionIri != null) tHasViri = new TripleImpl(entry, HAS_VERSION_IRI, new UriRef(
-                    versionIri.toString()));
+            tType = new TripleImpl(entry, RDF.type, ENTRY_URIREF);
+            tMaps = new TripleImpl(entry, MAPS_TO_GRAPH_URIREF, graphName);
+            LiteralFactory lf = LiteralFactory.getInstance();
+            tHasOiri = new TripleImpl(entry, HAS_ONTOLOGY_IRI_URIREF, lf.createTypedLiteral(new UriRef(
+                    ontologyIRI.toString())));
+            if (versionIri != null) tHasViri = new TripleImpl(entry, HAS_VERSION_IRI_URIREF,
+                    lf.createTypedLiteral(new UriRef(versionIri.toString())));
             synchronized (graph) {
                 graph.add(tType);
                 graph.add(tMaps);
@@ -197,19 +188,26 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
 
         OWLOntologyID buildPublicKey(final UriRef resource) {
             // TODO desanitize?
+            LiteralFactory lf = LiteralFactory.getInstance();
             IRI oiri = null, viri = null;
-            Iterator<Triple> it = graph.filter(resource, HAS_ONTOLOGY_IRI, null);
+            Iterator<Triple> it = graph.filter(resource, HAS_ONTOLOGY_IRI_URIREF, null);
             if (it.hasNext()) {
+                UriRef s = null;
                 Resource obj = it.next().getObject();
-                if (obj instanceof UriRef) oiri = IRI.create(((UriRef) obj).getUnicodeString());
+                if (obj instanceof UriRef) s = ((UriRef) obj);
+                else if (obj instanceof TypedLiteral) s = lf.createObject(UriRef.class, (TypedLiteral) obj);
+                oiri = IRI.create(s.getUnicodeString());
             } else {
                 // Anonymous ontology? Decode the resource itself (which is not null)
                 return OntologyUtils.decode(resource.getUnicodeString());
             }
-            it = graph.filter(resource, HAS_VERSION_IRI, null);
+            it = graph.filter(resource, HAS_VERSION_IRI_URIREF, null);
             if (it.hasNext()) {
+                UriRef s = null;
                 Resource obj = it.next().getObject();
-                if (obj instanceof UriRef) viri = IRI.create(((UriRef) obj).getUnicodeString());
+                if (obj instanceof UriRef) s = ((UriRef) obj);
+                else if (obj instanceof TypedLiteral) s = lf.createObject(UriRef.class, (TypedLiteral) obj);
+                viri = IRI.create(s.getUnicodeString());
             }
             if (viri == null) return new OWLOntologyID(oiri);
             else return new OWLOntologyID(oiri, viri);
@@ -223,20 +221,14 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
          * @return
          */
         UriRef buildResource(OWLOntologyID publicKey) {
-
-            // // The UriRef is of the form ontologyIRI[:::versionIRI] (TODO use something less conventional?)
-            // IRI ontologyIRI = publicKey.getOntologyIRI(), versionIri = publicKey
-            // .getVersionIRI();
-            // UriRef entry = new UriRef(URIUtils.sanitize(ontologyIRI).toString()
-            // + ((versionIri == null) ? "" : (":::" + URIUtils.sanitize(versionIri)
-            // .toString())));
-            // System.out.println("Returning "+entry);
-            // return entry;
-
+            /*
+             * The UriRef is of the form ontologyIRI[:::versionIRI] (TODO use something less conventional e.g.
+             * the string form of OWLOntologyID objects?)
+             */
             TripleCollection meta = getMetaGraph(TripleCollection.class);
             if (publicKey == null) throw new IllegalArgumentException(
                     "Cannot build a UriRef resource on a null public key!");
-            // The UriRef is of the form ontologyIRI[:::versionIRI] (TODO use something less conventional?)
+
             // XXX should versionIRI also include the version IRI set by owners? Currently not
 
             // Remember not to sanitize logical identifiers.
@@ -247,8 +239,11 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             log.debug("Searching for a meta graph entry for public key:");
             log.debug(" -- {}", publicKey);
             UriRef match = null;
-            for (Iterator<Triple> it = meta
-                    .filter(null, HAS_ONTOLOGY_IRI, new UriRef(ontologyIri.toString())); it.hasNext();) {
+            LiteralFactory lf = LiteralFactory.getInstance();
+            TypedLiteral oiri = lf.createTypedLiteral(new UriRef(ontologyIri.toString()));
+            TypedLiteral viri = versionIri == null ? null : lf.createTypedLiteral(new UriRef(versionIri
+                    .toString()));
+            for (Iterator<Triple> it = meta.filter(null, HAS_ONTOLOGY_IRI_URIREF, oiri); it.hasNext();) {
                 Resource subj = it.next().getSubject();
                 log.debug(" -- Ontology IRI match found. Scanning");
                 log.debug(" -- Resource : {}", subj);
@@ -256,10 +251,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                     log.debug(" ---- (uncomparable: skipping...)");
                     continue;
                 }
-                if (versionIri != null) {
+                if (viri != null) {
                     // Must find matching versionIRI
-                    if (meta.contains(new TripleImpl((UriRef) subj, HAS_VERSION_IRI, new UriRef(versionIri
-                            .toString())))) {
+                    if (meta.contains(new TripleImpl((UriRef) subj, HAS_VERSION_IRI_URIREF, viri))) {
                         log.debug(" ---- Version IRI match!");
                         match = (UriRef) subj;
                         break; // Found
@@ -270,7 +264,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
 
                 } else {
                     // Must find unversioned resource
-                    if (meta.filter((UriRef) subj, HAS_VERSION_IRI, null).hasNext()) {
+                    if (meta.filter((UriRef) subj, HAS_VERSION_IRI_URIREF, null).hasNext()) {
                         log.debug(" ---- Unexpected version IRI found. Skipping.");
                         continue;
                     } else {
@@ -289,16 +283,13 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         }
 
         UriRef getMapping(OWLOntologyID reference) {
-            // UriRef res = buildResource(reference);
-
             Set<UriRef> aliases = new HashSet<UriRef>();
             aliases.add(buildResource(reference));
             for (OWLOntologyID alias : listAliases(reference))
                 aliases.add(buildResource(alias));
-
             for (UriRef alias : aliases) {
                 // Logical mappings first.
-                Iterator<Triple> it = graph.filter(alias, new UriRef(Vocabulary.MAPS_TO_GRAPH), null);
+                Iterator<Triple> it = graph.filter(alias, MAPS_TO_GRAPH_URIREF, null);
                 while (it.hasNext()) {
                     Resource obj = it.next().getObject();
                     if (obj instanceof UriRef) return (UriRef) obj;
@@ -306,7 +297,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                 Literal litloc = LiteralFactory.getInstance().createTypedLiteral(
                     new UriRef(alias.getUnicodeString()));
                 // Logical mappings failed, try physical mappings.
-                it = graph.filter(null, new UriRef(Vocabulary.RETRIEVED_FROM), litloc);
+                it = graph.filter(null, RETRIEVED_FROM_URIREF, litloc);
                 while (it.hasNext()) {
                     Resource obj = it.next().getSubject();
                     if (obj instanceof UriRef) return (UriRef) obj;
@@ -317,7 +308,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
 
         OWLOntologyID getReverseMapping(UriRef graphName) {
             // Logical mappings first.
-            Iterator<Triple> it = graph.filter(null, new UriRef(Vocabulary.MAPS_TO_GRAPH), graphName);
+            Iterator<Triple> it = graph.filter(null, MAPS_TO_GRAPH_URIREF, graphName);
             while (it.hasNext()) {
                 Resource obj = it.next().getSubject();
                 if (obj instanceof UriRef) return buildPublicKey((UriRef) obj);
@@ -325,7 +316,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             Literal litloc = LiteralFactory.getInstance().createTypedLiteral(
                 new UriRef(graphName.getUnicodeString()));
             // Logical mappings failed, try physical mappings.
-            it = graph.filter(null, new UriRef(Vocabulary.RETRIEVED_FROM), litloc);
+            it = graph.filter(null, RETRIEVED_FROM_URIREF, litloc);
             while (it.hasNext()) {
                 Resource subj = it.next().getSubject();
                 if (subj instanceof UriRef) return buildPublicKey((UriRef) subj);
@@ -337,16 +328,15 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         Set<OWLOntologyID> getVersions(IRI ontologyIri) {
             if (ontologyIri == null) throw new IllegalArgumentException("Cannot get versions for a null IRI.");
             Set<OWLOntologyID> keys = new HashSet<OWLOntologyID>();
-            UriRef iri = new UriRef(ontologyIri.toString());
+            LiteralFactory lf = LiteralFactory.getInstance();
+            TypedLiteral iri = lf.createTypedLiteral(new UriRef(ontologyIri.toString()));
             // Exclude aliases.
-            for (Iterator<Triple> it = graph.filter(null, HAS_ONTOLOGY_IRI, iri); it.hasNext();) {
+            for (Iterator<Triple> it = graph.filter(null, HAS_ONTOLOGY_IRI_URIREF, iri); it.hasNext();) {
                 Resource sub = it.next().getSubject();
                 if (sub instanceof UriRef) keys.add(buildPublicKey((UriRef) sub));
             }
             // Also check for physical locations
-            Literal litloc = LiteralFactory.getInstance().createTypedLiteral(iri);
-            for (Iterator<Triple> it = graph.filter(null, new UriRef(Vocabulary.RETRIEVED_FROM), litloc); it
-                    .hasNext();) {
+            for (Iterator<Triple> it = graph.filter(null, RETRIEVED_FROM_URIREF, iri); it.hasNext();) {
                 Resource sub = it.next().getSubject();
                 if (sub instanceof UriRef) keys.add(buildPublicKey((UriRef) sub));
             }
@@ -356,24 +346,22 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         void mapLocator(IRI locator, UriRef graphName) {
             if (graphName == null) throw new IllegalArgumentException("A null graph name is not allowed.");
             // Null locator is a legal argument, will remove all locator mappings from the supplied graph
-            UriRef retrieved_from = new UriRef(Vocabulary.RETRIEVED_FROM);
             Set<Triple> remove = new HashSet<Triple>();
             for (Iterator<Triple> nodes = graph.filter(graphName, null, null); nodes.hasNext();) {
                 Triple t = nodes.next();
                 // isOntology |= RDF.type.equals(t.getPredicate()) && OWL.Ontology.equals(t.getObject());
-                if (retrieved_from.equals(t.getPredicate())) remove.add(t);
+                if (RETRIEVED_FROM_URIREF.equals(t.getPredicate())) remove.add(t);
             }
             graph.removeAll(remove);
             if (locator != null) {
                 Literal litloc = LiteralFactory.getInstance().createTypedLiteral(
                     new UriRef(locator.toString()));
-                graph.add(new TripleImpl(graphName, retrieved_from, litloc));
+                graph.add(new TripleImpl(graphName, RETRIEVED_FROM_URIREF, litloc));
             }
         }
 
         void removeMapping(OWLOntologyID ontologyReference) {
-            Iterator<Triple> it = graph.filter(buildResource(ontologyReference), new UriRef(
-                    Vocabulary.MAPS_TO_GRAPH), null);
+            Iterator<Triple> it = graph.filter(buildResource(ontologyReference), MAPS_TO_GRAPH_URIREF, null);
             // I expect a concurrent modification exception here, but we'll deal with it later.
             while (it.hasNext())
                 graph.remove(it.next());
@@ -682,7 +670,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         final TripleCollection meta = store.getTriples(new UriRef(metaGraphId));
 
         // Scopes first
-        for (Iterator<Triple> it = meta.filter(null, RDF.type, SCOPE); it.hasNext();) { // for each scope
+        for (Iterator<Triple> it = meta.filter(null, RDF.type, SCOPE_URIREF); it.hasNext();) { // for each
+                                                                                               // scope
             Triple ta = it.next();
             NonLiteral sub = ta.getSubject();
             if (sub instanceof UriRef) {
@@ -691,17 +680,17 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                 if (s.startsWith(prefix)) {
                     String scopeId = s.substring(prefix.length());
                     log.info("Rebuilding scope \"{}\".", scopeId);
-                    coreOntologies.put(scopeId, new LinkedList<OWLOntologyID>());
-                    customOntologies.put(scopeId, new LinkedList<OWLOntologyID>());
+                    coreOntologies.put(scopeId, new TreeSet<OWLOntologyID>());
+                    customOntologies.put(scopeId, new TreeSet<OWLOntologyID>());
                     UriRef core_ur = null, custom_ur = null;
                     Resource r;
                     // Check core space
-                    Iterator<Triple> it2 = meta.filter(sub, HAS_SPACE_CORE, null);
+                    Iterator<Triple> it2 = meta.filter(sub, HAS_SPACE_CORE_URIREF, null);
                     if (it2.hasNext()) {
                         r = it2.next().getObject();
                         if (r instanceof UriRef) core_ur = (UriRef) r;
                     } else {
-                        it2 = meta.filter(null, IS_SPACE_CORE_OF, sub);
+                        it2 = meta.filter(null, IS_SPACE_CORE_OF_URIREF, sub);
                         if (it2.hasNext()) {
                             r = it2.next().getSubject();
                             if (r instanceof UriRef) core_ur = (UriRef) r;
@@ -709,12 +698,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                     }
 
                     // Check custom space
-                    it2 = meta.filter(sub, HAS_SPACE_CUSTOM, null);
+                    it2 = meta.filter(sub, HAS_SPACE_CUSTOM_URIREF, null);
                     if (it2.hasNext()) {
                         r = it2.next().getObject();
                         if (r instanceof UriRef) custom_ur = (UriRef) r;
                     } else {
-                        it2 = meta.filter(null, IS_SPACE_CUSTOM_OF, sub);
+                        it2 = meta.filter(null, IS_SPACE_CUSTOM_OF_URIREF, sub);
                         if (it2.hasNext()) {
                             r = it2.next().getSubject();
                             if (r instanceof UriRef) custom_ur = (UriRef) r;
@@ -726,7 +715,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                         for (it2 = meta.filter(core_ur, null, null); it2.hasNext();) {
                             Triple t = it2.next();
                             UriRef predicate = t.getPredicate();
-                            if (predicate.equals(MANAGES)) {
+                            if (predicate.equals(MANAGES_URIREF)) {
                                 if (t.getObject() instanceof UriRef) coreOntologies.get(scopeId).add(
                                     keymap.buildPublicKey((UriRef) t.getObject()) // FIXME must be very
                                                                                   // temporary!
@@ -737,7 +726,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                         for (it2 = meta.filter(null, null, core_ur); it2.hasNext();) {
                             Triple t = it2.next();
                             UriRef predicate = t.getPredicate();
-                            if (predicate.equals(IS_MANAGED_BY)) {
+                            if (predicate.equals(IS_MANAGED_BY_URIREF)) {
                                 if (t.getSubject() instanceof UriRef) coreOntologies.get(scopeId).add(
                                     keymap.buildPublicKey((UriRef) t.getSubject()) // FIXME must be very
                                                                                    // temporary!
@@ -750,7 +739,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                         for (it2 = meta.filter(custom_ur, null, null); it2.hasNext();) {
                             Triple t = it2.next();
                             UriRef predicate = t.getPredicate();
-                            if (predicate.equals(MANAGES)) {
+                            if (predicate.equals(MANAGES_URIREF)) {
                                 if (t.getObject() instanceof UriRef) customOntologies.get(scopeId).add(
                                     keymap.buildPublicKey((UriRef) t.getObject()) // FIXME must be very
                                                                                   // temporary!
@@ -761,7 +750,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                         for (it2 = meta.filter(null, null, custom_ur); it2.hasNext();) {
                             Triple t = it2.next();
                             UriRef predicate = t.getPredicate();
-                            if (predicate.equals(IS_MANAGED_BY)) {
+                            if (predicate.equals(IS_MANAGED_BY_URIREF)) {
                                 if (t.getSubject() instanceof UriRef) customOntologies.get(scopeId).add(
                                     keymap.buildPublicKey((UriRef) t.getSubject()) // FIXME must be very
                                                                                    // temporary!
@@ -777,7 +766,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
 
         // Sessions next
         Map<String,Collection<OWLOntologyID>> sessionOntologies = new HashMap<String,Collection<OWLOntologyID>>();
-        for (Iterator<Triple> it = meta.filter(null, RDF.type, SESSION); it.hasNext();) { // for each scope
+        for (Iterator<Triple> it = meta.filter(null, RDF.type, SESSION_URIREF); it.hasNext();) { // for each
+                                                                                                 // scope
             Triple ta = it.next();
             NonLiteral sub = ta.getSubject();
             if (sub instanceof UriRef) {
@@ -787,11 +777,11 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                 if (s.startsWith(prefix)) {
                     String sessionId = s.substring(prefix.length());
                     log.info("Rebuilding session \"{}\".", sessionId);
-                    sessionOntologies.put(sessionId, new HashSet<OWLOntologyID>());
-                    attachedScopes.put(sessionId, new HashSet<String>());
+                    sessionOntologies.put(sessionId, new TreeSet<OWLOntologyID>());
+                    attachedScopes.put(sessionId, new TreeSet<String>());
                     // retrieve the ontologies
                     if (ses_ur != null) {
-                        for (Iterator<Triple> it2 = meta.filter(ses_ur, MANAGES, null); it2.hasNext();) {
+                        for (Iterator<Triple> it2 = meta.filter(ses_ur, MANAGES_URIREF, null); it2.hasNext();) {
                             Resource obj = it2.next().getObject();
                             if (obj instanceof UriRef) sessionOntologies.get(sessionId).add(
                                 keymap.buildPublicKey((UriRef) obj) // FIXME must be very temporary!
@@ -799,7 +789,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                                     );
 
                         }
-                        for (Iterator<Triple> it2 = meta.filter(null, IS_MANAGED_BY, ses_ur); it2.hasNext();) {
+                        for (Iterator<Triple> it2 = meta.filter(null, IS_MANAGED_BY_URIREF, ses_ur); it2
+                                .hasNext();) {
                             Resource subj = it2.next().getSubject();
                             if (subj instanceof UriRef) sessionOntologies.get(sessionId).add(
                                 keymap.buildPublicKey((UriRef) subj) // FIXME must be very temporary!
@@ -807,7 +798,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                                     );
 
                         }
-                        for (Iterator<Triple> it2 = meta.filter(null, APPENDED_TO, ses_ur); it2.hasNext();) {
+                        for (Iterator<Triple> it2 = meta.filter(null, APPENDED_TO_URIREF, ses_ur); it2
+                                .hasNext();) {
                             Resource subj = it2.next().getSubject();
                             if (subj instanceof UriRef) {
                                 String s1 = ((UriRef) subj).getUnicodeString();
@@ -818,7 +810,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                                 }
                             }
                         }
-                        for (Iterator<Triple> it2 = meta.filter(ses_ur, HAS_APPENDED, null); it2.hasNext();) {
+                        for (Iterator<Triple> it2 = meta.filter(ses_ur, HAS_APPENDED_URIREF, null); it2
+                                .hasNext();) {
                             Resource obj = it2.next().getObject();
                             if (obj instanceof UriRef) {
                                 String s1 = ((UriRef) obj).getUnicodeString();
@@ -1168,9 +1161,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
             // mappedIds += realId;
             // }
             // }
-            Triple t = new TripleImpl(keymap.buildResource(publicKey),
-                    org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SIZE_IN_TRIPLES, LiteralFactory
-                            .getInstance().createTypedLiteral(Integer.valueOf(rdfData.size())));
+            Triple t = new TripleImpl(keymap.buildResource(publicKey), SIZE_IN_TRIPLES_URIREF, LiteralFactory
+                    .getInstance().createTypedLiteral(Integer.valueOf(rdfData.size())));
             getMetaGraph(MGraph.class).add(t);
 
         }
@@ -1456,14 +1448,14 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         // If this method was called after a scope rebuild, the following will have little to no effect.
         synchronized (meta) {
             // Spaces are created along with the scope, so it is safe to add their triples.
-            meta.add(new TripleImpl(scopeur, RDF.type, SCOPE));
-            meta.add(new TripleImpl(coreur, RDF.type, SPACE));
-            meta.add(new TripleImpl(custur, RDF.type, SPACE));
-            meta.add(new TripleImpl(scopeur, HAS_SPACE_CORE, coreur));
-            meta.add(new TripleImpl(scopeur, HAS_SPACE_CUSTOM, custur));
+            meta.add(new TripleImpl(scopeur, RDF.type, SCOPE_URIREF));
+            meta.add(new TripleImpl(coreur, RDF.type, SPACE_URIREF));
+            meta.add(new TripleImpl(custur, RDF.type, SPACE_URIREF));
+            meta.add(new TripleImpl(scopeur, HAS_SPACE_CORE_URIREF, coreur));
+            meta.add(new TripleImpl(scopeur, HAS_SPACE_CUSTOM_URIREF, custur));
             // Add inverse predicates so we can traverse the graph in both directions.
-            meta.add(new TripleImpl(coreur, IS_SPACE_CORE_OF, scopeur));
-            meta.add(new TripleImpl(custur, IS_SPACE_CUSTOM_OF, scopeur));
+            meta.add(new TripleImpl(coreur, IS_SPACE_CORE_OF_URIREF, scopeur));
+            meta.add(new TripleImpl(custur, IS_SPACE_CUSTOM_OF_URIREF, scopeur));
         }
         log.debug("Ontology collector information triples added for scope \"{}\".", scope);
     }
@@ -1485,7 +1477,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         for (Iterator<Triple> it = meta.filter(scopeur, null, null); it.hasNext();) {
             Triple t = it.next();
             if (RDF.type.equals(t.getPredicate())) {
-                if (SCOPE.equals(t.getObject())) removable = true;
+                if (SCOPE_URIREF.equals(t.getObject())) removable = true;
                 else conflict = true;
             }
             removeUs.add(t);
@@ -1493,7 +1485,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         if (!removable) {
             log.error("Cannot write scope deregistration to persistence:");
             log.error("-- resource {}", scopeur);
-            log.error("-- is not typed as a {} in the meta-graph.", SCOPE);
+            log.error("-- is not typed as a {} in the meta-graph.", SCOPE_URIREF);
         } else if (conflict) {
             log.error("Conflict upon scope deregistration:");
             log.error("-- resource {}", scopeur);

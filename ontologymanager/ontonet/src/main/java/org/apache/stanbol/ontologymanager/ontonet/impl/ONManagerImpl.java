@@ -46,9 +46,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.collector.MissingOntologyE
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.StoredOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.NoSuchScopeException;
@@ -407,7 +406,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
     }
 
     @Override
-    public OntologyScope createOntologyScope(String scopeID, OriginOrInputSource... coreOntologies) throws DuplicateIDException {
+    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?>... coreOntologies) throws DuplicateIDException {
         if (this.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
                 "Scope registry already contains ontology scope with ID " + scopeID);
         IRI prefix = IRI.create(getOntologyNetworkNamespace() + scopeRegistryId + "/");
@@ -511,13 +510,11 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
             long before = System.currentTimeMillis();
             log.debug("Rebuilding scope with ID \"{}\".", scopeId);
             Collection<OWLOntologyID> coreOnts = struct.getCoreOntologyKeysForScope(scopeId);
-            Origin<?>[] srcs = new Origin<?>[coreOnts.size()];
+            OntologyInputSource<?>[] srcs = new OntologyInputSource<?>[coreOnts.size()];
             int i = 0;
             for (OWLOntologyID coreOnt : coreOnts) {
                 log.debug("Core ontology key : {}", coreOnts);
-                srcs[i++] = Origin.create(coreOnt)
-                // new GraphSource(coreOnt)
-                ;
+                srcs[i++] = new StoredOntologySource(coreOnt);
             }
             OntologyScope scope;
             try {
@@ -533,9 +530,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
             for (OWLOntologyID key : struct.getCustomOntologyKeysForScope(scopeId))
                 try {
                     log.debug("Custom ontology key : {}", key);
-                    custom.addOntology(Origin.create(key)
-                    // new GraphSource(key)
-                    );
+                    custom.addOntology(new StoredOntologySource(key));
                 } catch (MissingOntologyException ex) {
                     log.error(
                         "Could not find an ontology with public key {} to be managed by scope \"{}\". Proceeding to next ontology.",

@@ -111,6 +111,20 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     }
 
     @Override
+    public boolean equals(Object arg0) {
+        if (arg0 == null) return false;
+        if (!(arg0 instanceof Session)) return false;
+        if (this == arg0) return true;
+        log.warn(
+            "{} only implements weak equality, i.e. managed ontologies are only checked by public key, not by content.",
+            getClass());
+        Session coll = (Session) arg0;
+        return super.equals(arg0) && this.getAttachedScopes().equals(coll.getAttachedScopes())
+               && this.getAttachedScopes().equals(coll.getAttachedScopes())
+               && this.getSessionState().equals(coll.getSessionState());
+    }
+
+    @Override
     protected MGraph exportToMGraph(boolean merge, IRI universalPrefix) {
         MGraph mg = super.exportToMGraph(merge, universalPrefix);
         // Add import declarations for attached scopes.

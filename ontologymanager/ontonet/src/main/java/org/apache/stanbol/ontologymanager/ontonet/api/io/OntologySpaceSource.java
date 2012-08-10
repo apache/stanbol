@@ -56,11 +56,6 @@ public class OntologySpaceSource extends AbstractOWLOntologyInputSource {
     }
 
     @Override
-    public Set<OWLOntology> getImports(boolean recursive) {
-        return space.getManagedOntologies(OWLOntology.class, recursive);
-    }
-
-    @Override
     public String toString() {
         return "SCOPE_ONT_IRI<" + getOrigin() + ">";
     }

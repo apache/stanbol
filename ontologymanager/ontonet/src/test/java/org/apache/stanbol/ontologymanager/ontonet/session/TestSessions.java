@@ -33,7 +33,7 @@ import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
@@ -148,10 +148,11 @@ public class TestSessions {
         assertFalse(resurrect);
     }
 
-//    @Test
+    // @Test
     public void zombieSessionClearsContents() throws Exception {
         Session ses = sessionManager.createSession();
-        ses.addOntology(Origin.create(IRI.create(getClass().getResource("/ontologies/mockfoaf.rdf"))));
+        ses.addOntology(new RootOntologyIRISource((IRI.create(getClass().getResource(
+            "/ontologies/mockfoaf.rdf")))));
         OWLOntologyID expectedKey = new OWLOntologyID(IRI.create("http://xmlns.com/foaf/0.1/"));
         assertTrue(ontologyProvider.hasOntology(expectedKey));
         sessionManager.destroySession(ses.getID());

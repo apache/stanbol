@@ -61,19 +61,11 @@
       <td>POST <code>/ontonet/ontology/</code>{scopeName}
         <br/>
         Content types :
-        <ul>
-          <li><code>application/owl+xml</code></li>
-          <li><code>application/rdf+json</code></li>
-          <li><code>application/rdf+xml</code></li>
-          <li><code>application/x-turtle</code></li>
-          <li><code>multipart/form-data</code></li>
-          <li><code>text/owl-functional</code></li>
-          <li><code>text/owl-manchester</code></li>
-          <li><code>text/plain</code></li>
-          <li><code>text/rdf+n3</code></li>
-          <li><code>text/rdf+nt</code></li>
-          <li><code>text/turtle</code></li> 
-        </ul>
+        <code>application/owl+xml</code>, <code>application/rdf+json</code>, 
+        <code>application/rdf+xml</code>, <code>application/x-turtle</code>, 
+        <code>multipart/form-data</code>, <code>text/owl-functional</code>, 
+        <code>text/owl-manchester</code>, <code>text/plain</code>, 
+        <code>text/rdf+n3</code>, <code>text/rdf+nt</code>, <code>text/turtle</code>
       </td>
     </tr>
     <tr>
@@ -124,12 +116,12 @@
 </table>
 
 <h5>Examples</h5>
-Load and store the SKOS thesaurus of ISO 3166-1 country codes into a scope that manages Geographical content, without knowing the ontology format.
+Load and store the SKOS thesaurus of ISO 3166-1 country codes into a scope that manages Geographical content.
 <pre>curl -X POST -F "url=http://eulersharp.sourceforge.net/2003/03swap/countries" ${it.publicBaseUri}ontonet/ontology/Geographical</pre>
   or
 <pre>curl -H "Content-type: text/plain" -d http://eulersharp.sourceforge.net/2003/03swap/countries ${it.publicBaseUri}ontonet/ontology/Geographical</pre>
 <br/>
-Load and store an ontology from a local file called <tt>acme-hierarchy.owl</tt> in the scope about the ACME organization, knowing the file is in RDF/XML format.
+Load an ontology from local file <tt>acme-hierarchy.owl</tt> in the scope about the ACME organization, knowing the file is in RDF/XML format.
 <pre>curl -X POST -F file=@acme-hierarchy.owl -F format=application/rdf+xml ${it.publicBaseUri}ontonet/ontology/ACME</pre>
   or
 <pre>curl -H "Content-type: application/rdf+xml" -d @acme-hierarchy.owl ${it.publicBaseUri}ontonet/ontology/ACME

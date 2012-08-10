@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.io;
 
-import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.ontologyProvider;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -27,18 +26,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.net.URI;
 import java.net.URL;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Set;
 
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,12 +52,8 @@ public class TestOWLAPIInputSources {
 
     private static OWLDataFactory df;
 
-    private static ONManager onm;
-
     @BeforeClass
     public static void setUp() {
-        Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
-        onm = new ONManagerImpl(ontologyProvider, new OfflineConfigurationImpl(onmconf), null, onmconf);
         df = OWLManager.getOWLDataFactory();
     }
 
@@ -119,10 +109,10 @@ public class TestOWLAPIInputSources {
         assertNotNull(f);
         OntologyInputSource<OWLOntology> coreSource = new ParentPathInputSource(f);
 
-        // Check that all the imports closure is made of local files
-        Set<OWLOntology> closure = coreSource.getImports(true);
-        for (OWLOntology o : closure)
-            assertEquals("file", o.getOWLOntologyManager().getOntologyDocumentIRI(o).getScheme());
+        // // Check that all the imports closure is made of local files
+        // Set<OWLOntology> closure = coreSource.getImports(true);
+        // for (OWLOntology o : closure)
+        // assertEquals("file", o.getOWLOntologyManager().getOntologyDocumentIRI(o).getScheme());
 
         assertEquals(coreSource.getRootOntology().getOntologyID().getOntologyIRI(),
             IRI.create(Constants.PEANUTS_MAIN_BASE));

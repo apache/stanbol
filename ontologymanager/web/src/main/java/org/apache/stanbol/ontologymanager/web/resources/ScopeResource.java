@@ -94,10 +94,10 @@ import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOnto
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.SetInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.StoredOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
@@ -462,10 +462,10 @@ public class ScopeResource extends BaseStanbolResource {
         else if (ontologyId == null || ontologyId.isEmpty()) rb = Response.status(BAD_REQUEST);
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
-            OWLOntology o = scope.getCustomSpace().getOntology(IRI.create(ontologyId), OWLOntology.class,
-                false, prefix);
-            if (o == null) o = scope.getCoreSpace().getOntology(IRI.create(ontologyId), OWLOntology.class,
-                false, prefix);
+            OWLOntology o = scope.getCustomSpace().getOntology(OntologyUtils.decode(ontologyId),
+                OWLOntology.class, false, prefix);
+            if (o == null) o = scope.getCoreSpace().getOntology(OntologyUtils.decode(ontologyId),
+                OWLOntology.class, false, prefix);
             if (o == null) rb = Response.status(NOT_FOUND);
             else try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -709,7 +709,7 @@ public class ScopeResource extends BaseStanbolResource {
         }
         if (!keys.isEmpty()) {
             for (String key : keys)
-                scope.getCustomSpace().addOntology(Origin.create(OntologyUtils.decode(key)));
+                scope.getCustomSpace().addOntology(new StoredOntologySource(OntologyUtils.decode(key)));
             rb = Response.seeOther(URI.create("/ontonet/ontology/" + scope.getID()));
         }
         // else throw new WebApplicationException(BAD_REQUEST);

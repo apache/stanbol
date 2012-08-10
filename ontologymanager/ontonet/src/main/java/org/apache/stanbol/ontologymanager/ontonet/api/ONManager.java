@@ -18,7 +18,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api;
 
 import java.io.File;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
@@ -31,7 +31,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
  * <br>
  * Note that since this object is both a {@link ScopeRegistry} and an {@link OntologyScopeFactory}, the call
  * to {@link ScopeRegistry#registerScope(OntologyScope)} or its overloads after
- * {@link OntologyScopeFactory#createOntologyScope(String, OriginOrInputSource...)} is unnecessary, as the
+ * {@link OntologyScopeFactory#createOntologyScope(String, OntologyInputSource...)} is unnecessary, as the
  * ONManager automatically registers newly created scopes.
  * 
  * @author alexdma, anuzzolese

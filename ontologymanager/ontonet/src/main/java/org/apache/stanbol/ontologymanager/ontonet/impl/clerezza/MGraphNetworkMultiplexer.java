@@ -16,15 +16,15 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.APPENDED_TO;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.ENTRY;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_APPENDED;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_ONTOLOGY_IRI;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_VERSION_IRI;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_MANAGED_BY;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.MANAGES;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SESSION;
-import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SIZE_IN_TRIPLES;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.APPENDED_TO_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.ENTRY_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_APPENDED_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_ONTOLOGY_IRI_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.HAS_VERSION_IRI_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.IS_MANAGED_BY_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.MANAGES_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SESSION_URIREF;
+import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary.SIZE_IN_TRIPLES_URIREF;
 import static org.apache.stanbol.ontologymanager.ontonet.api.Vocabulary._NS_STANBOL_INTERNAL;
 
 import java.util.HashSet;
@@ -32,9 +32,11 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.RDF;
@@ -95,18 +97,20 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
     protected OWLOntologyID buildPublicKey(final UriRef resource) {
         // TODO desanitize?
         IRI oiri = null, viri = null;
-        Iterator<Triple> it = meta.filter(resource, HAS_ONTOLOGY_IRI, null);
+        Iterator<Triple> it = meta.filter(resource, HAS_ONTOLOGY_IRI_URIREF, null);
         if (it.hasNext()) {
             Resource obj = it.next().getObject();
             if (obj instanceof UriRef) oiri = IRI.create(((UriRef) obj).getUnicodeString());
+            else if (obj instanceof Literal) oiri = IRI.create(((Literal) obj).getLexicalForm());
         } else {
             // Anonymous ontology? Decode the resource itself (which is not null)
             return OntologyUtils.decode(resource.getUnicodeString());
         }
-        it = meta.filter(resource, HAS_VERSION_IRI, null);
+        it = meta.filter(resource, HAS_VERSION_IRI_URIREF, null);
         if (it.hasNext()) {
             Resource obj = it.next().getObject();
             if (obj instanceof UriRef) viri = IRI.create(((UriRef) obj).getUnicodeString());
+            else if (obj instanceof Literal) viri = IRI.create(((Literal) obj).getLexicalForm());
         }
         if (viri == null) return new OWLOntologyID(oiri);
         else return new OWLOntologyID(oiri, viri);
@@ -130,12 +134,14 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
         IRI ontologyIri = publicKey.getOntologyIRI(), versionIri = publicKey.getVersionIRI();
         if (ontologyIri == null) throw new IllegalArgumentException(
                 "Cannot build a UriRef resource on an anonymous public key!");
-
         log.debug("Searching for a meta graph entry for public key:");
         log.debug(" -- {}", publicKey);
         UriRef match = null;
-        for (Iterator<Triple> it = meta.filter(null, HAS_ONTOLOGY_IRI, new UriRef(ontologyIri.toString())); it
-                .hasNext();) {
+        LiteralFactory lf = LiteralFactory.getInstance();
+        TypedLiteral oiri = lf.createTypedLiteral(new UriRef(ontologyIri.toString()));
+        TypedLiteral viri = versionIri == null ? null : lf.createTypedLiteral(new UriRef(versionIri
+                .toString()));
+        for (Iterator<Triple> it = meta.filter(null, HAS_ONTOLOGY_IRI_URIREF, oiri); it.hasNext();) {
             Resource subj = it.next().getSubject();
             log.debug(" -- Ontology IRI match found. Scanning");
             log.debug(" -- Resource : {}", subj);
@@ -143,10 +149,9 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
                 log.debug(" ---- (uncomparable: skipping...)");
                 continue;
             }
-            if (versionIri != null) {
+            if (viri != null) {
                 // Must find matching versionIRI
-                if (meta.contains(new TripleImpl((UriRef) subj, HAS_VERSION_IRI, new UriRef(versionIri
-                        .toString())))) {
+                if (meta.contains(new TripleImpl((UriRef) subj, HAS_VERSION_IRI_URIREF, viri))) {
                     log.debug(" ---- Version IRI match!");
                     match = (UriRef) subj;
                     break; // Found
@@ -157,7 +162,7 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
 
             } else {
                 // Must find unversioned resource
-                if (meta.filter((UriRef) subj, HAS_VERSION_IRI, null).hasNext()) {
+                if (meta.filter((UriRef) subj, HAS_VERSION_IRI_URIREF, null).hasNext()) {
                     log.debug(" ---- Unexpected version IRI found. Skipping.");
                     continue;
                 } else {
@@ -193,7 +198,7 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
     @Override
     public Set<OWLOntologyID> getPublicKeys() {
         Set<OWLOntologyID> result = new HashSet<OWLOntologyID>();
-        Iterator<Triple> it = meta.filter(null, RDF.type, ENTRY);
+        Iterator<Triple> it = meta.filter(null, RDF.type, ENTRY_URIREF);
         while (it.hasNext()) {
             Resource obj = it.next().getSubject();
             if (obj instanceof UriRef) result.add(buildPublicKey((UriRef) obj));
@@ -204,7 +209,7 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
     @Override
     public int getSize(OWLOntologyID publicKey) {
         UriRef subj = buildResource(publicKey);
-        Iterator<Triple> it = meta.filter(subj, SIZE_IN_TRIPLES, null);
+        Iterator<Triple> it = meta.filter(subj, SIZE_IN_TRIPLES_URIREF, null);
         if (it.hasNext()) {
             Resource obj = it.next().getObject();
             if (obj instanceof Literal) {
@@ -242,11 +247,11 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
         boolean hasValues = false;
         log.debug("Ontology {}", addedOntology);
         log.debug("-- is already managed by the following collectors :");
-        for (Iterator<Triple> it = meta.filter(u, IS_MANAGED_BY, null); it.hasNext();) {
+        for (Iterator<Triple> it = meta.filter(u, IS_MANAGED_BY_URIREF, null); it.hasNext();) {
             hasValues = true;
             log.debug("-- {}", it.next().getObject());
         }
-        for (Iterator<Triple> it = meta.filter(null, MANAGES, u); it.hasNext();) {
+        for (Iterator<Triple> it = meta.filter(null, MANAGES_URIREF, u); it.hasNext();) {
             hasValues = true;
             log.debug("-- {} (inverse)", it.next().getSubject());
         }
@@ -255,12 +260,12 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
         // Add both inverse triples. This graph has to be traversed efficiently, no need for reasoners.
         UriRef predicate1 = null, predicate2 = null;
         if (collector instanceof OntologySpace) {
-            predicate1 = MANAGES;
-            predicate2 = IS_MANAGED_BY;
+            predicate1 = MANAGES_URIREF;
+            predicate2 = IS_MANAGED_BY_URIREF;
         } else if (collector instanceof Session) {
             // TODO implement model for sessions.
-            predicate1 = MANAGES;
-            predicate2 = IS_MANAGED_BY;
+            predicate1 = MANAGES_URIREF;
+            predicate2 = IS_MANAGED_BY_URIREF;
         } else {
             log.error("Unrecognized ontology collector type {} for \"{}\". Aborting.", collector.getClass(),
                 collector.getID());
@@ -303,7 +308,7 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
         for (Iterator<Triple> it = meta.filter(c, null, u); it.hasNext();) {
             UriRef property = it.next().getPredicate();
             if (collector instanceof OntologySpace || collector instanceof Session) {
-                if (property.equals(MANAGES)) badState = false;
+                if (property.equals(MANAGES_URIREF)) badState = false;
             }
         }
 
@@ -311,7 +316,7 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
         for (Iterator<Triple> it = meta.filter(u, null, c); it.hasNext();) {
             UriRef property = it.next().getPredicate();
             if (collector instanceof OntologySpace || collector instanceof Session) {
-                if (property.equals(IS_MANAGED_BY)) badState = false;
+                if (property.equals(IS_MANAGED_BY_URIREF)) badState = false;
             }
         }
 
@@ -320,8 +325,8 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
 
         synchronized (meta) {
             if (collector instanceof OntologySpace) {
-                meta.remove(new TripleImpl(c, MANAGES, u));
-                meta.remove(new TripleImpl(u, IS_MANAGED_BY, c));
+                meta.remove(new TripleImpl(c, MANAGES_URIREF, u));
+                meta.remove(new TripleImpl(u, IS_MANAGED_BY_URIREF, c));
             }
         }
     }
@@ -332,8 +337,8 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
         if (sessionur == null || scopeur == null) throw new IllegalArgumentException(
                 "UriRefs for scope and session cannot be null.");
         if (meta instanceof MGraph) synchronized (meta) {
-            meta.add(new TripleImpl(sessionur, HAS_APPENDED, scopeur));
-            meta.add(new TripleImpl(scopeur, APPENDED_TO, sessionur));
+            meta.add(new TripleImpl(sessionur, HAS_APPENDED_URIREF, scopeur));
+            meta.add(new TripleImpl(scopeur, APPENDED_TO_URIREF, sessionur));
         }
     }
 
@@ -344,8 +349,8 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
                 "UriRefs for scope and session cannot be null.");
         if (meta instanceof MGraph) synchronized (meta) {
             // TripleImpl implements equals() and hashCode() ...
-            meta.remove(new TripleImpl(sessionur, HAS_APPENDED, scopeur));
-            meta.remove(new TripleImpl(scopeur, APPENDED_TO, sessionur));
+            meta.remove(new TripleImpl(sessionur, HAS_APPENDED_URIREF, scopeur));
+            meta.remove(new TripleImpl(scopeur, APPENDED_TO_URIREF, sessionur));
         }
     }
 
@@ -368,7 +373,7 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
         // If this method was called after a session rebuild, the following will have little to no effect.
         synchronized (meta) {
             // The only essential triple to add is typing
-            meta.add(new TripleImpl(sesur, RDF.type, SESSION));
+            meta.add(new TripleImpl(sesur, RDF.type, SESSION_URIREF));
         }
         log.debug("Ontology collector information triples added for session \"{}\".", sesur);
     }
@@ -381,7 +386,7 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
         for (Iterator<Triple> it = meta.filter(sessionur, null, null); it.hasNext();) {
             Triple t = it.next();
             if (RDF.type.equals(t.getPredicate())) {
-                if (SESSION.equals(t.getObject())) removable = true;
+                if (SESSION_URIREF.equals(t.getObject())) removable = true;
                 else conflict = true;
             }
             removeUs.add(t);
@@ -389,7 +394,7 @@ public class MGraphNetworkMultiplexer implements OntologyNetworkMultiplexer {
         if (!removable) {
             log.error("Cannot write session deregistration to persistence:");
             log.error("-- resource {}", sessionur);
-            log.error("-- is not typed as a {} in the meta-graph.", SESSION);
+            log.error("-- is not typed as a {} in the meta-graph.", SESSION_URIREF);
         } else if (conflict) {
             log.error("Conflict upon session deregistration:");
             log.error("-- resource {}", sessionur);

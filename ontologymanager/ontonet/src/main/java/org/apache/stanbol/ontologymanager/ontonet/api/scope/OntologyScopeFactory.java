@@ -17,7 +17,7 @@
 package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 
 /**
  * An ontology scope factory is responsible for the creation of new ontology scopes from supplied ontology
@@ -44,5 +44,5 @@ public interface OntologyScopeFactory extends ScopeEventListenable {
      *             if an ontology scope with the given identifier is already <i>registered</i>. The exception
      *             is not thrown if another scope with the same ID has been created but not registered.
      */
-    OntologyScope createOntologyScope(String scopeID, OriginOrInputSource... coreOntologies) throws DuplicateIDException;
+    OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?>... coreOntologies) throws DuplicateIDException;
 }

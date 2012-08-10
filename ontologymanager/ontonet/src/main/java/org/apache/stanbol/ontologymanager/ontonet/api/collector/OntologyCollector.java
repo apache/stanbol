@@ -19,8 +19,8 @@ package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedArtifact;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSourceHandler;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyID;
@@ -41,13 +41,11 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedArt
      * storage and does not have an OWL version IRI of its own, this ontology collector will 'claim ownership'
      * of the ontology by setting its own logical ID as the version IRI of the new ontology.
      * 
-     * TODO make this method return the public key as an {@link OWLOntologyID}.
-     * 
      * @param ontology
      *            the ontology to be added
      * @return the key that can be used for accessing the stored ontology directly
      */
-    OWLOntologyID addOntology(OriginOrInputSource ontology);
+    OWLOntologyID addOntology(OntologyInputSource<?> ontology);
 
     /**
      * Returns the ontologies managed by this ontology space. This is a shortcut method for iterating

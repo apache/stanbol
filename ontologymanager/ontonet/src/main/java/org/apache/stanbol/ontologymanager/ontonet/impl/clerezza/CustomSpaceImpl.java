@@ -56,6 +56,18 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl implements Custom
     }
 
     @Override
+    public boolean equals(Object arg0) {
+        if (arg0 == null) return false;
+        if (!(arg0 instanceof CustomOntologySpace)) return false;
+        if (this == arg0) return true;
+        log.warn(
+            "{} only implements weak equality, i.e. managed ontologies are only checked by public key, not by content.",
+            getClass());
+        CustomOntologySpace sp = (CustomOntologySpace) arg0;
+        return super.equals(arg0) && this.getConnectivityPolicy().equals(sp.getConnectivityPolicy());
+    }
+
+    @Override
     public ConnectivityPolicy getConnectivityPolicy() {
         return policy;
     }

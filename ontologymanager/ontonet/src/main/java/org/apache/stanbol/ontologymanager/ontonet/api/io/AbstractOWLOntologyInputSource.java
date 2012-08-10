@@ -16,11 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
-import java.util.Set;
-
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * Abstract OWL API implementation of {@link OntologyInputSource} with the basic methods for obtaining root
@@ -30,11 +27,5 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * 
  */
 public abstract class AbstractOWLOntologyInputSource extends AbstractGenericInputSource<OWLOntology> {
-
-    @Override
-    public Set<OWLOntology> getImports(boolean recursive) {
-        OWLOntologyManager mgr = rootOntology.getOWLOntologyManager();
-        return (recursive ? mgr.getImportsClosure(rootOntology) : mgr.getDirectImports(rootOntology));
-    }
 
 }

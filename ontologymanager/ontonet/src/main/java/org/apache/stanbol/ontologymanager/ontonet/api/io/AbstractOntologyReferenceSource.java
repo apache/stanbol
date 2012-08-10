@@ -16,29 +16,25 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.access.TcManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * Default implementation of an {@link OntologyInputSource} that returns {@link TripleCollection} objects as
- * ontologies.
+ * Input sources that do not deliver an ontology object, but only a means for consumers to obtain one if they
+ * wish, should subclass this one.
  * 
- * Subclasses must implement the {@link #getImports(boolean)} method, as the availability of imported
- * ontologies might depend on the input source being able to access the {@link TcManager} where they are
- * stored.
+ * These input sources should be used whenever it is possible to avoid creating an ontology object, thereby
+ * saving resources. Examples include cases where the ontology is already stored in Stanbol, or whenever
+ * loading has to be deferred.
  * 
  * @author alexdma
  * 
+ * @param <O>
+ *            the ontology object
  */
-public abstract class AbstractClerezzaGraphInputSource extends AbstractGenericInputSource<TripleCollection> {
+@SuppressWarnings({"unchecked", "rawtypes"})
+public abstract class AbstractOntologyReferenceSource extends AbstractGenericInputSource {
 
-    protected Logger log = LoggerFactory.getLogger(getClass());
-
-    @Override
-    protected void bindRootOntology(TripleCollection ontology) {
-        super.bindRootOntology(ontology);
+    public AbstractOntologyReferenceSource(Origin<?> origin) {
+        this.origin = origin;
+        this.rootOntology = null;
     }
 
 }

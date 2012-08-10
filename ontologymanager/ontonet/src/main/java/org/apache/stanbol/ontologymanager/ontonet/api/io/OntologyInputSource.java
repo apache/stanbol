@@ -16,8 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
-import java.util.Set;
-
 /**
  * An ontology input source provides a point for loading an ontology. Currently it provides two ways of
  * obtaining an ontology document:
@@ -36,15 +34,7 @@ import java.util.Set;
  * @author alexdma
  * 
  */
-public interface OntologyInputSource<O> extends OriginOrInputSource {
-
-    /**
-     * Gets the ontology network resulting from the transitive closure of import statements on the root
-     * ontology. Useful for implementations with a custom management of ontology loading.
-     * 
-     * @return the import closure of the root ontology.
-     */
-    Set<O> getImports(boolean recursive);
+public interface OntologyInputSource<O> {
 
     /**
      * Returns a reference object that can be used for obtaining the supplied ontology. Depending on how the

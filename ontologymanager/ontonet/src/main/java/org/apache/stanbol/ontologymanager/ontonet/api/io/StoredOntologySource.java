@@ -16,29 +16,30 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.access.TcManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 
 /**
- * Default implementation of an {@link OntologyInputSource} that returns {@link TripleCollection} objects as
- * ontologies.
- * 
- * Subclasses must implement the {@link #getImports(boolean)} method, as the availability of imported
- * ontologies might depend on the input source being able to access the {@link TcManager} where they are
- * stored.
+ * An reference source for an ontology already stored by Stanbol with the given public key. Handlers are free
+ * to decide whether to obtain an ontology object from it , or simply pass the reference along.
  * 
  * @author alexdma
  * 
  */
-public abstract class AbstractClerezzaGraphInputSource extends AbstractGenericInputSource<TripleCollection> {
+public class StoredOntologySource extends AbstractOntologyReferenceSource {
 
-    protected Logger log = LoggerFactory.getLogger(getClass());
+    /**
+     * Creates a new instance of {@link StoredOntologySource}.
+     * 
+     * @param publicKey
+     *            the public key of the stored ontology.
+     */
+    public StoredOntologySource(OWLOntologyID publicKey) {
+        super(Origin.create(publicKey));
+    }
 
     @Override
-    protected void bindRootOntology(TripleCollection ontology) {
-        super.bindRootOntology(ontology);
+    public String toString() {
+        return "PUBLIC-KEY" + origin.getReference();
     }
 
 }

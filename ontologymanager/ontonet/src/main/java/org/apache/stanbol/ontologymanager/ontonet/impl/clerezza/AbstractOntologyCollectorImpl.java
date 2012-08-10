@@ -50,11 +50,9 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSourceHandler;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OriginOrInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
@@ -121,85 +119,66 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         supportedTypes.add(OWLOntology.class);
         supportedTypes.add(TripleCollection.class);
         setID(id);
-        setNamespace(namespace);
+        setDefaultNamespace(namespace);
         this.ontologyProvider = ontologyProvider;
         this.managedOntologies = new HashSet<OWLOntologyID>();
     }
 
     @Override
-    public OWLOntologyID addOntology(OriginOrInputSource ontology) {
-        if (ontology.isInputSource()) return addOntology(ontology.asInputSource());
-        if (ontology.isOrigin()) {
-            addOntology(ontology.asOrigin());
-            return null;
-        }
-        return null;
-    }
+    public synchronized OWLOntologyID addOntology(OntologyInputSource<?> ontologySource) throws UnmodifiableOntologyCollectorException {
 
-    private synchronized OWLOntologyID addOntology(OntologyInputSource<?> ontologySource) throws UnmodifiableOntologyCollectorException {
-
-        long before = System.currentTimeMillis();
-
+        // Check for error conditions.
         if (locked) throw new UnmodifiableOntologyCollectorException(this);
+        if (ontologySource == null) throw new IllegalArgumentException("Ontology source cannot be null.");
 
         log.debug("Adding ontology to collector {}", getID());
-        if (ontologySource == null || !ontologySource.hasRootOntology()) // No ontology to add
-        throw new IllegalArgumentException(
-                "Ontology source cannot be null and must provide an ontology object.");
-
-        Object o = ontologySource.getRootOntology();
-
-        // Now for the actual storage. We pass the ontology object directly.
         OWLOntologyID key = null;
-        // // FIXME restore ownership management, but maybe not by directly setting the versionIRI
-        // if (ontologyProvider.hasOntology(id.getOntologyIRI())) if (o instanceof MGraph)
-        // claimOwnership((MGraph) o);
-        // else if (o instanceof OWLOntology) claimOwnership((OWLOntology) o);
 
-        if (ontologySource.hasOrigin()) key = ontologyProvider.loadInStore(o, false,
-            ontologySource.getOrigin());
-        else key = ontologyProvider.loadInStore(o, false);
+        if (ontologySource.hasRootOntology()) {
+            long before = System.currentTimeMillis();
+            Object o = ontologySource.getRootOntology();
+            // // FIXME restore ownership management, but maybe not by directly setting the versionIRI
+            // if (ontologyProvider.hasOntology(id.getOntologyIRI())) if (o instanceof MGraph)
+            // claimOwnership((MGraph) o);
+            // else if (o instanceof OWLOntology) claimOwnership((OWLOntology) o);
 
-        /*
-         * Actually we are not interested in knowing the key here (ontology collectors are not concerned with
-         * them), but knowing it is non-null and non-empty indicates the operation was successful.
-         */
-        if (key != null) {
-
-            // add to index
-            managedOntologies.add(key);
-            // // Always add sanitized version
-            // managedOntologies.add(id.getVersionIRI() == null ? new OWLOntologyID(URIUtils.sanitizeID(id
-            // .getOntologyIRI())) : new OWLOntologyID(URIUtils.sanitizeID(id.getOntologyIRI()),
-            // URIUtils.sanitizeID(id.getVersionIRI())));
-            // Note that imported ontologies are not considered as managed! TODO should we change this?
-            log.debug("Add ontology completed in {} ms.", (System.currentTimeMillis() - before));
-            // fire the event
-            fireOntologyAdded(key);
-        }
+            // Check the origin anyhow, as it may be useful for setting aliases with physical locations etc.
+            if (ontologySource.hasOrigin()) key = ontologyProvider.loadInStore(o, false,
+                ontologySource.getOrigin());
+            else key = ontologyProvider.loadInStore(o, false);
+            if (key != null) {
+                managedOntologies.add(key);
+                // Note that imported ontologies are not considered as managed! TODO should we change this?
+                log.info("Add ontology completed in {} ms.", (System.currentTimeMillis() - before));
+                // Fire the event
+                fireOntologyAdded(key);
+            }
+        } else if (ontologySource.hasOrigin()) {
+            // Just the origin : see if it is satisfiable
+            log.debug("Checking origin satisfiability...");
+            Origin<?> origin = ontologySource.getOrigin();
+            Object ref = origin.getReference();
+            log.debug("Origin wraps a {}", ref.getClass().getCanonicalName());
+            if (ref instanceof IRI) try {
+                log.debug("Deferring addition to physical IRI {} (if available).", ref);
+                key = addOntology(new RootOntologyIRISource((IRI) ref));
+            } catch (OWLOntologyCreationException e) {
+                throw new RuntimeException(e);
+            }
+            else if (ref instanceof UriRef) {
+                log.debug("Deferring addition to stored Clerezza graph {} (if available).", ref);
+                key = addOntology(new GraphSource((UriRef) ref));
+            } else if (ref instanceof OWLOntologyID) {
+                OWLOntologyID idref = (OWLOntologyID) ref;
+                log.debug("Deferring addition to stored ontology with public key {} (if available).", ref);
+                if (!ontologyProvider.hasOntology(idref)) throw new MissingOntologyException(this, idref);
+                key = idref;
+                if (managedOntologies.add(idref)) fireOntologyAdded(idref);
+            } else throw new IllegalArgumentException("Invalid origin " + origin);
+        } else throw new IllegalArgumentException(
+                "Ontology source must provide either an ontology object, or a way to reference one (i.e. an origin).");
+        log.info("Public key : {}", key);
         return key;
-    }
-
-    private synchronized void addOntology(Origin<?> origin) throws UnmodifiableOntologyCollectorException {
-        if (origin == null) throw new IllegalArgumentException("Origin cannot be null.");
-        Object ref = origin.getReference();
-        if (ref instanceof IRI) try {
-            addOntology(new RootOntologyIRISource((IRI) ref));
-            return;
-        } catch (OWLOntologyCreationException e) {
-            throw new RuntimeException(e);
-        }
-        if (ref instanceof UriRef) {
-            addOntology(new GraphSource((UriRef) ref));
-            return;
-        }
-        if (ref instanceof OWLOntologyID) {
-            OWLOntologyID idref = (OWLOntologyID) ref;
-            if (!ontologyProvider.hasOntology(idref)) throw new MissingOntologyException(this, idref);
-            if (managedOntologies.add(idref)) fireOntologyAdded(idref);
-            return;
-        }
-        throw new IllegalArgumentException("Invalid origin " + origin);
     }
 
     @Override
@@ -263,6 +242,21 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     @Override
     public void clearOntologyCollectorListeners() {
         listeners.clear();
+    }
+
+    @Override
+    public boolean equals(Object arg0) {
+        if (arg0 == null) return false;
+        if (!(arg0 instanceof OntologyCollector)) return false;
+        if (this == arg0) return true;
+        log.warn(
+            "{} only implements weak equality, i.e. managed ontologies are only checked by public key, not by content.",
+            getClass());
+        OntologyCollector coll = (OntologyCollector) arg0;
+        return this.getID().equals(coll.getID())
+               && this.getDefaultNamespace().equals(coll.getDefaultNamespace())
+               && this.listManagedOntologies().equals(coll.listManagedOntologies())
+               && this.getSupportedOntologyTypes().equals(coll.getSupportedOntologyTypes());
     }
 
     @Override
@@ -742,8 +736,6 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
      *            only allows non-null and non-empty IRIs, with no query or fragment. Hash URIs are not
      *            allowed, slash URIs are preferred. If neither, a slash will be concatenated and a warning
      *            will be logged.
-     * 
-     * @see OntologySpace#setNamespace(IRI)
      */
     @Override
     public void setDefaultNamespace(IRI namespace) {

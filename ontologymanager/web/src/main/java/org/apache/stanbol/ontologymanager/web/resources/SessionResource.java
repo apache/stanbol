@@ -90,8 +90,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOnto
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.StoredOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
@@ -716,7 +716,7 @@ public class SessionResource extends BaseStanbolResource {
         }
         if (!keys.isEmpty()) {
             for (String key : keys)
-                session.addOntology(Origin.create(OntologyUtils.decode(key)));
+                session.addOntology(new StoredOntologySource(OntologyUtils.decode(key)));
             rb = Response.seeOther(URI.create("/ontonet/session/" + session.getID()));
         } // Now check scopes
         if (toAppend != null

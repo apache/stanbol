@@ -36,7 +36,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.MissingOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.StoredOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyNetworkMultiplexer;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
@@ -183,11 +183,11 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
         if (id == null) id = _ID_DEFAULT;
         String s = null;
         try {
-            setNamespace(offline.getDefaultOntologyNetworkNamespace());
+            setDefaultNamespace(offline.getDefaultOntologyNetworkNamespace());
         } catch (Exception e) {
             log.warn("Invalid namespace {}. Setting to default value {}",
                 offline.getDefaultOntologyNetworkNamespace(), _ONTOLOGY_NETWORK_NS_DEFAULT);
-            setNamespace(IRI.create(_ONTOLOGY_NETWORK_NS_DEFAULT));
+            setDefaultNamespace(IRI.create(_ONTOLOGY_NETWORK_NS_DEFAULT));
         }
         try {
             s = (String) configuration.get(SessionManager.MAX_ACTIVE_SESSIONS);
@@ -383,9 +383,7 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
             session.setActive(false); // Restored sessions are inactive at first.
             for (OWLOntologyID key : struct.getOntologyKeysForSession(sessionId))
                 try {
-                    session.addOntology(
-                    // new GraphSource(key)
-                    Origin.create(key));
+                    session.addOntology(new StoredOntologySource(key));
                 } catch (MissingOntologyException ex) {
                     log.error(
                         "Could not find an ontology with public key {} to be managed by session \"{}\". Proceeding to next ontology.",
