@@ -25,14 +25,14 @@
   <!-- Note: that Tika only inits the Parser correctly if the start level of
        tika-core is lower than tika-bundle
    -->  
-  <startLevel level="16">
+  <startLevel level="26">
     <bundle> <!-- Apache Tika core (required by the LangId and TikaEngine) -->
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-core</artifactId>
         <version>1.1</version>
     </bundle>
   </startLevel>
-  <startLevel level="17">
+  <startLevel level="27">
     <bundle> <!-- Apache Tika bundle (required by the TikaEngine) -->
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-bundle</artifactId>
@@ -40,7 +40,7 @@
     </bundle>
   </startLevel>
   <!-- Stanbol Enhancer infrastructure and required libraries -->
-  <startLevel level="20">
+  <startLevel level="30">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
@@ -53,7 +53,7 @@
     </bundle>
   </startLevel>
   <!-- LDPath -->
-  <startLevel level="20">
+  <startLevel level="30">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.ldpath</artifactId>
@@ -61,7 +61,7 @@
     </bundle>
   </startLevel>
   <!-- EnhancementJobManager implementations -->
-  <startLevel level="20">
+  <startLevel level="30">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.eventjobmanager</artifactId>
@@ -74,7 +74,7 @@
     </bundle>
   </startLevel>
   <!-- Enhancement Chain implementations -->
-  <startLevel level="20">
+  <startLevel level="30">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.allactive</artifactId>
@@ -97,7 +97,7 @@
     </bundle>
   </startLevel>
   <!-- Web Fragment -->
-  <startLevel level="21">
+  <startLevel level="31">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
@@ -106,7 +106,7 @@
   </startLevel>
 
   <!-- Benchmarks for the Stanbol Enhancer -->
-  <startLevel level="21">
+  <startLevel level="31">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.benchmark</artifactId>
@@ -115,7 +115,7 @@
   </startLevel>
 
   <!-- Stanbol Enhancer plug-ins (the Enhancement Engines) -->
-  <startLevel level="25">
+  <startLevel level="35">
 
     <!-- language identification -->
 
@@ -201,7 +201,7 @@
   
   <!-- Default Configuration for the Stanbol Enhancer -->
   
-  <startLevel level="26">
+  <startLevel level="36">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.defaults</artifactId>

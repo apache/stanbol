@@ -17,7 +17,7 @@
 -->
 
 <bundles>
-	<startLevel level="22">
+	<startLevel level="32">
 		<!-- Stanbol Rules -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>

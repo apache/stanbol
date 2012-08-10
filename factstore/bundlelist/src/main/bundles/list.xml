@@ -17,7 +17,7 @@
 -->
 
 <bundles>
-  <startLevel level="10">
+  <startLevel level="20">
     <bundle> <!-- only used by the Factstore -->
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
@@ -25,7 +25,7 @@
     </bundle>
   </startLevel> 
 
-  <startLevel level="20">
+  <startLevel level="30">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.factstore</artifactId>

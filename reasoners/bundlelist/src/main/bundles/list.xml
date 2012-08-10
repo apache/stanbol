@@ -17,7 +17,7 @@
 -->
 
 <bundles>
-  <startLevel level="20">
+  <startLevel level="30">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
@@ -39,7 +39,7 @@
       <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
-  <startLevel level="28">
+  <startLevel level="38">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.web</artifactId>

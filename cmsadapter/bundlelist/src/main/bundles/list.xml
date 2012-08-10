@@ -17,7 +17,7 @@
 -->
 
 <bundles>
-	<startLevel level="23">
+	<startLevel level="33">
 		<!-- JCR Bundles -->
 		<bundle>
 			<groupId>javax.jcr</groupId>
