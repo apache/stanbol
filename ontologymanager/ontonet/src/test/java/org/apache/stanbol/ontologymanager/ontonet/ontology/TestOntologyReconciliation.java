@@ -22,8 +22,10 @@ import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -48,6 +50,11 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class TestOntologyReconciliation {
+
+    @AfterClass
+    public static void cleanup() {
+        reset();
+    }
 
     @BeforeClass
     public static void setup() {
@@ -107,7 +114,7 @@ public class TestOntologyReconciliation {
      */
     @Test
     public void namedFromStream() throws Exception {
-        String location = "/ontologies/id/named-2.owl";
+        String location = "/ontologies/naming/named-2.owl";
         OWLOntologyID expectedId = new OWLOntologyID(
                 IRI.create("http://stanbol.apache.org/ontologies/test/naming/named-2"));
         InputStream in = getClass().getResourceAsStream(location);
@@ -145,7 +152,7 @@ public class TestOntologyReconciliation {
      */
     @Test
     public void namedFromURL() throws Exception {
-        String location = "/ontologies/id/named-1.owl";
+        String location = "/ontologies/naming/named-1.owl";
         OWLOntologyID expectedId = new OWLOntologyID(
                 IRI.create("http://stanbol.apache.org/ontologies/test/naming/named-1"));
         URL url = getClass().getResource(location);
@@ -276,9 +283,102 @@ public class TestOntologyReconciliation {
         assertSame(0, ontologyProvider.listAliases(id2).size());
     }
 
-    @AfterClass
-    public static void cleanup() {
-        reset();
+    /*
+     * If an ontology has no ontology IRI but does have a version IRI, it should still be possible to load it,
+     * but the version IRI must be erased.
+     */
+    @Test
+    public void versionedOnlyFromStream() throws Exception {
+        String location = "/ontologies/naming/versionedonly.owl";
+
+        InputStream in = getClass().getResourceAsStream(location);
+        in.mark(Integer.MAX_VALUE);
+        OWLOntologyManager onMgr = OWLManager.createOWLOntologyManager();
+        OWLOntology o1 = onMgr.loadOntologyFromOntologyDocument(in);
+        // Ensure that the OWL API erases the version IRI.
+        assertTrue(o1.isAnonymous());
+        assertNull(o1.getOntologyID().getVersionIRI());
+        in.reset();
+        // in = getClass().getResourceAsStream(location); // use if stream cannot be reset
+
+        // The public key must be non-anonymous nonetheless.
+        OWLOntologyID key = ontologyProvider.loadInStore(in, RDF_XML, false);
+        assertNotNull(key);
+        assertFalse(key.isAnonymous());
+        assertNull(key.getVersionIRI());
+        log.info("Wrongly versioned ontology loaded with public key {}", key);
+        assertFalse(o1.equals(key));
+
+        OWLOntology o1_1 = ontologyProvider.getStoredOntology(key, OWLOntology.class, false);
+        assertNotNull(o1_1);
+        assertTrue(o1_1.isAnonymous());
+        assertNull(o1_1.getOntologyID().getVersionIRI());
+
+        // Cannot equal two OWLOntology objects, especially if anonymous.
+        // Check that they match axiom-wise.
+        log.warn("Plain OWL API seems to be failing to preserve owl:versionInfo. Will test non-annotation axioms only.");
+        assertEquals(o1.getTBoxAxioms(false), o1_1.getTBoxAxioms(false));
+        log.info(" -- TBox axiom check successful.");
+        assertEquals(o1.getABoxAxioms(false), o1_1.getABoxAxioms(false));
+        log.info(" -- ABox axiom check successful.");
+
+        // No aliases should have been created.
+        assertSame(0, ontologyProvider.listAliases(key).size());
+    }
+
+    /*
+     * If an ontology has no ontology IRI but does have a version IRI, it should still be possible to load it,
+     * but the version IRI must be erased. Plus, the public key should be created after the resource URL.
+     */
+    @Test
+    public void versionedOnlyFromURL() throws Exception {
+        String location = "/ontologies/naming/versionedonly.owl";
+        IRI url = IRI.create(getClass().getResource(location));
+
+        OWLOntologyID expected = new OWLOntologyID(url);
+
+        OWLOntologyManager onMgr = OWLManager.createOWLOntologyManager();
+        OWLOntology o1 = onMgr.loadOntologyFromOntologyDocument(url);
+        // Ensure that the OWL API erases the version IRI.
+        assertTrue(o1.isAnonymous());
+        assertNull(o1.getOntologyID().getVersionIRI());
+
+        // The public key must be non-anonymous nonetheless.
+        OWLOntologyID key = ontologyProvider.loadInStore(url, RDF_XML, false);
+        assertNotNull(key);
+        assertFalse(key.isAnonymous());
+
+        log.info("Wrongly versioned ontology loaded with public key {}", key);
+        assertFalse(o1.equals(key));
+        assertEquals(expected, key);
+        log.info(" -- (matches resource URL).");
+
+        OWLOntology o1_1 = ontologyProvider.getStoredOntology(key, OWLOntology.class, false);
+        assertNotNull(o1_1);
+        assertTrue(o1_1.isAnonymous());
+        assertNull(o1_1.getOntologyID().getVersionIRI());
+
+        // Cannot equal two OWLOntology objects, especially if anonymous.
+        // Check that they match axiom-wise.
+        log.warn("Plain OWL API seems to be failing to preserve owl:versionInfo. Will test non-annotation axioms only.");
+        assertEquals(o1.getTBoxAxioms(false), o1_1.getTBoxAxioms(false));
+        log.info(" -- TBox axiom check successful.");
+        assertEquals(o1.getABoxAxioms(false), o1_1.getABoxAxioms(false));
+        log.info(" -- ABox axiom check successful.");
+
+        // No aliases should have been created.
+        assertSame(0, ontologyProvider.listAliases(key).size());
+    }
+
+    /*
+     * Ensures ontology IDs with only the version IRI are illegal.
+     */
+    @Test
+    public void versionIriOnlyIsIllegal() {
+        try {
+            new OWLOntologyID(null, IRI.create("http://stanbol.apache.org/ontologies/version/bad/1"));
+            fail("An anonymous ontology ID with a version IRI was unexpectedly accepted!");
+        } catch (Exception ex) {}
     }
 
 }

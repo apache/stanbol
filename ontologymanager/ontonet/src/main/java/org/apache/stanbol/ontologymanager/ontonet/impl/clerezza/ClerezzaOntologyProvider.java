@@ -598,7 +598,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
 
     @Override
     public Set<OWLOntologyID> listAliases(OWLOntologyID publicKey) {
-        if (publicKey == null || publicKey.getOntologyIRI() == null) throw new IllegalArgumentException(
+        if (publicKey == null || publicKey.isAnonymous()) throw new IllegalArgumentException(
                 "Cannot locate aliases for null or anonymous public keys.");
         Set<OWLOntologyID> aliases = new HashSet<OWLOntologyID>();
         TripleCollection meta = getMetaGraph(TripleCollection.class);
