@@ -36,6 +36,7 @@ public class CoreSpaceImpl extends AbstractOntologySpaceImpl implements CoreOnto
 
     public CoreSpaceImpl(String scopeID, IRI namespace, OntologyProvider<?> ontologyProvider) {
         super(buildId(scopeID), namespace, SpaceType.CORE, ontologyProvider);
+        setConnectivityPolicy(ConnectivityPolicy.LOOSE);
     }
 
     @Override

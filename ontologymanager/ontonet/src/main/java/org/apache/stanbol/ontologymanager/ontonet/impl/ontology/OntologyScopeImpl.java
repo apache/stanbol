@@ -322,6 +322,11 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     }
 
     @Override
+    public ConnectivityPolicy getConnectivityPolicy() {
+        return ConnectivityPolicy.LOOSE;
+    }
+
+    @Override
     public CoreOntologySpace getCoreSpace() {
         return coreSpace;
     }
@@ -372,6 +377,12 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     @Override
     public void removeOntologyCollectorListener(OntologyCollectorListener listener) {
         listeners.remove(listener);
+    }
+
+    @Override
+    public void setConnectivityPolicy(ConnectivityPolicy policy) {
+        throw new UnsupportedOperationException(
+                "Cannot set connectivity policy on scopes. Ontology scopes only allow LOOSE connectivity policy (set by default).");
     }
 
     @Override

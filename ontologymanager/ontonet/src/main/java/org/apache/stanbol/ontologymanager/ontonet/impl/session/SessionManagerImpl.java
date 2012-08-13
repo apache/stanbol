@@ -29,6 +29,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -37,6 +38,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfigurati
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.MissingOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.StoredOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable.ConnectivityPolicy;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyNetworkMultiplexer;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
@@ -73,6 +75,7 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
 
     public static final String _ID_DEFAULT = "session";
     public static final int _MAX_ACTIVE_SESSIONS_DEFAULT = -1;
+    public static final String _CONNECTIVITY_POLICY_DEFAULT = "TIGHT";
     public static final String _ONTOLOGY_NETWORK_NS_DEFAULT = "http://localhost:8080/ontonet/";
 
     /**
@@ -83,6 +86,15 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
 
     @Property(name = SessionManager.ID, value = _ID_DEFAULT)
     protected String id;
+
+    @Property(name = SessionManager.CONNECTIVITY_POLICY, options = {
+                                                                    @PropertyOption(value = '%'
+                                                                                            + SessionManager.CONNECTIVITY_POLICY
+                                                                                            + ".option.tight", name = "TIGHT"),
+                                                                    @PropertyOption(value = '%'
+                                                                                            + SessionManager.CONNECTIVITY_POLICY
+                                                                                            + ".option.loose", name = "LOOSE")}, value = _CONNECTIVITY_POLICY_DEFAULT)
+    private String connectivityPolicyString;
 
     protected SessionIDGenerator idgen;
 
@@ -204,6 +216,13 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
 
         idgen = new TimestampedSessionIDGenerator();
 
+        Object connectivityPolicy = configuration.get(SessionManager.CONNECTIVITY_POLICY);
+        if (connectivityPolicy == null) {
+            this.connectivityPolicyString = _CONNECTIVITY_POLICY_DEFAULT;
+        } else {
+            this.connectivityPolicyString = connectivityPolicy.toString();
+        }
+
         // Add listeners
         if (ontologyProvider instanceof SessionListener) this
                 .addSessionListener((SessionListener) ontologyProvider);
@@ -273,6 +292,17 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
         OntologyNetworkMultiplexer multiplexer = ontologyProvider.getOntologyNetworkDescriptor();
         session.addOntologyCollectorListener(multiplexer);
         session.addSessionListener(multiplexer);
+
+        ConnectivityPolicy policy;
+        try {
+            policy = ConnectivityPolicy.valueOf(connectivityPolicyString);
+        } catch (IllegalArgumentException e) {
+            log.warn("The value {}", connectivityPolicyString);
+            log.warn(" -- configured as default ConnectivityPolicy does not match any value of the Enumeration!");
+            log.warn(" -- Setting the default policy as defined by the {}.", ConnectivityPolicy.class);
+            policy = ConnectivityPolicy.valueOf(_CONNECTIVITY_POLICY_DEFAULT);
+        }
+        session.setConnectivityPolicy(policy);
 
         addSession(session);
         fireSessionCreated(session);

@@ -89,6 +89,8 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
      */
     protected int backwardPathLength = 0;
 
+    protected ConnectivityPolicy connectivityPolicy;
+
     private Set<OntologyCollectorListener> listeners = new HashSet<OntologyCollectorListener>();
 
     /**
@@ -484,6 +486,11 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
+    public ConnectivityPolicy getConnectivityPolicy() {
+        return this.connectivityPolicy;
+    }
+
+    @Override
     public IRI getDefaultNamespace() {
         return this.namespace;
     }
@@ -728,6 +735,11 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     @Override
     public void removeOntologyCollectorListener(OntologyCollectorListener listener) {
         listeners.remove(listener);
+    }
+
+    @Override
+    public void setConnectivityPolicy(ConnectivityPolicy policy) {
+        this.connectivityPolicy = policy;
     }
 
     /**

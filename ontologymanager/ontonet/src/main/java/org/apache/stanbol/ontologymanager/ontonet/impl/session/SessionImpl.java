@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
@@ -38,6 +39,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +87,34 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
         fireScopeAppended(scopeId);
     }
 
+    private void attachScopeImportsClerezza(TripleCollection target, IRI prefix) {
+        UriRef iri = new UriRef(prefix + _id);
+        String scopePrefix = prefix.toString();
+        scopePrefix = scopePrefix.substring(0, scopePrefix.lastIndexOf("/" + shortName + "/")) + "/ontology/";
+        for (String scopeID : attachedScopes) {
+            UriRef physIRI = new UriRef(scopePrefix + scopeID);
+            target.add(new TripleImpl(iri, OWL.imports, physIRI));
+        }
+    }
+
+    private void attachScopeImportsOwlApi(OWLOntology target, IRI prefix) {
+        if (!attachedScopes.isEmpty()) {
+            String scopePrefix = prefix.toString();
+            scopePrefix = scopePrefix.substring(0, scopePrefix.lastIndexOf("/" + shortName + "/"))
+                          + "/ontology/";
+            List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
+            OWLOntologyManager ontologyManager = target.getOWLOntologyManager();
+            OWLDataFactory df = ontologyManager.getOWLDataFactory();
+            // Add import declarations for attached scopes.
+            for (String scopeID : attachedScopes) {
+                IRI physIRI = IRI.create(scopePrefix + scopeID);
+                changes.add(new AddImport(target, df.getOWLImportsDeclaration(physIRI)));
+            }
+            // Commit
+            ontologyManager.applyChanges(changes);
+        }
+    }
+
     @Override
     public void clearScopes() {
         attachedScopes.clear();
@@ -127,14 +157,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     protected MGraph exportToMGraph(boolean merge, IRI universalPrefix) {
         MGraph mg = super.exportToMGraph(merge, universalPrefix);
-        // Add import declarations for attached scopes.
-        UriRef iri = new UriRef(universalPrefix + _id);
-        String scopePrefix = universalPrefix.toString();
-        scopePrefix = scopePrefix.substring(0, scopePrefix.lastIndexOf("/" + shortName + "/")) + "/ontology/";
-        for (String scopeID : attachedScopes) {
-            UriRef physIRI = new UriRef(scopePrefix + scopeID);
-            mg.add(new TripleImpl(iri, OWL.imports, physIRI));
-        }
+        attachScopeImportsClerezza(mg, universalPrefix);
         return mg;
     }
 
@@ -144,21 +167,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     protected OWLOntology exportToOWLOntology(boolean merge, IRI universalPrefix) {
         OWLOntology o = super.exportToOWLOntology(merge, universalPrefix);
-        if (!attachedScopes.isEmpty()) {
-            String scopePrefix = universalPrefix.toString();
-            scopePrefix = scopePrefix.substring(0, scopePrefix.lastIndexOf("/" + shortName + "/"))
-                          + "/ontology/";
-            List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
-            OWLOntologyManager ontologyManager = o.getOWLOntologyManager();
-            OWLDataFactory df = ontologyManager.getOWLDataFactory();
-            // Add import declarations for attached scopes.
-            for (String scopeID : attachedScopes) {
-                IRI physIRI = IRI.create(scopePrefix + scopeID);
-                changes.add(new AddImport(o, df.getOWLImportsDeclaration(physIRI)));
-            }
-            // Commit
-            ontologyManager.applyChanges(changes);
-        }
+        attachScopeImportsOwlApi(o, universalPrefix);
         return o;
     }
 
@@ -187,6 +196,38 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     public Set<String> getAttachedScopes() {
         return attachedScopes;
+    }
+
+    @Override
+    protected MGraph getOntologyAsMGraph(OWLOntologyID ontologyId, boolean merge, IRI universalPrefix) {
+        MGraph o = super.getOntologyAsMGraph(ontologyId, merge, universalPrefix);
+        switch (getConnectivityPolicy()) {
+            case LOOSE:
+                break;
+            case TIGHT:
+                attachScopeImportsClerezza(o, universalPrefix);
+                break;
+            default:
+                break;
+        }
+        return o;
+    }
+
+    @Override
+    protected OWLOntology getOntologyAsOWLOntology(OWLOntologyID ontologyId,
+                                                   boolean merge,
+                                                   IRI universalPrefix) {
+        OWLOntology o = super.getOntologyAsOWLOntology(ontologyId, merge, universalPrefix);
+        switch (getConnectivityPolicy()) {
+            case LOOSE:
+                break;
+            case TIGHT:
+                attachScopeImportsOwlApi(o, universalPrefix);
+                break;
+            default:
+                break;
+        }
+        return o;
     }
 
     @Override

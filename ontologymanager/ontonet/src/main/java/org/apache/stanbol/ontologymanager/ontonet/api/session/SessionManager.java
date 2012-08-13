@@ -35,6 +35,11 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 public interface SessionManager extends NamedArtifact, SessionListenable {
 
     /**
+     * The key used to configure the connectivity policy.
+     */
+    String CONNECTIVITY_POLICY = "org.apache.stanbol.ontologymanager.ontonet.session_connectivity";
+
+    /**
      * The key used to configure the base namespace of the ontology network.
      */
     String ID = "org.apache.stanbol.ontologymanager.ontonet.session_mgr_id";

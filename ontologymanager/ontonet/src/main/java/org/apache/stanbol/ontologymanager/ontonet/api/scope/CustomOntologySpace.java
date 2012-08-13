@@ -30,13 +30,4 @@ package org.apache.stanbol.ontologymanager.ontonet.api.scope;
  */
 public interface CustomOntologySpace extends OntologySpace {
 
-    enum ConnectivityPolicy {
-        LOOSE,
-        TIGHT
-    };
-
-    ConnectivityPolicy getConnectivityPolicy();
-
-    void setConnectivityPolicy(ConnectivityPolicy policy);
-
 }

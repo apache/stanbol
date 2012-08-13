@@ -49,8 +49,6 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl implements Custom
         return (scopeID != null ? scopeID : "") + "/" + SUFFIX;
     }
 
-    private ConnectivityPolicy policy;
-
     public CustomSpaceImpl(String scopeID, IRI namespace, OntologyProvider<?> ontologyProvider) {
         super(buildId(scopeID), namespace, SpaceType.CUSTOM, ontologyProvider);
     }
@@ -65,11 +63,6 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl implements Custom
             getClass());
         CustomOntologySpace sp = (CustomOntologySpace) arg0;
         return super.equals(arg0) && this.getConnectivityPolicy().equals(sp.getConnectivityPolicy());
-    }
-
-    @Override
-    public ConnectivityPolicy getConnectivityPolicy() {
-        return policy;
     }
 
     @Override
@@ -119,11 +112,6 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl implements Custom
                 break;
         }
         return o;
-    }
-
-    @Override
-    public void setConnectivityPolicy(ConnectivityPolicy policy) {
-        this.policy = policy;
     }
 
     /**
