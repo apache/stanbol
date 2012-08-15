@@ -1068,7 +1068,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
         // XXX Force is ignored for the content, but the imports?
 
         // TODO Profile this method. Are we getting rid of rdfData after adding its triples?
-        OWLOntologyID publicKey = OWLUtils.guessOntologyIdentifier(rdfData);
+        OWLOntologyID publicKey = OWLUtils.extractOntologyID(rdfData);
         if (publicKey == null) {
             IRI z;
             if (origins.length > 0 && origins[0] != null) {
@@ -1095,8 +1095,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider>, S
                      * ontology source. XXX note that anonymous ontologies should be considered a match... or
                      * should they not?
                      */
-                    OWLOntologyID idFromSrc = OWLUtils.guessOntologyIdentifier(rdfData);
-                    OWLOntologyID idFromStore = OWLUtils.guessOntologyIdentifier(store.getTriples(ref));
+                    OWLOntologyID idFromSrc = OWLUtils.extractOntologyID(rdfData);
+                    OWLOntologyID idFromStore = OWLUtils.extractOntologyID(store.getTriples(ref));
                     condition &= (idFromSrc == null && idFromStore == null) || idFromSrc.equals(idFromStore);
 
                     // Finally, a size check

@@ -49,7 +49,7 @@ public class OntologyContentInputSource extends AbstractOWLOntologyInputSource {
 
     @Override
     public String toString() {
-        return "<ONTOLOGY_CONTENT>" + OWLUtils.guessOntologyIdentifier(getRootOntology());
+        return "<ONTOLOGY_CONTENT>" + OWLUtils.extractOntologyID(getRootOntology());
     }
 
 }

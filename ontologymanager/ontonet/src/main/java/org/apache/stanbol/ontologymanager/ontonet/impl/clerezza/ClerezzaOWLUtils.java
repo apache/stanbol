@@ -16,19 +16,12 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,37 +44,6 @@ public class ClerezzaOWLUtils {
 
     public static MGraph createOntology(String id) {
         return createOntology(id, TcManager.getInstance());
-    }
-
-    /**
-     * Performs lookahead with a 100 kB limit.
-     * 
-     * @param content
-     * @param parser
-     * @param format
-     * @return
-     * @throws IOException
-     */
-    public static OWLOntologyID guessOntologyID(InputStream content, Parser parser, String format) throws IOException {
-        return guessOntologyID(content, parser, format, 100 * 1024);
-    }
-
-    public static OWLOntologyID guessOntologyID(InputStream content, Parser parser, String format, int limit) throws IOException {
-        BufferedInputStream bIn = new BufferedInputStream(content);
-        bIn.mark(limit); // set an appropriate limit
-        OntologyLookaheadMGraph graph = new OntologyLookaheadMGraph();
-        try {
-            parser.parse(graph, bIn, format);
-        } catch (RuntimeException e) {}
-        if (graph.getOntologyIRI() != null) {
-            // bIn.reset(); // reset set the stream to the start
-            return new OWLOntologyID(IRI.create(graph.getOntologyIRI().getUnicodeString()));
-        } else { // No OntologyID found
-            // do some error handling
-            log.warn("No ontologyID found after {} bytes, ontology has a chance of being anonymous.", limit);
-            return null;
-        }
-
     }
 
 }

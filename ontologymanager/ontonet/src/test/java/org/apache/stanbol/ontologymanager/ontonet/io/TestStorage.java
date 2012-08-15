@@ -42,6 +42,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +97,7 @@ public class TestStorage {
         String ephemeralScopeId = "CaducousScope";
         OntologyInputSource<OWLOntology> ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
             "/ontologies/nonexistentcharacters.owl")));
-        IRI ontologyId = ois.getRootOntology().getOntologyID().getOntologyIRI();
+        OWLOntologyID ontologyId = ois.getRootOntology().getOntologyID();
         OntologyScope scope = onManager.createOntologyScope(ephemeralScopeId);
         // Initially, the ontology is not there
         assertFalse(ontologyProvider.hasOntology(ontologyId));

@@ -390,7 +390,7 @@ public class ReengineerResource extends BaseStanbolResource {
         // MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
         TripleCollection mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
         MGraph mg2 = null;
-        IRI iri = OWLUtils.guessOntologyIdentifier(o).getOntologyIRI();
+        IRI iri = OWLUtils.extractOntologyID(o).getOntologyIRI();
         UriRef ref = new UriRef(iri.toString());
         try {
             mg2 = tcManager.createMGraph(ref);

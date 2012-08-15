@@ -1,0 +1,655 @@
+##############################################################################
+### Licensed to the Apache Software Foundation (ASF) under one or more
+### contributor license agreements.  See the NOTICE file distributed with
+### this work for additional information regarding copyright ownership.
+### The ASF licenses this file to You under the Apache License, Version 2.0
+### (the "License"); you may not use this file except in compliance with
+### the License.  You may obtain a copy of the License at
+###
+###    http://www.apache.org/licenses/LICENSE-2.0
+###
+### Unless required by applicable law or agreed to in writing, software
+### distributed under the License is distributed on an "AS IS" BASIS,
+### WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+### See the License for the specific language governing permissions and
+### limitations under the License.
+##############################################################################
+
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix : <http://stanbol.apache.org/ontologies/test#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://stanbol.apache.org/ontologies/test> .
+
+<http://stanbol.apache.org/ontologies/test> 
+
+                                            owl:versionIRI <http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/owl/src/test/resources/owl/versioned_distance-100-reversed.owl> ;
+                                            
+                                            owl:versionInfo """Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the \"License\"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+		"""@en .
+
+
+#################################################################
+#
+#    Annotation properties
+#
+#################################################################
+
+
+
+
+#################################################################
+#
+#    Individuals
+#
+#################################################################
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0001
+
+:Thing.0001 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0002
+
+:Thing.0002 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0003
+
+:Thing.0003 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0004
+
+:Thing.0004 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0005
+
+:Thing.0005 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0006
+
+:Thing.0006 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0007
+
+:Thing.0007 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0008
+
+:Thing.0008 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0009
+
+:Thing.0009 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0010
+
+:Thing.0010 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0011
+
+:Thing.0011 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0012
+
+:Thing.0012 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0013
+
+:Thing.0013 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0014
+
+:Thing.0014 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0015
+
+:Thing.0015 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0016
+
+:Thing.0016 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0017
+
+:Thing.0017 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0018
+
+:Thing.0018 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0019
+
+:Thing.0019 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0020
+
+:Thing.0020 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0021
+
+:Thing.0021 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0022
+
+:Thing.0022 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0023
+
+:Thing.0023 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0024
+
+:Thing.0024 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0025
+
+:Thing.0025 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0026
+
+:Thing.0026 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0027
+
+:Thing.0027 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0028
+
+:Thing.0028 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0029
+
+:Thing.0029 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0030
+
+:Thing.0030 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0031
+
+:Thing.0031 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0032
+
+:Thing.0032 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0033
+
+:Thing.0033 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0034
+
+:Thing.0034 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0035
+
+:Thing.0035 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0036
+
+:Thing.0036 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0037
+
+:Thing.0037 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0038
+
+:Thing.0038 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0039
+
+:Thing.0039 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0040
+
+:Thing.0040 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0041
+
+:Thing.0041 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0042
+
+:Thing.0042 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0043
+
+:Thing.0043 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0044
+
+:Thing.0044 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0045
+
+:Thing.0045 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0046
+
+:Thing.0046 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0047
+
+:Thing.0047 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0048
+
+:Thing.0048 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0049
+
+:Thing.0049 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0050
+
+:Thing.0050 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0051
+
+:Thing.0051 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0052
+
+:Thing.0052 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0053
+
+:Thing.0053 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0054
+
+:Thing.0054 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0055
+
+:Thing.0055 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0056
+
+:Thing.0056 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0057
+
+:Thing.0057 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0058
+
+:Thing.0058 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0059
+
+:Thing.0059 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0060
+
+:Thing.0060 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0061
+
+:Thing.0061 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0062
+
+:Thing.0062 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0063
+
+:Thing.0063 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0064
+
+:Thing.0064 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0065
+
+:Thing.0065 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0066
+
+:Thing.0066 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0067
+
+:Thing.0067 rdf:type owl:Thing .
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0068
+
+:Thing.0068 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0069
+
+:Thing.0069 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0070
+
+:Thing.0070 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0071
+
+:Thing.0071 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0072
+
+:Thing.0072 rdf:type owl:Thing .
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0073
+
+:Thing.0073 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0074
+
+:Thing.0074 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0075
+
+:Thing.0075 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0076
+
+:Thing.0076 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0077
+
+:Thing.0077 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0078
+
+:Thing.0078 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0079
+
+:Thing.0079 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0080
+
+:Thing.0080 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0081
+
+:Thing.0081 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0082
+
+:Thing.0082 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0083
+
+:Thing.0083 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0084
+
+:Thing.0084 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0085
+
+:Thing.0085 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0086
+
+:Thing.0086 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0087
+
+:Thing.0087 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0088
+
+:Thing.0088 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0089
+
+:Thing.0089 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0090
+
+:Thing.0090 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0091
+
+:Thing.0091 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0092
+
+:Thing.0092 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0093
+
+:Thing.0093 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0094
+
+:Thing.0094 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0095
+
+:Thing.0095 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0096
+
+:Thing.0096 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0097
+
+:Thing.0097 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0098
+
+:Thing.0098 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0099
+
+:Thing.0099 rdf:type owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontologies/test#Thing.0100
+
+:Thing.0100 rdf:type owl:Thing .
+
+
+<http://stanbol.apache.org/ontologies/test> rdf:type owl:Ontology .
+
+
+###  Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net
+

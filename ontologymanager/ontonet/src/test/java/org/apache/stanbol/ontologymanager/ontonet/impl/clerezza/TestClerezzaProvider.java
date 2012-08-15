@@ -64,8 +64,6 @@ public class TestClerezzaProvider {
 
     private String fn1 = "/ontologies/versiontest_v1.owl", fn2 = "/ontologies/versiontest_v2.owl";
 
-    private String oiri = "http://stanbol.apache.org/ontologies/versiontest";
-
     private OntologyProvider<TcProvider> ontologyProvider;
 
     private OfflineConfiguration offline = new OfflineConfigurationImpl(new Hashtable<String,Object>());
@@ -98,7 +96,7 @@ public class TestClerezzaProvider {
 
         // Must be 2 different graphs
         assertFalse(key1.equals(key2));
-        assertEquals(2, ontologyProvider.getPublicKeys().size());
+        assertEquals(2, ontologyProvider.listOntologies().size());
 
         // Ontologies must not be tainting each other
         // Don't use keys any more here. They're not the real public keys!
