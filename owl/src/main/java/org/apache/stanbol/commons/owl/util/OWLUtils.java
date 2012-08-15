@@ -16,14 +16,19 @@
  */
 package org.apache.stanbol.commons.owl.util;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.stanbol.commons.owl.OntologyLookaheadMGraph;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
@@ -34,6 +39,8 @@ import org.slf4j.LoggerFactory;
  * A set of utility methods for the manipulation of OWL API objects.
  */
 public class OWLUtils {
+
+    private static int _LOOKAHEAD_LIMIT_DEFAULT = 1024;
 
     private static Logger log = LoggerFactory.getLogger(OWLUtils.class);
 
@@ -46,7 +53,7 @@ public class OWLUtils {
      * @param o
      * @return
      */
-    public static OWLOntologyID guessOntologyIdentifier(OWLOntology o) {
+    public static OWLOntologyID extractOntologyID(OWLOntology o) {
         String oiri;
         IRI viri = null;
         // For named OWL ontologies it is their ontology ID.
@@ -71,7 +78,7 @@ public class OWLUtils {
      *            the RDF graph
      * @return the OWL ontology ID of the supplied graph, or null if it denotes an anonymous ontology.
      */
-    public static OWLOntologyID guessOntologyIdentifier(TripleCollection graph) {
+    public static OWLOntologyID extractOntologyID(TripleCollection graph) {
         IRI ontologyIri = null, versionIri = null;
         Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
         if (it.hasNext()) {
@@ -95,6 +102,54 @@ public class OWLUtils {
         }
         if (versionIri == null) return new OWLOntologyID(ontologyIri);
         else return new OWLOntologyID(ontologyIri, versionIri);
+    }
+
+    /**
+     * Performs lookahead with a 100 kB limit.
+     * 
+     * @param content
+     * @param parser
+     * @param format
+     * @return
+     * @throws IOException
+     */
+    public static OWLOntologyID guessOntologyID(InputStream content, Parser parser, String format) throws IOException {
+        return guessOntologyID(content, parser, format, _LOOKAHEAD_LIMIT_DEFAULT);
+    }
+
+    public static OWLOntologyID guessOntologyID(InputStream content, Parser parser, String format, int limit) throws IOException {
+        return guessOntologyID(content, parser, format, limit, Math.max(10, limit / 10));
+    }
+
+    public static OWLOntologyID guessOntologyID(InputStream content,
+                                                Parser parser,
+                                                String format,
+                                                int limit,
+                                                int versionIriOffset) throws IOException {
+        long before = System.currentTimeMillis();
+        log.info("Guessing ontology ID. Read limit = {} triples; offset = {} triples.", limit,
+            versionIriOffset);
+        BufferedInputStream bIn = new BufferedInputStream(content);
+        bIn.mark(limit * 512); // set an appropriate limit
+        OntologyLookaheadMGraph graph = new OntologyLookaheadMGraph(limit, versionIriOffset);
+        try {
+            parser.parse(graph, bIn, format);
+        } catch (RuntimeException e) {}
+        OWLOntologyID result;
+
+        if (graph.getOntologyIRI() == null) { // No Ontology ID found
+            log.warn(" *** No ontology ID found, ontology has a chance of being anonymous.");
+            result = null;
+        } else {
+            // bIn.reset(); // reset set the stream to the start
+            IRI oiri = IRI.create(graph.getOntologyIRI().getUnicodeString());
+            result = graph.getVersionIRI() == null ? new OWLOntologyID(oiri) : new OWLOntologyID(oiri,
+                    IRI.create(graph.getVersionIRI().getUnicodeString()));
+            log.info(" *** Guessed ID : {}", result);
+        }
+        log.info(" *** Triples scanned : {}, filtered : {}", graph.getScannedTripleCount(), graph.size());
+        log.info(" *** Time : {} ms", System.currentTimeMillis() - before);
+        return result;
     }
 
 }
