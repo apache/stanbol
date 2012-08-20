@@ -21,11 +21,13 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.stanbol.commons.semanticindex.core.store.ChangeSetImpl;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
 import org.apache.stanbol.commons.semanticindex.store.EpochException;
 import org.apache.stanbol.commons.semanticindex.store.IndexingSource;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
+import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.utils.TimeUtils;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
@@ -118,6 +120,10 @@ public class JenaTdbStore extends AbstractTdbBackend implements Store<Representa
      * typed literals.
      */
     private TypeMapper typeMapper = TypeMapper.getInstance();
+    
+    @org.apache.felix.scr.annotations.Reference
+    private RevisionManager revisionManager;
+    
 	private Dataset dataset;
 	private String name;
 	private String description;
@@ -130,7 +136,7 @@ public class JenaTdbStore extends AbstractTdbBackend implements Store<Representa
 	private Node namedGraphNode;
 
 	@Activate
-	protected final void activate(ComponentContext context) throws ConfigurationException {
+	protected final void activate(ComponentContext context) throws ConfigurationException, StoreException {
 		Object value = context.getProperties().get(PROPERTY_NAME);
 		Map<String,Object> properties = new HashMap<String,Object>();
 		if(value == null || value.toString().isEmpty()){
@@ -223,6 +229,10 @@ public class JenaTdbStore extends AbstractTdbBackend implements Store<Representa
 			dataset.getLock().leaveCriticalSection();
 		}
 		this.properties = Collections.unmodifiableMap(properties);
+		revisionManager.initializeRevisionTables(this);
+		//TODO: we need to register existing data with the revision manager
+		//      on the first start-up. Currently this works only with an
+		//      empty RDF Graph
 	}
 	
 	@Deactivate
@@ -294,16 +304,19 @@ public class JenaTdbStore extends AbstractTdbBackend implements Store<Representa
 	}
 
 	@Override
-	public long getEpoch() {
-		// TODO not yet implemented
-		throw new UnsupportedOperationException("TODO: implement!!");
+	public long getEpoch() throws StoreException {
+		return revisionManager.getEpoch(this);
 	}
 
 	@Override
 	public ChangeSet<Representation> changes(long epoch, long revision, int batchSize)
 			throws StoreException, EpochException {
-		// TODO not yet implemented
-		throw new UnsupportedOperationException("TODO: implement!!");
+        if (getEpoch() != epoch) {
+            throw new EpochException(this, getEpoch(), epoch);
+        }
+        ChangeSet<Representation> changesSet = (ChangeSetImpl<Representation>) 
+        		revisionManager.getChanges(this, revision, batchSize);
+        return changesSet;
 	}
 
 	@Override
@@ -311,6 +324,7 @@ public class JenaTdbStore extends AbstractTdbBackend implements Store<Representa
 		dataset.getLock().enterCriticalSection(false);
 		try {
 			Node node = Node.createURI(item.getId());
+			revisionManager.updateRevision(this, item.getId());
 			removeResource(node); //remove the old data
 			addResource(item); //add the new data
 		} finally {
@@ -345,6 +359,7 @@ public class JenaTdbStore extends AbstractTdbBackend implements Store<Representa
 			for(Representation item : items){
 				try {
 					Node node = Node.createURI(item.getId());
+					revisionManager.updateRevision(this, item.getId());
 					removeResource(node); //remove the old data
 					addResource(item); //add the new data
 					added.add(item.getId());
@@ -550,10 +565,13 @@ public class JenaTdbStore extends AbstractTdbBackend implements Store<Representa
 	 * @param resource
 	 * @return
 	 */
-	private boolean removeResource(Node resource) {
+	private boolean removeResource(Node resource) throws StoreException {
 		ExtendedIterator<Triple> current = graph.find(resource, null, null);
 		Set<Node> bNodes = new HashSet<Node>();
 		boolean contains = current.hasNext();
+		if(contains){
+			revisionManager.updateRevision(this, resource.toString());
+		}
 		while(current.hasNext()){ //delete current
 		    Node obj = current.removeNext().getObject();
 		    if(obj.isBlank()){

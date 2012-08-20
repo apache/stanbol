@@ -34,11 +34,14 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.ldpath.clerezza.ClerezzaBackend;
+import org.apache.stanbol.commons.semanticindex.core.store.ChangeSetImpl;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
 import org.apache.stanbol.commons.semanticindex.store.EpochException;
 import org.apache.stanbol.commons.semanticindex.store.IndexingSource;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
+import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -94,6 +97,9 @@ public class ClerezzaStore extends ClerezzaBackend implements Store<Representati
 	public static final String PROPERTY_GRAPH_URI = "org.apache.stanbol.entityhub.store.clerezza.graphuri";
     @Reference
     private TcManager tcManager;
+    
+    @Reference
+    private RevisionManager revisionManager;
 
     private TripleCollection graph;
     
@@ -108,9 +114,26 @@ public class ClerezzaStore extends ClerezzaBackend implements Store<Representati
 	 * method
 	 */
 	private Map<String,Object> properties;
+	/**
+	 * Default Constructor used by OSGI
+	 */
+	public ClerezzaStore(){}
+	
+//	/**
+//	 * Constructor intended to be used for unit testing
+//	 * @param name
+//	 * @param grpah
+//	 * @param revManager
+//	 */
+//	protected ClerezzaStore(String name, TripleCollection graph, RevisionManager revManager){
+//		this.name = name;
+//		this.description = null;
+//		this.graph = graph;
+//		this.revisionManager = revManager;
+//	}
 	
 	@Activate
-	protected final void activate(ComponentContext context) throws ConfigurationException {
+	protected final void activate(ComponentContext context) throws ConfigurationException, StoreException {
 		Object value = context.getProperties().get(PROPERTY_NAME);
 		Map<String,Object> properties = new HashMap<String,Object>();
 		if(value == null || value.toString().isEmpty()){
@@ -173,6 +196,13 @@ public class ClerezzaStore extends ClerezzaBackend implements Store<Representati
 		log.info("Activate {} '{}' with grpah URI {}");
 		properties.put(PROPERTY_ITEM_TYPE, Representation.class);
 		this.properties = Collections.unmodifiableMap(properties);
+		
+		//initialize the Revision manager
+        revisionManager.initializeRevisionTables(this);
+        //TODO: we should sync the revisions with the actual data of the Graph
+        //      currently this assumes an empty Graph AND that all modifications
+        //      are done via the Store interface
+        
 	}
 	
 	@Deactivate
@@ -221,16 +251,19 @@ public class ClerezzaStore extends ClerezzaBackend implements Store<Representati
     }
 
 	@Override
-	public long getEpoch() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO: implement!!");
+	public long getEpoch() throws StoreException {
+		return revisionManager.getEpoch(this);
 	}
 
 	@Override
 	public ChangeSet<Representation> changes(long epoch, long revision,
 			int batchSize) throws StoreException, EpochException {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO: implement!!");
+        if (getEpoch() != epoch) {
+            throw new EpochException(this, getEpoch(), epoch);
+        }
+        ChangeSet<Representation> changesSet = (ChangeSetImpl<Representation>) 
+        		revisionManager.getChanges(this,revision, batchSize);
+        return changesSet;
 	}
 
 	@Override
@@ -252,7 +285,11 @@ public class ClerezzaStore extends ClerezzaBackend implements Store<Representati
         log.debug("put Representation " + representation.getId());
         final Lock writeLock = writeLockGraph();
         try {
-            return add(representation);
+        	//update Revision first to block changes on exceptions in the
+        	//revisionManager
+			revisionManager.updateRevision(this, representation.getId());
+            String id = add(representation);
+			return id;
         } finally {
             writeLock.unlock();
         }
@@ -266,6 +303,12 @@ public class ClerezzaStore extends ClerezzaBackend implements Store<Representati
         try {
         	//remove all existing
 			for(Representation item : items){
+	        	//update Revision first to block changes on exceptions in the
+	        	//revisionManager
+				//NOTE: we need also to update the revision if the item does
+				//      not yet exist in the store (removeResource returns false)
+				//      as the new revision will be used for the added item
+				revisionManager.updateRevision(this, item.getId());
 				removeResource(new UriRef(item.getId()));
 			}
 			//add all parsed
@@ -296,6 +339,7 @@ public class ClerezzaStore extends ClerezzaBackend implements Store<Representati
 	public void removeAll() throws StoreException {
         final Lock writeLock = writeLockGraph();
         try {
+        	revisionManager.updateEpoch(this);
         	graph.clear();
         } finally {
             writeLock.unlock();
@@ -331,11 +375,16 @@ public class ClerezzaStore extends ClerezzaBackend implements Store<Representati
      * This method assumes a read lock on {@link #graph}
 	 * @param resource
 	 * @return
+	 * @throws StoreException if the {@link #revisionManager} is unable to 
+	 * update the revision
 	 */
-	private boolean removeResource(UriRef resource) {
+	private boolean removeResource(UriRef resource) throws StoreException {
 		Iterator<Triple> current = graph.filter(resource, null, null);
 		Set<BNode> bNodes = new HashSet<BNode>();
 		boolean contains = current.hasNext();
+		if(contains){
+    		revisionManager.updateRevision(this, resource.getUnicodeString());
+		}
 		while(current.hasNext()){ //delete current
 		    Triple t = current.next();
 		    current.remove();
@@ -394,7 +443,7 @@ public class ClerezzaStore extends ClerezzaBackend implements Store<Representati
 	 * adds triples for {@link BNode}s that are {@link Triple#getObject()}s of
 	 * added triples.
      * <p>
-     * This method assumes a read lock on {@link #graph}
+     * This method assumes a write lock on {@link #graph}
 	 * @param source the source graph
 	 * @param resource the resource to add
 	 */
