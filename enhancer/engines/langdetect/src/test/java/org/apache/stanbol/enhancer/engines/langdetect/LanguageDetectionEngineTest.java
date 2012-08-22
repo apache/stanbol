@@ -21,6 +21,7 @@ import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper
 import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateAllTextAnnotations;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +41,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
@@ -122,10 +124,9 @@ public class LanguageDetectionEngineTest {
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
             langIdEngine.getClass().getName()));
         int textAnnotationCount = validateAllTextAnnotations(ci.getMetadata(), text, expectedValues);
-        assertEquals("A single TextAnnotation is expected", 1,textAnnotationCount);
-        //even through this tests do not validate service quality but rather
-        //the correct integration of the CELI service as EnhancementEngine
-        //we expect the "en" is detected for the parsed text
+        assertTrue("A TextAnnotation is expected", textAnnotationCount > 0);
+        //even through this tests do not validate detection quality
+        //we expect the "en" is detected as best guess for the parsed text
         assertEquals("The detected language for text '"+text+"' MUST BE 'en'",
             "en",EnhancementEngineHelper.getLanguage(ci));
 
