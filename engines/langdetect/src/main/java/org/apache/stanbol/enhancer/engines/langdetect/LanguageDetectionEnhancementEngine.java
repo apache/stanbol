@@ -77,9 +77,14 @@ public class LanguageDetectionEnhancementEngine
     /**
      * a configurable value of the text segment length to check
      */
-    @Property
+    @Property(intValue=LanguageDetectionEnhancementEngine.PROBE_LENGTH_DEFAULT)
     public static final String PROBE_LENGTH_PROP = "org.apache.stanbol.enhancer.engines.langdetect.probe-length";
 
+    /**
+     * a configurable value of the maximum number of suggested languages
+     */
+    @Property(intValue=LanguageDetectionEnhancementEngine.DEFAULT_MAX_SUGGESTED_LANGUAGES)
+    public static final String MAX_SUGGESTED_PROP = "org.apache.stanbol.enhancer.engines.langdetect.max-suggested";
 
     /**
      * The default value for the Execution of this Engine. Currently set to
@@ -105,7 +110,19 @@ public class LanguageDetectionEnhancementEngine
      */
     private static final Logger log = LoggerFactory.getLogger(LanguageDetectionEnhancementEngine.class);
 
-    private static final int PROBE_LENGTH_DEFAULT = 1000;
+    /*
+     * NOTE: Checked the Documentation: The tool already supports the taking
+     * of several shorter samples randomly distributed over the parsed text
+     * to imrpove results and reduce noise. See
+     * http://code.google.com/p/language-detection/wiki/FrequentlyAskedQuestion
+     * "Each detected language differs for the same document" for a hint. 
+     */
+    private static final int PROBE_LENGTH_DEFAULT = -1;
+
+    /**
+     * Default value for the maximum number of suggested Languages
+     */
+    private static final int DEFAULT_MAX_SUGGESTED_LANGUAGES = 3;
 
     /**
      * How much text should be used for testing: If the value is 0 or smaller,
@@ -113,6 +130,8 @@ public class LanguageDetectionEnhancementEngine
      * is taken from the middle of the text. The default length is 1000.
      */
     private int probeLength = PROBE_LENGTH_DEFAULT;
+    
+    private int maxSuggestedLanguages = DEFAULT_MAX_SUGGESTED_LANGUAGES;
     
     /**
      * The literal factory
@@ -134,8 +153,34 @@ public class LanguageDetectionEnhancementEngine
         if (ce != null) {
             @SuppressWarnings("unchecked")
             Dictionary<String, String> properties = ce.getProperties();
-            String lengthVal = properties.get(PROBE_LENGTH_PROP);
-            probeLength = lengthVal == null ? PROBE_LENGTH_DEFAULT : Integer.parseInt(lengthVal);
+            Object value = properties.get(PROBE_LENGTH_PROP);
+            if(value instanceof Number){
+                probeLength = ((Number)value).intValue();
+            } else if(value != null){
+                try {
+                    probeLength = Integer.parseInt(value.toString());
+                } catch (NumberFormatException e) {
+                    throw new ConfigurationException(PROBE_LENGTH_PROP, 
+                        "The parsed 'proble length' MUST be a valid Integer", e);
+                }
+            } else {
+                probeLength = PROBE_LENGTH_DEFAULT;
+            }
+            value = properties.get(MAX_SUGGESTED_PROP);
+            if(value instanceof Number){
+                maxSuggestedLanguages = ((Number)value).intValue();
+            } else if(value != null){
+                try {
+                    maxSuggestedLanguages = Integer.parseInt(value.toString());
+                } catch (NumberFormatException e) {
+                    throw new ConfigurationException(MAX_SUGGESTED_PROP, 
+                        "The parsed number of the maximum suggested lanugages "
+                        + "MUST BE a valid Integer", e);
+                }
+            }
+            if(maxSuggestedLanguages < 1){
+                maxSuggestedLanguages = DEFAULT_MAX_SUGGESTED_LANGUAGES;
+            }
         }
         languageIdentifier = new LanguageIdentifier();
     }
@@ -143,6 +188,8 @@ public class LanguageDetectionEnhancementEngine
     protected void deactivate(ComponentContext ce) {
         super.deactivate(ce);
         this.languageIdentifier = null;
+        this.maxSuggestedLanguages = -1;
+        this.probeLength = -1;
     }
 
     public int canEnhance(ContentItem ci) throws EngineException {
@@ -190,16 +237,20 @@ public class LanguageDetectionEnhancementEngine
         }
         
         // add language to metadata
-        if (languages.size() > 0) {
+        if (languages != null) {
             MGraph g = ci.getMetadata();
             ci.getLock().writeLock().lock();
-            // add best hypothesis
-            Language oneLang = languages.get(0);
             try {
-                UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
-                g.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl(oneLang.lang)));
-                g.add(new TripleImpl(textEnhancement, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(oneLang.prob)));
-                g.add(new TripleImpl(textEnhancement, DC_TYPE, DCTERMS_LINGUISTIC_SYSTEM));
+                for(int i=0;i<maxSuggestedLanguages && i<languages.size();i++){
+                    // add a hypothesis
+                    Language hypothesis = languages.get(i);
+                    UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                    g.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl(hypothesis.lang)));
+                    g.add(new TripleImpl(textEnhancement, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(hypothesis.prob)));
+                    g.add(new TripleImpl(textEnhancement, DC_TYPE, DCTERMS_LINGUISTIC_SYSTEM));
+                    g.add(new TripleImpl(textEnhancement, ENHANCER_CONFIDENCE, 
+                        literalFactory.createTypedLiteral(hypothesis.prob)));
+                }
             } finally {
                 ci.getLock().writeLock().unlock();
             }
