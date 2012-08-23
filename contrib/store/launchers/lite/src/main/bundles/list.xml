@@ -61,7 +61,7 @@
 	</startLevel>
 
 	<!-- Felix web console and plugins -->
-	<startLevel level="10">
+	<startLevel level="20">
 		<bundle>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.webconsole</artifactId>
@@ -76,7 +76,7 @@
 	</startLevel>
 
 	<!-- General-purpose libraries -->
-	<startLevel level="10">
+	<startLevel level="20">
 		<bundle>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore-osgi</artifactId>
@@ -95,7 +95,7 @@
 	</startLevel>
 
 	<!-- JAX-RS -->
-	<startLevel level="14">
+	<startLevel level="24">
 		<!--
 			WARNING: jersey-core bug, must start before jersey-server to avoid
 			jersey spi class not found errors. Restart jersey-server manually if
@@ -109,7 +109,7 @@
 	</startLevel>
 	
 	<!-- Jersey -->
-	<startLevel level="15">
+	<startLevel level="25">
 		<bundle>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
@@ -127,7 +127,7 @@
 		</bundle>
 	</startLevel>
 	<!-- Clerezza storage and sparql infrastructure -->
-	<startLevel level="16">
+	<startLevel level="26">
 		<bundle>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.core</artifactId>
@@ -206,7 +206,7 @@
 	</startLevel>
 	
 	<!-- Stanbol Web -->
-	<startLevel level="17">
+	<startLevel level="27">
 	<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
@@ -229,7 +229,7 @@
 		</bundle>
 	</startLevel>
 	
-	<startLevel level="18">
+	<startLevel level="28">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId>

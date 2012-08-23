@@ -26,7 +26,7 @@
        ********************************************************************* -->
   
 	<!-- General-purpose libraries -->
-	<startLevel level="10">
+	<startLevel level="20">
 		<bundle>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math</artifactId>
@@ -42,7 +42,7 @@
 	</startLevel>
 	
   <!-- Stanbol Commons -->
-  <startLevel level="17">
+  <startLevel level="27">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
@@ -51,7 +51,7 @@
   </startLevel>
 
   <!-- The default data expected by the default configuration of Stanbol -->
-  <startLevel level="19">
+  <startLevel level="29">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
@@ -75,7 +75,7 @@
        ********************************************************************* -->
 
   <!-- Stanbol Enhancer  -->
-  <startLevel level="20">
+  <startLevel level="30">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
@@ -99,7 +99,7 @@
        ********************************************************************* -->
   	
 	<!-- Stanbol Enhancer Enhancement Engines -->
-	<startLevel level="25">
+	<startLevel level="35">
         <bundle>
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>

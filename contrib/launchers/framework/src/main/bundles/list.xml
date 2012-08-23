@@ -25,7 +25,7 @@
           (internal and external)
        ********************************************************************* -->
   <!-- General-purpose libraries -->
-  <startLevel level="10">
+  <startLevel level="20">
     <bundle> <!-- only used by the Contenthub -->
       <groupId>eu.medsea.mimeutil</groupId>
       <artifactId>mime-util</artifactId>
@@ -39,7 +39,7 @@
   </startLevel>
   
   <!-- Stanbol Commons -->
-  <startLevel level="17">
+  <startLevel level="27">
     <!-- The common web interface -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
@@ -49,7 +49,7 @@
   </startLevel>
 
   <!-- The default data expected by the default configuration of Stanbol 
-  <startLevel level="19">
+  <startLevel level="29">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.defaultdata</artifactId>
@@ -63,7 +63,7 @@
        ********************************************************************* -->
 
   <!-- Stanbol Enhancer infrastructure and required libraries-->
-  <startLevel level="20">
+  <startLevel level="30">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
@@ -103,7 +103,7 @@
     </bundle>
   </startLevel>
   <!-- Stanbol Web Fragments -->
-  <startLevel level="21">
+  <startLevel level="31">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
@@ -118,7 +118,7 @@
   </startLevel>
   
   <!-- FactStore -->
-  <startLevel level="20">
+  <startLevel level="30">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.factstore</artifactId>
@@ -127,7 +127,7 @@
   </startLevel>
  
   <!-- KReS -->
-  <startLevel level="22">
+  <startLevel level="32">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.owl</artifactId>
@@ -141,7 +141,7 @@
        ********************************************************************* -->
   
   <!-- Stanbol Enhancer plug-ins (the Enhancement Engines) -->
-  <startLevel level="25">
+  <startLevel level="35">
 
   </startLevel>
 
