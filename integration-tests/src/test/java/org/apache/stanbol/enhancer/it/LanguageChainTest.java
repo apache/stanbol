@@ -22,7 +22,7 @@ public class LanguageChainTest extends EnhancerTestBase {
 
     public LanguageChainTest() {
         super(getChainEndpoint("language"),
-            "langid","LangIdEnhancementEngine");
+            "langdetect","LanguageDetectionEnhancementEngine");
     }
     
     
@@ -37,7 +37,7 @@ public class LanguageChainTest extends EnhancerTestBase {
         )
         .assertStatus(200)
         .assertContentRegexp( // it MUST detect the language
-                "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
+                "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
                 "http://purl.org/dc/terms/language.*en")
         .assertContentRegexp(false, //MUST NOT contain because NER is not in this chain
                 "http://fise.iks-project.eu/ontology/entity-label.*Paris", //No entitylinking

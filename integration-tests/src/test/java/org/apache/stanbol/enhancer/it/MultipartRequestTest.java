@@ -181,7 +181,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
             "Content-Disposition: form-data; name=\"urn:tika:text:.*",
             "Content-Disposition: form-data; name=\"urn:content-item-sha1-.*",
             //and the expected enhancements in the metadata
-            "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
+            "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
             "http://fise.iks-project.eu/ontology/entity-label.*Paris",
             "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
@@ -220,7 +220,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertContentRegexp(false, //MUST NOT contain
             "Content-Disposition: form-data; name=\"metadata\"; filename=.*",
             //and the expected enhancements in the metadata
-            "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
+            "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
             "http://fise.iks-project.eu/ontology/entity-label.*Paris",
             "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
@@ -255,7 +255,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
             "Content-Disposition: form-data; name=\"metadata\"; filename=.*",
             "Content-Disposition: form-data; name=\"urn:tika:text:.*",
             //and the expected enhancements in the metadata
-            "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
+            "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
             "http://fise.iks-project.eu/ontology/entity-label.*Paris",
             "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
@@ -291,7 +291,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
              "Content-Disposition: form-data; name=\"metadata\"; filename=.*",
              "Content-Disposition: form-data; name=\"urn:tika:text:.*",
              //and the expected enhancements in the metadata
-             "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
+             "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
              "http://purl.org/dc/terms/language.*en",
              "http://fise.iks-project.eu/ontology/entity-label.*Paris",
              "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
@@ -368,7 +368,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertStatus(200)
         .assertContentRegexp(
             //and the expected enhancements in the metadata
-            "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
+            "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
             "http://fise.iks-project.eu/ontology/entity-label.*Paris",
             "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
@@ -509,7 +509,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertStatus(200)
         .assertContentRegexp(
             //and the expected enhancements based on the parsed content
-            "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
+            "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
             "http://fise.iks-project.eu/ontology/entity-label.*Paris",
             "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",

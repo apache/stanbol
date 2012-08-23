@@ -29,6 +29,7 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
 /**
@@ -51,24 +52,47 @@ public class DefaultChain {
     
     @Property(boolValue=DefaultChain.DEFAULT_STATE)
     public static final String PROPERTY_ENABLED = "stanbol.enhancer.chain.default.enabled";
-        
+    
+    @Property(value=DefaultChain.DEFAULT_NAME)
+    public static final String PROPERTY_NAME = "stanbol.enhancer.chain.default.name";
+    
+    
     public static final boolean DEFAULT_STATE = true;
+    public static final String DEFAULT_NAME = "default";
     
     private ServiceRegistration defaultChainReg;
     private AllActiveEnginesChain defaultChain;
     
     @Activate
-    protected void activate(ComponentContext ctx){
+    protected void activate(ComponentContext ctx) throws ConfigurationException {
         boolean enabled = DEFAULT_STATE;
         Object value = ctx.getProperties().get(PROPERTY_ENABLED);
         if(value != null){
             enabled = Boolean.parseBoolean(value.toString());
         }
+        value = ctx.getProperties().get(PROPERTY_NAME);
+        String name = value == null ? DEFAULT_NAME : value.toString();
+        if(name.isEmpty()){
+            throw new ConfigurationException(PROPERTY_NAME, "The parsed name for the default chain MUST NOT be empty!");
+        }
+        int ranking;
+        value = ctx.getProperties().get(Constants.SERVICE_RANKING);
+        if(value instanceof Number){
+            ranking = ((Number)value).intValue();
+        } else if(value != null){
+            try {
+                ranking = Integer.parseInt(value.toString());
+            }catch (NumberFormatException e) {
+                throw new ConfigurationException(Constants.SERVICE_RANKING, "Unable to pase Integer service.ranking value",e);
+            }
+        } else {
+            ranking = Integer.MIN_VALUE;
+        }
         if(enabled){
-            defaultChain = new AllActiveEnginesChain(ctx.getBundleContext(),"default");
+            defaultChain = new AllActiveEnginesChain(ctx.getBundleContext(),name);
             Dictionary<String,Object> properties = new Hashtable<String,Object>();
             properties.put(Chain.PROPERTY_NAME, defaultChain.getName());
-            properties.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
+            properties.put(Constants.SERVICE_RANKING, ranking);
             defaultChainReg = ctx.getBundleContext().registerService(
                 Chain.class.getName(), defaultChain, properties);
         }
