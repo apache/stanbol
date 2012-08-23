@@ -183,8 +183,8 @@ public enum PosTagsCollectionEnum {
     SV_FOLLOW("sv",PosTypeCollectionType.FOLLOW,"PR","ID","IM","I?","IC","IG","IK","IP","IQ","IR","IS","IT","IU"),
     /**
      * Nouns related POS types for Spanish language.
-     * I was not able to find the list, so POS tag results where used to 
-     * create this configuration.
+     * The description of the Tagset is available at
+     * http://www.lsi.upc.edu/~nlp/SVMTool/parole.html
      */
     ES_NOUN("es",PosTypeCollectionType.NOUN,"NC","NP","Z"),
     /**
