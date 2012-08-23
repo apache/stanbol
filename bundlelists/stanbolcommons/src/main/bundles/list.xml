@@ -123,9 +123,9 @@
     </bundle>
     <bundle> <!-- Bundle for org.json -->
         <!-- this bundle was suggested in the release vote of felix.webconsole 4.0.0 -->
-        <groupId>org.apache.geronimo.bundles</groupId>
-        <artifactId>json</artifactId>
-        <version>20090211_1</version>
+      <groupId>org.apache.geronimo.bundles</groupId>
+      <artifactId>json</artifactId>
+      <version>20090211_1</version>
     </bundle>
 <!-- not a bundle (need to be embedded)
     <bundle>
@@ -293,6 +293,35 @@
     </bundle>
   </startLevel>
 
+  <!-- authentication -->
+  <startLevel level="27">
+    <bundle>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>platform.config</artifactId>
+      <version>0.3-incubating</version>
+    </bundle>
+    <bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>permissiondescriptions</artifactId>
+			<version>0.1-incubating</version>
+		</bundle>
+    <bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>platform</artifactId>
+			<version>0.1-incubating</version>
+		</bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.security</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.authentication.basic</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+
   <!-- Stanbol Commons -->
   <startLevel level="27">
     <!-- Allows to run Stanbol in offline mode -->
@@ -317,10 +346,10 @@
     </bundle>
     <!-- OWL libraries and utilities -->
     <bundle>
-	  <groupId>org.apache.stanbol</groupId>
-	  <artifactId>org.apache.stanbol.commons.owl</artifactId>
-	  <version>0.10.0-incubating-SNAPSHOT</version>
-	</bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.owl</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
     <!-- support for JSON-LD -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
