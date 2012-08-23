@@ -19,6 +19,16 @@ package org.apache.stanbol.launchpad;
 import static org.apache.sling.launchpad.base.shared.SharedConstants.SLING_HOME;
 
 import java.io.File;
+import java.security.AllPermission;
+import java.security.PermissionCollection;
+import java.security.Permissions;
+import java.security.Policy;
+import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class Main {
 
@@ -33,6 +43,20 @@ public class Main {
             home = new File(DEFAULT_STANBOL_HOME).getAbsolutePath();
             System.setProperty(SLING_HOME, home);
         } //else do not override user configured values
+        List<String> argsList = new ArrayList<String>(Arrays.asList(args));
+        if (argsList.contains("-s")) {
+        	argsList.remove("-s");
+        	args = argsList.toArray(new String[argsList.size()]);
+	        Policy.setPolicy(new Policy() {
+				@Override
+				public PermissionCollection getPermissions(ProtectionDomain domain) {
+					PermissionCollection result = new Permissions();
+					result.add(new AllPermission());
+					return result;
+				}
+			});
+	        System.setSecurityManager(new SecurityManager());
+        }
         //now use the standard Apache Sling launcher to do the job
         org.apache.sling.launchpad.app.Main.main(args);
     }

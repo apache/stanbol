@@ -61,6 +61,8 @@
     <module>ldpath/clerezza</module>
     <module>httpqueryheaders</module>
     <module>launchpad</module>
+    <module>security</module>
+    <module>authentication.basic</module>
 
     <module>testing/jarexec</module>
     <module>testing/http</module>
