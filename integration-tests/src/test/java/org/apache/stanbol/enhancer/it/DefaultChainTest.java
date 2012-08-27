@@ -31,7 +31,7 @@ public class DefaultChainTest extends EnhancerTestBase {
     public final static String [] ACCEPT_FORMAT_TEST_DATA  = new String[] {
         "application/json",
         "application/json", //now JSON LD uses application/json
-        "\"creator\": \"org.apache.stanbol.enhancer.engines.langid.LangIdEnhancementEngine\",",
+        "\"creator\": \"org.apache.stanbol.enhancer.engines.langdetect.LanguageDetectionEnhancementEngine\",",
         
         "application/rdf+xml",
         "application/rdf+xml",
@@ -39,7 +39,7 @@ public class DefaultChainTest extends EnhancerTestBase {
     
         "application/rdf+json", 
         "application/rdf+json",
-        "\"value\":\"org.apache.stanbol.enhancer.engines.langid.LangIdEnhancementEngine\"",
+        "\"value\":\"org.apache.stanbol.enhancer.engines.langdetect.LanguageDetectionEnhancementEngine\"",
     
         "text/turtle", 
         "text/turtle", 
@@ -73,7 +73,7 @@ public class DefaultChainTest extends EnhancerTestBase {
                 "http://stanbol.apache.org/ontology/enhancer/executionmetadata#executionPart",
                 //check execution of tika & if executionPlan is included
                 "http://stanbol.apache.org/ontology/enhancer/executionplan#engine.*tika", 
-                "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
+                "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
                 "http://purl.org/dc/terms/language.*en",
                 "http://fise.iks-project.eu/ontology/entity-label.*Paris",
                 "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
