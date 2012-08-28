@@ -61,6 +61,8 @@
     <module>chain/weighted</module>
     <module>chain/list</module>
     
+    <module>engines</module>
+      
     <module>jersey</module>
     <module>ldpath</module>
     <module>benchmark</module>

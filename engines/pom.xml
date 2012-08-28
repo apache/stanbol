@@ -56,5 +56,7 @@
     <module>geonames</module> <!-- http://geonames.org -->
     <module>opencalais</module> <!-- http://opencalais.com/ -->
     <module>zemanta</module> <!-- htt://zemanta.com -->
+    <!-- Disambiguation Engine -->
+    <module>disambiguation-mlt</module>
   </modules>
 </project>
