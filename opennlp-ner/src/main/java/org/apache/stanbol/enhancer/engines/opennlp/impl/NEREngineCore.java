@@ -178,7 +178,11 @@ public class NEREngineCore implements EnhancementEngine {
                 }
             }
         } catch (Exception e) {
-            throw new EngineException(this, ci, e);
+        	if (e instanceof RuntimeException) {
+        		throw (RuntimeException)e;
+        	} else {
+        		throw new EngineException(this, ci, e);
+        	}
         }
     }
 
