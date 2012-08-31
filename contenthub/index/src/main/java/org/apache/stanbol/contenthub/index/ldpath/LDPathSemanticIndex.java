@@ -20,10 +20,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,7 +34,6 @@ import java.util.Set;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -66,13 +63,10 @@ import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrSearch;
-import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.enhancer.ldpath.EnhancerLDPath;
 import org.apache.stanbol.enhancer.ldpath.backend.ContentItemBackend;
-import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
@@ -80,9 +74,6 @@ import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -96,7 +87,6 @@ import org.slf4j.LoggerFactory;
 
 import at.newmedialab.ldpath.LDPath;
 import at.newmedialab.ldpath.exception.LDPathParseException;
-import at.newmedialab.ldpath.model.fields.FieldMapping;
 import at.newmedialab.ldpath.model.programs.Program;
 
 /**
@@ -223,7 +213,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
 
             // check the configuration has changed
             java.util.Properties oldMetadata = ldpathSemanticIndexManager.getIndexMetadata(pid);
-            if (checkIndexConfiguration(name, ldPathProgram, pid, oldMetadata)) {
+            if (checkIndexConfiguration(name, indexingSource.getName(), ldPathProgram, pid, oldMetadata)) {
                 logger.info(
                     "LDPath program of the Semantic Index: {} has been changed. Reindexing will start now...",
                     this.name);
@@ -309,11 +299,14 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
     /**
      * Compares the new configuration (metadata) of this SemanticIndex with the old one. The old metadata is
      * obtained by using the pid of the this SemanticIndex through
-     * {@link LDPathSemanticIndexManager#getIndexMetadata(pid)}. If the name has changed an exception is
-     * thrown, if the LDPath program has changed the {@link Reindexer} thread is activated.
+     * {@link LDPathSemanticIndexManager#getIndexMetadata(pid)}. If the name of the index or name of the
+     * indexing source has changed an exception is thrown, if the LDPath program has changed the
+     * {@link Reindexer} thread is activated.
      * 
      * @param name
      *            new name of the SemanticIndex
+     * @param indexingSourceName
+     *            new name of the {@link IndexingSource} associated with this index
      * @param ldPath
      *            new LDPath program of the SemanticIndex
      * @param pid
@@ -324,6 +317,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
      * @throws ConfigurationException
      */
     private boolean checkIndexConfiguration(String name,
+                                            String indexingSourceName,
                                             String ldPath,
                                             String pid,
                                             java.util.Properties oldMetadata) throws ConfigurationException {
@@ -332,6 +326,12 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
         if (!name.equals(oldMetadata.get(PROP_NAME))) {
             throw new ConfigurationException(PROP_NAME,
                     "It is not allowed to change the name of a Semantic Index");
+        }
+
+        // name of the indexing source has changed
+        if (!indexingSourceName.equals(oldMetadata.get(PROP_INDEXING_SOURCE_NAME))) {
+            throw new ConfigurationException(PROP_INDEXING_SOURCE_NAME,
+                    "For the time being, it is not allowed to change the name of the indexing source.");
         }
 
         // ldpath of the semantic has changed, reindexing needed
@@ -475,107 +475,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
             doc.addField(entry.getKey(), entry.getValue());
         }
 
-        JSONObject constraints = getConstraints(ci);
-        if (constraints != null) {
-            @SuppressWarnings("unchecked")
-            Iterator<String> keyIterator = constraints.keys();
-            while (keyIterator.hasNext()) {
-                String key = keyIterator.next();
-                Iterator<FieldMapping<?,Object>> fieldIt = this.objectProgram.getFields().iterator();
-                boolean contains = false;
-                while (fieldIt.hasNext()) {
-                    FieldMapping<?,Object> fm = fieldIt.next();
-                    if (fm.getFieldName().equals(key)) {
-                        contains = true;
-                    }
-                }
-
-                String solrFieldName = key;
-                if (!contains) {
-                    // field passed from the constraints does not included in the schema, create a dynamic
-                    // field
-
-                    try {
-                        Object values = constraints.get(key);
-                        if (values instanceof JSONArray) {
-                            solrFieldName = addSolrDynamicFieldExtension(key,
-                                ((JSONArray) values).getString(0));
-                            for (int i = 0; i < ((JSONArray) values).length(); i++) {
-                                doc.addField(solrFieldName, ((JSONArray) values).getString(i));
-                            }
-                        } else {
-                            logger.warn("Values for the key: {} is not a JSONArray");
-                        }
-                    } catch (JSONException e) {
-                        logger.error(
-                            String.format(
-                                "Failed to add field: %s to the Solr document while indexing the Content Item: %s",
-                                key, ci.getUri()), e);
-                        continue;
-                    }
-                }
-            }
-        } else {
-            logger.debug("No additional constraint while indexing the Content Item: {}", ci.getUri());
-        }
         return doc;
-    }
-
-    private JSONObject getConstraints(ContentItem ci) {
-        JSONObject constraints = null;
-        try {
-            Blob constraintsPart = ci.getPart(new UriRef("org.apache.stanbol.contenthub.constraints"),
-                Blob.class);
-            if (constraintsPart != null) {
-                try {
-                    constraints = new JSONObject(IOUtils.toString(constraintsPart.getStream()));
-                } catch (JSONException e) {
-                    logger.error("Failed to parse constraints of content item: {}", ci.getUri(), e);
-                } catch (IOException e) {
-                    logger.error("Failed to parse constraints of content item: {}", ci.getUri(), e);
-                }
-            }
-        } catch (NoSuchPartException e) {
-            // ignore the exception. no constraint case is handled in the caller method(getSolrDocument)
-        }
-        return constraints;
-    }
-
-    private Object inferObjectType(Object val) {
-        Object ret = null;
-        try {
-            ret = DateFormat.getInstance().parse(val.toString());
-        } catch (Exception e) {
-            try {
-                ret = Long.valueOf(val.toString());
-            } catch (Exception e1) {
-                try {
-                    ret = Double.valueOf(val.toString());
-                } catch (Exception e2) {
-                    try {
-                        ret = String.valueOf(val.toString());
-                    } catch (Exception e3) {}
-                }
-            }
-        }
-
-        if (ret == null) ret = val;
-        return ret;
-    }
-
-    private String addSolrDynamicFieldExtension(String fieldName, String strValue) {
-        Object typed = inferObjectType(strValue);
-        String dynamicFieldName = fieldName;
-        if (typed instanceof String) {
-            dynamicFieldName += SolrVocabulary.SOLR_DYNAMIC_FIELD_TEXT;
-        } else if (typed instanceof Long) {
-            dynamicFieldName += SolrVocabulary.SOLR_DYNAMIC_FIELD_LONG;
-        } else if (typed instanceof Double) {
-            dynamicFieldName += SolrVocabulary.SOLR_DYNAMIC_FIELD_DOUBLE;
-        } else if (typed instanceof Date) {
-            dynamicFieldName += SolrVocabulary.SOLR_DYNAMIC_FIELD_DATE;
-        }
-        return dynamicFieldName;
     }
 
     @Override
@@ -810,8 +710,18 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
         Program<Resource> resourceProgram;
         try {
             resourceProgram = resourceLDPath.parseProgram(new StringReader(this.ldPathProgram));
-            resourceProgram.execute(contentItemBackend, ci.getUri());
-            // sonuclari birlestir
+            Map<String,Collection<?>> ciBackendResults = resourceProgram.execute(contentItemBackend,
+                ci.getUri());
+            for (Entry<String,Collection<?>> result : ciBackendResults.entrySet()) {
+                if (results.containsKey(result.getKey())) {
+                    @SuppressWarnings("unchecked")
+                    Collection<Object> resultsValue = (Collection<Object>) results.get(result.getKey());
+                    resultsValue.addAll(result.getValue());
+                } else {
+                    results.put(result.getKey(), result.getValue());
+                }
+
+            }
         } catch (LDPathParseException e) {
             logger.error("Failed to create Program<Resource> from the LDPath program", e);
         }
