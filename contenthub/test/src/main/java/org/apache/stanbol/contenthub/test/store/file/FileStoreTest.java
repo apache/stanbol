@@ -16,26 +16,33 @@
  */
 package org.apache.stanbol.contenthub.test.store.file;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.semanticindex.index.IndexException;
 import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.store.Store;
@@ -75,11 +82,26 @@ public class FileStoreTest {
 
     private Store<ContentItem> store;
 
+    private String fileStoreFolder;
+
     @Before
-    public void before() throws IndexManagementException, IndexException, InterruptedException, IOException {
+    public void before() throws IndexManagementException,
+                        IndexException,
+                        InterruptedException,
+                        IOException,
+                        NoSuchFieldException,
+                        SecurityException,
+                        IllegalArgumentException,
+                        IllegalAccessException {
         if (store == null) {
             if (bundleContext != null) {
-                store = getContenthubStore(bundleContext);
+                store = getContenthubStore();
+
+                // get store folder
+                Field field = store.getClass().getDeclaredField("storeFolder");
+                field.setAccessible(true);
+                fileStoreFolder = ((File) field.get(store)).getPath();
+
                 if (store == null) {
                     throw new IllegalStateException("Null Store");
                 }
@@ -112,23 +134,101 @@ public class FileStoreTest {
 
     @Test
     public void storeFolderTest() {
-        String fileStoreFolder = bundleContext.getProperty("sling.home") + "/"
-                                 + FileStore.FILE_STORE_FOLDER_PATH + "/" + FileStore.FILE_STORE_NAME;
         File storeFolder = new File(fileStoreFolder);
         assertTrue("No store folder exists", storeFolder.exists());
     }
 
     @Test
+    public void removeTest() throws SQLException, StoreException, IOException {
+        // create zip file
+        String id = "filestoretestid";
+        File file = putTemplateZipFile(id);
+
+        store.remove(id);
+
+        // check zip file is exist
+        file = new File(fileStoreFolder + "/" + encodeId(id) + ".zip");
+        assertFalse(String.format("Zip file is not removed after removing contentitem with id: %s", id),
+            file.exists());
+
+        // check revision is updated, then delete it
+        String selectRevision = "SELECT id,revision FROM " + revisionManager.getStoreID(store)
+                                + " content_item_revision WHERE id = '%s'";
+        Connection con = dbManager.getConnection();
+        // Create a Statement for scrollable ResultSet
+        Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = stmt.executeQuery(String.format(selectRevision, id));
+
+        if (rs.next()) {
+            rs.deleteRow();
+        } else {
+            assertTrue(
+                String.format("Revision table is not updated after removing contentitem with id: %s", id),
+                false);
+        }
+
+        dbManager.closeResultSet(rs);
+        dbManager.closeStatement(stmt);
+        dbManager.closeConnection(con);
+    }
+
+    @Test
+    public void removeUrisTest() throws StoreException, SQLException, IOException {
+        // create zip files
+        String id1 = "filestoretestid01";
+        String id2 = "filestoretestid02";
+        File file1 = putTemplateZipFile(id1);
+        File file2 = putTemplateZipFile(id2);
+
+        store.remove(Arrays.asList(id1, id2));
+
+        // check zip files are exist
+        file1 = new File(fileStoreFolder + "/" + encodeId(id1) + ".zip");
+        assertFalse(String.format("Zip file is not removed after removing contentitem with id: %s", id1),
+            file1.exists());
+        file2 = new File(fileStoreFolder + "/" + encodeId(id2) + ".zip");
+        assertFalse(String.format("Zip file is not removed after removing contentitem with id: %s", id2),
+            file2.exists());
+
+        // check revisions are updated, then delete them
+        String selectRevision = "SELECT id,revision FROM " + revisionManager.getStoreID(store)
+                                + " content_item_revision WHERE id = '%s' OR id = '%s'";
+        Connection con = dbManager.getConnection();
+        // Create a Statement for scrollable ResultSet
+        Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = stmt.executeQuery(String.format(selectRevision, id1, id2));
+
+        if (rs.next()) {
+            rs.deleteRow();
+        } else {
+            assertTrue(
+                String.format("Revision table is not updated after removing contentitem with id: %s", id1),
+                false);
+        }
+
+        if (rs.next()) {
+            rs.deleteRow();
+        } else {
+            assertTrue(
+                String.format("Revision table is not updated after removing contentitem with id: %s", id2),
+                false);
+        }
+
+        dbManager.closeResultSet(rs);
+        dbManager.closeStatement(stmt);
+        dbManager.closeConnection(con);
+    }
+
+    @Test
     public void putTest() throws IOException, StoreException, JSONException {
         String id = null;
+        ZipFile zipFile = null;
         try {
             StringSource stringSource = new StringSource("I love Paris.");
             ContentItem ci = contentItemFactory.createContentItem(stringSource);
             id = store.put(ci);
 
             // check zip file
-            String fileStoreFolder = bundleContext.getProperty("sling.home") + "/"
-                                     + FileStore.FILE_STORE_FOLDER_PATH + "/" + FileStore.FILE_STORE_NAME;
             File storeFolder = new File(fileStoreFolder);
             String[] fileNames = storeFolder.list();
             boolean zipExists = false;
@@ -141,7 +241,7 @@ public class FileStoreTest {
             assertTrue("Failed to find content item in store folder", zipExists);
 
             // check content of zip file
-            ZipFile zipFile = new ZipFile(new File(storeFolder.getPath() + "/" + encodeId(id) + ".zip"));
+            zipFile = new ZipFile(new File(storeFolder.getPath() + "/" + encodeId(id) + ".zip"));
             ZipEntry zipEntry = zipFile.getEntry("metadata");
             assertTrue("Zip file does not contain the metadata entry", zipEntry != null);
             zipEntry = zipFile.getEntry("org.apache.stanbol.contenthub.htmlmetadata");
@@ -152,8 +252,70 @@ public class FileStoreTest {
             assertTrue("Zip file does not contain the header entry", zipEntry != null);
 
         } finally {
+            if (zipFile != null) {
+                zipFile.close();
+            }
             if (id != null) {
                 clearTestContentItem(id);
+            }
+        }
+    }
+
+    @Test
+    public void putItemsTest() throws IOException, StoreException {
+        List<ContentItem> cis = null;
+        List<String> ids = null;
+        ZipFile zipFile = null;
+        try {
+            // create contentitems
+            StringSource stringSource1 = new StringSource("I love Paris.");
+            StringSource stringSource2 = new StringSource("I love Istanbul.");
+            ContentItem ci1 = contentItemFactory.createContentItem(stringSource1);
+            ContentItem ci2 = contentItemFactory.createContentItem(stringSource2);
+
+            String id1 = ci1.getUri().getUnicodeString();
+            String id2 = ci2.getUri().getUnicodeString();
+            cis = Arrays.asList(ci1, ci2);
+            ids = Arrays.asList(id1, id2);
+
+            store.put(cis);
+
+            // check zip files
+            File storeFolder = new File(fileStoreFolder);
+            String[] fileNames = storeFolder.list();
+            boolean zip1Exists = false;
+            boolean zip2Exists = false;
+            for (String fileName : fileNames) {
+                if (fileName.equals(encodeId(id1) + ".zip")) {
+                    zip1Exists = true;
+                }
+                if (fileName.equals(encodeId(id2) + ".zip")) {
+                    zip2Exists = true;
+                }
+            }
+            assertTrue("Failed to find content item in store folder", (zip1Exists && zip2Exists));
+
+            for (String id : ids) {
+                // check content of zip file
+                zipFile = new ZipFile(new File(storeFolder.getPath() + "/" + encodeId(id) + ".zip"));
+                ZipEntry zipEntry = zipFile.getEntry("metadata");
+                assertTrue("Zip file does not contain the metadata entry", zipEntry != null);
+                zipEntry = zipFile.getEntry("org.apache.stanbol.contenthub.htmlmetadata");
+                assertTrue("Zip file does not contain the html metadata entry", zipEntry != null);
+                zipEntry = zipFile.getEntry(encodeId(id) + "_main");
+                assertTrue("Zip file does not contain the metadata entry", zipEntry != null);
+                zipEntry = zipFile.getEntry("header");
+                assertTrue("Zip file does not contain the header entry", zipEntry != null);
+            }
+
+        } finally {
+            if (zipFile != null) {
+                zipFile.close();
+            }
+            for (String id : ids) {
+                if (id != null) {
+                    clearTestContentItem(id);
+                }
             }
         }
     }
@@ -163,13 +325,11 @@ public class FileStoreTest {
         String id = null;
         try {
             // put a content item
-            StringSource stringSource = new StringSource("I love Paris.");
-            ContentItem ci = contentItemFactory.createContentItem(stringSource);
-            ci.addPart(new UriRef("dummypart"), new IndexedMGraph());
-            id = store.put(ci);
+            id = "file_store_get_test_id";
+            putTemplateZipFile(id);
 
             // check metadata
-            ci = store.get(id);
+            ContentItem ci = store.get(id);
             assertTrue("Failed to find metadata of retrieved content item", ci.getMetadata() != null);
 
             // check main blob
@@ -182,15 +342,23 @@ public class FileStoreTest {
 
         } finally {
             if (id != null) {
-                clearTestContentItem(id);
+                // delete the file
+                File f = new File(fileStoreFolder + "/" + encodeId(id) + ".zip");
+                f.delete();
             }
         }
     }
 
+    private File putTemplateZipFile(String id) throws IOException, StoreException {
+        byte[] data = IOUtils.toByteArray(FileStoreTest.class.getResource(
+            "/FileStoreTest/templateContentItem.zip").openStream());
+        File file = new File(fileStoreFolder + "/" + encodeId(id) + ".zip");
+        FileUtils.writeByteArrayToFile(file, data);
+        return file;
+    }
+
     private void clearTestContentItem(String id) throws StoreException {
         // delete the file
-        String fileStoreFolder = bundleContext.getProperty("sling.home") + "/"
-                                 + FileStore.FILE_STORE_FOLDER_PATH + "/" + FileStore.FILE_STORE_NAME;
         File f = new File(fileStoreFolder + "/" + encodeId(id) + ".zip");
         f.delete();
 
@@ -240,7 +408,7 @@ public class FileStoreTest {
     }
 
     @SuppressWarnings("unchecked")
-    private Store<ContentItem> getContenthubStore(BundleContext bundleContext) {
+    private Store<ContentItem> getContenthubStore() {
         Store<ContentItem> contentHubStore = null;
         try {
             ServiceReference[] stores = bundleContext.getServiceReferences(Store.class.getName(), null);

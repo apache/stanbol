@@ -134,7 +134,7 @@ public class FileStore implements Store<ContentItem> {
 
     public static final String FIELD_ID = "id";
 
-    public static final String FILE_STORE_FOLDER_PATH = "datafiles/contenthub";
+    public static final String FILE_STORE_FOLDER_PATH = "contenthub/stores";
 
     public static final String FILE_STORE_NAME = "filestore";
 
