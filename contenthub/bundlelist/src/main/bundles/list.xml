@@ -11,14 +11,14 @@
   language governing permissions and limitations under the License. -->
 
 <bundles>
-  <startLevel level="22">
+  <startLevel level="32">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.revisionmanager</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
-  <startLevel level="23">
+  <startLevel level="33">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
