@@ -148,7 +148,12 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         //      RESTful interface of the Enhancer!
         //ci.getMetadata().addAll(job.getExecutionMetadata());
         if(job.isFailed()){
-            throw new ChainException(job.getErrorMessage(), job.getError());
+        	Exception e = job.getError();
+        	if (e instanceof SecurityException) {
+        		throw (SecurityException)e;
+        	} else {
+        		throw new ChainException(job.getErrorMessage(), e);
+        	}
         }
         if(!job.isFinished()){
             throw new ChainException("EnhancementJobManager was deactivated while" +
