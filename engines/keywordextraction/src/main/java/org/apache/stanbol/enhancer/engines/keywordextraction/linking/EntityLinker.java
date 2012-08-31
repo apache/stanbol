@@ -410,7 +410,9 @@ public class EntityLinker {
         //ensure the correct order of the tokens in the suggested entity
         boolean search = true;
         int firstFoundIndex = -1;
+        int firstProcessableFoundIndex = -1;
         int lastFoundIndex = -1;
+        int lastProcessableFoundIndex = -1;
         int firstFoundLabelIndex = -1;
         int lastfoundLabelIndex = -1;
         Token currentToken;
@@ -462,6 +464,10 @@ public class EntityLinker {
                 if(found){ //found
                     if(isProcessable){
                         foundProcessableTokens++; //only count processable Tokens
+                        if(firstProcessableFoundIndex < 0){
+                            firstProcessableFoundIndex = currentIndex;
+                        }
+                        lastProcessableFoundIndex = currentIndex;
                     }
                     foundTokens++;
                     foundTokenMatch = foundTokenMatch + matchFactor; //sum up the matches
@@ -512,6 +518,7 @@ public class EntityLinker {
                 if(found){ //found
                     if(isProcessable){
                         foundProcessableTokens++; //only count processable Tokens
+                        firstProcessableFoundIndex = currentIndex;
                     }
                     foundTokens++;
                     foundTokenMatch = foundTokenMatch + matchFactor; //sum up the matches
@@ -533,6 +540,7 @@ public class EntityLinker {
         //e.g. if given and family name of persons are switched
         MATCH labelMatch; 
         int coveredTokens = lastFoundIndex-firstFoundIndex+1;
+        int coveredProcessableTokens = lastProcessableFoundIndex-firstProcessableFoundIndex+1;
         float labelMatchScore = (foundTokenMatch/(float)labelTokens.length);
         //Matching rules
         // - if less than config#minTokenFound() than accept only EXACT
@@ -552,8 +560,8 @@ public class EntityLinker {
                     //  Tokens are found, but if all Tokens of the Label are
                     //  matched! (STANBOL-622)
                     //foundTokens == coveredTokens) && 
-                    foundTokens >= labelTokens.length) &&
-                    labelMatchScore >= 0.6f){
+                    foundTokens >= labelTokens.length)){ //&&
+                    //labelMatchScore >= 0.6f){
                 //same as above
                 //if(foundTokens == coveredTokens){
                 if(foundTokens == labelTokens.length && foundTokens == coveredTokens){
@@ -568,7 +576,9 @@ public class EntityLinker {
                 if(match.getMatchCount() < foundProcessableTokens ||
                         match.getMatchCount() == foundProcessableTokens && 
                         labelMatch.ordinal() > match.getMatch().ordinal()){
-                    match.updateMatch(labelMatch, firstFoundIndex, coveredTokens, foundTokens,
+//                    match.updateMatch(labelMatch, firstFoundIndex, coveredTokens, foundTokens,
+//                        foundTokenMatch/foundTokens,label,labelTokens.length);
+                    match.updateMatch(labelMatch, firstProcessableFoundIndex, coveredProcessableTokens, foundProcessableTokens,
                         foundTokenMatch/foundTokens,label,labelTokens.length);
                 } //else this match is not better as the existing one
             } //else ignore labels with MATCH.NONE

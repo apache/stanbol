@@ -16,26 +16,23 @@
 package org.apache.stanbol.enhancer.engine.disambiguation.mlt;
 
 import static org.apache.commons.lang.StringUtils.getLevenshteinDistance;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_CONTRIBUTOR;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDFS_LABEL;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -51,6 +48,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -60,7 +58,7 @@ import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
-import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
+import org.apache.stanbol.entityhub.servicesapi.defaults.SpecialFieldEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
@@ -79,14 +77,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Simple Enhancer
- * 
- * @author Kritarth
+ * Disambiguation Engine using Entityhub {@link SimilarityConstraint}s to
+ * disambiguate between existing fise:EntityAnnotations for fise:TextAnnotations.
+ * <p>
+ * <b>TODOs</b>:<ul>
+ * <li> Configurations: currently all configurations is set to the defaults
+ * <li> Context: test and improve different ways to determine the context
+ *      used for disambiguation.
+ * <li> URI based similarity: currently only full text similarity is used.
+ *      However it would also be possible to use the 
+ *      {@link SpecialFieldEnum#references} field to disambiguate based on
+ *      URIs of already suggested Entities.
+ * </ul>
+ * @author Kritarth Anand
+ * @author Rupert Westenthaler
  */
 @Component(immediate = true, metatype = true)
 @Service
 @Properties(value = {
-    @Property(name = EnhancementEngine.PROPERTY_NAME, value = "entity-disambiguator")
+    @Property(name = EnhancementEngine.PROPERTY_NAME, value = "disambiguation-mlt")
 })
 public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,RuntimeException> implements
         EnhancementEngine, ServiceProperties {
@@ -120,6 +129,35 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
     @Reference
     protected SiteManager siteManager;
 
+    /*
+     * The following parameters describe the ratio of the 
+     * original fise:confidence values and the disambiguation scores contributing
+     * to the final disambiguated fise:confidence
+     * 
+     * TODO: make configurable
+     */
+    /**
+     * Default ratio for Disambiguation (2.0)
+     */
+    public static final double DEFAULT_DISAMBIGUATION_RATIO = 2.0;
+    /**
+     * Default ratio for the original fise:confidence of suggested entities
+     */
+    public static final double DEFAULT_CONFIDNECE_RATIO = 1.0;
+        
+    /**
+     * The weight for disambiguation scores 
+     * <code>:= disRatio/(disRatio+confRatio)</code>
+     */
+    private double disambiguationWeight = DEFAULT_DISAMBIGUATION_RATIO / 
+            (DEFAULT_DISAMBIGUATION_RATIO + DEFAULT_CONFIDNECE_RATIO);
+    /**
+     * The weight for the original confidence scores 
+     * <code>:= confRatio/(disRatio+confRatio)</code>
+     */
+    private double confidenceWeight = DEFAULT_CONFIDNECE_RATIO / 
+            (DEFAULT_DISAMBIGUATION_RATIO + DEFAULT_CONFIDNECE_RATIO);
+    
     /**
      * The {@link LiteralFactory} used to create typed RDF literals
      */
@@ -159,189 +197,152 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
 
+        String textContent;
+        Entry<UriRef,Blob> textBlob = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        if(textBlob != null){
+            try {
+                textContent = ContentItemHelper.getText(textBlob.getValue());
+            } catch (IOException e) {
+                log.warn("Unable to retieve plain text content for ContentItem "+ci.getUri(),e);
+                textContent = null;
+            }
+        } else {
+            textContent = null;
+        }
+        
         MGraph graph = ci.getMetadata();
 
-        List<String> allEntities = new ArrayList<String>();
-        Map<SavedEntity,List<UriRef>> textAnnotations = new HashMap<SavedEntity,List<UriRef>>();
-        String contentLangauge = null;
-
-        // List to contain old confidence values that are to removed
-        List<Triple> loseConfidence = new ArrayList<Triple>();
-        // List to contain new confidence values to be added to metadata
-        List<Triple> gainConfidence = new ArrayList<Triple>();
-
+        // (1) read the data from the content item
+        String contentLangauge;
+        DisambiguationData disData;
         ci.getLock().readLock().lock();
         try {
             contentLangauge = EnhancementEngineHelper.getLanguage(ci);
-            readEntities(loseConfidence, allEntities, textAnnotations, graph);
-        } catch (Exception e) {
-
-            log.info(" readEntities" + e.getMessage());
-
+            //NOTE (rwesten): moved the parsing of the information from the 
+            //contentItem to static method of the Class holding those information 
+            //(similar as it already was for SavedEntity)
+            //readEntities(loseConfidence, allEntities, textAnnotations, graph);
+            disData = DisambiguationData.createFromContentItem(ci);
+        } finally {
+            ci.getLock().readLock().unlock();
         }
-        ci.getLock().readLock().unlock();
-
-        Site dbpediaSite = null;
-        try {
-            dbpediaSite = siteManager.getSite("dbpedia");
-
-            for (Entry<SavedEntity,List<UriRef>> entry : textAnnotations.entrySet()) {
-
-                SavedEntity savedEntity = entry.getKey();
-                // the selected text of the TextAnnotation to disambiguate
-                String label = savedEntity.getName();
-                Collection<String> types = null; // potential types of entities
-                String language = contentLangauge; // the language of the analyzed text
-                List<UriRef> subsumed = entry.getValue();
-                boolean casesensitive = false; //TODO: make configurable
-                String savedEntityLabel = casesensitive ? label : label.toLowerCase();
-
-                if (subsumed.size() <= 1) {
-                    continue;
-                }
-
-                String extractionContext = savedEntity.getContext();
-
-                List<String> L = EntitiesInRange(directoryTextAnotation,
-                    (savedEntity.getStart() + savedEntity.getEnd()) / 2);
-                // the surrounding text of the TextAnnotation
-                List<String> M = getEntititesSelection(label, allEntities, extractionContext); 
-
-                extractionContext = unionString(L, M, label);
-                if (extractionContext.equals("")) extractionContext = label;
-                QueryResultList<Entity> results = queryDbpedia(dbpediaSite, savedEntityLabel, language,
-                    extractionContext);
-                log.info(" - {} results returned by query {}", results.size(), results.getQuery());
-
-                List<Suggestion> matches = rankResults(results, casesensitive, language, savedEntityLabel);
-                Collections.sort(matches);
-
-                ci.getLock().readLock().lock();
-                try {
-                    if (intersectionCheck(matches, subsumed, graph, contentLangauge)) {
-                        gainConfidence = intersection(matches, subsumed, graph, gainConfidence,
-                            contentLangauge);
-                    } else {
-                        loseConfidence = unchangedConfidences(subsumed, graph, loseConfidence);
-                    }
-                } finally {
-                    ci.getLock().readLock().unlock();
-                }
+        
+        // (2) Disambiguate the SavedEntities
+        for (SavedEntity savedEntity : disData.textAnnotations.values()) {
+            if (savedEntity.getSuggestions().size() <= 1) {
+                //we need not to disambiguate if only one suggestion is present
+                continue;
             }
-            ci.getLock().writeLock().lock();
+            //NOTE: the site is determined from the 
+            //      fise:TextAnnotation <-- dc:relation -- 
+            //          fise:EntityAnnotation -- entityhub:ste --> "{siteName}"^^xsd:string
+            //      data.
+            //TODO: add configuration to include/exclude Sites by name
+            Site site = siteManager.getSite(savedEntity.getSite());
+            Collection<String> types = null; // potential types of entities
+            boolean casesensitive = false; //TODO: make configurable
+            String savedEntityLabel = casesensitive ? 
+                    savedEntity.getName() : savedEntity.getName().toLowerCase();
+            
+            //Determine the context used for disambiguation
+            //TODO: make this configurable options
+            
+            String disambiguationContext;
+            //(0.a) The easiest way is to just use the selection context
+            //disambiguationContext = savedEntity.getContext();
+            //(0.b) Calculate a context based on a moving window
+            String window = getDisambiguationContext(textContent,savedEntity.getName(),
+                savedEntity.getStart(),100);
+            log.info("Use Window: '{}' for '{}'",window,savedEntity.getName());
+                    
+            //(1) The contextSelections:
+            //    All other selected text within the selection context
+            List<String> contextSelections = getSelectionsInContext(
+                savedEntity.getName(), 
+                disData.allSelectedTexts, 
+                window);
+                //savedEntity.getContext()); 
+            disambiguationContext = unionString(false,
+                Collections.singleton(savedEntity.getName()),
+                contextSelections);
+            
+            //(2) I do not understand this variant (see comment for the 
+            //    EntitiesInRange(..) method
+//            List<String> L = EntitiesInRange(disData.directoryTextAnotation,
+//                (savedEntity.getStart() + savedEntity.getEnd()) / 2);
+//            disambiguationContext = unionString(false,contextSelections);
+
+            //(3) one can build a combination of the above
+//            disambiguationContext = unionString(true, //unique adds
+//                Collections.singleton(savedEntity.getName()), //the selected text
+//                Collections.singleton(context), //the context
+//                contextSelections); //other selected parsed in the context
+            
+            //(4) TODO: I would also like to have the possibility to disambiguate
+            //    using URIs of Entities suggested for other TextAnnotations
+            //    within the context.
+    
+            //make the similarity query on the Entityhub using the collected
+            //information
+            QueryResultList<Entity> results;
+            log.info(" - Query '{}' for {}@{} with context '{}'",
+                new Object[]{site.getId(),savedEntityLabel,contentLangauge,disambiguationContext});
             try {
-                removeOldConfidenceFromGraph(graph, loseConfidence);
-
-                addNewConfidenceToGraph(graph, gainConfidence);
-            } finally {
-                ci.getLock().writeLock().unlock();
+                results = query(site, savedEntityLabel, contentLangauge,
+                    disambiguationContext);
+            } catch (SiteException e) {
+                //TODO we could also try to catch those errors ...
+                throw new EngineException("Unable to disambiguate Mention of '"
+                        + savedEntity.getName()+"' on Entityhub Site '"+
+                        site.getId()+"!",e);
             }
-
+            log.debug(" - {} results returned by query {}", results.size(), results.getQuery());
+    
+            //match the results with the suggestions
+            disambiguateSuggestions(results, savedEntity);
         }
-
-        catch (Exception e) {
-            log.info("Error " + e.getMessage());
-            log.info("Error " + e.getStackTrace());
-
+        //(3) Write back the Results of the Disambiguation process
+        // NOTE (rwesten): In the original version of Kritarth this was done as
+        // part of (2) - disambiguation. This is now changed as in (2) the
+        // disambiguation results are stored in the Suggestions and only
+        // applied to the EnhancementStructure in (3). This allows to reduce the
+        // coverage of the wirte lock needed to be applied to the ContentItem.
+        ci.getLock().writeLock().lock();
+        try {
+            applyDisambiguationResults(graph, disData);
+        } finally {
+            ci.getLock().writeLock().unlock();
         }
     }
 
-    /*
-     * We create a data structure that stores the mapping of text annotation to List of Uri of all possible
-     * amiguations of the Text. Also it fills the list loseconfidence with confidence values of all the
-     * ambiguations for all entities (which will be removed eventually)
-     */
-    protected void readEntities(List<Triple> loseConfidence,
-                                List<String> allEntities,
-                                Map<SavedEntity,List<UriRef>> textAnnotations,
-                                MGraph graph) {
-        Iterator<Triple> it = graph.filter(null, RDF_TYPE, TechnicalClasses.ENHANCER_TEXTANNOTATION);
-        while (it.hasNext()) {
-            UriRef uri = (UriRef) it.next().getSubject();
-            String selectText = EnhancementEngineHelper.getString(graph, uri, ENHANCER_SELECTED_TEXT);
-// TODO: rwesten: do we really want to ignore fise:TextAnnotations that link to
-//       to an other one (typically two TextAnnotations that select the exact same text)
-//            if (graph.filter(uri, new UriRef(NamespaceEnum.dc + "relation"), null).hasNext()) {
-//                continue;
-//            }
 
-            SavedEntity savedEntity = SavedEntity.createFromTextAnnotation(graph, uri);
-            if (savedEntity != null) {
-                allEntities.add(selectText);
-                directoryTextAnotation.put(
-                    (savedEntity.getStart()+savedEntity.getEnd()) / 2, selectText);
-
-                List<UriRef> confidenceUriList = new ArrayList<UriRef>();
-                for (Iterator<Triple> it2 = graph
-                        .filter(null, new UriRef(NamespaceEnum.dc + "relation"), uri); it2.hasNext();) {
-                    UriRef uriAmbiguations = (UriRef) it2.next().getSubject();
-                    Iterator<Triple> confidenceTriple = graph.filter(uriAmbiguations, ENHANCER_CONFIDENCE,
-                        null);
-                    while (confidenceTriple.hasNext()) {
-                        loseConfidence.add(confidenceTriple.next());
-                    }
-
-                    // UriRef textAnnotation = uri; //the URI of the processed TextAnnotation
-                    // UriRef entityAnnotation = uriAmbiguations; //the URI of the original EntityAnnotation
-                    // UriRef copy = new UriRef("urn:enhancement-"
-                    // + EnhancementEngineHelper.randomUUID());
-
-                    // List<Triple> triples = new ArrayList<Triple>();
-                    // it = graph.filter(entityAnnotation,null,null);
-                    // int refCount = 0;
-                    // while(it.hasNext()){
-                    // Triple triple = it.next();
-                    // if(DC_RELATION.equals(triple.getPredicate())){
-                    // refCount++;
-                    // }
-                    // if(triple!=null)
-                    // triples.add(triple);
-                    // }
-                    /*
-                     * if(refCount > 1){ for(Triple triple : triples){
-                     * /*if(DC_RELATION.equals(triple.getPredicate())){
-                     * if(triple.getObject().equals(textAnnotation)){ //remove the dc relation to the
-                     * currently processed //textAnnotation from the original //graph.remove(triple); //
-                     * RemoveConf.add(triple); //and add it to the copy // graph.add(new TripleImpl( // copy,
-                     * triple.getPredicate(), triple.getObject())); //AddConf.add(triple); } //else it is not
-                     * the currently processed TextAnnotation // so we need to keep in in the original and NOT
-                     * add // it to the copy } else { //we can copy all other information 1:1 // graph.add(new
-                     * TripleImpl(copy,triple.getPredicate(), triple.getObject())); //AddConf.add(triple); } }
-                     * }
-                     */
-
-                    confidenceUriList.add(uriAmbiguations);
-
-                }
-                textAnnotations.put(savedEntity, confidenceUriList);
-            }
-        }
-        return;
-    }
 
     /*
      * Is used to query the Dbpedia with a entity as main constraint and then add string of all other entities
      * detected as similarity constraints
      */
 
-    protected QueryResultList<Entity> queryDbpedia(Site dbpediaSite,
+    protected QueryResultList<Entity> query(Site dbpediaSite,
                                                    String savedEntityLabel,
                                                    String language,
                                                    String extractionContext) throws SiteException {
 
         FieldQuery query = dbpediaSite.getQueryFactory().createFieldQuery();
-        Constraint labelConstraint;
-        if (language != null) {
-            labelConstraint = new TextConstraint(savedEntityLabel, false, language, null);
+        if(savedEntityLabel != null && !savedEntityLabel.isEmpty()){
+            Constraint labelConstraint;
+            if (language != null) {
+                labelConstraint = new TextConstraint(savedEntityLabel, false, language, null);
+            } else {
+                labelConstraint = new TextConstraint(savedEntityLabel, false);
+            }
+            //TODO: what happens if a recommendation was not based on rdfs:label?
+            query.setConstraint(RDFS_LABEL.getUnicodeString(), labelConstraint);
         } else {
-            labelConstraint = new TextConstraint(savedEntityLabel, false);
+            log.warn("parsed label {} was empty or NULL. Will use Similarity constraint only!",savedEntityLabel);
         }
-
-        query.setConstraint(RDFS_LABEL.getUnicodeString(), labelConstraint);
-        log.info("Init SavedEntityTaggingEngine instance for the Entityhub");
-        query.setConstraint("http://stanbol.apache.org/ontology/entityhub/query#fullText",
+        query.setConstraint(SpecialFieldEnum.fullText.getUri(),
             new SimilarityConstraint(extractionContext));
-        // query.setLimit(Math.max(20,9));
+        query.setLimit(25);
 
         return dbpediaSite.findEntities(query);
     }
@@ -350,106 +351,168 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
      * If for an entity the Dbpedia query results in suggestion none of which match the already present
      * ambiguations, we go with the ambiguations found earlier that is the ones we have with.
      */
+    // NOTE (rwesten): The disambiguateSuggestions now reduces confidence
+    // values of Suggestions that are not within the disambiguation result
+    // by the #confidenceWeight. So if not a single suggestion do match with
+    // the disambiguation result the ambiguation is kept but the overall
+    // fise:confidence values are reduced by #confidenceWeight (ensured to be
+    // less than 1)
+//    protected List<Triple> unchangedConfidences(List<UriRef> subsumed,
+//                                                MGraph graph,
+//                                                List<Triple> loseConfidence) {
+//        for (int i = 0; i < subsumed.size(); i++) {
+//            UriRef uri = subsumed.get(i);
+//            Iterator<Triple> confidenceTriple = graph.filter(uri, ENHANCER_CONFIDENCE, null);
+//            while (confidenceTriple.hasNext()) {
+//                loseConfidence.remove(confidenceTriple.next());
+//            }
+//        }
+//        return loseConfidence;
+//    }
 
-    protected List<Triple> unchangedConfidences(List<UriRef> subsumed,
-                                                MGraph graph,
-                                                List<Triple> loseConfidence) {
-        for (int i = 0; i < subsumed.size(); i++) {
-            UriRef uri = subsumed.get(i);
-            Iterator<Triple> confidenceTriple = graph.filter(uri, ENHANCER_CONFIDENCE, null);
-            while (confidenceTriple.hasNext()) {
-                loseConfidence.remove(confidenceTriple.next());
-            }
-        }
-        return loseConfidence;
-    }
-
-    /* To convert the values from Dbpedia into score values. */
-    protected List<Suggestion> rankResults(QueryResultList<Entity> results,
-                                           boolean casesensitive,
-                                           String language,
-                                           String savedEntityLabel) {
+    /** 
+     * Applies the disambiguation results to the suggestions of the
+     * {@link SavedEntity}.<p>
+     * This method modifies the state of the {@link SavedEntity#getSuggestions()}
+     * @param results the results of the disambiguation request
+     * @param savedEntity the saved entity to be disambiguated
+     **/
+    protected void disambiguateSuggestions(QueryResultList<Entity> results,
+                                           SavedEntity savedEntity) {
+        //NOTE (rwesten) We should not score disambiguation results based on
+        //     how well the labels match.
+        //     Either use directly the scores of the disambiguation results OR
+        //     do combine the confidence of the original suggestion with the
+        //     scores of the disambiguation
+        
+        /*
+         * Algorithm: Combine original confidence with Disambiguation results
+         * 
+         * Parameter(s):
+         * 
+         *   * ratio configured as '{dr}:{cr}' where 'dr' stands for the
+         *       ratio for the disambiguation score and 'cr' stand for the
+         *       ratio for the original fise:confidence of a suggestion
+         *       (default 1:1)
+         *   * disambiguation weight (dw) := dr/(dr+cr) ... already calculated
+         *       based on the configured ratio in #disambiguationWeight
+         *   * confidence weight (cw) := cw/(dr+cr) ... already calculated
+         *       based on the configured ratio in #confidenceWeight
+         * 
+         * Input(s):
+         * 
+         *   * confidence (c): the original confidence of a suggestion 
+         *       (range [0..1])
+         *   * score (s): the score of the disambiguation
+         *   * maximum score (ms): the maximum disambiguation score 
+         *   
+         * Output
+         * 
+         *   * disambiguated confidence (dc): the confidence after disambiguation
+         *   
+         * Algorithm:
+         *  
+         *   * normalized score (ns) := s/ms ... ensures range [0..1] for 
+         *       disambiguation scores
+         *   * disambiguated confidence = c*cw+ns*dw ... guaranteed to be [0..1]
+         * 
+         */
         List<Suggestion> matches = new ArrayList<Suggestion>(results.size());
-        Float maxScore = null;
-        Float maxExactScore = null;
-
-        for (Iterator<Entity> guesses = results.iterator(); guesses.hasNext();) {
-            Suggestion match = new Suggestion(guesses.next());
-            Representation rep = match.getEntity().getRepresentation();
-            Float score = rep.getFirst(RdfResourceEnum.resultScore.getUri(), Float.class);
-            match.setURI(rep.getId());
+        Float maxScore = null; 
+        Float maxSuggestedScore = null;
+        Iterator<Entity> guesses = results.iterator();
+        log.info("disambiguate {}: ",savedEntity.getName());
+        while ( guesses.hasNext()) {
+            Entity guess = guesses.next();
+            Float score = guess.getRepresentation().getFirst(
+                RdfResourceEnum.resultScore.getUri(),Float.class);
+            if(score == null){
+                log.warn("Missing Score for Entityhub Query Result {}!",
+                    guess.getId());
+                continue;
+            }
             if (maxScore == null) {
                 maxScore = score;
             }
-            Iterator<Text> labels = rep.getText(RDFS_LABEL.getUnicodeString());
-            while (labels.hasNext() && match.getLevenshtein() < 1.0) {
-                Text label1 = labels.next();
-                if (language == null || // if the content language is unknown -> accept all labels
-                    label1.getLanguage() == null || // accept labels with no language
-                    // and labels in the same language as the content
-                    (language != null && label1.getLanguage().startsWith(language))) {
-                    double actMatch = levenshtein(
-                        casesensitive ? label1.getText().toLowerCase() : label1.getText(), savedEntityLabel);
-                    if (actMatch > match.getLevenshtein()) {
-                        match.setLevenshtein(actMatch);
-                        // JOptionPane.showMessageDialog(null, "++"+label1);
-                        match.setMatchedLabel(label1);
-                    }
-                }
+            UriRef uri = new UriRef(guess.getId());
+            Suggestion suggestion = savedEntity.getSuggestion(uri);
+            if(suggestion == null){
+                log.info(" - not found {}",guess.getId());
+                continue;
             }
-            if (match.getMatchedLabel() != null) {
-                if (match.getLevenshtein() == 1.0) {
-                    if (maxExactScore == null) {
-                        maxExactScore = score;
-                    }
-                    // normalise exact matches against the best exact score
-                    match.setScore(score.doubleValue() / maxExactScore.doubleValue());
-                } else {
-                    // normalise partial matches against the best match and the
-                    // Levenshtein similarity with the label
-                    match.setScore(score.doubleValue() * match.getLevenshtein() / maxScore.doubleValue());
-                }
-                matches.add(match);
-            } else {
-                log.info("No value of {} for Entity {}!", RDFS_LABEL.getUnicodeString(), match.getEntity()
-                        .getId());
+            if(maxSuggestedScore == null){
+                maxSuggestedScore = score;
             }
+            double c = suggestion.getOriginalConfidnece() == null ? 0 :
+                suggestion.getOriginalConfidnece();
+            //TODO (rwesten) we need to find out if we should normalize based on the
+            //     maximum score or the maximum score of an suggested one
+            double ns = score/maxSuggestedScore;
+            suggestion.setNormalizedDisambiguationScore(ns);
+            double dc = c*confidenceWeight + ns*disambiguationWeight;
+            suggestion.setDisambiguatedConfidence(dc);
+            log.info("  - found {}, origConf:{}, disScore:{}, disConf:{}",
+                new Object[]{suggestion.getEntityUri(),c,ns,dc});
         }
-        return matches;
+        //if at least one suggestion was also in the disambiguation result
+        if(maxSuggestedScore != null){ 
+            //adapt the confidence of suggestions that where not part of the
+            //disambiguation result
+            for(Suggestion suggestion : savedEntity.getSuggestions()){
+                if(suggestion.getDisambiguatedConfidence() == null){
+                    double c = suggestion.getOriginalConfidnece() == null ? 0 :
+                        suggestion.getOriginalConfidnece();
+                    suggestion.setDisambiguatedConfidence(c*confidenceWeight);
+                }
+            }
+        } else { //else keep the original results
+            log.info("  - none found");
+        }
     }
 
     /*
      * Checks if there is any common elements amongst the ambiguations amongst latest dbpedia query and intial
      * ambiguations
      */
+     // NOTE (rwesten): now done as part of the disambiguateSuggestions(..)
+     // method.  
+//    protected boolean intersectionCheck(List<Suggestion> matches,
+//                                        List<UriRef> subsumed,
+//                                        MGraph graph,
+//                                        String contentLangauge) {
+//        for (int i = 0; i < subsumed.size(); i++) {
+//            UriRef uri = subsumed.get(i);
+//
+//            UriRef uri1 = EnhancementEngineHelper.getReference(graph, uri, new UriRef(NamespaceEnum.fise
+//                                                                                      + "entity-reference"));
+//
+//            String selectedText = EnhancementEngineHelper.getString(graph, uri, ENHANCER_ENTITY_LABEL);
+//
+//            if (selectedText == null) {
+//                continue;
+//            }
+//
+//            for (int j = 0; j < matches.size(); j++) {
+//                Suggestion suggestion = matches.get(j);
+//                String suggestName = suggestion.getURI();
+//                if (suggestName.compareToIgnoreCase(uri1.getUnicodeString()) == 0) return true;
+//            }
+//        }
+//        return false;
+//    }
 
-    protected boolean intersectionCheck(List<Suggestion> matches,
-                                        List<UriRef> subsumed,
-                                        MGraph graph,
-                                        String contentLangauge) {
-        for (int i = 0; i < subsumed.size(); i++) {
-            UriRef uri = subsumed.get(i);
+// NOTE (rwesten): one MUST NOT store information of processed ContentItems
+//                 as member variables, as one EnhancementEngine instance is
+//                 concurrently used to process multiple ContentItems. Because
+//                 of that member variables will have data of different
+//                 ContentItems!
+//                 All those data need to be hold in information that are local
+//                 to the processing of a single ContentItem (similar to 
+//                 SavedEntity).
+// NOTE moved the DisambiguationData#directoryTextAnotation
+//    public Map<Integer,String> directoryTextAnotation = new HashMap<Integer,String>();
 
-            UriRef uri1 = EnhancementEngineHelper.getReference(graph, uri, new UriRef(NamespaceEnum.fise
-                                                                                      + "entity-reference"));
-
-            String selectedText = EnhancementEngineHelper.getString(graph, uri, ENHANCER_ENTITY_LABEL);
-
-            if (selectedText == null) {
-                continue;
-            }
-
-            for (int j = 0; j < matches.size(); j++) {
-                Suggestion suggestion = matches.get(j);
-                String suggestName = suggestion.getURI();
-                if (suggestName.compareToIgnoreCase(uri1.getUnicodeString()) == 0) return true;
-            }
-        }
-        return false;
-    }
-
-    public Map<Integer,String> directoryTextAnotation = new HashMap<Integer,String>();
-
+    //TODO: make configureable
     int radii = 23;
 
     // Value to be configured
@@ -460,13 +523,19 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
         }
         return false;
     }
-
-    public List<String> EntitiesInRange(Map<Integer,String> map, int radius) {
+    /*
+     * TODO: rwesten I do not understand what is the intension of this
+     * Adding the fise:selection-context of all entities within a range of
+     * #radii characters seams not to be a great way to build a context (or
+     * do i miss something?
+     */
+    @Deprecated //for now until someone can answer the anove question
+    public List<String> EntitiesInRange(NavigableMap<Integer,SavedEntity> map, int radius) {
         List<String> temp = new ArrayList<String>();
-
-        for (Entry<Integer,String> entry : map.entrySet()) {
+        //TODO: reimplement using subMap of the parsed NavigableMap map
+        for (Entry<Integer,SavedEntity> entry : map.entrySet()) {
             Integer s = entry.getKey();
-            String subs = entry.getValue();
+            String subs = entry.getValue().getContext();
             if (toInclude(s, radius)) {
                 temp.add(subs);
             }
@@ -475,16 +544,22 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
         return temp; // if(Cal(f,k))
     }
 
-    /* Returns a string on appended text annotations seperated by spaces */
-    protected List<String> getEntititesSelection(String label, List<String> allEntities, String context) {
+    /**
+     * Returns a list of all fise:selected-text values occurring in the
+     * parsed context (excluding the parsed label if not null
+     * @param label The label of the current Entity. parse <code>null</code> if
+     * the current label should not be ignored (and included in the context)
+     * @param allEntities The collections with all the fise:selection-text values
+     * of all fise:TextAnnotations
+     * @param context
+     * @return
+     */
+    protected List<String> getSelectionsInContext(String label, Collection<String> allEntities, String context) {
         List<String> allEntityString = new ArrayList<String>();
 
-        for (int i = 0; i < allEntities.size(); i++) {
-
-            if (label.compareToIgnoreCase(allEntities.get(i)) != 0 && (context != null)
-                && (context.contains(allEntities.get(i)))) {
-                allEntityString.add(allEntities.get(i));
-
+        for (String selectedText : allEntities) {
+            if (context.contains(selectedText) && selectedText.compareToIgnoreCase(label) != 0) {
+                allEntityString.add(selectedText);
             }
 
         }
@@ -492,18 +567,18 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
         return allEntityString;
     }
 
-    public String unionString(List<String> a, List<String> b, String h) {
-        Set union = new HashSet();
-
-        union.addAll(a);
-        union.addAll(b);
-        String AllString = "";
-
-        Object[] temp = union.toArray();
-        for (int i = 0; i < temp.length; i++) {
-            AllString = AllString + " " + (String) temp[i];
+    public String unionString(boolean unique,Collection<?>...lists) {
+        StringBuilder union = new StringBuilder();
+        HashSet<String> added = new HashSet<String>();
+        for(Collection<?> list : lists){
+            for(Object entry : list){
+                if(!unique || added.add(entry.toString())){
+                    union.append(entry);
+                    union.append(' ');
+                }
+            }
         }
-        return AllString;
+        return union.toString();
     }
 
     /*
@@ -511,49 +586,52 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
      * the one from dpedia). Update the confidence values of those and make the confidence values of others as
      * 0 in gainconfidence list
      */
-    protected List<Triple> intersection(List<Suggestion> matches,
-                                        List<UriRef> subsumed,
-                                        MGraph graph,
-                                        List<Triple> gainConfidence,
-                                        String contentLangauge) {
-
-        for (int i = 0; i < subsumed.size(); i++) {
-            boolean matchFound = false;
-            UriRef uri = subsumed.get(i);
-
-            UriRef uri1 = EnhancementEngineHelper.getReference(graph, uri, new UriRef(NamespaceEnum.fise
-                                                                                      + "entity-reference"));
-
-            for (int j = 0; j < matches.size(); j++) {
-                Suggestion suggestion = matches.get(j);
-                String suggestName = suggestion.getURI();
-
-                if (suggestName != null && uri1 != null
-                    && suggestName.compareToIgnoreCase(uri1.getUnicodeString()) == 0) {
-                    Triple confidenceTriple = new TripleImpl(uri, ENHANCER_CONFIDENCE, LiteralFactory
-                            .getInstance().createTypedLiteral(suggestion.getScore()));
-                    Triple contributorTriple = new TripleImpl((UriRef) confidenceTriple.getSubject(),
-                            new UriRef(NamespaceEnum.dc + "contributor"), LiteralFactory.getInstance()
-                                    .createTypedLiteral(this.getClass().getName()));
-                    gainConfidence.add(confidenceTriple);
-                    gainConfidence.add(contributorTriple);
-                    matchFound = true;
-                }
-            }
-
-            if (!matchFound) {
-                Triple confidenceTriple = new TripleImpl(uri, ENHANCER_CONFIDENCE, LiteralFactory
-                        .getInstance().createTypedLiteral(0.0));
-                Triple contributorTriple = new TripleImpl((UriRef) confidenceTriple.getSubject(), new UriRef(
-                        NamespaceEnum.dc + "contributor"), LiteralFactory.getInstance().createTypedLiteral(
-                    this.getClass().getName()));
-                gainConfidence.add(confidenceTriple);
-                gainConfidence.add(contributorTriple);
-            }
-        }
-
-        return gainConfidence;
-    }
+    // NOTE (rwesten): intersection is calculated as part of the disambiguateSuggestions(..)
+    // method. Results are stored in the Suggestions (member of SavedEntiy) and
+    // than written back to the EnhancementStructure in a separate step
+//    protected List<Triple> intersection(List<Suggestion> matches,
+//                                        List<UriRef> subsumed,
+//                                        MGraph graph,
+//                                        List<Triple> gainConfidence,
+//                                        String contentLangauge) {
+//
+//        for (int i = 0; i < subsumed.size(); i++) {
+//            boolean matchFound = false;
+//            UriRef uri = subsumed.get(i);
+//
+//            UriRef uri1 = EnhancementEngineHelper.getReference(graph, uri, new UriRef(NamespaceEnum.fise
+//                                                                                      + "entity-reference"));
+//
+//            for (int j = 0; j < matches.size(); j++) {
+//                Suggestion suggestion = matches.get(j);
+//                String suggestName = suggestion.getURI();
+//
+//                if (suggestName != null && uri1 != null
+//                    && suggestName.compareToIgnoreCase(uri1.getUnicodeString()) == 0) {
+//                    Triple confidenceTriple = new TripleImpl(uri, ENHANCER_CONFIDENCE, LiteralFactory
+//                            .getInstance().createTypedLiteral(suggestion.getScore()));
+//                    Triple contributorTriple = new TripleImpl((UriRef) confidenceTriple.getSubject(),
+//                            new UriRef(NamespaceEnum.dc + "contributor"), LiteralFactory.getInstance()
+//                                    .createTypedLiteral(this.getClass().getName()));
+//                    gainConfidence.add(confidenceTriple);
+//                    gainConfidence.add(contributorTriple);
+//                    matchFound = true;
+//                }
+//            }
+//
+//            if (!matchFound) {
+//                Triple confidenceTriple = new TripleImpl(uri, ENHANCER_CONFIDENCE, LiteralFactory
+//                        .getInstance().createTypedLiteral(0.0));
+//                Triple contributorTriple = new TripleImpl((UriRef) confidenceTriple.getSubject(), new UriRef(
+//                        NamespaceEnum.dc + "contributor"), LiteralFactory.getInstance().createTypedLiteral(
+//                    this.getClass().getName()));
+//                gainConfidence.add(confidenceTriple);
+//                gainConfidence.add(contributorTriple);
+//            }
+//        }
+//
+//        return gainConfidence;
+//    }
 
     /* Removes the value in lose confidence from the graph */
     protected void removeOldConfidenceFromGraph(MGraph graph, List<Triple> loseConfidence) {
@@ -563,12 +641,104 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
         }
     }
 
-    /* adds the confidence values from gain confidence list to graph */
-    protected void addNewConfidenceToGraph(MGraph graph, List<Triple> gainConfidence) {
-        for (int i = 0; i < gainConfidence.size(); i++) {
-            Triple elementToAdd = gainConfidence.get(i);
-            graph.add(elementToAdd);
+    /**
+     * Adds the disambiguation results to the enhancement structure
+     * @param graph the metadata of the {@link ContentItem}
+     * @param disData the disambiguation data
+     */
+    protected void applyDisambiguationResults(MGraph graph, DisambiguationData disData) {
+        for(SavedEntity savedEntity : disData.textAnnotations.values()){
+            for(Suggestion s : savedEntity.getSuggestions()){
+                if(s.getDisambiguatedConfidence() != null){
+                    if(disData.suggestionMap.get(s.getEntityAnnotation()).size() > 1){
+                        //already encountered AND disambiguated -> we need to clone!!
+                        log.info("clone {} suggesting {} for {}[{},{}]({})",
+                            new Object[]{s.getEntityAnnotation(),s.getEntityUri(),
+                                         savedEntity.getName(),savedEntity.getStart(),
+                                         savedEntity.getEnd(),savedEntity.getUri()});
+                        s.setEntityAnnotation(cloneTextAnnotation(
+                            graph,s.getEntityAnnotation(),savedEntity.getUri()));
+                        log.info("  - cloned {}",s.getEntityAnnotation());
+                    }
+                    //change the confidence
+                    EnhancementEngineHelper.set(graph, 
+                        s.getEntityAnnotation(), ENHANCER_CONFIDENCE,
+                        s.getDisambiguatedConfidence(),literalFactory);
+                    EnhancementEngineHelper.addContributingEngine(graph,
+                        s.getEntityAnnotation(),this);
+                }
+            }
         }
+    }
+    /**
+     * This creates a 'clone' of the fise:EntityAnnotation where the original
+     * does no longer have a dc:relation to the parsed fise:TextAnnotation and
+     * the created clone does only have a dc:relation to the parsed
+     * fise:TextAnnotation.<p>
+     * This is required by disambiguation because other engines typically only
+     * create a single fise:EntityAnnotation instance if several
+     * fise:TextAnnotation do have the same fise:selected-text values. So
+     * for a text that multiple times mentions the same Entity (e.g. "Paris")
+     * there will be multiple fise:TextAnnotations selecting the different
+     * mentions of that Entity, but there will be only a single set of
+     * suggestions - fise:EntityAnnotations (e.g. "Paris, France" and 
+     * "Paris, Texas"). Now lets assume a text like
+     * <pre>
+     *     Paris is the capital of France and it is worth a visit for sure. But
+     *     one can also visit Paris without leaving the United States as there
+     *     is also a city with the same name in Texas.
+     * </pre>
+     * 
+     * Entity Disambiguation need to be able to have different fise:confidence
+     * values for the first and second mention of Paris and this is only
+     * possible of the fise:TextAnnotations of those mentions do NOT refer to
+     * the same set of fise:EntityAnnotations.<p>
+     * This methods accomplished exactly that as it <ul>
+     * <li> creates a clone of a fise:EntityAnnotation
+     * <li> removes the dc:relation link to the 2nd mention of Paris from the original
+     * <li> only adds the dc:relation of the end mention to the clone
+     * </ul>
+     * So in the end you will have two fise:EntityAnnotation<ul>
+     * <li> the original fise:EntityAnnotation with dc:relation to all 
+     * fise:TextAnnotations other than the 2nd mention (the one this method was
+     * called for)
+     * <li> the cloned fise:EntityAnnnotation with a dc:relation to the 2nd
+     * mention.
+     * </ul>
+     * @param graph
+     * @param entityAnnotation
+     * @param textAnnotation
+     * @return
+     */
+    public static UriRef cloneTextAnnotation(MGraph graph, UriRef entityAnnotation, UriRef textAnnotation) {
+        UriRef copy = new UriRef("urn:enhancement-"
+                + EnhancementEngineHelper.randomUUID());
+        Iterator<Triple> it = graph.filter(entityAnnotation,null,null);
+        //we can not add triples to the graph while iterating. So store them
+        //in a list and add later
+        List<Triple> added = new ArrayList<Triple>(32);
+        while(it.hasNext()){
+            Triple triple = it.next();
+            if(DC_RELATION.equals(triple.getPredicate())){
+                if(triple.getObject().equals(textAnnotation)){
+                    //remove the dc relation to the currently processed
+                    //textAnnotation from the original
+                    it.remove();
+                    //and add it to the copy
+                    added.add(new TripleImpl(
+                        copy, //use the copy as subject!
+                        triple.getPredicate(), triple.getObject()));
+                } //else it is not the currently processed TextAnnotation
+                  // so we need to keep in in the original and NOT add
+                  // it to the copy
+            } else { //we can copy all other information 1:1
+                added.add(new TripleImpl(
+                    copy, //use the copy as subject!
+                    triple.getPredicate(), triple.getObject()));
+            }
+        }
+        graph.addAll(added);
+        return copy;
     }
 
     /* Returns a string on appended text annotations seperated by spaces */
@@ -602,7 +772,54 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
         }
 
     }
-
+    /**
+     * Extracts the selection context based on the content, selection and
+     * the start char offset of the selection
+     * @param content the content
+     * @param selection the selected text
+     * @param selectionStartPos the start char position of the selection
+     * @param contextSize the size of the context in characters
+     * @return the context
+     */
+    public static String getDisambiguationContext(String content, String selection,int selectionStartPos, int contextSize){
+        //extract the selection context
+        int beginPos;
+        if(selectionStartPos <= contextSize){
+            beginPos = 0;
+        } else {
+            int start = selectionStartPos-contextSize;
+            beginPos = start;
+            int c;
+            do {
+                c = content.codePointAt(beginPos);
+                beginPos++;
+            } while(beginPos <= selectionStartPos || 
+                    Character.isWhitespace(c)  || 
+                    Character.getType(c) == Character.SPACE_SEPARATOR);
+            if(beginPos < 0 || beginPos >= selectionStartPos){ //no words
+                beginPos = start; //begin within a word
+            }
+        }
+        int endPos;
+        if(selectionStartPos+selection.length()+contextSize >= content.length()){
+            endPos = content.length();
+        } else {
+            int selectionEndPos = selectionStartPos+selection.length();
+            int end = selectionEndPos+contextSize;
+            endPos = end;
+            int c;
+            do {
+                c = content.codePointAt(endPos);
+                endPos--;
+            } while(endPos > selectionEndPos || 
+                    Character.isWhitespace(c)  || 
+                    Character.getType(c) == Character.SPACE_SEPARATOR);
+            if(endPos <= selectionStartPos+selection.length()){
+                endPos = end; //end within a word;
+            }
+        }
+        return content.substring(beginPos, endPos);
+    }
     /**
      * Activate and read the properties
      * 
@@ -645,15 +862,15 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
         return serviceURL;
     }
 
-    private static double levenshtein(String s1, String s2) {
-        if (s1 == null || s2 == null) {
-            throw new IllegalArgumentException("NONE of the parsed String MUST BE NULL!");
-        }
-        s1 = StringUtils.trim(s1);
-        s2 = StringUtils.trim(s2);
-        return s1.isEmpty() || s2.isEmpty() ? 0
-                : 1.0 - (((double) getLevenshteinDistance(s1, s2)) / ((double) (Math.max(s1.length(),
-                    s2.length()))));
-    }
+//    private static double levenshtein(String s1, String s2) {
+//        if (s1 == null || s2 == null) {
+//            throw new IllegalArgumentException("NONE of the parsed String MUST BE NULL!");
+//        }
+//        s1 = StringUtils.trim(s1);
+//        s2 = StringUtils.trim(s2);
+//        return s1.isEmpty() || s2.isEmpty() ? 0
+//                : 1.0 - (((double) getLevenshteinDistance(s1, s2)) / ((double) (Math.max(s1.length(),
+//                    s2.length()))));
+//    }
 
 }

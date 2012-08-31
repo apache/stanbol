@@ -1,144 +1,250 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.enhancer.engine.disambiguation.mlt;
 
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
+import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
+import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class SavedEntity {
     private static final Logger log = LoggerFactory.getLogger(SavedEntity.class);
+    
     /**
      * The {@link LiteralFactory} used to create typed RDF literals
      */
     private final static LiteralFactory literalFactory = LiteralFactory.getInstance();
-    private NonLiteral entity;
     private String name;
     private UriRef type;
-    private String URI;
+    private UriRef uri;
     private String context;
     private Integer start;
     private Integer end;
     
-    private SavedEntity() {
-        //use createFromTextAnnotation to create an instance
-    }
     /**
-     * Getter for the Node providing the information about that entity
-     * @return the entity
+     * Map with the suggestion. The key is the URI of the fise:EntityAnnotation
+     * and the value is the Triple with the confidence value
      */
-    public final NonLiteral getEntity() {
-        return entity;
-    }
+    private Map<UriRef,Suggestion> suggestions = new LinkedHashMap<UriRef,Suggestion>();
+
     /**
-     * Getter for the name
-     * @return the name
+     * The name of the Entityhub {@link Site} managing the suggestions of
+     * this fise:TextAnnotation
      */
-    public final String getName() {
-        return name;
-    }
+    private String site;
+
     /**
-     * Getter for the type
-     * @return the type
+     * private constructor only used by {@link #createFromTextAnnotation(TripleCollection, NonLiteral)}
      */
-    public final UriRef getType() {
-        return type;
-    }
-    @Override
-    public int hashCode() {
-        return entity.hashCode();
-    }
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof SavedEntity && entity.equals(((SavedEntity)o).entity);
-    }
-    @Override
-    public String toString() {
-        return String.format("SavedEntity %s (name=%s|type=%s)",entity,name,type);
-    }
+    private SavedEntity() {}
+
     /**
-     * Extracts the information of an {@link SavedEntity} from an
-     * {@link TechnicalClasses#ENHANCER_TEXTANNOTATION} instance.
-     * @param graph the graph with the information
-     * @param textAnnotation the text annotation instance
-     * @return the {@link SavedEntity} or <code>null</code> if the parsed
-     * text annotation is missing required information.
+     * creates a SavedEntity instance for the parsed fise:TextAnnotation
+     * 
+     * @param graph
+     *            the graph with the information
+     * @param textAnnotation
+     *            the fise:TextAnnotation
+     * @return the {@link SavedEntity} or <code>null</code> if the parsed text 
+     *         annotation is missing required information.
      */
-    public static SavedEntity createFromTextAnnotation(TripleCollection graph, NonLiteral textAnnotation){
+    public static SavedEntity createFromTextAnnotation(TripleCollection graph, UriRef textAnnotation) {
         SavedEntity entity = new SavedEntity();
-        String name = EnhancementEngineHelper.getString(graph, textAnnotation, ENHANCER_SELECTED_TEXT);
-        if (name == null) {
+        entity.uri = textAnnotation;
+        entity.name = EnhancementEngineHelper.getString(graph, textAnnotation, ENHANCER_SELECTED_TEXT);
+        if (entity.name == null) {
             log.debug("Unable to create SavedEntity for TextAnnotation {} "
-                    + "because property {} is not present",textAnnotation,ENHANCER_SELECTED_TEXT);
+                      + "because property {} is not present", textAnnotation, ENHANCER_SELECTED_TEXT);
             return null;
         }
+        //NOTE rwesten: I think one should not change the selected text
         // remove punctuation form the search string
-        entity.name = cleanupKeywords(name);
-        if(entity.name.isEmpty()){
-            log.debug("Unable to process TextAnnotation {} because its selects "
-            		+ "an empty Stirng !",textAnnotation);
+        //entity.name = cleanupKeywords(name);
+        if (entity.name.isEmpty()) {
+            log.debug("Unable to process TextAnnotation {} because its selects " + "an empty Stirng !",
+                textAnnotation);
             return null;
         }
         entity.type = EnhancementEngineHelper.getReference(graph, textAnnotation, DC_TYPE);
-        //NOTE rwesten: TextAnnotations without dc:type should be still OK
-//        if (type == null) {
-//            log.warn("Unable to process TextAnnotation {} because property {}"
-//                     + " is not present!",textAnnotation, DC_TYPE);
-//            return null;
-//        }
+        // NOTE rwesten: TextAnnotations without dc:type should be still OK
+        // if (type == null) {
+        // log.warn("Unable to process TextAnnotation {} because property {}"
+        // + " is not present!",textAnnotation, DC_TYPE);
+        // return null;
+        // }
         entity.context = EnhancementEngineHelper.getString(graph, textAnnotation, ENHANCER_SELECTION_CONTEXT);
-        Integer start = EnhancementEngineHelper.get(graph, textAnnotation, ENHANCER_START,Integer.class,literalFactory);
-        Integer end = EnhancementEngineHelper.get(graph, textAnnotation, ENHANCER_END,Integer.class,literalFactory);
-        if(start == null || end ==null){
+        Integer start = EnhancementEngineHelper.get(graph, textAnnotation, ENHANCER_START, Integer.class,
+            literalFactory);
+        Integer end = EnhancementEngineHelper.get(graph, textAnnotation, ENHANCER_END, Integer.class,
+            literalFactory);
+        if (start == null || end == null) {
             log.debug("Unable to process TextAnnotation {} because the start and/or the end "
-                + "position is not defined (selectedText: {}, start: {}, end: {})",
-                new Object[]{textAnnotation, name, start, end});
-            
+                      + "position is not defined (selectedText: {}, start: {}, end: {})",
+                new Object[] {textAnnotation, entity.name, start, end});
+
+        }
+        entity.start = start;
+        entity.end = end;
+        
+        //parse the suggestions
+        
+        //all the entityhubSites that manage a suggested Entity 
+        //(hopefully only a single one)
+        Set<String> entityhubSites = new HashSet<String>();
+        List<Suggestion> suggestionList = new ArrayList<Suggestion>();
+        Iterator<Triple> suggestions = graph.filter(null, Properties.DC_RELATION, textAnnotation);
+        //NOTE: this iterator will also include dc:relation between fise:TextAnnotation's
+        //      but in those cases NULL will be returned as suggestion
+        while (suggestions.hasNext()) {
+            UriRef entityAnnotation = (UriRef) suggestions.next().getSubject();
+            Suggestion suggestion = Suggestion.createFromEntityAnnotation(graph, entityAnnotation);
+            if(suggestion != null){
+                suggestionList.add(suggestion);
+                if(suggestion.getSite() != null){
+                    entityhubSites.add(suggestion.getSite());
+                }
+            }
+        }
+        if(suggestionList.isEmpty()){
+            log.warn("TextAnnotation {} (selectedText: {}, start: {}) has no"
+                    + "suggestions.",
+                    new Object[]{entity.uri,entity.name,entity.start});
+            return null; //nothing to disambiguate
+        } else {
+            Collections.sort(suggestionList); //sort them based on confidence
+            //the LinkedHashMap will keep the order (based on the original
+            //confidence)
+            for(Suggestion suggestion : suggestionList){
+                entity.suggestions.put(suggestion.getEntityUri(), suggestion);
+            }
+        }
+        if(entityhubSites.isEmpty()) {
+            log.debug("TextAnnotation {} (selectedText: {}, start: {}) has "
+                    + "suggestions do not have 'entityhub:site' information. "
+                    + "Can not disambiguate because origin is unknown.",
+                    new Object[]{entity.uri,entity.name,entity.start});
+            return null; //Ignore TextAnnotatiosn with suggestions of unknown origin.
+        } else if(entityhubSites.size() > 1){
+            log.warn("TextAnnotation {} (selectedText: {}, start: {}) has "
+                    + "suggestions originating from multiple Entityhub Sites {}",
+                    new Object[]{entity.uri,entity.name,entity.start,entityhubSites});
+            return null; //TODO: Ignore those for now
+        } else {
+            entity.site = entityhubSites.iterator().next();
         }
         return entity;
-    }        
+    }
+
     /**
      * Removes punctuation form a parsed string
      */
     private static String cleanupKeywords(String keywords) {
         return keywords.replaceAll("\\p{P}", " ").trim();
     }
-    
-    public String getURI()
-    {return this.URI;}
 
-    public String getContext()
-    {return this.context;}
-    
-    public int getStart()
-    {return this.start;}
+    /**
+     * Getter for the name
+     * 
+     * @return the name
+     */
+    public final String getName() {
+        return name;
+    }
 
-    public int getEnd()
-    {return this.end;}
-  
+    /**
+     * Getter for the type
+     * 
+     * @return the type
+     */
+    public final UriRef getType() {
+        return type;
+    }
+
+    @Override
+    public int hashCode() {
+        return uri.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof SavedEntity && uri.equals(((SavedEntity) o).uri);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("SavedEntity %s (name=%s | type=%s)", uri, name, type);
+    }
+
+    public UriRef getUri() {
+        return this.uri;
+    }
+
+    public String getContext() {
+        return this.context;
+    }
+
+    public int getStart() {
+        return this.start;
+    }
+
+    public int getEnd() {
+        return this.end;
+    }
+
+    public Collection<Suggestion> getSuggestions(){
+        return suggestions.values();
+    }
+    
+    public Suggestion getSuggestion(UriRef uri){
+        return suggestions.get(uri);
+    }
+    
+    /**
+     * The name of the Entityhub {@link Site} managing the suggestions
+     * @return
+     */
+    public String getSite() {
+        return site;
+    }
 }

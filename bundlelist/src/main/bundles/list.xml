@@ -166,8 +166,14 @@
       <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
 
+    <!-- Disambiguation Enhancement Engine -->
+	<bundle>
+	  <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engine.disambiguation.mlt</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+	</bundle>
+	
     <!-- Refactor Enhancement Engine -->
-
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.refactor</artifactId>
