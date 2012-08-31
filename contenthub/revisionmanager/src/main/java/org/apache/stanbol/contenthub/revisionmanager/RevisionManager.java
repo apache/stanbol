@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -195,7 +196,7 @@ public class RevisionManager {
                     return new ChangeSetImpl<Item>(store, store.getEpoch(), Long.MIN_VALUE, Long.MAX_VALUE,
                             changedUris);
                 }
-                
+
                 // if the number of changes >= batchsize + 1
                 if (rs.absolute(batchSize + 1)) {
                     lastRowRevision = rs.getLong(2);
@@ -208,7 +209,7 @@ public class RevisionManager {
                         moreChanges = true;
                     }
                     while (rs.next()) {
-                        if(rs.isLast()) {
+                        if (rs.isLast()) {
                             break;
                         }
                         changedUris.add(rs.getString(1));
@@ -379,6 +380,39 @@ public class RevisionManager {
 
         // add initial epoch for the store
         updateEpoch(store, true);
+    }
+
+    /**
+     * Clear the resources including the revision table and the epoch entry regarding the given {@link Store}
+     * 
+     * @param store
+     *            Store instance of which resources will be cleared
+     * @throws StoreException
+     */
+    public <Item> void clearRevisionTables(Store<Item> store) throws StoreException {
+        Connection con = null;
+        Statement stmt = null;
+        PreparedStatement ps = null;
+        String tableName = getStoreID(store);
+        try {
+            con = dbManager.getConnection();
+            // first remove the the table
+            stmt = con.createStatement();
+            stmt.executeUpdate("DROP TABLE " + tableName);
+
+            // delete the entry from epoch table
+            ps = con.prepareStatement("DELETE FROM " + StoreDBManager.EPOCH_TABLE_NAME
+                                      + " WHERE tableName = ?");
+            ps.setString(1, tableName);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            log.error("Failed clear test resources for the table: {}", tableName);
+        } finally {
+            dbManager.closeStatement(stmt);
+            dbManager.closeStatement(ps);
+            dbManager.closeConnection(con);
+        }
     }
 
     /**
