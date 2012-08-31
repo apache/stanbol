@@ -741,7 +741,7 @@ public class KeywordLinkingEngine
             if(minSearchTokenLength < 1){
                 throw new ConfigurationException(MIN_SEARCH_TOKEN_LENGTH, "Values MUST be valid Integer values > 0");
             }
-            linkerConfig.setMaxSuggestions(minSearchTokenLength);
+            linkerConfig.setMinSearchTokenLength(minSearchTokenLength);
         }
         //init the REDIRECT_PROCESSING_MODE
         value = configuration.get(REDIRECT_PROCESSING_MODE);
