@@ -205,7 +205,12 @@ public class KeywordLinkingEngine
      * The literal representing the LangIDEngine as creator.
      */
     public static final Literal LANG_ID_ENGINE_NAME = LiteralFactory.getInstance().createTypedLiteral("org.apache.stanbol.enhancer.engines.langid.LangIdEnhancementEngine");
-    
+
+    /**
+     * The default value for the LIMIT of the {@link EntitySearcher}
+     */
+    private static final int DEFAULT_ENTITY_SEARCHER_LIMIT = 10;
+
     private EntitySearcher entitySearcher;
     private EntityLinkerConfig linkerConfig;
     private TextAnalyzerConfig nlpConfig;
@@ -873,9 +878,9 @@ public class KeywordLinkingEngine
         }
         //TODO: make limit configurable!
         if(Entityhub.ENTITYHUB_IDS.contains(referencedSiteName.toLowerCase())){
-            entitySearcher = new EntityhubSearcher(context.getBundleContext(),10);
+            entitySearcher = new EntityhubSearcher(context.getBundleContext(),DEFAULT_ENTITY_SEARCHER_LIMIT);
         } else {
-            entitySearcher = new ReferencedSiteSearcher(context.getBundleContext(),referencedSiteName,10);
+            entitySearcher = new ReferencedSiteSearcher(context.getBundleContext(),referencedSiteName,DEFAULT_ENTITY_SEARCHER_LIMIT);
         }
     }
     /**

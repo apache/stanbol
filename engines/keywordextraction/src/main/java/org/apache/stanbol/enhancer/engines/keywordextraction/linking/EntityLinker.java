@@ -56,6 +56,8 @@ public class EntityLinker {
      * The map holding the results of the linking process
      */
     private final Map<String,LinkedEntity> linkedEntities = new HashMap<String,LinkedEntity>();
+
+    private Integer lookupLimit;
     
     /**
      * After {@link #process()}ing this returns the entities linked for the
@@ -79,6 +81,7 @@ public class EntityLinker {
         this.entitySearcher = taxonomy;
         this.config = config;
         this.state = new ProcessingState(content.getAnalysedText());
+        this.lookupLimit  = Math.max(10,config.getMaxSuggestions()*2);
     }
     /**
      * Steps over the sentences, chunks, tokens of the {@link #sentences}
@@ -289,8 +292,11 @@ public class EntityLinker {
     private List<Suggestion> lookupEntities(List<String> searchStrings) throws EngineException {
         Collection<? extends Representation> results;
         try {
-            results = entitySearcher.lookup(config.getNameField(),config.getSelectedFields(),
-            searchStrings, state.getSentence().getLanguage(),config.getDefaultLanguage());
+            results = entitySearcher.lookup(config.getNameField(),
+                config.getSelectedFields(),
+                searchStrings, 
+                new String[]{state.getSentence().getLanguage(),config.getDefaultLanguage()},
+                lookupLimit);
         } catch (RuntimeException e) {
             throw new EngineException(e.getMessage(),e);
         }
@@ -555,6 +561,7 @@ public class EntityLinker {
                 //processable tokens are counted, but Exact also checks
                 //of non-processable!
                 foundTokens = coveredTokens;
+                foundProcessableTokens = coveredProcessableTokens;
             } else if((foundProcessableTokens >= config.getMinFoundTokens() ||
                     //NOTE (rwesten, 2012-05-21): Do not check if all covered
                     //  Tokens are found, but if all Tokens of the Label are

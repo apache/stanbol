@@ -262,9 +262,7 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
                 disData.allSelectedTexts, 
                 window);
                 //savedEntity.getContext()); 
-            disambiguationContext = unionString(false,
-                Collections.singleton(savedEntity.getName()),
-                contextSelections);
+          disambiguationContext = unionString(false, contextSelections);
             
             //(2) I do not understand this variant (see comment for the 
             //    EntitiesInRange(..) method
@@ -277,6 +275,11 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
 //                Collections.singleton(savedEntity.getName()), //the selected text
 //                Collections.singleton(context), //the context
 //                contextSelections); //other selected parsed in the context
+            
+            //or just the name of the entity AND the context
+//            disambiguationContext = unionString(false,
+//                Collections.singleton(savedEntity.getName()),
+//                contextSelections);
             
             //(4) TODO: I would also like to have the possibility to disambiguate
             //    using URIs of Entities suggested for other TextAnnotations

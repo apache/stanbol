@@ -62,13 +62,19 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
     public Collection<? extends Representation> lookup(String field,
                                            Set<String> includeFields,
                                            List<String> search,
-                                           String... languages) throws IllegalStateException {
+                                           String[] languages,
+                                           Integer limit) throws IllegalStateException {
         Entityhub entityhub = getSearchService();
         if(entityhub == null){
             throw new IllegalStateException("The Entityhub is currently not active");
         }
         FieldQuery query = EntitySearcherUtils.createFieldQuery(entityhub.getQueryFactory(),
             field, includeFields, search, languages);
+        if(limit != null && limit > 0){
+            query.setLimit(limit);
+        } else if(this.limit != null){
+            query.setLimit(this.limit);
+        }
         QueryResultList<Representation> results;
         try {
             results = entityhub.find(query);

@@ -44,10 +44,11 @@ public interface EntitySearcher {
      * to be included. Other fields MAY also be included.
      * @param search the tokens to search for. MUST NOT be <code>null</code>
      * @param languages the languages to include in the search 
+     * @param limit The maximum number of resutls of <code>null</code> to use the default
      * @return the Representations found for the specified query
      * @throws T An exception while searching for concepts
      */
-    Collection<? extends Representation> lookup(String field,Set<String> includeFields,List<String> search,String...languages) throws IllegalStateException;
+    Collection<? extends Representation> lookup(String field, Set<String> includeFields, List<String> search, String[] languages,Integer limit) throws IllegalStateException;
     /**
      * Lookup a concept of the taxonomy by the id.
      * @param id the id
