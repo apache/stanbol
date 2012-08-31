@@ -533,7 +533,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
                     // and labels in the same language as the content
                     (language != null && label.getLanguage().startsWith(language))) {
                     double actMatch = levenshtein(
-                        casesensitive ? label.getText().toLowerCase() : label.getText(), namedEntityLabel);
+                        casesensitive ? label.getText() : label.getText().toLowerCase(), namedEntityLabel);
                     if (actMatch > match.getLevenshtein()) {
                         match.setLevenshtein(actMatch);
                         match.setMatchedLabel(label);
