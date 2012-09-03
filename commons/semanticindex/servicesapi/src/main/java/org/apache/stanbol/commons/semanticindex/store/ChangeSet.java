@@ -17,13 +17,11 @@
 package org.apache.stanbol.commons.semanticindex.store;
 
 import java.util.Iterator;
-import java.util.Set;
 
 /**
  * This interface represents a set of {@link #size()} changes starting {@link #fromRevision()}
- * {@link #toRevision()} affecting items with the URIs returned by {@link #changed()}.
- * Instead of getting all changes as a whole, they can be retrieved iteratively through the {@link Store}
- * instance.
+ * {@link #toRevision()} affecting items with the URIs returned by {@link #changed()}. Instead of getting all
+ * changes as a whole, they can be retrieved iteratively through the {@link Store} instance.
  * <p>
  * The intended usage of this class is <code><pre>
  *     Store&lt;ContentItem&gt; store; //the store
@@ -45,7 +43,7 @@ import java.util.Set;
  *     index.persist(cs.fromRevision());
  * </pre></code>
  */
-public interface ChangeSet<Item> extends Iterable<String>{
+public interface ChangeSet<Item> extends Iterable<String> {
     /**
      * The lowest revision number included in this ChangeSet
      * 
@@ -59,24 +57,24 @@ public interface ChangeSet<Item> extends Iterable<String>{
      * @return the highest revision number of this set
      */
     long toRevision();
-    
+
     /**
-     * The epoch of this ChangeSet. Revisions are only valid within a given
-     * Epoch. If the {@link IndexingSource} increases the epoch indexing needs to start
-     * from scratch (see documentation of {@link IndexingSource} for details.
+     * The epoch of this ChangeSet. Revisions are only valid within a given Epoch. If the
+     * {@link IndexingSource} increases the epoch indexing needs to start from scratch (see documentation of
+     * {@link IndexingSource} for details.
      */
     long getEpoch();
-    
+
     /**
      * The read only Iterator over the changed items of this ChangeSet
      * 
      * @return the URIs of the changed contentItems included in this ChangeSet
      */
     public Iterator<String> iterator();
-    
+
     /**
-     * The reference to the {@link Store} of this {@link ChangeSet}. 
-     * This {@link IndexingSource} can be used to iterate on the changes.
+     * The reference to the {@link Store} of this {@link ChangeSet}. This {@link IndexingSource} can be used
+     * to iterate on the changes.
      * 
      * @return the IndexingSource of this {@link ChangeSet}
      */

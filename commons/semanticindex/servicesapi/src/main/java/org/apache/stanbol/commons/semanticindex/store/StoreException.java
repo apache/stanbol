@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.commons.semanticindex.store;
 
-
 /**
  * @author anil.sinaci
  * 

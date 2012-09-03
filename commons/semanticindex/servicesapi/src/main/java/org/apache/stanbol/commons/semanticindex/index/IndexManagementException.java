@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.commons.semanticindex.index;
 
-
 /**
  * Exception to be thrown in unexpected situations which occur during index management issues such as index
  * creation, retrieval, deletion, etc.

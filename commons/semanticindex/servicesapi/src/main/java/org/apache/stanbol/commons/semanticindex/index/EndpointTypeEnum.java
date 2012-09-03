@@ -17,12 +17,12 @@
 package org.apache.stanbol.commons.semanticindex.index;
 
 /**
- * Well known RESTful endpoint types offered by {@link SemanticIndex}.
- * Use {@link EndpointTypeEnum#getUri()} or {@link EndpointTypeEnum#toString()}
- * to parse this endpoint types to the {@link SemanticIndexManager} interface.
+ * Well known RESTful endpoint types offered by {@link SemanticIndex}. Use {@link EndpointTypeEnum#getUri()}
+ * or {@link EndpointTypeEnum#toString()} to parse this endpoint types to the {@link SemanticIndexManager}
+ * interface.
  */
 public enum EndpointTypeEnum {
-   /**
+    /**
      * RESTful endpoint of the Solr
      */
     SOLR("http://lucene.apache.org/solr"),
@@ -43,14 +43,12 @@ public enum EndpointTypeEnum {
      */
     SPARQL("http://www.w3.org/TR/rdf-sparql-query/");
 
-
     private final String uri;
-    
-    
-    EndpointTypeEnum(String uri){
-    	this.uri = uri;
+
+    EndpointTypeEnum(String uri) {
+        this.uri = uri;
     }
-    
+
     public String getUri() {
         return uri;
     }
@@ -59,6 +57,5 @@ public enum EndpointTypeEnum {
     public String toString() {
         return uri;
     }
-
 
 }

@@ -32,10 +32,9 @@ public interface SemanticIndexManager {
      * 
      * @param name
      *            Name of the {@link SemanticIndex} to be retrieved
-     * @return the {@link SemanticIndex} instance with the given name if there is any, 
-     *         otherwise {@code null}. In case several {@link SemanticIndex}s would confirm
-     *         to the parsed requirements the one with the higest {@link Constants#SERVICE_RANKING ranking}
-     *         is returned.
+     * @return the {@link SemanticIndex} instance with the given name if there is any, otherwise {@code null}.
+     *         In case several {@link SemanticIndex}s would confirm to the parsed requirements the one with
+     *         the higest {@link Constants#SERVICE_RANKING ranking} is returned.
      * @throws IndexManagementException
      */
     SemanticIndex<?> getIndex(String name) throws IndexManagementException;
@@ -45,9 +44,8 @@ public interface SemanticIndexManager {
      * 
      * @param name
      *            Name of the {@link SemanticIndex}es to be retrieved
-     * @return the {@link SemanticIndex}es with the given name if there is any, 
-     *         otherwise an empty list.Returned SemanticIndexes are sorted by
-     *         their {@link Constants#SERVICE_RANKING rankings}.
+     * @return the {@link SemanticIndex}es with the given name if there is any, otherwise an empty
+     *         list.Returned SemanticIndexes are sorted by their {@link Constants#SERVICE_RANKING rankings}.
      * @throws IndexManagementException
      */
     List<SemanticIndex<?>> getIndexes(String name) throws IndexManagementException;
@@ -57,14 +55,12 @@ public interface SemanticIndexManager {
      * {@link Constants#SERVICE_RANKING} value.
      * 
      * @param endpointType
-     *            The name of the endpoint type that need to be supported by the
-     *            returned SemanticIndexes. See the {@link EndpointTypeEnum} for
-     *            well known RESTfull endpoint types. to search for Java endpoints
-     *            use {@link Class#getName()}.
+     *            The name of the endpoint type that need to be supported by the returned SemanticIndexes. See
+     *            the {@link EndpointTypeEnum} for well known RESTfull endpoint types. to search for Java
+     *            endpoints use {@link Class#getName()}.
      * @return the {@link SemanticIndex} instance with the given {@link EndpointTypeEnum} if there is any,
-     *         otherwise {@code null}. In case several {@link SemanticIndex}s would confirm
-     *         to the parsed requirements the one with the higest {@link Constants#SERVICE_RANKING ranking}
-     *         is returned.
+     *         otherwise {@code null}. In case several {@link SemanticIndex}s would confirm to the parsed
+     *         requirements the one with the higest {@link Constants#SERVICE_RANKING ranking} is returned.
      * @throws IndexManagementException
      */
     SemanticIndex<?> getIndexByEndpointType(String endpointType) throws IndexManagementException;
@@ -73,13 +69,12 @@ public interface SemanticIndexManager {
      * Retrieves the {@link SemanticIndex}es with the given {@link EndpointTypeEnum}.
      * 
      * @param endpointType
-     *            The name of the endpoint type that need to be supported by the
-     *            returned SemanticIndexes. See the {@link EndpointTypeEnum} for
-     *            well known RESTfull endpoint types. to search for Java endpoints
-     *            use {@link Class#getName()}.
+     *            The name of the endpoint type that need to be supported by the returned SemanticIndexes. See
+     *            the {@link EndpointTypeEnum} for well known RESTfull endpoint types. to search for Java
+     *            endpoints use {@link Class#getName()}.
      * @return the {@link SemanticIndex}es instances with the given {@link EndpointTypeEnum} if there is any,
-     *         otherwise an empty list. Returned SemanticIndexes are sorted by
-     *         their {@link Constants#SERVICE_RANKING rankings}.
+     *         otherwise an empty list. Returned SemanticIndexes are sorted by their
+     *         {@link Constants#SERVICE_RANKING rankings}.
      * @throws IndexManagementException
      */
     List<SemanticIndex<?>> getIndexesByEndpointType(String endpointType) throws IndexManagementException;
@@ -89,17 +84,14 @@ public interface SemanticIndexManager {
      * {@link Constants#SERVICE_RANKING} value.
      * 
      * @param name
-     *            Name of the {@link SemanticIndex}es to be retrieved.
-     *            <code>null</code> is used as wildcard
+     *            Name of the {@link SemanticIndex}es to be retrieved. <code>null</code> is used as wildcard
      * @param endpointType
-     *            The name of the endpoint type that need to be supported by the
-     *            returned SemanticIndexes. See the {@link EndpointTypeEnum} for
-     *            well known RESTfull endpoint types. to search for Java endpoints
-     *            use {@link Class#getName()}. <code>null</code> is used as wildcard
-     * @return the {@link SemanticIndex} instance with the given name, {@link EndpointTypeEnum} if there is any,
-     *         otherwise {@code null}. In case several {@link SemanticIndex}s would confirm
-     *         to the parsed requirements the one with the higest {@link Constants#SERVICE_RANKING ranking}
-     *         is returned.
+     *            The name of the endpoint type that need to be supported by the returned SemanticIndexes. See
+     *            the {@link EndpointTypeEnum} for well known RESTfull endpoint types. to search for Java
+     *            endpoints use {@link Class#getName()}. <code>null</code> is used as wildcard
+     * @return the {@link SemanticIndex} instance with the given name, {@link EndpointTypeEnum} if there is
+     *         any, otherwise {@code null}. In case several {@link SemanticIndex}s would confirm to the parsed
+     *         requirements the one with the higest {@link Constants#SERVICE_RANKING ranking} is returned.
      * @throws IndexManagementException
      */
     SemanticIndex<?> getIndex(String name, String endpointType) throws IndexManagementException;
@@ -108,16 +100,14 @@ public interface SemanticIndexManager {
      * Retrieves the {@link SemanticIndex}es instance with the given name and {@link EndpointTypeEnum}.
      * 
      * @param name
-     *            Name of the {@link SemanticIndex}es to be retrieved.
-     *            <code>null</code> is used as wildcard
+     *            Name of the {@link SemanticIndex}es to be retrieved. <code>null</code> is used as wildcard
      * @param endpointType
-     *            The name of the endpoint type that need to be supported by the
-     *            returned SemanticIndexes. See the {@link EndpointTypeEnum} for
-     *            well known endpoint types. <code>null</code> is used as
+     *            The name of the endpoint type that need to be supported by the returned SemanticIndexes. See
+     *            the {@link EndpointTypeEnum} for well known endpoint types. <code>null</code> is used as
      *            wildcard
      * @return the {@link SemanticIndex} instance with the given name and {@link EndpointTypeEnum} if there is
-     *         any, otherwise an empty list. Returned SemanticIndexes are sorted by
-     *         their {@link Constants#SERVICE_RANKING rankings}.
+     *         any, otherwise an empty list. Returned SemanticIndexes are sorted by their
+     *         {@link Constants#SERVICE_RANKING rankings}.
      * @throws IndexManagementException
      */
     List<SemanticIndex<?>> getIndexes(String name, String endpointType) throws IndexManagementException;
