@@ -43,7 +43,6 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.NoSuchEntityException;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.ResultSet;
@@ -83,6 +82,8 @@ import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,6 +116,8 @@ public class SolrStoreImpl implements SolrStore {
 
     private BundleContext bundleContext;
 
+    private ServiceRegistration enhancementGraphRegistry;
+
     @Activate
     protected void activate(ComponentContext context) throws IllegalArgumentException,
                                                      IOException,
@@ -125,11 +128,15 @@ public class SolrStoreImpl implements SolrStore {
         }
         this.bundleContext = context.getBundleContext();
         SolrCoreManager.getInstance(bundleContext, managedSolrServer).createDefaultSolrServer();
+
+        // create and register the enhancement graph
+        createEnhancementGraph();
     }
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
         managedSolrServer = null;
+        enhancementGraphRegistry.unregister();
     }
 
     @Override
@@ -144,19 +151,42 @@ public class SolrStoreImpl implements SolrStore {
         try {
             enhancementGraph = tcManager.getMGraph(graphUri);
         } catch (NoSuchEntityException e) {
-            log.debug("Creating the enhancement graph!");
-            enhancementGraph = tcManager.createMGraph(graphUri);
-
-            // register enhancement graph to OSGi environment
-            Dictionary<String,Object> props = new Hashtable<String,Object>();
-            props.put("graph.uri", graphUri);
-            props.put("graph.name", "Enhancement Graph");
-            props.put("graph.description",
-                "This graph stores enhancements of all content items stored within Contenthub.");
-            props.put(org.osgi.framework.Constants.SERVICE_RANKING, Integer.MAX_VALUE);
-            bundleContext.registerService(TripleCollection.class.getName(), enhancementGraph, props);
+            log.error("Enhancement Graph must be exist");
         }
         return enhancementGraph;
+    }
+
+    public void createEnhancementGraph() {
+        final UriRef graphUri = new UriRef(Constants.ENHANCEMENTS_GRAPH_URI);
+        MGraph enhancementGraph = null;
+        try {
+            enhancementGraph = tcManager.getMGraph(graphUri);
+            String filter = String.format("(%s=%s)", "graph.uri", graphUri.getUnicodeString());
+            ServiceReference[] sr = bundleContext.getServiceReferences(TripleCollection.class.getName(),
+                filter);
+            if (sr == null) {
+                registerEnhancementGraph(graphUri, enhancementGraph);
+            }
+        } catch (NoSuchEntityException e) {
+            log.debug("Creating the enhancement graph!");
+            enhancementGraph = tcManager.createMGraph(graphUri);
+            registerEnhancementGraph(graphUri, enhancementGraph);
+
+        } catch (InvalidSyntaxException e) {
+            log.error("Failed to get ServiceReference for TripleCollection");
+        }
+    }
+
+    private void registerEnhancementGraph(UriRef graphUri, MGraph enhancementGraph) {
+        Dictionary<String,Object> props = new Hashtable<String,Object>();
+        props.put("graph.uri", graphUri);
+        props.put("graph.name", "Enhancement Graph");
+        props.put("graph.description",
+            "This graph stores enhancements of all content items stored within Contenthub.");
+        props.put(org.osgi.framework.Constants.SERVICE_RANKING, Integer.MAX_VALUE);
+        enhancementGraphRegistry = bundleContext.registerService(TripleCollection.class.getName(),
+            enhancementGraph, props);
+        log.debug("Enhancement graph is registered to the OSGi environment");
     }
 
     @Override
@@ -250,7 +280,7 @@ public class SolrStoreImpl implements SolrStore {
                 willBeRemoved.add(triple);
             }
         }
-        
+
         enhancementGraph.removeAll(willBeRemoved);
     }
 
