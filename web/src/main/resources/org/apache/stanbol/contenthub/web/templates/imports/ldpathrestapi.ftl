@@ -55,8 +55,8 @@
 <div class="preParent">
   <img onClick="javascript:getLine(this.parentNode);" class="copyImg" src="${it.staticRootUrl}/contenthub/images/copy_icon_16.png" title="Get command in a single line" />
 <pre>
-<div id="curl1" class="curlLine">curl -i -X POST -d "name=universities&program= @prefix dbp-ont : <http://dbpedia.org/ontology/>; city = dbp-ont:city / rdfs:label :: xsd:string; country = dbp-ont:country / rdfs:label :: xsd:string; president = dbp-ont:president / rdfs:label :: xsd:string; numberOfStudent = dbp-ont:numberOfStudents :: xsd:int;" "http://localhost:8080/contenthub/ldpath/program"<hr/></div>curl -i -X POST -d "name=universities&program= \
-                    @prefix dbp-ont : <http://dbpedia.org/ontology/>; \
+<div id="curl1" class="curlLine">curl -i -X POST -d "name=universities&program= @prefix dbp-ont : &lt;http://dbpedia.org/ontology/&gt;; city = dbp-ont:city / rdfs:label :: xsd:string; country = dbp-ont:country / rdfs:label :: xsd:string; president = dbp-ont:president / rdfs:label :: xsd:string; numberOfStudent = dbp-ont:numberOfStudents :: xsd:int;" "http://localhost:8080/contenthub/ldpath/program"<hr/></div>curl -i -X POST -d "name=universities&program= \
+                    @prefix dbp-ont : &lt;http://dbpedia.org/ontology/&gt;; \
                     city = dbp-ont:city / rdfs:label :: xsd:string; \
                     country = dbp-ont:country / rdfs:label :: xsd:string; \
                     president = dbp-ont:president / rdfs:label :: xsd:string; \
