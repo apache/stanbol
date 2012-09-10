@@ -119,10 +119,7 @@ public class SolrStoreImpl implements SolrStore {
     private ServiceRegistration enhancementGraphRegistry;
 
     @Activate
-    protected void activate(ComponentContext context) throws IllegalArgumentException,
-                                                     IOException,
-                                                     InvalidSyntaxException,
-                                                     StoreException {
+    protected void activate(ComponentContext context) throws StoreException {
         if (managedSolrServer == null) {
             throw new IllegalStateException("ManagedSolrServer cannot be referenced within SolrServerImpl.");
         }
@@ -156,7 +153,7 @@ public class SolrStoreImpl implements SolrStore {
         return enhancementGraph;
     }
 
-    public void createEnhancementGraph() {
+    public void createEnhancementGraph() throws StoreException {
         final UriRef graphUri = new UriRef(Constants.ENHANCEMENTS_GRAPH_URI);
         MGraph enhancementGraph = null;
         try {
@@ -174,6 +171,7 @@ public class SolrStoreImpl implements SolrStore {
 
         } catch (InvalidSyntaxException e) {
             log.error("Failed to get ServiceReference for TripleCollection");
+            throw new StoreException("Failed to get ServiceReference for TripleCollection", e);
         }
     }
 
