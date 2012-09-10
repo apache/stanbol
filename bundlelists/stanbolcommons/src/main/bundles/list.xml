@@ -293,35 +293,6 @@
     </bundle>
   </startLevel>
 
-  <!-- authentication -->
-  <startLevel level="27">
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>platform.config</artifactId>
-      <version>0.3-incubating</version>
-    </bundle>
-    <bundle>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>permissiondescriptions</artifactId>
-			<version>0.1-incubating</version>
-		</bundle>
-    <bundle>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>platform</artifactId>
-			<version>0.1-incubating</version>
-		</bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.security</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.authentication.basic</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
-
   <!-- Stanbol Commons -->
   <startLevel level="27">
     <!-- Allows to run Stanbol in offline mode -->

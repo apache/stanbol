@@ -135,6 +135,14 @@
       <version>0.10.0-incubating-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
+    <!-- Authentication Support-->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.authentication</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- Stanbol CMS Adapter Bundle List -->
     <dependency>
