@@ -31,7 +31,7 @@ import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.getAcceptableMediaType;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.getLDPathParseExceptionMessage;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
-import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.prepairQueryLDPathProgram;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.prepareQueryLDPathProgram;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.transformQueryResults;
 
 import java.io.File;
@@ -426,7 +426,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         //first prepare (only execute the query if the parameters are valid)
         Program<Object> program;
         try {
-            program = prepairQueryLDPathProgram(ldpathProgramString, selectedFields, backend, ldPath);
+            program = prepareQueryLDPathProgram(ldpathProgramString, selectedFields, backend, ldPath);
         } catch (LDPathParseException e) {
             log.warn("Unable to parse LDPath program used as select for a Query to the '/sites' endpoint:");
             log.warn("FieldQuery: \n {}",query);

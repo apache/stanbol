@@ -101,30 +101,11 @@ public class RepresentationReader implements MessageBodyReader<Map<String,Repres
     
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        boolean keyOK;
-        boolean valueOK;
         String mediaTypeWithoutParameter = 
-            mediaType.getType().toLowerCase()+'/'+
-            mediaType.getSubtype().toLowerCase();
+                mediaType.getType().toLowerCase()+'/'+
+                mediaType.getSubtype().toLowerCase();
         log.debug("isreadable: [genericType: {}| mediaType {}]",
             genericType,mediaTypeWithoutParameter);
-        //first check the parsed type
-        if(genericType instanceof ParameterizedType && 
-                ((ParameterizedType)genericType).getActualTypeArguments().length > 1){
-            //both the raw type MUST BE compatible with Set and the
-            //generic type MUST BE compatible with Representation
-            //e.g to support method declarations like
-            // public <T extends Collection> store(T<? extends Representation> representations){...}
-            keyOK = JerseyUtils.testType(Map.class, ((ParameterizedType)genericType).getRawType()) &&
-                JerseyUtils.testType(String.class, ((ParameterizedType)genericType).getActualTypeArguments()[0]);
-            valueOK = JerseyUtils.testType(Representation.class, ((ParameterizedType)genericType).getActualTypeArguments()[1]);
-        } else if(genericType instanceof Class<?>){
-            keyOK = Map.class.isAssignableFrom((Class<?>)genericType);
-            valueOK = true; //not needed
-        } else {//No Idea what that means
-            keyOK = false;
-            valueOK = false;
-        }
         //second the media type
         boolean mediaTypeOK = (//the MimeTypes of Representations
                 supportedMediaTypes.contains(mediaTypeWithoutParameter) ||
@@ -132,8 +113,11 @@ public class RepresentationReader implements MessageBodyReader<Map<String,Repres
                 MediaType.APPLICATION_FORM_URLENCODED.equals(mediaTypeWithoutParameter) ||
                 //and mime multipart
                 MediaType.MULTIPART_FORM_DATA.equals(mediaTypeWithoutParameter));
-        log.debug("  > java-type: {}, media-type {}",keyOK,mediaTypeOK);
-        return keyOK && valueOK && mediaTypeOK;
+        boolean typeOk = JerseyUtils.testParameterizedType(Map.class, 
+            new Class[]{String.class,Representation.class}, genericType);
+        log.debug("type is {} for {} against Map<String,Representation>",
+            typeOk ? "compatible" : "incompatible" ,genericType);
+        return typeOk && mediaTypeOK;
     }
 
     @Override

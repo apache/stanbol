@@ -257,7 +257,7 @@ public class LDPathHelper {
      * @throws IllegalStateException if the fields selected by the LDPath
      * program conflict with the fields selected by the query.
      */
-    public static Program<Object> prepairQueryLDPathProgram(String ldpathProgram,
+    public static Program<Object> prepareQueryLDPathProgram(String ldpathProgram,
                                                 Set<String> selectedFields,
                                                 AbstractBackend backend,
                                                 EntityhubLDPath ldPath) throws LDPathParseException {

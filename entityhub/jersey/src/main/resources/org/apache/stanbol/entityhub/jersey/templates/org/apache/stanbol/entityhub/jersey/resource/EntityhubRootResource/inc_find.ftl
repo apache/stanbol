@@ -40,6 +40,8 @@
     			<li>limit: The maximum number of returned Entities (optional)</li>
     			<li>offset: The offset of the first returned Entity (default: 0)</li>
     			<li>select: A list of fields included for returned Entities (optional)</li>
+    			<li>ldpath: The LDPath program executed for entities selected by the find query (optionally). 
+    			The LDPath program needs to be URLEncoded.</li>
     		</ul>
     	</td>
 	</tr>
