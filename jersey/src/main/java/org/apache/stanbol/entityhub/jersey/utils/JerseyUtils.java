@@ -27,6 +27,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURT
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.net.URLDecoder;
@@ -59,6 +60,8 @@ import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.api.representation.Form;
 /**
  * Utility methods used by several of the RESTful service endpoints of the
  * Entityhub.
@@ -250,7 +253,7 @@ public final class JerseyUtils {
      * @param genericType the required class
      * @return if the generic type is compatible with the required class
      */
-    public static boolean testType(Class<?> required, Type genericType) {
+    public static boolean testType(Class<?> required, Type type) {
         //for the examples let assume that a Set is the raw type and the
         //requested generic type is a Representation with the following class
         //hierarchy:
@@ -260,18 +263,15 @@ public final class JerseyUtils {
         //         -> InMemoryRepresentation
         //     -> InputStream
         //     -> Collection<T>
-        boolean typeOK;
-        if(genericType instanceof Class<?>){
-            //OK
-            //  Set<Representation>
-            //  Set<Object>
-            //NOT OK
-            //  Set<RdfRepresentation>
-            //  Set<InputStream>
-            typeOK = ((Class<?>)genericType).isAssignableFrom(required);
-        } else if(genericType instanceof WildcardType){
+        boolean typeOK = false;
+//        while(type != null && !typeOK){
+//            types.add(type);
+        if(type instanceof Class<?>){
+            typeOK = required.isAssignableFrom((Class<?>) type);
+            type = ((Class<?>)type).getGenericSuperclass();
+        } else if(type instanceof WildcardType){
             //In cases <? super {class}>, <? extends {class}, <?>
-            WildcardType wildcardSetType = (WildcardType) genericType;
+            WildcardType wildcardSetType = (WildcardType) type;
             if(wildcardSetType.getLowerBounds().length > 0){
                 Type lowerBound = wildcardSetType.getLowerBounds()[0];
                 //OK
@@ -297,17 +297,65 @@ public final class JerseyUtils {
                 // Set<?>
                 typeOK = true;
             }
-        } else if(required.isArray() && genericType instanceof GenericArrayType){
+        } else if(required.isArray() && type instanceof GenericArrayType){
             //In case the required type is an array we need also to support 
             //possible generic Array specifications
-            GenericArrayType arrayType = (GenericArrayType)genericType;
+            GenericArrayType arrayType = (GenericArrayType)type;
             typeOK = testType(required.getComponentType(), arrayType.getGenericComponentType());
+        } else if(type instanceof ParameterizedType){
+            ParameterizedType pType = ((ParameterizedType)type);
+            typeOK = pType.getRawType() instanceof Class<?> && 
+                    required.isAssignableFrom((Class<?>)pType.getRawType());
+            type = null;
         } else {
             //GenericArrayType but !required.isArray() -> incompatible
             //TypeVariable -> no variables define -> incompatible
             typeOK = false;
+//                type = null; //end
         }
+//        }
         return typeOK;
+    }
+    /**
+     * Tests the parsed type against the raw type and parsed Type parameters.
+     * This allows e.g. to check for <code>Map&lt;String,Number&gt</code> but
+     * also works with classes that extend generic types such as
+     * <code>Dummy extends {@link HashMap}&lt;String,String&gt</code>.
+     * @param rawType the raw type to test against
+     * @param parameterTypes the types of the parameters
+     * @param type the type to test
+     * @return if the type is compatible or not
+     */
+    public static boolean testParameterizedType(Class<?> rawType, Class<?>[] parameterTypes, Type type) {
+        // first check the raw type
+        if (!testType(rawType, type)) {
+            return false;
+        }
+        while (type != null) {
+            // types.add(type);
+            Type[] parameters = null;
+            if (type instanceof ParameterizedType) {
+                parameters = ((ParameterizedType) type).getActualTypeArguments();
+                // the number of type arguments MUST BE the same as parameter types
+                if (parameters.length == parameterTypes.length) {
+                    boolean compatible = true;
+                    // All parameters MUST BE compatible!
+                    for (int i = 0; compatible && i < parameters.length; i++) {
+                        compatible = testType(parameterTypes[i], parameters[i]);
+                    }
+                    if (compatible) {
+                        return true;
+                    }
+                } // else check parent types
+
+            } // else not parameterised
+            if (type instanceof Class<?>) {
+                type = ((Class<?>) type).getGenericSuperclass();
+            } else {
+                return false;
+            }
+        }
+        return false;
     }
     
     /**

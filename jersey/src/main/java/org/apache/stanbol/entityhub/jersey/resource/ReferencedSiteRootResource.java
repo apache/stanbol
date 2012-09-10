@@ -38,7 +38,7 @@ import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.REPRESENTATI
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.createFieldQueryForFindRequest;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.getLDPathParseExceptionMessage;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
-import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.prepairQueryLDPathProgram;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.prepareQueryLDPathProgram;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.transformQueryResults;
 
 import java.io.File;
@@ -652,7 +652,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         //first prepare (only execute the query if the parameters are valid)
         Program<Object> program;
         try {
-            program = prepairQueryLDPathProgram(ldpathProgramString, selectedFields, backend, ldPath);
+            program = prepareQueryLDPathProgram(ldpathProgramString, selectedFields, backend, ldPath);
         } catch (LDPathParseException e) {
             log.warn("Unable to parse LDPath program used as select for Query:");
             log.warn("FieldQuery: \n {}",query);

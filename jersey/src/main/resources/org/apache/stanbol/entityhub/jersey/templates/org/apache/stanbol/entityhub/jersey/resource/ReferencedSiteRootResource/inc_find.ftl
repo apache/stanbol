@@ -43,6 +43,8 @@
     		information to return for Entities selected by the /find request</li>
     		<li>limit: optionally the maximum number of results</li>
     		<li>offset: optionally the offset of first result</li>
+            <li>ldpath: The LDPath program executed for entities selected by the find query (optionally). 
+            The LDPath program needs to be URLEncoded.</li>
     		</ul>
     	</td>
 	</tr>
