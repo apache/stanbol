@@ -61,8 +61,9 @@ import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
 import org.apache.stanbol.commons.semanticindex.store.EpochException;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
-import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
-import org.apache.stanbol.contenthub.revisionmanager.StoreDBManager;
+import org.apache.stanbol.commons.semanticindex.store.revisionmanager.RevisionManager;
+import org.apache.stanbol.contenthub.revisionmanager.DerbyRevisionManager;
+import org.apache.stanbol.contenthub.revisionmanager.DerbyDBManager;
 import org.apache.stanbol.contenthub.store.file.serializer.ContentPartDeserializer;
 import org.apache.stanbol.contenthub.store.file.serializer.ContentPartSerializer;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
@@ -91,9 +92,9 @@ import org.slf4j.LoggerFactory;
  * suitable with the types of the parts.
  * </p>
  * <p>
- * Revisions of {@link ContentItem}s submitted to this store is managed through the {@link RevisionManager}.
- * Once a document added, updated or deleted the revision of the {@link ContentItem} is set as
- * {@link System#currentTimeMillis()}.
+ * Revisions of {@link ContentItem}s submitted to this store is managed through the
+ * {@link DerbyRevisionManager}. Once a document added, updated or deleted the revision of the
+ * {@link ContentItem} is set as {@link System#currentTimeMillis()}.
  * </p>
  * <p>
  * To be able to populate the HTML interface, this implementation also provides additional metadata regarding
@@ -152,7 +153,7 @@ public class FileStore implements Store<ContentItem> {
                                                                  + FIELD_TITLE + " VARCHAR(" + MAX_ID_LENGTH
                                                                  + "))";
 
-    private static final String SELECT_RECENTLY_ENHANCED_ITEMS = "SELECT t1.id, mimeType, enhancementCount, title FROM %s t1, "
+    private static final String SELECT_RECENTLY_ENHANCED_ITEMS = "SELECT t1.id, mimeType, enhancementCount, title FROM \"%s\" t1, "
                                                                  + RECENTLY_ENHANCED_TABLE_NAME
                                                                  + " t2 WHERE"
                                                                  + " t1.id=t2."
@@ -190,7 +191,7 @@ public class FileStore implements Store<ContentItem> {
     private RevisionManager revisionManager;
 
     @Reference
-    private StoreDBManager dbManager;
+    private DerbyDBManager dbManager;
 
     @Reference
     private ContentPartSerializer contentPartSerializer;
@@ -201,22 +202,9 @@ public class FileStore implements Store<ContentItem> {
     @Reference
     private EnhancementJobManager jobManager;
 
-    Map<String,Object> storeProperties;
+    private Map<String,Object> storeProperties;
 
-    public FileStore() {
-
-    }
-
-    /**
-     * Public constructor which is intended to be used from the tests. This component is an OSGi based
-     * component, so this constructor MUST NOT be used to obtain a {@link FileStore} instance.
-     * 
-     * @param name
-     */
-    public FileStore(String name, RevisionManager revisionManager) {
-        this.name = name;
-        this.revisionManager = revisionManager;
-    }
+    private String pid;
 
     @Activate
     protected void activate(ComponentContext componentContext) throws StoreException {
@@ -235,14 +223,16 @@ public class FileStore implements Store<ContentItem> {
         }
 
         // init the store properties
+        pid = (String) componentContext.getProperties().get(Constants.SERVICE_PID);
         Map<String,Object> properties = new HashMap<String,Object>();
         properties.put(PROPERTY_NAME, getName());
         properties.put(PROPERTY_DESCRIPTION, getDescription());
         properties.put(PROPERTY_ITEM_TYPE, getItemType());
+        properties.put(Constants.SERVICE_PID, pid);
         storeProperties = Collections.unmodifiableMap(properties);
 
         // create file store revision and recentlyenhanced tables
-        revisionManager.initializeRevisionTables(this);
+        revisionManager.registerStore(pid);
         createRecentlyEnhancedTable();
     }
 
@@ -271,7 +261,7 @@ public class FileStore implements Store<ContentItem> {
 
     @Override
     public long getEpoch() throws StoreException {
-        return revisionManager.getEpoch(this);
+        return revisionManager.getEpoch(pid);
     }
 
     @Override
@@ -314,7 +304,7 @@ public class FileStore implements Store<ContentItem> {
     @Override
     public void removeAll() throws StoreException {
         // get changes to obtain identifier of the all changed ContentItems
-        ChangeSet<ContentItem> changes = changes(getEpoch(), Long.MIN_VALUE, Integer.MAX_VALUE);
+        ChangeSet changes = changes(getEpoch(), Long.MIN_VALUE, Integer.MAX_VALUE);
         List<ContentItem> removed = new ArrayList<ContentItem>();
         Iterator<String> idIterator = changes.iterator();
         while (idIterator.hasNext()) {
@@ -325,12 +315,12 @@ public class FileStore implements Store<ContentItem> {
             }
         }
         // update the epoch of this Store. It will also clear the revision table
-        revisionManager.updateEpoch(this);
+        revisionManager.updateEpoch(pid);
     }
 
     private void updateTablesForDelete(String id) throws StoreException {
         // update revision
-        revisionManager.updateRevision(this, id);
+        revisionManager.updateRevision(pid, id);
         // update recently_enhanced table
         removeFromRecentlyEnhancedTable(id);
     }
@@ -445,7 +435,7 @@ public class FileStore implements Store<ContentItem> {
             // ignore the exception
         }
         try {
-            revisionManager.updateRevision(this, htmlMetadata.getString(FIELD_ID));
+            revisionManager.updateRevision(pid, htmlMetadata.getString(FIELD_ID));
             updateRecentlyEnhancedItem(htmlMetadata.getString(FIELD_ID), title,
                 htmlMetadata.getString(FIELD_MIME_TYPE), htmlMetadata.getLong(FIELD_ENHANCEMENT_COUNT));
         } catch (JSONException e) {
@@ -763,12 +753,11 @@ public class FileStore implements Store<ContentItem> {
     }
 
     @Override
-    public ChangeSet<ContentItem> changes(long epoch, long revision, int batchSize) throws StoreException {
+    public ChangeSet changes(long epoch, long revision, int batchSize) throws StoreException {
         if (getEpoch() != epoch) {
             throw new EpochException(this, getEpoch(), epoch);
         }
-        ChangeSetImpl<ContentItem> changesSet = (ChangeSetImpl<ContentItem>) revisionManager.getChanges(this,
-            revision, batchSize);
+        ChangeSetImpl changesSet = (ChangeSetImpl) revisionManager.getChanges(pid, revision, batchSize);
         return changesSet;
     }
 
@@ -854,8 +843,7 @@ public class FileStore implements Store<ContentItem> {
         ResultSet rs = null;
         List<JSONObject> recentlyEnhancedList = new ArrayList<JSONObject>();
         try {
-            ps = con.prepareStatement(String.format(SELECT_RECENTLY_ENHANCED_ITEMS,
-                revisionManager.getStoreID(this)));
+            ps = con.prepareStatement(String.format(SELECT_RECENTLY_ENHANCED_ITEMS, pid));
             ps.setMaxRows(limit);
             ps.setInt(1, offset);
             rs = ps.executeQuery();

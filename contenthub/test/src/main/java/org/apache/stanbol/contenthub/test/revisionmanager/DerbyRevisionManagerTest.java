@@ -30,9 +30,8 @@ import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
-import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
-import org.apache.stanbol.contenthub.revisionmanager.StoreDBManager;
-import org.apache.stanbol.contenthub.store.file.FileStore;
+import org.apache.stanbol.commons.semanticindex.store.revisionmanager.RevisionManager;
+import org.apache.stanbol.contenthub.revisionmanager.DerbyDBManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.BundleContext;
@@ -40,14 +39,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(SlingAnnotationsTestRunner.class)
-public class RevisionManagerTest {
-    private static Logger log = LoggerFactory.getLogger(RevisionManagerTest.class);
+public class DerbyRevisionManagerTest {
+    private static Logger log = LoggerFactory.getLogger(DerbyRevisionManagerTest.class);
 
     @TestReference
     private RevisionManager revisionManager;
 
     @TestReference
-    private StoreDBManager dbManager;
+    private DerbyDBManager dbManager;
 
     @TestReference
     private BundleContext bundleContext;
@@ -69,7 +68,7 @@ public class RevisionManagerTest {
 
     @Test
     public void updateRevisionTest() throws StoreException, SQLException {
-        FileStore fileStore = new FileStore("updateRevisionTestStore", revisionManager);
+        String storeID = "updateRevisionTestStore";
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -80,10 +79,9 @@ public class RevisionManagerTest {
         long revisionNumber = Long.MAX_VALUE;
         String query;
         try {
-            revisionManager.initializeRevisionTables(fileStore);
-            newRevision = revisionManager.updateRevision(fileStore, contentItemID);
-            query = String.format("SELECT id, revision FROM %s WHERE id = ?",
-                revisionManager.getStoreID(fileStore));
+            revisionManager.registerStore(storeID);
+            newRevision = revisionManager.updateRevision(storeID, contentItemID);
+            query = String.format("SELECT id, revision FROM \"%s\" WHERE id = ?", storeID);
 
             // check the update
             con = dbManager.getConnection();
@@ -101,23 +99,22 @@ public class RevisionManagerTest {
         } finally {
             dbManager.closeResultSet(rs);
             dbManager.closeStatement(ps);
-            clearDummyStoreResources(fileStore, con);
+            clearDummyStoreResources(storeID, con);
         }
     }
 
     @Test
     public void iterativeChangesTest() throws StoreException, InterruptedException, SQLException {
-        FileStore fileStore = new FileStore("iterativeChangesTestStore", revisionManager);
+        String storeID = "iterativeChangesTestStore";
         Connection con = null;
         String contentItemID = "contenthub_test_content_item_id";
         PreparedStatement ps = null;
         try {
             con = dbManager.getConnection();
-            revisionManager.initializeRevisionTables(fileStore);
+            revisionManager.registerStore(storeID);
 
             // do the update
-            String query = "INSERT INTO " + revisionManager.getStoreID(fileStore)
-                           + " (id, revision) VALUES (?,?)";
+            String query = "INSERT INTO \"" + storeID + "\" (id, revision) VALUES (?,?)";
             long startRevision = System.currentTimeMillis();
             long revision = System.currentTimeMillis();
             for (int i = 0; i < 5; i++) {
@@ -130,7 +127,7 @@ public class RevisionManagerTest {
             }
 
             // check changes
-            ChangeSet<?> changeSet = revisionManager.getChanges(fileStore, startRevision, 3);
+            ChangeSet changeSet = revisionManager.getChanges(storeID, startRevision, 3);
             Iterator<String> changedItems = changeSet.iterator();
             int itemCount = 0;
             while (changedItems.hasNext()) {
@@ -153,7 +150,7 @@ public class RevisionManagerTest {
             assertTrue("Changes does not include correct toRevision value",
                 (changeSet.toRevision() == revision - 2));
 
-            changeSet = revisionManager.getChanges(fileStore, revision - 2, 3);
+            changeSet = revisionManager.getChanges(storeID, revision - 2, 3);
             itemCount = 0;
             changedItems = changeSet.iterator();
             while (changedItems.hasNext()) {
@@ -178,22 +175,21 @@ public class RevisionManagerTest {
                 (changeSet.toRevision() == revision));
         } finally {
             dbManager.closeStatement(ps);
-            clearDummyStoreResources(fileStore, con);
+            clearDummyStoreResources(storeID, con);
         }
     }
 
     @Test
     public void batchSizeDoesNotFitToRevisionTest() throws StoreException, SQLException {
-        FileStore fileStore = new FileStore("batchSizeDoesNotFitToRevisionTestStore", revisionManager);
+        String storeID = "batchSizeDoesNotFitToRevisionTestStore";
         Connection con = null;
         String contentItemID = "contenthub_test_content_item_id";
         PreparedStatement ps = null;
         try {
-            revisionManager.initializeRevisionTables(fileStore);
+            revisionManager.registerStore(storeID);
             con = dbManager.getConnection();
             // do the update
-            String query = "INSERT INTO " + revisionManager.getStoreID(fileStore)
-                           + " (id, revision) VALUES (?,?)";
+            String query = "INSERT INTO \"" + storeID + "\" (id, revision) VALUES (?,?)";
             long revision = System.currentTimeMillis();
             for (int i = 0; i < 2; i++) {
                 ps = con.prepareStatement(query);
@@ -204,7 +200,7 @@ public class RevisionManagerTest {
             }
 
             // get changes
-            ChangeSet<?> changeSet = revisionManager.getChanges(fileStore, revision, 1);
+            ChangeSet changeSet = revisionManager.getChanges(storeID, revision, 1);
             int itemCount = 0;
             Iterator<String> changedItems = changeSet.iterator();
             while (changedItems.hasNext()) {
@@ -224,39 +220,32 @@ public class RevisionManagerTest {
             }
         } finally {
             dbManager.closeStatement(ps);
-            clearDummyStoreResources(fileStore, con);
+            clearDummyStoreResources(storeID, con);
         }
     }
 
     @Test
     public void emptyChangesTest() throws StoreException {
-        FileStore fileStore = new FileStore("emptyChangesTestStore", revisionManager);
+        String storeID = "emptyChangesTestStore";
         try {
-            revisionManager.initializeRevisionTables(fileStore);
+            revisionManager.registerStore(storeID);
             long revision = System.currentTimeMillis();
-            ChangeSet<?> changeSet = revisionManager.getChanges(fileStore, revision, 1);
-            assertTrue("There must be no changes", !changeSet.iterator().hasNext());
+            ChangeSet changeSet = revisionManager.getChanges(storeID, revision, 1);
+            assertTrue("There must be no changes", changeSet.iterator().hasNext() == false);
         } finally {
-            clearDummyStoreResources(fileStore, dbManager.getConnection());
+            clearDummyStoreResources(storeID, dbManager.getConnection());
         }
     }
 
     @Test
-    public void getStoreIDTest() {
-        FileStore fileStore = new FileStore("getStoreIDTestStore", null);
-        assertTrue("Store ID must be same with the name of the Store", revisionManager.getStoreID(fileStore)
-                .equals(fileStore.getName()));
-    }
-
-    @Test
     public void initializeRevisionTablesTest() throws StoreException, SQLException {
-        FileStore fileStore = new FileStore("revisionManagerTestStore", revisionManager);
+        String storeID = "revisionManagerTestStore";
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String tableName = revisionManager.getStoreID(fileStore);
+        String tableName = storeID;
         try {
-            revisionManager.initializeRevisionTables(fileStore);
+            revisionManager.registerStore(storeID);
             // check table
             assertTrue(String.format("There is no table having name: %s", tableName),
                 dbManager.existsTable(tableName));
@@ -264,7 +253,7 @@ public class RevisionManagerTest {
             // check epoch table entry
             con = dbManager.getConnection();
             boolean recordExists = false;
-            ps = con.prepareStatement("SELECT epoch FROM " + StoreDBManager.EPOCH_TABLE_NAME
+            ps = con.prepareStatement("SELECT epoch FROM " + DerbyDBManager.EPOCH_TABLE_NAME
                                       + " WHERE tableName = ?");
             ps.setString(1, tableName);
             rs = ps.executeQuery();
@@ -277,21 +266,21 @@ public class RevisionManagerTest {
         } finally {
             dbManager.closeResultSet(rs);
             dbManager.closeStatement(ps);
-            clearDummyStoreResources(fileStore, con);
+            clearDummyStoreResources(storeID, con);
         }
     }
 
-    private void clearDummyStoreResources(FileStore store, Connection con) {
+    private void clearDummyStoreResources(String storeID, Connection con) {
         Statement stmt = null;
         PreparedStatement ps = null;
-        String tableName = revisionManager.getStoreID(store);
+        String tableName = storeID;
         try {
             // first remove the the table
             stmt = con.createStatement();
-            stmt.executeUpdate("DROP TABLE " + tableName);
+            stmt.executeUpdate("DROP TABLE \"" + tableName + "\"");
 
             // delete the entry from epoch table
-            ps = con.prepareStatement("DELETE FROM " + StoreDBManager.EPOCH_TABLE_NAME
+            ps = con.prepareStatement("DELETE FROM " + DerbyDBManager.EPOCH_TABLE_NAME
                                       + " WHERE tableName = ?");
             ps.setString(1, tableName);
             ps.executeUpdate();

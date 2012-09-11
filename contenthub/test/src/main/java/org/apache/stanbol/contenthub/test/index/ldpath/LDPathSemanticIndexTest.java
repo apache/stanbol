@@ -343,6 +343,8 @@ public class LDPathSemanticIndexTest {
 
         try {
             SemanticIndex<ContentItem> semanticIndex = getLDPathSemanticIndex(name);
+            // TODO instead of creating a new ContentItem and enhancing and use an already existing
+            // ContentItem
             ContentItem ci = contentItemFactory.createContentItem(new StringSource(
                     "Michael Jackson is a very famous person, and he was born in Indiana."));
             jobManager.enhanceContent(ci);

@@ -28,15 +28,15 @@ import java.sql.Statement;
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
-import org.apache.stanbol.contenthub.revisionmanager.StoreDBManager;
+import org.apache.stanbol.contenthub.revisionmanager.DerbyDBManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.BundleContext;
 
 @RunWith(SlingAnnotationsTestRunner.class)
-public class StoreDBManagerTest {
+public class DerbyDBManagerTest {
     @TestReference
-    private StoreDBManager dbManager;
+    private DerbyDBManager dbManager;
 
     @TestReference
     private BundleContext bundleContext;
@@ -60,8 +60,8 @@ public class StoreDBManagerTest {
 
     @Test
     public void testEpochTable() throws StoreException {
-        assertTrue(StoreDBManager.EPOCH_TABLE_NAME + " has not been created",
-            dbManager.existsTable(StoreDBManager.EPOCH_TABLE_NAME));
+        assertTrue(DerbyDBManager.EPOCH_TABLE_NAME + " has not been created",
+            dbManager.existsTable(DerbyDBManager.EPOCH_TABLE_NAME));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class StoreDBManagerTest {
         try {
             // first remove the the table
             stmt = con.createStatement();
-            stmt.executeUpdate("DROP TABLE " + tableName);
+            stmt.executeUpdate("DROP TABLE \"" + tableName + "\"");
 
         } finally {
             dbManager.closeStatement(stmt);
@@ -94,7 +94,7 @@ public class StoreDBManagerTest {
         ResultSet rs = null;
         try {
             // put some value into it
-            String insertQuery = "INSERT INTO " + tableName + "(id, revision) VALUES(?,?)";
+            String insertQuery = "INSERT INTO \"" + tableName + "\" (id, revision) VALUES(?,?)";
             long initialRevision = System.currentTimeMillis();
             con = dbManager.getConnection();
             for (int i = 0; i < 5; i++) {
@@ -110,7 +110,7 @@ public class StoreDBManagerTest {
             dbManager.truncateTable(tableName);
 
             // check the values
-            ps = con.prepareStatement("SELECT * FROM " + tableName);
+            ps = con.prepareStatement("SELECT * FROM \"" + tableName + "\"");
             rs = ps.executeQuery();
 
             boolean recordExists = false;
@@ -127,7 +127,7 @@ public class StoreDBManagerTest {
             try {
                 // first remove the the table
                 stmt = con.createStatement();
-                stmt.executeUpdate("DROP TABLE " + tableName);
+                stmt.executeUpdate("DROP TABLE \"" + tableName + "\"");
 
             } finally {
                 dbManager.closeStatement(stmt);

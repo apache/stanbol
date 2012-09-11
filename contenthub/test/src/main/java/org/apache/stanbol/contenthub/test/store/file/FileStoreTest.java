@@ -47,8 +47,7 @@ import org.apache.stanbol.commons.semanticindex.index.IndexException;
 import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
-import org.apache.stanbol.contenthub.revisionmanager.RevisionManager;
-import org.apache.stanbol.contenthub.revisionmanager.StoreDBManager;
+import org.apache.stanbol.contenthub.revisionmanager.DerbyDBManager;
 import org.apache.stanbol.contenthub.store.file.FileStore;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -59,6 +58,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -75,10 +75,7 @@ public class FileStoreTest {
     private ContentItemFactory contentItemFactory;
 
     @TestReference
-    private StoreDBManager dbManager;
-
-    @TestReference
-    private RevisionManager revisionManager;
+    private DerbyDBManager dbManager;
 
     private Store<ContentItem> store;
 
@@ -152,8 +149,8 @@ public class FileStoreTest {
             file.exists());
 
         // check revision is updated, then delete it
-        String selectRevision = "SELECT id,revision FROM " + revisionManager.getStoreID(store)
-                                + " content_item_revision WHERE id = '%s'";
+        String selectRevision = "SELECT id,revision FROM \""
+                                + store.getProperties().get(Constants.SERVICE_PID) + "\" WHERE id = '%s'";
         Connection con = dbManager.getConnection();
         // Create a Statement for scrollable ResultSet
         Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
@@ -191,8 +188,9 @@ public class FileStoreTest {
             file2.exists());
 
         // check revisions are updated, then delete them
-        String selectRevision = "SELECT id,revision FROM " + revisionManager.getStoreID(store)
-                                + " content_item_revision WHERE id = '%s' OR id = '%s'";
+        String selectRevision = "SELECT id,revision FROM \""
+                                + store.getProperties().get(Constants.SERVICE_PID)
+                                + "\" WHERE id = '%s' OR id = '%s'";
         Connection con = dbManager.getConnection();
         // Create a Statement for scrollable ResultSet
         Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
@@ -363,7 +361,8 @@ public class FileStoreTest {
         f.delete();
 
         // delete the database records
-        String query = String.format("DELETE FROM %s WHERE id = ?", revisionManager.getStoreID(store));
+        String query = String.format("DELETE FROM \"%s\" WHERE id = ?",
+            store.getProperties().get(Constants.SERVICE_PID));
         Connection connection = dbManager.getConnection();
         PreparedStatement ps = null;
         try {

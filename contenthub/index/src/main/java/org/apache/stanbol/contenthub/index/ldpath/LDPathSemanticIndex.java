@@ -873,7 +873,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
         }
 
         private long indexDocuments() throws StoreException, IndexException {
-            ChangeSet<ContentItem> cs;
+            ChangeSet cs;
             long revision = Long.MIN_VALUE;
             boolean noChange = false;
             do {
@@ -914,7 +914,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                     return;
                 }
 
-                ChangeSet<ContentItem> changeSet = null;
+                ChangeSet changeSet = null;
                 try {
                     changeSet = indexingSource.changes(epoch, revision, batchSize);
                 } catch (StoreException e) {

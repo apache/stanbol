@@ -47,12 +47,12 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @Component(immediate = true)
-@Service(value = StoreDBManager.class)
-public class StoreDBManager {
+@Service(value = DerbyDBManager.class)
+public class DerbyDBManager {
 
     public static final String EPOCH_TABLE_NAME = "epochTable";
 
-    private static Logger log = LoggerFactory.getLogger(StoreDBManager.class);
+    private static Logger log = LoggerFactory.getLogger(DerbyDBManager.class);
 
     private static int MAX_ID_LENGTH = 1024;
 
@@ -70,7 +70,7 @@ public class StoreDBManager {
     /**
      * Creates an empty revision table with the given name. Different {@link Store} implementations are
      * expected to call this method in their initializations with the value to be obtained by
-     * {@link RevisionManager#getStoreID(Store)} method.
+     * {@link DerbyRevisionManager#getStoreID(Store)} method.
      * 
      * @param tableName
      *            name of the table to be created
@@ -82,8 +82,9 @@ public class StoreDBManager {
         try {
             // try to create revision table
             if (!existsTable(tableName)) {
-                String createRevisionTable = "CREATE TABLE " + tableName + " (id VARCHAR(" + MAX_ID_LENGTH
-                                             + ") NOT NULL PRIMARY KEY," + "revision BIGINT NOT NULL)";
+                String createRevisionTable = "CREATE TABLE \"" + tableName + "\" (id VARCHAR("
+                                             + MAX_ID_LENGTH + ") NOT NULL PRIMARY KEY,"
+                                             + "revision BIGINT NOT NULL)";
                 stmt = con.createStatement();
                 stmt.executeUpdate(createRevisionTable);
                 log.info("Revision table created for {}.", tableName);
@@ -170,12 +171,13 @@ public class StoreDBManager {
         if (!exists) {
             throw new IllegalArgumentException(String.format("There is no table having name: %s", tableName));
         }
-        String truncateTable = "TRUNCATE TABLE " + tableName;
+        String truncateTable = "TRUNCATE TABLE \"" + tableName + "\"";
         Connection con = getConnection();
         Statement stmt = null;
         try {
             stmt = con.createStatement();
             stmt.execute(truncateTable);
+            log.debug("Table having name: {} has been truncated", tableName);
         } catch (SQLException e) {
             log.error("Failed to truncate table: {}", tableName, e);
             throw new StoreException(String.format("Failed to truncate table: %s", tableName), e);
@@ -183,7 +185,6 @@ public class StoreDBManager {
             closeStatement(stmt);
             closeConnection(con);
         }
-        log.debug("Table having name: {} has been truncated", tableName);
     }
 
     /**
@@ -241,6 +242,7 @@ public class StoreDBManager {
         Connection con = null;
         try {
             con = DriverManager.getConnection(DB_URL);
+            log.debug("New database connection has been prepared");
         } catch (SQLException e) {
             log.error("Failed to obtain Derby connection", e);
             throw new StoreException("Failed to obtain Derby connection", e);
