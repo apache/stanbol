@@ -20,36 +20,32 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
-import org.apache.stanbol.commons.semanticindex.store.IndexingSource;
 
-public class ChangeSetImpl<Item> implements ChangeSet<Item> {
+public class ChangeSetImpl implements ChangeSet {
     private final long from;
     private final long to;
     private final long epoch;
     private final Iterable<String> changedUris;
-    private final IndexingSource<Item> source;
 
-    public ChangeSetImpl(IndexingSource<Item> source,long epoch,long from, long to, Iterable<String> changed) {
-    	if(source == null){
-    		throw new IllegalArgumentException("The parsed IndexingSource MUST NOT be NULL!");
-    	}
-    	if(from > to){
-    		throw new IllegalArgumentException("The pared from revision MUST NOT be bigger as the to revision!");
-    	}
-    	if(changed == null){
-    		if(to != from){
-    			throw new IllegalArgumentException("For empty ChangeSets from and to revisions MUST BE the same!");
-    		}
-        	this.changedUris = Collections.emptyList();
-    	} else {
-    		this.changedUris = changed;
-    	}
-    	this.epoch = epoch;
-    	this.from = from;
-    	this.to = to;
-    	this.source = source;
-	}
-    
+    public ChangeSetImpl(long epoch, long from, long to, Iterable<String> changed) {
+        if (from > to) {
+            throw new IllegalArgumentException(
+                    "The pared from revision MUST NOT be bigger as the to revision!");
+        }
+        if (changed == null) {
+            if (to != from) {
+                throw new IllegalArgumentException(
+                        "For empty ChangeSets from and to revisions MUST BE the same!");
+            }
+            this.changedUris = Collections.emptyList();
+        } else {
+            this.changedUris = changed;
+        }
+        this.epoch = epoch;
+        this.from = from;
+        this.to = to;
+    }
+
     @Override
     public long fromRevision() {
         return from;
@@ -61,17 +57,12 @@ public class ChangeSetImpl<Item> implements ChangeSet<Item> {
     }
 
     @Override
-    public IndexingSource<Item> getIndexingSource() {
-        return source;
+    public long getEpoch() {
+        return epoch;
     }
 
-	@Override
-	public long getEpoch() {
-		return epoch;
-	}
-
-	@Override
-	public Iterator<String> iterator() {
-		return changedUris.iterator();
-	}
+    @Override
+    public Iterator<String> iterator() {
+        return changedUris.iterator();
+    }
 }

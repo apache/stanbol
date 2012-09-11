@@ -120,5 +120,5 @@ public interface IndexingSource<Item> {
      *             If the Epoch used by this IndexingSource is different of the epoch parsed in the request
      * @see ChangeSet
      */
-    ChangeSet<Item> changes(long epoch, long revision, int batchSize) throws StoreException, EpochException;
+    ChangeSet changes(long epoch, long revision, int batchSize) throws StoreException, EpochException;
 }

@@ -43,7 +43,7 @@ import java.util.Iterator;
  *     index.persist(cs.fromRevision());
  * </pre></code>
  */
-public interface ChangeSet<Item> extends Iterable<String> {
+public interface ChangeSet extends Iterable<String> {
     /**
      * The lowest revision number included in this ChangeSet
      * 
@@ -71,12 +71,4 @@ public interface ChangeSet<Item> extends Iterable<String> {
      * @return the URIs of the changed contentItems included in this ChangeSet
      */
     public Iterator<String> iterator();
-
-    /**
-     * The reference to the {@link Store} of this {@link ChangeSet}. This {@link IndexingSource} can be used
-     * to iterate on the changes.
-     * 
-     * @return the IndexingSource of this {@link ChangeSet}
-     */
-    IndexingSource<Item> getIndexingSource();
 }
