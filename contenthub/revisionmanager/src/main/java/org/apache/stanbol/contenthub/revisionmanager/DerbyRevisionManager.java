@@ -144,6 +144,9 @@ public class DerbyRevisionManager implements RevisionManager {
      */
     @Override
     public ChangeSet getChanges(String storeID, long revision, int batchSize) throws RevisionManagerException {
+        if (batchSize <= 0) {
+            throw new IllegalArgumentException("Batch size must be larger than 0");
+        }
         // get connection
         Connection con = getConnection();
 
@@ -167,6 +170,7 @@ public class DerbyRevisionManager implements RevisionManager {
                         new ArrayList<String>());
             }
 
+            from = revisionBeans.get(0).getRevision();
             // if the number of changes >= batchsize + 1
             if (revisionBeans.size() == (batchSize + 1)) {
                 log.debug("There are changes more than the given batch size: {}", batchSize);
@@ -181,16 +185,15 @@ public class DerbyRevisionManager implements RevisionManager {
                 for (int i = 0; i < revisionBeans.size() - 1; i++) {
                     changedUris.add(revisionBeans.get(i).getID());
                 }
+                to = revisionBeans.get(revisionBeans.size() - 2).getRevision();
                 log.info("Changes have been fetched for the initial batch size");
             } else {
-                log.info("There are {} changes in total", revisionBeans.size());
                 for (RevisionBean rb : revisionBeans) {
                     changedUris.add(rb.getID());
                 }
+                to = revisionBeans.get(revisionBeans.size() - 1).getRevision();
+                log.info("There are {} changes in total", revisionBeans.size());
             }
-
-            to = revisionBeans.get(batchSize).getRevision();
-            from = revisionBeans.get(0).getRevision();
 
             if (moreChanges) {
                 revisionBeans = dbManager.getRevisions(revisionTableName, revision, lastRowRevision,
@@ -198,7 +201,8 @@ public class DerbyRevisionManager implements RevisionManager {
                 for (RevisionBean rb : revisionBeans) {
                     changedUris.add(rb.getID());
                 }
-                log.info("Changes exceeding the batch size have been fetched. Total fetched changes: {}", changedUris.size());
+                log.info("Changes exceeding the batch size have been fetched. Total fetched changes: {}",
+                    changedUris.size());
             }
 
             long epoch = getEpoch(storeID);
