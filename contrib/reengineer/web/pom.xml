@@ -135,7 +135,6 @@
     <dependency>
       <groupId>freemarker</groupId>
       <artifactId>freemarker</artifactId>
-	  <version>2.3.9</version>
     </dependency>
     <!-- indirect dependency for freemarker -->
     <dependency>

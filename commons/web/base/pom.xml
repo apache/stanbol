@@ -65,7 +65,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.commons.web.*,freemarker.cache.*,freemarker.template.*
+              org.apache.stanbol.commons.web.*,freemarker.cache.*,freemarker.template.*,freemarker.core
             </Export-Package>
             <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
             </Embed-Dependency>
@@ -83,6 +83,10 @@
               !org.python.*,
               !org.dom4j.*,
               !org.apache.log.*,
+              !com.sun.org.apache.*,
+              !javax.el,
+              !org.slf4j.spi,
+              !org.zeroturnaround.javarebel,
               *
             </Import-Package>
           </instructions>
