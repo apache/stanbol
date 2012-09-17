@@ -420,7 +420,8 @@ public class EnhancementStructureHelper {
             XSD.dateTime.equals(((TypedLiteral)createdResource).getDataType()));
         Date creationDate = LiteralFactory.getInstance().createObject(Date.class, (TypedLiteral)createdResource);
         assertNotNull("Unable to convert "+createdResource+" to a Java Date object",creationDate);
-        assertTrue("CreationDate MUST NOT be in the Future",new Date().after(creationDate));
+        Date now = new Date();
+        assertTrue("CreationDate MUST NOT be in the Future",now.after(creationDate) || now.equals(creationDate));
         assertFalse("Only a single createnDate MUST BE present", createdIterator.hasNext());
         //validate optional modification date if present
         Iterator<Triple> modDateIterator = enhancements.filter(enhancement, DCTERMS.modified, null);
