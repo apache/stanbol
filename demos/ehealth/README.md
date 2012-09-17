@@ -55,7 +55,7 @@ To install the demo you will need to do the following steps
     * index the datasets
     * copy the results "org.apache.stanbol.data.site.ehealth-1.0.0.jar" and "ehealth.solrindex.zip" to the "./target" folder
 3. __Install__ the data to a running Stanbol instance: Both the Stable and the Full launcher can be used as base for this demo. The following steps are required to install the demo
-    1. copy "./target/ehealth.solrindex.zip" to "{stanbol-workingdir}/sling/datafiles"
+    1. copy "./target/ehealth.solrindex.zip" to "{stanbol-workingdir}/sling/datafiles" (NOTE: for the 0.10.* versions it is "{stanbol-workingdir}/stanbol/datafiles")
     2. install both bundles "./target/org.apache.stanbol.data.site.ehealth-1.0.0.jar" and "./target/org.apache.stanbol.demo.ehealth-*.jar" to your Stanbol instance. Users can use the [Apache Felix Web Console](http://localhost:8080/system/console/bundles)(url: http:{host}:{port}/system/console/bundles) for this task.
     3. wait a minute until Stanbol has installed the data from the "ehealth.solrindex.zip" file
 
