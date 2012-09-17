@@ -16,35 +16,28 @@
  */
 package org.apache.stanbol.commons.semanticindex.store.revisionmanager;
 
-import org.apache.stanbol.commons.semanticindex.store.StoreException;
-
 /**
- * Exception to be thrown when an unexpected situation occurs during revision management
+ * A tiny bean holding the changes obtained from a {@link RevisionManager}. This it keeps the uri of the
+ * changed item and corresponding new revision.
+ * 
+ * @author suat
  * 
  */
-public class RevisionManagerException extends StoreException {
+public class RevisionBean {
+    private String id;
 
-    private static final long serialVersionUID = -3536940194241661109L;
+    private long revision;
 
-    /**
-     * @param msg
-     */
-    public RevisionManagerException(String msg) {
-        super(msg);
+    public RevisionBean(String id, long revision) {
+        this.id = id;
+        this.revision = revision;
     }
 
-    /**
-     * @param cause
-     */
-    public RevisionManagerException(Throwable cause) {
-        super(cause);
+    public String getID() {
+        return this.id;
     }
 
-    /**
-     * @param msg
-     * @param cause
-     */
-    public RevisionManagerException(String msg, Throwable cause) {
-        super(msg, cause);
+    public long getRevision() {
+        return this.revision;
     }
 }

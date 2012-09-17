@@ -17,12 +17,9 @@
 package org.apache.stanbol.contenthub.revisionmanager;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -32,6 +29,7 @@ import org.apache.stanbol.commons.semanticindex.core.store.ChangeSetImpl;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
+import org.apache.stanbol.commons.semanticindex.store.revisionmanager.RevisionBean;
 import org.apache.stanbol.commons.semanticindex.store.revisionmanager.RevisionManager;
 import org.apache.stanbol.commons.semanticindex.store.revisionmanager.RevisionManagerException;
 import org.slf4j.Logger;
@@ -61,25 +59,6 @@ import org.slf4j.LoggerFactory;
 public class DerbyRevisionManager implements RevisionManager {
     private static Logger log = LoggerFactory.getLogger(DerbyRevisionManager.class);
 
-    private String SELECT_REVISION = "SELECT id,revision FROM \"%s\" content_item_revision WHERE id = ?";
-
-    private String INSERT_REVISION = "INSERT INTO \"%s\" (id, revision) VALUES (?,?)";
-
-    private String UPDATE_REVISION = "UPDATE \"%s\" SET revision=? WHERE id=?";
-
-    private String SELECT_CHANGES = "SELECT id, revision FROM \"%s\" WHERE revision > ? ORDER BY revision ASC";
-
-    private String SELECT_MORECHANGES = "SELECT id, revision FROM \"%s\" WHERE revision > ? AND revision <= ? ORDER BY revision ASC OFFSET ? ROWS";
-
-    private String SELECT_EPOCH = "SELECT epoch FROM " + DerbyDBManager.EPOCH_TABLE_NAME
-                                  + " WHERE tableName = ?";
-
-    private String INSERT_EPOCH = "INSERT INTO " + DerbyDBManager.EPOCH_TABLE_NAME
-                                  + " (epoch, tableName) values (?, ?)";
-
-    private String UPDATE_EPOCH = "UPDATE " + DerbyDBManager.EPOCH_TABLE_NAME
-                                  + " SET epoch = ? WHERE tableName = ?";
-
     @Reference
     DerbyDBManager dbManager;
 
@@ -96,114 +75,53 @@ public class DerbyRevisionManager implements RevisionManager {
     @Override
     public void registerStore(String storeID) throws RevisionManagerException {
         // initialize tables if not already
-        try {
-            dbManager.createRevisionTable(storeID);
-            log.debug("Revision table initialized for the Store: {}", storeID);
-        } catch (StoreException e) {
-            log.error("Failed to create revision table for the store: {}", storeID);
-            throw new RevisionManagerException(String.format(
-                "Failed to create revision table for the store: %s", storeID), e);
-        }
+        dbManager.createRevisionTable(storeID);
 
         // add initial epoch for the store
         updateEpoch(storeID, true);
-        log.debug("Epoch is initialized for the Store: {}", storeID);
+
+        log.info("The Store: {} has been registered", storeID);
     }
 
     /**
-     * Removes the revision table and the epoch entry regarding the given {@link Store}
+     * Removes the revision table and associated index on the revision from the Derby database. Also, the
+     * epoch entry is removed from the epoch table.
      * 
      * @param storeID
      *            the identifier of the {@link Store}
      * @throws StoreException
      */
     public void unregisterStore(String storeID) throws RevisionManagerException {
-        // get connection
-        Connection con = getConnection();
-        Statement stmt = null;
-        PreparedStatement ps = null;
-        String tableName = storeID;
-        try {
-            // first remove the the table
-            stmt = con.createStatement();
-            stmt.executeUpdate("DROP TABLE \"" + tableName + "\"");
-            log.debug("The revision table for the Store: {} has been dropped", storeID);
+        // first remove the table
+        dbManager.removeTable(storeID);
+        // remove the index
+        dbManager.removeIndex(getRevisionIndexName(storeID));
+        // delete the entry from epoch table
+        dbManager.removeEpochEntry(storeID);
 
-            // delete the entry from epoch table
-            ps = con.prepareStatement("DELETE FROM " + DerbyDBManager.EPOCH_TABLE_NAME
-                                      + " WHERE tableName = ?");
-            ps.setString(1, tableName);
-            ps.executeUpdate();
-            log.debug("The epoch entry for the the Store: {} has been deleted", storeID);
-
-        } catch (SQLException e) {
-            log.error("Failed clear test resources for the table: {}", tableName);
-            throw new RevisionManagerException(String.format("Failed clear test resources for the table: %s",
-                tableName), e);
-        } finally {
-            dbManager.closeStatement(stmt);
-            dbManager.closeStatement(ps);
-            dbManager.closeConnection(con);
-        }
+        log.info("The Store: {} has been unregistered");
     }
 
     @Override
     public long updateRevision(String storeID, String itemID) throws RevisionManagerException {
-        // get connection
-        Connection con = getConnection();
         String revisionTableName = storeID;
 
         // check existence of record for the given content item id
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        boolean recordExist = false;
-        try {
-            ps = con.prepareStatement(String.format(SELECT_REVISION, revisionTableName));
-            ps.setString(1, itemID);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                recordExist = true;
-            }
+        boolean recordExist = dbManager.existsRevisionEntry(revisionTableName, itemID);
 
-        } catch (SQLException e) {
-            dbManager.closeConnection(con);
-            log.error("Failed to query revision of content item", e);
-            throw new RevisionManagerException("Failed to query revision of content item", e);
-        } finally {
-            dbManager.closeResultSet(rs);
-            dbManager.closeStatement(ps);
+        long newRevision = System.currentTimeMillis();
+        if (!recordExist) {
+            dbManager.createRevisionEntry(revisionTableName, itemID, newRevision);
+        } else {
+            dbManager.updateRevisionEntry(revisionTableName, itemID, newRevision);
         }
+        log.info("Revision of the item: {} in Store: {} has been updated", itemID, storeID);
+        return newRevision;
+    }
 
-        // update the table
-        try {
-            long newRevision = System.currentTimeMillis();
-            if (!recordExist) {
-                log.debug("New revision: {} for the item: {} of Store: {} will be added",
-                    new Object[] {newRevision, itemID, revisionTableName});
-                ps = con.prepareStatement(String.format(INSERT_REVISION, revisionTableName));
-                ps.setString(1, itemID);
-                ps.setLong(2, newRevision);
-            } else {
-                log.debug("New revision: {} for the item: {} of Store: {} will be updated",
-                    new Object[] {newRevision, itemID, revisionTableName});
-
-                ps = con.prepareStatement(String.format(UPDATE_REVISION, revisionTableName));
-                ps.setLong(1, newRevision);
-                ps.setString(2, itemID);
-            }
-            int updatedRecordNum = ps.executeUpdate();
-            // exactly one record should be affected
-            if (updatedRecordNum != 1) {
-                log.warn("Unexpected number of updated records: {}, should be 1", updatedRecordNum);
-            }
-            return newRevision;
-        } catch (SQLException e) {
-            log.error("Failed to update revision", e);
-            throw new RevisionManagerException("Failed to update revision", e);
-        } finally {
-            dbManager.closeStatement(ps);
-            dbManager.closeConnection(con);
-        }
+    @Override
+    public void registerRevisions(String storeID, List<String> itemIDs) throws RevisionManagerException {
+        dbManager.createRevisionEntries(storeID, itemIDs);
     }
 
     /**
@@ -235,88 +153,52 @@ public class DerbyRevisionManager implements RevisionManager {
         batchSize = batchSize == Integer.MAX_VALUE ? batchSize - 1 : batchSize;
 
         // check existence of record for the given content item id
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         try {
             boolean moreChanges = false;
             long lastRowRevision = 0;
-            try {
-                ps = con.prepareStatement(String.format(SELECT_CHANGES, revisionTableName),
-                    ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                ps.setLong(1, revision);
-                // set max rows one more than the batchsize to be able to see if there are other changes for
-                // the given revision beyond the batchsize
-                ps.setMaxRows(batchSize + 1);
-                rs = ps.executeQuery();
+            // set max rows one more than the batchsize to be able to see if there are other changes for
+            // the given revision beyond the batchsize
+            List<RevisionBean> revisionBeans = dbManager.getRevisions(revisionTableName, revision,
+                Long.MAX_VALUE, batchSize + 1, 0);
 
-                if (!rs.first()) {
-                    log.debug("There is no changes in store: {}, after revision: {}", storeID, revision);
-                    return new ChangeSetImpl(Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-                            new ArrayList<String>());
-                }
-
-                // if the number of changes >= batchsize + 1
-                if (rs.absolute(batchSize + 1)) {
-                    log.debug("There are changes after given revision more than the given batch size");
-                    lastRowRevision = rs.getLong(2);
-                    rs.previous();
-                    long nextToLastRowRevision = rs.getLong(2);
-                    rs.beforeFirst();
-                    // if we are in the middle of a revision, set the moreChanges flag to add all changes in
-                    // that revision to changedUris
-                    if (lastRowRevision == nextToLastRowRevision) {
-                        log.debug("The changes for the revision: {} exceeds the batch size");
-                        moreChanges = true;
-                    }
-                    while (rs.next()) {
-                        if (rs.isLast()) {
-                            break;
-                        }
-                        changedUris.add(rs.getString(1));
-                    }
-                    rs.previous();
-                } else {
-                    log.debug("There are changes after given revision less than or equal to the given batch size");
-                    rs.beforeFirst();
-                    while (rs.next()) {
-                        changedUris.add(rs.getString(1));
-                    }
-                    rs.last();
-                }
-
-                to = rs.getLong(2);
-                rs.first();
-                from = rs.getLong(2);
-                log.debug("Changes have been fetched for the initial batch size");
-
-            } catch (SQLException e) {
-                log.error("Failed to get changes for the Store: {}", storeID, e);
-                throw new RevisionManagerException(String.format("Failed to get changes for the Store: %s",
-                    storeID), e);
-            } finally {
-                dbManager.closeResultSet(rs);
-                dbManager.closeStatement(ps);
+            if (revisionBeans.isEmpty()) {
+                log.debug("There is no changes in store: {}, after revision: {}", storeID, revision);
+                return new ChangeSetImpl(Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+                        new ArrayList<String>());
             }
-            if (moreChanges) {
-                try {
-                    ps = con.prepareStatement(String.format(SELECT_MORECHANGES, revisionTableName),
-                        ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                    ps.setLong(1, revision);
-                    ps.setLong(2, lastRowRevision);
-                    ps.setLong(3, batchSize);
-                    rs = ps.executeQuery();
 
-                    while (rs.next()) {
-                        changedUris.add(rs.getString(1));
-                    }
-                    log.debug("Changes exceeding the batch size have been fetched");
-                } catch (SQLException e) {
-                    log.error("Failed to get changes", e);
-                    throw new RevisionManagerException("Failed to get changes", e);
-                } finally {
-                    dbManager.closeResultSet(rs);
-                    dbManager.closeStatement(ps);
+            // if the number of changes >= batchsize + 1
+            if (revisionBeans.size() == (batchSize + 1)) {
+                log.debug("There are changes more than the given batch size: {}", batchSize);
+                lastRowRevision = revisionBeans.get(batchSize).getRevision();
+                long nextToLastRowRevision = revisionBeans.get(batchSize - 1).getRevision();
+                // if we are in the middle of a revision, set the moreChanges flag to add all changes in
+                // that revision to changedUris
+                if (lastRowRevision == nextToLastRowRevision) {
+                    log.debug("The changes for the revision: {} exceeds the batch size", revision);
+                    moreChanges = true;
                 }
+                for (int i = 0; i < revisionBeans.size() - 1; i++) {
+                    changedUris.add(revisionBeans.get(i).getID());
+                }
+                log.info("Changes have been fetched for the initial batch size");
+            } else {
+                log.info("There are {} changes in total", revisionBeans.size());
+                for (RevisionBean rb : revisionBeans) {
+                    changedUris.add(rb.getID());
+                }
+            }
+
+            to = revisionBeans.get(batchSize).getRevision();
+            from = revisionBeans.get(0).getRevision();
+
+            if (moreChanges) {
+                revisionBeans = dbManager.getRevisions(revisionTableName, revision, lastRowRevision,
+                    Integer.MAX_VALUE, batchSize);
+                for (RevisionBean rb : revisionBeans) {
+                    changedUris.add(rb.getID());
+                }
+                log.info("Changes exceeding the batch size have been fetched. Total fetched changes: {}", changedUris.size());
             }
 
             long epoch = getEpoch(storeID);
@@ -328,34 +210,7 @@ public class DerbyRevisionManager implements RevisionManager {
 
     @Override
     public long getEpoch(String storeID) throws RevisionManagerException {
-        // get connection
-        Connection con = getConnection();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        long epoch;
-        try {
-            ps = con.prepareStatement(SELECT_EPOCH);
-            ps.setString(1, storeID);
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                epoch = rs.getLong(1);
-            } else {
-                log.error(String.format("There is not an epoch record for the Store: %s", storeID));
-                throw new RevisionManagerException(String.format(
-                    "There is not an epoch record for the Store: %s", storeID));
-            }
-            log.debug("The epoch: {} for the Store: {} has been fetched", epoch, storeID);
-
-        } catch (SQLException e) {
-            log.error("Failed to execute query", e);
-            throw new RevisionManagerException("Failed to execute query", e);
-        } finally {
-            dbManager.closeResultSet(rs);
-            dbManager.closeStatement(ps);
-            dbManager.closeConnection(con);
-        }
-        return epoch;
+        return dbManager.getEpoch(storeID);
     }
 
     /**
@@ -370,74 +225,26 @@ public class DerbyRevisionManager implements RevisionManager {
         return updateEpoch(storeID, false);
     }
 
-    private long updateEpoch(String storeID, boolean insert) throws RevisionManagerException {
-        // get connection
-        Connection con = getConnection();
-        PreparedStatement ps = null;
-
-        // update the table
-        try {
-            long newEpoch = System.currentTimeMillis();
-            if (!insert) {
-                // truncate the revision table
-                try {
-                    dbManager.truncateTable(storeID);
-                } catch (StoreException e) {
-                    log.error("Failed to truncate table while updating the epoch for the Store: {}", storeID);
-                    throw new RevisionManagerException(String.format(
-                        "Failed to truncate table while updating the epoch for the Store: %s", storeID), e);
-                }
-
-                log.debug("New epoch: {} for the Store: {} will be updated", newEpoch, storeID);
-                ps = con.prepareStatement(UPDATE_EPOCH);
-            } else {
-                // check existence of the epoch entry for the given Store
-                ResultSet rs = null;
-                boolean recordExist = false;
-                try {
-                    ps = con.prepareStatement(SELECT_EPOCH);
-                    ps.setString(1, storeID);
-                    rs = ps.executeQuery();
-                    if (rs.next()) {
-                        recordExist = true;
-                        newEpoch = rs.getLong("epoch");
-                    }
-
-                } catch (SQLException e) {
-                    log.error("Failed to query revision of content item", e);
-                    throw new RevisionManagerException("Failed to query revision of content item", e);
-                } finally {
-                    dbManager.closeResultSet(rs);
-                    dbManager.closeStatement(ps);
-                }
-
-                if (!recordExist) {
-                    log.debug("New epoch: {} for the Store: {} will be added", newEpoch, storeID);
-                    ps = con.prepareStatement(INSERT_EPOCH);
+    private long updateEpoch(String storeID, boolean initialize) throws RevisionManagerException {
+        long newEpoch = System.currentTimeMillis();
+        if (!initialize) {
+            // truncate the revision table
+            dbManager.truncateTable(storeID);
+            dbManager.updateEpochEntry(storeID, newEpoch);
+        } else {
+            try {
+                newEpoch = dbManager.getEpoch(storeID);
+            } catch (RevisionManagerException e) {
+                if (e.getCause() == null) {
+                    dbManager.createEpochEntry(storeID, newEpoch);
                 } else {
-                    // if there already exists an entry in the "epochTable"
-                    // for the given store, return from the method
-                    return newEpoch;
+                    throw e;
                 }
             }
-            ps.setLong(1, newEpoch);
-            ps.setString(2, storeID);
-            int updatedRecordNum = ps.executeUpdate();
-            log.debug("Epoch update/insertion has been done");
-
-            // exactly one record should be affected
-            if (updatedRecordNum != 1) {
-                log.warn("Unexpected number of updated records: {}, should be 1", updatedRecordNum);
-            }
-            return newEpoch;
-        } catch (SQLException e) {
-            log.error("Failed to update epoch for Store identified as: {}", storeID, e);
-            throw new RevisionManagerException(String.format("Failed to update epoch for identified as: %s",
-                storeID), e);
-        } finally {
-            dbManager.closeStatement(ps);
-            dbManager.closeConnection(con);
         }
+
+        log.info("Epoch update has been completed for the Store: {}", storeID);
+        return newEpoch;
     }
 
     private Connection getConnection() throws RevisionManagerException {
@@ -452,14 +259,13 @@ public class DerbyRevisionManager implements RevisionManager {
     }
 
     /**
-     * Returns a string identifying the given {@link Store} instance in the scope of the revision management.
-     * Currently, the name of the Store is used as the identifiers of the Store. The name is obtained through
-     * the {@link Store#getName()} method.
+     * Returns a name for the index to be created on the <b>revision</b> of the given table
      * 
-     * @param store
+     * @param tableName
+     *            name of the revision table on which the index will be created
      * @return
      */
-    // public <Item> String getStoreID(Store<Item> store) {
-    // return store.getName();
-    // }
+    private String getRevisionIndexName(String tableName) {
+        return tableName + "_revisionindex";
+    }
 }
