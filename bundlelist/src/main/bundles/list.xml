@@ -197,6 +197,13 @@
 	  <artifactId>org.apache.stanbol.enhancer.engines.celi</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
+    
+     <!-- DBpedia Spotlight Engines (STANBOL-706) -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.dbpspotlight</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
   </startLevel>
   
   <!-- Default Configuration for the Stanbol Enhancer -->
