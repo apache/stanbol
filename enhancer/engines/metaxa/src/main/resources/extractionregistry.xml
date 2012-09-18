@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<extractorFactories>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.excel.ExcelExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.apache.stanbol.enhancer.engines.metaxa.core.html.HtmlExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.jpg.JpgExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.office.OfficeExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.opendocument.OpenDocumentExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.openxml.OpenXmlExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.pdf.PdfExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.plaintext.PlainTextExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.powerpoint.PowerPointExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.presentations.PresentationsExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.publisher.PublisherExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.quattro.QuattroExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.rtf.RtfExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.visio.VisioExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.word.WordExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.wordperfect.WordPerfectExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.works.WorksExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.semanticdesktop.aperture.extractor.xml.XmlExtractorFactory</name>
+	</extractorFactory>
+	<extractorFactory>
+		<name>org.apache.stanbol.enhancer.engines.metaxa.core.mp3.MP3FileExtractorFactory</name>
+	</extractorFactory>	
+	<extractorFactory>
+		<name>org.apache.stanbol.enhancer.engines.metaxa.core.mail.simple.SimpleMailExtractorFactory</name>
+	</extractorFactory>
+</extractorFactories>

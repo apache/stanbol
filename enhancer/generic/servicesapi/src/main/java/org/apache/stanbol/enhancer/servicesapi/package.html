@@ -1,0 +1,90 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<body>
+<h1>Stanbol Enhancer services API</h1>
+<p>
+The Stanbol Enhancer services API defines the service interfaces 
+for the components that collaborate to implement a Stanbol enhancement
+server.
+</p>
+<p>
+See <a href="http://wiki.iks-project.eu/index.php/FISEcodeAndDocs">FISEcodeAndDocs</a> on the IKS wiki
+for more information about Stanbol Enhancer (formally called  IKS FISE).
+</p>
+<p>
+The API has almost no external dependencies and is independent
+of OSGi or any other components model.
+</p>
+<p>
+It currently has a dependency on the Clerezza MGraph interface,
+but we might want to replace that with a more generic "annotations"
+interface. 
+</p>
+<h1>Main design goals</h1>
+<p>
+The Stanbol enhancement server aims to:
+<ul>
+<li>
+Make it very easy to use it as an external content enhancement/search engine, with a
+simple RESTful HTTP interface. Client PUTs or POSTs a piece of content to the 
+Stanbol Enhancer, and can then retrieve the enhancements produced by the 
+{@link org.apache.stanbol.enhancer.servicesapi.EnhancementEngine}
+that are active in the Stanbol Enhancement server, with a GET request.
+</li>
+<li>
+Make it simple for providers of enhancement engines (annotation, geolocation, 
+etc...) to plug them into a Stanbol Enhancement server.
+With the current implementation, one just needs to implement a new {@link org.apache.stanbol.enhancer.servicesapi.EnhancementEngine} and supply it
+as an OSGi service in an OSGi bundle. See the 
+<a href="http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/autotagging/">Autotagging engine</a>
+for an example that wraps a non-OSGi java content enhancement library.
+</li>
+</ul>
+
+<p>
+TODO should we say "annotation" instead of "enhancement", and rename the interfaces
+accordingly?
+</p>
+
+<h1>Main Stanbol Enhancer use-case</h1>
+<p>
+To help understand the API, here's an overview of the main Stanbol Enhancer use-case:
+<ul>
+<li>
+Client PUTs or POSTs a piece of content to register it with Enhancer, supplied as a binary 
+stream with a Content-Type (and optional initial metadata - not currently implemented).
+</li>
+<li>
+The {@link org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager} goes through its list of 
+{@link org.apache.stanbol.enhancer.servicesapi.EnhancementEngine} and
+finds out which ones can process the incoming {@link org.apache.stanbol.enhancer.servicesapi.ContentItem}. An engine can suggest
+enhancing the content synchronously or assynchronously, and the job manager can override
+those suggestions.  
+</li>
+<li>
+The client GETs the {@link org.apache.stanbol.enhancer.servicesapi.ContentItem} using the same URL that it used in the previous
+PUT request, or the URL supplied by Enhancer (Location header) if a POST request was used
+to register the content.
+</li>
+<li>
+As some enhancement requests might be asynchronous, the returned data might include process
+information, for example "3 requests for enhancement still pending".
+</li>
+</ul>
+That's it. Not too hard.
+</p>
+</body>

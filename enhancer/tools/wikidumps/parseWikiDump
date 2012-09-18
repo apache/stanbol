@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# Parses {1} - an XML dump of a wiki as produced by http://download.wikimedia.org/ services - and produces
+# a single .txt file for each article entry, saving them in folder {2}
+# Txt file are named is the article name with few char replaces. An additional file is produces which contains the originl wiki URI according to $wprefix
+# Eg
+# Article_Name.txt
+# Article_Name.uri
+#
+# Skips articles not in the 'main' namespace
+#
+#
+rdom () { local IFS=\> ; read -d \< E C ;}
+outdir=${2}
+
+if [[ $outdir = "" ]]; then
+  outdir="./"
+fi
+outdir=`cd $outdir; pwd;`
+
+wprefix=http://en.wikinews.org/wiki/
+wtitle=""
+wtext=""
+wuri=""
+while rdom; do
+    if [[ $E = title ]]; then
+       wtitle=$C
+    fi
+    #echo $E
+    if [[ $E == text\ * ]]; then
+       wtext=$C
+    fi
+    #echo "$wtitle $wtext"
+    if [[ $wtitle != "" && $wtext != "" ]]; then
+	# ignore all articles starting with a namespace, which means it is not a content article
+	if [[ $wtitle =~ \: ]]; then
+		echo Skipped $wtitle
+	else
+
+		title=`echo $wtitle|sed -e 's/[\ ]/_/g'`
+		fname=`echo $wtitle|sed -e 's/[\ \/\:]/_/g'`
+		wuri="$wprefix$title"
+                furi=$outdir/$fname.uri
+		fname=$outdir/$fname.txt
+                echo "Parsed: $wuri"
+		echo "$wtitle
+
+$wtext">>"$fname"
+		echo "$wuri">>"$furi"
+	fi
+	wtitle=""
+	wtext=""
+	wuri=""
+    fi
+done < ${1}

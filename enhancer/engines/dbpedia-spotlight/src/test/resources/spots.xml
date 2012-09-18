@@ -1,0 +1,8 @@
+<annotation
+	text="President Obama is meeting Angela Merkel in Berlin on Monday.">
+	<surfaceForm name="President Obama" offset="0" />
+	<surfaceForm name="meeting" offset="19" />
+	<surfaceForm name="Angela Merkel" offset="27" />
+	<surfaceForm name="Berlin" offset="44" />
+	<surfaceForm name="Monday" offset="54" />
+</annotation>

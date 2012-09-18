@@ -1,0 +1,3 @@
+Name=Default SolrIndex for Topic Classification
+Description=Base SolrIndex configuration for topic classification models
+Index-Archive=default-topic-model.solrindex.zip
