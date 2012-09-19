@@ -51,6 +51,11 @@
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
+    <bundle> <!-- NLP processing (STANBOL-733) -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.nlp</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
   </startLevel>
   <!-- LDPath -->
   <startLevel level="30">
@@ -146,6 +151,30 @@
       <artifactId>org.apache.stanbol.enhancer.engines.tika</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
+    
+    <!-- NLP processing engines (all STANBOL-733 and sub-tasks) -->
+    
+    <bundle><!-- POS tagging with OpenNLP -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.opennlp.pos</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle><!-- Chunking tagging with OpenNLP -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.opennlp.chunker</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle><!-- Sentiment Word Classifiers -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.sentiment.wordclassifier</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle><!-- NLP metadata to RDF (using NIF 1.0) -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.nlp2rdf</artifactId>
+      <version>0.10.0-incubating-SNAPSHOT</version>
+    </bundle>
+    
 
     <!-- Named Entity Recoqunition (NER)-->
 
@@ -154,6 +183,8 @@
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
       <version>0.10.0-incubating-SNAPSHOT</version>
     </bundle>
+    
+    
     <!-- Entity Extraction/Linking -->
     <bundle><!-- NER linking (depends on the Entityhub) -->
       <groupId>org.apache.stanbol</groupId>

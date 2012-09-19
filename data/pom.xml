@@ -102,5 +102,19 @@
         <module>bundlelists/opennlp</module>
       </modules>
     </profile>
+    <profile>
+      <!--
+       Profile including all OpenNLP language and NER modules
+       -->
+      <id>sentiment</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>sentiment/sentiws</module>
+        <module>sentiment/sentiwordnet</module>
+        <module>bundlelists/sentiment</module>
+      </modules>
+    </profile>
   </profiles>
 </project>

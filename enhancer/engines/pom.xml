@@ -58,5 +58,12 @@
     <module>zemanta</module> <!-- htt://zemanta.com -->
     <!-- DBpedia.org Spotlight Enhancement Engines (STANBOL-706) -->
     <module>dbpedia-spotlight</module>
+    
+    <!-- NLP engines -->
+    <module>opennlp-pos</module>
+    <module>opennlp-chunker</module>
+    <module>sentiment-wordclassifier</module>
+    <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
+    
   </modules>
 </project>
