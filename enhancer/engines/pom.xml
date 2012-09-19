@@ -47,6 +47,7 @@
     <module>langid</module>
     <module>topic</module>
     <module>metaxa</module>
+	<module>htmlextractor</module>
     <module>tika</module>
     <module>entitytagging</module>
     <module>keywordextraction</module>
