@@ -110,7 +110,10 @@ public class SentiWSComponent {
             }
             //all resources available ... start the service
             if(loadedSentiWsFiles.equals(sentiWsFileNames)){
+                log.info("register Sentiment Classifier for SentiWs (german)");
                 registerService();
+            } else {
+                log.info("loaded {} (required: {})",loadedSentiWsFiles,sentiWsFileNames);
             }
             //remove registration
             return true;
@@ -142,7 +145,7 @@ public class SentiWSComponent {
         Dictionary<String,Object> serviceProperties = new Hashtable<String,Object>();
         serviceProperties.put("language", "de"); //set the language
         BundleContext bc = bundleContext;
-        if(bc != null){
+        if(bc != null && sentiWsClassifierService == null){
             sentiWsClassifierService = bc.registerService(
                 SentimentClassifier.class.getName(), sentiWsClassifier, 
                 serviceProperties);

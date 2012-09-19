@@ -43,6 +43,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -58,7 +59,8 @@ import org.slf4j.LoggerFactory;
 public class Nlp2RdfMetadataEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> {
 
     private final Logger log = LoggerFactory.getLogger(Nlp2RdfMetadataEngine.class);
-    
+    //TODO: replace this with a reald ontology
+    private final static UriRef SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"sentiment-value");
     private final LiteralFactory lf = LiteralFactory.getInstance();
     
     /**
@@ -159,10 +161,16 @@ public class Nlp2RdfMetadataEngine extends AbstractEnhancementEngine<RuntimeExce
                 writePos(metadata, span, current);
                 writePhrase(metadata, span, current);
                 //OlIA does not include Sentiments
-//                Value<SentimentTag> sentiment = span.getAnnotation(NlpAnnotations.sentimentAnnotation);
-//                if(sentiment != null){
-//                    
-//                }
+                
+                Value<SentimentTag> sentiment = span.getAnnotation(NlpAnnotations.sentimentAnnotation);
+                if(sentiment != null){
+                    double sentimentVal = sentiment.probability();
+                    if(sentiment.value().isNegative()) {
+                        sentimentVal = sentimentVal * -1;
+                    }
+                    metadata.add(new TripleImpl(current, SENTIMENT_PROPERTY, 
+                        lf.createTypedLiteral(sentimentVal)));
+                }
             }
         } finally {
             ci.getLock().writeLock().unlock();

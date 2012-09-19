@@ -54,6 +54,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -87,25 +88,30 @@ import java.util.Set;
  * <p/>
  * Author: Sebastian Schaffert
  */
-@Component(immediate = true, metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
+@Component(immediate = true, metatype = true, 
+    configurationFactory = true, //allow multiple instances
+    policy = ConfigurationPolicy.OPTIONAL) //create a default instance with the default configuration
 @Service
 @Properties(value={
-        @Property(name= EnhancementEngine.PROPERTY_NAME,value="sentiment")
+        @Property(name= EnhancementEngine.PROPERTY_NAME,value="sentiment-wordclassifier"),
+        @Property(name=SentimentEngine.CONFIG_LANGUAGES,value={SentimentEngine.DEFAULT_LANGUAGE_CONFIG}),
+        @Property(name=SentimentEngine.CONFIG_ADJECTIVES,
+            boolValue=SentimentEngine.DEFAULT_PROCESS_ADJECTIVES_ONLY),
+        @Property(name=SentimentEngine.CONFIG_MIN_POS_CONFIDENCE,
+            doubleValue = SentimentEngine.DEFAULT_MIN_POS_CONFIDNECE),
+        @Property(name=Constants.SERVICE_RANKING,intValue=-100) //give the default instance a ranking < 0
 })
-
 public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException,RuntimeException> {
 
     /**
      * Language configuration. Takes a list of ISO language codes of supported languages. Currently supported
      * are the languages given as default value.
      */
-    @Property(value={SentimentEngine.DEFAULT_LANGUAGE_CONFIG})
     public static final String CONFIG_LANGUAGES = "org.apache.stanbol.enhancer.sentiment.languages";
 
     /**
      * When set to true, only adjectives and nouns will be considered in sentiment analysis.
      */
-    @Property(boolValue = SentimentEngine.DEFAULT_PROCESS_ADJECTIVES_ONLY )
     public static final String CONFIG_ADJECTIVES = "org.apache.stanbol.enhancer.sentiment.adjectives";
     /**
      * POS tags that are not selected by {@link SentimentClassifier#isAdjective(PosTag)}
@@ -114,11 +120,8 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
      * that Words that do have a suitable TAG are still considered if the
      * confidence of the fitting tag is &gt;= {min-pos-confidence}/2
      */
-    @Property(doubleValue = SentimentEngine.DEFAULT_MIN_POS_CONFIDNECE)
     public static final String CONFIG_MIN_POS_CONFIDENCE = "org.apache.stanbol.enhancer.sentiment.min-pos-confidence";
 
-    @Property(boolValue=true)
-    public static final String DEBUG_SENTIMENTS = "debug";
     boolean debugSentiments;
     
     public static final String DEFAULT_LANGUAGE_CONFIG = "*";
@@ -131,9 +134,9 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
      * {@link LexicalCategory#Noun Noun} if {@link #CONFIG_ADJECTIVES} is
      * deactivated) - default: 0.8<p>
      */
-    private static final double DEFAULT_MIN_POS_CONFIDNECE = 0.8;
+    public static final double DEFAULT_MIN_POS_CONFIDNECE = 0.8;
 
-    private static final boolean DEFAULT_PROCESS_ADJECTIVES_ONLY = false;
+    public static final boolean DEFAULT_PROCESS_ADJECTIVES_ONLY = false;
 
 
     private static Logger log = LoggerFactory.getLogger(SentimentEngine.class);
@@ -156,10 +159,12 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
     protected void bindClassifier(SentimentClassifier classifier){
         log.info("  ... bind Sentiment Classifier {} for language {}",
             classifier.getClass().getSimpleName(),classifier.getLanguage());
-        SentimentClassifier old = classifiers.put(classifier.getLanguage(), classifier);
-        if(old != null){
-            log.warn("Replaced Sentiment Classifier for language {} (old: {}, new: {}",
-                new Object[]{old.getLanguage(),old,classifier});
+        synchronized (classifiers) {
+            SentimentClassifier old = classifiers.put(classifier.getLanguage(), classifier);
+            if(old != null){
+                log.warn("Replaced Sentiment Classifier for language {} (old: {}, new: {}",
+                    new Object[]{old.getLanguage(),old,classifier});
+            }
         }
     }
     /** unbind method for {@link #classifiers} */
@@ -285,41 +290,6 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
 //        } finally {
 //            ci.getLock().writeLock().unlock();
 //        }
-//        if(debugSentiments){
-//            Iterator<Sentence> sentences = analysedText.getSentences();
-//            if(sentences.hasNext()){
-//                while(sentences.hasNext()){
-//                    Sentence sent = sentences.next();
-//                    log.info("Sentence: {}", sent.getSpan());
-//                    tokens = sent.getTokens();
-//                    double positive = 0.0;
-//                    double negaitve = 0.0;
-//                    while (tokens.hasNext()){
-//                        Token token = tokens.next();
-//                        Value<SentimentTag> sentiment = token.getAnnotation(NlpAnnotations.sentimentAnnotation);
-//                        if(sentiment != null){
-//                            if(sentiment.value().isPositive()){
-//                                positive = positive+sentiment.probability();
-//                            } else {
-//                                negaitve = negaitve+sentiment.probability();
-//                            }
-//                            Value<PosTag> posTag = token.getAnnotation(NlpAnnotations.POSAnnotation);
-//                            log.info("   - {} '{}'[{}] - value: {}",
-//                                new Object []{
-//                                sentiment.value().isPositive()?"positive":"negative",
-//                                token.getSpan(),
-//                                posTag != null ? posTag.value(): "POS unknown",
-//                                sentiment.probability()
-//                                });
-//                        }
-//                    }
-//                    log.info(" > positive: {} | negative: {} | sum: {}",
-//                        new Object []{positive, negaitve, (positive - negaitve)});
-//                }
-//            } else {
-//                
-//            }
-//        }
     }
 
 
@@ -365,12 +335,6 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
                 "The configured minimum POS confidence value '"
                 +minPOSConfidence+"' MUST BE > 0 and < 1!");
         }
-        
-        //TODO: just for testing
-        value = properties.get(DEBUG_SENTIMENTS);
-        debugSentiments = value instanceof Boolean ? (Boolean)value :
-            value != null ? Boolean.parseBoolean(value.toString()) : 
-                false;
     }
     
     @Deactivate

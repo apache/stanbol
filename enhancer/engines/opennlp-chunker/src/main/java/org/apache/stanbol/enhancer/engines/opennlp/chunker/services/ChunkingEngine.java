@@ -60,12 +60,14 @@ import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
+import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
 import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -81,13 +83,19 @@ import org.slf4j.LoggerFactory;
  * The noun phrase detector requires a {@link org.apache.stanbol.enhancer.engines.opennlp.pos.model.POSContentPart} to
  * be present in the content item and will extend each {@link org.apache.stanbol.enhancer.engines.opennlp.pos.model.POSSentence}
  * with an array of chunks.
- * <p/>
- * Author: Sebastian Schaffert
+ * 
+ * @author Sebastian Schaffert
  */
-@Component(immediate = true, metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
+@Component(immediate = true, metatype = true, 
+    configurationFactory = true, //allow multiple instances to be configured
+    policy = ConfigurationPolicy.OPTIONAL) //create the default instance with the default config
 @Service
 @Properties(value={
-        @Property(name= EnhancementEngine.PROPERTY_NAME,value="chunker")
+        @Property(name=EnhancementEngine.PROPERTY_NAME,value="opennlp-chunker"),
+        @Property(name=ChunkingEngine.CONFIG_LANGUAGES,
+            value = {"de;model=OpenNLP_1.5.1-German-Chunker-TigerCorps07.zip","*"}),
+        @Property(name=ChunkingEngine.MIN_CHUNK_SCORE),
+        @Property(name=Constants.SERVICE_RANKING,intValue=-100) //give the default instance a ranking < 0
 })
 public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> {
 
@@ -95,19 +103,18 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
      * Language configuration. Takes a list of ISO language codes of supported languages. Currently supported
      * are the languages given as default value.
      */
-    @Property(value = {"de;OpenNLP_1.5.1-German-Chunker-TigerCorps07.zip","*"})
     public static final String CONFIG_LANGUAGES = "org.apache.stanbol.enhancer.chunker.languages";
 
-    @Property
     public static final String MIN_CHUNK_SCORE = "org.apache.stanbol.enhancer.chunker.minScore";
     
     public static final String[] AVAILABLE_LANGUAGES = new String[] {"en","de"};
 
+    private static final String MODEL_PARAM_NAME = "model";
 
     private static Logger log = LoggerFactory.getLogger(ChunkingEngine.class);
 
-
-    private Double minChunkScore;
+    private LanguageConfiguration languageConfiguration = new LanguageConfiguration(CONFIG_LANGUAGES, 
+        new String []{"de;"+MODEL_PARAM_NAME+"=OpenNLP_1.5.1-German-Chunker-TigerCorps07.zip","*"});
     
     @Reference
     private OpenNLP openNLP;
@@ -117,23 +124,7 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
      */
     private PhraseTagSetRegistry tagSetRegistry = PhraseTagSetRegistry.getInstance();
 
-    /**
-     * Holds as key explicitly enabled languages and as value the name of the
-     * OpenNLP model used for Chunking. If the value is <code>null</code> this
-     * indicates that the default model (
-     * provided by {@link OpenNLP#getChunkerModel(String)}) will be used.<p>
-     * NOTE: a configured language does not automatically mean that also the
-     * requested model is available.
-     */
-    private Map<String,String> configuredLanguages;
-    /**
-     * Languages that are explicitly excluded
-     */
-    private Set<String> excludedLanguages;
-    /**
-     * if '*' is used as language configuration
-     */
-    private boolean allowAll;
+    private Double minChunkScore;
 
 
     /**
@@ -378,62 +369,12 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
         }
         
         //read the language configuration
-        configuredLanguages = new HashMap<String,String>();
-        excludedLanguages = new HashSet<String>();
-        allowAll = false;
-        if(properties.get(CONFIG_LANGUAGES) != null) {
-            String[] languages = (String[])properties.get(CONFIG_LANGUAGES);
-
-            for(String lang : languages) {
-                String modelName;
-                int seperatorIndex = lang.indexOf(';');
-                if(seperatorIndex >= 0){
-                    if(seperatorIndex <lang.length()-2){
-                        modelName = lang.substring(seperatorIndex+1).trim();
-                    } else {
-                        modelName = null;
-                    }
-                    lang = lang.substring(0, seperatorIndex).trim();
-                } else {
-                    modelName = null;
-                }
-                if(lang.charAt(0) == '!'){ //exclude
-                    lang = lang.substring(1);
-                    if(configuredLanguages.containsKey(lang)){
-                        throw new ConfigurationException(CONFIG_LANGUAGES, 
-                            "Langauge '"+lang+"' is both included and excluded (config: "
-                            + Arrays.toString(languages)+"");
-                    }
-                    excludedLanguages.add(lang);
-                    if(modelName != null){
-                        log.warn("Parsed model names are ignored for excluded languages "
-                            + "(langauge: {}, modelName: {})!", lang,modelName);
-                    }
-                } else if("*".equals(lang)){
-                    allowAll = true;
-                    if(modelName != null){
-                        log.warn("A parsed model name is ignored for the wildcard "
-                            + "langauge (modelName: {})!", lang,modelName);
-                    }
-                } else if(!lang.isEmpty()){
-                    if(excludedLanguages.contains(lang)){
-                        throw new ConfigurationException(CONFIG_LANGUAGES, 
-                            "Langauge '"+lang+"' is both included and excluded (config: "
-                            + Arrays.toString(languages)+"");
-                    }
-                    configuredLanguages.put(lang,modelName);
-                }
-            }
-        } else {
-            allowAll = true;
-        }
+        languageConfiguration.setConfiguration(properties);
     }
     
     @Deactivate
     protected void deactivate(ComponentContext context){
-        this.allowAll = false;
-        this.configuredLanguages = null;
-        this.excludedLanguages = null;
+        this.languageConfiguration.setDefault();
         this.minChunkScore = null;
         super.deactivate(context);
     }
@@ -450,9 +391,7 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
      * language is not configured as beeing processed.
      */
     boolean isLangaugeConfigured(String language, boolean exception){
-        boolean state = allowAll ? 
-                (!excludedLanguages.contains(language)) : 
-                    configuredLanguages.containsKey(language);
+        boolean state = languageConfiguration.isLanguage(language);
         if(!state && exception){
             throw new IllegalStateException("Language "+language+" is not included "
                     + "by the LanguageConfiguration of this engine (name "+ getName()
@@ -465,7 +404,7 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
    
     private ChunkerME initChunker(String language) {
         isLangaugeConfigured(language, true); //check if the parsed language is ok
-        String modelName = configuredLanguages.get(language);
+        String modelName = languageConfiguration.getParameter(language, MODEL_PARAM_NAME);
         ChunkerModel model;
         try {
             if(modelName == null){ // the default model

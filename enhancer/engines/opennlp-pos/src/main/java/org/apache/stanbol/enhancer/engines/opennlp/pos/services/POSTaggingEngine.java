@@ -76,6 +76,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -85,14 +86,18 @@ import org.slf4j.LoggerFactory;
  * A german language POS tagger. Requires that the content item has a text/plain part and a
  * language id of "de". Adds a POSContentPart to the content item that can be used for further
  * processing by other modules.
- * <p/>
- * Author: Sebastian Schaffert
+ * 
+ * @author Sebastian Schaffert
  */
 
-@Component(immediate = true, metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
+@Component(immediate = true, metatype = true, 
+    configurationFactory = true, //allow multiple instances
+    policy = ConfigurationPolicy.OPTIONAL) //create a default instance with the default configuration
 @Service
 @Properties(value={
-        @Property(name= EnhancementEngine.PROPERTY_NAME,value="pos-tagger")
+        @Property(name= EnhancementEngine.PROPERTY_NAME,value="opennlp-pos"),
+        @Property(name=POSTaggingEngine.CONFIG_LANGUAGES, value = {"*"},cardinality=Integer.MAX_VALUE),
+        @Property(name=Constants.SERVICE_RANKING,intValue=-100) //give the default instance a ranking < 0
 })
 public class POSTaggingEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> {
 
@@ -101,17 +106,18 @@ public class POSTaggingEngine extends AbstractEnhancementEngine<RuntimeException
      * Language configuration. Takes a list of ISO language codes of supported languages. Currently supported
      * are the languages given as default value.
      */
-    @Property(value = {"en","de","da","es","sv","pt","nl"})
     public static final String CONFIG_LANGUAGES = "org.apache.stanbol.enhancer.pos.languages";
 
-
-    public static final String[] AVAILABLE_LANGUAGES = new String[] {"en","de","da","es","sv","pt","nl"};
+    /**
+     * The parameter name used to configure the name of the OpenNLP model used for pos tagging
+     */
+    private static final String MODEL_NAME_PARAM = "model";
 
 
     private static Logger log = LoggerFactory.getLogger(POSTaggingEngine.class);
 
     //Langauge configuration
-    private LanguageConfiguration languageConfig = new LanguageConfiguration(CONFIG_LANGUAGES, AVAILABLE_LANGUAGES);
+    private LanguageConfiguration languageConfig = new LanguageConfiguration(CONFIG_LANGUAGES,new String[]{"*"});
 //    private Set<String> configuredLanguages;
 //    private Set<String> excludedLanguages;
 //    private boolean allowAll;
@@ -391,8 +397,14 @@ public class POSTaggingEngine extends AbstractEnhancementEngine<RuntimeException
         return null;
     }
     private POSTagger getPOSTagger(String language) {
+        String modelName = languageConfig.getParameter(language,MODEL_NAME_PARAM);
         try {
-            POSModel model = openNLP.getPartOfSpeachModel(language);
+            POSModel model;
+            if(modelName == null){ //use the default
+                model = openNLP.getPartOfSpeachModel(language);
+            } else {
+                model = openNLP.getModel(POSModel.class, modelName, null);
+            }
             if(model != null) {
                 log.debug("POS Tagger Model {} for lanugage '{}' version: {}",
                     new Object[]{model.getClass().getSimpleName(), 
