@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.contenthub.web.resources;
 
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.OPTIONS;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
@@ -29,12 +31,14 @@ import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -49,8 +53,8 @@ import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.store.IndexingSource;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex;
-import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndexManager;
+import org.apache.stanbol.contenthub.index.solr.SolrSemanticIndex;
+import org.apache.stanbol.contenthub.index.solr.SolrSemanticIndexFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
@@ -71,14 +75,15 @@ public class LDPathSemanticIndexResource extends BaseStanbolResource {
 
     private static final Logger logger = LoggerFactory.getLogger(LDPathSemanticIndexResource.class);
 
-    private LDPathSemanticIndexManager programManager;
+    private SolrSemanticIndexFactory solrSemanticIndexFactory;
 
     public LDPathSemanticIndexResource(@Context ServletContext context) {
-        programManager = ContextHelper.getServiceFromContext(LDPathSemanticIndexManager.class, context);
-        if (programManager == null) {
-            logger.error("Missing LDPathSemanticIndexManager");
+        solrSemanticIndexFactory = ContextHelper.getServiceFromContext(SolrSemanticIndexFactory.class,
+            context);
+        if (solrSemanticIndexFactory == null) {
+            logger.error("Missing SolrSemanticIndexFactory");
             throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .entity("Missing LDPathSemanticIndexManager\n").build());
+                    .entity("Missing SolrSemanticIndexFactory\n").build());
         }
     }
 
@@ -86,6 +91,14 @@ public class LDPathSemanticIndexResource extends BaseStanbolResource {
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
         enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
+    @OPTIONS
+    @Path("/{pid}")
+    public Response handleCorsPreflightDeleteProgram(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers, DELETE, OPTIONS);
         return res.build();
     }
 
@@ -99,7 +112,7 @@ public class LDPathSemanticIndexResource extends BaseStanbolResource {
     }
 
     /**
-     * HTTP POST method which saves an {@link LDPathSemanticIndex} into the persistent store of Contenthub.
+     * HTTP POST method which creates a {@link SolrSemanticIndex} in the scope of Contenthub.
      * 
      * @param name
      *            The name identifying the index
@@ -122,61 +135,83 @@ public class LDPathSemanticIndexResource extends BaseStanbolResource {
      *            property of other implementations should be set higher than of this one
      * @param headers
      *            HTTP Headers
-     * @return HTTP OK(200) or BAD REQUEST(400)
+     * @return
      * @throws IndexManagementException
      * @throws InterruptedException
      * @throws IndexException
      */
     @POST
     @Consumes(APPLICATION_FORM_URLENCODED)
-    public Response submitProgram(@FormParam("name") String name,
-                                  @FormParam("description") String description,
-                                  @FormParam("program") String program,
-                                  @FormParam("indexContent") boolean indexContent,
-                                  @FormParam("batchSize") @DefaultValue("10") int batchsize,
-                                  @FormParam("indexingSourceName") @DefaultValue("contenthubFileStore") String indexingSourceName,
-                                  @FormParam("indexingSourceCheckPeriod") @DefaultValue("10") int indexingSourceCheckperiod,
-                                  @FormParam("solrCheckTime") @DefaultValue("5") int solrchecktime,
-                                  @FormParam("ranking") @DefaultValue("0") int ranking,
-                                  @Context ServletContext context,
-                                  @Context HttpHeaders headers) throws IndexManagementException,
-                                                               InterruptedException,
-                                                               IndexException {
+    public Response submitIndex(@FormParam("name") String name,
+                                @FormParam("description") String description,
+                                @FormParam("program") String program,
+                                @FormParam("indexContent") boolean indexContent,
+                                @FormParam("batchSize") @DefaultValue("10") int batchsize,
+                                @FormParam("indexingSourceName") @DefaultValue("contenthubFileStore") String indexingSourceName,
+                                @FormParam("indexingSourceCheckPeriod") @DefaultValue("10") int indexingSourceCheckperiod,
+                                @FormParam("solrCheckTime") @DefaultValue("5") int solrchecktime,
+                                @FormParam("ranking") @DefaultValue("0") int ranking,
+                                @Context ServletContext context,
+                                @Context HttpHeaders headers) throws IndexManagementException,
+                                                             InterruptedException,
+                                                             IndexException {
 
         Properties parameters = new Properties();
-        parameters.put(LDPathSemanticIndex.PROP_NAME, name);
-        parameters.put(LDPathSemanticIndex.PROP_DESCRIPTION, description);
-        parameters.put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM, program);
-        parameters.put(LDPathSemanticIndex.PROP_INDEX_CONTENT, indexContent);
-        parameters.put(LDPathSemanticIndex.PROP_BATCH_SIZE, batchsize);
-        parameters.put(LDPathSemanticIndex.PROP_INDEXING_SOURCE_NAME, indexingSourceName);
-        parameters.put(LDPathSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD, indexingSourceCheckperiod);
-        parameters.put(LDPathSemanticIndex.PROP_SOLR_CHECK_TIME, solrchecktime);
+        parameters.put(SolrSemanticIndex.PROP_NAME, name);
+        parameters.put(SolrSemanticIndex.PROP_DESCRIPTION, description);
+        parameters.put(SolrSemanticIndex.PROP_LD_PATH_PROGRAM, program);
+        parameters.put(SolrSemanticIndex.PROP_INDEX_CONTENT, indexContent);
+        parameters.put(SolrSemanticIndex.PROP_BATCH_SIZE, batchsize);
+        parameters.put(SolrSemanticIndex.PROP_INDEXING_SOURCE_NAME, indexingSourceName);
+        parameters.put(SolrSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD, indexingSourceCheckperiod);
+        parameters.put(SolrSemanticIndex.PROP_SOLR_CHECK_TIME, solrchecktime);
         parameters.put(Constants.SERVICE_RANKING, ranking);
-        programManager.createIndex(parameters);
-        ResponseBuilder rb = Response
-                .ok("LDPath program has been successfully saved and corresponding Solr Core has been successfully created.");
+        String pid = solrSemanticIndexFactory.createIndex(parameters);
+        ResponseBuilder rb = Response.ok(pid);
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+    /**
+     * HTTP DELETE method to delete an {@link SolrSemanticIndex}.
+     * 
+     * @param pid
+     *            The persistent identifier (pid) of the SolrSemanticIndex to be deleted
+     * @param headers
+     *            HTTP headers
+     * @return
+     * @throws IndexManagementException
+     */
+    @DELETE
+    @Path("/{pid}")
+    public Response deleteIndex(@PathParam(value = "pid") String pid, @Context HttpHeaders headers) throws IndexManagementException {
+        if (!solrSemanticIndexFactory.getSemanticIndexMetadataManager().isConfigured(pid)) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+        solrSemanticIndexFactory.removeIndex(pid);
+        ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
     // Helper methods for HTML view
     public Map<String,List<String>> getLdPrograms() {
-        Map<String,Properties> allIndexMetadata = programManager.getAllIndexMetadata();
+        Map<String,Properties> allIndexMetadata = solrSemanticIndexFactory.getSemanticIndexMetadataManager()
+                .getAllIndexMetadata();
         Map<String,List<String>> indexMetadataMap = new HashMap<String,List<String>>();
         for (Entry<String,Properties> indexMetadata : allIndexMetadata.entrySet()) {
             List<String> indexMetadataMapValues = new ArrayList<String>();
             Properties properties = indexMetadata.getValue();
-            indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_NAME).toString());
-            indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_DESCRIPTION).toString());
-            indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_INDEX_CONTENT).toString());
-            indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_BATCH_SIZE).toString());
-            indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_INDEXING_SOURCE_NAME)
+            indexMetadataMapValues.add(properties.get(SolrSemanticIndex.PROP_NAME).toString());
+            indexMetadataMapValues.add(properties.get(SolrSemanticIndex.PROP_DESCRIPTION).toString());
+            indexMetadataMapValues.add(properties.get(SolrSemanticIndex.PROP_INDEX_CONTENT).toString());
+            indexMetadataMapValues.add(properties.get(SolrSemanticIndex.PROP_BATCH_SIZE).toString());
+            indexMetadataMapValues
+                    .add(properties.get(SolrSemanticIndex.PROP_INDEXING_SOURCE_NAME).toString());
+            indexMetadataMapValues.add(properties.get(SolrSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD)
                     .toString());
-            indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD)
-                    .toString());
-            indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_SOLR_CHECK_TIME).toString());
-            indexMetadataMapValues.add(properties.get(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM).toString());
+            indexMetadataMapValues.add(properties.get(SolrSemanticIndex.PROP_SOLR_CHECK_TIME).toString());
+            indexMetadataMapValues.add(properties.get(SolrSemanticIndex.PROP_LD_PATH_PROGRAM).toString());
             indexMetadataMap.put(indexMetadata.getKey(), indexMetadataMapValues);
         }
         return indexMetadataMap;

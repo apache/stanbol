@@ -14,86 +14,61 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<#-- 
-  <h3>Uploading new content to the Contenthub</h3>
-
- 
-  <p>Contenthub lives at the endpoint starting with "contenthub":</p>
-  <code>${it.publicBaseUri}contenthub/</code>
-  <p>This endpoint automatically forwards to:</p>
-  <code>${it.publicBaseUri}contenthub/store/</code>
-
-  <p>The endpoint to which Contenthub automatically forwards includes the name of the default index,
-  whose name is "contenthub". That is the reason for two consecutive "contenthub"s in the endpoint.
-  Lastly, "store" page provides the storage related functionalities of Contenthub such as document submission.</p>
-
-  <p>You can upload content to the Contenthub for analysis with or without providing the content
-   id at your option:</p>
-  <ul>
-    <li><code>POST</code> content to <code>${it.publicBaseUri}contenthub/store/<strong>content-id</strong></code>
-     with <code>Content-Type: text/plain</code>.</li>
-    <li><code>GET</code> content with its enhancements from the same URL.</li>
-  </ul>
-  
-  <p><code><strong>content-id</strong></code> can be any valid URI and
-   will be used to fetch your item back later. <code><strong>content-id</strong></code>s are unique within Contenthub.</p>
-
-  <p>On a unix-ish box you can use run the following command from
-   the top-level source directory to populate the Stanbol Contenthub service with
-   sample content items:</p>
-
-  <pre>
-  for file in enhancer/data/text-examples/*.txt;
-  do
-    curl -i -X POST -H "Content-Type:text/plain" -T $file ${it.publicBaseUri}contenthub/store/$(basename $file);
-  done
-  </pre> 
-
-  Alternatively you can let the Stanbol Contenthub automatically build an id base on the SHA1
-  hash of the content by posting it at the root of the Contenthub.
-  <ul>
-    <li><code>POST</code> content to <code>${it.publicBaseUri}contenthub/store</code>
-     with <code>Content-Type: text/plain</code>.</li>
-  </ul>
-  
-  <p>For instance:</p>
-<pre>
-curl -i -X POST -H "Content-Type:text/plain" \
-     --data "The Stanbol enhancer can detect famous cities such as Paris." \
-     ${it.publicBaseUri}contenthub/store
-    
-HTTP/1.1 201 Created
-Location: ${it.publicBaseUri}contenthub/store/content/{<code><strong>content-id</strong><code>}
-Content-Length: 0
-Server: Jetty(6.1.x)
-</pre>
-
-<h3>Fetching back the original content item and the related enhancements from the Contenthub</h3>
-
-<p>Once the content is created in the Contenthub, you can fetch back either the original content, a HTML summary view or
-the extracted RDF metadata by dereferencing the URL:</p>
-
-<pre>
-curl -i <strong>-H "Accept: text/plain"</strong> ${it.publicBaseUri}contenthub/store/content/{<code><strong>content-id</strong><code>}
-
-HTTP/1.1 307 TEMPORARY_REDIRECT
-Location: ${it.publicBaseUri}contenthub/store/raw/{<code><strong>content-id</strong><code>}
-Content-Length: 0
-Server: Jetty(6.1.x)
-</pre>
-
-<p>
-Tutorials on Stanbol Contenthub can be found in the following links:<br/>
-<a href="http://incubator.apache.org/stanbol/docs/trunk/contenthub/">Contenhub - One Minute Tutorial</a><br/>
-<a href="http://incubator.apache.org/stanbol/docs/trunk/contenthub5min">Contenthub - Five Minutes Tutorial</a>
-</p>
--->
 <br>
 <h3>The RESTful API of the Contenthub Store</h3>
 
-<h3>Create a Content Item</h3>
+<h3>Create Content Item</h3>
 
-<h4>Create with raw content</h4>  
+<h4>Create ContentItem using multipart serialization</h4>  
+<table>
+<tbody>
+  <tr>
+    <th>Description</th>
+    <td>HTTP POST method to create a content item in Contenthub. This method takes a 
+    	<a href="http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/generic/servicesapi/src/main/java/org/apache/stanbol/enhancer/servicesapi/ContentItem.java">ContentItem</a> object
+      	directly. This means that the values provided for this service will be parsed by the multipart mime
+	    serialization of Content Items. (see the following links: <a href="http://incubator.apache.org/stanbol/docs/trunk/components/enhancer/contentitem.html#multipart_mime_serialization">Content Item Multipart Serialization</a> and 
+      	<a href="http://incubator.apache.org/stanbol/docs/trunk/components/enhancer/enhancerrest.html">Using the multi-part content item RESTful API extensions</a>)
+    </td>
+  </tr>
+  <tr>
+    <th>Request</th>
+    <td>POST /contenthub/store</td>
+  </tr>
+  <tr>
+    <th>Parameter</th>
+    <td><b>ci:</b> ContentItem to be stored</td>
+  </tr>
+  <tr>
+    <th>Produces</th>
+    <td>id of the newly created contentitem</td>
+  </tr>
+  <tr>
+    <th>Throws</th>
+    <td>
+      URISyntaxException<br>
+      StoreException
+    </td>
+  </tr>
+</tbody>
+</table>
+<h4>Example</h4>
+With following curl command, a ContentItem is created using the data specified in the <b>content</b> part.
+Also metadata of the ContentItem is set with the <b>metadata</b> part. Note that the name of the metadata file is set as the URI
+of the ContentItem.
+<div class="preParent">
+  <img onClick="javascript:getLine(this.parentNode);" class="copyImg" src="${it.staticRootUrl}/contenthub/images/copy_icon_16.png" title="Get command in a single line" />
+<pre>
+<div id="curl0" class="curlLine">curl -F "metadata=@/home/user/Desktop/urn:content-item-sha1-90a5f5ceaee67fb26d877df9bc56ed973f9cf058;type=application/rdf+xml" -F "content=I live in Paris.;type=text/plain" "http://localhost:8080/contenthub/store"<hr/></div>curl -F "metadata=@/home/user/Desktop/paris.txt;type=application/rdf+xml" \ 
+     -F "content=I live in Paris.;type=text/plain" \
+     "http://localhost:8080/contenthub/store"
+</pre>
+</div>
+
+<hr>
+
+
+<h4>Create ContentItem with raw content</h4>  
 <table>
 <tbody>
   <tr>
@@ -141,68 +116,28 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
 </pre>
 </div>
 
-<hr>
-
-<h4>Create with raw content and user specified uri</h4>
-<table>
-<tbody>
-  <tr>
-    <th>Description</th>
-    <td>HTTP POST method to create a content item in Contenthub. </td>
-  </tr>
-  <tr>
-    <th>Request</th>
-    <td>POST /contenthub/store/{uri}</td>
-  </tr>
-  <tr>
-    <th>Parameter</th>
-    <td>
-      <b>data:</b> Raw data of the content item<br>
-      <b>uri:</b>  URI for the content item. If not supplied, Contenthub automatically assigns a unique ID (uri) to the content item.
-    </td>
-  </tr>
-  <tr>
-    <th>Produces</th>
-    <td>Redirects to "contenthub/store/content/uri" which shows the content item in the HTML view.</td>
-  </tr>
-  <tr>
-    <th>Throws</th>
-    <td>
-      URISyntaxException<br>
-      EngineException<br>
-      StoreException
-    </td>
-  </tr>
-</tbody>
-</table>
-<h4>Example</h4>
-<div class="preParent">
-  <img onClick="javascript:getLine(this.parentNode);" class="copyImg" src="${it.staticRootUrl}/contenthub/images/copy_icon_16.png" title="Get command in a single line" />
-<pre>
-<div id="curl3" class="curlLine">curl -i -X POST -H "Content-Type:text/plain" --data @/home/user/Documents/test.txt http://localhost:8080/contenthub/store/example1234<hr/></div>curl -i -X POST -H "Content-Type:text/plain" \
-     --data @/home/user/Documents/test.txt \
-     http://localhost:8080/contenthub/store/example1234
-</pre>
-</div>
+A custom URI can also be specified for the the Content Item as a path parameter as in the example below:
 
 <div class="preParent">
   <img onClick="javascript:getLine(this.parentNode);" class="copyImg" src="${it.staticRootUrl}/contenthub/images/copy_icon_16.png" title="Get command in a single line" />
 <pre>
-<div id="curl4" class="curlLine">curl -i -X POST -H "Content-Type:text/plain" --data "I live in Paris." http://localhost:8080/contenthub/store/example1234<hr/></div>curl -i -X POST -H "Content-Type:text/plain" \
+<div id="curl4" class="curlLine">curl -i -X POST -H "Content-Type:text/plain" --data "I live in Paris." http://localhost:8080/contenthub/store/urn:content-item-exampleid1234<hr/></div>curl -i -X POST -H "Content-Type:text/plain" \
      --data "I live in Paris." \
-     http://localhost:8080/contenthub/store/example1234
+     http://localhost:8080/contenthub/store/urn:content-item-exampleid1234
 </pre>
 </div>
 
 <hr>
 
 
-<h4>Create with form elements</h4>
+<h4>Create ContentItem with form elements</h4>
 <table>
 <tbody>
   <tr>
     <th>Description</th>
-    <td>Creates a content item in Contenthub. This method requires the content to be text-based</td>
+    <td>Creates a content item in Contenthub based on the given parameters. The content is given either by raw text content or it is 
+    	fetched from a url.
+	</td>
   </tr>
   <tr>
     <th>Request</th>
@@ -213,7 +148,7 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
     <td>
       <b>content:</b> Actual content in text format. If this parameter is supplied, url is ommitted.<br>
       <b>url:</b> URL where the actual content resides. If this parameter is supplied (and content is <code>null</code>, then the content is retrieved from this url.<br>
-      <b>constraints:</b> Constraints in JSON format. Constraints are used to add supplementary metadata to the content item. For example, author of the content item may be supplied as {author: "John Doe"}. Then, this constraint is added to the Solr and will be indexed if the corresponding Solr schema includes the author field. Solr indexed can be created/adjusted through LDPath programs.<br>
+      <b>constraints:</b> Constraints in JSON format. Constraints are used to add supplementary metadata to the content item. For example, author of the content item may be supplied as {author:"John Doe"}. All constraints are expected to be passed as field value pairs in the JSON object. During the execution of this method, they are transformed into an RDF graph and that graph is added as an additional content part of the content item.<br>
       <b>title:</b> The title for the content item. Titles can be used to present summary of the actual content. For example, search results are presented by showing the titles of resultant content items.<br>
     </td>
   </tr>
@@ -238,58 +173,8 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
 <div class="preParent">
   <img onClick="javascript:getLine(this.parentNode);" class="copyImg" src="${it.staticRootUrl}/contenthub/images/copy_icon_16.png" title="Get command in a single line" />
 <pre>
-<div id="curl5" class="curlLine">curl -i -X POST --data "content=Paris is the capital of France&constraints={type:city}&title=Paris" http://localhost:8080/contenthub/store<hr/></div>curl -i -X POST --data \
-     "content=Paris is the capital of France&constraints={type:city}&title=Paris" \
-     http://localhost:8080/contenthub/store
-</pre>
-</div>
-
-<hr>
-
-
-<h4>Create with file</h4>  
-<table>
-<tbody>
-  <tr>
-    <th>Description</th>
-    <td>HTTP POST method to create a content item from file. File is read and loaded as the actual content.</td>
-  </tr>
-  <tr>
-    <th>Request</th>
-    <td>POST /contenthub/store</td>
-  </tr>
-  <tr>
-    <th>Parameter</th>
-    <td>
-      <b>file:</b> File which contains the content for the content item.<br>
-      <b>disposition:</b> Additional information about the file parameter<br>
-      <b>jsonCons:</b> Constraints in JSON format. Constraints are used to add supplementary metadata to the content item. For example, author of the content item may be supplied as {author: "John Doe"}. Then, this constraint is added to the Solr and will be indexed if the corresponding Solr schema includes the author field. Solr indexed can be created/adjusted through LDPath programs.<br>
-      <b>title:</b> The title for the content item. Titles can be used to present summary of the actual content. For example, search results are presented by showing the titles of resultant content items.<br>
-    </td>
-  </tr>
-  <tr>
-    <th>Produces</th>
-    <td>Redirects to "contenthub/store/content/{uri}" which shows the content item in the HTML view.</td>
-  </tr>
-  <tr>
-    <th>Throws</th>
-    <td>
-      URISyntaxException<br>
-      EngineException<br>
-      MalformedURLException<br>
-      IOException<br>
-      StoreException
-    </td>
-  </tr>
-</tbody>
-</table>
-<h4>Example</h4>
-<div class="preParent">
-  <img onClick="javascript:getLine(this.parentNode);" class="copyImg" src="${it.staticRootUrl}/contenthub/images/copy_icon_16.png" title="Get command in a single line" />
-<pre>
-<div id="curl6" class="curlLine">curl -i -F "file=@/home/mrc/Desktop/test.txt" -F "constraints={type:city}" -F "title=Paris" http://localhost:8080/contenthub/store<hr/></div>curl -i -F "file=@/home/mrc/Desktop/test.txt" \
-        -F "constraints={type:city}" \ 
-        -F "title=Paris" \
+<div id="curl5" class="curlLine">curl -i -X POST --data "content=Paris is the capital of France&constraints={author:"John\ Doe"}&title=Paris" http://localhost:8080/contenthub/store<hr/></div>curl -i -X POST --data \
+     "content=Paris is the capital of France&constraints={author:"John\ Doe"}&title=Paris" \
      http://localhost:8080/contenthub/store
 </pre>
 </div>
@@ -323,7 +208,7 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
 </tbody>
 </table>
 <h4>Example</h4>
-<pre>curl -i -X DELETE http://localhost:8080/contenthub/store/example-uri-1234</pre>
+<pre>curl -i -X DELETE http://localhost:8080/contenthub/store/urn:content-item-exampleid1234</pre>
 
 <hr>
 
@@ -335,7 +220,13 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
 <tbody>
   <tr>
     <th>Description</th>
-    <td>Cool URI handler for the uploaded resource.</td>
+    <td>Cool URI handler for the uploaded resource. Based on the Accept header this service redirects the incoming request to different endpoints in the following way:
+    	<ul>
+    		<li>If the Accept header contains the "text/html" value it is the request is redirected to the <b>page</b> endpoint so that an HTML document is drawn.</li>
+      		<li>If the Accept header one of the RDF serialization formats defined {@link SupportedFormat} annotation, the request is redirected to the <b>metadata</b> endpoint.</li>
+      		<li>If the previous two conditions are not satisfied the request is redirected to the <b>raw</b> endpoint.</li>
+      	</ul>
+    </td>
   </tr>
   <tr>
     <th>Request</th>
@@ -343,65 +234,29 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
   </tr>
   <tr>
     <th>Parameter</th>
-    <td><b>uri:</b> The URI of the resource in the Stanbol Contenthub store</td>
+    <td><b>uri:</b> The URI of the resource in the Stanbol Contenthub</td>
   </tr>
   <tr>
     <th>Produces</th>
-    <td>Depending on requested media type, it can produce HTML, RDF or raw binary content</td>
+    <td>Depending on requested media type, return a redirection to either a browser view, the RDF metadata or the raw binary content</td>
   </tr>
 </tbody>
 </table>
+
 <h4>Example</h4>
 <pre>curl -i http://localhost:8080/contenthub/store/content/uri-234231</pre>
 
 <hr>
-
-
-<h4>Subresource /download</h4>
-<table>
-<tbody>
-  <tr>
-    <th>Description</th>
-    <td>Raw data or metadata of the content item can be downloaded.</td>
-  </tr>
-  <tr>
-    <th>Request</th>
-    <td>GET /contenthub/store/download/{type}/{uri}</td>
-  </tr>
-  <tr>
-    <th>Parameter</th>
-    <td>
-      <b>type: </b>It can be <code> "metadata"</code> or <code> "raw"</code>. Based on the type, related parts of the content item will be prepared for download.<br>
-      <b>uri: </b>URI of the resource in the Stanbol Contenthub store.<br>
-      <b>format: </b>Rdf serialization format of metadata.
-    </td>
-  </tr>
-  <tr>
-    <th>Produces</th>
-    <td>200 with a file containing metadata or raw data of the content item</td>
-  </tr>
-  <tr>
-    <th>Throws</th>
-    <td>
-      IOException<br/>
-      StoreException
-    </td>
-  </tr>
-</tbody>
-</table>
-<h4>Example</h4>
-<pre>curl http://localhost:8080/contenthub/store/download/metadata/5d85e7c63cc48c0985?format=application%2Fjson</pre>
-<pre>curl http://localhost:8080/contenthub/store/download/raw/5d85e7c63cc48c01b8d4</pre>
-
-<hr>
-
 
 <h4>Subresource /metadata</h4>  
 <table>
 <tbody>
   <tr>
     <th>Description</th>
-    <td>Retrieves the metadata of the content item. Generally, metadata contains the enhancements of the content item.</td>
+    <td>HTTP GET method to retrieve or download the metadata i.e enhancements of the content item. If the
+		Accept header is compatible with the <b>text/html</b> value the metadata is serialized and included in
+		the response using the specified format type, otherwise the metadata is returned as a multipart object.
+	</td>
   </tr>
   <tr>
     <th>Request</th>
@@ -409,11 +264,14 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
   </tr>
   <tr>
     <th>Parameter</th>
-    <td><b>uri:</b> The URI of the resource in the Stanbol Contenthub store</td>
+    <td>
+      <b>uri:</b> The URI of the resource in the Stanbol Contenthub store<br>
+      <b>format: </b>Rdf serialization format of metadata.
+    </td>
   </tr>
   <tr>
     <th>Produces</th>
-    <td>200 with RDF representation of the metadata of the content item.</td>
+    <td>text/html or application/octet-stream, according to the accept header</td>
   </tr>
   <tr>
     <th>Throws</th>
@@ -425,7 +283,8 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
 </tbody>
 </table>
 <h4>Example</h4>
-<pre>curl http://localhost:8080/contenthub/store/metadata/sha1-5d85e7c63cc48c01</pre>
+<pre>curl -i -H "Accept:text/html" http://localhost:8080/contenthub/store/metadata/sha1-5d85e7c63cc48c01</pre>
+<pre>curl -i -H "Accept:application/octet-stream" http://localhost:8080/contenthub/store/metadata/5d85e7c63cc48c0985?format=application%2Fjson</pre>
 <hr>
 
 
@@ -434,7 +293,10 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
 <tbody>
   <tr>
     <th>Description</th>
-    <td>Retrieve the raw content item</td>
+    <td>HTTP GET method to retrieve or download the raw content item. If the Accept header is compatible with
+      	the <b>text/html</b> value the raw content of the ContentItem included in the response with the
+      	<b>text/plain</b> type, otherwise the content is returned as a multipart object.
+  	</td>
   </tr>
   <tr>
     <th>Request</th>
@@ -446,7 +308,7 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
   </tr>
   <tr>
     <th>Produces</th>
-    <td>200 with the raw data of the content item</td>
+    <td>text/html or application/octet-stream, according to the accept header</td>
   </tr>
   <tr>
     <th>Throws</th>
@@ -458,7 +320,8 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
 </tbody>
 </table>
 <h4>Example</h4>
-<pre>curl http://localhost:8080/contenthub/store/raw/testuri2343124</pre>
+<pre>curl -i -H "Accept:text/html" http://localhost:8080/contenthub/store/raw/testuri2343124</pre>
+<pre>curl -i -H "Accept:application/octet-stream" http://localhost:8080/contenthub/store/raw/testuri2343124</pre>
 
 <hr>
 

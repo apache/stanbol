@@ -57,7 +57,7 @@
     </div>
   </div>
 
-  <h3>Submit Constraints to Content Item for analysis</h3>
+  <h3>Submit additional constraints to Content Item</h3>
   <fieldset>
     <legend>Give Field:Value for your content</legend>
     <input type="text" id="fieldTitle" value="title" readonly="readonly"/> : <input type="text" id="valueTitle" />
@@ -92,7 +92,7 @@
     </fieldset>
   </form>
 
-  <form method="POST" id="fileForm" accept-charset="utf-8"  enctype="multipart/form-data" onSubmit = "return setConstraints();">
+  <form method="POST" action="store/file" id="fileForm" accept-charset="utf-8"  enctype="multipart/form-data" onSubmit = "return setConstraints();">
     <fieldset>
       <input type="hidden" id="constraintsFile" name="constraints" value="" />
       <input type="hidden" name="title" value="" />

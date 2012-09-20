@@ -77,6 +77,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -94,6 +95,7 @@ import org.apache.stanbol.commons.semanticindex.store.StoreException;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.store.file.FileStore;
+import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -114,7 +116,6 @@ import org.slf4j.LoggerFactory;
 import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
-import com.sun.jersey.multipart.FormDataParam;
 
 /**
  * Resource to provide a CRU[D] REST API for content items and there related enhancements.
@@ -192,11 +193,6 @@ public class StoreResource extends BaseStanbolResource {
         }
     }
 
-    /**
-     * 
-     * @param context
-     * @param uriInfo
-     */
     public StoreResource(@Context ServletContext context, @Context UriInfo uriInfo) {
         BundleContext bundleContext = ContextHelper.getBundleContext(context);
         if (bundleContext == null) {
@@ -261,14 +257,6 @@ public class StoreResource extends BaseStanbolResource {
     }
 
     @OPTIONS
-    @Path("/download/{type}/{uri:.+}")
-    public Response handleCorsPreflightDownload(@Context HttpHeaders headers) {
-        ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
-        return res.build();
-    }
-
-    @OPTIONS
     @Path("/metadata/{uri:.+}")
     public Response handleCorsPreflightMetadata(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
@@ -297,9 +285,18 @@ public class StoreResource extends BaseStanbolResource {
      */
 
     /**
-     * Cool URI handler for the uploaded resource.
+     * Cool URI handler for the uploaded resource. Based on the Accept header this service redirects the
+     * incoming request to different endpoints in the following way:
+     * <ul>
+     * <li>If the Accept header contains the "text/html" value it is the request is redirected to the
+     * <b>page</b> endpoint so that an HTML document is drawn.</li>
+     * <li>If the Accept header one of the RDF serialization formats defined {@link SupportedFormat}
+     * annotation, the request is redirected to the <b>metadata</b> endpoint.</li>
+     * <li>If the previous two conditions are not satisfied the request is redirected to the <b>raw</b>
+     * endpoint.</li>
+     * </ul>
      * 
-     * @param contentURI
+     * @param uri
      *            The URI of the resource in the Stanbol Contenthub store
      * @param headers
      *            HTTP headers
@@ -307,9 +304,12 @@ public class StoreResource extends BaseStanbolResource {
      */
     @GET
     @Path("/content/{uri:.+}")
-    public Response getContent(@PathParam(value = "uri") String contentURI, @Context HttpHeaders headers) throws StoreException {
-
-        ContentItem ci = store.get(contentURI);
+    public Response getContent(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws StoreException {
+        if (uri == null || uri.isEmpty()) {
+            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                    .entity("uri parameter should be set correctly").build());
+        }
+        ContentItem ci = store.get(uri);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
@@ -317,8 +317,8 @@ public class StoreResource extends BaseStanbolResource {
         // handle smart redirection to browser view
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (mt.toString().startsWith(TEXT_HTML)) {
-                URI pageUri = uriInfo.getBaseUriBuilder().path("/contenthub").path("store/page")
-                        .path(contentURI).build();
+                URI pageUri = uriInfo.getBaseUriBuilder().path("/contenthub").path("store/page").path(uri)
+                        .build();
                 ResponseBuilder rb = Response.temporaryRedirect(pageUri);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
@@ -329,45 +329,57 @@ public class StoreResource extends BaseStanbolResource {
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (RDF_MEDIA_TYPES.contains(mt.toString())) {
                 URI metadataUri = uriInfo.getBaseUriBuilder().path("/contenthub").path("store/metadata")
-                        .path(contentURI).build();
+                        .path(uri).build();
                 ResponseBuilder rb = Response.temporaryRedirect(metadataUri);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             }
         }
-        URI rawUri = uriInfo.getBaseUriBuilder().path("/contenthub").path("store/raw").path(contentURI)
-                .build();
+        URI rawUri = uriInfo.getBaseUriBuilder().path("/contenthub").path("store/raw").path(uri).build();
         ResponseBuilder rb = Response.temporaryRedirect(rawUri);
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
     /**
-     * HTTP GET method specific for download operations. Raw data (content item) or only metadata of the
-     * content item can be downloaded.
+     * HTTP GET method to retrieve or download the metadata i.e enhancements of the content item. If the
+     * Accept header is compatible with the <b>text/html</b> value the metadata is serialized and included in
+     * the response using the specified format type, otherwise the metadata is returned as a multipart object.
      * 
-     * @param type
-     *            Type can be {@code "metadata"} or {@code "raw"}. Based on the type, related parts of the
-     *            content item will be prepared for download.
-     * @param contentURI
+     * @param uri
      *            URI of the resource in the Stanbol Contenthub store
-     * @return Raw content item or metadata of the content item.
+     * @param format
+     *            serialization format of contentitem metadata
+     * @return RDF representation of the metadata of the content item.
      * @throws IOException
      * @throws StoreException
      */
     @GET
-    @Path("/download/{type}/{uri:.+}")
-    public Response downloadContentItem(@PathParam(value = "type") String type,
-                                        @PathParam(value = "uri") String contentURI,
-                                        @QueryParam(value = "format") String format,
-                                        @Context HttpHeaders headers) throws IOException, StoreException {
+    @Path("/metadata/{uri:.+}")
+    @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_OCTET_STREAM})
+    public Response getContentItemMetaData(@PathParam(value = "uri") String uri,
+                                           @QueryParam(value = "format") @DefaultValue(SupportedFormat.RDF_XML) String format,
+                                           @Context HttpHeaders headers) throws IOException, StoreException {
 
-        ContentItem ci = store.get(contentURI);
+        if (uri == null || uri.isEmpty()) {
+            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                    .entity("uri parameter should be set correctly").build());
+        }
+        ContentItem ci = store.get(uri);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-        if (type.equals("metadata")) {
-            String fileName = URLEncoder.encode(contentURI, "utf-8") + "-metadata";
+
+        MediaType acceptedHeader = RestUtil.getAcceptedMediaType(headers);
+        if (acceptedHeader.isCompatible(MediaType.TEXT_HTML_TYPE)) {
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            serializer.serialize(out, ci.getMetadata(), format);
+            ResponseBuilder rb = Response.ok(out.toString(), "text/plain");
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
+        } else {
+            String fileName = URLEncoder.encode(uri, "utf-8") + "-metadata";
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             serializer.serialize(baos, ci.getMetadata(), format);
             InputStream is = new ByteArrayInputStream(baos.toByteArray());
@@ -377,49 +389,15 @@ public class StoreResource extends BaseStanbolResource {
             response.type("text/plain");
             addCORSOrigin(servletContext, response, headers);
             return response.build();
-        } else if (type.equals("raw")) {
-            String fileName = URLEncoder.encode(contentURI, "utf-8") + "-raw";
-            ResponseBuilder response = Response.ok((Object) ci.getStream());
-            response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-            response.type(ci.getMimeType());
-            addCORSOrigin(servletContext, response, headers);
-            return response.build();
-        } else {
-            throw new WebApplicationException(404);
         }
-
     }
 
     /**
-     * HTTP GET method to retrieve the metadata of the content item. Generally, metadata contains the
-     * enhancements of the content item.
+     * HTTP GET method to retrieve or download the raw content item. If the Accept header is compatible with
+     * the <b>text/html</b> value the raw content of the ContentItem included in the response with the
+     * <b>text/plain</b> type, otherwise the content is returned as a multipart object.
      * 
-     * @param contentURI
-     *            URI id of the resource in the Stanbol Contenthub store
-     * @return RDF representation of the metadata of the content item.
-     * @throws IOException
-     * @throws StoreException
-     */
-    @GET
-    @Path("/metadata/{uri:.+}")
-    public Response getContentItemMetaData(@PathParam(value = "uri") String contentURI,
-                                           @Context HttpHeaders headers) throws IOException, StoreException {
-        ContentItem ci = store.get(contentURI);
-        if (ci == null) {
-            throw new WebApplicationException(404);
-        }
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        serializer.serialize(out, ci.getMetadata(), SupportedFormat.RDF_XML);
-        ResponseBuilder rb = Response.ok(out.toString(), "text/plain");
-        addCORSOrigin(servletContext, rb, headers);
-        return rb.build();
-    }
-
-    /**
-     * HTTP GET method to retrieve the raw content item.
-     * 
-     * @param contentURI
+     * @param uri
      *            URI of the resource in the Stanbol Contenthub store
      * @return Raw data of the content item.
      * @throws IOException
@@ -427,20 +405,65 @@ public class StoreResource extends BaseStanbolResource {
      */
     @GET
     @Path("/raw/{uri:.+}")
-    public Response getRawContent(@PathParam(value = "uri") String contentURI, @Context HttpHeaders headers) throws IOException,
-                                                                                                            StoreException {
-        ContentItem ci = store.get(contentURI);
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_OCTET_STREAM})
+    public Response getRawContent(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws IOException,
+                                                                                                     StoreException {
+        if (uri == null || uri.isEmpty()) {
+            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                    .entity("uri parameter should be set correctly").build());
+        }
+        ContentItem ci = store.get(uri);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-        ResponseBuilder rb = Response.ok(ci.getStream(), ci.getMimeType());
-        addCORSOrigin(servletContext, rb, headers);
-        return rb.build();
+
+        MediaType acceptedHeader = RestUtil.getAcceptedMediaType(headers);
+        if (acceptedHeader.isCompatible(MediaType.TEXT_PLAIN_TYPE)) {
+            ResponseBuilder rb = Response.ok(ci.getStream(), ci.getMimeType());
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
+        } else {
+            String fileName = URLEncoder.encode(uri, "utf-8") + "-raw";
+            ResponseBuilder response = Response.ok((Object) ci.getStream());
+            response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            response.type(ci.getMimeType());
+            addCORSOrigin(servletContext, response, headers);
+            return response.build();
+        }
     }
 
     /*
      * Services for content item creation
      */
+    /**
+     * HTTP POST method to create a content item in Contenthub. This method takes a {@link ContentItem} object
+     * directly. This means that the values provided for this service will be parsed by the multipart mime
+     * serialization of Content Items. (see the following links: <a href=
+     * "http://incubator.apache.org/stanbol/docs/trunk/components/enhancer/contentitem.html#multipart_mime_serialization"
+     * >Content Item Multipart Serialization</a> and <a
+     * href="http://incubator.apache.org/stanbol/docs/trunk/components/enhancer/enhancerrest.html">Using the
+     * multi-part content item RESTful API extensions</a>)
+     * 
+     * @param ci
+     *            {@link ContentItem} to be stored.
+     * @param headers
+     *            HTTP Headers
+     * @return id of the newly created contentitem
+     * @throws StoreException
+     * @throws URISyntaxException
+     */
+    @POST
+    @Consumes(MULTIPART_FORM_DATA)
+    public Response createContentItem(ContentItem ci, @Context HttpHeaders headers) throws StoreException,
+                                                                                   URISyntaxException {
+        store.put(ci);
+
+        // use an redirect to point browsers to newly created content
+        ResponseBuilder rb = Response.created(new URI(ci.getUri().getUnicodeString()));
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
     /**
      * HTTP POST method to create a content item in Contenthub. This is the very basic method to create the
      * content item. The payload of the POST method should include the raw data of the content item to be
@@ -465,7 +488,8 @@ public class StoreResource extends BaseStanbolResource {
     }
 
     /**
-     * HTTP POST method to create a content item in Contenthub.
+     * HTTP POST method to create a content item in Contenthub. The payload of the POST method should include
+     * the raw data of the content item to be created.
      * 
      * @param contentURI
      *            URI for the content item. If not supplied, Contenthub automatically assigns a unique ID
@@ -490,21 +514,29 @@ public class StoreResource extends BaseStanbolResource {
         return createEnhanceAndRedirect(data, headers.getMediaType(), contentURI, headers);
     }
 
+    private Response createEnhanceAndRedirect(byte[] data,
+                                              MediaType mediaType,
+                                              String contentURI,
+                                              HttpHeaders headers) throws EngineException,
+                                                                  URISyntaxException,
+                                                                  StoreException {
+        return createEnhanceAndRedirect(data, mediaType, contentURI, false, null, null, headers);
+    }
+
     /**
-     * HTTP POST method to create a content item in Contenthub. This method requires the content to be
-     * text-based.
+     * HTTP POST method to create a content item in Contenthub.
      * 
      * @param content
-     *            Actual content in text format. If this parameter is supplied, {@link url} is ommitted.
+     *            Actual content. If this parameter is supplied, {@link url} is ommitted.
      * @param url
      *            URL where the actual content resides. If this parameter is supplied (and {@link content} is
      *            {@code null}, then the content is retrieved from this url.
      * @param constraints
      *            Constraints in JSON format. Constraints are used to add supplementary metadata to the
      *            content item. For example, author of the content item may be supplied as {author:
-     *            "John Doe"}. Then, this constraint is added to the Solr and will be indexed if the
-     *            corresponding Solr schema includes the author field. Solr indexed can be created/adjusted
-     *            through LDPath programs.
+     *            "John Doe"}. All constraints are expected to be passed as field value pairs in the JSON
+     *            object. During the execution of this method, they are transformed into an RDF graph and that
+     *            graph is added as an additional content part of the content item.
      * @param title
      *            The title for the content item. Titles can be used to present summary of the actual content.
      *            For example, search results are presented by showing the titles of resultant content items.
@@ -532,46 +564,6 @@ public class StoreResource extends BaseStanbolResource {
         return createContentItemFromForm(content, url, null, null, null, headers, constraints, title);
     }
 
-    /**
-     * HTTP POST method to create a content item from file. File is read and loaded as the actual content.
-     * 
-     * @param file
-     *            {@link File} which contains the content for the content item.
-     * @param disposition
-     *            Additional information about the {@link file} parameter
-     * @param constraints
-     *            Constraints in JSON format. Constraints are used to add supplementary metadata to the
-     *            content item. For example, author of the content item may be supplied as {author:
-     *            "John Doe"}. Then, this constraint is added to the Solr and will be indexed if the
-     *            corresponding Solr schema includes the author field. Solr indexed can be created/adjusted
-     *            through LDPath programs.
-     * @param title
-     *            The title for the content item. Titles can be used to present summary of the actual content.
-     *            For example, search results are presented by showing the titles of resultant content items.
-     * @param headers
-     *            HTTP headers (optional)
-     * @return Redirects to "contenthub/store/content/uri" which shows the content item in the HTML view.
-     * @throws URISyntaxException
-     * @throws EngineException
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws StoreException
-     */
-    @POST
-    @Consumes(MULTIPART_FORM_DATA)
-    public Response createContentItemFromForm(@FormDataParam("file") File file,
-                                              @FormDataParam("file") FormDataContentDisposition disposition,
-                                              @FormDataParam("file") FormDataBodyPart body,
-                                              @FormDataParam("constraints") String constraints,
-                                              @FormDataParam("title") String title,
-                                              @Context HttpHeaders headers) throws URISyntaxException,
-                                                                           EngineException,
-                                                                           MalformedURLException,
-                                                                           IOException,
-                                                                           StoreException {
-        return createContentItemFromForm(null, null, file, disposition, body, headers, constraints, title);
-    }
-
     private Response createContentItemFromForm(String content,
                                                String url,
                                                File file,
@@ -584,8 +576,7 @@ public class StoreResource extends BaseStanbolResource {
                                                             MalformedURLException,
                                                             IOException,
                                                             StoreException {
-        byte[] data = null; // TODO: rewrite me in a streamable way to avoid
-        // buffering all the content in memory
+        byte[] data = null;
         MediaType mt = null;
         if (content != null && !content.trim().isEmpty()) {
             data = content.getBytes();
@@ -596,8 +587,8 @@ public class StoreResource extends BaseStanbolResource {
                 data = IOUtils.toByteArray(uc.getInputStream());
                 mt = MediaType.valueOf(uc.getContentType());
             } catch (IOException e) {
-                // TODO: collect remote resource error message for user friendly
-                // feedback
+                throw new WebApplicationException(e, Response.serverError()
+                        .entity("Failed to obtain content from the given URL").build());
             }
         } else if (file != null) {
             mt = body.getMediaType();
@@ -611,7 +602,6 @@ public class StoreResource extends BaseStanbolResource {
             String uri = ContentItemHelper.makeDefaultUrn(data).getUnicodeString();
             return createEnhanceAndRedirect(data, mt, uri, true, constraints, title, headers);
         } else {
-            // TODO: add user-friendly feedback on empty requests from a form
             ResponseBuilder rb = Response.seeOther(new URI("/contenthub/store"));
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
@@ -650,10 +640,16 @@ public class StoreResource extends BaseStanbolResource {
                         throw new StoreException(String.format("Undefined namespace in predicate: %s",
                             predicate));
                     }
-                    JSONArray jsonArray = cons.getJSONArray(key);
-                    for (int i = 0; i < jsonArray.length(); i++) {
+                    Object value = cons.get(key);
+                    if (value instanceof JSONArray) {
+                        JSONArray jsonArray = cons.getJSONArray(key);
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            g.add(new TripleImpl(uri, new UriRef(predicate), LiteralFactory.getInstance()
+                                    .createTypedLiteral(inferObjectType(jsonArray.get(i)))));
+                        }
+                    } else if (value instanceof String) {
                         g.add(new TripleImpl(uri, new UriRef(predicate), LiteralFactory.getInstance()
-                                .createTypedLiteral(inferObjectType(jsonArray.get(i)))));
+                                .createTypedLiteral(inferObjectType(cons.getString(key)))));
                     }
                 }
                 ci.addPart(FileStore.CONSTRAINTS_URI, g);
@@ -714,15 +710,6 @@ public class StoreResource extends BaseStanbolResource {
         ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
-    }
-
-    private Response createEnhanceAndRedirect(byte[] data,
-                                              MediaType mediaType,
-                                              String contentURI,
-                                              HttpHeaders headers) throws EngineException,
-                                                                  URISyntaxException,
-                                                                  StoreException {
-        return createEnhanceAndRedirect(data, mediaType, contentURI, false, null, null, headers);
     }
 
     private Object inferObjectType(Object val) {
@@ -800,8 +787,8 @@ public class StoreResource extends BaseStanbolResource {
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-        return new ContentItemResource(contentURI, ci, uriInfo, "/contenthub/store/download", tcManager,
-                serializer, servletContext);
+        return new ContentItemResource(contentURI, ci, uriInfo, "/contenthub/store", tcManager, serializer,
+                servletContext);
     }
 
     // Helper methods for HTML view
