@@ -215,7 +215,7 @@ public final class NIFHelper {
     }
     
     /**
-     * Writes the {@link NlpAnnotations#POSAnnotation} as NIF 1.0 to the parsed
+     * Writes the {@link NlpAnnotations#POS_ANNOTATION} as NIF 1.0 to the parsed
      * RDF graph by using the parsed segmentUri as subject
      * @param graph the graph
      * @param annotated the annotated element (e.g. a {@link Token})
@@ -223,7 +223,7 @@ public final class NIFHelper {
      * annotated element in the graph
      */
     public static void writePos(MGraph graph, Annotated annotated, UriRef segmentUri) {
-        Value<PosTag> posTag = annotated.getAnnotation(NlpAnnotations.POSAnnotation);
+        Value<PosTag> posTag = annotated.getAnnotation(NlpAnnotations.POS_ANNOTATION);
         if(posTag != null){
             if(posTag.value().getCategory() != null){
                 graph.add(new TripleImpl(segmentUri, SsoOntology.oliaLink.getUri(), 
@@ -237,7 +237,7 @@ public final class NIFHelper {
     }    
     
     /**
-     * Writes a {@link NlpAnnotations#phraseAnnotation} as NIF 1.0 to the
+     * Writes a {@link NlpAnnotations#PHRASE_ANNOTATION} as NIF 1.0 to the
      * parsed RDF graph by using the segmentUri as subject
      * @param graph the graph
      * @param annotated the annotated element (e.g. a {@link Chunk})
@@ -245,7 +245,7 @@ public final class NIFHelper {
      * annotated element in the graph
      */
     public static void writePhrase(MGraph graph, Annotated annotated, UriRef segmentUri) {
-        Value<PhraseTag> phraseTag = annotated.getAnnotation(NlpAnnotations.phraseAnnotation);
+        Value<PhraseTag> phraseTag = annotated.getAnnotation(NlpAnnotations.PHRASE_ANNOTATION);
         if(phraseTag != null){
             UriRef phraseTypeUri = LEXICAL_TYPE_TO_PHRASE_TYPE.get(phraseTag.value().getCategory());
             if(phraseTypeUri != null){ //add the oliaLink for the Phrase

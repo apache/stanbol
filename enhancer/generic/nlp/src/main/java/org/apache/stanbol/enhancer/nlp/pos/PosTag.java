@@ -7,7 +7,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 
 /**
  * An POS (part-of-speech) tag typically assigned by an POS-Tagger (an
- * NLP component) to a {@link Token} by using the {@link POS#POSAnnotation}<p>
+ * NLP component) to a {@link Token} by using the {@link POS#POS_ANNOTATION}<p>
  * The only required field is {@link #getTag()} - the string tag assigned by
  * the POS Tagger.<p>
  * PosTags can be mapped to a {@link LexicalCategory} and be part of an

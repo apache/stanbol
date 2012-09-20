@@ -16,7 +16,7 @@
 
 package org.apache.stanbol.enhancer.engines.sentiment.services;
 
-import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.sentimentAnnotation;
+import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.SENTIMENT_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getAnalysedText;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 
@@ -190,13 +190,13 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
     /**
      * The minimum {@link PosTag} value {@link Value#probability() confidence}.<p>
      * This means that if the {@link Value#probability() confidence} of a
-     * {@link NlpAnnotations#POSAnnotation}s (returned by
+     * {@link NlpAnnotations#POS_ANNOTATION}s (returned by
      * {@link Token#getAnnotations(Annotation)}) is greater than 
      * {@link #minPOSConfidence} that the result of 
      * {@link SentimentClassifier#isAdjective(PosTag)} (and 
      * {@link SentimentClassifier#isNoun(PosTag)}  - if #CONFIG_ADJECTIVES is 
      * deactivated) is used to decide if a Token needs to be processed or not.
-     * Otherwise further {@link NlpAnnotations#POSAnnotation}s are analysed for
+     * Otherwise further {@link NlpAnnotations#POS_ANNOTATION}s are analysed for
      * processable POS tags. Processable POS tags are accepted until
      * <code>{@link #minPOSConfidence}/2</code>.  
      */
@@ -267,7 +267,7 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
             Token token = tokens.next();
             boolean process = !adjectivesOnly;
             if(!process){ //check POS types
-                Iterator<Value<PosTag>> posTags = token.getAnnotations(NlpAnnotations.POSAnnotation).iterator();
+                Iterator<Value<PosTag>> posTags = token.getAnnotations(NlpAnnotations.POS_ANNOTATION).iterator();
                 boolean ignore = false;
                 while(!ignore && !process && posTags.hasNext()) {
                     Value<PosTag> value = posTags.next();
@@ -280,7 +280,7 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
             if(process){
                 double sentiment = classifier.classifyWord(token.getSpan());
                 if(sentiment != 0.0){
-                    token.addAnnotation(sentimentAnnotation, 
+                    token.addAnnotation(SENTIMENT_ANNOTATION, 
                         new Value<SentimentTag>(sentiment > 0 ? 
                                 SentimentTag.POSITIVE : SentimentTag.NEGATIVE,
                                 Math.abs(sentiment)));

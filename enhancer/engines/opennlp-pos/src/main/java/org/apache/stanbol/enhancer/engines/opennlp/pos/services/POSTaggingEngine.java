@@ -17,7 +17,7 @@
 package org.apache.stanbol.enhancer.engines.opennlp.pos.services;
 
 import static java.util.Collections.singleton;
-import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POSAnnotation;
+import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.initAnalysedText;
 
@@ -264,7 +264,7 @@ public class POSTaggingEngine extends AbstractEnhancementEngine<RuntimeException
         while(it.hasNext()){
             Span span = it.next();
             log.info(" > {}",span);
-            for(Value<PosTag> value : span.getAnnotations(POSAnnotation)){
+            for(Value<PosTag> value : span.getAnnotations(POS_ANNOTATION)){
                 log.info("   - {}",value);
             }
         }
@@ -309,7 +309,7 @@ public class POSTaggingEngine extends AbstractEnhancementEngine<RuntimeException
                 }
             }
             //create the POS values
-            token.addAnnotations(POSAnnotation, Value.values(actPos, actProp,j));
+            token.addAnnotations(POS_ANNOTATION, Value.values(actPos, actProp,j));
         }
 
     }

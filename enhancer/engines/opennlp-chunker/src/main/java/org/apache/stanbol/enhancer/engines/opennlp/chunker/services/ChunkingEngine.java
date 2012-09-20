@@ -16,8 +16,8 @@
 
 package org.apache.stanbol.enhancer.engines.opennlp.chunker.services;
 
-import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POSAnnotation;
-import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.phraseAnnotation;
+import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
+import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.PHRASE_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getAnalysedText;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 
@@ -212,7 +212,7 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
                     Token token = tokens.next();
                     tokenList.add(token);
                     tokenTextList.add(token.getSpan());
-                    Value<PosTag> posValue = token.getAnnotation(POSAnnotation);
+                    Value<PosTag> posValue = token.getAnnotation(POS_ANNOTATION);
                     if(posValue == null){
                         throw new EngineException("Missing POS value for Token '"
                             + token.getSpan()+" of ContentItem "+ci.getUri()
@@ -258,7 +258,7 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
                         Chunk chunk = at.addChunk( 
                             tokenList.get(i-chunkTokenCount).getStart(), 
                             tokenList.get(i-1).getEnd());
-                        chunk.addAnnotation(phraseAnnotation, 
+                        chunk.addAnnotation(PHRASE_ANNOTATION, 
                             new Value<PhraseTag>(tag,
                                     chunkProps/(double)chunkTokenCount));
                         //reset the state
@@ -280,7 +280,7 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
                     Chunk chunk = at.addChunk( 
                         tokenList.get(i-chunkTokenCount).getStart(), 
                         tokenList.get(i-1).getEnd());
-                    chunk.addAnnotation(phraseAnnotation, 
+                    chunk.addAnnotation(PHRASE_ANNOTATION, 
                         new Value<PhraseTag>(tag,
                                 chunkProps/(double)chunkTokenCount));
                     
@@ -304,7 +304,7 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
             } else {
                 log.info(" > {}",span);
             }
-            for(Value<PhraseTag> value : span.getAnnotations(phraseAnnotation)){
+            for(Value<PhraseTag> value : span.getAnnotations(PHRASE_ANNOTATION)){
                 log.info("   - {}",value);
             }
         }

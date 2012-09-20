@@ -121,16 +121,20 @@ public final class NlpEngineHelper {
      * @throws EngineException on any exception while accessing the 
      * '<code>text/plain</code>' Blob
      * @throws IllegalStateException if no '<code>text/plain</code>' Blob is
-     * present as content part of the parsed {@link ContentItem}. NOTE that if
-     * the {@link AnalysedText} content part is already present no Exception will
-     * be thrown even if no plain text {@link Blob} is present in the parsed
-     * {@link ContentItem}
+     * present as content part of the parsed {@link ContentItem} or the parsed
+     * {@link AnalysedTextFactory} is <code>null</code>. <i>NOTE</i> that 
+     * {@link IllegalStateException} are only thrown if the {@link AnalysedText}
+     * ContentPart is not yet present in the parsed {@link ContentItem}
      */
     public static AnalysedText initAnalysedText(EnhancementEngine engine, 
                                                 AnalysedTextFactory analysedTextFactory,
                                                 ContentItem ci) throws EngineException {
         AnalysedText at = AnalysedTextUtils.getAnalysedText(ci);
         if(at == null){
+            if(analysedTextFactory == null){
+                throw new IllegalStateException("Unable to initialise AnalysedText"
+                    + "ContentPart because the parsed AnalysedTextFactory is NULL");
+            }
             Entry<UriRef,Blob> textBlob = getPlainText(engine, ci, true);
             log.debug(" ... create new AnalysedText instance for Engine {}", engine.getName());
             try {

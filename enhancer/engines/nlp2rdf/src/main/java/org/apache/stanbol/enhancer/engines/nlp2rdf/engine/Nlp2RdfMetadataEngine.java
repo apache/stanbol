@@ -162,7 +162,7 @@ public class Nlp2RdfMetadataEngine extends AbstractEnhancementEngine<RuntimeExce
                 writePhrase(metadata, span, current);
                 //OlIA does not include Sentiments
                 
-                Value<SentimentTag> sentiment = span.getAnnotation(NlpAnnotations.sentimentAnnotation);
+                Value<SentimentTag> sentiment = span.getAnnotation(NlpAnnotations.SENTIMENT_ANNOTATION);
                 if(sentiment != null){
                     double sentimentVal = sentiment.probability();
                     if(sentiment.value().isNegative()) {
