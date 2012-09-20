@@ -42,7 +42,7 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.stanbol.commons.semanticindex.index.IndexException;
 import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
-import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex;
+import org.apache.stanbol.contenthub.index.solr.SolrSemanticIndex;
 import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.ConstrainedDocumentSet;
@@ -190,9 +190,9 @@ public class FeaturedSearchImpl implements FeaturedSearch {
 
     @Override
     public List<FacetResult> getAllFacetResults(String indexName) throws SearchException {
-        LDPathSemanticIndex semanticIndex = null;
+        SolrSemanticIndex semanticIndex = null;
         try {
-            semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(indexName);
+            semanticIndex = (SolrSemanticIndex) semanticIndexManager.getIndex(indexName);
         } catch (IndexManagementException e) {
             log.error("Failed to get index {}", indexName, e);
             throw new SearchException("Failed to get index " + indexName, e);

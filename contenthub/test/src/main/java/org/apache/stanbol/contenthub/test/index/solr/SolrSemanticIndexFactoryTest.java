@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.test.index.ldpath;
+package org.apache.stanbol.contenthub.test.index.solr;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -36,8 +36,8 @@ import org.apache.sling.junit.annotations.TestReference;
 import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
-import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex;
-import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndexManager;
+import org.apache.stanbol.contenthub.index.solr.SolrSemanticIndex;
+import org.apache.stanbol.contenthub.index.solr.SolrSemanticIndexFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.BundleContext;
@@ -45,11 +45,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(SlingAnnotationsTestRunner.class)
-public class LDPathSemanticIndexManagerTest {
-    private static Logger logger = LoggerFactory.getLogger(LDPathSemanticIndexManagerTest.class);
+public class SolrSemanticIndexFactoryTest {
+    private static Logger logger = LoggerFactory.getLogger(SolrSemanticIndexFactoryTest.class);
 
     @TestReference
-    private LDPathSemanticIndexManager ldPathSemanticIndexManager;
+    private SolrSemanticIndexFactory solrSemanticIndexFactory;
 
     @TestReference
     private SemanticIndexManager semanticIndexManager;
@@ -58,9 +58,9 @@ public class LDPathSemanticIndexManagerTest {
     private BundleContext bundleContext;
 
     @Test
-    public void ldPathSemanticIndexManagerTest() {
-        assertNotNull("Expecting LDPathSemanticIndexManager to be injected by Sling test runner",
-            ldPathSemanticIndexManager);
+    public void solrSemanticIndexFactoryTest() {
+        assertNotNull("Expecting SolrSemanticIndexFactory to be injected by Sling test runner",
+            solrSemanticIndexFactory);
     }
 
     @Test
@@ -78,10 +78,10 @@ public class LDPathSemanticIndexManagerTest {
     public void testCreateIndexWithoutName() {
         Properties indexMetadata = new Properties();
         indexMetadata
-                .put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM,
+                .put(SolrSemanticIndex.PROP_LD_PATH_PROGRAM,
                     "@prefix dbp-ont : <http://dbpedia.org/ontology/>; city = dbp-ont:city / rdfs:label :: xsd:string; ");
         try {
-            ldPathSemanticIndexManager.createIndex(indexMetadata);
+            solrSemanticIndexFactory.createIndex(indexMetadata);
             assertTrue("An Index cannot be created without name", false);
         } catch (IndexManagementException e) {
 
@@ -93,7 +93,7 @@ public class LDPathSemanticIndexManagerTest {
         Properties indexMetadata = new Properties();
         indexMetadata.put(SemanticIndex.PROP_NAME, "test_index_name");
         try {
-            ldPathSemanticIndexManager.createIndex(indexMetadata);
+            solrSemanticIndexFactory.createIndex(indexMetadata);
             assertTrue("An Index cannot be created without program", false);
         } catch (IndexManagementException e) {
 
@@ -106,29 +106,29 @@ public class LDPathSemanticIndexManagerTest {
         String program = "@prefix dbp-ont : <http://dbpedia.org/ontology/>; city = dbp-ont:city / rdfs:label :: xsd:string;";
         Properties indexMetadata = new Properties();
         indexMetadata.put(SemanticIndex.PROP_NAME, name);
-        indexMetadata.put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM, program);
-        String pid = ldPathSemanticIndexManager.createIndex(indexMetadata);
+        indexMetadata.put(SolrSemanticIndex.PROP_LD_PATH_PROGRAM, program);
+        String pid = solrSemanticIndexFactory.createIndex(indexMetadata);
 
-        // retrieve LDPathSemanticIndex
-        LDPathSemanticIndex semanticIndex;
+        // retrieve SolrSemanticIndex
+        SolrSemanticIndex semanticIndex;
         String indexMetadataFilePath;
         File indexMetadataDirectory;
         File file;
         try {
-            semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+            semanticIndex = (SolrSemanticIndex) semanticIndexManager.getIndex(name);
             int timeoutCount = 0;
             while (semanticIndex == null) {
                 if (timeoutCount == 8) break;
                 Thread.sleep(500);
-                semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+                semanticIndex = (SolrSemanticIndex) semanticIndexManager.getIndex(name);
                 timeoutCount++;
             }
-            assertNotNull("Failed to create LDPathSemanticIndex with name " + name, semanticIndex);
+            assertNotNull("Failed to create SolrSemanticIndex with name " + name, semanticIndex);
 
             // check IndexMetadata folder exists
             indexMetadataDirectory = bundleContext
-                    .getServiceReference(LDPathSemanticIndexManager.class.getName()).getBundle()
-                    .getBundleContext().getDataFile(LDPathSemanticIndexManager.class.getName());
+                    .getServiceReference(SolrSemanticIndexFactory.class.getName()).getBundle()
+                    .getBundleContext().getDataFile(SolrSemanticIndexFactory.class.getName());
             assertTrue("IndexMetadata Directory does not exist", indexMetadataDirectory.exists());
 
             // check IndexMetadata files of indexes before remove index
@@ -138,24 +138,24 @@ public class LDPathSemanticIndexManagerTest {
             assertTrue("IndexMetadata File cannot be found for pid: " + pid, file.exists());
 
         } finally {
-            // remove LDPathSemanticIndex
-            ldPathSemanticIndexManager.removeIndex(pid);
+            // remove SolrSemanticIndex
+            solrSemanticIndexFactory.removeIndex(pid);
         }
 
         // wait some time to let OSGi remove the configuration
         int timeoutCount = 0;
-        semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+        semanticIndex = (SolrSemanticIndex) semanticIndexManager.getIndex(name);
         while (semanticIndex != null) {
             if (timeoutCount == 8) break;
             Thread.sleep(500);
-            semanticIndex = (LDPathSemanticIndex) semanticIndexManager.getIndex(name);
+            semanticIndex = (SolrSemanticIndex) semanticIndexManager.getIndex(name);
             timeoutCount++;
         }
 
-        assertNull(String.format("LDPathSemanticIndex with name %s cannot be removed", name), semanticIndex);
+        assertNull(String.format("SolrSemanticIndex with name %s cannot be removed", name), semanticIndex);
         if (semanticIndex == null) {
-            assertFalse("SemanticIndex is removed, but still appears configured.",
-                ldPathSemanticIndexManager.isConfigured(pid));
+            assertFalse("SemanticIndex is removed, but still appears configured.", solrSemanticIndexFactory
+                    .getSemanticIndexMetadataManager().isConfigured(pid));
         }
 
         // check IndexMetadata files of indexes after remove index
@@ -173,25 +173,25 @@ public class LDPathSemanticIndexManagerTest {
 
         Properties indexMetadata = new Properties();
         indexMetadata.put(SemanticIndex.PROP_NAME, name1);
-        indexMetadata.put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM, program);
-        String pid1 = ldPathSemanticIndexManager.createIndex(indexMetadata);
-        String pid2 = ldPathSemanticIndexManager.createIndex(name2, "Test Index Description", program);
+        indexMetadata.put(SolrSemanticIndex.PROP_LD_PATH_PROGRAM, program);
+        String pid1 = solrSemanticIndexFactory.createIndex(indexMetadata);
+        String pid2 = solrSemanticIndexFactory.createIndex(name2, "Test Index Description", program);
 
-        // create and retrieve LDPathSemanticIndex
-        LDPathSemanticIndex semanticIndex1 = (LDPathSemanticIndex) semanticIndexManager.getIndex(name1);
-        LDPathSemanticIndex semanticIndex2 = (LDPathSemanticIndex) semanticIndexManager.getIndex(name2);
+        // create and retrieve SolrSemanticIndex
+        SolrSemanticIndex semanticIndex1 = (SolrSemanticIndex) semanticIndexManager.getIndex(name1);
+        SolrSemanticIndex semanticIndex2 = (SolrSemanticIndex) semanticIndexManager.getIndex(name2);
         int timeoutCount = 0;
         while (semanticIndex1 == null || semanticIndex2 == null) {
             if (timeoutCount == 8) break;
             Thread.sleep(500);
-            semanticIndex1 = (LDPathSemanticIndex) semanticIndexManager.getIndex(name1);
-            semanticIndex2 = (LDPathSemanticIndex) semanticIndexManager.getIndex(name2);
+            semanticIndex1 = (SolrSemanticIndex) semanticIndexManager.getIndex(name1);
+            semanticIndex2 = (SolrSemanticIndex) semanticIndexManager.getIndex(name2);
             timeoutCount++;
         }
 
         File indexMetadataDirectory = bundleContext
-                .getServiceReference(LDPathSemanticIndexManager.class.getName()).getBundle()
-                .getBundleContext().getDataFile(LDPathSemanticIndexManager.class.getName());
+                .getServiceReference(SolrSemanticIndexFactory.class.getName()).getBundle()
+                .getBundleContext().getDataFile(SolrSemanticIndexFactory.class.getName());
 
         Map<String,Properties> indexMetadataMap = new HashMap<String,Properties>();
         // load index metadata to memory
@@ -218,24 +218,30 @@ public class LDPathSemanticIndexManagerTest {
         }
 
         // test getAllIndexMetadata
-        Map<String,Properties> allIndexMetadata = ldPathSemanticIndexManager.getAllIndexMetadata();
+        Map<String,Properties> allIndexMetadata = solrSemanticIndexFactory
+                .getSemanticIndexMetadataManager().getAllIndexMetadata();
         assertTrue("getAllIndexMetadata() cannot return the expected value",
             allIndexMetadata.equals(indexMetadataMap));
 
         // check IndexMetadata map entries
-        assertTrue(String.format("IndexMetadata for %s is not match with the expected value", pid1),
-            ldPathSemanticIndexManager.getIndexMetadata(pid1).equals(indexMetadataMap.get(pid1)));
-        assertTrue(String.format("IndexMetadata for %s is not match with the expected value", pid1),
-            ldPathSemanticIndexManager.getIndexMetadata(pid2).equals(indexMetadataMap.get(pid2)));
+        assertTrue(
+            String.format("IndexMetadata for %s is not match with the expected value", pid1),
+            solrSemanticIndexFactory.getSemanticIndexMetadataManager().getIndexMetadata(pid1)
+                    .equals(indexMetadataMap.get(pid1)));
+        assertTrue(
+            String.format("IndexMetadata for %s is not match with the expected value", pid1),
+            solrSemanticIndexFactory.getSemanticIndexMetadataManager().getIndexMetadata(pid2)
+                    .equals(indexMetadataMap.get(pid2)));
 
         // update indexMetadataMap
         indexMetadataMap.get(pid1).put("test field", "test value");
-        ldPathSemanticIndexManager.updateIndexMetadata(pid1, indexMetadataMap.get(pid1));
-        assertTrue("IndexMetadata cannot be updated properly",
-            ldPathSemanticIndexManager.getIndexMetadata(pid1).equals(indexMetadataMap.get(pid1)));
+        solrSemanticIndexFactory.getSemanticIndexMetadataManager().updateIndexMetadata(pid1,
+            indexMetadataMap.get(pid1));
+        assertTrue("IndexMetadata cannot be updated properly", solrSemanticIndexFactory
+                .getSemanticIndexMetadataManager().getIndexMetadata(pid1).equals(indexMetadataMap.get(pid1)));
 
-        // remove LDPathSemanticIndex
-        ldPathSemanticIndexManager.removeIndex(pid1);
-        ldPathSemanticIndexManager.removeIndex(pid2);
+        // remove SolrSemanticIndex
+        solrSemanticIndexFactory.removeIndex(pid1);
+        solrSemanticIndexFactory.removeIndex(pid2);
     }
 }

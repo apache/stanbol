@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.index.ldpath;
+package org.apache.stanbol.contenthub.index.solr;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.ws.rs.core.MediaType;
 
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
@@ -53,7 +54,6 @@ import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.IndexState;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.commons.semanticindex.store.ChangeSet;
-import org.apache.stanbol.commons.semanticindex.store.EpochException;
 import org.apache.stanbol.commons.semanticindex.store.IndexingSource;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
@@ -61,19 +61,12 @@ import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.contenthub.index.AbstractLDPathSemanticIndex;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrSearch;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
-import org.apache.stanbol.enhancer.ldpath.EnhancerLDPath;
-import org.apache.stanbol.enhancer.ldpath.backend.ContentItemBackend;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
-import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
-import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -84,10 +77,6 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.LDPath;
-import at.newmedialab.ldpath.exception.LDPathParseException;
-import at.newmedialab.ldpath.model.programs.Program;
 
 /**
  * LDPath based {@link SemanticIndex} implementation. This implementations creates the underlying Solr core by
@@ -122,88 +111,49 @@ import at.newmedialab.ldpath.model.programs.Program;
  */
 @Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, metatype = true, immediate = true)
 @Service
-@Properties(value = {
-                     @Property(name = SemanticIndex.PROP_NAME),
-                     @Property(name = SemanticIndex.PROP_DESCRIPTION),
-                     @Property(name = LDPathSemanticIndex.PROP_LD_PATH_PROGRAM),
-                     @Property(name = LDPathSemanticIndex.PROP_INDEX_CONTENT, boolValue = true),
-                     @Property(name = LDPathSemanticIndex.PROP_BATCH_SIZE, intValue = 10),
-                     @Property(name = LDPathSemanticIndex.PROP_INDEXING_SOURCE_NAME, value = "contenthubFileStore"),
-                     @Property(name = LDPathSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD, intValue = 10),
-                     @Property(name = LDPathSemanticIndex.PROP_SOLR_CHECK_TIME, intValue = 5),
-                     @Property(name = Constants.SERVICE_RANKING, intValue = 0)})
-public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
+@Properties(value = {@Property(name = SolrSemanticIndex.PROP_SOLR_CHECK_TIME, intValue = 5),
+                     @Property(name = SolrSemanticIndex.PROP_INDEX_CONTENT, boolValue = true)})
+public class SolrSemanticIndex extends AbstractLDPathSemanticIndex {
 
-    public static final String PROP_LD_PATH_PROGRAM = "org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex.ldPathProgram";
-    public static final String PROP_INDEX_CONTENT = "org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex.indexContent";
-    public static final String PROP_BATCH_SIZE = "org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex.batchSize";
-    public static final String PROP_INDEXING_SOURCE_NAME = "org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex.indexingSourceName";
-    public static final String PROP_INDEXING_SOURCE_CHECK_PERIOD = "org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex.indexingSourceCheckPeriod";
-    public static final String PROP_SOLR_CHECK_TIME = "org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex.solrCheckTime";
+    public static final String PROP_SOLR_CHECK_TIME = "org.apache.stanbol.contenthub.index.solr.SolrSemanticIndex.solrCheckTime";
+    public static final String PROP_INDEX_CONTENT = "org.apache.stanbol.contenthub.index.solr.SolrSemanticIndex.indexContent";
 
-    private final Logger logger = LoggerFactory.getLogger(LDPathSemanticIndex.class);
+    private static final Logger logger = LoggerFactory.getLogger(SolrSemanticIndex.class);
+
+    private static final Set<String> SUPPORTED_MIMETYPES = Collections.unmodifiableSet(new HashSet<String>(
+            Arrays.asList(MediaType.TEXT_HTML, MediaType.TEXT_PLAIN, MediaType.TEXT_XML)));
+
+    private boolean indexContent;
 
     @Reference
-    private LDPathSemanticIndexManager ldpathSemanticIndexManager;
+    private SolrSemanticIndexFactory solrSemanticIndexFactory;
 
     @Reference(target = "(org.apache.solr.core.CoreContainer.name=contenthub)")
     private ManagedSolrServer managedSolrServer;
 
-    private IndexingSource<ContentItem> indexingSource;
-
-    @Reference
-    private SiteManager siteManager;
-
-    private String name;
-    private String description;
-    private String ldPathProgram;
-    private Program<Object> objectProgram;
-    private boolean indexContent;
-    private int batchSize;
-    private int storeCheckPeriod;
     private int solrCheckTime;
-    private long epoch;
-    private long revision = Long.MIN_VALUE;
-    private volatile IndexState state = IndexState.UNINIT;
-    private String pid;
     private RegisteredSolrServerTracker registeredServerTracker;
-    private ComponentContext componentContext;
-    private Integer indexingCount;
-    // store update check thread
-    private Thread pollingThread;
-    private volatile Boolean deactivate = new Boolean(false);
-    // reindexer thread
-    private Thread reindexerThread;
 
     @Activate
     protected void activate(ComponentContext context) throws IndexException,
                                                      IndexManagementException,
                                                      ConfigurationException,
                                                      StoreException {
+
+        super.activate(context);
         @SuppressWarnings("rawtypes")
         Dictionary properties = context.getProperties();
-        this.name = (String) OsgiUtils.checkProperty(properties, PROP_NAME);
-        this.ldPathProgram = (String) OsgiUtils.checkProperty(properties, PROP_LD_PATH_PROGRAM);
-        this.indexContent = (Boolean) OsgiUtils.checkProperty(properties, PROP_INDEX_CONTENT);
-        this.description = (String) OsgiUtils.checkProperty(properties, PROP_DESCRIPTION);
-        this.batchSize = (Integer) OsgiUtils.checkProperty(properties, PROP_BATCH_SIZE);
-        this.storeCheckPeriod = (Integer) OsgiUtils.checkProperty(properties,
-            PROP_INDEXING_SOURCE_CHECK_PERIOD);
         this.solrCheckTime = (Integer) OsgiUtils.checkProperty(properties, PROP_SOLR_CHECK_TIME);
-        this.componentContext = context;
-        this.indexingCount = 0;
-
-        initializeStore((String) OsgiUtils.checkProperty(properties, PROP_INDEXING_SOURCE_NAME), context);
-        getPrograms();
+        this.indexContent = (Boolean) OsgiUtils.checkProperty(properties,
+            SolrSemanticIndex.PROP_INDEX_CONTENT);
 
         // create index if it is not already done. When an instance of this component is created through the
         // REST/Java services first the Solr core initalized and then the associated OSGI component is
         // activated
-        this.pid = (String) properties.get(Constants.SERVICE_PID);
-        if (!ldpathSemanticIndexManager.isConfigured(pid)) {
+        if (!solrSemanticIndexFactory.getSemanticIndexMetadataManager().isConfigured(pid)) {
             // solr core has not been created. create now...
             logger.info("New Solr core will be created for the Semantic Index: {}", this.name);
-            ldpathSemanticIndexManager.createIndex(getConfigProperties());
+            solrSemanticIndexFactory.createIndex(getConfigProperties());
             this.state = IndexState.ACTIVE;
             this.epoch = indexingSource.getEpoch();
 
@@ -212,8 +162,11 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
             // more
 
             // check the configuration has changed
-            java.util.Properties oldMetadata = ldpathSemanticIndexManager.getIndexMetadata(pid);
-            if (checkIndexConfiguration(name, indexingSource.getName(), ldPathProgram, pid, oldMetadata)) {
+            java.util.Properties oldMetadata = solrSemanticIndexFactory.getSemanticIndexMetadataManager()
+                    .getIndexMetadata(pid);
+
+            checkUnmodifiableConfigurations(name, indexingSource.getName(), oldMetadata);
+            if (checkReindexingCondition(ldPathProgram, oldMetadata)) {
                 logger.info(
                     "LDPath program of the Semantic Index: {} has been changed. Reindexing will start now...",
                     this.name);
@@ -221,8 +174,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                 this.state = IndexState.REINDEXING;
                 this.epoch = Long.parseLong((String) oldMetadata.getProperty(SemanticIndex.PROP_EPOCH));
 
-                this.reindexerThread = new Thread(new Reindexer());
-                this.reindexerThread.start();
+                startReindexing();
 
             } else {
                 if (oldMetadata.get(SemanticIndex.PROP_REVISION) != null) {
@@ -245,43 +197,10 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
             initializeTracker(this.name);
 
             // start polling the changes in the store
-            startStoreCheckThread();
+            startIndexingSourceCheckThread();
         }
         updateIndexMetadata();
         logger.info("The SemanticIndex: {} initialized successfully", this.name);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void initializeStore(String indexingSourceName, ComponentContext componentContext) throws ConfigurationException {
-        BundleContext bundleContext = componentContext.getBundleContext();
-        try {
-            ServiceReference[] indexingSources = bundleContext.getServiceReferences(
-                IndexingSource.class.getName(), null);
-            for (ServiceReference serviceReference : indexingSources) {
-                Object indexingSource = bundleContext.getService(serviceReference);
-                Type[] genericInterfaces = indexingSource.getClass().getGenericInterfaces();
-                if (genericInterfaces.length == 1 && genericInterfaces[0] instanceof ParameterizedType) {
-                    Type[] types = ((ParameterizedType) genericInterfaces[0]).getActualTypeArguments();
-                    try {
-                        @SuppressWarnings("unused")
-                        Class<ContentItem> contentItemClass = (Class<ContentItem>) types[0];
-                        if (((IndexingSource<ContentItem>) indexingSource).getName().equals(
-                            indexingSourceName)) {
-                            this.indexingSource = (IndexingSource<ContentItem>) indexingSource;
-                        }
-                    } catch (ClassCastException e) {
-                        // ignore
-                    }
-                }
-            }
-            if (this.indexingSource == null) {
-                throw new ConfigurationException(PROP_INDEXING_SOURCE_NAME,
-                        "There is no IndexingSource<ContentItem> for the given store name: "
-                                + indexingSourceName);
-            }
-        } catch (InvalidSyntaxException e) {
-            // ignore as there is no filter
-        }
     }
 
     private void initializeTracker(String name) {
@@ -296,71 +215,9 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
         registeredServerTracker.open();
     }
 
-    /**
-     * Compares the new configuration (metadata) of this SemanticIndex with the old one. The old metadata is
-     * obtained by using the pid of the this SemanticIndex through
-     * {@link LDPathSemanticIndexManager#getIndexMetadata(pid)}. If the name of the index or name of the
-     * indexing source has changed an exception is thrown, if the LDPath program has changed the
-     * {@link Reindexer} thread is activated.
-     * 
-     * @param name
-     *            new name of the SemanticIndex
-     * @param indexingSourceName
-     *            new name of the {@link IndexingSource} associated with this index
-     * @param ldPath
-     *            new LDPath program of the SemanticIndex
-     * @param pid
-     *            unique pid of the SemanticIndex
-     * @param oldMetadata
-     *            old metadata of the SemanticIndex
-     * @return {@code true} if the LDPath program has changed, otherwise {@code false}
-     * @throws ConfigurationException
-     */
-    private boolean checkIndexConfiguration(String name,
-                                            String indexingSourceName,
-                                            String ldPath,
-                                            String pid,
-                                            java.util.Properties oldMetadata) throws ConfigurationException {
-
-        // name of the semantic index has changed
-        if (!name.equals(oldMetadata.get(PROP_NAME))) {
-            throw new ConfigurationException(PROP_NAME,
-                    "It is not allowed to change the name of a Semantic Index");
-        }
-
-        // name of the indexing source has changed
-        if (!indexingSourceName.equals(oldMetadata.get(PROP_INDEXING_SOURCE_NAME))) {
-            throw new ConfigurationException(PROP_INDEXING_SOURCE_NAME,
-                    "For the time being, it is not allowed to change the name of the indexing source.");
-        }
-
-        // ldpath of the semantic has changed, reindexing needed
-        if (!ldPath.equals(oldMetadata.get(PROP_LD_PATH_PROGRAM))) {
-            return true;
-        }
-        return false;
-    }
-
-    private void getPrograms() throws IndexException, IndexManagementException {
-        // create program for EntityhubLDPath
-        SiteManagerBackend backend = new SiteManagerBackend(siteManager);
-        ValueFactory vf = InMemoryValueFactory.getInstance();
-        EntityhubLDPath ldPath = new EntityhubLDPath(backend, vf);
-        try {
-            this.objectProgram = ldPath.parseProgram(LDPathUtils.constructReader(this.ldPathProgram));
-        } catch (LDPathParseException e) {
-            logger.error("Should never happen!!!!!", e);
-            throw new IndexException("Failed to create Program from the parsed LDPath", e);
-        }
-    }
-
     @Deactivate
-    protected void deactivate(ComponentContext context) throws IndexManagementException {
-        // close store check thread and solr core tracker
-        deactivate = true;
-        if (pollingThread != null) {
-            pollingThread.interrupt();
-        }
+    protected void deactivate(ComponentContext context) {
+        super.deactivate(context);
         if (registeredServerTracker != null) {
             registeredServerTracker.close();
         }
@@ -378,35 +235,15 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                 logger.info(
                     "Configuration for the Semantic Index: {} has been deleted. All resources will be removed.",
                     this.name);
-                if (ldpathSemanticIndexManager.isConfigured(pid)) {
+                if (solrSemanticIndexFactory.getSemanticIndexMetadataManager().isConfigured(pid)) {
                     // this case is a check for the remove operation from the felix web console
-                    ldpathSemanticIndexManager.removeIndex(this.pid);
+                    solrSemanticIndexFactory.removeIndex(this.pid);
                 }
             } // the index is deactivated. do not nothing.
         } catch (IOException e) {
             logger.error("Failed to obtain configuration for the Semantic Index: {}.", this.name, e);
-        }
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public Class<ContentItem> getIntdexType() {
-        return ContentItem.class;
-    }
-
-    @Override
-    public String getDescription() {
-        return this.description;
-    }
-
-    @Override
-    public IndexState getState() {
-        synchronized (state) {
-            return state;
+        } catch (IndexManagementException e) {
+            logger.error("Failed to remove index: {} while deactivating", this.name, e);
         }
     }
 
@@ -436,7 +273,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
         try {
             SolrServer solrServer = getServer();
             SolrInputDocument doc = getSolrDocument(ci);
-            if (this.indexContent) {
+            if (this.indexContent && SUPPORTED_MIMETYPES.contains(ci.getMimeType())) {
                 doc.addField(SolrFieldName.CONTENT.toString(),
                     org.apache.commons.io.IOUtils.toString(ci.getStream()));
             }
@@ -513,17 +350,6 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
             throw new IndexException("Given SolrInputDocument cannot be added to Solr Server with name "
                                      + this.name, e);
         }
-    }
-
-    @Override
-    public void persist(long revision) throws IndexException {
-        this.revision = revision;
-        updateIndexMetadata();
-    }
-
-    @Override
-    public long getRevision() {
-        return this.revision;
     }
 
     @Override
@@ -655,87 +481,11 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
         return solrServer;
     }
 
-    /**
-     * This method executes the LDPath program, which was used to configure this index, on the enhancements of
-     * submitted content by means of the Entityhub. In other words, additional information is gathered from
-     * the Entityhub for each entity detected in the enhancements by querying the ldpath of this index.
-     * Furthermore, the same LDPath is also executed on the given {@link ContentItem} through the
-     * {@link ContentItemBackend}.
-     * 
-     * @param contexts
-     *            a {@link Set} of URIs (string representations) that are used as starting nodes to execute
-     *            LDPath program of this index. The context are the URIs of the entities detected in the
-     *            enhancements of the content submitted.
-     * @param ci
-     *            {@link ContentItem} on on which the LDPath associated with this index will be executed
-     * @return the {@link Map} containing the results obtained by executing the given program on the given
-     *         contexts. Keys of the map corresponds to fields in the program and values of the map
-     *         corresponds to results obtained for the field specified in the key.
-     * @throws IndexManagementException
-     */
-    private Map<String,Collection<?>> executeProgram(Set<String> contexts, ContentItem ci) throws IndexManagementException {
-        Map<String,Collection<?>> results = new HashMap<String,Collection<?>>();
-
-        // execute the given LDPath for each context passed in contexts parameter
-        SiteManagerBackend backend = new SiteManagerBackend(siteManager);
-        ValueFactory vf = InMemoryValueFactory.getInstance();
-        EntityhubLDPath entityhubPath = new EntityhubLDPath(backend, vf);
-        Representation representation;
-        for (String context : contexts) {
-            representation = entityhubPath.execute(vf.createReference(context), this.objectProgram);
-            Iterator<String> fieldNames = representation.getFieldNames();
-            while (fieldNames.hasNext()) {
-                String fieldName = fieldNames.next();
-                Iterator<Object> valueIterator = representation.get(fieldName);
-                Set<Object> values = new HashSet<Object>();
-                while (valueIterator.hasNext()) {
-                    values.add(valueIterator.next());
-                }
-                if (results.containsKey(fieldName)) {
-                    @SuppressWarnings("unchecked")
-                    Collection<Object> resultCollection = (Collection<Object>) results.get(fieldName);
-                    Collection<Object> tmpCol = (Collection<Object>) values;
-                    for (Object o : tmpCol) {
-                        resultCollection.add(o);
-                    }
-                } else {
-                    results.put(fieldName, values);
-                }
-            }
-        }
-
-        // execute the LDPath on the given ContentItem
-        ContentItemBackend contentItemBackend = new ContentItemBackend(ci, true);
-        LDPath<Resource> resourceLDPath = new LDPath<Resource>(contentItemBackend, EnhancerLDPath.getConfig());
-        Program<Resource> resourceProgram;
-        try {
-            resourceProgram = resourceLDPath.parseProgram(new StringReader(this.ldPathProgram));
-            Map<String,Collection<?>> ciBackendResults = resourceProgram.execute(contentItemBackend,
-                ci.getUri());
-            for (Entry<String,Collection<?>> result : ciBackendResults.entrySet()) {
-                if (results.containsKey(result.getKey())) {
-                    @SuppressWarnings("unchecked")
-                    Collection<Object> resultsValue = (Collection<Object>) results.get(result.getKey());
-                    resultsValue.addAll(result.getValue());
-                } else {
-                    results.put(result.getKey(), result.getValue());
-                }
-
-            }
-        } catch (LDPathParseException e) {
-            logger.error("Failed to create Program<Resource> from the LDPath program", e);
-        }
-
-        return results;
-    }
-
-    private void updateIndexMetadata() throws IndexException {
-        // java.util.Properties properties = ldpathSemanticIndexManager.getIndexMetadata(this.pid);
-        // properties.put(PROP_REVISION, this.revision);
-        // properties.put(PROP_STATE, this.state.name());
+    protected void updateIndexMetadata() throws IndexException {
         java.util.Properties properties = getConfigProperties();
         try {
-            ldpathSemanticIndexManager.updateIndexMetadata(this.pid, properties);
+            solrSemanticIndexFactory.getSemanticIndexMetadataManager().updateIndexMetadata(this.pid,
+                properties);
         } catch (IndexManagementException e) {
             logger.error("Failed to update the metadata of the index: {}", this.name, e);
             throw new IndexException(String.format("Failed to update the metadata of the index: %s",
@@ -749,13 +499,17 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
         java.util.Properties propertiesSubset = new java.util.Properties();
         propertiesSubset.put(PROP_NAME, properties.get(PROP_NAME));
         propertiesSubset.put(PROP_DESCRIPTION, properties.get(PROP_DESCRIPTION));
-        propertiesSubset.put(PROP_LD_PATH_PROGRAM, properties.get(PROP_LD_PATH_PROGRAM));
-        propertiesSubset.put(PROP_INDEX_CONTENT, properties.get(PROP_INDEX_CONTENT));
-        propertiesSubset.put(PROP_BATCH_SIZE, properties.get(PROP_BATCH_SIZE));
-        propertiesSubset.put(PROP_INDEXING_SOURCE_NAME, properties.get(PROP_INDEXING_SOURCE_NAME));
+        propertiesSubset.put(AbstractLDPathSemanticIndex.PROP_LD_PATH_PROGRAM,
+            properties.get(AbstractLDPathSemanticIndex.PROP_LD_PATH_PROGRAM));
+        propertiesSubset.put(SolrSemanticIndex.PROP_INDEX_CONTENT,
+            properties.get(SolrSemanticIndex.PROP_INDEX_CONTENT));
+        propertiesSubset.put(AbstractLDPathSemanticIndex.PROP_BATCH_SIZE,
+            properties.get(AbstractLDPathSemanticIndex.PROP_BATCH_SIZE));
+        propertiesSubset.put(AbstractLDPathSemanticIndex.PROP_INDEXING_SOURCE_NAME,
+            properties.get(AbstractLDPathSemanticIndex.PROP_INDEXING_SOURCE_NAME));
         propertiesSubset.put(PROP_SOLR_CHECK_TIME, properties.get(PROP_SOLR_CHECK_TIME));
-        propertiesSubset.put(PROP_INDEXING_SOURCE_CHECK_PERIOD,
-            properties.get(PROP_INDEXING_SOURCE_CHECK_PERIOD));
+        propertiesSubset.put(AbstractLDPathSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD,
+            properties.get(AbstractLDPathSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD));
         propertiesSubset.put(Constants.SERVICE_PID, properties.get(Constants.SERVICE_PID));
         propertiesSubset.put(Constants.SERVICE_RANKING, properties.get(Constants.SERVICE_RANKING));
         propertiesSubset.put(PROP_REVISION, this.revision);
@@ -764,27 +518,9 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
         return propertiesSubset;
     }
 
-    private void semUp() throws IndexException {
-        synchronized (this.indexingCount) {
-            this.indexingCount++;
-            this.state = IndexState.INDEXING;
-            updateIndexMetadata();
-        }
-    }
-
-    private void semDown() throws IndexException {
-        synchronized (this.indexingCount) {
-            this.indexingCount--;
-            if (this.indexingCount == 0) {
-                this.state = IndexState.ACTIVE;
-                updateIndexMetadata();
-            }
-        }
-    }
-
-    private void startStoreCheckThread() {
-        pollingThread = new Thread(new StoreUpdateChecker(), "StoreUpdateChecker");
-        pollingThread.start();
+    protected void startReindexing() {
+        reindexerThread = new Thread(new Reindexer());
+        reindexerThread.start();
     }
 
     /**
@@ -856,7 +592,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
             }
 
             // start update checker
-            startStoreCheckThread();
+            startIndexingSourceCheckThread();
             logger.info("Reindexing of Semantic Index: {} has completed successfully", name);
         }
 
@@ -869,7 +605,7 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                 count++;
             } while ((managedSolrServer.isManagedIndex(coreName)));
 
-            return ldpathSemanticIndexManager.createSolrCore(coreName, ldPathProgram);
+            return solrSemanticIndexFactory.createSolrCore(coreName, ldPathProgram);
         }
 
         private long indexDocuments() throws StoreException, IndexException {
@@ -894,91 +630,6 @@ public class LDPathSemanticIndex implements SemanticIndex<ContentItem> {
                 }
             } while (!noChange);
             return revision;
-        }
-    }
-
-    /**
-     * Separate thread to poll changes in the {@link Store}
-     * 
-     * @author meric
-     * 
-     */
-    private class StoreUpdateChecker implements Runnable {
-        @Override
-        public void run() {
-            while (!deactivate) {
-                logger.info("Pooling thread for index: {} will check the changes", name);
-                // if the polling thread is interrupted i.e the parent index component is deactivated,
-                // stop polling
-                if (Thread.currentThread().isInterrupted()) {
-                    return;
-                }
-
-                ChangeSet changeSet = null;
-                try {
-                    changeSet = indexingSource.changes(epoch, revision, batchSize);
-                } catch (StoreException e) {
-                    logger.error(
-                        String.format(
-                            "Failed to get changes from FileRevisionManager with start revision: %s and batch size: %s for Store: %s",
-                            revision, batchSize, indexingSource.getName()), e);
-                } catch (EpochException e) {
-                    if (e.getActiveEpoch() > e.getRequestEpoch()) {
-                        // epoch of the store has increased. So, a reindexing is needed.
-                        // Start the reindexing thread and terminate this one
-                        logger.info(
-                            "Epoch of the Store: {} has increase. So, a reindexing will be in progress",
-                            indexingSource.getName());
-                        epoch = e.getActiveEpoch();
-                        state = IndexState.REINDEXING;
-                        reindexerThread = new Thread(new Reindexer());
-                        reindexerThread.start();
-                        return;
-                    }
-                }
-                if (changeSet != null) {
-                    Iterator<String> changedItems = changeSet.iterator();
-                    boolean persist = true;
-                    while (changedItems.hasNext()) {
-                        String changedItem = changedItems.next();
-                        ContentItem ci;
-                        try {
-                            ci = indexingSource.get(changedItem);
-                            if (ci != null) {
-                                index(ci);
-                                logger.info("ContentItem with Uri {} is indexed to {}", changedItem, name);
-                            } else {
-                                remove(changedItem);
-                            }
-
-                        } catch (StoreException e) {
-                            logger.error("Failed to retrieve contentitem with uri: {}", changedItem);
-                            persist = false;
-                            break;
-                        } catch (IndexException e) {
-                            logger.error("Failed to index contentitem with uri: {}", changedItem);
-                            persist = false;
-                            break;
-                        }
-                    }
-                    if (persist) {
-                        try {
-                            if (changeSet.iterator().hasNext()) {
-                                persist(changeSet.toRevision());
-                            }
-                        } catch (IndexException e) {
-                            logger.error("Index revision cannot be persist to solr", e);
-                        }
-                    }
-                }
-                try {
-                    Thread.sleep(1000 * storeCheckPeriod);
-                } catch (InterruptedException e) {
-                    logger.info(
-                        "Store Checker for index: {} is interrupted while sleeping. Closing the thread", name);
-                    return;
-                }
-            }
         }
     }
 }

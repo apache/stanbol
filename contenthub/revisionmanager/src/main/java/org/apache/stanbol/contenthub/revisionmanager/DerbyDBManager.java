@@ -60,8 +60,6 @@ public class DerbyDBManager {
 
     private static int MAX_ID_LENGTH = 1024;
 
-    // private String SELECT_CHANGES =
-    // "SELECT id, revision FROM \"%s\" WHERE revision > ? ORDER BY revision ASC";
     private String SELECT_CHANGES = "SELECT id, revision FROM \"%s\" WHERE revision > ? AND revision <= ? ORDER BY revision ASC OFFSET ? ROWS";
 
     private String SELECT_REVISION = "SELECT id,revision FROM \"%s\" content_item_revision WHERE id = ?";
@@ -86,7 +84,7 @@ public class DerbyDBManager {
     protected void activate(ComponentContext componentContext) throws RevisionManagerException {
         System.setProperty("derby.language.statementCacheSize", "0");
         String stanbolHome = componentContext.getBundleContext().getProperty("sling.home");
-        DB_URL = "jdbc:derby:" + stanbolHome + "/contenthub/store/revisions;create=true";
+        DB_URL = "jdbc:derby:" + stanbolHome + "/contenthub/derby/revisions;create=true";
         // initialize the epoch table
         createEpochTable();
     }
@@ -327,7 +325,7 @@ public class DerbyDBManager {
                 throw new RevisionManagerException(String.format(
                     "There is not an epoch record for the Store: %s", storeID));
             }
-            log.info("The epoch for the Store: %s has been fetched as %s", storeID, epoch);
+            log.info("The epoch for the Store: {} has been fetched as {}", storeID, epoch);
 
         } catch (SQLException e) {
             log.error("Failed to get epoch of the Store: {}", storeID, e);
@@ -566,8 +564,8 @@ public class DerbyDBManager {
         PreparedStatement ps = null;
         try {
             ps = con.prepareStatement(String.format(UPDATE_REVISION, tableName));
-            ps.setString(1, itemID);
-            ps.setLong(2, revision);
+            ps.setString(2, itemID);
+            ps.setLong(1, revision);
             ps.executeUpdate();
             log.info("Revision of the item: %s in table: %s has been updated as %d", new Object[] {itemID,
                                                                                                    tableName,

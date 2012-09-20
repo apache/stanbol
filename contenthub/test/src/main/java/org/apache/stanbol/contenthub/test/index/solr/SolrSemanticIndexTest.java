@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.contenthub.test.index.ldpath;
+package org.apache.stanbol.contenthub.test.index.solr;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -44,8 +44,8 @@ import org.apache.stanbol.commons.semanticindex.index.SemanticIndex;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
 import org.apache.stanbol.commons.semanticindex.store.Store;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
-import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndex;
-import org.apache.stanbol.contenthub.index.ldpath.LDPathSemanticIndexManager;
+import org.apache.stanbol.contenthub.index.solr.SolrSemanticIndex;
+import org.apache.stanbol.contenthub.index.solr.SolrSemanticIndexFactory;
 import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrSearch;
@@ -68,14 +68,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(SlingAnnotationsTestRunner.class)
-public class LDPathSemanticIndexTest {
+public class SolrSemanticIndexTest {
 
-    private static Logger logger = LoggerFactory.getLogger(LDPathSemanticIndexTest.class);
+    private static Logger logger = LoggerFactory.getLogger(SolrSemanticIndexTest.class);
 
     private static final int TESTCOUNT = 15;
 
     @TestReference
-    private LDPathSemanticIndexManager ldPathSemanticIndexManager;
+    private SolrSemanticIndexFactory solrSemanticIndexFactory;
 
     @TestReference
     private ContentItemFactory contentItemFactory;
@@ -92,7 +92,7 @@ public class LDPathSemanticIndexTest {
     @TestReference
     private BundleContext bundleContext;
 
-    private static LDPathSemanticIndex semanticIndex;
+    private static SolrSemanticIndex semanticIndex;
     private static SolrServer solrServer;
     private static String pid;
     private static int counter = 0;
@@ -104,12 +104,12 @@ public class LDPathSemanticIndexTest {
         String name = "test_index_name";
         if (counter == 0) {
             String program = "@prefix dbp-ont : <http://dbpedia.org/ontology/>; city = dbp-ont:city / rdfs:label :: xsd:string; country = dbp-ont:country / rdfs:label :: xsd:string; ";
-            pid = ldPathSemanticIndexManager.createIndex(name, "test_index_description", program);
-            SemanticIndex<ContentItem> tempSemanticIndex = getLDPathSemanticIndex(name);
+            pid = solrSemanticIndexFactory.createIndex(name, "test_index_description", program);
+            SemanticIndex<ContentItem> tempSemanticIndex = getSolrSemanticIndex(name);
             assertTrue("This tests assume that the Semantic Index with the name '" + name + "' is of type "
-                       + LDPathSemanticIndex.class.getSimpleName(),
-                tempSemanticIndex instanceof LDPathSemanticIndex);
-            semanticIndex = (LDPathSemanticIndex) tempSemanticIndex;
+                       + SolrSemanticIndex.class.getSimpleName(),
+                tempSemanticIndex instanceof SolrSemanticIndex);
+            semanticIndex = (SolrSemanticIndex) tempSemanticIndex;
             solrServer = semanticIndex.getServer();
         }
         if (store == null) {
@@ -125,16 +125,16 @@ public class LDPathSemanticIndexTest {
     }
 
     @Test
-    public void ldPathSemanticIndexTest() {
-        assertNotNull("Expecting LDPathSemanticIndex to be injected by Sling test runner", semanticIndex);
-        assertTrue("Expection LDPathSemanticIndex implementation of SemanticIndex interface",
-            semanticIndex instanceof LDPathSemanticIndex);
+    public void solrSemanticIndexTest() {
+        assertNotNull("Expecting SolrSemanticIndex to be injected by Sling test runner", semanticIndex);
+        assertTrue("Expection SolrSemanticIndex implementation of SemanticIndex interface",
+            semanticIndex instanceof SolrSemanticIndex);
     }
 
     @Test
-    public void ldPathSemanticIndexManagerTest() {
-        assertNotNull("Expecting LDPathSemanticIndexManager to be injected by Sling test runner",
-            ldPathSemanticIndexManager);
+    public void solrSemanticIndexFactoryTest() {
+        assertNotNull("Expecting SolrSemanticIndexFactory to be injected by Sling test runner",
+            solrSemanticIndexFactory);
     }
 
     @Test
@@ -237,7 +237,8 @@ public class LDPathSemanticIndexTest {
         semanticIndex.persist(3);
         assertTrue("Revision cannot be persist with given value 3", semanticIndex.getRevision() == 3);
 
-        Properties indexMetadata = ldPathSemanticIndexManager.getIndexMetadata(pid);
+        Properties indexMetadata = solrSemanticIndexFactory.getSemanticIndexMetadataManager()
+                .getIndexMetadata(pid);
         long revision = Long.parseLong((String) indexMetadata.get(SemanticIndex.PROP_REVISION));
         assertTrue(
             "Return value of getRevision() is not match with the revision stored in IndexMetadata File",
@@ -249,7 +250,7 @@ public class LDPathSemanticIndexTest {
         Field field = null;
         long revision = 0;
         try {
-            field = semanticIndex.getClass().getDeclaredField("revision");
+            field = semanticIndex.getClass().getSuperclass().getDeclaredField("revision");
             field.setAccessible(true);
             revision = (Long) field.get(semanticIndex);
         } catch (SecurityException e) {
@@ -339,12 +340,10 @@ public class LDPathSemanticIndexTest {
         String name = "test_index_name_for_reindexing";
         String program = "@prefix dbp-ont: <http://dbpedia.org/ontology/>; person_entities = .[rdf:type is dbp-ont:Person]:: xsd:anyURI (termVectors=\"true\");";
         String newProgram = "@prefix dbp-ont: <http://dbpedia.org/ontology/>; place_entities = .[rdf:type is dbp-ont:Place]:: xsd:anyURI (termVectors=\"true\");";
-        String pid = ldPathSemanticIndexManager.createIndex(name, "", program);
+        String pid = solrSemanticIndexFactory.createIndex(name, "", program);
 
         try {
-            SemanticIndex<ContentItem> semanticIndex = getLDPathSemanticIndex(name);
-            // TODO instead of creating a new ContentItem and enhancing and use an already existing
-            // ContentItem
+            SemanticIndex<ContentItem> semanticIndex = getSolrSemanticIndex(name);
             ContentItem ci = contentItemFactory.createContentItem(new StringSource(
                     "Michael Jackson is a very famous person, and he was born in Indiana."));
             jobManager.enhanceContent(ci);
@@ -359,27 +358,28 @@ public class LDPathSemanticIndexTest {
             Configuration config = configAdmin.getConfiguration(pid);
             @SuppressWarnings("unchecked")
             Dictionary<String,String> properties = config.getProperties();
-            properties.put(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM, newProgram);
-            properties.put(LDPathSemanticIndex.PROP_DESCRIPTION, "reindexing");
+            properties.put(SolrSemanticIndex.PROP_LD_PATH_PROGRAM, newProgram);
+            properties.put(SolrSemanticIndex.PROP_DESCRIPTION, "reindexing");
             config.update(properties);
             Thread.sleep(1000);
 
-            semanticIndex = getLDPathSemanticIndex(name);
+            semanticIndex = getSolrSemanticIndex(name);
             // index ci to new semantic index
             while (semanticIndex.getState() != IndexState.ACTIVE) {
                 Thread.sleep(500);
             }
             semanticIndex.index(ci);
 
-            Properties indexMetadata = ldPathSemanticIndexManager.getIndexMetadata(pid);
-            assertTrue("LDPathSemanticIndex is changed, but it uses old program",
-                indexMetadata.get(LDPathSemanticIndex.PROP_LD_PATH_PROGRAM).equals(newProgram));
+            Properties indexMetadata = solrSemanticIndexFactory.getSemanticIndexMetadataManager()
+                    .getIndexMetadata(pid);
+            assertTrue("SolrSemanticIndex is changed, but it uses old program",
+                indexMetadata.get(SolrSemanticIndex.PROP_LD_PATH_PROGRAM).equals(newProgram));
             query = "place_entities:\"http://dbpedia.org/resource/Indiana\"";
             sdl = solrSearch.search(query, name).getResults();
             assertNotNull("Result must not be null for query " + query, sdl);
 
         } finally {
-            ldPathSemanticIndexManager.removeIndex(pid);
+            solrSemanticIndexFactory.removeIndex(pid);
         }
     }
 
@@ -388,13 +388,13 @@ public class LDPathSemanticIndexTest {
         counter++;
         if (counter == TESTCOUNT) {
             counter = 0;
-            ldPathSemanticIndexManager.removeIndex(pid);
+            solrSemanticIndexFactory.removeIndex(pid);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private SemanticIndex<ContentItem> getLDPathSemanticIndex(String name) throws InterruptedException,
-                                                                          IndexManagementException {
+    private SemanticIndex<ContentItem> getSolrSemanticIndex(String name) throws InterruptedException,
+                                                                        IndexManagementException {
 
         SemanticIndex<ContentItem> tempSemanticIndex = (SemanticIndex<ContentItem>) semanticIndexManager
                 .getIndex(name);
