@@ -39,7 +39,8 @@
 
     <module>web/base</module>
     <module>web/home</module>
-
+	<module>web/ldviewable</module>
+	
     <module>stanboltools/datafileprovider</module>
     <module>stanboltools/offline</module>
     <module>stanboltools/bundledatafileprovider</module>
