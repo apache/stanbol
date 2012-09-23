@@ -69,6 +69,9 @@ public class BasicAuthentication implements WeightedAuthenticationMethod {
 		if (authorization != null) {
 			String authBase64 = authorization.substring(authorization.indexOf(' ') + 1);
 			String[] credentials = new String(Base64.decode(authBase64)).split(":");
+			if (credentials.length == 0) {
+				return false;
+			}
 			String userName = credentials[0];
 			String password;
 			if (credentials.length > 1) {
