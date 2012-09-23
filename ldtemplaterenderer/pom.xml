@@ -31,7 +31,7 @@
   <version>0.10.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol LDPath template service</name>
+  <name>Apache Stanbol Commons LDPath template service</name>
   <description>A service providing ldpath template redering</description>
   <scm>
     <connection>
