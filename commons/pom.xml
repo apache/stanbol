@@ -59,6 +59,7 @@
   
     <module>indexedgraph</module>
     <module>ldpath/clerezza</module>
+	<module>ldtemplaterenderer</module>
     <module>httpqueryheaders</module>
     <module>launchpad</module>
     <module>security</module>
