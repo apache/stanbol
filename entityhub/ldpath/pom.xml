@@ -95,7 +95,7 @@
     </dependency>
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core-bundle</artifactId>
+      <artifactId>ldpath-core</artifactId>
     </dependency>
     
     <!-- generic tax -->

@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.ldpath.function;
 
 import static java.util.Collections.singletonMap;
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,6 +35,7 @@ import at.newmedialab.ldpath.api.functions.SelectorFunction;
 import at.newmedialab.ldpath.api.selectors.NodeSelector;
 import at.newmedialab.ldpath.model.transformers.IntTransformer;
 import at.newmedialab.ldpath.model.transformers.StringTransformer;
+
 
 public class SuggestionFunction implements SelectorFunction<Resource> {
     
@@ -91,7 +93,7 @@ public class SuggestionFunction implements SelectorFunction<Resource> {
     }
     
     @Override
-    public Collection<Resource> apply(final RDFBackend<Resource> backend, Collection<Resource>... args) throws IllegalArgumentException {
+    public Collection<Resource> apply(final RDFBackend<Resource> backend, Resource context, Collection<Resource>... args) throws IllegalArgumentException {
         Integer limit = parseParamLimit(backend, args,1);
 //        final String processingMode = parseParamProcessingMode(backend, args,2);
         final int missingConfidenceMode = parseParamMissingConfidenceMode(backend, args,2);
@@ -125,8 +127,8 @@ public class SuggestionFunction implements SelectorFunction<Resource> {
                                     List<Resource> result) {
         List<Entry<Double,Resource>> suggestions = new ArrayList<Entry<Double,Resource>>();
         for(Resource annotation : annotations){
-            for(Resource suggestion : suggestionSelector.select(backend, annotation)){
-                Collection<Resource> cs = confidenceSelector.select(backend, suggestion);
+            for(Resource suggestion : suggestionSelector.select(backend, annotation, null, null)){
+                Collection<Resource> cs = confidenceSelector.select(backend, suggestion, null, null);
                 Double confidence = !cs.isEmpty() ? backend.doubleValue(cs.iterator().next()) : 
                         missingConfidenceMode == MISSING_CONFIDENCE_FILTER ?
                                 null : missingConfidenceMode == MISSING_CONFIDENCE_FIRST ?
@@ -143,7 +145,7 @@ public class SuggestionFunction implements SelectorFunction<Resource> {
             if(resultSelector == null){
                 result.add(suggestion.getValue());
             } else {
-                result.addAll(resultSelector.select(backend, suggestion.getValue()));
+                result.addAll(resultSelector.select(backend, suggestion.getValue(), null, null));
             }
         }
     }
@@ -225,6 +227,17 @@ public class SuggestionFunction implements SelectorFunction<Resource> {
     public String getPathExpression(RDFBackend<Resource> backend) {
         return name;
     }
+
+	@Override
+	public String getSignature() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public String getDescription() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
     
 }

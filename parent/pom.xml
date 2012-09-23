@@ -1138,12 +1138,12 @@
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
       <artifactId>ldpath-api</artifactId>
-      <version>0.9.5</version>
+      <version>0.9.12</version>
     </dependency>
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core-bundle</artifactId>
-      <version>0.9.5</version>
+      <artifactId>ldpath-core</artifactId>
+      <version>0.9.12</version>
     </dependency>
     
     <!-- Apache Tika -->

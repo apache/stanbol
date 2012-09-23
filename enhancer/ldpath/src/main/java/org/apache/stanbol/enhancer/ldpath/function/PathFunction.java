@@ -56,7 +56,7 @@ public class PathFunction<Node> implements SelectorFunction<Node> {
     }
 
     @Override
-    public Collection<Node> apply(RDFBackend<Node> backend, Collection<Node>... args) throws IllegalArgumentException {
+    public Collection<Node> apply(RDFBackend<Node> backend, Node node, Collection<Node>... args) throws IllegalArgumentException {
         if(args == null || args.length < 1 || args[0] == null || args[0].isEmpty()){
             throw new IllegalArgumentException("The 'fn:"+name+"' function " +
                     "requires at least a single none empty parameter (the context). Use 'fn:" +
@@ -64,7 +64,7 @@ public class PathFunction<Node> implements SelectorFunction<Node> {
         }
         Set<Node> selected = new HashSet<Node>();
         for(Node context : args[0]){
-            selected.addAll(selector.select(backend, context));
+            selected.addAll(selector.select(backend, context, null, null));
         }
         return selected;
     }
@@ -73,5 +73,16 @@ public class PathFunction<Node> implements SelectorFunction<Node> {
     public String getPathExpression(RDFBackend<Node> backend) {
         return name;
     }
+
+
+	@Override
+	public String getSignature() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	@Override
+	public String getDescription() {
+		return "Pathfunction "+name+" with selector "+selector;
+	}
 
 }

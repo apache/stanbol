@@ -37,6 +37,7 @@ import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.newmedialab.ldpath.api.backend.RDFBackend;
 import at.newmedialab.ldpath.api.functions.SelectorFunction;
 
 /**
@@ -118,5 +119,21 @@ public class ContentFunction extends ContentItemFunction implements SelectorFunc
         }
         return result;
     }
+
+
+	@Override
+	public String getSignature() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getDescription() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
 
 }

@@ -45,7 +45,10 @@ public abstract class ContentItemFunction implements SelectorFunction<Resource> 
         this.name = name;
     }
     
-    public final Collection<Resource> apply(RDFBackend<Resource> backend, Collection<Resource>... args) throws IllegalArgumentException {
+	@Override
+	public final Collection<Resource> apply(RDFBackend<Resource> backend,
+			Resource context, Collection<Resource>... args)
+			throws IllegalArgumentException {
         if(backend instanceof ContentItemBackend){
             return apply((ContentItemBackend)backend, args);
         } else {
