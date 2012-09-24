@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>2-incubating-SNAPSHOT</version>
+    <version>2-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-  <version>0.10.1-incubating-SNAPSHOT</version>
+  <version>0.10.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Solr Core</name>
