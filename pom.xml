@@ -28,10 +28,10 @@
 
   <scm>
     <connection>
-  		scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/
+  		scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/contenthub/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/contenthub/
     </developerConnection>
   </scm>
 
