@@ -76,7 +76,7 @@
                <Bundle-Version>${osgi.version}</Bundle-Version>
                <Bundle-Description>${project.description}</Bundle-Description>
                <Bundle-Name>${project.name}</Bundle-Name>
-               <Bundle-DocURL>http://incubator.apache.org/stanbol</Bundle-DocURL>
+               <Bundle-DocURL>http://stanbol.apache.org</Bundle-DocURL>
                <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
                <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
                <Fragment-Host>system.bundle; extension:=framework</Fragment-Host>

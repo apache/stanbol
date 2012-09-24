@@ -35,9 +35,9 @@
   </description>
   
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/release/apache-stanbol-framework-source-release-assembly-descriptor</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/release/apache-stanbol-framework-source-release-assembly-descriptor</developerConnection>
-    <url>http://incubator.apache.org/stanbol</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/release/apache-stanbol-framework-source-release-assembly-descriptor</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/release/apache-stanbol-framework-source-release-assembly-descriptor</developerConnection>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <!-- workaround find from : https://issues.apache.org/jira/browse/SLING-2164b-->

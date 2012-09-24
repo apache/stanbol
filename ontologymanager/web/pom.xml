@@ -35,12 +35,12 @@
   <description>Home page of Apache Stanbol OntoNet HTTP endpoints.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/ontologymanager/web
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/ontologymanager/web
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/ontologymanager/web
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/ontologymanager/web
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

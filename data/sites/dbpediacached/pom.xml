@@ -43,12 +43,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites/dbpediacached
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/data/sites/dbpediacached
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites/dbpediacached
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/data/sites/dbpediacached
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

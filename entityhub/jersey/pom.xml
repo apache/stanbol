@@ -39,12 +39,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/jersey
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/jersey
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/jersey
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/jersey
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>

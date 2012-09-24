@@ -48,12 +48,12 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/site/linkeddata
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/site/linkeddata
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/site/linkeddata
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/site/linkeddata
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>

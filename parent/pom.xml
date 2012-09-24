@@ -45,9 +45,9 @@
   </licenses>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/parent</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/parent</developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/parent</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/parent</developerConnection>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <issueManagement>
@@ -161,7 +161,7 @@
           <inherited>true</inherited>
           <configuration>
             <instructions>
-              <Bundle-DocURL>http://incubator.apache.org/stanbol</Bundle-DocURL>
+              <Bundle-DocURL>http://stanbol.apache.org</Bundle-DocURL>
               <Bundle-Vendor>Apache Stanbol (Incubating)</Bundle-Vendor>
               <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
               <_versionpolicy>$${version;===;${@}}</_versionpolicy>
