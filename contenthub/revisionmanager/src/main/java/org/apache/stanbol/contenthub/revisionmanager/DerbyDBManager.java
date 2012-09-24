@@ -177,8 +177,9 @@ public class DerbyDBManager {
                     break;
                 }
             }
+            
         } catch (SQLException e) {
-            log.error("Failed to check existence of the table: {}", tableName);
+            log.error("Failed to check existence of the table: {}", tableName, e);
             throw new RevisionManagerException(String.format("Failed to check existence of the table: %s",
                 tableName), e);
         } finally {
@@ -601,7 +602,7 @@ public class DerbyDBManager {
         String query = "INSERT INTO \"" + tableName + "\" (id, revision) VALUES";
         StringBuilder sb = new StringBuilder(query);
         try {
-            long revision = Long.MIN_VALUE;
+            long revision = Long.MIN_VALUE + 1;
             int i;
             for (i = 0; i < itemIDs.size(); i++) {
                 sb.append("(?,?),");

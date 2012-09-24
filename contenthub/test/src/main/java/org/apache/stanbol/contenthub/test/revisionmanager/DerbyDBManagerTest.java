@@ -24,11 +24,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.sling.junit.annotations.SlingAnnotationsTestRunner;
 import org.apache.sling.junit.annotations.TestReference;
 import org.apache.stanbol.commons.semanticindex.store.StoreException;
+import org.apache.stanbol.commons.semanticindex.store.revisionmanager.RevisionBean;
+import org.apache.stanbol.commons.semanticindex.store.revisionmanager.RevisionManagerException;
 import org.apache.stanbol.contenthub.revisionmanager.DerbyDBManager;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.BundleContext;
@@ -40,6 +46,20 @@ public class DerbyDBManagerTest {
 
     @TestReference
     private BundleContext bundleContext;
+
+    Connection con = null;
+
+    @Before
+    public void before() throws RevisionManagerException {
+        if (con == null) {
+            con = dbManager.getConnection();
+        }
+    }
+
+    @After
+    public void after() {
+        dbManager.closeConnection(con);
+    }
 
     @Test
     public void dbManagerTest() {
@@ -65,21 +85,49 @@ public class DerbyDBManagerTest {
     }
 
     @Test
-    public void testCreateRevisionTable() throws StoreException, SQLException {
+    public void testCreateRevisionTable() throws RevisionManagerException {
         String tableName = "StoreDBManagerRevisionTable";
-        dbManager.createRevisionTable(tableName);
-        assertTrue("Failed to create " + tableName, dbManager.existsTable(tableName));
-        // clear test data
-        Connection con = dbManager.getConnection();
+        try {
+            dbManager.createRevisionTable(tableName);
+            assertTrue("Failed to create " + tableName, dbManager.existsTable(tableName));
+        } finally {
+            dbManager.removeTable(tableName);
+        }
+    }
+
+    @Test
+    public void testExistsTable() throws SQLException, RevisionManagerException {
+        String tableName = "existTable";
         Statement stmt = null;
         try {
-            // first remove the the table
+            String createRevisionTable = "CREATE TABLE \""
+                                         + tableName
+                                         + "\" (id VARCHAR(1024) NOT NULL PRIMARY KEY,revision BIGINT NOT NULL)";
             stmt = con.createStatement();
-            stmt.executeUpdate("DROP TABLE \"" + tableName + "\"");
+            stmt.executeUpdate(createRevisionTable);
+            assertTrue(String.format("Failed to detect existence of the %s table", tableName),
+                dbManager.existsTable(tableName));
 
         } finally {
             dbManager.closeStatement(stmt);
-            dbManager.closeConnection(con);
+            dbManager.removeTable(tableName);
+        }
+    }
+
+    public void testRemoveTable() throws SQLException, RevisionManagerException {
+        String tableName = "removeTable";
+        Statement stmt = null;
+        try {
+            String createRevisionTable = "CREATE TABLE \""
+                                         + tableName
+                                         + "\" (id VARCHAR(1024) NOT NULL PRIMARY KEY,revision BIGINT NOT NULL)";
+            stmt = con.createStatement();
+            stmt.executeUpdate(createRevisionTable);
+            assertTrue(String.format("Failed to remove the %s table", tableName),
+                !dbManager.existsTable(tableName));
+
+        } finally {
+            dbManager.closeStatement(stmt);
         }
     }
 
@@ -89,14 +137,12 @@ public class DerbyDBManagerTest {
         // create dummy table
         dbManager.createRevisionTable(tableName);
 
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             // put some value into it
             String insertQuery = "INSERT INTO \"" + tableName + "\" (id, revision) VALUES(?,?)";
             long initialRevision = System.currentTimeMillis();
-            con = dbManager.getConnection();
             for (int i = 0; i < 5; i++) {
                 ps = con.prepareStatement(insertQuery);
                 ps.setString(1, "id" + i);
@@ -121,18 +167,115 @@ public class DerbyDBManagerTest {
         } finally {
             dbManager.closeResultSet(rs);
             dbManager.closeStatement(ps);
+            dbManager.removeTable(tableName);
+        }
+    }
 
-            // clear test data
-            Statement stmt = null;
-            try {
-                // first remove the the table
-                stmt = con.createStatement();
-                stmt.executeUpdate("DROP TABLE \"" + tableName + "\"");
+    @Test
+    public void testGetEpochEntry() throws SQLException, RevisionManagerException {
+        long epoch = 413;
+        String tableName = "getEpochTable";
+        try {
+            dbManager.createEpochEntry(tableName, epoch);
+            long retrivedEpoch = dbManager.getEpoch(tableName);
+            assertTrue("Failed to retrieve expected epoch value", retrivedEpoch == epoch);
 
-            } finally {
-                dbManager.closeStatement(stmt);
-                dbManager.closeConnection(con);
+        } finally {
+            // remove test entry
+            dbManager.removeEpochEntry(tableName);
+        }
+    }
+
+    @Test
+    public void testCreateEpochEntry() throws RevisionManagerException {
+        String tableName = "createEpochEntryTable";
+        long epoch = 413;
+        try {
+            dbManager.createEpochEntry(tableName, epoch);
+            long retrievedEpoch = dbManager.getEpoch(tableName);
+            assertTrue("Created and retrieved epochs should be the same", retrievedEpoch == epoch);
+        } finally {
+            // remove test entry
+            dbManager.removeEpochEntry(tableName);
+        }
+    }
+
+    @Test
+    public void testUpdateEpochEntry() throws RevisionManagerException {
+        String tableName = "updateEpochEntryTable";
+        long epoch = 413;
+        long updatedEpoch = 909;
+        try {
+            dbManager.createEpochEntry(tableName, epoch);
+            dbManager.updateEpochEntry(tableName, updatedEpoch);
+            long retrievedEpoch = dbManager.getEpoch(tableName);
+            assertTrue("Updated and retrieved epoch should be the same", updatedEpoch == retrievedEpoch);
+        } finally {
+            dbManager.removeEpochEntry(tableName);
+        }
+    }
+
+    @Test(expected = RevisionManagerException.class)
+    public void testRemoveEpochEntry() throws RevisionManagerException {
+        String tableName = "removeEpochEntry";
+        long epoch = 413;
+        dbManager.createEpochEntry(tableName, epoch);
+        dbManager.removeEpochEntry(tableName);
+        dbManager.getEpoch(tableName);
+    }
+
+    @Test
+    public void testCreateExistsRevisionMethods() throws RevisionManagerException {
+        String tableName = "revisionMethodsTable";
+        String itemID = "itemID";
+        long revision = 413;
+        try {
+            dbManager.createRevisionTable(tableName);
+            dbManager.createRevisionEntry(tableName, itemID, revision);
+            assertTrue("Failed to create revision", dbManager.existsRevisionEntry(tableName, itemID));
+        } finally {
+            dbManager.removeTable(tableName);
+        }
+    }
+
+    @Test
+    public void testCreateGetRevisionEntries() throws RevisionManagerException {
+        String tableName = "createEntriesTable";
+        String itemID = "itemID";
+        List<String> itemIDs = new ArrayList<String>();
+        for (int i = 0; i < 5; i++) {
+            itemIDs.add(itemID + i);
+        }
+        try {
+            dbManager.createRevisionTable(tableName);
+            dbManager.createRevisionEntries(tableName, itemIDs);
+            List<RevisionBean> revisions = dbManager.getRevisions(tableName, Long.MIN_VALUE, Long.MAX_VALUE,
+                5, 0);
+            for (int i = 0; i < 5; i++) {
+                String id = revisions.get(i).getID();
+                assertTrue(String.format("Original items does not contain the ID: %s", id),
+                    itemIDs.contains(id));
             }
+        } finally {
+            dbManager.removeTable(tableName);
+        }
+    }
+
+    @Test
+    public void testUpdateRevisionEntry() throws RevisionManagerException {
+        String tableName = "updateRevisionEntryTable";
+        String itemID = "itemID";
+        long revision = 413;
+        long updatedRevision = 909;
+        try {
+            dbManager.createRevisionTable(tableName);
+            dbManager.createRevisionEntry(tableName, itemID, revision);
+            dbManager.updateRevisionEntry(tableName, itemID, updatedRevision);
+            List<RevisionBean> revisions = dbManager.getRevisions(tableName, 0, 1000, 1, 0);
+            assertTrue("Failed to retrieve the updated revision",
+                revisions.get(0).getRevision() == updatedRevision);
+        } finally {
+            dbManager.removeTable(tableName);
         }
     }
 }
