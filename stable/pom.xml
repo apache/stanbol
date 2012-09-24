@@ -27,7 +27,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.launchers.stable</artifactId>
-  <version>0.10.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Launchers Stable Launcher</name>
@@ -139,7 +139,7 @@
       <!-- The Apache Stanbol lauchpad -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchpad</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <!-- maven-launchpad-plugin builds on the launchpad.base app -->
@@ -197,7 +197,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.bundlelists.opennlp</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>

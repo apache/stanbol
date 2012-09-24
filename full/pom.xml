@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>2-incubating-SNAPSHOT</version>
+    <version>2-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.launchers.full</artifactId>
-  <version>0.10.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Launchers Full Launcher</name>
@@ -139,7 +139,7 @@
       <!-- The Apache Stanbol lauchpad -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchpad</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <!-- maven-launchpad-plugin builds on the launchpad.base app -->
@@ -152,7 +152,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -161,7 +161,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -170,7 +170,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.authentication</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -179,7 +179,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.zzshell</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -188,7 +188,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.cmsadapter.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -197,7 +197,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -206,14 +206,14 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.bundlelists.defaultdata</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
     <dependency> <!-- include all OpenNLP models in the full launcher -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.bundlelists.opennlp</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -222,7 +222,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -231,7 +231,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.bundlelist</artifactId>
-      <version>0.11.0-incubating-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -240,7 +240,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.factstore.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -249,7 +249,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -258,7 +258,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -267,7 +267,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>

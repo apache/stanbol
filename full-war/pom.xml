@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>2-incubating-SNAPSHOT</version>
+    <version>2-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.launchers.full-war</artifactId>
-  <version>0.10.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <name>Apache Stanbol Launchers Full Launcher as WAR</name>
@@ -124,7 +124,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
 
@@ -132,14 +132,14 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
     <!-- Authentication Support-->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.authentication</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -148,7 +148,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.cmsadapter.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
 
@@ -156,7 +156,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
 
@@ -164,14 +164,14 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.bundlelists.defaultdata</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
     
     <dependency> <!-- include all OpenNLP models in the full launcher -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.bundlelists.opennlp</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -180,7 +180,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
 
@@ -188,7 +188,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.bundlelist</artifactId>
-      <version>0.11.0-incubating-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
     
@@ -196,7 +196,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.factstore.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
 
@@ -204,7 +204,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
 
@@ -212,7 +212,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
     
@@ -220,7 +220,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.bundlelist</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
