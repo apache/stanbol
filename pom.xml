@@ -45,9 +45,9 @@
   </licenses>
   
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/releasing/source-assembly</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/releasing/source-assembly</developerConnection>
-    <url>http://incubator.apache.org/stanbol</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/releasing/source-assembly</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/releasing/source-assembly</developerConnection>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>
