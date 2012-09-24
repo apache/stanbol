@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.11.0-incubating-SNAPSHOT</version>
+    <version>0.11.0-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
-  <version>0.11.0-incubating-SNAPSHOT</version>
+  <version>0.11.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Entityhub Yard based on Clerezza</name>
@@ -86,7 +86,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.11.0-incubating-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -126,7 +126,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.test</artifactId>
-      <version>0.11.0-incubating-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <!-- A TC Provider is needed to run the Unit Tests of the Yard Interface.

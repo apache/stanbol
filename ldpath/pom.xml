@@ -16,13 +16,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.11.0-incubating-SNAPSHOT</version>
+    <version>0.11.0-SNAPSHOT</version>
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
-  <version>0.11.0-incubating-SNAPSHOT</version>
+  <version>0.11.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Entityhub LDPath Support</name>
@@ -80,12 +80,12 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.11.0-incubating-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.11.0-incubating-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
 
     <!-- LD Path -->
@@ -130,13 +130,13 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.11.0-incubating-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-      <version>1.0.5-incubating-SNAPSHOT</version>
+      <version>1.0.5-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <!-- Apache Stanbol Commons Solr and Solr Yard dependencies -->
