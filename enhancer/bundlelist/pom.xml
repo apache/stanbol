@@ -17,13 +17,13 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-		<version>0.10.0-incubating-SNAPSHOT</version>
+		<version>0.10.0-SNAPSHOT</version>
 		<relativePath>../parent</relativePath>
 	</parent>
 
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
-	<version>0.10.0-incubating-SNAPSHOT</version>
+	<version>0.10.0-SNAPSHOT</version>
 	<packaging>partialbundlelist</packaging>
 
 	<name>Apache Stanbol Enhancer Bundle List</name>

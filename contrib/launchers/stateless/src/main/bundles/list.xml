@@ -46,7 +46,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
 
@@ -55,17 +55,17 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
-      <version>1.0.2-incubating-SNAPSHOT</version>
+      <version>1.0.2-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-      <version>1.0.2-incubating-SNAPSHOT</version>
+      <version>1.0.2-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-      <version>1.0.4-incubating-SNAPSHOT</version>
+      <version>1.0.4-SNAPSHOT</version>
     </bundle>
   </startLevel>
 
@@ -79,17 +79,17 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.weightedjobmanager</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
     </bundle>
 	<bundle>
 	  <groupId>org.apache.stanbol</groupId>
 	  <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-	  <version>0.10.0-incubating-SNAPSHOT</version>
+	  <version>0.10.0-SNAPSHOT</version>
 	</bundle>
   </startLevel>
 
@@ -103,7 +103,7 @@
         <bundle>
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
-            <version>0.10.0-incubating-SNAPSHOT</version>
+            <version>0.10.0-SNAPSHOT</version>
         </bundle>
 	</startLevel>
 
