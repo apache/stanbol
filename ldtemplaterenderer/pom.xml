@@ -40,7 +40,7 @@
     <developerConnection>
       scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/ldpathtemplate
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

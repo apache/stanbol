@@ -37,12 +37,12 @@
   </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/testing/http
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/testing/http
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/testing/http
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/testing/http
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <dependencies>
