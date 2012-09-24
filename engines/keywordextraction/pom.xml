@@ -44,12 +44,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/keywordextraction/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/keywordextraction/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/keywordextraction/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/keywordextraction/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
