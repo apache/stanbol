@@ -59,5 +59,8 @@
     <module>zemanta</module> <!-- htt://zemanta.com -->
     <!-- DBpedia.org Spotlight Enhancement Engines (STANBOL-706) -->
     <module>dbpedia-spotlight</module>
+    <module>uimaremote</module>
+    <module>uimatotriples</module>
+    <module>uimalocal-template</module>
   </modules>
 </project>
