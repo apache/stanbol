@@ -147,8 +147,8 @@ public class OWLUtils {
                     IRI.create(graph.getVersionIRI().getUnicodeString()));
             log.info(" *** Guessed ID : {}", result);
         }
-        log.info(" *** Triples scanned : {}, filtered : {}", graph.getScannedTripleCount(), graph.size());
-        log.info(" *** Time : {} ms", System.currentTimeMillis() - before);
+        log.info(" ... Triples scanned : {}; filtered in : {}", graph.getScannedTripleCount(), graph.size());
+        log.info(" ... Time : {} ms", System.currentTimeMillis() - before);
         return result;
     }
 
