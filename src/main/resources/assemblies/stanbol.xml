@@ -37,9 +37,6 @@
 
         <!-- license issues -->
         <exclude>enhancer/engines/metaxa/**</exclude>
-        <exclude>data/opennlp/lang/**/*.bin</exclude>
-        <exclude>data/opennlp/ner/**/*.bin</exclude>
-        <exclude>data/sites/dbpedia/**/*.zip</exclude>
 
         <!-- demos have their own release cycle -->
         <exclude>demos/**</exclude>
@@ -53,6 +50,9 @@
 
         <!-- build output -->
         <exclude>%regex[(?!((?!${project.build.directory}/)[^/]+/)*src/).*${project.build.directory}.*]</exclude>
+
+        <!-- downloads -->
+        <exclude>%regex[(?!((?!downloads/)[^/]+/)*src/).*downloads.*]</exclude>
         
         <!-- NOTE: Most of the following excludes should not be required 
              if the standard release process is followed. This is because the 
