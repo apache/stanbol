@@ -65,6 +65,7 @@
     <module>launchpad</module>
     <module>security</module>
     <module>authentication.basic</module>
+    <module>caslight</module>
 
     <module>testing/jarexec</module>
     <module>testing/http</module>
