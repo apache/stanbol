@@ -62,6 +62,7 @@
           <excludes>
             <!-- AL20 licensed files. See src/main/resources/README -->
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-language.config</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-default.config</exclude>            
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.keywordextraction.engine.KeywordLinkingEngine-entityhub.config</exclude>
           </excludes>
         </configuration>

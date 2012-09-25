@@ -19,26 +19,46 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>2-SNAPSHOT</version>
+    <relativePath>../parent</relativePath>
+  </parent>
+
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.data.reactor</artifactId>
+  <artifactId>apache-stanbol-data</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   
-  <name>Apache Stanbol Data Reactor</name>
+  <name>Apache Stanbol Data</name>
+  <description>
+    Pseudo project to build the complete Apache Stanbol Data bundles
+  </description>  
+
+  <inceptionYear>2010</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>  
 
   <scm>
-      <connection>
-          scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/data
-      </connection>
-      <developerConnection>
-          scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/data
-      </developerConnection>
-      <url>http://stanbol.apache.org/</url>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/data
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/data
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
   </scm>
   
   <modules>
-      <module>parent</module>
-      <module>defaultconfig</module>
+    <module>parent</module>
+    <module>defaultconfig</module>
   </modules>
 
   <profiles>
@@ -102,5 +122,60 @@
         <module>bundlelists/opennlp</module>
       </modules>
     </profile>
+    <profile>
+      <id>apache-release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <configuration>
+              <excludeSubProjects>false</excludeSubProjects>
+              <excludes>
+                <!--
+                  All license headers are also checked per
+                  artifact. These excludes are necessary
+                  to make the reactor build suceed. Consider
+                  the excluded files here as already checked
+                  in the artifacts.
+                -->
+
+                <!-- exclude hidden files -->
+                <exclude>**/.*</exclude>
+                <exclude>**/.*/*</exclude>
+                <exclude>**/.*/**/*</exclude>
+
+                <!-- exclude build files -->
+                <exclude>**/target/**</exclude>
+                <exclude>**/*.log</exclude>             
+
+                <!-- exclude generated files listing the licenses of deps -->
+                <exclude>DEPENDENCIES</exclude>
+                <exclude>DEPENDENCIES-BY-LICENSE</exclude>
+                <exclude>RAT-REPORT</exclude>
+
+                <!-- exclude certain file types -->
+                <exclude>**/*.config</exclude>
+                <exclude>**/*.ref</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>aggregate-add-third-party</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>    
   </profiles>
 </project>
