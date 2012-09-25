@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -45,54 +46,60 @@ import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
+
 /**
- *
  * @author Mihaly Heder
  */
 @Component(immediate = true, metatype = true, inherit = true,
-label = "UIMA To RDF triples Enhancement Engine",
-description = "Filters and converts UIMA Feature Structures to RDF Triples")
+        label = "UIMA To RDF triples Enhancement Engine",
+        description = "Filters and converts UIMA Feature Structures to RDF Triples")
 @Service
 @Properties(value = {
-    @Property(name = EnhancementEngine.PROPERTY_NAME, value = "uimatotriples")
+        @Property(name = EnhancementEngine.PROPERTY_NAME, value = "uimatotriples")
 })
-public class UIMAToTriples
-        extends AbstractEnhancementEngine<RuntimeException, RuntimeException>
+public class UIMAToTriples extends AbstractEnhancementEngine<RuntimeException, RuntimeException>
         implements EnhancementEngine, ServiceProperties {
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private static final Integer defaultOrder = ServiceProperties.ORDERING_POST_PROCESSING;
+
     @Property(cardinality = 1000, label = "UIMA source names",
-    description = "The name of the uima sources as defined in the UIMA Client Enhancement Engine")
-    public static final String UIMA_SOURCENAMES = "stanbol.engine.uimatotriples.sourcenames";
+            description = "The name of the uima sources as defined in the UIMA Client Enhancement Engine")
+    private static final String UIMA_SOURCENAMES = "stanbol.engine.uimatotriples.sourcenames";
+
     @Property(value = "uima.apache.org", label = "Content Part URI reference",
-    description = "The URI Reference of the UIMA content part, as defined in the UIMA Client")
-    public static final String UIMA_CONTENTPART_URIREF = "stanbol.engine.uimatotriples.contentpart.uriref";
+            description = "The URI Reference of the UIMA content part, as defined in the UIMA Client")
+    private static final String UIMA_CONTENTPART_URIREF = "stanbol.engine.uimatotriples.contentpart.uriref";
+
     @Property(cardinality = 1000, label = "UIMA annotations to process",
-    description = "The UIMA type names enumerated here will be converted to triples. "
-    + "You can filter by features, e.g TokenAnnotation;posTag=v.* will give you only "
-    + "those TokenAnnotations which have a posTag and its value matches the "
-    + "regexp 'v.*'. No other features will be converted. If you want to convert additional features, "
-    + "enumerate them: TokenAnnotation;posTag=v.*;lemma this will also convert the lemma feature of "
-    + "the filtered TokenAnnotations  ")
-    public static final String UIMA_TYPENAMES = "stanbol.engine.uimatotriples.typenames";
+            description = "The UIMA type names enumerated here will be converted to triples. "
+                    + "You can filter by features, e.g TokenAnnotation;posTag=v.* will give you only "
+                    + "those TokenAnnotations which have a posTag and its value matches the "
+                    + "regexp 'v.*'. No other features will be converted. If you want to convert additional features, "
+                    + "enumerate them: TokenAnnotation;posTag=v.*;lemma this will also convert the lemma feature of "
+                    + "the filtered TokenAnnotations  ")
+    private static final String UIMA_TYPENAMES = "stanbol.engine.uimatotriples.typenames";
+
     @Property(cardinality = 1000, label = "UIMA type/feature name to RDF name mappings",
-    description = "Syntax: oldName;newname . You can provide here a mapping according to which names should be translated to RDF."
-    + "E.g. you might want to an UIMA posTag feature to appear as sso:posTag. You can give mappings for type"
-    + "names as well as for feature names here.")
-    public static final String UIMA_MAPPINGS = "stanbol.engine.uimatotriples.mappings";
-    final Logger logger = LoggerFactory.getLogger(this.getClass());
-    public static final Integer defaultOrder = ServiceProperties.ORDERING_POST_PROCESSING;
+            description = "Syntax: oldName;newname . You can provide here a mapping according to which names should be translated to RDF."
+                    + "E.g. you might want to an UIMA posTag feature to appear as sso:posTag. You can give mappings for type"
+                    + "names as well as for feature names here.")
+    private static final String UIMA_MAPPINGS = "stanbol.engine.uimatotriples.mappings";
+
     protected static final Set<String> SUPPORTED_MIMETYPES =
             Collections.unmodifiableSet(new HashSet<String>(
-            Arrays.asList("text/plain", "text/html")));
+                    Arrays.asList("text/plain", "text/html")));
+
     private String uimaUri;
     private String[] sourceNames;
     private Map<String, String> mappings;
@@ -133,9 +140,8 @@ public class UIMAToTriples
                 String[] mainparts = map.split(";", 2);
                 if (mainparts.length == 2) {
                     mappings.put(mainparts[0], mainparts[1]);
-                }
-                else {
-                    logger.warn("Mapping string '"+map+"' does not contain ';'. Skipping this mapping.");
+                } else {
+                    logger.warn(new StringBuilder("Mapping string '").append(map).append("' does not contain ';'. Skipping this mapping.").toString());
                 }
             }
         }
@@ -153,22 +159,23 @@ public class UIMAToTriples
 
         try {
             UriRef uimaUriRef = new UriRef(uimaUri);
-            logger.info("Trying to load holder for ref:" + uimaUri);
+            logger.info(new StringBuilder("Trying to load holder for ref:").append(uimaUri).toString());
             holder = ci.getPart(uimaUriRef, FeatureStructureListHolder.class);
             for (String source : sourceNames) {
-                logger.info("Processing UIMA source:" + source);
+                logger.info(new StringBuilder("Processing UIMA source:").append(source).toString());
                 List<FeatureStructure> sourceList = holder.getFeatureStructureList(source);
                 if (sourceList != null) {
-                    logger.info("UIMA source:" + source + " contains " + sourceList.size() + " annotations.");
+                    logger.info(new StringBuilder("UIMA source:").append(source)
+                            .append(" contains ").append(sourceList.size()).append(" annotations.").toString());
                 } else {
-                    logger.info("Source list is null:" + source);
+                    logger.info(new StringBuilder("Source list is null:").append(source).toString());
                     continue;
                 }
                 for (FeatureStructure fs : sourceList) {
                     String typeName = fs.getTypeName();
-                    logger.debug("Checking " + typeName);
+                    logger.debug(new StringBuilder("Checking ").append(typeName).toString());
                     if (tnfs.checkFeatureStructureAllowed(typeName, fs.getFeatures())) {
-                        logger.debug("Adding " + typeName);
+                        logger.debug(new StringBuilder("Adding ").append(typeName).toString());
                         UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(
                                 ci, this);
                         MGraph metadata = ci.getMetadata();
@@ -210,7 +217,7 @@ public class UIMAToTriples
 
 
         } catch (NoSuchPartException e) {
-            logger.error("No UIMA results found with ref:" + uimaUri, e);
+            logger.error(new StringBuilder("No UIMA results found with ref:").append(uimaUri).toString(), e);
         }
     }
 
