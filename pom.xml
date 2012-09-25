@@ -110,7 +110,7 @@
         </configuration>
       </plugin>
 
-      <!-- Add license and disclaimer to artifacts -->
+      <!-- Add license to artifacts -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
@@ -118,7 +118,6 @@
           <execution>
             <configuration>
               <resourceBundles>
-                <resourceBundle>org.apache:apache-incubator-disclaimer-resource-bundle:1.1</resourceBundle>
                 <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
               </resourceBundles>
             </configuration>
@@ -1490,7 +1489,7 @@
               <dependency>
                 <groupId>org.apache.stanbol</groupId>
                 <artifactId>source-assembly</artifactId>
-                <version>0.10.0-incubating</version>
+                <version>1.0.0-SNAPSHOT</version>
               </dependency>
             </dependencies>
           </plugin>
