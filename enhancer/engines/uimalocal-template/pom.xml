@@ -57,6 +57,11 @@
             <artifactId>org.apache.stanbol.commons.caslight</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-uima</artifactId>
+            <version>4.0.0-BETA</version>
+        </dependency>
     </dependencies>
 
     <build>
