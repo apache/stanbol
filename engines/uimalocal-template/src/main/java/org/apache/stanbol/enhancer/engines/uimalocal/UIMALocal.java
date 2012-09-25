@@ -16,8 +16,6 @@
 */
 package org.apache.stanbol.enhancer.engines.uimalocal;
 
-import org.apache.stanbol.enhancer.engines.uimalocal.endorsed.AEProvider;
-import org.apache.stanbol.enhancer.engines.uimalocal.endorsed.AEProviderFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,14 +28,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.caslight.Feature;
 import org.apache.stanbol.commons.caslight.FeatureStructure;
 import org.apache.stanbol.commons.caslight.FeatureStructureListHolder;
-import org.apache.stanbol.commons.caslight.Feature;
+import org.apache.stanbol.enhancer.engines.uimalocal.endorsed.AEProvider;
+import org.apache.stanbol.enhancer.engines.uimalocal.endorsed.AEProviderFactory;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -61,45 +62,47 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Mihaly Heder
  */
 @Component(immediate = true, metatype = true, inherit = true, label = "UIMA Local Enhancement Engine",
-description = "Runs UIMA Analysis Engine and retuns values.")
+        description = "Runs UIMA Analysis Engine and retuns values.")
 @Service
 @Properties(value = {
-    @Property(name = EnhancementEngine.PROPERTY_NAME, value = "uimalocal")
+        @Property(name = EnhancementEngine.PROPERTY_NAME, value = "uimalocal")
 })
 public class UIMALocal extends AbstractEnhancementEngine<RuntimeException, RuntimeException>
         implements EnhancementEngine, ServiceProperties {
 
-    Imports imports = new Imports();
-    private AEProvider aeProvider;
-    final Logger logger = LoggerFactory.getLogger(this.getClass());
-    @Property(value = "sourceName",
-    label = "UIMA source name",
-    description = "The name of this UIMA source"
-    + "The sourcename will be used for referring internally to the UIMA endpoint")
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Property(value = "sourceName", label = "UIMA source name",
+            description = "The name of this UIMA source which will be used for referring internally to the UIMA endpoint")
     public static final String UIMA_SOURCENAME = "stanbol.engine.uimalocal.sourcename";
+
     @Property(value = "/path/to/descriptor",
-    label = "UIMA descriptor file path",
-    description = "The file path to the UIMA descriptor XML to load")
+            label = "UIMA descriptor file path",
+            description = "The file path to the UIMA descriptor XML to load")
     public static final String UIMA_DESCRIPTOR_PATH = "stanbol.engine.uimalocal.descriptorpath";
+
     @Property(value = "uima.apache.org", label = "Content Part URI reference",
-    description = "The URI Reference of the UIMA content part to be created. This content part will "
-    + "contain Annotations from all the resources above.")
+            description = "The URI Reference of the UIMA content part to be created. This content part will "
+                    + "contain Annotations from all the resources above.")
     public static final String UIMA_CONTENTPART_URIREF = "stanbol.engine.uimalocal.contentpart.uriref";
+
     @Property(cardinality = 1000, value = "text/plain", label = "Supported Mime Types",
-    description = "Mime Types supported by this client. This should be aligned to the capabilities of the "
-    + "UIMA Endpoints.")
+            description = "Mime Types supported by this client. This should be aligned to the capabilities of the UIMA Endpoints.")
     public static final String UIMA_SUPPORTED_MIMETYPES = "stanbol.engine.uimalocal.contentpart.mimetypes";
+
     public static final Integer defaultOrder = ServiceProperties.ORDERING_PRE_PROCESSING;
+
+    private AEProvider aeProvider;
     private Set<String> SUPPORTED_MIMETYPES;
     private String uimaUri;
     private String uimaSourceName;
     private String uimaDescriptorPath;
     private List<String> uimaTypeNames;
-    
+
 
     @Override
     protected void activate(ComponentContext ctx) throws ConfigurationException {
@@ -243,7 +246,7 @@ public class UIMALocal extends AbstractEnhancementEngine<RuntimeException, Runti
         Type type = jcas.getTypeSystem().getType(typeName);
         List<org.apache.uima.cas.Feature> featList = type.getFeatures();
 
-        for (FSIterator<org.apache.uima.cas.FeatureStructure> iterator = jcas.getFSIndexRepository().getAllIndexedFS(type); iterator.hasNext();) {
+        for (FSIterator<org.apache.uima.cas.FeatureStructure> iterator = jcas.getFSIndexRepository().getAllIndexedFS(type); iterator.hasNext(); ) {
             org.apache.uima.cas.FeatureStructure casFs = iterator.next();
             logger.debug("Processing UIMA CAS FeatureSet:" + casFs.toString());
             FeatureStructure newFs = new FeatureStructure(UUID.randomUUID().toString(), type.getShortName());
