@@ -56,17 +56,20 @@
   </scm>
 
   <properties>
-    <downloadWarning>
-*                  
-* WARNING - this build downloads some OpenNLP files that are *not*
-* licensed under the Apache License, and have more restrictive usage
-* terms than the Apache Stanbol code. See STANBOL-545 for more
-* information: https://issues.apache.org/jira/browse/STANBOL-545
-*
-    </downloadWarning>
+    <downloadWarning>No downloads for this artifact.</downloadWarning>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>    
   </properties>  
 
   <build>
+    <resources> 
+      <resource> 
+        <directory>src/main/resources</directory> 
+      </resource> 
+      <resource> 
+        <directory>downloads/resources</directory> 
+      </resource> 
+    </resources> 
+
     <pluginManagement>
       <plugins>
         <plugin>
@@ -99,7 +102,7 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
-            <phase>validate</phase>
+            <phase>generate-resources</phase>
             <goals>
               <goal>run</goal>
             </goals>
@@ -111,7 +114,32 @@
           </execution>
         </executions>
       </plugin>
-    </plugins>
+    </plugins>    
   </build>
 
+  <profiles>
+    <profile>
+      <activation>
+        <property>
+          <name>downloads</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>2.5</version>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>./downloads</directory>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>      
+    </profile>
+  </profiles>
 </project>

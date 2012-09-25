@@ -108,8 +108,8 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
-            <id>compile</id>
-            <phase>compile</phase>
+            <id>download</id>
+            <phase>generate-resources</phase>
             <configuration>
               <!--
                 TODO: I would like to add an "unless" constraint to the
@@ -121,7 +121,7 @@
                 available!
               -->
               <target>
-                <property name="target.directory" value="${project.basedir}/src/main/resources/${dbpedia.default.index.path}" />
+                <property name="target.directory" value="${project.basedir}/downloads/resources/${dbpedia.default.index.path}" />
                 <property name="index.url" value="${dbpedia.default.index.url}" />
                                 
                 <echo message="copy Solr Index " />
