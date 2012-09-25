@@ -18,9 +18,9 @@
 package org.apache.stanbol.rules.adapters.impl;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -144,11 +144,10 @@ public class RuleAdaptersFactoryImpl implements RuleAdaptersFactory, ServiceList
 
     @Override
     public List<RuleAdapter> listRuleAdapters() {
-
-        List<RuleAdapter> ruleAdapters = Collections.emptyList();
+        List<RuleAdapter> ruleAdapters = new LinkedList<RuleAdapter>();
+        // Collections.emptyList();
         ruleAdapters.addAll(this.ruleAdapters.values());
         return ruleAdapters;
-
     }
 
     @Override

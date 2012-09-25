@@ -87,7 +87,28 @@
           </tr>
         </#list>
       </div>
-    </table> <!-- allScopes -->
+    </table> <!-- allOntologies -->
+  </div>
+  
+  <h3>Orphan ontologies</h3>
+  <#assign orphans = it.orphans>
+  <div class="storeContents">
+    <table id="orphans">
+      <div>
+        <tr>
+          <th width="90%">ID</th>
+          <th width="5%">Aliases</th>
+          <th width="5%">Direct handles</th>
+        </tr>
+        <#list orphans as orphan>
+          <tr>
+            <td><strike>${it.stringForm(orphan)}</strike></td>
+            <td>${it.getAliases(orphan)?size}</td>
+            <td>${it.getHandles(orphan)?size}</td>
+          </tr>
+        </#list>
+      </div>
+    </table> <!-- orphans -->
   </div>
   
   <hr>

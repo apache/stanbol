@@ -73,19 +73,22 @@ import org.slf4j.LoggerFactory;
 @Service(SessionManager.class)
 public class SessionManagerImpl implements SessionManager, ScopeEventListener {
 
+    public static final String _CONNECTIVITY_POLICY_DEFAULT = "TIGHT";
     public static final String _ID_DEFAULT = "session";
     public static final int _MAX_ACTIVE_SESSIONS_DEFAULT = -1;
-    public static final String _CONNECTIVITY_POLICY_DEFAULT = "TIGHT";
     public static final String _ONTOLOGY_NETWORK_NS_DEFAULT = "http://localhost:8080/ontonet/";
+
+    private static SessionManagerImpl me = null;
+
+    public static SessionManagerImpl get() {
+        return me;
+    }
 
     /**
      * Concatenated with the sessionManager ID, it identifies the Web endpoint and default base URI for all
      * sessions.
      */
     private IRI baseNS;
-
-    @Property(name = SessionManager.ID, value = _ID_DEFAULT)
-    protected String id;
 
     @Property(name = SessionManager.CONNECTIVITY_POLICY, options = {
                                                                     @PropertyOption(value = '%'
@@ -95,6 +98,9 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
                                                                                             + SessionManager.CONNECTIVITY_POLICY
                                                                                             + ".option.loose", name = "LOOSE")}, value = _CONNECTIVITY_POLICY_DEFAULT)
     private String connectivityPolicyString;
+
+    @Property(name = SessionManager.ID, value = _ID_DEFAULT)
+    protected String id;
 
     protected SessionIDGenerator idgen;
 
@@ -106,10 +112,10 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
     private int maxSessions;
 
     @Reference
-    private ONManager onManager;
+    private OfflineConfiguration offline;
 
     @Reference
-    private OfflineConfiguration offline;
+    private ONManager onManager;
 
     @Reference
     private OntologyProvider<?> ontologyProvider;
@@ -189,7 +195,7 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
     protected void activate(Dictionary<String,Object> configuration) throws IOException {
 
         long before = System.currentTimeMillis();
-
+        me = this;
         // Parse configuration
         id = (String) configuration.get(SessionManager.ID);
         if (id == null) id = _ID_DEFAULT;
@@ -448,6 +454,27 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
     }
 
     @Override
+    public void scopeActivated(OntologyScope scope) {}
+
+    @Override
+    public void scopeCreated(OntologyScope scope) {}
+
+    @Override
+    public void scopeDeactivated(OntologyScope scope) {
+        for (String sid : getRegisteredSessionIDs())
+            getSession(sid).detachScope(scope.getID());
+    }
+
+    @Override
+    public void scopeRegistered(OntologyScope scope) {}
+
+    @Override
+    public void scopeUnregistered(OntologyScope scope) {
+        for (String sid : getRegisteredSessionIDs())
+            getSession(sid).detachScope(scope.getID());
+    }
+
+    @Override
     public void setActiveSessionLimit(int limit) {
         this.maxSessions = limit;
     }
@@ -481,26 +508,5 @@ public class SessionManagerImpl implements SessionManager, ScopeEventListener {
         throw new UnsupportedOperationException(
                 "Not necessary. Session content is always stored by default in the current implementation.");
     }
-
-    @Override
-    public void scopeActivated(OntologyScope scope) {}
-
-    @Override
-    public void scopeCreated(OntologyScope scope) {}
-
-    @Override
-    public void scopeDeactivated(OntologyScope scope) {
-        for (String sid : getRegisteredSessionIDs())
-            getSession(sid).detachScope(scope.getID());
-    }
-
-    @Override
-    public void scopeUnregistered(OntologyScope scope) {
-        for (String sid : getRegisteredSessionIDs())
-            getSession(sid).detachScope(scope.getID());
-    }
-
-    @Override
-    public void scopeRegistered(OntologyScope scope) {}
 
 }

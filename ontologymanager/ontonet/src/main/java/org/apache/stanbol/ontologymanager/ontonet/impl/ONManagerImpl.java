@@ -89,6 +89,22 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
     public static final String _CONNECTIVITY_POLICY_DEFAULT = "TIGHT";
     public static final String _ID_SCOPE_REGISTRY_DEFAULT = "ontology";
 
+    /**
+     * The singleton instance of {@link ONManagerImpl}.
+     */
+    private static ONManagerImpl me = null;
+
+    /**
+     * Returns the instance of {@link ONManagerImpl} that was activated most recently. It can be used for
+     * referencing this component from an object that is not an OSGi component (for instance, if making it a
+     * component would introduce an activation cycle).
+     * 
+     * @return the singleton instance of {@link ONManagerImpl}.
+     */
+    public static ONManagerImpl get() {
+        return me;
+    }
+
     @Property(name = ONManager.CONFIG_ONTOLOGY_PATH, value = _CONFIG_ONTOLOGY_PATH_DEFAULT)
     private String configPath;
 
@@ -137,8 +153,8 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
      * Component Runtime support.
      * <p>
-     * DO NOT USE to manually create instances - the ReengineerManagerImpl instances do need to be configured!
-     * YOU NEED TO USE
+     * DO NOT USE to manually create instances - the ONManagerImpl instances do need to be configured! YOU
+     * NEED TO USE
      * {@link #ONManagerImpl(OntologyProvider, OfflineConfiguration, OntologySpaceFactory, Dictionary)} or its
      * overloads, to parse the configuration and then initialise the rule store if running outside an OSGI
      * environment.
@@ -148,6 +164,18 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         // All bindings are deferred to the activator
     }
 
+    /**
+     * Used to instantiate an ONManagerImpl outside of an OSGi environment.
+     * 
+     * @param ontologyProvider
+     *            the ontology provider that will be used for storing ontologies.
+     * @param offline
+     *            the offline configuration
+     * @param spaceFactory
+     *            the factory implementation to be used for creating ontology spaces
+     * @param configuration
+     *            the configuration of this ONManagerImpl
+     */
     public ONManagerImpl(OntologyProvider<?> ontologyProvider,
                          OfflineConfiguration offline,
                          OntologySpaceFactory spaceFactory,
@@ -187,6 +215,8 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
 
         long before = System.currentTimeMillis();
 
+        me = this; // Assign singleton instance
+
         // Parse configuration
         if (offline != null) ontonetNS = offline.getDefaultOntologyNetworkNamespace();
 
@@ -213,9 +243,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
 
         // configPath = (String) configuration.get(CONFIG_FILE_PATH);
 
-        /*
-         * If there is no configuration file, just start with an empty scope set
-         */
+        // If there is no configuration file, just start with an empty scope set
 
         Object connectivityPolicy = configuration.get(ONManager.CONNECTIVITY_POLICY);
         if (connectivityPolicy == null) {
@@ -295,6 +323,7 @@ public class ONManagerImpl extends ScopeRegistryImpl implements ONManager {
         // Add listeners
         if (ontologyProvider instanceof ScopeEventListener) this
                 .addScopeEventListener((ScopeEventListener) ontologyProvider);
+        this.addScopeEventListener(ontologyProvider.getOntologyNetworkDescriptor());
     }
 
     private void bootstrapOntologyNetwork(OWLOntology configOntology) {

@@ -27,20 +27,27 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.AbstractOntologyCollectorImpl;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologySetProvider;
+import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -167,6 +174,43 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     protected OWLOntology exportToOWLOntology(boolean merge, IRI universalPrefix) {
         OWLOntology o = super.exportToOWLOntology(merge, universalPrefix);
+
+        IRI iri = o.getOntologyID().getOntologyIRI();
+
+        if (merge) { // Re-merge
+            ONManager onm = ONManagerImpl.get(); // FIXME try to avoid this.
+            final Set<OWLOntology> set = new HashSet<OWLOntology>();
+            set.add(o);
+            for (String scopeID : attachedScopes) {
+                log.debug(" ... Merging with attached scope {}.", scopeID);
+
+                OntologyScope sc = onm.getScope(scopeID);
+                if (sc != null)
+
+                set.add(sc.export(OWLOntology.class, merge));
+
+                for (OWLOntologyID ontologyId : managedOntologies) {
+                    set.add(getOntology(ontologyId, OWLOntology.class, true));
+                }
+
+                OWLOntologySetProvider provider = new OWLOntologySetProvider() {
+                    @Override
+                    public Set<OWLOntology> getOntologies() {
+                        return set;
+                    }
+                };
+                OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+                try {
+                    o = merger.createMergedOntology(OWLManager.createOWLOntologyManager(), iri);
+                } catch (OWLOntologyCreationException e) {
+                    log.error("Failed to merge imports for ontology " + iri, e);
+                    o = null;
+                }
+
+            }
+
+        } else
+
         attachScopeImportsOwlApi(o, universalPrefix);
         return o;
     }

@@ -30,7 +30,7 @@ import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
-import org.apache.stanbol.ontologymanager.ontonet.api.OntologyLoadingException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

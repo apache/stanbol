@@ -82,11 +82,11 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcProvider;
+import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.IrremovableOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorModificationException;
@@ -98,6 +98,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.SetInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.StoredOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
@@ -127,7 +128,7 @@ import com.sun.jersey.multipart.FormDataMultiPart;
  * 
  */
 @Path("/ontonet/ontology/{scopeid}")
-public class ScopeResource extends BaseStanbolResource {
+public class ScopeResource extends AbstractOntologyAccessResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -460,6 +461,8 @@ public class ScopeResource extends BaseStanbolResource {
         ResponseBuilder rb;
         if (scope == null) rb = Response.status(NOT_FOUND);
         else if (ontologyId == null || ontologyId.isEmpty()) rb = Response.status(BAD_REQUEST);
+        else if (!ontologyProvider.hasOntology(OntologyUtils.decode(ontologyId))) rb = Response
+                .status(NOT_FOUND);
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
             OWLOntology o = scope.getCustomSpace().getOntology(OntologyUtils.decode(ontologyId),
@@ -662,8 +665,20 @@ public class ScopeResource extends BaseStanbolResource {
                     try {
                         // Use a buffered stream that can be reset for multiple attempts.
                         InputStream content = new BufferedInputStream(new FileInputStream(file));
-                        src = new GraphContentInputSource(content, format, ontologyProvider.getStore());
-                        break;
+                        OWLOntologyID guessed = OWLUtils.guessOntologyID(content, Parser.getInstance(), f);
+                        if (ontologyProvider.hasOntology(guessed)) {
+                            rb = Response.status(Status.CONFLICT);
+                            this.submitted = guessed;
+                            if (headers.getAcceptableMediaTypes().contains(MediaType.TEXT_HTML_TYPE)) {
+                                rb.entity(new Viewable("/imports/409", this));
+                                rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML + "; charset=utf-8");
+                            }
+                            break;
+                        } else {
+                            content = new BufferedInputStream(new FileInputStream(file));
+                            src = new GraphContentInputSource(content, format, ontologyProvider.getStore());
+                            break;
+                        }
                     } catch (OntologyLoadingException e) {
                         // throw new WebApplicationException(e, BAD_REQUEST);
                         continue;
@@ -705,7 +720,7 @@ public class ScopeResource extends BaseStanbolResource {
                                                                                                         * uri)
                                                                                                         */);
                 } else rb = Response.ok();
-            } else rb = Response.status(INTERNAL_SERVER_ERROR);
+            } else if (rb == null) rb = Response.status(INTERNAL_SERVER_ERROR);
         }
         if (!keys.isEmpty()) {
             for (String key : keys)

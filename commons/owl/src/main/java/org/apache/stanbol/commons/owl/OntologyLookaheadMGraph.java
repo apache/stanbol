@@ -117,9 +117,9 @@ public class OntologyLookaheadMGraph extends SimpleMGraph {
         // (if foundIndex is positive, then tripleCount must be at least the same.)
         if (foundIndex > 0 && tripleCount - foundIndex == offset) {
             log.debug("Offset reached.");
-            log.debug("Triples scanned: {}", tripleCount);
-            log.debug("Found at: {}", foundIndex);
-            log.debug("Offset: {}", offset);
+            log.debug(" ... Triples scanned: {}", tripleCount);
+            log.debug(" ... Found at: {}", foundIndex);
+            log.debug(" ... Offset: {}", offset);
             throw new RuntimeException();
         }
         boolean b = false;
@@ -133,7 +133,7 @@ public class OntologyLookaheadMGraph extends SimpleMGraph {
         // check the currently available triples for the Ontology ID
         checkOntologyId();
         if (ontologyIRI != null && versionIRI != null) {
-            log.debug("Fully qualified OWL Ontology ID found. Aborting.");
+            log.debug("Fully qualified OWL Ontology ID found. Exiting.");
             throw new RuntimeException(); // stop importing
         }
         return b;

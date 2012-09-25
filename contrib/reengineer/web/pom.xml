@@ -133,7 +133,7 @@
       <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>freemarker</groupId>
+      <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
     </dependency>
     <!-- indirect dependency for freemarker -->

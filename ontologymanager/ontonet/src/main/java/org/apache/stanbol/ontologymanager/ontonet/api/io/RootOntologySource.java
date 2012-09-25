@@ -43,11 +43,6 @@ public class RootOntologySource extends AbstractOWLOntologyInputSource {
         bindPhysicalOrigin(phyicalIRI == null ? null : Origin.create(phyicalIRI));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.manager.io.AbstractOntologyInputSource#toString()
-     */
     @Override
     public String toString() {
         return "ROOT_ONT<" + rootOntology.getOntologyID() + ">";

@@ -39,6 +39,7 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.Lockable;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.MissingOntologyException;
@@ -67,7 +68,6 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologySetProvider;
 import org.semanticweb.owlapi.model.RemoveImport;
-import org.semanticweb.owlapi.model.SetOntologyID;
 import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,57 +188,8 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         listeners.add(listener);
     }
 
-    /**
-     * FIXME use dynamic prefix?
-     * 
-     * @param ontology
-     */
-    protected void claimOwnership(MGraph ontology) {
-        UriRef owl_viri = new UriRef("http://www.w3.org/2002/07/owl#versionIRI");
-        UriRef ontologyId = null;
-        UriRef versionIri = new UriRef(getDefaultNamespace() + getID());
-        Iterator<Triple> it = ontology.filter(null, RDF.type, OWL.Ontology);
-        if (it.hasNext()) {
-            NonLiteral r = it.next().getSubject();
-            if (r instanceof UriRef) ontologyId = (UriRef) r;
-        }
-        log.info("Checking ownership of {} {}", MGraph.class.getSimpleName(), ontologyId != null ? ontologyId
-                : "(anonymous)");
-        if (ontologyId != null) {
-            it = ontology.filter(ontologyId, owl_viri, OWL.Ontology);
-            if (it.hasNext()) {
-                versionIri = (UriRef) it.next().getObject();
-                log.info("    Found OWL version IRI {} . Will not claim ownership. ", versionIri);
-            } else {
-                log.info("    No OWL version IRI Found . Will set to own ID. ");
-                Triple t = new TripleImpl(ontologyId, owl_viri, versionIri);
-                ontology.add(t);
-                log.info("    Set OWL version IRI : {} . ", versionIri);
-            }
-        }
-    }
-
-    /**
-     * FIXME use dynamic prefix?
-     * 
-     * @param ontology
-     */
-    protected void claimOwnership(OWLOntology ontology) {
-        log.info("Checking ownership of {} {}", OWLOntology.class.getSimpleName(), ontology.getOntologyID());
-        OWLOntologyID id = ontology.getOntologyID();
-        if (id.getOntologyIRI() != null) {
-            IRI ontologyIRI = id.getOntologyIRI();
-            IRI versionIri = id.getVersionIRI();
-            if (versionIri == null) {
-                log.info("    No OWL version IRI Found . Will set to own ID. ");
-                versionIri = IRI.create(getDefaultNamespace() + getID());
-                OWLOntologyID newId = new OWLOntologyID(ontologyIRI, versionIri);
-                OWLOntologyChange change = new SetOntologyID(ontology, newId);
-                ontology.getOWLOntologyManager().applyChange(change);
-                log.info("    Set OWL version IRI : {} . ", versionIri);
-            } else log.info("    Found OWL version IRI {} . Will not claim ownership. ", versionIri);
-        }
-
+    protected void claimOwnership(OWLOntologyID publicKey) {
+        throw new UnsupportedOperationException("Not implemented yet.");
     }
 
     @Override
@@ -371,6 +322,25 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         return root;
     }
 
+    private TripleCollection getMergedTc() {
+        TripleCollection result = new SimpleMGraph(); // Takes less memory than the Indexed one
+
+        for (OWLOntologyID key : listManagedOntologies()) {
+            // TODO when implemented, switch to true.
+            TripleCollection managed = getOntology(key, TripleCollection.class, false);
+            Set<Resource> exclusions = new HashSet<Resource>();
+            Iterator<Triple> it = managed.filter(null, RDF.type, OWL.Ontology);
+            while (it.hasNext())
+                exclusions.add(it.next().getSubject());
+            for (Triple t : managed)
+                if (!exclusions.contains(t.getSubject())) result.add(t);
+        }
+
+        // TODO Purge property usage
+
+        return result;
+    }
+
     /**
      * This method has no conversion calls, to it can be invoked by subclasses that wish to modify it
      * afterwards.
@@ -410,6 +380,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         if (root != null) {
 
             if (merge) {
+
                 final Set<OWLOntology> set = new HashSet<OWLOntology>();
                 log.debug("Merging {} with its imports.", root);
                 set.add(root);
@@ -428,6 +399,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
                 OWLOntologyMerger merger = new OWLOntologyMerger(provider);
                 try {
                     root = merger.createMergedOntology(OWLManager.createOWLOntologyManager(), iri);
+
                 } catch (OWLOntologyCreationException e) {
                     log.error("Failed to merge imports for ontology " + iri, e);
                     root = null;
@@ -445,15 +417,10 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
                 // The key set of managedOntologies contains the ontology IRIs, not their storage keys.
                 for (OWLOntologyID ontologyId : managedOntologies) {
-                    // TODO some day the versionIRI will be the only physical reference for the ontology
-                    IRI physIRI =
-                    // ontologyId.getVersionIRI() == null ? URIUtils.sanitize(IRI
-                    // .create(base + ontologyId.getOntologyIRI())) : URIUtils.sanitize(IRI
-                    // .create(base + ontologyId.getVersionIRI()));
-                    IRI.create(base + OntologyUtils.encode(ontologyId));
+                    // XXX some day the versionIRI will be the only physical reference for the ontology
+                    IRI physIRI = IRI.create(base + OntologyUtils.encode(ontologyId));
                     changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
                 }
-
                 ontologyManager.applyChanges(changes);
             }
 
@@ -545,11 +512,11 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         return getOntology(ontologyId, returnType, merge, getDefaultNamespace());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType, boolean merge, IRI universalPrefix) {
-        if (OWLOntology.class.isAssignableFrom(returnType)) {
-            return (O) getOntologyAsOWLOntology(ontologyId, merge, universalPrefix);
-        }
+        if (OWLOntology.class.isAssignableFrom(returnType)) return (O) getOntologyAsOWLOntology(ontologyId,
+            merge, universalPrefix);
         if (TripleCollection.class.isAssignableFrom(returnType)) {
             TripleCollection root = getOntologyAsMGraph(ontologyId, merge, universalPrefix);
             // A Clerezza graph has to be cast properly.
@@ -575,8 +542,8 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
          * going upOne() add "session" or "ontology" if needed). But only do this if we keep considering
          * imported ontologies as *not* managed.
          */
-        // if (!merge) {
-        MGraph o = new SimpleMGraph(ontologyProvider.getStoredOntology(ontologyId, MGraph.class, merge));
+        // if (!merge) { // TODO
+        MGraph o = new IndexedMGraph(ontologyProvider.getStoredOntology(ontologyId, MGraph.class, merge));
 
         // Now rewrite import statements
 
@@ -610,8 +577,8 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
         for (Triple t : newImports)
             o.add(t);
-        // }
-        // TODO else if (merge)
+
+        // } // TODO else if (merge)
 
         return o;
     }
@@ -694,15 +661,16 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
     @Override
     public boolean hasOntology(IRI ontologyIri) {
-        return hasOntology(new OWLOntologyID(ontologyIri)) || hasOntology(new OWLOntologyID(/*
-                                                                                             * URIUtils.sanitizeID
-                                                                                             * (ontologyIri/*)
-                                                                                             */));
+        return hasOntology(new OWLOntologyID(ontologyIri));
     }
 
     @Override
     public boolean hasOntology(OWLOntologyID ontologyId) {
-        return managedOntologies.contains(ontologyId);
+        Set<OWLOntologyID> aliases = ontologyProvider.listAliases(ontologyId);
+        if (managedOntologies.contains(ontologyId)) return true;
+        for (OWLOntologyID alias : aliases)
+            if (managedOntologies.contains(alias)) return true;
+        return false;
     }
 
     @Override
@@ -717,7 +685,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
     @Override
     public void removeOntology(IRI ontologyId) throws OntologyCollectorModificationException {
-        removeOntology(new OWLOntologyID(/* URIUtils.sanitizeID( */ontologyId/* ) */));
+        removeOntology(new OWLOntologyID(ontologyId));
     }
 
     @Override
@@ -727,9 +695,15 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         if (publicKey.getOntologyIRI() == null) throw new IllegalArgumentException(
                 "Cannot remove an ontology whose public key has a null ontology IRI.");
         if (locked) throw new UnmodifiableOntologyCollectorException(this);
-        if (!managedOntologies.contains(publicKey)) throw new MissingOntologyException(this, publicKey);
+
+        Set<OWLOntologyID> aliases = ontologyProvider.listAliases(publicKey);
+        aliases.add(publicKey);
+        boolean removed = false;
+        for (OWLOntologyID alias : aliases)
+            removed |= managedOntologies.remove(alias);
         // Don't fire if the ontology wasn't there in the first place.
-        if (managedOntologies.remove(publicKey)) fireOntologyRemoved(publicKey);
+        if (removed) fireOntologyRemoved(publicKey);
+        else throw new MissingOntologyException(this, publicKey);
     }
 
     @Override
@@ -751,13 +725,14 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
      */
     @Override
     public void setDefaultNamespace(IRI namespace) {
-        if (namespace == null) throw new IllegalArgumentException("Namespace cannot be null.");
+        if (namespace == null) throw new IllegalArgumentException(
+                "Stanbol ontology namespace cannot be null.");
         if (namespace.toURI().getQuery() != null) throw new IllegalArgumentException(
-                "URI Query is not allowed in OntoNet namespaces.");
+                "URI Query is not allowed in Stanbol ontology namespaces.");
         if (namespace.toURI().getFragment() != null) throw new IllegalArgumentException(
-                "URI Fragment is not allowed in OntoNet namespaces.");
+                "URI Fragment is not allowed in Stanbol ontology namespaces.");
         if (namespace.toString().endsWith("#")) throw new IllegalArgumentException(
-                "OntoNet namespaces must not end with a hash ('#') character.");
+                "Stanbol ontology namespaces must not end with a hash ('#') character.");
         if (!namespace.toString().endsWith("/")) {
             log.warn("Namespace {} does not end with a slash ('/') character. It be added automatically.",
                 namespace);

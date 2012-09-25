@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeEventListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 
@@ -30,7 +31,36 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
  * @author alexdma.
  * 
  */
-public interface OntologyNetworkMultiplexer extends OntologyCollectorListener, SessionListener {
+public interface OntologyNetworkMultiplexer extends OntologyCollectorListener, ScopeEventListener,
+        SessionListener {
+
+    /**
+     * Liberates the selected ontology from all its bindings with other ontologies, excluding ontology
+     * collectors. As a consequence, no import statements other than those pointing to ontology collectors, if
+     * any, should appear when exporting the ontology.
+     * 
+     * @param dependent
+     *            the ontology to be cleared of dependencies.
+     */
+    void clearDependencies(OWLOntologyID dependent);
+
+    /**
+     * Returns all the ontologies that the supplied ontology depends on, if any.
+     * 
+     * @param dependent
+     *            the public key of the depending ontology.
+     * @return the set of dependencies (possibly empty).
+     */
+    Set<OWLOntologyID> getDependencies(OWLOntologyID dependent);
+
+    /**
+     * Returns all the ontologies that depend on the supplied ontology, if any.
+     * 
+     * @param dependency
+     *            the public key of the ontology that other ontologies could depend on.
+     * @return the set of ontologies it depends on (possibly empty).
+     */
+    Set<OWLOntologyID> getDependents(OWLOntologyID dependency);
 
     /**
      * Not just the IDs because spaces and sessions can share identifiers.
@@ -66,5 +96,30 @@ public interface OntologyNetworkMultiplexer extends OntologyCollectorListener, S
      * @return the size in triples of the ontology.
      */
     int getSize(OWLOntologyID publicKey);
+
+    /**
+     * Removes any claim that stored ontology <code>dependent</code> has a dependency on stored ontology
+     * <code>dependency</code>. As a consquence, no related import statement should figure in the serialized
+     * <code>dependant</code>. Note that this operation can be overridden by a call to
+     * {@link #setDependency(OWLOntologyID, OWLOntologyID)}.
+     * 
+     * @param dependent
+     *            the depending ontology.
+     * @param dependency
+     *            the ontology it depends on.
+     */
+    void removeDependency(OWLOntologyID dependent, OWLOntologyID dependency);
+
+    /**
+     * States that stored ontology <code>dependant</code> has a dependency on stored ontology
+     * <code>dependency</code>, e.g. because the former imports the latter. As a consequence, various
+     * restrictions could apply, e.g. <code>dependency</code> cannot be deleted as long as it is a dependency.
+     * 
+     * @param dependent
+     *            the depending ontology.
+     * @param dependency
+     *            the ontology it depends on.
+     */
+    void setDependency(OWLOntologyID dependent, OWLOntologyID dependency);
 
 }

@@ -55,11 +55,15 @@ public class Vocabulary {
 
     private static final String _SHORT_APPENDED_TO = "isAppendedTo";
 
+    private static final String _SHORT_DEPENDS_ON = "dependsOn";
+
     private static final String _SHORT_ENTRY = "Entry";
 
     private static final String _SHORT_GRAPH = "Graph";
 
     private static final String _SHORT_HAS_APPENDED = "hasAppended";
+
+    private static final String _SHORT_HAS_DEPENDENT = "hasDependenct";
 
     private static final String _SHORT_HAS_ONTOLOGY_IRI = "hasOntologyIRI";
 
@@ -119,6 +123,17 @@ public class Vocabulary {
     public static final UriRef APPENDED_TO_URIREF = new UriRef(_NS_ONTONET + _SHORT_APPENDED_TO);
 
     /**
+     * The OWL <b>object property</b> <tt>dependsOn</tt>.
+     */
+    public static final OWLObjectProperty DEPENDS_ON = __df.getOWLObjectProperty(IRI
+            .create(_NS_ONTONET + _SHORT_DEPENDS_ON));
+
+    /**
+     * The OWL <b>object property</b> <tt>dependsOn</tt> (in UriRef form).
+     */
+    public static final UriRef DEPENDS_ON_URIREF = new UriRef(_NS_ONTONET + _SHORT_DEPENDS_ON);
+
+    /**
      * The OWL <b>class</b> <tt>Entry</tt>.
      */
     public static final OWLClass ENTRY = __df.getOWLClass(IRI.create(_NS_ONTONET + _SHORT_ENTRY));
@@ -148,6 +163,17 @@ public class Vocabulary {
      * The OWL <b>object property</b> <tt>hasAppended</tt> (in UriRef form).
      */
     public static final UriRef HAS_APPENDED_URIREF = new UriRef(_NS_ONTONET + _SHORT_HAS_APPENDED);
+
+    /**
+     * The OWL <b>object property</b> <tt>hasDependent</tt>.
+     */
+    public static final OWLObjectProperty HAS_DEPENDENT = __df.getOWLObjectProperty(IRI
+            .create(_NS_ONTONET + _SHORT_HAS_DEPENDENT));
+
+    /**
+     * The OWL <b>datatype property</b> <tt>hasDependent</tt> (in UriRef form).
+     */
+    public static final UriRef HAS_DEPENDENT_URIREF = new UriRef(_NS_ONTONET + _SHORT_HAS_DEPENDENT);
 
     /**
      * The OWL <b>datatype property</b> <tt>hasOntologyIRI</tt>.

@@ -49,7 +49,10 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedArt
 
     /**
      * Returns the ontologies managed by this ontology space. This is a shortcut method for iterating
-     * {@link #getOntology(IRI, Class)} calls over {@link #listManagedOntologies()}.
+     * {@link #getOntology(OWLOntologyID, Class)} calls over {@link #listManagedOntologies()}.
+     * 
+     * @deprecated Please simulate this method manually by iterating
+     *             {@link #getOntology(OWLOntologyID, Class)} calls over {@link #listManagedOntologies()}
      * 
      * @param withClosure
      *            if true, also the ontologies imported by those directly managed by this space will be
@@ -59,7 +62,7 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedArt
     <O> Set<O> getManagedOntologies(Class<O> returnType, boolean withClosure);
 
     /**
-     * @deprecated
+     * @deprecated Please use {@link #getOntology(OWLOntologyID, Class)} instead.
      * @param ontologyIri
      * @param returnType
      * @return
@@ -69,7 +72,7 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedArt
     /**
      * TODO replace merge parameter with integer for merge level (-1 for infinite).
      * 
-     * @deprecated
+     * @deprecated Please use {@link #getOntology(OWLOntologyID, Class, boolean)} instead.
      * @param ontologyIri
      * @param returnType
      * @param merge
@@ -78,7 +81,7 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedArt
     <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge);
 
     /**
-     * @deprecated
+     * @deprecated Please use {@link #getOntology(OWLOntologyID, Class, boolean, IRI)} instead.
      * @param ontologyIri
      * @param returnType
      * @param merge
@@ -88,7 +91,7 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedArt
     <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge, IRI universalPrefix);
 
     /**
-     * @deprecated
+     * @deprecated Please use {@link #getOntology(OWLOntologyID, Class, IRI)} instead.
      * @param ontologyIri
      * @param returnType
      * @param universalPrefix
@@ -96,21 +99,99 @@ public interface OntologyCollector extends OntologyCollectorListenable, NamedArt
      */
     <O> O getOntology(IRI ontologyIri, Class<O> returnType, IRI universalPrefix);
 
-    <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType);
+    /**
+     * Returns the managed ontology with the specified public key as a Java object of the specified type, if
+     * supported. If such an ontology exists but is not managed by this collector, it will not be returned.<br>
+     * <br>
+     * How the method should react if <code>publicKey</code> is invalid or no such ontology exists, or whether
+     * the desired return type is not supported, is implementation-dependent. However, developers should at
+     * least expect that the methods either returns <code>null</code> or throws a
+     * {@link MissingOntologyException} if no such ontology is managed by this collector. Likewise, if
+     * <code>returnType</code> is not supported, an {@link UnsupportedOperationException} could be expected to
+     * be thrown.
+     * 
+     * @param publicKey
+     *            the public identifier of the requested ontology.
+     * @param returnType
+     *            the desired type of the ontology object.
+     * @return the ontology object.
+     */
+    <O> O getOntology(OWLOntologyID publicKey, Class<O> returnType);
 
     /**
+     * Returns the managed ontology with the specified public key as a Java object of the specified type, if
+     * supported. If such an ontology exists but is not managed by this collector, it will not be returned.<br>
+     * <br>
+     * How the method should react if <code>publicKey</code> is invalid or no such ontology exists, or whether
+     * the desired return type is not supported, is implementation-dependent. However, developers should at
+     * least expect that the methods either returns <code>null</code> or throws a
+     * {@link MissingOntologyException} if no such ontology is managed by this collector. Likewise, if
+     * <code>returnType</code> is not supported, an {@link UnsupportedOperationException} could be expected to
+     * be thrown.<br>
+     * <br>
      * TODO replace merge parameter with integer for merge level (-1 for infinite).
      * 
-     * @param ontologyIri
+     * @param publicKey
+     *            the public identifier of the requested ontology.
      * @param returnType
+     *            the desired type of the ontology object.
      * @param merge
-     * @return
+     *            if true, the requested ontology will be merged with its imports up to whatever supported
+     *            level.
+     * @return the ontology object.
      */
-    <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType, boolean merge);
+    <O> O getOntology(OWLOntologyID publicKey, Class<O> returnType, boolean merge);
 
-    <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType, boolean merge, IRI universalPrefix);
+    /**
+     * Returns the managed ontology with the specified public key as a Java object of the specified type, if
+     * supported. If such an ontology exists but is not managed by this collector, it will not be returned.<br>
+     * <br>
+     * How the method should react if <code>publicKey</code> is invalid or no such ontology exists, or whether
+     * the desired return type is not supported, is implementation-dependent. However, developers should at
+     * least expect that the methods either returns <code>null</code> or throws a
+     * {@link MissingOntologyException} if no such ontology is managed by this collector. Likewise, if
+     * <code>returnType</code> is not supported, an {@link UnsupportedOperationException} could be expected to
+     * be thrown.<br>
+     * <br>
+     * TODO replace merge parameter with integer for merge level (-1 for infinite).
+     * 
+     * @param publicKey
+     *            the public identifier of the requested ontology.
+     * @param returnType
+     *            the desired type of the ontology object.
+     * @param merge
+     *            if true, the requested ontology will be merged with its imports up to whatever supported
+     *            level.
+     * @param universalPrefix
+     *            the IRI to be used as a prefix and/or namespace for all derived IRIs, e.g. OWL import
+     *            statements and version IRIs.
+     * @return the ontology object.
+     */
+    <O> O getOntology(OWLOntologyID publicKey, Class<O> returnType, boolean merge, IRI universalPrefix);
 
-    <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType, IRI universalPrefix);
+    /**
+     * Returns the managed ontology with the specified public key as a Java object of the specified type, if
+     * supported. If such an ontology exists but is not managed by this collector, it will not be returned.<br>
+     * <br>
+     * How the method should react if <code>publicKey</code> is invalid or no such ontology exists, or whether
+     * the desired return type is not supported, is implementation-dependent. However, developers should at
+     * least expect that the methods either returns <code>null</code> or throws a
+     * {@link MissingOntologyException} if no such ontology is managed by this collector. Likewise, if
+     * <code>returnType</code> is not supported, an {@link UnsupportedOperationException} could be expected to
+     * be thrown.<br>
+     * <br>
+     * TODO replace merge parameter with integer for merge level (-1 for infinite).
+     * 
+     * @param publicKey
+     *            the public identifier of the requested ontology.
+     * @param returnType
+     *            the desired type of the ontology object.
+     * @param universalPrefix
+     *            the IRI to be used as a prefix and/or namespace for all derived IRIs, e.g. OWL import
+     *            statements and version IRIs.
+     * @return the ontology object.
+     */
+    <O> O getOntology(OWLOntologyID publicKey, Class<O> returnType, IRI universalPrefix);
 
     /**
      * Determines if the ontology identified by the supplied public key is being managed by this collector.<br>

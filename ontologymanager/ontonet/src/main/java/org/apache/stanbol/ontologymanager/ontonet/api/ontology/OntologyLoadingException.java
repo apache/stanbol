@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api;
+package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
 /**
  * A runtime exception denoting that trying to load an ontology into the Ontology Manager has caused an

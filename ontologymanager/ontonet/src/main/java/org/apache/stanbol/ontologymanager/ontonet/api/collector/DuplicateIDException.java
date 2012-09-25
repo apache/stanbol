@@ -33,6 +33,9 @@ public class DuplicateIDException extends Exception {
 	 */
     private static final long serialVersionUID = 802959772682427494L;
 
+    /**
+     * The duplicate identifier
+     */
     protected String dupe;
 
     /**

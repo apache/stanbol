@@ -100,7 +100,7 @@ public class Origin<R> {
     /**
      * Returns the actual reference object that was wrapped by this Origin.
      * 
-     * @return
+     * @return the reference object.
      */
     public R getReference() {
         return ref;

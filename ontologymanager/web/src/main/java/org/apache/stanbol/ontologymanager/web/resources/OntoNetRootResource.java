@@ -21,6 +21,7 @@ import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
@@ -61,6 +62,7 @@ import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -82,20 +84,23 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.clerezza.rdf.ontologies.OWL;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyHandleException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyNetworkMultiplexer;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OrphanOntologyKeyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.MGraphNetworkMultiplexer;
@@ -113,6 +118,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.RemoveImport;
+import org.semanticweb.owlapi.model.SetOntologyID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +138,7 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 
 @Path("/ontonet")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
-public class OntoNetRootResource extends BaseStanbolResource {
+public class OntoNetRootResource extends AbstractOntologyAccessResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -173,21 +179,41 @@ public class OntoNetRootResource extends BaseStanbolResource {
         return rb.build();
     }
 
-    /*
-     * TODO before implementing removal, we need OWL dependency checks.
-     */
-    // @DELETE
-    // @Path("/{ontologyId:.+}")
-    public Response deleteOntology(@PathParam("ontologyId") String ontologyid, @Context HttpHeaders headers) {
-        ResponseBuilder rb = Response.ok();
+    @DELETE
+    @Path("/{ontologyId:.+}")
+    public Response deleteOntology(@PathParam("ontologyId") String ontologyId, @Context HttpHeaders headers) {
+        OWLOntologyID key = OntologyUtils.decode(ontologyId);
+        ResponseBuilder rb;
+        try {
+            if (!ontologyProvider.hasOntology(key)) rb = Response.status(NOT_FOUND);
+            else try {
+                // TODO check aliases!
+                ontologyProvider.removeOntology(key);
+                rb = Response.ok();
+            } catch (OntologyHandleException e) {
+                rb = Response.status(CONFLICT);
+            }
+        } catch (OrphanOntologyKeyException e) {
+            log.warn("Orphan ontology key {}. No associated graph found in store.", e.getOrphanPublicKey());
+            rb = Response.status(NOT_FOUND);
+        }
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
-    private MGraph getGraph(String ontologyId, boolean merged) {
+    public Set<String> getAliases(OWLOntologyID ontologyId) {
+        Set<String> aliases = new HashSet<String>();
+        for (OWLOntologyID alias : ontologyProvider.listAliases(ontologyId))
+            aliases.add(OntologyUtils.encode(alias));
+        return aliases;
+    }
+
+    private MGraph getGraph(String ontologyId, boolean merged, URI requestUri) {
         long before = System.currentTimeMillis();
-        IRI iri = URIUtils.sanitize(IRI.create(ontologyId));
-        log.debug("Will try to retrieve ontology {} from provider.", iri);
+
+        OWLOntologyID key = OntologyUtils.decode(ontologyId);
+
+        log.debug("Will try to retrieve ontology {} from provider.", key);
         /*
          * Export directly to MGraph since the OWLOntologyWriter uses (de-)serializing converters for the
          * other formats.
@@ -198,13 +224,15 @@ public class OntoNetRootResource extends BaseStanbolResource {
          */
         MGraph o = null, oTemp = null;
         try {
-            oTemp = ontologyProvider.getStoredOntology(new OWLOntologyID(iri), MGraph.class, merged);
+            oTemp = ontologyProvider.getStoredOntology(key, MGraph.class, merged);
         } catch (Exception ex) {
-            log.warn("Retrieval of ontology with ID " + iri + " failed.", ex);
+            log.warn("Retrieval of ontology with ID " + key + " failed.", ex);
         }
 
         if (oTemp == null) {
-            log.debug("Ontology {} missing from provider. Trying libraries...", iri);
+            log.debug("Ontology {} missing from provider. Trying libraries...", key);
+            // TODO remove once registry supports OWLOntologyID as public key.
+            IRI iri = URIUtils.sanitize(IRI.create(ontologyId));
             // See if we can touch a library. TODO: replace with event model on the ontology provider.
             int minSize = -1;
             IRI smallest = null;
@@ -225,14 +253,16 @@ public class OntoNetRootResource extends BaseStanbolResource {
             }
         }
 
-        if (oTemp != null) o = new IndexedMGraph(oTemp);
+        // This is needed because we need to change import statements. No need to use a more efficient but
+        // resource-intensive IndexedMGraph, since both o and oTemp will be GC'ed after serialization.
+        if (oTemp != null) o = new SimpleMGraph(oTemp);
 
         if (o == null) {
-            log.debug("Ontology {} not found in any ontology provider or library.", iri);
+            log.debug("Ontology {} not found in any ontology provider or library.", ontologyId);
             return null;
         }
 
-        log.debug("Retrieved ontology {} .", iri);
+        log.debug("Retrieved ontology {} .", ontologyId);
 
         // Rewrite imports
         String uri = uriInfo.getRequestUri().toString();
@@ -271,13 +301,6 @@ public class OntoNetRootResource extends BaseStanbolResource {
         return handles;
     }
 
-    public Set<String> getAliases(OWLOntologyID ontologyId) {
-        Set<String> aliases = new HashSet<String>();
-        for (OWLOntologyID alias : ontologyProvider.listAliases(ontologyId))
-            aliases.add(OntologyUtils.encode(alias));
-        return aliases;
-    }
-
     @GET
     @Produces(TEXT_HTML)
     public Response getHtmlInfo(@Context HttpHeaders headers) {
@@ -297,7 +320,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
         ResponseBuilder rb;
         if (ontologyId == null || ontologyId.isEmpty()) rb = Response.status(BAD_REQUEST);
         else {
-            TripleCollection o = getGraph(ontologyId, merged);
+            TripleCollection o = getGraph(ontologyId, merged, uriInfo.getRequestUri());
             rb = o == null ? Response.status(NOT_FOUND) : Response.ok(o);
         }
         addCORSOrigin(servletContext, rb, headers);
@@ -326,7 +349,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
         ResponseBuilder rb;
         if (ontologyId == null || ontologyId.isEmpty()) rb = Response.status(BAD_REQUEST);
         else {
-            OWLOntology o = getOntology(ontologyId, merged);
+            OWLOntology o = getOWLOntology(ontologyId, merged, uriInfo.getRequestUri());
             rb = o == null ? Response.status(NOT_FOUND) : Response.ok(o);
         }
         addCORSOrigin(servletContext, rb, headers);
@@ -343,12 +366,17 @@ public class OntoNetRootResource extends BaseStanbolResource {
 
     public SortedSet<OWLOntologyID> getOntologies() {
         SortedSet<OWLOntologyID> filtered = new TreeSet<OWLOntologyID>();
+        Set<OWLOntologyID> orphans = ontologyProvider.listOrphans();
         for (OWLOntologyID id : ontologyProvider.getPublicKeys())
-            if (id != null) filtered.add(id);
+            if (id != null && !orphans.contains(id)) filtered.add(id);
         return filtered;
     }
+    
+    public Set<OWLOntologyID> getOrphans() {
+        return ontologyProvider.listOrphans();
+    }
 
-    private OWLOntology getOntology(String ontologyId, boolean merge) {
+    private OWLOntology getOWLOntology(String ontologyId, boolean merge, URI requestUri) {
         long before = System.currentTimeMillis();
         IRI iri = URIUtils.sanitize(IRI.create(ontologyId));
         log.debug("Will try to retrieve ontology {} from provider.", iri);
@@ -403,6 +431,15 @@ public class OntoNetRootResource extends BaseStanbolResource {
             IRI target = IRI.create(base + s);
             changes.add(new AddImport(o, df.getOWLImportsDeclaration(target)));
         }
+
+        // Versioning.
+        OWLOntologyID id = o.getOntologyID();
+        if (!id.isAnonymous() && id.getVersionIRI() == null) {
+            IRI viri = IRI.create(requestUri);
+            log.debug("Setting version IRI for export : {}", viri);
+            changes.add(new SetOntologyID(o, new OWLOntologyID(id.getOntologyIRI(), viri)));
+        }
+
         o.getOWLOntologyManager().applyChanges(changes);
         log.debug("Exported as Clerezza Graph in {} ms. Handing over to writer.", System.currentTimeMillis()
                                                                                   - before);
@@ -464,7 +501,19 @@ public class OntoNetRootResource extends BaseStanbolResource {
                     // Re-instantiate the stream on every attempt
                     InputStream content = new FileInputStream(file);
                     // ClerezzaOWLUtils.guessOntologyID(new FileInputStream(file), Parser.getInstance(), f);
-                    key = ontologyProvider.loadInStore(content, f, true);
+                    OWLOntologyID guessed = OWLUtils.guessOntologyID(content, Parser.getInstance(), f);
+                    if (ontologyProvider.hasOntology(guessed)) {
+                        rb = Response.status(Status.CONFLICT);
+                        this.submitted = guessed;
+                        if (headers.getAcceptableMediaTypes().contains(MediaType.TEXT_HTML_TYPE)) {
+                            rb.entity(new Viewable("/imports/409", this));
+                            rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML + "; charset=utf-8");
+                        }
+                        break;
+                    } else {
+                        content = new FileInputStream(file);
+                        key = ontologyProvider.loadInStore(content, f, true);
+                    }
                 } catch (UnsupportedFormatException e) {
                     log.warn(
                         "POST method failed for media type {}. This should not happen (should fail earlier)",
@@ -479,7 +528,7 @@ public class OntoNetRootResource extends BaseStanbolResource {
                     failed++;
                 }
             } while ((key == null || key.isAnonymous()) && itf.hasNext());
-            if (key == null || key.isAnonymous()) {
+            if (key == null || key.isAnonymous() && rb == null) {
                 if (failed > 0) throw new WebApplicationException(BAD_REQUEST);
                 else if (unsupported > 0) throw new WebApplicationException(UNSUPPORTED_MEDIA_TYPE);
             }
@@ -497,18 +546,17 @@ public class OntoNetRootResource extends BaseStanbolResource {
         }
 
         if (key != null && !key.isAnonymous()) {
-            // FIXME ugly but will have to do for the time being
-            String uri
-            // = key.split("::")[1];
-            = OntologyUtils.encode(key);
-            // uri
-            // = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
-            if (uri != null && !uri.isEmpty()) rb = Response.seeOther(URI.create("/ontonet/" + uri));
-            else rb = Response.ok();
-        } else rb = Response.status(Status.INTERNAL_SERVER_ERROR);
+            String uri = OntologyUtils.encode(key);
+            if (uri != null && !uri.isEmpty()) {
+                rb = Response.created(URI.create("/" + uri));
+                if (headers.getAcceptableMediaTypes().contains(MediaType.TEXT_HTML_TYPE)) {
+                    rb.entity(new Viewable("index", this));
+                    rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML + "; charset=utf-8");
+                }
+            } else rb = Response.ok();
+        } else if (rb == null) rb = Response.status(Status.INTERNAL_SERVER_ERROR);
 
         // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        // FIXME return an appropriate response e.g. 303
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -516,12 +564,14 @@ public class OntoNetRootResource extends BaseStanbolResource {
     @GET
     @Path("/{ontologyId:.+}")
     @Produces(TEXT_HTML)
-    public Response showOntology(@PathParam("ontologyId") String ontologyId, @Context HttpHeaders headers) {
+    public Response showOntology(@PathParam("ontologyId") String ontologyId,
+                                 @Context HttpHeaders headers,
+                                 @Context UriInfo uriInfo) {
         ResponseBuilder rb;
         if (ontologyId == null || ontologyId.isEmpty()) rb = Response.status(BAD_REQUEST);
         else {
             OWLOntologyID id = OntologyUtils.decode(ontologyId);
-            OWLOntology o = getOntology(ontologyId, false);
+            OWLOntology o = getOWLOntology(ontologyId, false, uriInfo.getRequestUri());
             if (o == null) rb = Response.status(NOT_FOUND);
             else
             // try
@@ -599,7 +649,4 @@ public class OntoNetRootResource extends BaseStanbolResource {
         return r;
     }
 
-    public String stringForm(OWLOntologyID ontologyID) {
-        return OntologyUtils.encode(ontologyID);
-    }
 }

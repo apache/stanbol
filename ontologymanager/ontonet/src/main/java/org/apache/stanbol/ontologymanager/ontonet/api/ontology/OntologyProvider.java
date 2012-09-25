@@ -295,6 +295,8 @@ public interface OntologyProvider<S> {
      */
     Set<OWLOntologyID> listOntologies();
 
+    Set<OWLOntologyID> listOrphans();
+
     /**
      * Returns all the public keys of the ontologies whose ontology IRI matches the one supplied,a nd which
      * differ by version IRI. Only primary keys are returned: aliases are not included.
@@ -382,7 +384,7 @@ public interface OntologyProvider<S> {
      *            the public key for accessing the ontology.
      * @return true iff an ontology with that public key existed and was removed.
      */
-    boolean removeOntology(OWLOntologyID publicKey);
+    boolean removeOntology(OWLOntologyID publicKey) throws OntologyHandleException;
 
     /**
      * Sets the policy adopted by this provider whenever an import statement is found in an ontology <i>that
@@ -399,6 +401,8 @@ public interface OntologyProvider<S> {
      * was) retrieved by dereferencing <tt>locator</tt>. If <tt>publicKey</tt>does not exist in the provider,
      * or if <tt>locator</tt> is already bound to an incompatible key, an {@link IllegalArgumentException}
      * will be thrown.
+     * 
+     * @deprecated this is now done by setting aliases.
      * 
      * @param locator
      *            a physical location for this ontology.

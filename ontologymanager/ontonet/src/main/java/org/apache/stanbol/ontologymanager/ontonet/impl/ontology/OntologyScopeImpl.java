@@ -64,7 +64,8 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
-public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListener {
+public class OntologyScopeImpl /* TODO extends AbstractOntologyCollectorImpl */implements OntologyScope,
+        OntologyCollectorListener {
 
     /**
      * The core ontology space for this scope, always set as default.

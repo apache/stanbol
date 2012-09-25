@@ -17,7 +17,7 @@
 package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
 /**
- * Thrown whenever an illegal operation that modifies an ontology space is detected and denied.
+ * Thrown whenever an illegal operation that modifies an ontology collector is detected and denied.
  */
 public class OntologyCollectorModificationException extends RuntimeException {
 
@@ -26,6 +26,9 @@ public class OntologyCollectorModificationException extends RuntimeException {
 	 */
     private static final long serialVersionUID = -5147080356192253724L;
 
+    /**
+     * The affected ontology collector.
+     */
     protected OntologyCollector collector;
 
     /**
