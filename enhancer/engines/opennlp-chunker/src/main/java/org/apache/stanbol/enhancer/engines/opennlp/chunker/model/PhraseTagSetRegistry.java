@@ -5,7 +5,7 @@ import java.util.Map;
 
 import opennlp.tools.chunker.Chunker;
 
-import org.apache.stanbol.enhancer.nlp.TagSet;
+import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 

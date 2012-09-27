@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.nlp;
+package org.apache.stanbol.enhancer.nlp.model.tag;
 
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 

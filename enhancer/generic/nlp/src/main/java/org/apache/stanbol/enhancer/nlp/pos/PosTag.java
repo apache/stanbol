@@ -1,8 +1,8 @@
 package org.apache.stanbol.enhancer.nlp.pos;
 
-import org.apache.stanbol.enhancer.nlp.Tag;
-import org.apache.stanbol.enhancer.nlp.TagSet;
 import org.apache.stanbol.enhancer.nlp.model.Token;
+import org.apache.stanbol.enhancer.nlp.model.tag.Tag;
+import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 
 /**

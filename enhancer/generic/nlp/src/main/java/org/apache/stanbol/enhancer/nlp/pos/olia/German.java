@@ -1,7 +1,7 @@
 package org.apache.stanbol.enhancer.nlp.pos.olia;
 
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.enhancer.nlp.TagSet;
+import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 

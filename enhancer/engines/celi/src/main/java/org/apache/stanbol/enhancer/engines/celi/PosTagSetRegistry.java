@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.CeliLemmatizerEnhancementEngine;
-import org.apache.stanbol.enhancer.nlp.TagSet;
+import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.apache.stanbol.enhancer.nlp.pos.olia.English;

@@ -45,7 +45,6 @@ import org.apache.stanbol.enhancer.nlp.model.annotation.Annotation;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
-import org.apache.stanbol.enhancer.nlp.sentiment.SentimentTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
 import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -280,10 +279,7 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
             if(process){
                 double sentiment = classifier.classifyWord(token.getSpan());
                 if(sentiment != 0.0){
-                    token.addAnnotation(SENTIMENT_ANNOTATION, 
-                        new Value<SentimentTag>(sentiment > 0 ? 
-                                SentimentTag.POSITIVE : SentimentTag.NEGATIVE,
-                                Math.abs(sentiment)));
+                    token.addAnnotation(SENTIMENT_ANNOTATION, new Value<Double>(sentiment));
                 } //else do not set sentiments with 0.0
             }
         }

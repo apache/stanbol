@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.nlp.ontology;
+package org.apache.stanbol.enhancer.nlp.nif;
 
 import org.apache.clerezza.rdf.core.UriRef;
 

@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.nlp;
+package org.apache.stanbol.enhancer.nlp.model.tag;
 
 import java.util.Arrays;
 import java.util.Collections;

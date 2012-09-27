@@ -54,10 +54,12 @@
               org.apache.stanbol.enhancer.nlp;version=${project.version},
               org.apache.stanbol.enhancer.nlp.model;version=${project.version},
               org.apache.stanbol.enhancer.nlp.model.annotation;version=${project.version},
-              org.apache.stanbol.enhancer.nlp.ontology;version=${project.version},
+              org.apache.stanbol.enhancer.nlp.model.tag;version=${project.version},
+              org.apache.stanbol.enhancer.nlp.nif;version=${project.version},
               org.apache.stanbol.enhancer.nlp.pos;version=${project.version},
               org.apache.stanbol.enhancer.nlp.pos.*;version=${project.version},
               org.apache.stanbol.enhancer.nlp.phrase;version=${project.version},
+              org.apache.stanbol.enhancer.nlp.morpho;version=${project.version},
               org.apache.stanbol.enhancer.nlp.sentiment;version=${project.version},
               org.apache.stanbol.enhancer.nlp.utils;version=${project.version}
             </Export-Package>

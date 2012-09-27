@@ -30,12 +30,11 @@ import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Annotated;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
-import org.apache.stanbol.enhancer.nlp.ontology.SsoOntology;
-import org.apache.stanbol.enhancer.nlp.ontology.StringOntology;
+import org.apache.stanbol.enhancer.nlp.nif.SsoOntology;
+import org.apache.stanbol.enhancer.nlp.nif.StringOntology;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
-import org.apache.stanbol.enhancer.nlp.sentiment.SentimentTag;
 import org.apache.stanbol.enhancer.nlp.utils.NIFHelper;
 import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -162,14 +161,10 @@ public class Nlp2RdfMetadataEngine extends AbstractEnhancementEngine<RuntimeExce
                 writePhrase(metadata, span, current);
                 //OlIA does not include Sentiments
                 
-                Value<SentimentTag> sentiment = span.getAnnotation(NlpAnnotations.SENTIMENT_ANNOTATION);
-                if(sentiment != null){
-                    double sentimentVal = sentiment.probability();
-                    if(sentiment.value().isNegative()) {
-                        sentimentVal = sentimentVal * -1;
-                    }
+                Value<Double> sentiment = span.getAnnotation(NlpAnnotations.SENTIMENT_ANNOTATION);
+                if(sentiment != null && sentiment.value() != null){
                     metadata.add(new TripleImpl(current, SENTIMENT_PROPERTY, 
-                        lf.createTypedLiteral(sentimentVal)));
+                        lf.createTypedLiteral(sentiment.value())));
                 }
             }
         } finally {
