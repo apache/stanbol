@@ -104,12 +104,12 @@
     <bundle>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.0</version>
+      <version>1.3</version>
     </bundle>
     <bundle>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.5</version>
+      <version>1.7</version>
     </bundle>
     <bundle>
       <groupId>commons-fileupload</groupId>
