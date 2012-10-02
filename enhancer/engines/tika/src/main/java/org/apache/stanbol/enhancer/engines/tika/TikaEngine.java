@@ -238,7 +238,7 @@ public class TikaEngine
                 ci.addPart(xhtmlBlobUri,  xhtmlSink.getBlob());
             }
             //add the extracted metadata
-            if(log.isDebugEnabled()){
+            if(log.isInfoEnabled()){
                 for(String name : metadata.names()){
                     log.info("{}: {}",name,Arrays.toString(metadata.getValues(name)));
                 }

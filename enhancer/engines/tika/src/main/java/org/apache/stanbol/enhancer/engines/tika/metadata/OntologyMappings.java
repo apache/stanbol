@@ -165,41 +165,41 @@ public class OntologyMappings implements Iterable<Mapping>{
         String dc = NamespaceEnum.dc.getNamespace();
         mappings.addMapping(
             new PropertyMapping(dc+"contributor",
-                DublinCore.CONTRIBUTOR,MSOffice.LAST_AUTHOR));
+                DublinCore.CONTRIBUTOR.getName(),MSOffice.LAST_AUTHOR));
         mappings.addMapping(
-            new PropertyMapping(dc+"coverage",DublinCore.COVERAGE));
+            new PropertyMapping(dc+"coverage",DublinCore.COVERAGE.getName()));
         mappings.addMappings(
             new PropertyMapping(dc+"creator",
-                DublinCore.CREATOR,MSOffice.AUTHOR,"initial-creator"));
+                DublinCore.CREATOR.getName(),MSOffice.AUTHOR,"initial-creator"));
         mappings.addMappings( 
-            new PropertyMapping(dc+"description",DublinCore.DESCRIPTION));
+            new PropertyMapping(dc+"description",DublinCore.DESCRIPTION.getName()));
         mappings.addMappings( 
             new PropertyMapping(dc+"format",
-                DublinCore.FORMAT,HttpHeaders.CONTENT_TYPE));
+                DublinCore.FORMAT.getName(),HttpHeaders.CONTENT_TYPE));
         mappings.addMappings( 
-            new PropertyMapping(dc+"identifier",DublinCore.IDENTIFIER));
+            new PropertyMapping(dc+"identifier",DublinCore.IDENTIFIER.getName()));
         mappings.addMappings(
             new PropertyMapping(dc+"language",
-                DublinCore.LANGUAGE,HttpHeaders.CONTENT_LANGUAGE));
+                DublinCore.LANGUAGE.getName(),HttpHeaders.CONTENT_LANGUAGE));
         mappings.addMappings(
             new PropertyMapping(dc+"modified",XSD.dateTime,
-                DublinCore.MODIFIED,"Last-Modified"));
+                DublinCore.MODIFIED.getName(),"Last-Modified"));
         mappings.addMappings( 
             new PropertyMapping(dc+"publisher",
-                DublinCore.PUBLISHER,MSOffice.COMPANY));
+                DublinCore.PUBLISHER.getName(),MSOffice.COMPANY));
         mappings.addMappings( 
-            new PropertyMapping(dc+"relation",DublinCore.RELATION));
+            new PropertyMapping(dc+"relation",DublinCore.RELATION.getName()));
         mappings.addMappings(
-            new PropertyMapping(dc+"rights",DublinCore.RIGHTS));
+            new PropertyMapping(dc+"rights",DublinCore.RIGHTS.getName()));
         mappings.addMappings( 
-            new PropertyMapping(dc+"source",DublinCore.SOURCE));
+            new PropertyMapping(dc+"source",DublinCore.SOURCE.getName()));
         mappings.addMappings( 
             new PropertyMapping(dc+"subject",
-                DublinCore.SUBJECT,MSOffice.KEYWORDS));
+                DublinCore.SUBJECT.getName(),MSOffice.KEYWORDS));
         mappings.addMappings( 
-            new PropertyMapping(dc+"title",DublinCore.TITLE));
+            new PropertyMapping(dc+"title",DublinCore.TITLE.getName()));
         mappings.addMappings( 
-            new PropertyMapping(dc+"type",DublinCore.TYPE));
+            new PropertyMapping(dc+"type",DublinCore.TYPE.getName()));
         mappings.addMappings( 
             new PropertyMapping(dc+"date",XSD.dateTime,DublinCore.DATE.getName()));
         //MS Office -> DC
@@ -211,19 +211,19 @@ public class OntologyMappings implements Iterable<Mapping>{
     public static void addMediaResourceOntologyMappings(OntologyMappings mappings){
         mappings.addMappings(
             new PropertyMapping(ma+"hasContributor",
-                DublinCore.CONTRIBUTOR,XMPDM.ARTIST.getName(),XMPDM.COMPOSER.getName()));
+                DublinCore.CONTRIBUTOR.getName(),XMPDM.ARTIST.getName(),XMPDM.COMPOSER.getName()));
         mappings.addMapping( 
             new ResourceMapping(ma+"hasLocation",
                 new TypeMapping(ma+"Location"),
-                new PropertyMapping(ma+"locationName",DublinCore.COVERAGE)));
+                new PropertyMapping(ma+"locationName",DublinCore.COVERAGE.getName())));
         mappings.addMappings( 
             new PropertyMapping(ma+"hasCreator",
-                DublinCore.CREATOR,MSOffice.AUTHOR,"initial-creator"));
+                DublinCore.CREATOR.getName(),MSOffice.AUTHOR,"initial-creator"));
         mappings.addMappings( 
-            new PropertyMapping(ma+"description",DublinCore.DESCRIPTION));
+            new PropertyMapping(ma+"description",DublinCore.DESCRIPTION.getName()));
         mappings.addMappings( 
             new PropertyMapping(ma+"hasFormat",
-                DublinCore.FORMAT,HttpHeaders.CONTENT_TYPE));
+                DublinCore.FORMAT.getName(),HttpHeaders.CONTENT_TYPE));
         /*
          * Excerpt of the MA recommendation:
          *   The identifier of a media resource is represented in RDF by the URI 
@@ -231,30 +231,30 @@ public class OntologyMappings implements Iterable<Mapping>{
          *   identified by several URI, owl:sameAs should be used.
          */
         mappings.addMappings( 
-            new PropertyMapping(OWL.sameAs,RDFS.Resource,DublinCore.IDENTIFIER));
+            new PropertyMapping(OWL.sameAs,RDFS.Resource,DublinCore.IDENTIFIER.getName()));
         mappings.addMappings( 
             new PropertyMapping(ma+"hasLanguage",
-                DublinCore.LANGUAGE,HttpHeaders.CONTENT_LANGUAGE));
+                DublinCore.LANGUAGE.getName(),HttpHeaders.CONTENT_LANGUAGE));
         mappings.addMappings( 
             new PropertyMapping(ma+"editDate",XSD.dateTime,
-                DublinCore.MODIFIED,MSOffice.LAST_SAVED.getName()));
+                DublinCore.MODIFIED.getName(),MSOffice.LAST_SAVED.getName()));
         mappings.addMappings(
-            new PropertyMapping(ma+"hasPublisher",DublinCore.PUBLISHER));
+            new PropertyMapping(ma+"hasPublisher",DublinCore.PUBLISHER.getName()));
         mappings.addMappings( 
-            new PropertyMapping(ma+"hasRelatedResource",DublinCore.RELATION));
+            new PropertyMapping(ma+"hasRelatedResource",DublinCore.RELATION.getName()));
         mappings.addMappings( 
             new PropertyMapping(ma+"copyright",RDFS.Resource,
                 //DC:rights and cc:license
-                DublinCore.RIGHTS,CreativeCommons.LICENSE_LOCATION, CreativeCommons.LICENSE_URL,
+                DublinCore.RIGHTS.getName(),CreativeCommons.LICENSE_LOCATION, CreativeCommons.LICENSE_URL,
                 XMPDM.COPYRIGHT.getName()));
         mappings.addMappings( 
-            new PropertyMapping(ma+"isMemberOf",DublinCore.SOURCE));
+            new PropertyMapping(ma+"isMemberOf",DublinCore.SOURCE.getName()));
         mappings.addMappings( 
             new PropertyMapping(ma+"hasKeyword",
-                DublinCore.SUBJECT,MSOffice.KEYWORDS));
+                DublinCore.SUBJECT.getName(),MSOffice.KEYWORDS));
         mappings.addMappings( 
             new PropertyMapping(ma+"title",
-                DublinCore.TITLE,XMPDM.SCENE.getName(),XMPDM.TAPE_NAME.getName(),
+                DublinCore.TITLE.getName(),XMPDM.SCENE.getName(),XMPDM.TAPE_NAME.getName(),
                 XMPDM.SHOT_NAME.getName()));
         mappings.addMapping(
             new PropertyMapping(ma+"alternativeTitle", XMPDM.ALT_TAPE_NAME.getName()));
@@ -262,13 +262,13 @@ public class OntologyMappings implements Iterable<Mapping>{
             new PropertyMapping(ma+"mainOriginalTitle", XMPDM.ALBUM.getName()));
         mappings.addMappings( 
             new PropertyMapping(ma+"hasGenre",
-                DublinCore.TYPE,XMPDM.GENRE.getName()));
+                DublinCore.TYPE.getName(),XMPDM.GENRE.getName()));
         mappings.addMappings(
             new PropertyMapping(ma+"creationDate",XSD.dateTime,
                 DublinCore.DATE.getName(),MSOffice.CREATION_DATE.getName(),"created"));
         mappings.addMapping(
             new PropertyMapping(ma+"description", 
-                DublinCore.DESCRIPTION,MSOffice.COMMENTS));
+                DublinCore.DESCRIPTION.getName(),MSOffice.COMMENTS));
         
         mappings.addMappings( 
             new PropertyMapping(ma+"hasContributor",
@@ -400,13 +400,13 @@ public class OntologyMappings implements Iterable<Mapping>{
         //DC -> SKOS
         mappings.addMappings( 
             new PropertyMapping(SKOS.prefLabel,
-                DublinCore.TITLE));
+                DublinCore.TITLE.getName()));
         mappings.addMappings( 
             new PropertyMapping(SKOS.definition,
-                DublinCore.DESCRIPTION));
+                DublinCore.DESCRIPTION.getName()));
         mappings.addMappings(
             new PropertyMapping(SKOS.notation,
-                DublinCore.IDENTIFIER));
+                DublinCore.IDENTIFIER.getName()));
         //MS Office -> SKOS
         mappings.addMappings( 
             new PropertyMapping(SKOS.note,MSOffice.COMMENTS));
@@ -418,9 +418,9 @@ public class OntologyMappings implements Iterable<Mapping>{
     public static void addRdfsMappings(OntologyMappings mappings){
         //DC
         mappings.addMappings( 
-            new PropertyMapping(RDFS.label,DublinCore.TITLE));
+            new PropertyMapping(RDFS.label,DublinCore.TITLE.getName()));
         mappings.addMappings( 
-            new PropertyMapping(RDFS.comment,DublinCore.DESCRIPTION,MSOffice.COMMENTS));
+            new PropertyMapping(RDFS.comment,DublinCore.DESCRIPTION.getName(),MSOffice.COMMENTS));
     }
     
     /**
