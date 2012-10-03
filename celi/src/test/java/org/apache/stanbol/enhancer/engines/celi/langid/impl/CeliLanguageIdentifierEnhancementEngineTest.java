@@ -40,6 +40,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -103,11 +104,7 @@ public class CeliLanguageIdentifierEnhancementEngineTest {
 	        int entityAnnoNum = validateAllEntityAnnotations(ci.getMetadata(), expectedValues);
 	        assertEquals("No EntityAnnotations are expected",0, entityAnnoNum);
 		} catch (EngineException e) {
-			if (e.getCause() != null && e.getCause() instanceof UnknownHostException) {
-				log.warn("Celi Service not reachable -> offline? -> deactivate test");
-				return;
-			}
-			throw e;
+            RemoteServiceHelper.checkServiceUnavailable(e);
 		}
 	}
 

@@ -44,6 +44,7 @@ import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
+import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -94,17 +95,17 @@ public class DBPSpotlightAnnotateEnhancementTest {
 	}
 
 	@Test
-	public void testEntityExtraction() {
+	public void testEntityExtraction() throws EngineException{
 		Collection<Annotation> entities;
 		try {
 			entities = dbpslight.doPostRequest(TEST_TEXT,ci.getUri());
-			LOG.info("Found entities: {}", entities.size());
-			LOG.debug("Entities:\n{}", entities);
-			Assert.assertFalse("No entities were found!", entities.isEmpty());
 		} catch (EngineException e) {
-			Assert.assertFalse("An EngineException occurred! The message was: "
-					+ e.getMessage(), true);
+            RemoteServiceHelper.checkServiceUnavailable(e);
+            return;
 		}
+        LOG.info("Found entities: {}", entities.size());
+        LOG.debug("Entities:\n{}", entities);
+        Assert.assertFalse("No entities were found!", entities.isEmpty());
 	}
 	@Test
 	public void testCanEnhance() throws EngineException {
@@ -117,7 +118,11 @@ public class DBPSpotlightAnnotateEnhancementTest {
 	 */
 	@Test
 	public void testEnhancement() throws EngineException {
-		dbpslight.computeEnhancements(ci);
+	    try {
+	        dbpslight.computeEnhancements(ci);
+	    } catch (EngineException e) {
+            RemoteServiceHelper.checkServiceUnavailable(e);
+        }
         HashMap<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(

@@ -38,6 +38,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
+import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -97,7 +98,13 @@ public class TestOpenCalaisEngine {
         Assert.assertNotNull("failed to load resource " + testFile, in);
         MGraph model = calaisExtractor.readModel(in, format);
         Assert.assertNotNull("model reader failed with format: " + format, model);
-        Collection<CalaisEntityOccurrence> entities = calaisExtractor.queryModel(model);
+        Collection<CalaisEntityOccurrence> entities;
+        try {
+            entities = calaisExtractor.queryModel(model);
+        } catch (EngineException e) {
+            RemoteServiceHelper.checkServiceUnavailable(e);
+            return;
+        }
         LOG.info("Found entities: {}", entities.size());
         LOG.debug("Entities:\n{}", entities);
         Assert.assertFalse("No entities found!", entities.isEmpty());
@@ -117,22 +124,30 @@ public class TestOpenCalaisEngine {
     }
 
     @Test
-    public void testCalaisConnection() throws IOException {
+    public void testCalaisConnection() throws IOException, EngineException {
         Assume.assumeNotNull(calaisExtractor.getLicenseKey());
+        ContentItem ci = wrapAsContentItem(TEST_TEXT);
+        ci.getMetadata().add(
+            new TripleImpl(ci.getUri(), Properties.DC_LANGUAGE, LiteralFactory.getInstance()
+                    .createTypedLiteral("en")));
+        MGraph model;
         try {
-            ContentItem ci = wrapAsContentItem(TEST_TEXT);
-            ci.getMetadata().add(
-                new TripleImpl(ci.getUri(), Properties.DC_LANGUAGE, LiteralFactory.getInstance()
-                        .createTypedLiteral("en")));
-            MGraph model = calaisExtractor.getCalaisAnalysis(TEST_TEXT, "text/plain");
-            Assert.assertNotNull("No model", model);
-            Collection<CalaisEntityOccurrence> entities = calaisExtractor.queryModel(model);
-            LOG.info("Found entities: {}", entities.size());
-            LOG.debug("Entities:\n{}", entities);
-            Assert.assertFalse("No entities found!", entities.isEmpty());
+            model = calaisExtractor.getCalaisAnalysis(TEST_TEXT, "text/plain");
         } catch (EngineException e) {
-            Assert.fail("Connection problem: " + e.getMessage());
+            RemoteServiceHelper.checkServiceUnavailable(e);
+            return;
         }
+        Assert.assertNotNull("No model", model);
+        Collection<CalaisEntityOccurrence> entities;
+        try {
+            entities = calaisExtractor.queryModel(model);
+        } catch (EngineException e) {
+            RemoteServiceHelper.checkServiceUnavailable(e);
+            return;
+        }
+        LOG.info("Found entities: {}", entities.size());
+        LOG.debug("Entities:\n{}", entities);
+        Assert.assertFalse("No entities found!", entities.isEmpty());
     }
 
     // problem with license keys for testing?
