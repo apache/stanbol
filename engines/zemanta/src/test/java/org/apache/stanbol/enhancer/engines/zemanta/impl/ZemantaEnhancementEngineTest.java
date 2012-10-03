@@ -40,6 +40,7 @@ import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
+import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -98,16 +99,13 @@ public class ZemantaEnhancementEngineTest {
     }
 
     @Test
-    public void tesetBioText() throws Exception {
+    public void tesetBioText()  throws EngineException, IOException {
         ContentItem ci = wrapAsContentItem(BIO_DOMAIN_TEXT);
         try {
             zemantaEngine.computeEnhancements(ci);
         } catch (EngineException e) {
-            if(e.getCause() != null && e.getCause() instanceof UnknownHostException){
-                log.warn("Zemanta Service not reachable -> offline? -> deactivate test");
-                return;
-            }
-            throw e;
+            RemoteServiceHelper.checkServiceUnavailable(e);
+            return;
         }
         JenaSerializerProvider serializer = new JenaSerializerProvider();
         serializer.serialize(System.out, ci.getMetadata(), TURTLE);

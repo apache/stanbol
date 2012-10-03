@@ -107,9 +107,15 @@ public class ListChain extends AbstractChain implements Chain {
         List<String> configuredChain = new ArrayList<String>();
         if(value instanceof String[]){
             configuredChain.addAll(Arrays.asList((String[])value));
+        } else if(value instanceof List<?>){
+            for(Object o : (List<?>)value){
+                if(o != null){
+                    configuredChain.add(o.toString());
+                }
+            }
         } else {
             throw new ConfigurationException(PROPERTY_ENGINE_LIST, 
-                "The engines of a List Chain MUST BE configured as Array of " +
+                "The engines of a List Chain MUST BE configured as Array/List of " +
                 "Strings (parsed: "+
                         (value != null?value.getClass():"null")+")");
         }
