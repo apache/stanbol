@@ -42,6 +42,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
+import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -110,11 +111,7 @@ public class CeliNamedEntityExtractionEnhancementEngineTest {
 	        int entityAnnoNum = EnhancementStructureHelper.validateAllEntityAnnotations(ci.getMetadata(),expectedValues);
 	        log.info(entityAnnoNum + " EntityAnnotations found ...");
 		} catch (EngineException e) {
-			if (e.getCause() != null && e.getCause() instanceof UnknownHostException) {
-				log.warn("Celi Service not reachable -> offliCeliNamedEntityExtractionEnhancementEnginene? -> deactivate test");
-				return;
-			}
-			throw e;
+            RemoteServiceHelper.checkServiceUnavailable(e);
 		}
     }
     

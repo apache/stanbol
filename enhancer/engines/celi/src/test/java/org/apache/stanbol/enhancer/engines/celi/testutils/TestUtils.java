@@ -19,10 +19,13 @@ package org.apache.stanbol.enhancer.engines.celi.testutils;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 
 import java.io.ByteArrayOutputStream;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +41,5 @@ public final class TestUtils {
         serializer.serialize(logOut, ci.getMetadata(), TURTLE);
         log.info("Enhancements: \n{}",new String(logOut.toByteArray(),Charset.forName("UTF-8")));
     }
-
 
 }

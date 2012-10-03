@@ -44,6 +44,7 @@ import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
+import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -94,11 +95,17 @@ public class DBPSpotlightCandidatesEnhancementTest {
 		assertEquals("en", EnhancementEngineHelper.getLanguage(ci));
 	}
 	@Test
-	public void testEntityExtraction() throws Exception{
-		Collection<SurfaceForm> entities = dbpslight.doPostRequest(TEST_TEXT,ci.getUri());
-			LOG.info("Found entities: {}", entities.size());
-			LOG.debug("Entities:\n{}", entities);
-			Assert.assertFalse("No entities were found!", entities.isEmpty());
+	public void testEntityExtraction() throws EngineException {
+		Collection<SurfaceForm> entities;
+        try {
+            entities = dbpslight.doPostRequest(TEST_TEXT,ci.getUri());
+        } catch (EngineException e) {
+            RemoteServiceHelper.checkServiceUnavailable(e);
+            return;
+        }
+        LOG.info("Found entities: {}", entities.size());
+        LOG.debug("Entities:\n{}", entities);
+        Assert.assertFalse("No entities were found!", entities.isEmpty());
 	}
 	@Test
 	public void testCanEnhance() throws EngineException {
@@ -111,7 +118,12 @@ public class DBPSpotlightCandidatesEnhancementTest {
 	 */
 	@Test
 	public void testEnhancement() throws EngineException {
-		dbpslight.computeEnhancements(ci);
+		try {
+            dbpslight.computeEnhancements(ci);
+        } catch (EngineException e) {
+            RemoteServiceHelper.checkServiceUnavailable(e);
+            return;
+        }
         HashMap<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(

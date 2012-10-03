@@ -60,6 +60,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
@@ -149,11 +150,7 @@ public class CeliLemmatizerEnhancementEngineTest {
         try {
             morphoAnalysisEngine.computeEnhancements(ci);
         } catch (EngineException e) {
-            if (e.getCause() != null && e.getCause() instanceof UnknownHostException) {
-                log.warn("Celi Service not reachable -> offline? -> deactivate test");
-                return;
-            }
-            throw e;
+            RemoteServiceHelper.checkServiceUnavailable(e);
         }
 
         TestUtils.logEnhancements(ci);

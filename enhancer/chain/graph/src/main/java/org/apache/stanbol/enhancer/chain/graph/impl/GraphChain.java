@@ -176,7 +176,7 @@ public class GraphChain extends AbstractChain implements Chain {
 
     @Activate
     @Override
-    public void activate(ComponentContext ctx) throws ConfigurationException {
+    protected void activate(ComponentContext ctx) throws ConfigurationException {
         super.activate(ctx);
         Object resource = ctx.getProperties().get(PROPERTY_GRAPH_RESOURCE);
         Object list = ctx.getProperties().get(PROPERTY_CHAIN_LIST);
@@ -245,7 +245,7 @@ public class GraphChain extends AbstractChain implements Chain {
     }
     @Deactivate
     @Override
-    public void deactivate(ComponentContext ctx){
+    protected void deactivate(ComponentContext ctx){
         if(mode == MODE.RESOURCE && tracker != null){
             //we need to remove the ExecutionPlanListerner
             tracker.removeAll((DataFileListener)internalChain);
