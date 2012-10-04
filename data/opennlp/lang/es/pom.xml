@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.parent</artifactId>
-    <version>0.10.1-incubating-SNAPSHOT</version>
+    <version>0.10.1-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.opennlp.lang.es</artifactId>
-  <version>1.0.0-incubating-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: OpenNLP Models for Spanish</name>
@@ -40,12 +40,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/opennlp/lang/es
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/data/opennlp/lang/es
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/opennlp/lang/es
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/data/opennlp/lang/es
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -24,6 +24,7 @@ import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Span;
+import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Annotated;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Annotation;
@@ -41,6 +42,18 @@ public final class NIFHelper {
     private static final LiteralFactory lf = LiteralFactory.getInstance();
 
     private NIFHelper(){}
+    
+    public static final Map<SpanTypeEnum,UriRef> SPAN_TYPE_TO_SSO_TYPE;
+    static {
+        Map<SpanTypeEnum,UriRef> mapping = new EnumMap<SpanTypeEnum,UriRef>(SpanTypeEnum.class);
+        //mapping.put(SpanTypeEnum.Text, null);
+        //mapping.put(SpanTypeEnum.TextSection, null);
+        mapping.put(SpanTypeEnum.Sentence, SsoOntology.Sentence.getUri());
+        mapping.put(SpanTypeEnum.Chunk, SsoOntology.Phrase.getUri());
+        mapping.put(SpanTypeEnum.Token, SsoOntology.Word.getUri());
+        SPAN_TYPE_TO_SSO_TYPE = Collections.unmodifiableMap(mapping);
+    }
+    
     /**
      * Read-only map that maps from the {@link LexicalCategory} to the OLIA
      * Concept representing the Phrase (e.g. {@link LexicalCategory#Noun} maps

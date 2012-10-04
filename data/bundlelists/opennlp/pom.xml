@@ -17,13 +17,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.parent</artifactId>
-    <version>0.10.1-incubating-SNAPSHOT</version>
+    <version>0.10.1-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.bundlelists.opennlp</artifactId>
-  <version>0.10.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>partialbundlelist</packaging>
 
   <name>Apache Stanbol Data: Bundle List for OpenNLP</name>

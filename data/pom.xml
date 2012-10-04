@@ -21,19 +21,19 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.reactor</artifactId>
-  <version>0.10.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   
   <name>Apache Stanbol Data Reactor</name>
 
   <scm>
       <connection>
-          scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data
+          scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/data
       </connection>
       <developerConnection>
-          scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data
+          scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/data
       </developerConnection>
-      <url>http://incubator.apache.org/stanbol/</url>
+      <url>http://stanbol.apache.org/</url>
   </scm>
   
   <modules>

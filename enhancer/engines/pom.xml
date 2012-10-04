@@ -22,7 +22,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.reactor</artifactId>
-  <version>0.10.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Enhancer Engines Reactor</name>
@@ -63,6 +63,7 @@
     <module>opennlp-pos</module>
     <module>opennlp-chunker</module>
     <module>sentiment-wordclassifier</module>
+    <module>sentiment-summarization</module>
     <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
     
   </modules>

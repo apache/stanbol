@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.parent</artifactId>
-    <version>0.10.1-incubating-SNAPSHOT</version>
+    <version>0.10.1-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-  <version>1.0.5-incubating-SNAPSHOT</version>
+  <version>1.0.5-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: DBpedia.org</name>
@@ -50,9 +50,9 @@
   </licenses>  
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites/dbpedia</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites/dbpedia</developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/data/sites/dbpedia</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/data/sites/dbpedia</developerConnection>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <properties>

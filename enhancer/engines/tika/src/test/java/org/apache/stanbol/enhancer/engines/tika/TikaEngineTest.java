@@ -301,7 +301,7 @@ public class TikaEngineTest {
         assertNotNull(xhtmlBlob);
         assertContentRegexp(xhtmlBlob, 
             "<html xmlns=\"http://www.w3.org/1999/xhtml\">",
-            "<title></title>",
+            "<title>\\[jira\\] Commented: \\(TIKA-461\\) RFC822 messages not parsed</title>",
             "<body><p>",
             "Julien Nioche commented on TIKA-461:",
             "I'll have a look at mime4j and try to use it in Tika",
@@ -310,9 +310,12 @@ public class TikaEngineTest {
             "URL: https://issues.apache.org/jira/browse/TIKA-461");
         //no check the extracted metadata!
         //DC
-        verifyValue(ci, new UriRef(NamespaceEnum.dc+"date"), XSD.dateTime,"2010-09-06T09:25:34Z");
+        //STANBOL-757: dc:date no longer added by Tika 1.2 (dc:created is still present)
+        //verifyValue(ci, new UriRef(NamespaceEnum.dc+"date"), XSD.dateTime,"2010-09-06T09:25:34Z");
         verifyValue(ci, new UriRef(NamespaceEnum.dc+"format"), null,"message/rfc822");
-        verifyValue(ci, new UriRef(NamespaceEnum.dc+"subject"), null,"[jira] Commented: (TIKA-461) RFC822 messages not parsed");
+        //STANBOL-757: dc:subject no longer added by Tika1.2 (dc:title is used instead)
+        //verifyValue(ci, new UriRef(NamespaceEnum.dc+"subject"), null,"[jira] Commented: (TIKA-461) RFC822 messages not parsed");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"title"), null,"[jira] Commented: (TIKA-461) RFC822 messages not parsed");
         verifyValue(ci, new UriRef(NamespaceEnum.dc+"creator"), null,"Julien Nioche (JIRA) <jira@apache.org>");
         verifyValue(ci, new UriRef(NamespaceEnum.dc+"created"), XSD.dateTime,"2010-09-06T09:25:34Z");
         
@@ -321,7 +324,8 @@ public class TikaEngineTest {
         verifyValue(ci, new UriRef(NamespaceEnum.media+"hasFormat"),null,"message/rfc822");
         verifyValue(ci, new UriRef(NamespaceEnum.media+"hasCreator"),null,"Julien Nioche (JIRA) <jira@apache.org>");
         verifyValue(ci, new UriRef(NamespaceEnum.media+"hasContributor"),null,"Julien Nioche (JIRA) <jira@apache.org>");
-        verifyValue(ci, new UriRef(NamespaceEnum.media+"hasKeyword"),null,"[jira] Commented: (TIKA-461) RFC822 messages not parsed");
+        //STANBOL-757: This was present with Tika 1.1 because its mapping from dc:subject 
+//        verifyValue(ci, new UriRef(NamespaceEnum.media+"hasKeyword"),null,"[jira] Commented: (TIKA-461) RFC822 messages not parsed");
 
         
         //Nepomuk Message
@@ -370,7 +374,7 @@ public class TikaEngineTest {
      * @throws IOException
      * @throws ParseException
      */
-    //@Test deactivated because of TIKA-852
+    @Test 
     public void testMp4() throws EngineException, IOException, ParseException {
         log.info(">>> testMp4 <<<");
         ContentItem ci = createContentItem("testMP4.m4a", "audio/mp4");
@@ -481,7 +485,7 @@ public class TikaEngineTest {
         verifyValues(ci, new UriRef(NamespaceEnum.media+"hasKeyword"),null,"serbor","moscow-birds","canon-55-250");
         //and finally the mapped DC properties
         verifyValue(ci, new UriRef(NamespaceEnum.dc+"format"),null,"image/jpeg");
-        verifyValue(ci, new UriRef(NamespaceEnum.dc+"date"),XSD.dateTime,"2009-08-11T09:09:45");
+        verifyValue(ci, new UriRef(NamespaceEnum.dc+"created"),XSD.dateTime,"2009-08-11T09:09:45");
         verifyValue(ci, new UriRef(NamespaceEnum.dc+"modified"),XSD.dateTime,"2009-10-02T23:02:49");
         verifyValues(ci, new UriRef(NamespaceEnum.dc+"subject"), null, "serbor","moscow-birds","canon-55-250");
     }

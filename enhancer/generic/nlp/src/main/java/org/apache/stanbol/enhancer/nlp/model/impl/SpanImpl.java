@@ -134,7 +134,8 @@ public abstract class SpanImpl extends AnnotatedImpl implements Span{
     
     @Override
     public int compareTo(Span o) {
-        if(!context.equals(o.getContext())){
+        if(context != null && o.getContext() != null && 
+                !context.equals(o.getContext())){
             log.warn("Comparing Spans with different Context. This is not an " +
             		"intended usage of this class as start|end|type parameters " +
             		"do not have a natural oder over different texts.");

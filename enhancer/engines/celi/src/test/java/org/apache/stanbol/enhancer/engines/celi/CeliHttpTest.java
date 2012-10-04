@@ -19,16 +19,26 @@ package org.apache.stanbol.enhancer.engines.celi;
 import static org.apache.stanbol.enhancer.engines.celi.langid.impl.CeliLanguageIdentifierEnhancementEngineTest.CELI_LANGID_SERVICE_URL;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.UnknownHostException;
 
+import javax.print.attribute.standard.MediaSize.Engineering;
 import javax.xml.soap.SOAPException;
 
 import junit.framework.Assert;
 
 import org.apache.stanbol.enhancer.engines.celi.langid.impl.LanguageIdentifierClientHTTP;
+import org.apache.stanbol.enhancer.engines.celi.testutils.TestUtils;
+import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CeliHttpTest {
+    
+    public static final Logger log = LoggerFactory.getLogger(CeliHttpTest.class);
 
     /**
      * None Existing user account should throw an IOException with 
@@ -67,7 +77,11 @@ public class CeliHttpTest {
     public void testTestAccount() throws IOException, SOAPException {
         LanguageIdentifierClientHTTP testClient = new LanguageIdentifierClientHTTP(
             new URL(CELI_LANGID_SERVICE_URL), null);
-        Assert.assertNotNull(testClient.guessQueryLanguage("This is a dummy request"));
+        try {
+            Assert.assertNotNull(testClient.guessQueryLanguage("This is a dummy request"));
+        } catch (IOException e) {
+            RemoteServiceHelper.checkServiceUnavailable(e);
+        }
     }
     
 }
