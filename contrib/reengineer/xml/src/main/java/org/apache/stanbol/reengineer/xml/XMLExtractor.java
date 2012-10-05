@@ -38,11 +38,11 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -109,12 +109,12 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
     public final Logger log = LoggerFactory.getLogger(getClass());
 
     @Reference
-    ONManager onManager;
+    ScopeManager onManager;
 
     @Reference
     ReengineerManager reengineeringManager;
 
-    private OntologyScope scope;
+    private Scope scope;
     private String scopeID;
 
     /**
@@ -122,13 +122,13 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
      * Component Runtime support.
      * <p>
      * DO NOT USE to manually create instances - the XMLExtractor instances do need to be configured! YOU NEED
-     * TO USE {@link #XMLExtractor(ONManager)} or its overloads, to parse the configuration and then
+     * TO USE {@link #XMLExtractor(ScopeManager)} or its overloads, to parse the configuration and then
      * initialise the rule store if running outside a OSGI environment.
      */
     public XMLExtractor() {}
 
     public XMLExtractor(ReengineerManager reengineeringManager,
-                        ONManager onManager,
+                        ScopeManager onManager,
                         Dictionary<String,Object> configuration) {
         this();
         this.reengineeringManager = reengineeringManager;

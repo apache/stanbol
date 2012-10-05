@@ -20,7 +20,7 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.ontologymanager.ontonet.api.NamedArtifact;
+import org.apache.stanbol.ontologymanager.servicesapi.NamedArtifact;
 
 /**
  * This is a dummy resource to be used for human-readable HTML output.

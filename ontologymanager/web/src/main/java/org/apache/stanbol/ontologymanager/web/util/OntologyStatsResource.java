@@ -24,10 +24,10 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollector;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.OntologyCollector;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace;
+import org.apache.stanbol.ontologymanager.servicesapi.session.Session;
+import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 

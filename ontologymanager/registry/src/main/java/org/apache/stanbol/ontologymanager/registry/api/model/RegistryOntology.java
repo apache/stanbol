@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.registry.api.model;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 

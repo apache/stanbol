@@ -17,7 +17,7 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
+import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 
 /**

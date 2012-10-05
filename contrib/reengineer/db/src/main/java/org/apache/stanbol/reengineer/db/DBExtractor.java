@@ -12,10 +12,11 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -88,7 +89,7 @@ public class DBExtractor implements Reengineer {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Reference
-    ONManager onManager;
+    ScopeManager onManager;
 
     @Reference
     ReengineerManager reengineeringManager;
@@ -98,15 +99,15 @@ public class DBExtractor implements Reengineer {
     private IRI reengineeringSpaceIRI;
 
     MGraph schemaGraph;
-    protected OntologyScope scope;
+    protected Scope scope;
 
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
      * Component Runtime support.
      * <p>
      * DO NOT USE to manually create instances - the DBExtractor instances do need to be configured! YOU NEED
-     * TO USE {@link #DBExtractor(ONManager)} or its overloads, to parse the configuration and then initialise
-     * the rule store if running outside a OSGI environment.
+     * TO USE {@link #DBExtractor(ScopeManager)} or its overloads, to parse the configuration and then
+     * initialise the rule store if running outside a OSGI environment.
      */
     public DBExtractor() {
 
@@ -118,7 +119,7 @@ public class DBExtractor implements Reengineer {
      * 
      */
     public DBExtractor(ReengineerManager reengineeringManager,
-                       ONManager onManager,
+                       ScopeManager onManager,
                        TcManager tcManager,
                        WeightedTcProvider weightedTcProvider,
                        Dictionary<String,Object> configuration) {
@@ -139,7 +140,7 @@ public class DBExtractor implements Reengineer {
      *            {@link ConnectionSettings}
      */
     public DBExtractor(ReengineerManager reengineeringManager,
-                       ONManager onManager,
+                       ScopeManager onManager,
                        TcManager tcManager,
                        WeightedTcProvider weightedTcProvider,
                        Dictionary<String,Object> configuration,
@@ -198,7 +199,7 @@ public class DBExtractor implements Reengineer {
             log.info("Ontology {} created.", iri);
 
             scope = onManager.createOntologyScope(reengineeringScopeID,
-                new RootOntologyIRISource(IRI.create(DBS_L1.URI)));
+                (OntologyInputSource<?>) new RootOntologyIRISource(IRI.create(DBS_L1.URI)));
 
             // scope.setUp();
 
@@ -267,7 +268,7 @@ public class DBExtractor implements Reengineer {
         return ReengineerType.RDB;
     }
 
-    private OntologyScope getScope() {
+    private Scope getScope() {
         if (onManager.isScopeActive(reengineeringScopeID)) return onManager.getScope(reengineeringScopeID);
         return null;
     }
@@ -299,7 +300,7 @@ public class DBExtractor implements Reengineer {
         /*
          * Fetch the reengineering scope.
          */
-        OntologyScope reengineeringScope = getScope();
+        Scope reengineeringScope = getScope();
         if (reengineeringScope != null) {
             ConnectionSettings connectionSettings = (ConnectionSettings) dataSource.getDataSource();
             DBSchemaGenerator schemaGenerator = new DBSchemaGenerator(outputIRI, connectionSettings);

@@ -32,7 +32,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Ontology Manager Registry Manager</name>
+  <name>Apache Stanbol Ontology Manager : Registry Manager</name>
   <description>
     A facility for storing, caching and managing local ontology registries and central repositories.
   </description>
@@ -52,7 +52,7 @@
               OSGI-INF
             </Bundle-ClassPath>
             <Export-Package>
-              org.apache.stanbol.ontologymanager.registry.*
+              org.apache.stanbol.ontologymanager.registry.*;version=${project.version}
             </Export-Package>
             <Import-Package>
               org.slf4j.*,
@@ -73,92 +73,47 @@
   </build>
 
   <dependencies>
-    <!-- Stanbol deps -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-      <version>0.9.0-incubating</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
-      <version>0.9.0-incubating</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
-    </dependency>
+
+    <!-- Stanbol commons -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
-
-    <!-- OSGi deps -->
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+      <version>0.9.0-incubating</version>
     </dependency>
 
-    <!-- OWL deps -->
+    <!-- Stanbol deps -->
     <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
-    </dependency>
-
-    <!-- Persistence deps -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.multiplexer.clerezza</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>  
     <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.core</artifactId>
-    </dependency>
-
-    <!-- Diagnostics deps -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-
-    <!-- Testing deps -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.servicesapi</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
-      <version>0.9.0-incubating</version>
-      <scope>test</scope>
+      <artifactId>org.apache.stanbol.ontologymanager.sources.owlapi</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>
+
+    <!-- for testing -->
     <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.jena.parser</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.jena.serializer</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.rdfjson</artifactId>
-      <scope>test</scope>
-    </dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>    
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.simple.storage</artifactId>
       <scope>test</scope>
     </dependency>
-
+  
   </dependencies>
 
 </project>

@@ -29,13 +29,13 @@ import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.OntologySpaceFactoryImpl;
+import org.apache.stanbol.ontologymanager.core.OfflineConfigurationImpl;
+import org.apache.stanbol.ontologymanager.core.scope.ScopeManagerImpl;
+import org.apache.stanbol.ontologymanager.multiplexer.clerezza.collector.ClerezzaCollectorFactory;
+import org.apache.stanbol.ontologymanager.multiplexer.clerezza.ontology.ClerezzaOntologyProvider;
+import org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerType;
@@ -127,8 +127,8 @@ public class XMLReengineerTest {
         // Two different ontology storages, the same sparql engine and tcprovider
 
         OntologyProvider<TcProvider> provider = new ClerezzaOntologyProvider(tcm, offline, new Parser());
-        ONManager onManager = new ONManagerImpl(provider, offline, new OntologySpaceFactoryImpl(provider,
-                emptyConf), emptyConf);
+        ScopeManager onManager = new ScopeManagerImpl(provider, offline, new ClerezzaCollectorFactory(
+                provider, emptyConf), emptyConf);
         xmlExtractor = new XMLExtractor(new ReengineerManagerImpl(emptyConf), onManager, emptyConf);
     }
 

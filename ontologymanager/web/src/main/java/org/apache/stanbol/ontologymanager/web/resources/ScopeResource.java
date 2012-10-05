@@ -86,26 +86,26 @@ import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.IrremovableOntologyException;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorModificationException;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.SetInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.StoredOntologySource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyLoadingException;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.IrremovableOntologyException;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.OntologyCollectorModificationException;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.UnmodifiableOntologyCollectorException;
+import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.servicesapi.io.SetInputSource;
+import org.apache.stanbol.ontologymanager.servicesapi.io.StoredOntologySource;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyLoadingException;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
+import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
+import org.apache.stanbol.ontologymanager.sources.clerezza.GraphContentInputSource;
+import org.apache.stanbol.ontologymanager.sources.clerezza.GraphSource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.apache.stanbol.ontologymanager.web.util.OntologyPrettyPrintResource;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
@@ -135,7 +135,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     /*
      * Placeholder for the ONManager to be fetched from the servlet context.
      */
-    protected ONManager onm;
+    protected ScopeManager onm;
 
     protected OntologyProvider<TcProvider> ontologyProvider;
 
@@ -144,14 +144,14 @@ public class ScopeResource extends AbstractOntologyAccessResource {
      */
     protected RegistryManager regMgr;
 
-    protected OntologyScope scope;
+    protected Scope scope;
 
     public ScopeResource(@PathParam(value = "scopeid") String scopeId, @Context ServletContext servletContext) {
         super();
         log.info("<init> with scope {}", scopeId);
 
         this.servletContext = servletContext;
-        this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        this.onm = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
         this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
             servletContext);
         this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
@@ -322,7 +322,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         // // String s1 = s.split("::")[1];
         // if (s != null && !s.isEmpty()) result.add(s);
         // }
-        for (OWLOntologyID id : ontologyProvider.listOntologies())
+        for (OWLOntologyID id : ontologyProvider.listPrimaryKeys())
             result.add(OntologyUtils.encode(id));
         for (OWLOntologyID id : scope.getCoreSpace().listManagedOntologies())
             result.remove(OntologyUtils.encode(id));
@@ -334,7 +334,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     /*
      * Needed for freemarker
      */
-    public OntologyScope getScope() {
+    public Scope getScope() {
         return scope;
     }
 
@@ -606,7 +606,6 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         return rb.build();
     }
 
-    @SuppressWarnings("unused")
     @POST
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})

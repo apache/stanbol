@@ -19,16 +19,16 @@ package org.apache.stanbol.ontologymanager.registry.io;
 import java.util.Set;
 
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.AbstractOWLOntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.SetInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.impl.model.LibraryImpl;
+import org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.servicesapi.io.SetInputSource;
+import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyImportUtils;
+import org.apache.stanbol.ontologymanager.sources.owlapi.AbstractOWLOntologyInputSource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -173,9 +173,9 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Set
             // else
             try {
                 OWLOntology parent;
-                if (parentSrc != null) parent = OntologyUtils.buildImportTree(parentSrc, subtrees,
+                if (parentSrc != null) parent = OntologyImportUtils.buildImportTree(parentSrc, subtrees,
                     ontologyManager);
-                else parent = OntologyUtils.buildImportTree(subtrees, ontologyManager);
+                else parent = OntologyImportUtils.buildImportTree(subtrees, ontologyManager);
                 bindRootOntology(parent);
             } catch (OWLOntologyCreationException e) {
                 log.error("Failed to build import tree for library source " + libraryID, e);

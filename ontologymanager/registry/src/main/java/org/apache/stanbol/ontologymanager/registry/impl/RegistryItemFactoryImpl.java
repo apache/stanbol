@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.registry.impl;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryItemFactory;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
@@ -24,6 +23,7 @@ import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
 import org.apache.stanbol.ontologymanager.registry.impl.model.LibraryImpl;
 import org.apache.stanbol.ontologymanager.registry.impl.model.RegistryImpl;
 import org.apache.stanbol.ontologymanager.registry.impl.model.RegistryOntologyImpl;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
 import org.semanticweb.owlapi.model.OWLNamedObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 

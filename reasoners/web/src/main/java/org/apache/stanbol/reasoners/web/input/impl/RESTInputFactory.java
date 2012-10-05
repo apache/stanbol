@@ -24,12 +24,12 @@ import java.util.Map.Entry;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
+import org.apache.stanbol.ontologymanager.obsolete.api.ONManager;
+import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputFactory;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputManager;
 import org.apache.stanbol.reasoners.web.input.provider.impl.FileInputProvider;
-import org.apache.stanbol.reasoners.web.input.provider.impl.OntonetInputProvider;
+import org.apache.stanbol.reasoners.web.input.provider.impl.OntologyManagerInputProvider;
 import org.apache.stanbol.reasoners.web.input.provider.impl.RecipeInputProvider;
 import org.apache.stanbol.reasoners.web.input.provider.impl.UrlInputProvider;
 import org.apache.stanbol.rules.base.api.RuleAdapterManager;
@@ -54,7 +54,10 @@ public class RESTInputFactory implements ReasoningServiceInputFactory {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    public RESTInputFactory(ONManager onm, SessionManager sm, RuleStore rStore, RuleAdapterManager adapterManager) {
+    public RESTInputFactory(ONManager onm,
+                            SessionManager sm,
+                            RuleStore rStore,
+                            RuleAdapterManager adapterManager) {
         this.onm = onm;
         this.sessionManager = sm;
         this.rStore = rStore;
@@ -107,7 +110,8 @@ public class RESTInputFactory implements ReasoningServiceInputFactory {
 
             } else if (entry.getKey().equals("recipe")) {
                 if (!entry.getValue().isEmpty()) {
-                    inmgr.addInputProvider(new RecipeInputProvider(rStore, adapterManager, entry.getValue().iterator().next()));
+                    inmgr.addInputProvider(new RecipeInputProvider(rStore, adapterManager, entry.getValue()
+                            .iterator().next()));
                 } else {
                     // Parameter exists with no value
                     log.error("Parameter 'recipe' must have a value!");
@@ -117,7 +121,7 @@ public class RESTInputFactory implements ReasoningServiceInputFactory {
             }
         }
         if (scope != null) {
-            inmgr.addInputProvider(new OntonetInputProvider(onm, sessionManager, scope, session));
+            inmgr.addInputProvider(new OntologyManagerInputProvider(onm, sessionManager, scope, session));
         }
         return inmgr;
     }

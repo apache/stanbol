@@ -33,7 +33,11 @@
   <inceptionYear>2011</inceptionYear>
 
   <modules>
-    <module>ontonet</module>
+    <module>generic/servicesapi</module>
+    <module>sources/clerezza</module>
+    <module>sources/owlapi</module>
+    <module>generic/core</module>
+    <module>multiplexer/clerezza</module>
     <module>registry</module>
     <module>web</module>
     <module>bundlelist</module>

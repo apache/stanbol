@@ -10,14 +10,14 @@ import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.OntologySpaceFactoryImpl;
+import org.apache.stanbol.ontologymanager.core.OfflineConfigurationImpl;
+import org.apache.stanbol.ontologymanager.core.scope.ScopeManagerImpl;
+import org.apache.stanbol.ontologymanager.multiplexer.clerezza.collector.ClerezzaCollectorFactory;
+import org.apache.stanbol.ontologymanager.multiplexer.clerezza.ontology.ClerezzaOntologyProvider;
+import org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.PersistentCollectorFactory;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 import org.apache.stanbol.reengineer.base.impl.ReengineerManagerImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -28,7 +28,7 @@ public class DBExtractorTest {
 
     static DBExtractor dbExtractor;
     static String graphNS;
-    static ONManager onManager;
+    static ScopeManager onManager;
     static IRI outputIRI;
 
     @BeforeClass
@@ -51,9 +51,9 @@ public class DBExtractorTest {
                 new Parser());
 
         // Two different ontology storages, the same sparql engine and tcprovider
-        OntologySpaceFactory sf = new OntologySpaceFactoryImpl(ontologyProvider, emptyConf);
+        PersistentCollectorFactory sf = new ClerezzaCollectorFactory(ontologyProvider, emptyConf);
 
-        onManager = new ONManagerImpl(ontologyProvider, offline, sf, emptyConf);
+        onManager = new ScopeManagerImpl(ontologyProvider, offline, sf, emptyConf);
         dbExtractor = new DBExtractor(new ReengineerManagerImpl(emptyConf), onManager, tcm, wtcp, emptyConf);
         graphNS = "http://kres.iks-project.eu/reengineering/test";
         outputIRI = IRI.create(graphNS);

@@ -18,10 +18,10 @@ package org.apache.stanbol.ontologymanager.registry.api;
 
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.registry.api.model.CachingPolicy;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
+import org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 

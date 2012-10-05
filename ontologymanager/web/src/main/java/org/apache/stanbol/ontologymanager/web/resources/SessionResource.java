@@ -83,25 +83,25 @@ import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.IrremovableOntologyException;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.OntologyCollectorModificationException;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyContentInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.StoredOntologySource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyLoadingException;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.IrremovableOntologyException;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.OntologyCollectorModificationException;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.UnmodifiableOntologyCollectorException;
+import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.servicesapi.io.StoredOntologySource;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyLoadingException;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
+import org.apache.stanbol.ontologymanager.servicesapi.session.DuplicateSessionIDException;
+import org.apache.stanbol.ontologymanager.servicesapi.session.Session;
+import org.apache.stanbol.ontologymanager.servicesapi.session.SessionLimitException;
+import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
+import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
+import org.apache.stanbol.ontologymanager.sources.clerezza.GraphContentInputSource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.OntologyContentInputSource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.web.util.OntologyPrettyPrintResource;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
@@ -128,7 +128,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    protected ONManager onMgr;
+    protected ScopeManager onMgr;
 
     protected OntologyProvider<TcProvider> ontologyProvider;
 
@@ -152,7 +152,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
             servletContext);
         this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
             OntologyProvider.class, servletContext);
-        this.onMgr = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        this.onMgr = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
         session = sesMgr.getSession(sessionId);
     }
 
@@ -249,7 +249,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
     @Produces({WILDCARD})
     public Response emptyPost(@Context HttpHeaders headers) {
         log.debug(" post(no data)");
-        for (OntologyScope sc : getAllScopes()) { // First remove appended scopes not in the list
+        for (Scope sc : getAllScopes()) { // First remove appended scopes not in the list
             String scid = sc.getID();
             if (getAppendedScopes().contains(scid)) {
                 session.detachScope(scid);
@@ -264,16 +264,16 @@ public class SessionResource extends AbstractOntologyAccessResource {
     /*
      * Needed for freemarker
      */
-    public Set<OntologyScope> getAllScopes() {
+    public Set<Scope> getAllScopes() {
         return onMgr.getRegisteredScopes();
     }
 
     /*
      * Needed for freemarker
      */
-    public Set<OntologyScope> getAppendableScopes() {
-        Set<OntologyScope> notAppended = new HashSet<OntologyScope>();
-        for (OntologyScope sc : onMgr.getRegisteredScopes())
+    public Set<Scope> getAppendableScopes() {
+        Set<Scope> notAppended = new HashSet<Scope>();
+        for (Scope sc : onMgr.getRegisteredScopes())
             if (!session.getAttachedScopes().contains(sc.getID())) notAppended.add(sc);
         return notAppended;
     }
@@ -283,7 +283,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
      */
     public Set<String> getAppendedScopes() {
         Set<String> appended = new HashSet<String>();
-        for (OntologyScope sc : onMgr.getRegisteredScopes())
+        for (Scope sc : onMgr.getRegisteredScopes())
             if (session.getAttachedScopes().contains(sc.getID())) appended.add(sc.getID());
         return appended;
     }
@@ -305,7 +305,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
 
     public SortedSet<String> getManageableOntologies() {
         SortedSet<String> result = new TreeSet<String>();
-        for (OWLOntologyID id : ontologyProvider.listOntologies())
+        for (OWLOntologyID id : ontologyProvider.listPrimaryKeys())
             result.add(OntologyUtils.encode(id));
         for (OWLOntologyID id : session.listManagedOntologies())
             result.remove(OntologyUtils.encode(id));
@@ -735,7 +735,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         } // Now check scopes
         if (toAppend != null
             && (!toAppend.isEmpty() || (toAppend.isEmpty() && !getAppendedScopes().isEmpty()))) {
-            for (OntologyScope sc : getAllScopes()) { // First remove appended scopes not in the list
+            for (Scope sc : getAllScopes()) { // First remove appended scopes not in the list
                 String scid = sc.getID();
                 if (!toAppend.contains(scid) && getAppendedScopes().contains(scid)) {
                     session.detachScope(scid);

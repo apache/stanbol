@@ -31,14 +31,14 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
+import org.apache.stanbol.ontologymanager.obsolete.api.ONManager;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
+import org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.ontologymanager.web.resources.OntoNetRootResource;
-import org.apache.stanbol.ontologymanager.web.resources.OntologyNetworkResource;
 import org.apache.stanbol.ontologymanager.web.resources.RegistryManagerResource;
+import org.apache.stanbol.ontologymanager.web.resources.ScopeManagerResource;
 import org.apache.stanbol.ontologymanager.web.resources.ScopeResource;
 import org.apache.stanbol.ontologymanager.web.resources.SessionManagerResource;
 import org.apache.stanbol.ontologymanager.web.resources.SessionResource;
@@ -68,12 +68,6 @@ public class OntologyManagerWebFragment implements WebFragment {
     private BundleContext bundleContext;
 
     @Reference
-    ONManager onm;
-
-    @Reference
-    SessionManager sessionManager;
-
-    @Reference
     OfflineConfiguration offline;
 
     @Reference
@@ -83,7 +77,18 @@ public class OntologyManagerWebFragment implements WebFragment {
     RegistryManager regMgr;
 
     @Reference
+    ONManager scopeMgr;
+
+    @Reference
+    SessionManager sessionMgr;
+
+    @Reference
     TcManager tcManager;
+
+    @Activate
+    protected void activate(ComponentContext ctx) {
+        this.bundleContext = ctx.getBundleContext();
+    }
 
     @Override
     public BundleContext getBundleContext() {
@@ -101,7 +106,7 @@ public class OntologyManagerWebFragment implements WebFragment {
         classes.add(RegistryManagerResource.class);
 
         // Scope resources
-        classes.add(OntologyNetworkResource.class);
+        classes.add(ScopeManagerResource.class);
         classes.add(ScopeResource.class);
 
         // Session resources
@@ -150,11 +155,6 @@ public class OntologyManagerWebFragment implements WebFragment {
     @Override
     public TemplateLoader getTemplateLoader() {
         return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
-    }
-
-    @Activate
-    protected void activate(ComponentContext ctx) {
-        this.bundleContext = ctx.getBundleContext();
     }
 
 }

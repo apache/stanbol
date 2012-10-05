@@ -18,8 +18,8 @@ package org.apache.stanbol.ontologymanager.registry.api.model;
 
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
 import org.semanticweb.owlapi.model.IRI;
 
 /**

@@ -52,8 +52,8 @@ import org.apache.stanbol.commons.jobs.api.JobManager;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
+import org.apache.stanbol.ontologymanager.obsolete.api.ONManager;
+import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.reasoners.jena.JenaReasoningService;
 import org.apache.stanbol.reasoners.owlapi.OWLApiReasoningService;
 import org.apache.stanbol.reasoners.servicesapi.InconsistentInputException;
@@ -66,7 +66,7 @@ import org.apache.stanbol.reasoners.servicesapi.UnsupportedTaskException;
 import org.apache.stanbol.reasoners.servicesapi.annotations.Documentation;
 import org.apache.stanbol.reasoners.web.input.impl.SimpleInputManager;
 import org.apache.stanbol.reasoners.web.input.provider.impl.FileInputProvider;
-import org.apache.stanbol.reasoners.web.input.provider.impl.OntonetInputProvider;
+import org.apache.stanbol.reasoners.web.input.provider.impl.OntologyManagerInputProvider;
 import org.apache.stanbol.reasoners.web.input.provider.impl.RecipeInputProvider;
 import org.apache.stanbol.reasoners.web.input.provider.impl.UrlInputProvider;
 import org.apache.stanbol.reasoners.web.utils.ReasoningServiceExecutor;
@@ -158,9 +158,10 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
 
         // Retrieve the rule store
         this.ruleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
-        
+
         // Retrieve the rule adapter manager
-        this.adapterManager = (RuleAdapterManager) ContextHelper.getServiceFromContext(RuleAdapterManager.class, servletContext);
+        this.adapterManager = (RuleAdapterManager) ContextHelper.getServiceFromContext(
+            RuleAdapterManager.class, servletContext);
 
         // Check if method is allowed
         // FIXME Supported methods are only GET and POST, but also PUT comes here, why?
@@ -306,7 +307,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         // If all parameters are missing we produce the service/task welcome
         // page
         if (this.parameters.isEmpty()) {
-            //return Response.ok(new Viewable("index", this)).build();
+            // return Response.ok(new Viewable("index", this)).build();
             ResponseBuilder rb = Response.ok(new Viewable("index", this));
             rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
             addCORSOrigin(servletContext, rb, headers);
@@ -471,8 +472,8 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
 
             } else if (entry.getKey().equals("recipe")) {
                 if (!entry.getValue().isEmpty()) {
-                    inmgr.addInputProvider(new RecipeInputProvider(ruleStore, adapterManager, entry.getValue().iterator()
-                            .next()));
+                    inmgr.addInputProvider(new RecipeInputProvider(ruleStore, adapterManager, entry
+                            .getValue().iterator().next()));
                     // We remove it form the additional parameter list
                     this.parameters.remove("url");
                 } else {
@@ -484,7 +485,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             }
         }
         if (scope != null) {
-            inmgr.addInputProvider(new OntonetInputProvider(onm, sessionManager, scope, session));
+            inmgr.addInputProvider(new OntologyManagerInputProvider(onm, sessionManager, scope, session));
             this.parameters.remove("scope");
             this.parameters.remove("session");
         }
@@ -578,35 +579,34 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         log.debug("(getJobManager()) ");
         return (JobManager) ContextHelper.getServiceFromContext(JobManager.class, this.context);
     }
-    
-    
-    public Map<String,String> getServiceDescription(){
-    	return getServiceDescription(service);
+
+    public Map<String,String> getServiceDescription() {
+        return getServiceDescription(service);
     }
-    
-    public Map<String,String> getServiceDescription(ReasoningService<?,?,?> service){
-    	Class<?> serviceC = service.getClass();
-	 	String name;
-		try {
-			name = serviceC.getAnnotation(Documentation.class).name();
-		} catch (NullPointerException e) {
-    		log.warn("The service {} is not documented: missing name", serviceC);
-			name="";
-		}
-	 	String description;
-		try {
-			description = serviceC.getAnnotation(Documentation.class).description();
-		} catch (NullPointerException e) {
-    		log.warn("The service {} is not documented: missing description", serviceC);
-    		description="";
-		}
-	 	// String file = serviceC.getAnnotation(Documentation.class).file();
-		Map<String,String> serviceProperties = new HashMap<String,String>();
-		serviceProperties.put("name", name);
-		serviceProperties.put("description", description);
-		// serviceProperties.put("file", file);
-		serviceProperties.put("path", service.getPath());
-		return serviceProperties;
+
+    public Map<String,String> getServiceDescription(ReasoningService<?,?,?> service) {
+        Class<?> serviceC = service.getClass();
+        String name;
+        try {
+            name = serviceC.getAnnotation(Documentation.class).name();
+        } catch (NullPointerException e) {
+            log.warn("The service {} is not documented: missing name", serviceC);
+            name = "";
+        }
+        String description;
+        try {
+            description = serviceC.getAnnotation(Documentation.class).description();
+        } catch (NullPointerException e) {
+            log.warn("The service {} is not documented: missing description", serviceC);
+            description = "";
+        }
+        // String file = serviceC.getAnnotation(Documentation.class).file();
+        Map<String,String> serviceProperties = new HashMap<String,String>();
+        serviceProperties.put("name", name);
+        serviceProperties.put("description", description);
+        // serviceProperties.put("file", file);
+        serviceProperties.put("path", service.getPath());
+        return serviceProperties;
     }
 
 }
