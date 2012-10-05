@@ -147,260 +147,193 @@ $.ajax({
 </div> <!-- end webview -->
 
 <div class="panel" id="restapi" style="display: none;">
-<h3> Getting rules from the rule store ("/rule") </h3>
-Request type: GET<br><br>
-Accepted MIME types:
+<h3 id="how-to-create-a-recipe">How to create a recipe</h3>
 <ul>
+<li>Service: <strong>/rules/recipe/</strong></li>
+<li>Method: PUT</li>
+<li>Parameters:<ul>
+<li>recipe (Path parameter): the ID of the recipe as a path parameter(MANDATORY)</li>
+<li>description: the textual description of the recipe (OPTIONAL)</li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<div class="codehilite"><pre>curl -G -X PUT -d <span class="nv">description</span><span class="o">=</span><span class="s2">&quot;A test recipe.&quot;</span> <span class="se">\</span>
+http://localhost:8080/rules/recipe/recipeTestA
+</pre></div>
+
+
+<h3 id="how-to-add-rules-to-a-recipe">How to add rules to a recipe</h3>
+<ul>
+<li>Service: <strong>/rules/recipe/</strong></li>
+<li>Method: POST</li>
+<li>Parameters:<ul>
+<li>recipe (Path parameter): the ID of the recipe as a path parameter (MANDATORY)</li>
+<li>rules: the rules in Stanbol syntax (MANDATORY)</li>
+<li>description: the textual description of the rules (OPTIONAL)</li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<div class="codehilite"><pre>curl -X POST -H <span class="s2">&quot;Content-type: multipart/form-data&quot;</span> <span class="se">\</span>
+-F <span class="nv">rules</span><span class="o">=</span>@myRules -F <span class="nv">description</span><span class="o">=</span><span class="s2">&quot;My rules in the recipe.&quot;</span> <span class="se">\</span>
+http://localhost:8080/rules/recipe/recipeTestA
+</pre></div>
+
+
+<h3 id="how-to-get-a-recipe-or-a-recipe-from-the-store">How to get a recipe or a recipe from the store</h3>
+<ul>
+<li>Service: <strong>/rules/recipe/</strong></li>
+<li>Method: GET</li>
+<li>Parameters:<ul>
+<li>recipe (Path parameter): the ID of the recipe as a path parameter(MANDATORY)</li>
+<li>rule: the ID of the rule (OPTIONAL). If it is null than the whole recipe is returned. Otherwise it is returned the single rule identified by the parameter value</li>
+</ul>
+</li>
+<li>Accepts:<ul>
 <li>application/rdf+xml</li>
+<li>text/html</li>
+<li>text/plain</li>
+<li>application/owl+xml</li>
+<li>text/owl-functional</li>
 <li>text/owl-manchester</li>
-<li>application/rdf+json</li>
-<li>application/turtle</li>
-<li>application/owl-functional</li>
+<li>application/rdf+json,</li>
+<li>text/turle</li>
 </ul>
-
-Parameters:
-
-<ul>
-<li> <b>uri (Mandatory).</b> The URI which identifies the rule in the rule store. The
- parameter has to be passed as a path parameter</li> 
+</li>
 </ul>
-Possible outputs:
+<p>Example:</p>
+<div class="codehilite"><pre>curl -G -X GET -H <span class="s2">&quot;Accept: text/turtle&quot;</span> <span class="se">\ </span>
+-d <span class="nv">rule</span><span class="o">=</span>recipeTestA_rule1 <span class="se">\</span>
+http://localhost:8080/rules/recipe/recipeTestA
+</pre></div>
+
+
+<h3 id="how-to-delete-a-recipe-or-a-recipe-from-the-store">How to delete a recipe or a recipe from the store</h3>
 <ul>
-  <li> 200 The rule is retrieved (import declarations point to KReS Services) </li>
-  <li> 404 The rule does not exists in the manager </li>
-  <li> 500 Some error occurred </li>
+<li>Service: <strong>/rules/recipe/</strong></li>
+<li>Method: DELETE</li>
+<li>Parameters:<ul>
+<li>recipe (Path parameter): the ID of the recipe as a path parameter(MANDATORY)</li>
+<li>rule: the ID of the rule (OPTIONAL). If it is null than the whole recipe is deleted. Otherwise it is deleted the single rule identified by the parameter value</li>
 </ul>
-
-Request example which returns the RDF representation of a rule identified
-by the URI <http://iks-project.eu/rules/rule1> in its RDF/XML serialization.
-<pre style="margin-bottom:40px;">
-$ curl -X GET -H "Accept: application/rdf+xml" \
-  http://localhost:8080/rule/http://iks-project.eu/rules/rule1
-</pre>
-
-<h3> Adding rules to the rule store ("/rule") </h3>
-Request type: POST<br><br>
-
-Parameters:
-
-<ul>
-<li> <b>recipe (Mandatory).</b> The recipe's identifier. It is the recipe to which the
- rules should be added</li>
- <li> <b>rule (Mandatory).</b> The rule's identifier. It can be any unique string, e.g. a URI</li> 
- <li> <b>kres-syntax (Mandatory).</b> The rule content expressed with the Stanbol Rules
- syntax</li>
- <li> <b>description.</b> A textual description of the behaviour of the rule</li>
+</li>
 </ul>
-Possible outputs:
+<p>Example:  <br />
+</p>
+<div class="codehilite"><pre>curl -X DELETE <span class="se">\</span>
+-d <span class="nv">rule</span><span class="o">=</span>recipeTestA_rule1 <span class="se">\</span>
+http://localhost:8080/rules/recipe/recipeTestA
+</pre></div>
+
+
+<h3 id="how-to-find-a-recipe-in-the-store">How to find a recipe in the store</h3>
 <ul>
-  <li> 200 The rule has been added </li>
-  <li> 204 The rule has not been added </li>
-  <li> 400 The rule and recipe are not specified </li>
-  <li> 404 Recipe or rule not found </li>
-  <li> 409 The rule has not been added </li>
-  <li> 500 Some error occurred </li>
+<li>Service: <strong>/rules/find/recipes</strong></li>
+<li>Method: GET</li>
+<li>Parameters:<ul>
+<li>description: some word describing the recipe. This parameter is used as search field.</li>
 </ul>
-
-Request example which shows how can be used the service in order to
-create a rule:
-<pre style="margin-bottom:40px;">
-$ curl -X POST -d recipe="http://iks-project.eu/recipies/recipeA" \
-      -d rule="http://iks-project.eu/rule/uncleRule" \
-      -d kres-syntax= \
-                  "has(<http://www.foo.org/myont.owl#hasFather>, ?x, ?z) . \
-                  has(<http://www.foo.org/myont.owl#hasBrother>, ?z, ?y) \
-                    -> \
-                  has(<http://www.foo.org/myont.owl#hasUncle>, ?x, ?y)" \
-      -d description="The rule which allows to infer hasUncle relations." \
-      http://localhost:8080/rule \
-</pre>
-
-<h3> Removing rules from the rule store ("/rule") </h3>
-Request type: DELETE<br><br>
-
-Parameters:
-
-<ul>
- <li> <b>rule (Mandatory).</b> The rule's identifier. It can be any unique string, e.g. a URI</li> 
- <li> <b>recipe.</b> The recipe's identifier. It is the recipe from which
- the rules should be removed. When the parameter is provided, the rule is
- removed only from the recipe, but it is still availavle in the rule base.
- Otherwise, if the parameter is not provided, the rule is completely deleted
- from the rule store</li>
-</ul>
-Possible outputs:
-<ul>
-  <li> 200 The rule has been deleted </li>
-  <li> 204 The rule has not been deleted </li>
-  <li> 404 Recipe or rule not found </li>
-  <li> 409 The recipe has not been deleted </li>
-  <li> 500 Some error occurred </li>
-</ul>
-
-Request example which shows how to delete a rule from a recipe leaving it
-into the rule store:
-<pre style="margin-bottom:40px;">
-$ curl -X DELETE -G -d recipe="http://iks-project.eu/recipies/recipeA" \
-      -d rule="http://iks-project.eu/rule/uncleRule" \
-      http://localhost:8080/rule
-</pre>
-
-<h3> Getting recipes from the rule store ("/recipe") </h3>
-Request type: GET<br><br>
-
-Accepted MIME types:
-<ul>
+</li>
+<li>Accepts:<ul>
 <li>application/rdf+xml</li>
+<li>text/html</li>
+<li>text/plain</li>
+<li>application/owl+xml</li>
+<li>text/owl-functional</li>
 <li>text/owl-manchester</li>
-<li>application/rdf+json</li>
-<li>application/turtle</li>
-<li>application/owl-functional</li>
+<li>application/rdf+json,</li>
+<li>text/turle</li>
 </ul>
-
-Parameters:
-
-<ul>
- <li> <b>uri (Mandatory).</b> The recipe's identifier that is basically an URI</li>
+</li>
 </ul>
-Possible outputs:
+<p>Example:  <br />
+</p>
+<div class="codehilite"><pre>curl -G -X GET <span class="se">\</span>
+-d <span class="nv">description</span><span class="o">=</span><span class="s2">&quot;test recipe&quot;</span> <span class="se">\</span>
+http://localhost:8080/rules/find/recipes
+</pre></div>
+
+
+<h3 id="how-to-find-a-rule-in-the-store">How to find a rule in the store</h3>
 <ul>
-  <li> 200 The recipe is retrieved </li>
-  <li> 404 The recipe does not exists in the manager </li>
-  <li> 500 Some error occurred </li>
+<li>Service: <strong>/rules/find/rules</strong></li>
+<li>Method: GET</li>
+<li>Parameters:<ul>
+<li>description: some word describing the rule. This parameter is used as search field.</li>
 </ul>
-
-Request example which shows how to get a recipe from the rule store:
-<pre style="margin-bottom:40px;">
-$ curl -X GET \
-      http://localhost:8080/recipe/http://iks-project.eu/recipies/recipeA
-</pre>
-
-<h3> Adding recipes to the rule store ("/recipe") </h3>
-Request type: POST<br><br>
-
-Parameters:
-
-<ul>
- <li> <b>recipe (Mandatory).</b> The recipe's identifier that is basically an URI</li>
- <li> <b>description.</b> The textual description of the recipe</li>
-</ul>
-Possible outputs:
-<ul>
-  <li> 200 The recipe has been added </li>
-  <li> 409 The recipe has not been added </li>
-  <li> 500 Some error occurred </li>
-</ul>
-
-Request example which shows how to create a recipe and add it into the rule
-store:
-<pre style="margin-bottom:40px;">
-$ curl -X POST \
-      -d recipe="http://iks-project.eu/recipies/recipeA" \
-      -d description="Example of recipe." \
-      http://localhost:8080/recipe
-</pre>
-
-<h3> Removing recipes from the rule store ("/recipe") </h3>
-Request type: DELETE<br><br>
-
-Parameters:
-
-<ul>
- <li> <b>recipe (Mandatory).</b> The recipe's identifier that is basically an URI</li>
-</ul>
-Possible outputs:
-<ul>
-  <li> 200 The recipe has been delted </li>
-  <li> 409 The recipe has not been deleted </li>
-  <li> 500 Some error occurred </li>
-</ul>
-
-Request example which shows how to delete a recipe from the rule
-store:
-<pre style="margin-bottom:40px;">
-$ curl -X DELETE -G \
-      -d recipe="http://iks-project.eu/recipies/recipeA" \
-      http://localhost:8080/recipe
-</pre>
-
-
-<h3> Refactoring RDF graphs ("/refactor") </h3>
-Request type: GET<br><br>
-
-Accepted MIME types:
-<ul>
+</li>
+<li>Accepts:<ul>
 <li>application/rdf+xml</li>
+<li>text/html</li>
+<li>text/plain</li>
+<li>application/owl+xml</li>
+<li>text/owl-functional</li>
 <li>text/owl-manchester</li>
-<li>application/rdf+json</li>
-<li>application/turtle</li>
-<li>application/owl-functional</li>
+<li>application/rdf+json,</li>
+<li>text/turle</li>
 </ul>
-
-Parameters:
-
-<ul>
- <li> <b>recipe (Mandatory).</b> The recipe's identifier that is basically an URI</li>
- <li> <b>input-graph (Mandatory).</b> The ID of the graph to transform</li>
- <li> <b>output-graph (Mandatory).</b> The ID that the transformed graph has to have in
- the IKS triple store</li>
+</li>
 </ul>
-Possible outputs:
+<p>Example:  <br />
+</p>
+<div class="codehilite"><pre>curl -G -X GET <span class="se">\</span>
+-d <span class="nv">description</span><span class="o">=</span><span class="s2">&quot;My rules&quot;</span> <span class="se">\</span>
+http://localhost:8080/rules/find/rules
+</pre></div>
+
+<h3 id="refactor-engine-refactor">Refactor Engine ("/refactor"):</h3>
 <ul>
-  <li> 200 The refactoring is performed and a new RDF graph is returned </li>
-  <li> 404 The recipe does not exists in the manager </li>
-  <li> 500 Some error occurred </li>
+<li>The Refactor Engine <strong>@/refactor</strong> performs a refactoring applying an existing recipe in the rule store to the provided RDF graph. </li>
 </ul>
-
-Request example which shows how to perform a refactoring
-applying an existing recipe in the rule store:
-<pre style="margin-bottom:40px;">
-$ curl -X GET -G -H "Accept: application/rdf+xml" \
-      -d recipe="http://iks-project.eu/recipies/recipeA" \
-      -d input-graph="http://iks-project.eu/graphs/graphIn" \
-      -d output-graph="http://iks-project.eu/graphs/graphOut" \
-      http://localhost:8080/refactor
-</pre>
-
-<h3> Refactoring RDF graphs ("/refactor/apply") </h3>
-Request type: POST<br><br>
-
-Accepted MIME types:
+<p>The request should be done as it follows:</p>
 <ul>
+<li>Method: GET</li>
+<li>Parameters:<ul>
+<li>input-graph: the ID of RDF graph in the triplestore provided as input</li>
+<li>output-graph: the ID of RDF graph in the triplestore in which we want to store the result.</li>
+<li>recipe: the ID of the recipe in the rule store</li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<div class="codehilite"><pre>curl -G -X GET <span class="se">\</span>
+-d input-graph<span class="o">=</span>stored_graph -d <span class="nv">recipe</span><span class="o">=</span>myTestRecipeA -d output-graph<span class="o">=</span>result_graph <span class="se">\</span>
+http://localhost:8080/refactor
+</pre></div>
+
+
+<h3 id="refactor-engine-refactorapply">Refactor Engine ("/refactor/apply"):</h3>
+<ul>
+<li>Refactor Engine <strong>@/refactor/apply</strong> performs a refactoring applying an recipe as string to the provided RDF graph as input source.</li>
+</ul>
+<p>The request should be done as it follows:</p>
+<ul>
+<li>Method: POST</li>
+<li>Parameters:<ul>
+<li>recipe: the ID of the recipe (MANDATORY)</li>
+<li>input: the RDF graph to which the refactoring has to be applied. The graph has to be provided as a binary file (MANDATORY)</li>
+</ul>
+</li>
+<li>Accepts:<ul>
 <li>application/rdf+xml</li>
+<li>text/html</li>
+<li>text/plain</li>
+<li>application/owl+xml</li>
+<li>text/owl-functional</li>
 <li>text/owl-manchester</li>
-<li>application/rdf+json</li>
-<li>application/turtle</li>
-<li>application/owl-functional</li>
+<li>application/rdf+json,</li>
+<li>text/turle</li>
 </ul>
-
-Parameters:
-
-<ul>
- <li> <b>recipe (Mandatory).</b> The recipe's identifier that is basically an URI</li>
- <li> <b>input-graph (Mandatory).</b> The ID of the graph to transform</li>
- <li> <b>output-graph (Mandatory).</b> The ID that the transformed graph has to have in
- the IKS triple store</li>
+</li>
 </ul>
-Possible outputs:
-<ul>
-  <li> 200 The refactoring is performed and a new RDF graph is returned </li>
-  <li> 404 The recipe does not exists in the manager </li>
-  <li> 500 Some error occurred </li>
-</ul>
+<p>Example:</p>
+<div class="codehilite"><pre>curl -X POST -H <span class="s2">&quot;Content-type: multipart/form-data&quot;</span> <span class="se">\</span>
+-H <span class="s2">&quot;Accept: application/rdf+json&quot;</span> <span class="se">\</span>
+-F <span class="nv">recipe</span><span class="o">=</span>recipeTestA -F <span class="nv">input</span><span class="o">=</span>@graph.rdf <span class="se">\</span>
+http://localhost:8080/refactor/apply
+</pre></div>
 
-Request example which shows how to perform a refactoring
-applying an existing recipe in the rule store:
-<pre style="margin-bottom:40px;">
-$ curl -X POST -H "Content-Type: multipart/form-data" \
-      -H "Accept: application/turtle" \
-      -F recipe="
-           has(<http://www.foo.org/myont.owl#hasFather>, ?x, ?z) . \
-           has(<http://www.foo.org/myont.owl#hasBrother>, ?z, ?y) \
-              -> \
-           has(<http://www.foo.org/myont.owl#hasUncle>, ?x, ?y)" \
-      -F input=@graph.rdf
-      http://localhost:8080/refactor/apply
-</pre>
 </div>
 </@common.page>
 </#escape>

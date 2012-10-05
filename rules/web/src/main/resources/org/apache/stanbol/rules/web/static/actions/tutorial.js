@@ -529,8 +529,7 @@ function Tutorial(){
 		
 			 $.ajaxSetup({ 
 			 	'beforeSend': function(xhr) {
-			 		//xhr.setRequestHeader("Accept", "application/manchester+owl")}
-			 		xhr.setRequestHeader("Accept", "application/turtle")}
+			 		xhr.setRequestHeader("Accept", "text/owl-manchester")}
 			 	}
 			 );
 			 

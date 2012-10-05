@@ -26,6 +26,8 @@ import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -207,6 +209,13 @@ public class RulesResource extends BaseStanbolResource {
 
         ResponseBuilder responseBuilder;
         try {
+        	
+        	URI uri = new URI(recipeID);
+			if(uri.getScheme() == null){
+				recipeID = "urn:" + recipeID;
+				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipeID);
+			}
+        	
             recipe = ruleStore.getRecipe(new UriRef(recipeID));
 
             if (ruleID != null && !ruleID.isEmpty()) {
@@ -228,7 +237,10 @@ public class RulesResource extends BaseStanbolResource {
         } catch (NoSuchRuleInRecipeException e) {
             log.error(e.getMessage(), e);
             responseBuilder = Response.status(Status.NOT_FOUND);
-        }
+        } catch (URISyntaxException e) {
+        	log.error(e.getMessage(), e);
+            responseBuilder = Response.status(Status.NOT_ACCEPTABLE);
+		}
 
         addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
@@ -246,6 +258,13 @@ public class RulesResource extends BaseStanbolResource {
 
         ResponseBuilder responseBuilder;
         try {
+        	
+        	URI uri = new URI(recipeID);
+			if(uri.getScheme() == null){
+				recipeID = "urn:" + recipeID;
+				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipeID);
+			}
+			
             recipe = ruleStore.getRecipe(new UriRef(recipeID));
 
             if (ruleID != null && !ruleID.isEmpty()) {
@@ -268,7 +287,10 @@ public class RulesResource extends BaseStanbolResource {
         } catch (NoSuchRuleInRecipeException e) {
             log.error(e.getMessage(), e);
             responseBuilder = Response.status(Status.NOT_FOUND);
-        }
+        } catch (URISyntaxException e) {
+			log.error(e.getMessage(), e);
+            responseBuilder = Response.status(Status.NOT_ACCEPTABLE);
+		}
 
         addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
@@ -299,13 +321,22 @@ public class RulesResource extends BaseStanbolResource {
 
         ResponseBuilder responseBuilder;
         try {
+        	
+        	URI uri = new URI(recipeID);
+			if(uri.getScheme() == null){
+				recipeID = "urn:" + recipeID;
+				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipeID);
+			}
             ruleStore.createRecipe(new UriRef(recipeID), description);
 
             responseBuilder = Response.ok();
         } catch (AlreadyExistingRecipeException e) {
             log.error(e.getMessage(), e);
             responseBuilder = Response.status(Status.CONFLICT);
-        }
+        } catch (URISyntaxException e) {
+        	log.error(e.getMessage(), e);
+            responseBuilder = Response.status(Status.NOT_ACCEPTABLE);
+		}
 
         addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
@@ -364,32 +395,53 @@ public class RulesResource extends BaseStanbolResource {
                                  @Context HttpHeaders headers) {
 
         ResponseBuilder responseBuilder;
-        if (rule != null && !rule.isEmpty()) {
-
-            Recipe rcp;
-            try {
-                rcp = ruleStore.getRecipe(new UriRef(recipe));
-                Rule rl = ruleStore.getRule(rcp, new UriRef(rule));
-                ruleStore.removeRule(rcp, rl);
-            } catch (NoSuchRecipeException e) {
-                log.error(e.getMessage(), e);
-                responseBuilder = Response.status(Status.PRECONDITION_FAILED);
-            } catch (RecipeConstructionException e) {
-                log.error(e.getMessage(), e);
-                responseBuilder = Response.status(Status.NO_CONTENT);
-            } catch (NoSuchRuleInRecipeException e) {
-                log.error(e.getMessage(), e);
-                responseBuilder = Response.status(Status.NOT_FOUND);
-            }
-
-        } else {
-            try {
-                ruleStore.removeRecipe(new UriRef(recipe));
-            } catch (RecipeEliminationException e) {
-                log.error(e.getMessage(), e);
-                responseBuilder = Response.status(Status.INTERNAL_SERVER_ERROR);
-            }
-        }
+        
+        boolean stop = false;
+        
+        URI uri = null;
+		try {
+			uri = new URI(recipe);
+		} catch (URISyntaxException e1) {
+			log.error(e1.getMessage(), e1);
+            responseBuilder = Response.status(Status.NOT_ACCEPTABLE);
+            stop = true;
+		}
+		
+		if(!stop){
+			if(uri != null && uri.getScheme() == null){
+				recipe = "urn:" + recipe;
+				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipe);
+			}
+	    	
+			log.info("The recipe ID is : " + recipe);
+	        
+	        if (rule != null && !rule.isEmpty()) {
+	
+	            Recipe rcp;
+	            try {
+	            	rcp = ruleStore.getRecipe(new UriRef(recipe));
+	                Rule rl = ruleStore.getRule(rcp, new UriRef(rule));
+	                ruleStore.removeRule(rcp, rl);
+	            } catch (NoSuchRecipeException e) {
+	                log.error(e.getMessage(), e);
+	                responseBuilder = Response.status(Status.PRECONDITION_FAILED);
+	            } catch (RecipeConstructionException e) {
+	                log.error(e.getMessage(), e);
+	                responseBuilder = Response.status(Status.NO_CONTENT);
+	            } catch (NoSuchRuleInRecipeException e) {
+	                log.error(e.getMessage(), e);
+	                responseBuilder = Response.status(Status.NOT_FOUND);
+	            } 
+	
+	        } else {
+	            try {
+	                ruleStore.removeRecipe(new UriRef(recipe));
+	            } catch (RecipeEliminationException e) {
+	                log.error(e.getMessage(), e);
+	                responseBuilder = Response.status(Status.INTERNAL_SERVER_ERROR);
+	            }
+	        }
+		}
 
         responseBuilder = Response.ok();
 
@@ -427,6 +479,13 @@ public class RulesResource extends BaseStanbolResource {
 
         Recipe rcp;
         try {
+        	
+        	URI uri = new URI(recipe);
+			if(uri.getScheme() == null){
+				recipe = "urn:" + recipe;
+				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipe);
+			}
+        	
             rcp = ruleStore.getRecipe(new UriRef(recipe));
             ruleStore.addRulesToRecipe(rcp, rules, description);
 
@@ -437,7 +496,10 @@ public class RulesResource extends BaseStanbolResource {
         } catch (RecipeConstructionException e) {
             log.error(e.getMessage(), e);
             responseBuilder = Response.status(Status.INTERNAL_SERVER_ERROR);
-        }
+        } catch (URISyntaxException e) {
+        	log.error(e.getMessage(), e);
+            responseBuilder = Response.status(Status.NOT_ACCEPTABLE);
+		}
 
         addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
@@ -478,6 +540,13 @@ public class RulesResource extends BaseStanbolResource {
             // ClassLoader loader = Thread.currentThread().getContextClassLoader();
             // classToLoad = loader.loadClass(format);
             classToLoad = Class.forName(format);
+            
+            URI uri = new URI(recipe);
+			if(uri.getScheme() == null){
+				recipe = "urn:" + recipe;
+				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipe);
+			}
+            
             Recipe rcp = ruleStore.getRecipe(new UriRef(recipe));
             RuleAdapter adapter = adapterManager.getAdapter(rcp, classToLoad);
 
@@ -512,7 +581,10 @@ public class RulesResource extends BaseStanbolResource {
         } catch (UnsupportedTypeForExportException e) {
             responseBuilder = Response.status(Status.FORBIDDEN);
             log.error(e.getMessage(), e);
-        }
+        } catch (URISyntaxException e) {
+        	responseBuilder = Response.status(Status.NOT_ACCEPTABLE);
+            log.error(e.getMessage(), e);
+		}
 
         addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
