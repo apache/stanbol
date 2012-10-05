@@ -130,19 +130,21 @@ public class AuthenticatingFilter implements Filter {
 		final HttpServletRequest request = (HttpServletRequest) servletRequest;
 		final HttpServletResponse response = (HttpServletResponse) servletResponse;
 		final Subject subject = getSubject();
-		AuthenticationMethod authenticationMethod = null;
-		try {
-			for (Iterator<WeightedAuthenticationMethod> it = methodList.iterator(); it.hasNext();) {
-				authenticationMethod = it.next();
-				if (authenticationMethod.authenticate(request,subject)) {
-					break;
+		{
+			AuthenticationMethod authenticationMethod = null;
+			try {
+				for (Iterator<WeightedAuthenticationMethod> it = methodList.iterator(); it.hasNext();) {
+					authenticationMethod = it.next();
+					if (authenticationMethod.authenticate(request,subject)) {
+						break;
+					}
 				}
+			} catch (LoginException ex) {
+				if (!authenticationMethod.writeLoginResponse(request, response, ex)) {
+					writeLoginResponse(request, response, ex);
+				}
+				return;
 			}
-		} catch (LoginException ex) {
-			if (!authenticationMethod.writeLoginResponse(request, response, ex)) {
-				writeLoginResponse(request, response, ex);
-			}
-			return;
 		}
 
 		Set<Principal> principals = subject.getPrincipals();
