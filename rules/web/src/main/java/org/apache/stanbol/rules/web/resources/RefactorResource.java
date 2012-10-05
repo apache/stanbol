@@ -21,6 +21,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
+import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
@@ -32,6 +33,8 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -47,6 +50,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -227,9 +231,18 @@ public class RefactorResource extends BaseStanbolResource {
 
         // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
         ResponseBuilder rb;
-        UriRef recipeID = new UriRef(recipe);
         Recipe rcp;
         try {
+        
+        	
+        	URI uri = new URI(recipe);
+        	if(uri != null && uri.getScheme() == null){
+				recipe = "urn:" + recipe;
+				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipe);
+			}
+        	
+        	UriRef recipeID = new UriRef(recipe);
+        	
             rcp = ruleStore.getRecipe(recipeID);
 
             OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -242,15 +255,22 @@ public class RefactorResource extends BaseStanbolResource {
             MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
             if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
 
-        } catch (NoSuchRecipeException e1) {
+        } catch (NoSuchRecipeException e) {
             rb = Response.status(NOT_FOUND);
-        } catch (RecipeConstructionException e1) {
+            log.error(e.getMessage(), e);
+        } catch (RecipeConstructionException e) {
             rb = Response.status(NO_CONTENT);
+            log.error(e.getMessage(), e);
         } catch (OWLOntologyCreationException e) {
             rb = Response.status(PRECONDITION_FAILED);
+            log.error(e.getMessage(), e);
         } catch (RefactoringException e) {
             rb = Response.status(INTERNAL_SERVER_ERROR);
-        }
+            log.error(e.getMessage(), e);
+        } catch (URISyntaxException e) {
+        	rb = Response.status(NOT_ACCEPTABLE);
+        	log.error(e.getMessage(), e);
+		}
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }

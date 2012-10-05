@@ -88,7 +88,7 @@ $('#recipecode').val(recipeTmp);
 cURL command for refactor 
 <div id="refactoringcurl" class="indent" style="display:none">
 <pre>
-curl -X POST -H "Accept: application/rdf+xml" -F input=@<span style="color:red;">%rdfGraph%</span> -F recipe=<span style="color:red;">%refactoringRecipe%</span>
+curl -X POST -H "Accept: application/rdf+xml" -F input=@<span style="color:red;">%rdfGraph%</span> -F recipe=<span style="color:red;">%refactoringRecipe%</span> http://localhost:8080/refactor/apply
 </pre>
 </div>
 <br>
