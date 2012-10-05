@@ -19,6 +19,7 @@ package org.apache.stanbol.rules.adapters.clerezza.atoms;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
+import org.apache.clerezza.rdf.core.sparql.query.LiteralExpression;
 import org.apache.clerezza.rdf.core.sparql.query.ResourceOrVariable;
 import org.apache.clerezza.rdf.core.sparql.query.UriRefOrVariable;
 import org.apache.clerezza.rdf.core.sparql.query.Variable;
@@ -84,8 +85,8 @@ public class DatavaluedPropertyAtom extends AbstractAdaptableAtom {
 
         if (arg2 instanceof Variable) {
             object = new ResourceOrVariable((Variable) arg2);
-        } else if (dt instanceof Literal) {
-            object = new ResourceOrVariable((Literal) arg2);
+        } else if (arg2 instanceof LiteralExpression) {
+            object = new ResourceOrVariable(((LiteralExpression) arg2).getLiteral());
         } else {
             throw new RuleAtomCallExeption(getClass());
         }
