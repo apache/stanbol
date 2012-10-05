@@ -27,7 +27,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.ontologymanager.obsolete.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
@@ -37,8 +37,10 @@ import org.slf4j.LoggerFactory;
  * Default implementation of the {@link OfflineConfiguration}.
  */
 @Component(immediate = true, metatype = true)
-@Service({OfflineConfiguration.class})
-public class OfflineConfigurationImpl implements OfflineConfiguration {
+@Service({OfflineConfiguration.class,
+          org.apache.stanbol.ontologymanager.obsolete.api.OfflineConfiguration.class})
+public class OfflineConfigurationImpl implements
+        org.apache.stanbol.ontologymanager.obsolete.api.OfflineConfiguration {
 
     public static final String _DEFAULT_NS_DEFAULT = "http://localhost:8080/ontonet/";
 
