@@ -30,9 +30,8 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.ontologymanager.obsolete.api.ONManager;
-import org.apache.stanbol.ontologymanager.obsolete.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.obsolete.api.session.SessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.reasoners.web.resources.JobsResource;
 import org.apache.stanbol.reasoners.web.resources.ReasoningServiceTaskResource;
 import org.apache.stanbol.reasoners.web.resources.ReasoningServicesResource;
@@ -51,7 +50,7 @@ import freemarker.cache.TemplateLoader;
  * 
  */
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true, metatype = false)
 @Service(WebFragment.class)
 public class ReasonersFragment implements WebFragment {
 
@@ -63,9 +62,6 @@ public class ReasonersFragment implements WebFragment {
 
     @Reference
     ONManager onm;
-
-    @Reference
-    OntologyProvider onProvider;
 
     @Reference
     SessionManager sessionManager;

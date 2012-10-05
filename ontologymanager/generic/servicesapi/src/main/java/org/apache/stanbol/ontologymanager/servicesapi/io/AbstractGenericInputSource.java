@@ -26,7 +26,7 @@ package org.apache.stanbol.ontologymanager.servicesapi.io;
  *            the ontology returned by this input source.
  */
 public abstract class AbstractGenericInputSource<O> implements
-        org.apache.stanbol.ontologymanager.obsolete.api.io.OntologyInputSource<O> {
+        org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource<O> {
 
     /**
      * Where the ontology object was retrieved from.

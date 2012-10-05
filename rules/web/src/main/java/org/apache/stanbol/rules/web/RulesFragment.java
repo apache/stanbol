@@ -50,7 +50,7 @@ import freemarker.cache.TemplateLoader;
  * 
  */
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true, metatype = false)
 @Service(WebFragment.class)
 public class RulesFragment implements WebFragment {
 

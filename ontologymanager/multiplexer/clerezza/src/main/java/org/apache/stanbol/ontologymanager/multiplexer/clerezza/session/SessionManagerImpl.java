@@ -72,9 +72,9 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @Component(immediate = true, metatype = true)
-@Service({SessionManager.class, org.apache.stanbol.ontologymanager.obsolete.api.session.SessionManager.class})
+@Service({SessionManager.class, org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager.class})
 public class SessionManagerImpl implements
-        org.apache.stanbol.ontologymanager.obsolete.api.session.SessionManager, ScopeEventListener {
+        org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager, ScopeEventListener {
 
     public static final String _CONNECTIVITY_POLICY_DEFAULT = "TIGHT";
     public static final String _ID_DEFAULT = "session";

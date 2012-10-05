@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.stanbol.commons.owl.transformation.JenaToOwlConvert;
-import org.apache.stanbol.ontologymanager.obsolete.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
 import org.apache.stanbol.ontologymanager.servicesapi.session.Session;
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;

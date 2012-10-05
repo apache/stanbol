@@ -24,7 +24,7 @@ import java.util.Map.Entry;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-import org.apache.stanbol.ontologymanager.obsolete.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputFactory;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputManager;

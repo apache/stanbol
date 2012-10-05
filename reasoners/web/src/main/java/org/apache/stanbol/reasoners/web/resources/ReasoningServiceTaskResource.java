@@ -52,7 +52,7 @@ import org.apache.stanbol.commons.jobs.api.JobManager;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.ontologymanager.obsolete.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.reasoners.jena.JenaReasoningService;
 import org.apache.stanbol.reasoners.owlapi.OWLApiReasoningService;

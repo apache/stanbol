@@ -51,8 +51,7 @@
             <Bundle-ClassPath>.</Bundle-ClassPath>
             <Bundle-Activator/>
             <Export-Package>
-              org.apache.stanbol.ontologymanager.obsolete.*;version=${project.version},
-              org.apache.stanbol.ontologymanager.ontonet.*;version=${project.version},
+              org.apache.stanbol.ontologymanager.ontonet.api.*;version=${project.version}, <!-- DEPRECATED -->
               org.apache.stanbol.ontologymanager.servicesapi.*;version=${project.version}
             </Export-Package>
             <Import-Package>

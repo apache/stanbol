@@ -127,9 +127,9 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true, metatype = true)
 @Service({OntologyProvider.class,
-          org.apache.stanbol.ontologymanager.obsolete.api.ontology.OntologyProvider.class})
+          org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider.class})
 public class ClerezzaOntologyProvider implements
-        org.apache.stanbol.ontologymanager.obsolete.api.ontology.OntologyProvider<TcProvider> {
+        org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider<TcProvider> {
 
     /**
      * Internally, the Clerezza ontology provider uses a reserved graph to store the associations between

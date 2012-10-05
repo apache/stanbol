@@ -53,7 +53,6 @@
             </Bundle-ClassPath>
             <Bundle-Activator/>
             <Export-Package>
-              org.apache.stanbol.ontologymanager.ontonet.*, <!-- DEPRECATED -->
               org.apache.stanbol.ontologymanager.multiplexer.clerezza.collector;version=${project.version},
               org.apache.stanbol.ontologymanager.multiplexer.clerezza.ontology;version=${project.version},
               org.apache.stanbol.ontologymanager.multiplexer.clerezza.session;version=${project.version}
