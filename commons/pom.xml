@@ -63,8 +63,8 @@
 	<module>ldtemplaterenderer</module>
     <module>httpqueryheaders</module>
     <module>launchpad</module>
-    <module>security</module>
-    <module>authentication.basic</module>
+    <module>security/core</module>
+    <module>security/authentication.basic</module>
     <module>caslight</module>
 
     <module>testing/jarexec</module>
