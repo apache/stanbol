@@ -63,59 +63,17 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-		<groupId>org.apache.clerezza</groupId>
-		<artifactId>rdf.ontologies</artifactId>
-	</dependency>
-	<dependency>
+   	<dependency>
 		<groupId>org.apache.clerezza</groupId>
 		<artifactId>rdf.utils</artifactId>
 	</dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.webconsole</artifactId>
-      <version>3.1.8</version>
-    </dependency>
-    <dependency>
-		<groupId>org.apache.clerezza</groupId>
-		<artifactId>platform.config</artifactId>
-		<version>0.3-incubating</version>
-	</dependency>
-    
-    <!-- Jersey, servlet and freemarker -->
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-
-    <!-- OSGi tax -->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-
+   
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
     
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core-bundle</artifactId>
-    </dependency>
-
-    <!-- integrated for now
-    <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-template</artifactId>
-	  <version>0.9.13-SNAPSHOT</version>
-	</dependency>
-	-->
-	<dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
       <version>0.10.1-SNAPSHOT</version>
