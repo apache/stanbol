@@ -1,0 +1,319 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY ontology "http://omv.ontoware.org/2005/05/ontology#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY onm "http://kres.iks-project.eu/ontology/meta/onm.owl#" >
+    <!ENTITY meta "http://www.ontologydesignpatterns.org/schemas/meta.owl#" >
+    <!ENTITY coddata "http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://kres.iks-project.eu/ontology/meta/onm.owl#"
+     xml:base="http://kres.iks-project.eu/ontology/meta/onm.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:ontology="http://omv.ontoware.org/2005/05/ontology#"
+     xmlns:coddata="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#"
+     xmlns:meta="http://www.ontologydesignpatterns.org/schemas/meta.owl#"
+     xmlns:onm="http://kres.iks-project.eu/ontology/meta/onm.owl#">
+    <owl:Ontology rdf:about="http://kres.iks-project.eu/ontology/meta/onm.owl">
+        <owl:versionInfo xml:lang="en">Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+</owl:versionInfo>
+        <rdfs:comment xml:lang="en">The IKS Ontology Network Manager metalevel vocabulary.</rdfs:comment>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/meta.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&rdfs;label"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;comment"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#isCoreLibraryOf -->
+
+    <owl:ObjectProperty rdf:about="&onm;isCoreLibraryOf">
+        <rdfs:label xml:lang="en">is core library of</rdfs:label>
+        <rdfs:subPropertyOf rdf:resource="&onm;isLibraryUsedBy"/>
+        <owl:inverseOf rdf:resource="&onm;usesCoreLibrary"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#isCoreOntologyUsedBy -->
+
+    <owl:ObjectProperty rdf:about="&onm;isCoreOntologyUsedBy">
+        <rdfs:subPropertyOf rdf:resource="&onm;isOntologyUsedBy"/>
+        <owl:inverseOf rdf:resource="&onm;usesCoreOntology"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#isCustomLibraryOf -->
+
+    <owl:ObjectProperty rdf:about="&onm;isCustomLibraryOf">
+        <rdfs:label xml:lang="en">is custom library of</rdfs:label>
+        <rdfs:subPropertyOf rdf:resource="&onm;isLibraryUsedBy"/>
+        <owl:inverseOf rdf:resource="&onm;usesCustomLibrary"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#isCustomOntologyUsedBy -->
+
+    <owl:ObjectProperty rdf:about="&onm;isCustomOntologyUsedBy">
+        <rdfs:subPropertyOf rdf:resource="&onm;isOntologyUsedBy"/>
+        <owl:inverseOf rdf:resource="&onm;usesCustomOntology"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#isLibraryUsedBy -->
+
+    <owl:ObjectProperty rdf:about="&onm;isLibraryUsedBy">
+        <rdfs:label xml:lang="en">is library used by</rdfs:label>
+        <rdfs:subPropertyOf rdf:resource="&onm;isOntologyResourceUsedBy"/>
+        <owl:inverseOf rdf:resource="&onm;usesLibrary"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#isOntologyResourceUsedBy -->
+
+    <owl:ObjectProperty rdf:about="&onm;isOntologyResourceUsedBy">
+        <rdfs:label xml:lang="en">is ontology resource used by</rdfs:label>
+        <owl:inverseOf rdf:resource="&onm;usesOntologyResource"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#isOntologyUsedBy -->
+
+    <owl:ObjectProperty rdf:about="&onm;isOntologyUsedBy">
+        <rdfs:subPropertyOf rdf:resource="&onm;isOntologyResourceUsedBy"/>
+        <owl:inverseOf rdf:resource="&onm;usesOntology"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#usesCoreLibrary -->
+
+    <owl:ObjectProperty rdf:about="&onm;usesCoreLibrary">
+        <rdfs:label xml:lang="en">uses core library</rdfs:label>
+        <rdfs:subPropertyOf rdf:resource="&onm;usesLibrary"/>
+        <rdfs:range rdf:resource="&coddata;OntologyLibrary"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#usesCoreOntology -->
+
+    <owl:ObjectProperty rdf:about="&onm;usesCoreOntology">
+        <rdfs:subPropertyOf rdf:resource="&onm;usesOntology"/>
+        <rdfs:range rdf:resource="&ontology;Ontology"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#usesCustomLibrary -->
+
+    <owl:ObjectProperty rdf:about="&onm;usesCustomLibrary">
+        <rdfs:label xml:lang="en">uses custom library</rdfs:label>
+        <rdfs:subPropertyOf rdf:resource="&onm;usesLibrary"/>
+        <rdfs:range rdf:resource="&coddata;OntologyLibrary"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#usesCustomOntology -->
+
+    <owl:ObjectProperty rdf:about="&onm;usesCustomOntology">
+        <rdfs:subPropertyOf rdf:resource="&onm;usesOntology"/>
+        <rdfs:range rdf:resource="&ontology;Ontology"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#usesLibrary -->
+
+    <owl:ObjectProperty rdf:about="&onm;usesLibrary">
+        <rdfs:label xml:lang="en">uses library</rdfs:label>
+        <rdfs:comment xml:lang="en">of something that relies upon something else as a data/function vocabulary for performing its own business.</rdfs:comment>
+        <rdfs:subPropertyOf rdf:resource="&onm;usesOntologyResource"/>
+        <rdfs:range rdf:resource="&coddata;OntologyLibrary"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#usesOntology -->
+
+    <owl:ObjectProperty rdf:about="&onm;usesOntology">
+        <rdfs:label xml:lang="en">uses ontology</rdfs:label>
+        <rdfs:subPropertyOf rdf:resource="&onm;usesOntologyResource"/>
+        <rdfs:range rdf:resource="&ontology;Ontology"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#usesOntologyResource -->
+
+    <owl:ObjectProperty rdf:about="&onm;usesOntologyResource">
+        <rdfs:label xml:lang="en">uses ontology resource</rdfs:label>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/schemas/meta.owl#hasOntology -->
+
+    <owl:ObjectProperty rdf:about="&meta;hasOntology"/>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#topObjectProperty -->
+
+    <owl:ObjectProperty rdf:about="&owl;topObjectProperty">
+        <rdfs:range rdf:resource="&coddata;OntologyLibrary"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#activateOnStart -->
+
+    <owl:DatatypeProperty rdf:about="&onm;activateOnStart">
+        <rdfs:domain rdf:resource="&onm;Scope"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#topDataProperty -->
+
+    <owl:DatatypeProperty rdf:about="&owl;topDataProperty"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#Scope -->
+
+    <owl:Class rdf:about="&onm;Scope">
+        <rdfs:label xml:lang="en">Scope</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&onm;usesLibrary"/>
+                <owl:allValuesFrom rdf:resource="&coddata;OntologyLibrary"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&onm;activateOnStart"/>
+                <owl:maxQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;boolean"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment xml:lang="en">An entity involving a set of (networked) ontologies encompassing a given domain or meta-domain.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://omv.ontoware.org/2005/05/ontology#Ontology -->
+
+    <owl:Class rdf:about="&ontology;Ontology"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary -->
+
+    <owl:Class rdf:about="&coddata;OntologyLibrary">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&meta;hasOntology"/>
+                <owl:allValuesFrom rdf:resource="&ontology;Ontology"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.22702) http://owlapi.sourceforge.net -->
+
