@@ -75,29 +75,7 @@
 		<groupId>org.apache.clerezza</groupId>
 		<artifactId>rdf.utils</artifactId>
 	</dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.webconsole</artifactId>
-      <version>3.1.8</version>
-    </dependency>
-    <dependency>
-		<groupId>org.apache.clerezza</groupId>
-		<artifactId>platform.config</artifactId>
-		<version>0.3-incubating</version>
-	</dependency>
-    
-    <!-- Jersey, servlet and freemarker -->
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-
-    <!-- OSGi tax -->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-
+   
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
