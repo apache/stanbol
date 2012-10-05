@@ -96,6 +96,7 @@
     </dependency>
 
     <!-- KReS dependencies -->
+    <!--
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
@@ -119,11 +120,27 @@
         </exclusion>
       </exclusions>
     </dependency>
+    -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
       <version>0.10.0-SNAPSHOT</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.servicesapi</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.sources.clerezza</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.sources.owlapi</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -134,7 +151,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.manager</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.10.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
