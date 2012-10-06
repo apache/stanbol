@@ -38,9 +38,9 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true, metatype = true)
 @Service({OfflineConfiguration.class,
-          org.apache.stanbol.ontologymanager.obsolete.api.OfflineConfiguration.class})
+          org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration.class})
 public class OfflineConfigurationImpl implements
-        org.apache.stanbol.ontologymanager.obsolete.api.OfflineConfiguration {
+        org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration {
 
     public static final String _DEFAULT_NS_DEFAULT = "http://localhost:8080/ontonet/";
 

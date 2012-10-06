@@ -36,7 +36,7 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
-import org.apache.stanbol.ontologymanager.obsolete.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.servicesapi.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.DuplicateIDException;
