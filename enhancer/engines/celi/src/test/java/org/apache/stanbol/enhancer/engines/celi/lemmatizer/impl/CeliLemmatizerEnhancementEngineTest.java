@@ -110,11 +110,8 @@ public class CeliLemmatizerEnhancementEngineTest {
         try {
 			morphoAnalysisEngine.computeEnhancements(ci);
         } catch (EngineException e) {
-            if (e.getCause() != null && e.getCause() instanceof UnknownHostException) {
-                log.warn("Celi Service not reachable -> offline? -> deactivate test");
-                return;
-            }
-            throw e;
+            RemoteServiceHelper.checkServiceUnavailable(e);
+            return;
         }
 
 		TestUtils.logEnhancements(ci);
@@ -151,6 +148,7 @@ public class CeliLemmatizerEnhancementEngineTest {
             morphoAnalysisEngine.computeEnhancements(ci);
         } catch (EngineException e) {
             RemoteServiceHelper.checkServiceUnavailable(e);
+            return;
         }
 
         TestUtils.logEnhancements(ci);

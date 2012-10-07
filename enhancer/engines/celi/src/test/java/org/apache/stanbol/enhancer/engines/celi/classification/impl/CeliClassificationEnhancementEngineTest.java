@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.rmi.RemoteException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -43,6 +44,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
+import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -105,12 +107,9 @@ public class CeliClassificationEnhancementEngineTest {
 			int numTopicAnnotations = validateAllTopicAnnotations(ci.getMetadata()  , expectedValues);
 			assertTrue("No TpocisAnnotations found", numTopicAnnotations > 0);
 		} catch (EngineException e) {
-			if (e.getCause() != null && e.getCause() instanceof UnknownHostException) {
-				log.warn("Celi Service not reachable -> offline? -> deactivate test");
-				return;
-			}
-			throw e;
-		}
+            RemoteServiceHelper.checkServiceUnavailable(e);
+            return;
+        }
 	}
 
 }
