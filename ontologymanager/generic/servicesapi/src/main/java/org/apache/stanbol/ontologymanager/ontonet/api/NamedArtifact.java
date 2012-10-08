@@ -16,7 +16,20 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api;
 
-@Deprecated
+/**
+ * Denotes any API artifact that has a qualified identifier. Both the identifier and the concatenation of the
+ * namespace with the identifier should be unique in the system. Having both a non-null namespace and ID is
+ * optional, but at least one of them should be non-null.
+ * 
+ * @deprecated Packages, class names etc. containing "ontonet" in any capitalization are being phased out.
+ *             Please switch to {@link org.apache.stanbol.ontologymanager.servicesapi.NamedArtifact} as soon
+ *             as possible.
+ * 
+ * @see org.apache.stanbol.ontologymanager.servicesapi.NamedArtifact
+ * 
+ * @author alexdma
+ * 
+ */
 public interface NamedArtifact extends org.apache.stanbol.ontologymanager.servicesapi.NamedArtifact {
 
 }

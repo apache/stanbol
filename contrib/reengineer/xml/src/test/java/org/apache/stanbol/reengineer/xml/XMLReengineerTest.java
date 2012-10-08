@@ -127,8 +127,8 @@ public class XMLReengineerTest {
         // Two different ontology storages, the same sparql engine and tcprovider
 
         OntologyProvider<TcProvider> provider = new ClerezzaOntologyProvider(tcm, offline, new Parser());
-        ScopeManager onManager = new ScopeManagerImpl(provider, offline, new ClerezzaCollectorFactory(
-                provider, emptyConf), emptyConf);
+        ClerezzaCollectorFactory factory = new ClerezzaCollectorFactory(provider, emptyConf);
+        ScopeManager onManager = new ScopeManagerImpl(provider, offline, factory, factory, emptyConf);
         xmlExtractor = new XMLExtractor(new ReengineerManagerImpl(emptyConf), onManager, emptyConf);
     }
 

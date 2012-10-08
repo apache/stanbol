@@ -25,7 +25,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
-import org.apache.stanbol.ontologymanager.servicesapi.OntologyNetworkConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.ImportManagementPolicy;
 import org.apache.stanbol.ontologymanager.servicesapi.io.Origin;
 import org.semanticweb.owlapi.model.IRI;

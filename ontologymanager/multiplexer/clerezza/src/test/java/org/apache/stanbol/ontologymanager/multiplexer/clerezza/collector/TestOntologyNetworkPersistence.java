@@ -178,8 +178,9 @@ public class TestOntologyNetworkPersistence {
         tcp = new SimpleTcProvider();
         resetOntologyProvider();
         Dictionary<String,Object> empty = new Hashtable<String,Object>();
-        onm = new ScopeManagerImpl(ontologyProvider, new OfflineConfigurationImpl(empty),
-                new ClerezzaCollectorFactory(ontologyProvider, empty), empty);
+        ClerezzaCollectorFactory factory = new ClerezzaCollectorFactory(ontologyProvider, empty);
+        onm = new ScopeManagerImpl(ontologyProvider, new OfflineConfigurationImpl(empty), factory, factory,
+                empty);
     }
 
     @Test

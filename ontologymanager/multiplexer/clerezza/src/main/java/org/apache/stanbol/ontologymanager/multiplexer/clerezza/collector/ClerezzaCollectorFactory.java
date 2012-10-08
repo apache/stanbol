@@ -37,23 +37,24 @@ import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace.SpaceType;
-import org.apache.stanbol.ontologymanager.servicesapi.scope.PersistentCollectorFactory;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeEventListener;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeFactory;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementation of {@link PersistentCollectorFactory} based on Clerezza.
+ * Implementation of {@link OntologySpaceFactory} based on Clerezza.
  * 
  * @author alexdma
  * 
  */
 @Component(immediate = true, metatype = false)
-@Service(PersistentCollectorFactory.class)
-public class ClerezzaCollectorFactory implements PersistentCollectorFactory {
+@Service(OntologySpaceFactory.class)
+public class ClerezzaCollectorFactory implements OntologySpaceFactory, ScopeFactory {
 
     protected Collection<ScopeEventListener> listeners;
 

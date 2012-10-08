@@ -14,22 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.session;
+package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
-/**
- * Objects that want to listen to events affecting sessions should implement this interface and add themselves
- * as listener to a manager.
- * 
- * @deprecated Packages, class names etc. containing "ontonet" in any capitalization are being phased out.
- *             Please switch to {@link org.apache.stanbol.ontologymanager.servicesapi.session.SessionListener}
- *             as soon as possible.
- * 
- * @see org.apache.stanbol.ontologymanager.servicesapi.session.SessionListener
- * 
- * @author alexdma
- * 
- */
-public interface SessionListener extends
-        org.apache.stanbol.ontologymanager.servicesapi.session.SessionListener {
+@Deprecated
+public class OntologyLoadingException extends
+        org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyLoadingException {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -4406721649095540941L;
+
+    public OntologyLoadingException(Throwable cause) {
+        super(cause);
+    }
+
+    /**
+     * Creates a new instance of {@link OntologyLoadingException}.
+     * 
+     * @param message
+     *            the exception message.
+     */
+    public OntologyLoadingException(String message) {
+        super(message);
+    }
 
 }

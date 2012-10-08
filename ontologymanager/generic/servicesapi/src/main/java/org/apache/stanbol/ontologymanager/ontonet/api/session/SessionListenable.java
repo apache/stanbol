@@ -16,7 +16,19 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.session;
 
-@Deprecated
+/**
+ * An object that can fire or propagate changes in {@link Session} objects.
+ * 
+ * @deprecated Packages, class names etc. containing "ontonet" in any capitalization are being phased out.
+ *             Please switch to
+ *             {@link org.apache.stanbol.ontologymanager.servicesapi.session.SessionListenable} as soon as
+ *             possible.
+ * 
+ * @see org.apache.stanbol.ontologymanager.servicesapi.session.SessionListenable
+ * 
+ * @author alexdma
+ * 
+ */
 public interface SessionListenable extends
         org.apache.stanbol.ontologymanager.servicesapi.session.SessionListenable {
 

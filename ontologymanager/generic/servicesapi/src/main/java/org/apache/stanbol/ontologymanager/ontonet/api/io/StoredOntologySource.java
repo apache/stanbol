@@ -14,22 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.session;
+package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
-/**
- * Objects that want to listen to events affecting sessions should implement this interface and add themselves
- * as listener to a manager.
- * 
- * @deprecated Packages, class names etc. containing "ontonet" in any capitalization are being phased out.
- *             Please switch to {@link org.apache.stanbol.ontologymanager.servicesapi.session.SessionListener}
- *             as soon as possible.
- * 
- * @see org.apache.stanbol.ontologymanager.servicesapi.session.SessionListener
- * 
- * @author alexdma
- * 
- */
-public interface SessionListener extends
-        org.apache.stanbol.ontologymanager.servicesapi.session.SessionListener {
+import org.semanticweb.owlapi.model.OWLOntologyID;
+
+@Deprecated
+public class StoredOntologySource extends
+        org.apache.stanbol.ontologymanager.servicesapi.io.StoredOntologySource {
+
+    public StoredOntologySource(OWLOntologyID publicKey) {
+        super(publicKey);
+    }
 
 }

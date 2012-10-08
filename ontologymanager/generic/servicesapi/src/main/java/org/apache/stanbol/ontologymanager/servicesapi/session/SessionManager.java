@@ -27,7 +27,7 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
  * of sessions, creates new ones and either destroys or stores existing ones persistently. All sessions are
  * managed via unique identifiers of the <code>org.semanticweb.owlapi.model.IRI</code> type.<br>
  * <br>
- * NOTE: implementations should be synchronized, or document whenever they are not.
+ * NOTE: implementations should either be synchronized, or document whenever they are not.
  * 
  * @author alexdma
  * 

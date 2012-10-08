@@ -33,6 +33,8 @@ package org.apache.stanbol.ontologymanager.servicesapi.io;
  * 
  * @author alexdma
  * 
+ * @param <O>
+ *            the root ontology object delivered by this input source.
  */
 public interface OntologyInputSource<O> {
 

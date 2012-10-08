@@ -36,7 +36,7 @@ import org.apache.stanbol.ontologymanager.servicesapi.collector.UnmodifiableOnto
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace.SpaceType;
-import org.apache.stanbol.ontologymanager.servicesapi.scope.PersistentCollectorFactory;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.sources.owlapi.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.sources.owlapi.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
@@ -60,7 +60,7 @@ public class TestOntologySpaces {
     public static IRI baseIri = IRI.create(Constants.PEANUTS_MAIN_BASE), baseIri2 = IRI
             .create(Constants.PEANUTS_MINOR_BASE);
 
-    private static PersistentCollectorFactory factory;
+    private static OntologySpaceFactory factory;
     private static OntologyInputSource<OWLOntology> inMemorySrc, minorSrc, dropSrc, nonexSrc;
     private static OWLAxiom linusIsHuman = null;
 
@@ -79,7 +79,7 @@ public class TestOntologySpaces {
 
     @BeforeClass
     public static void setup() throws Exception {
-        factory = onManager.getPersistentCollectorFactory();
+        factory = onManager.getOntologySpaceFactory();
         if (factory == null) fail("Could not instantiate ontology space factory");
 
         OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(onManager

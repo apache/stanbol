@@ -14,22 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.session;
+package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
+
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.Multiplexer;
 
 /**
- * Objects that want to listen to events affecting sessions should implement this interface and add themselves
- * as listener to a manager.
+ * The object that "knows" the relationships between stored graphs and their usage in ontology spaces or
+ * sessions.
  * 
  * @deprecated Packages, class names etc. containing "ontonet" in any capitalization are being phased out.
- *             Please switch to {@link org.apache.stanbol.ontologymanager.servicesapi.session.SessionListener}
- *             as soon as possible.
+ *             Please switch to {@link Multiplexer} as soon as possible.
  * 
- * @see org.apache.stanbol.ontologymanager.servicesapi.session.SessionListener
+ * @see Multiplexer
  * 
  * @author alexdma
  * 
  */
-public interface SessionListener extends
-        org.apache.stanbol.ontologymanager.servicesapi.session.SessionListener {
+public interface OntologyNetworkMultiplexer extends Multiplexer {
 
 }

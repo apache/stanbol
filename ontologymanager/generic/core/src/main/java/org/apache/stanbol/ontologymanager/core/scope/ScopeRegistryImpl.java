@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.core.scope;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -48,13 +49,23 @@ public class ScopeRegistryImpl implements ScopeRegistry {
     }
 
     @Override
-    public void addScopeRegistrationListener(ScopeEventListener listener) {
+    public void addScopeEventListener(ScopeEventListener listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void clearScopeRegistrationListeners() {
+    public void addScopeRegistrationListener(ScopeEventListener listener) {
+        addScopeEventListener(listener);
+    }
+
+    @Override
+    public void clearScopeEventListeners() {
         listeners.clear();
+    }
+
+    @Override
+    public void clearScopeRegistrationListeners() {
+        clearScopeEventListeners();
     }
 
     @Override
@@ -123,8 +134,13 @@ public class ScopeRegistryImpl implements ScopeRegistry {
     }
 
     @Override
-    public Set<ScopeEventListener> getScopeRegistrationListeners() {
+    public Collection<ScopeEventListener> getScopeEventListeners() {
         return listeners;
+    }
+
+    @Override
+    public Set<ScopeEventListener> getScopeRegistrationListeners() {
+        return new HashSet<ScopeEventListener>(listeners);
     }
 
     @Override
@@ -146,8 +162,13 @@ public class ScopeRegistryImpl implements ScopeRegistry {
     }
 
     @Override
-    public void removeScopeRegistrationListener(ScopeEventListener listener) {
+    public void removeScopeEventListener(ScopeEventListener listener) {
         listeners.remove(listener);
+    }
+
+    @Override
+    public void removeScopeRegistrationListener(ScopeEventListener listener) {
+        removeScopeEventListener(listener);
     }
 
     @Override

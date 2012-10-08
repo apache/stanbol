@@ -16,7 +16,22 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.session;
 
-@Deprecated
+/**
+ * Manages session objects via CRUD-like operations. A <code>SessionManager</code> maintains in-memory storage
+ * of sessions, creates new ones and either destroys or stores existing ones persistently. All sessions are
+ * managed via unique identifiers of the <code>org.semanticweb.owlapi.model.IRI</code> type.<br>
+ * <br>
+ * NOTE: implementations should either be synchronized, or document whenever they are not.
+ * 
+ * @deprecated Packages, class names etc. containing "ontonet" in any capitalization are being phased out.
+ *             Please switch to {@link org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager}
+ *             as soon as possible.
+ * 
+ * @see org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager
+ * 
+ * @author alexdma
+ * 
+ */
 public interface SessionManager extends org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager {
 
 }

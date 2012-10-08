@@ -17,8 +17,19 @@
 package org.apache.stanbol.ontologymanager.ontonet.api;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 
-@Deprecated
+/**
+ * A component that provides all the facilities for creating, registering and querying ontology scopes.
+ * 
+ * @deprecated Packages, class names etc. containing "ontonet" in any capitalization are being phased out.
+ *             Please switch to {@link ScopeManager} as soon as possible.
+ * 
+ * @see ScopeManager
+ * 
+ * @author alexdma
+ * 
+ */
 public interface ONManager extends org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager,
         ScopeRegistry {
 

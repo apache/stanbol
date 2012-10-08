@@ -29,7 +29,7 @@ import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace.SpaceT
  * 
  * @author alexdma
  */
-public interface PersistentCollectorFactory extends ScopeFactory, ScopeEventListenable, NamedArtifact {
+public interface OntologySpaceFactory extends ScopeEventListenable, NamedArtifact {
 
     /**
      * Creates and sets up a default core ontology space. Equivalent to calling

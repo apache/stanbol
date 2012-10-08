@@ -40,7 +40,7 @@ import org.apache.stanbol.ontologymanager.servicesapi.collector.UnmodifiableOnto
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace.SpaceType;
-import org.apache.stanbol.ontologymanager.servicesapi.scope.PersistentCollectorFactory;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
@@ -93,7 +93,7 @@ public class ScopeImpl implements Scope, OntologyCollectorListener {
 
     public ScopeImpl(String id,
                      IRI namespace,
-                     PersistentCollectorFactory factory,
+                     OntologySpaceFactory factory,
                      OntologyInputSource<?>... coreOntologies) {
         setID(id);
         setDefaultNamespace(namespace);
@@ -115,13 +115,13 @@ public class ScopeImpl implements Scope, OntologyCollectorListener {
         listeners.clear();
     }
 
-    private void configureCoreSpace(PersistentCollectorFactory factory) {
+    private void configureCoreSpace(OntologySpaceFactory factory) {
         this.coreSpace = factory.createCoreOntologySpace(id/* , coreOntologies */);
         this.coreSpace.addOntologyCollectorListener(this); // Set listener before adding core ontologies
 
     }
 
-    private void configureCustomSpace(PersistentCollectorFactory factory) {
+    private void configureCustomSpace(OntologySpaceFactory factory) {
         try {
             setCustomSpace(factory.createCustomOntologySpace(id));
         } catch (UnmodifiableOntologyCollectorException e) {

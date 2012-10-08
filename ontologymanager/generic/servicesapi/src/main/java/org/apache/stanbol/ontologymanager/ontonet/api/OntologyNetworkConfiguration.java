@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.servicesapi;
+package org.apache.stanbol.ontologymanager.ontonet.api;
 
 import java.util.Collection;
 import java.util.Map;
@@ -24,10 +24,12 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
 /**
  * Contains ownership and collector information on all ontology networks currently configured.
  * 
+ * @deprecated as it is only for use by component activators, it will probably be confined to a private
+ *             package.
+ * 
  * @author alexdma
  * 
  */
-@Deprecated
 public class OntologyNetworkConfiguration {
 
     private Map<String,Collection<String>> scopesForSessions;

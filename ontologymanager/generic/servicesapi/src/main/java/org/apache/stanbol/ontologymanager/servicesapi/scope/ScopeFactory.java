@@ -19,7 +19,7 @@ package org.apache.stanbol.ontologymanager.servicesapi.scope;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 
-public interface ScopeFactory {
+public interface ScopeFactory extends ScopeEventListenable {
 
     /**
      * Creates and returns a new ontology scope with the core space ontologies obtained from

@@ -28,11 +28,13 @@ import org.apache.stanbol.ontologymanager.servicesapi.collector.DuplicateIDExcep
  * @author alexdma
  * 
  */
-public interface ScopeRegistry {
+public interface ScopeRegistry extends ScopeEventListenable {
 
     /**
      * Adds a scope registration listener to this registry. If the listener was already added, this should
      * result in no effect.
+     * 
+     * @deprecated use {@link ScopeEventListenable#addScopeEventListener(ScopeEventListener)}
      * 
      * @param listener
      *            the listener to be added
@@ -41,6 +43,8 @@ public interface ScopeRegistry {
 
     /**
      * Removes all registered scope registration listeners.
+     * 
+     * @deprecated use {@link ScopeEventListenable#clearScopeEventListeners()}
      */
     void clearScopeRegistrationListeners();
 
@@ -82,6 +86,8 @@ public interface ScopeRegistry {
     /**
      * Returns the set of registered scope registration listeners, in no particular order.
      * 
+     * @deprecated use {@link ScopeEventListenable#getScopeEventListeners()}
+     * 
      * @return the set of scope registration listeners
      */
     Set<ScopeEventListener> getScopeRegistrationListeners();
@@ -109,6 +115,8 @@ public interface ScopeRegistry {
     /**
      * Removes a scope registration listener from this registry. If the listener was not previously added,
      * this should result in no effect.
+     * 
+     * @deprecated use {@link ScopeEventListenable#removeScopeEventListener(ScopeEventListener)}
      * 
      * @param listener
      *            the listener to be removed

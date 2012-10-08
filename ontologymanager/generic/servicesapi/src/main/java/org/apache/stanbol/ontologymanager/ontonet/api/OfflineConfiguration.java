@@ -16,7 +16,19 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api;
 
-@Deprecated
+/**
+ * Provides the configuration needed by the ontology manager in order to locate offline ontologies and export
+ * them to the Web.
+ * 
+ * @deprecated Packages, class names etc. containing "ontonet" in any capitalization are being phased out.
+ *             Please switch to {@link org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration} as
+ *             soon as possible.
+ * 
+ * @see org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration
+ * 
+ * @author alexdma
+ * 
+ */
 public interface OfflineConfiguration extends
         org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration {
 

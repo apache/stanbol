@@ -45,7 +45,7 @@ import org.apache.stanbol.ontologymanager.servicesapi.collector.UnmodifiableOnto
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace.SpaceType;
-import org.apache.stanbol.ontologymanager.servicesapi.scope.PersistentCollectorFactory;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.sources.clerezza.GraphSource;
 import org.apache.stanbol.ontologymanager.sources.owlapi.ParentPathInputSource;
@@ -68,7 +68,7 @@ public class TestClerezzaSpaces {
 
     private static OWLAxiom linusIsHuman = null;
 
-    private static PersistentCollectorFactory factory;
+    private static OntologySpaceFactory factory;
 
     private static OntologyInputSource<TripleCollection> minorSrc, dropSrc, nonexSrc;
 

@@ -18,13 +18,13 @@ package org.apache.stanbol.ontologymanager.servicesapi.scope;
 
 import java.io.File;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 
 /**
- * An Ontology Network Manager holds all references and tools for creating, modifying and deleting the logical
- * realms that store Web Ontologies, as well as offer facilities for handling the ontologies contained
- * therein.<br>
+ * A Scope Manager holds all references and tools for creating, modifying and deleting the logical realms that
+ * store Web Ontologies, as well as offer facilities for handling the ontologies contained therein.<br>
  * <br>
  * Note that since this object is both a {@link ScopeRegistry} and an {@link ScopeFactory}, the call to
  * {@link ScopeRegistry#registerScope(OntologyScope)} or its overloads after
@@ -59,6 +59,8 @@ public interface ScopeManager extends ScopeFactory, ScopeRegistry {
      */
     OfflineConfiguration getOfflineConfiguration();
 
+    OntologySpaceFactory getOntologySpaceFactory();
+
     /**
      * Implementations should be able to create a {@link File} object from this path.
      * 
@@ -76,15 +78,6 @@ public interface ScopeManager extends ScopeFactory, ScopeRegistry {
      * @return the base namespace of the Stanbol ontology network.
      */
     String getOntologyNetworkNamespace();
-
-    /**
-     * Returns the ontology space factory that was created along with the manager context. <br>
-     * <br>
-     * Note: Because this can be backend-dependent, this method is not deprecated yet.
-     * 
-     * @return the default ontology space factory.
-     */
-    PersistentCollectorFactory getPersistentCollectorFactory();
 
     /**
      * Returns the unique ontology scope registry for this context.

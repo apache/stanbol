@@ -36,7 +36,6 @@ import org.apache.stanbol.ontologymanager.multiplexer.clerezza.ontology.Clerezza
 import org.apache.stanbol.ontologymanager.multiplexer.clerezza.session.SessionManagerImpl;
 import org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.servicesapi.scope.PersistentCollectorFactory;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 
@@ -57,7 +56,7 @@ public class MockOsgiContext {
 
     public static OntologyProvider<TcProvider> ontologyProvider;
 
-    public static PersistentCollectorFactory collectorfactory;
+    public static ClerezzaCollectorFactory collectorfactory;
 
     public static Parser parser;
 
@@ -97,7 +96,8 @@ public class MockOsgiContext {
 
     public static void resetManagers() {
         // PersistentCollectorFactory factory = new ClerezzaCollectorFactory(ontologyProvider, config);
-        onManager = new ScopeManagerImpl(ontologyProvider, offline, collectorfactory, config);
+        onManager = new ScopeManagerImpl(ontologyProvider, offline, collectorfactory, collectorfactory,
+                config);
         sessionManager = new SessionManagerImpl(ontologyProvider, offline, config);
     }
 

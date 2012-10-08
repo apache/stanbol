@@ -18,12 +18,11 @@ package org.apache.stanbol.ontologymanager.servicesapi;
 
 import java.util.List;
 
-import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 import org.semanticweb.owlapi.model.IRI;
 
 /**
- * Provides the configuration needed for the {@link ScopeManager}. A configuration should only be handled
- * internally by the {@link ScopeManager} implementation.
+ * Provides the configuration needed by the ontology manager in order to locate offline ontologies and export
+ * them to the Web.
  * 
  * @author alexdma
  * 

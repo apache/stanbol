@@ -37,8 +37,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.servicesapi.OntologyNetworkConfiguration;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.MissingOntologyException;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.UnmodifiableOntologyCollectorException;
@@ -48,8 +48,10 @@ import org.apache.stanbol.ontologymanager.servicesapi.ontology.Multiplexer;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.NoSuchScopeException;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace;
-import org.apache.stanbol.ontologymanager.servicesapi.scope.PersistentCollectorFactory;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeEventListener;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeFactory;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyNetworkConfigurationUtils;
@@ -111,8 +113,15 @@ public class ScopeManagerImpl extends ScopeRegistryImpl implements ONManager {
                                                                                           + ".option.loose", name = "LOOSE")}, value = _CONNECTIVITY_POLICY_DEFAULT)
     private String connectivityPolicyString;
 
+    /*
+     * TODO when adapters are implemented for exporting, factory implementations can be Clerezza-independent
+     * and this object can become a scope factory itself.
+     */
     @Reference
-    private PersistentCollectorFactory factory;
+    private ScopeFactory scopeFactory;
+
+    @Reference
+    private OntologySpaceFactory spaceFactory;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -149,9 +158,9 @@ public class ScopeManagerImpl extends ScopeRegistryImpl implements ONManager {
      * <p>
      * DO NOT USE to manually create instances - the ONManagerImpl instances do need to be configured! YOU
      * NEED TO USE
-     * {@link #ONManagerImpl(OntologyProvider, OfflineConfiguration, PersistentCollectorFactory, Dictionary)}
-     * or its overloads, to parse the configuration and then initialise the rule store if running outside an
-     * OSGI environment.
+     * {@link #ONManagerImpl(OntologyProvider, OfflineConfiguration, OntologySpaceFactory, Dictionary)} or its
+     * overloads, to parse the configuration and then initialise the rule store if running outside an OSGI
+     * environment.
      */
     public ScopeManagerImpl() {
         super();
@@ -172,11 +181,13 @@ public class ScopeManagerImpl extends ScopeRegistryImpl implements ONManager {
      */
     public ScopeManagerImpl(OntologyProvider<?> ontologyProvider,
                             OfflineConfiguration offline,
-                            PersistentCollectorFactory factory,
+                            ScopeFactory scopeFactory,
+                            OntologySpaceFactory spaceFactory,
                             Dictionary<String,Object> configuration) {
         this();
         this.ontologyProvider = ontologyProvider;
-        this.factory = factory;
+        this.scopeFactory = scopeFactory;
+        this.spaceFactory = spaceFactory;
         this.offline = offline;
         try {
             activate(configuration);
@@ -308,14 +319,14 @@ public class ScopeManagerImpl extends ScopeRegistryImpl implements ONManager {
         // (OntologyProvider<TcProvider>) ontologyProvider, new Hashtable<String,Object>());
         // }
         IRI iri = IRI.create(ontonetNS + scopeRegistryId + "/");
-        factory.setDefaultNamespace(iri);
+        spaceFactory.setDefaultNamespace(iri);
 
         // Add listeners
         // if (ontologyProvider instanceof ScopeEventListener) factory
         // .addScopeEventListener((ScopeEventListener) ontologyProvider);
         Multiplexer multiplexer = ontologyProvider.getOntologyNetworkDescriptor();
         this.addScopeRegistrationListener(multiplexer);
-        factory.addScopeEventListener(multiplexer);
+        this.addScopeEventListener(multiplexer);
     }
 
     private void bootstrapOntologyNetwork(OWLOntology configOntology) {
@@ -417,13 +428,13 @@ public class ScopeManagerImpl extends ScopeRegistryImpl implements ONManager {
         // Commented out: for the time being we try not to propagate additions to scopes.
         // if (ontologyProvider instanceof OntologyCollectorListener) scope
         // .addOntologyCollectorListener((OntologyCollectorListener) ontologyProvider);
-        // fireScopeCreated(scope);
+        fireScopeCreated(scope);
         this.registerScope(scope);
     }
 
     @Override
     public Scope createOntologyScope(String scopeID, OntologyInputSource<?>... coreOntologies) throws DuplicateIDException {
-        Scope sc = factory.createOntologyScope(scopeID, coreOntologies);
+        Scope sc = scopeFactory.createOntologyScope(scopeID, coreOntologies);
         configureScope(sc);
         return sc;
     }
@@ -469,16 +480,6 @@ public class ScopeManagerImpl extends ScopeRegistryImpl implements ONManager {
     @Override
     public String getOntologyNetworkNamespace() {
         return ontonetNS.toString();
-    }
-
-    /**
-     * Returns the ontology space factory that was created along with the manager context.
-     * 
-     * @return the ontology space factory
-     */
-    @Override
-    public PersistentCollectorFactory getPersistentCollectorFactory() {
-        return factory;
     }
 
     @Override
@@ -560,6 +561,16 @@ public class ScopeManagerImpl extends ScopeRegistryImpl implements ONManager {
             namespace += "/";
         }
         this.ontonetNS = IRI.create(namespace);
+    }
+
+    protected void fireScopeCreated(Scope scope) {
+        for (ScopeEventListener l : listeners)
+            l.scopeCreated(scope);
+    }
+
+    @Override
+    public OntologySpaceFactory getOntologySpaceFactory() {
+        return spaceFactory;
     }
 
 }

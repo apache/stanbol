@@ -16,7 +16,6 @@ import org.apache.stanbol.ontologymanager.multiplexer.clerezza.collector.Clerezz
 import org.apache.stanbol.ontologymanager.multiplexer.clerezza.ontology.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.servicesapi.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.servicesapi.scope.PersistentCollectorFactory;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 import org.apache.stanbol.reengineer.base.impl.ReengineerManagerImpl;
 import org.junit.Before;
@@ -51,9 +50,9 @@ public class DBExtractorTest {
                 new Parser());
 
         // Two different ontology storages, the same sparql engine and tcprovider
-        PersistentCollectorFactory sf = new ClerezzaCollectorFactory(ontologyProvider, emptyConf);
+        ClerezzaCollectorFactory sf = new ClerezzaCollectorFactory(ontologyProvider, emptyConf);
 
-        onManager = new ScopeManagerImpl(ontologyProvider, offline, sf, emptyConf);
+        onManager = new ScopeManagerImpl(ontologyProvider, offline, sf, sf, emptyConf);
         dbExtractor = new DBExtractor(new ReengineerManagerImpl(emptyConf), onManager, tcm, wtcp, emptyConf);
         graphNS = "http://kres.iks-project.eu/reengineering/test";
         outputIRI = IRI.create(graphNS);

@@ -16,7 +16,21 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.scope;
 
-@Deprecated
+/**
+ * An ontology collector that maintains references to core ontologies that will be imported by any ontology in
+ * the custom space of a scope. They are used for boosting reasoning operations. Core spaces should only be
+ * created and populated upon creation of the corresponding ontology scope and not modified afterwards.
+ * 
+ * @deprecated Packages, class names etc. containing "ontonet" in any capitalization are being phased out. In
+ *             addition, the distinction between core and custom spaces will disappear at the operational
+ *             level. Please switch to
+ *             {@link org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace} as soon as possible.
+ * 
+ * @see org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace
+ * 
+ * @author alexdma
+ * 
+ */
 public interface CoreOntologySpace extends OntologySpace {
 
 }
