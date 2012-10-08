@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @Component(immediate = true, metatype = false)
-@Service(OntologySpaceFactory.class)
+@Service({OntologySpaceFactory.class, ScopeFactory.class})
 public class ClerezzaCollectorFactory implements OntologySpaceFactory, ScopeFactory {
 
     protected Collection<ScopeEventListener> listeners;
