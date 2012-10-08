@@ -24,11 +24,16 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -85,7 +90,11 @@ public class XmpExtractorEngine extends AbstractEnhancementEngine<IOException,Ru
 		}
     	byte[] bytes = baos.toByteArray();
     	if (bytes.length > 0) {
-	        Graph model = parser.parse(new ByteArrayInputStream(bytes), "application/rdf+xml");
+	        MGraph model = new IndexedMGraph();
+			parser.parse(model, new ByteArrayInputStream(bytes), "application/rdf+xml");
+	        GraphNode gn = new GraphNode(
+					new UriRef("http://relative-uri.fake/"), model);
+			gn.replaceWith(ci.getUri());
 	        ci.getLock().writeLock().lock();
 	        try { 
 	            LOG.info("Model: {}",model);
