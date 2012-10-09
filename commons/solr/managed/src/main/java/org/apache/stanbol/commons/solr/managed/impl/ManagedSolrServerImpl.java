@@ -1048,20 +1048,22 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
                 boolean keepTracking = false;
                 for(String indexName : managedCores.getIndexNames(resourceName)){
                     IndexMetadata metadata = managedCores.getIndexMetadata(indexName);
-                    List<String> archives = metadata.getIndexArchives();
-                    String currentArchive = metadata.getArchive();
-                    if(currentArchive == null || 
-                            archives.indexOf(resourceName) < archives.indexOf(currentArchive)){
-                        metadata.setArchive(resourceName);
-                        managedCores.store(metadata);
-                        indexUpdateDaemon.update(ManagedIndexState.ACTIVE,metadata, ais);
-                        //if synchronised do not remove this listener
-                        keepTracking = keepTracking || metadata.isSynchronized();
-                    } else { //currently used Archive is of higher priority as
-                        // this one.
-                        //keep tracking if synchronised
-                        keepTracking = keepTracking || metadata.isSynchronized();
-                    }
+                    if(metadata != null){ //the core might be deleted in the meantime
+                        List<String> archives = metadata.getIndexArchives();
+                        String currentArchive = metadata.getArchive();
+                        if(currentArchive == null || 
+                                archives.indexOf(resourceName) < archives.indexOf(currentArchive)){
+                            metadata.setArchive(resourceName);
+                            managedCores.store(metadata);
+                            indexUpdateDaemon.update(ManagedIndexState.ACTIVE,metadata, ais);
+                            //if synchronised do not remove this listener
+                            keepTracking = keepTracking || metadata.isSynchronized();
+                        } else { //currently used Archive is of higher priority as
+                            // this one.
+                            //keep tracking if synchronised
+                            keepTracking = keepTracking || metadata.isSynchronized();
+                        }
+                    } //else managed core was deleted in the meantime ...
                 }
                 return !keepTracking;
             } else { //unable to create an ArchiveInputStrem 
