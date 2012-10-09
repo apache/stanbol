@@ -228,7 +228,6 @@ public class ManagedSiteComponent {
             yardTracker.close();
             yardTracker = null;
         }
-        yardTracker.close();
         synchronized (yardReferenceLock) {
             yardReference = null;
         }
