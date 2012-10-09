@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -260,7 +261,7 @@ public class ManagedIndexMetadata {
             Collection<String> indexNames = archiveName2CoreName.get(archiveName);
             return indexNames == null ? 
                     (Collection<String>)Collections.EMPTY_LIST : 
-                        Collections.unmodifiableCollection(indexNames);
+                        Collections.unmodifiableCollection(new ArrayList<String>(indexNames));
         }
     }
     
