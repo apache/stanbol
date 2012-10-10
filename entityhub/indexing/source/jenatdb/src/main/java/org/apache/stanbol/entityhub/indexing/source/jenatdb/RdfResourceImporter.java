@@ -30,9 +30,12 @@ import org.openjena.riot.RiotReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.sparql.core.Quad;
 import com.hp.hpl.jena.tdb.TDBLoader;
 import com.hp.hpl.jena.tdb.store.DatasetGraphTDB;
 import com.hp.hpl.jena.tdb.store.bulkloader.BulkLoader;
@@ -70,6 +73,13 @@ public class RdfResourceImporter implements ResourceImporter {
             return ResourceState.IGNORED;
         } else if (format == Lang.NTRIPLES) {
             TDBLoader.load(indexingDataset, is, true);
+        } else if(format == Lang.NQUADS || format == Lang.TRIG){ //quads
+            TDBLoader loader = new TDBLoader();
+            loader.setShowProgress(true);
+            Destination<Quad> dest = createQuad2TripleDestination();
+            dest.start();
+            RiotReader.parseQuads(is,format,null, dest);
+            dest.finish();
         } else if (format != Lang.RDFXML) {
             // use RIOT to parse the format but with a special configuration
             // RiotReader!
@@ -126,6 +136,44 @@ public class RdfResourceImporter implements ResourceImporter {
                 loaderTriples.loadIndexFinish() ;
                 loaderTriples.loadFinish() ;
             }
+        } ;
+        return sink ;
+    }
+    /**
+     * Creates a Destination that consumes {@link Quad}s and stores
+     * {@link Triple}s to the {@link #indexingDataset}
+     * @return
+     */
+    private Destination<Quad> createQuad2TripleDestination() {
+        LoadMonitor monitor = new LoadMonitor(indexingDataset, 
+            log, "triples",50000,100000);
+        final LoaderNodeTupleTable loaderTriples = new LoaderNodeTupleTable(
+            indexingDataset.getTripleTable().getNodeTupleTable(), "triples", monitor) ;
+
+        Destination<Quad> sink = new Destination<Quad>() {
+            //long count = 0 ;
+            public final void start()
+            {
+                loaderTriples.loadStart() ;
+                loaderTriples.loadDataStart() ;
+            }
+            public final void send(Quad quad)
+            {
+                loaderTriples.load(quad.getSubject(), quad.getPredicate(), quad.getObject()) ;
+                //count++ ;
+            }
+
+            public final void flush() { }
+            public void close() { }
+
+            public final void finish()
+            {
+                loaderTriples.loadDataFinish() ;
+                loaderTriples.loadIndexStart() ;
+                loaderTriples.loadIndexFinish() ;
+                loaderTriples.loadFinish() ;
+            }
+
         } ;
         return sink ;
     }

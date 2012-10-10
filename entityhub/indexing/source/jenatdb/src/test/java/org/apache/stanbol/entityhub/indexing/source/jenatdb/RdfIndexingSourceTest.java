@@ -131,6 +131,37 @@ public class RdfIndexingSourceTest {
             NUMBER_OF_ENTITIES_EXPECTED,count), 
             NUMBER_OF_ENTITIES_EXPECTED, count);
     }
+    /**
+     * Tests support for Quads (STANBOL-764)
+     */
+    @Test
+    public void testQuadsImport(){
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"quads",CONFIG_ROOT+"quads"){};
+        EntityIterator entityIdIterator = config.getEntityIdIterator();
+        assertNotNull("Unable to perform test whithout EntityIterator",entityIdIterator);
+        if(entityIdIterator.needsInitialisation()){
+            entityIdIterator.initialise();
+        }
+        EntityDataProvider dataProvider = config.getEntityDataProvider();
+        assertNotNull(dataProvider);
+        assertTrue(dataProvider.needsInitialisation());//there are test data to load
+        dataProvider.initialise();
+        assertEquals(dataProvider.getClass(), RdfIndexingSource.class);
+        long count = 0;
+        while(entityIdIterator.hasNext()){
+            EntityScore entityScore = entityIdIterator.next();
+            assertNotNull(entityScore);
+            assertNotNull(entityScore.id);
+            validateRepresentation(dataProvider.getEntityData(entityScore.id),
+                entityScore.id);
+            count++;
+        }
+        //check if all 9 entities where imported to the default dataset
+        // (and not named graphs)
+        assertEquals(String.format("%s Entities expected but %s processed!",
+            9, count), 
+            9, count);
+    }
 
     /**
      * @param it
