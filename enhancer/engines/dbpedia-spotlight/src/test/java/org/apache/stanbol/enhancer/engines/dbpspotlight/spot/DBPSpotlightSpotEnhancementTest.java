@@ -80,7 +80,7 @@ public class DBPSpotlightSpotEnhancementTest {
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
 		//and the enhancement engine instance
-		dbpslight = new DBPSpotlightSpotEnhancementEngine(new URL(SPL_URL),null);
+		dbpslight = new DBPSpotlightSpotEnhancementEngine(new URL(SPL_URL),null,10);
 	}
 
 	@Before

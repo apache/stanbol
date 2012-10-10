@@ -106,14 +106,17 @@ public class DBPSpotlightSpotEnhancementEngine extends
 	/** holds the chosen of spotter to be used */
 	private String spotlightSpotter;
 
+    private int connectionTimeout;
+
 	/**
 	 * Default constructor used by OSGI
 	 */
 	public DBPSpotlightSpotEnhancementEngine(){}
 	
-	protected DBPSpotlightSpotEnhancementEngine(URL spotlightUrl, String spotlightSpotter){
+	protected DBPSpotlightSpotEnhancementEngine(URL spotlightUrl, String spotlightSpotter, int connectionTimeout){
 		this.spotlightUrl = spotlightUrl;
 		this.spotlightSpotter = spotlightSpotter;
+		this.connectionTimeout = connectionTimeout;
 	}
 	
 	/**
@@ -131,6 +134,7 @@ public class DBPSpotlightSpotEnhancementEngine extends
 
 		Dictionary<String, Object> properties = ce.getProperties();
 		spotlightUrl = SpotlightEngineUtils.parseSpotlightServiceURL(properties);
+        connectionTimeout = SpotlightEngineUtils.getConnectionTimeout(properties);
 
 		//also set the spotter to null if an empty string is parsed
 		Object spotterConfig = properties.get(PARAM_SPOTTER);
@@ -238,7 +242,13 @@ public class DBPSpotlightSpotEnhancementEngine extends
 					"application/x-www-form-urlencoded");
 			connection.setRequestProperty("Accept", "text/xml");
 
-			connection.setUseCaches(false);
+            //set ConnectionTimeout (if configured)
+            if(connectionTimeout > 0){
+                connection.setConnectTimeout(connectionTimeout*1000);
+                connection.setReadTimeout(connectionTimeout*1000);
+            }
+
+            connection.setUseCaches(false);
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 

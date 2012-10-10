@@ -27,12 +27,18 @@ public interface Constants {
 	String PARAM_SUPPORT = "dbpedia.spotlight.support";
 
 	String PARAM_CONFIDENCE = "dbpedia.spotlight.confidence";
-
+	/**
+	 * Cab be used to set both connection AND read timeout for Http requests
+	 * to the configured DBpedia Spotlight services.<br>
+	 * Supported by all DBpedia Spotlight Engines.
+	 */
+	String PARAM_CONNECTION_TIMEOUT = "dbpedia.spotlight.connection.timeout";
 	
 	/**
 	 * The namespace used by DBpedia Spotlight specific properties 
 	 */
 	String SPOTLIGHT_NAME_SPACE = "http://spotlight.dbpedia.org/ns/";
+	
 	
 	/*
 	 * Definition of some Spotlight specific properties added to
