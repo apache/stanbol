@@ -1,0 +1,48 @@
+<http://www.telemac0.net/marketing-50/> <http://purl.org/dc/elements/1.1/type> <http://purl.org/dc/dcmitype/Text> <http://www.telemac0.net/marketing-50/>   .
+<http://www.telemac0.net/marketing-50/> <http://purl.org/dc/elements/1.1/title> "telemac0" <http://www.telemac0.net/marketing-50/>   .
+<http://www.telemac0.net/marketing-50/> <http://creativecommons.org/ns#attributionURL> <http://telemac0.net> <http://www.telemac0.net/marketing-50/>   .
+<http://www.telemac0.net/marketing-50/> <http://creativecommons.org/ns#attributionName> "cyb" <http://www.telemac0.net/marketing-50/>   .
+<http://www.telemac0.net/marketing-50/> <http://purl.org/dc/elements/1.1/source> <http://telemac0.net> <http://www.telemac0.net/marketing-50/>   .
+<http://zorg.com.ru/2008/06/30/opyat-nakurilsya/> <http://purl.org/dc/elements/1.1/type> <http://purl.org/dc/dcmitype/InteractiveResource> <http://zorg.com.ru/2008/06/30/opyat-nakurilsya/>   .
+<http://zorg.com.ru/2008/06/30/opyat-nakurilsya/> <http://purl.org/dc/elements/1.1/title> "Blogg Texts" <http://zorg.com.ru/2008/06/30/opyat-nakurilsya/>   .
+<http://zorg.com.ru/2008/06/30/opyat-nakurilsya/> <http://creativecommons.org/ns#attributionURL> <http://zorg.com.ru/> <http://zorg.com.ru/2008/06/30/opyat-nakurilsya/>   .
+<http://zorg.com.ru/2008/06/30/opyat-nakurilsya/> <http://creativecommons.org/ns#attributionName> "Sergey Agarkov" <http://zorg.com.ru/2008/06/30/opyat-nakurilsya/>   .
+<http://zorg.com.ru/2008/06/30/opyat-nakurilsya/> <http://purl.org/dc/elements/1.1/source> <http://zorg.com.ru/> <http://zorg.com.ru/2008/06/30/opyat-nakurilsya/>   .
+<http://www.logosportswear.com/product/794> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdf.data-vocabulary.org/#Product> <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/794> <http://rdf.data-vocabulary.org/#photo> ""@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/794> <http://rdf.data-vocabulary.org/#url> "Colored Handle Tote"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/794> <http://rdf.data-vocabulary.org/#name> "Colored Handle Tote"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/794> <http://rdf.data-vocabulary.org/#price> "12.51"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/158> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdf.data-vocabulary.org/#Product> <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/158> <http://rdf.data-vocabulary.org/#photo> ""@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/158> <http://rdf.data-vocabulary.org/#url> "All Purpose Tote"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/158> <http://rdf.data-vocabulary.org/#name> "All Purpose Tote"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/158> <http://rdf.data-vocabulary.org/#price> "16.06"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/1531> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdf.data-vocabulary.org/#Product> <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/1531> <http://rdf.data-vocabulary.org/#photo> ""@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/1531> <http://rdf.data-vocabulary.org/#url> "Harbor Cruise Boat Tote"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/1531> <http://rdf.data-vocabulary.org/#name> "Harbor Cruise Boat Tote"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/1531> <http://rdf.data-vocabulary.org/#price> "19.47"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/14109> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdf.data-vocabulary.org/#Product> <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/14109> <http://rdf.data-vocabulary.org/#photo> ""@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/14109> <http://rdf.data-vocabulary.org/#url> "Contemporary Tote"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/14109> <http://rdf.data-vocabulary.org/#name> "Contemporary Tote"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/14109> <http://rdf.data-vocabulary.org/#price> "16.47"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/4373> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdf.data-vocabulary.org/#Product> <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/4373> <http://rdf.data-vocabulary.org/#photo> ""@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/4373> <http://rdf.data-vocabulary.org/#url> "Zippered Tote"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/4373> <http://rdf.data-vocabulary.org/#name> "Zippered Tote"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/4373> <http://rdf.data-vocabulary.org/#price> "14.92"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/1337> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdf.data-vocabulary.org/#Product> <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/1337> <http://rdf.data-vocabulary.org/#photo> ""@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/1337> <http://rdf.data-vocabulary.org/#url> "Ensigns Boat Bag"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/1337> <http://rdf.data-vocabulary.org/#name> "Ensigns Boat Bag"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/1337> <http://rdf.data-vocabulary.org/#price> "15.93"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/11710> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdf.data-vocabulary.org/#Product> <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/11710> <http://rdf.data-vocabulary.org/#photo> ""@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/11710> <http://rdf.data-vocabulary.org/#url> "New ! Tees and Totes Combination Package"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/11710> <http://rdf.data-vocabulary.org/#name> "New ! Tees and Totes Combination Package"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+<http://www.logosportswear.com/product/11710> <http://rdf.data-vocabulary.org/#price> "22.95"@en <http://www.logosportswear.com/imprintedtotebagspersonalized.php>   .
+_:node16nh2jpdcx57591272 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Agent> <http://www.huffingtonpost.com/2009/01/13/obama-issues-first-veto-t_n_157585.html>   .
+_:node16nh2jpdcx57591272 <http://xmlns.com/foaf/0.1/homepage> <http://www.huffingtonpost.com/news/barack-obama/> <http://www.huffingtonpost.com/2009/01/13/obama-issues-first-veto-t_n_157585.html>   .
+_:node16nh2jpdcx57591272 <http://xmlns.com/foaf/0.1/name> "Barack Obama"@en <http://www.huffingtonpost.com/2009/01/13/obama-issues-first-veto-t_n_157585.html>   .
