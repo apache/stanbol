@@ -319,10 +319,16 @@ public class EnhancementStructureHelper {
         // check if the relation to the text annotation is set
         assertTrue(relationToTextAnnotationIterator.hasNext());
         while (relationToTextAnnotationIterator.hasNext()) {
-            // test if the referred annotations are text annotations
+            // test if the referred annotations are text annotations or
+            // the referenced annotations is a fise:EntityAnnotation AND also a
+            // dc:requires link is defined (STANBOL-766)
             UriRef referredTextAnnotation = (UriRef) relationToTextAnnotationIterator.next().getObject();
-            assertTrue(enhancements.filter(referredTextAnnotation, RDF_TYPE,
-                    ENHANCER_TEXTANNOTATION).hasNext());
+            assertTrue("fise:EntityAnnotations MUST BE dc:related to a fise:TextAnnotation OR dc:requires and dc:related to the same fise:EntityAnnotation",
+                enhancements.filter(referredTextAnnotation, RDF_TYPE,
+                    ENHANCER_TEXTANNOTATION).hasNext() || (
+                enhancements.filter(referredTextAnnotation, RDF_TYPE,
+                    ENHANCER_ENTITYANNOTATION).hasNext() && 
+                    enhancements.filter(entityAnnotation, Properties.DC_REQUIRES, referredTextAnnotation).hasNext()));
         }
 
         // test if an entity is referred
