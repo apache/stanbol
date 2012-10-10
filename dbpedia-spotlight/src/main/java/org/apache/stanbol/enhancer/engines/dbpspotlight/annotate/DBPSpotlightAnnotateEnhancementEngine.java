@@ -24,6 +24,7 @@ import static org.apache.stanbol.enhancer.engines.dbpspotlight.Constants.PARAM_S
 import static org.apache.stanbol.enhancer.engines.dbpspotlight.Constants.PARAM_SUPPORT;
 import static org.apache.stanbol.enhancer.engines.dbpspotlight.Constants.PARAM_URL_KEY;
 import static org.apache.stanbol.enhancer.engines.dbpspotlight.Constants.UTF8;
+import static org.apache.stanbol.enhancer.engines.dbpspotlight.utils.SpotlightEngineUtils.getConnectionTimeout;
 import static org.apache.stanbol.enhancer.engines.dbpspotlight.utils.XMLParser.loadXMLFromInputStream;
 
 import java.io.BufferedWriter;
@@ -120,6 +121,8 @@ public class DBPSpotlightAnnotateEnhancementEngine extends
 	/** holds the sparql restriction for the results, if the user wishes one */
 	private String spotlightSparql;
 
+    private int connectionTimeout;
+
 	/**
 	 * Default constructor used by OSGI. Expects {@link #activate(ComponentContext)}
 	 * to be called before the instance is used.
@@ -130,8 +133,9 @@ public class DBPSpotlightAnnotateEnhancementEngine extends
 	 * Constructor intended to be used by unit tests
 	 * @param spotlightUrl
 	 */
-	protected DBPSpotlightAnnotateEnhancementEngine(URL spotlightUrl){
+	protected DBPSpotlightAnnotateEnhancementEngine(URL spotlightUrl, int connectionTimeout){
 		this.spotlightUrl = spotlightUrl;
+		this.connectionTimeout = connectionTimeout;
 	}
 	
 	/**
@@ -149,6 +153,7 @@ public class DBPSpotlightAnnotateEnhancementEngine extends
 
 		Dictionary<String, Object> properties = ce.getProperties();
 		spotlightUrl = SpotlightEngineUtils.parseSpotlightServiceURL(properties);
+        connectionTimeout = getConnectionTimeout(properties);
 		spotlightSpotter = properties.get(PARAM_SPOTTER) == null ? null
 				: (String) properties.get(PARAM_SPOTTER);
 		spotlightDisambiguator = properties.get(PARAM_DISAMBIGUATOR) == null ? null
@@ -267,6 +272,12 @@ public class DBPSpotlightAnnotateEnhancementEngine extends
 					"application/x-www-form-urlencoded");
 			connection.setRequestProperty("Accept", "text/xml");
 
+			//set ConnectionTimeout (if configured)
+			if(connectionTimeout > 0){
+			    connection.setConnectTimeout(connectionTimeout*1000);
+                connection.setReadTimeout(connectionTimeout*1000);
+			}
+			
 			connection.setUseCaches(false);
 			connection.setDoInput(true);
 			connection.setDoOutput(true);

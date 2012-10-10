@@ -79,7 +79,7 @@ public class DBPSpotlightCandidatesEnhancementTest {
 
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
-		dbpslight = new DBPSpotlightCandidatesEnhancementEngine(new URL(SPL_URL));
+		dbpslight = new DBPSpotlightCandidatesEnhancementEngine(new URL(SPL_URL),10);
 	}
 	
 	@Before

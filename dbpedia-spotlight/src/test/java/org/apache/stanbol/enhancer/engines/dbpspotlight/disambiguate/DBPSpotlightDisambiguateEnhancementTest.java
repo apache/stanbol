@@ -86,7 +86,7 @@ public class DBPSpotlightDisambiguateEnhancementTest {
 
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
-		dbpslight = new DBPSpotlightDisambiguateEnhancementEngine(new URL(SPL_URL));
+		dbpslight = new DBPSpotlightDisambiguateEnhancementEngine(new URL(SPL_URL),10);
 	}
 	
 	@Before
