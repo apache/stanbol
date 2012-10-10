@@ -22,6 +22,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.cm.file.ConfigurationHandler;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
@@ -243,7 +244,9 @@ public final class OsgiConfigurationUtil {
     
     public static void createBundle(IndexingConfig config){
         Builder builder = new Builder();
-        builder.setProperty("Install-Path",CONFIG_PATH+config.getName().toLowerCase());
+        builder.setProperty("Install-Path",
+            FilenameUtils.separatorsToUnix(CONFIG_PATH) //see STANBOL-768
+                + config.getName().toLowerCase());
         builder.setProperty(Builder.EXPORT_PACKAGE,CONFIG_PACKAGE+config.getName().toLowerCase());
         builder.setProperty(Builder.BUNDLE_CATEGORY, "Stanbol Data");
         builder.setProperty(Builder.BUNDLE_NAME, "Apache Stanbol Data: "+config.getName());
