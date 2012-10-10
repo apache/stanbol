@@ -160,7 +160,9 @@ public class TestLocationEnhancementEngine {
         int entityAnnotationCount = validateAllEntityAnnotations(ci.getMetadata(),expectedValues);
         //two suggestions for New Zealand and one hierarchy entry for the first
         //suggestion
-        assertEquals(2, entityAnnotationCount);
+        //NOTE 2012-10-10: changed expected value back to "3" as geonames.org
+        //   again returns "Oceania" as parent for "New Zealand"
+        assertEquals(3, entityAnnotationCount);
     }
 
 
