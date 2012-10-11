@@ -21,6 +21,8 @@ import static org.apache.stanbol.entityhub.indexing.source.jenatdb.Constants.PAR
 import static org.apache.stanbol.entityhub.indexing.source.jenatdb.Utils.initTDBDataset;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -41,6 +43,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
+import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +63,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -85,6 +89,19 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
      * separator to parsed multiple sources.
      */
     public static final String PARAM_SOURCE_FILE_OR_FOLDER = "source";
+    /**
+     * Allows to enable/disable the indexing of Bnodes (see 
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-765">STANBOL-765</a>
+     * for details).
+     */
+    private static final String PARAM_BNODE_STATE = "bnode";
+    /**
+     * If present, this Parameter allows to convert RDF BNodes to dereferable
+     * URIs by using {bnode-prefix}{bnode-id} (see 
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-765">STANBOL-765</a>
+     * for details)
+     */
+    public static final String PARAM_BNODE_PREFIX = "bnode-prefix";
     /**
      * The Parameter that can be used to deactivate the importing of sources.
      * If this parameter is set to <code>false</code> the values configured for
@@ -112,6 +129,12 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
     
     private ResourceLoader loader;
 
+    protected String bnodePrefix; //protected to allow direct access in inner classes
+    /**
+     * used for logging a single WARN level entry on the first ignored BNode
+     */
+    private boolean bnodeIgnored = false;
+    
     /**
      * Default Constructor relaying on that {@link #setConfiguration(Map)} is
      * called afterwards to provide the configuration!
@@ -207,6 +230,37 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
         } else {
             log.info("Importing RDF data deactivated by parameer {}={}"+PARAM_IMPORT_SOURCE,value);
         }
+        //STANBOL-765: parsed bnode-prefix from parsed configuration.
+        value = config.get(PARAM_BNODE_STATE);
+        final Boolean bnodeState;
+        if(value != null){
+            bnodeState = value instanceof Boolean ? (Boolean) value :
+                Boolean.parseBoolean(value.toString());
+        } else if(config.containsKey(PARAM_BNODE_STATE)){ //support key without value
+            bnodeState = true;
+        } else {
+            bnodeState = null; //undefined
+        }
+        if(bnodeState == null || bnodeState){ //null or enabled -> consider prefix
+            value = config.get(PARAM_BNODE_PREFIX);
+            if(value != null){
+                try {
+                    new URI(value.toString());
+                } catch (URISyntaxException e) {
+                    throw new IllegalArgumentException("The configured "+PARAM_BNODE_PREFIX+"='"
+                        + value.toString() + "' MUST BE a valid URI!");
+                }
+                bnodePrefix = value.toString();
+            } else if(bnodeState != null) { //use default prefix if bnodeState is true
+                bnodePrefix = String.format("urn:bnode:%s:",indexingConfig.getName());
+            } // else bnodeState == null and no custom prefix -> disable by default
+        }
+        if(bnodePrefix != null){
+            log.info("Indexing of Bnodes enabled (prefix: {}",bnodePrefix);
+        } else {
+            log.info("Indexing of Bnodes disabled");
+            
+        }
     }
     @Override
     public boolean needsInitialisation() {
@@ -222,28 +276,57 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
         loader = null;
         indexingDataset.close();
     }
-    @Override
-    public EntityDataIterator entityDataIterator() {
-        String enityVar = "s";
+    public void debug(){
+        String entityVar = "s";
         String fieldVar = "p";
         String valueVar = "o";
         StringBuilder qb = new StringBuilder();
         qb.append(String.format("SELECT ?%s ?%s ?%s \n",
-            enityVar,fieldVar,valueVar)); //for the select
+            entityVar,fieldVar,valueVar)); //for the select
         qb.append("{ \n");
         qb.append(String.format("    ?%s ?%s ?%s . \n",
-            enityVar,fieldVar,valueVar)); //for the where
+            entityVar,fieldVar,valueVar)); //for the where
+        qb.append("} \n");
+        log.debug("EntityDataIterator Query: \n"+qb.toString());
+        Query q = QueryFactory.create(qb.toString(), Syntax.syntaxARQ);
+        ResultSet rs = QueryExecutionFactory.create(q, indexingDataset.toDataset()).execSelect();
+        Var s = Var.alloc(entityVar);
+        Var p = Var.alloc(fieldVar);
+        Var o = Var.alloc(valueVar);
+        while (rs.hasNext()){
+            Binding b = rs.nextBinding();
+            log.info("{} {} {}",new Object[]{b.get(s),b.get(p),b.get(o)});
+        }
+    }
+    
+    @Override
+    public EntityDataIterator entityDataIterator() {
+        String entityVar = "s";
+        String fieldVar = "p";
+        String valueVar = "o";
+        StringBuilder qb = new StringBuilder();
+        qb.append(String.format("SELECT ?%s ?%s ?%s \n",
+            entityVar,fieldVar,valueVar)); //for the select
+        qb.append("{ \n");
+        qb.append(String.format("    ?%s ?%s ?%s . \n",
+            entityVar,fieldVar,valueVar)); //for the where
         qb.append("} \n");
         log.debug("EntityDataIterator Query: \n"+qb.toString());
         Query q = QueryFactory.create(qb.toString(), Syntax.syntaxARQ);
         return new RdfEntityIterator(
             QueryExecutionFactory.create(q, indexingDataset.toDataset()).execSelect(),
-            enityVar,fieldVar,valueVar);
+            entityVar,fieldVar,valueVar);
     }
 
     @Override
     public Representation getEntityData(String id) {
-        Node resource = Node.createURI(id);
+        final Node resource;
+        //STANBOL-765: check if the parsed id represents an bnode
+        if(bnodePrefix != null && id.startsWith(bnodePrefix)){
+            resource = Node.createAnon(AnonId.create(id.substring(bnodePrefix.length())));
+        } else {
+            resource = Node.createURI(id);
+        }
         Representation source = vf.createRepresentation(id);
         ExtendedIterator<Triple> outgoing = indexingDataset.getDefaultGraph().find(resource, null, null);
         boolean found = outgoing.hasNext();
@@ -260,10 +343,12 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
             } //end else predicate != null
         } //end iteration over resource triple
         if(found) {
+            if(log.isTraceEnabled()){
+                log.info("Resource: \n{}", ModelUtils.getRepresentationInfo(source));
+            }
             return source;
-            //log.info("Resource: \n"+ModelUtils.getRepresentationInfo(source));
         } else {
-            log.debug("No Statements found for Entity {}!",id);
+            log.debug("No Statements found for id {} (Node: {})!",id,resource);
             return null;
         }
     }
@@ -324,14 +409,26 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
                 } //else ignore empty literals
             }
             // "" is parsed if there is no language
-        } else {
-            if(value.isBlank()){
-                log.info("ignoreing blank node value {} for field {} and Resource {}!",
-                        new Object[]{value,field,source.getId()});
+        } else if(value.isBlank()) { 
+            if(bnodePrefix != null) { //STANBOL-765: convert Bnodes to URIs
+                StringBuilder sb = new StringBuilder(bnodePrefix);
+                sb.append(value.getBlankNodeId().getLabelString());
+                source.addReference(field, sb.toString());
             } else {
-                log.warn("ignoreing value {} for field {} and Resource {} because it is of an unsupported type!",
-                        new Object[]{value,field,source.getId()});
+                if(!bnodeIgnored){
+                    bnodeIgnored = true;
+                    log.warn("The Indexed RDF Data do contain Blank Nodes. Those are "
+                        + "ignored unless the '{}' parameter is set to valid URI. "
+                        + "If this parameter is set Bnodes are converted to URIs by "
+                        + "using {bnode-prefix}{bnodeId} (see STANBOL-765)",
+                        PARAM_BNODE_PREFIX);
+                }
+                log.debug("ignoreing blank node value {} for field {} and Resource {}!",
+                    new Object[]{value,field,source.getId()});
             }
+        }  else {
+            log.warn("ignoreing value {} for field {} and Resource {} because it is of an unsupported type!",
+                    new Object[]{value,field,source.getId()});
         } //end different value node type
     }
     /**
@@ -505,9 +602,11 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
             while(!next && resultSet.hasNext()){
                 Binding binding = resultSet.nextBinding();
                 Node entityNode = binding.get(entityVar);
-                if(entityNode.isURI() && 
-                        // it's unbelievable, but Jena URIs might be empty!
-                        !entityNode.toString().isEmpty()){
+                //NOTES:
+                // * for URIs we need to check for empty URIs!
+                // * STANBOL-765: added support for BNodes
+                if((entityNode.isURI() && !entityNode.toString().isEmpty()) ||
+                        entityNode.isBlank() && bnodePrefix != null){
                     if(!entityNode.equals(currentEntity)){
                         //start of next Entity
                         this.nextEntity = entityNode; //store the node for the next entity
@@ -525,19 +624,22 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
                 nextEntity = null; //there are no more entities
                 nextBinding = null; // and there are also no more solutions
             }
-            return currentEntity.toString();
+            //STANBOL-765: if current is a Bnode add the bnode-prefix
+            return currentEntity.isBlank() ?
+                new StringBuilder(bnodePrefix).append(currentEntity.getBlankNodeId().getLabelString()).toString() :
+                    currentEntity.getURI();
         }
         /**
          * Processes a {@link Binding} by storing the {@link Node}s for the 
          * variables {@link #fieldVar} and {@link #valueVar} to {@link #data}.
          * This method ensures that both values are not <code>null</code> and
          * that the {@link Node} representing the field is an URI (
-         * returns <code>true</code> for {@link Node#isURI()})
+         * returns <code>true</code> for {@link Node#isURI()}).
          * @param binding the binding to process
          */
         private void processSolution(Binding binding) {
             Node field = binding.get(fieldVar);
-            if(field != null && field.isURI()){
+            if(field != null && field.isURI()){ //property MUST BE an URI
                 Node value = binding.get(valueVar);
                 if(value != null){
                     //add the pair
@@ -557,7 +659,15 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
          * information for the Representation are already stored in {@link #data}
          */
         private Representation createRepresentation() {
-            Representation representation = vf.createRepresentation(currentEntity.toString());
+            final String uri;
+            if(currentEntity.isBlank()){ //STANBOL-765: support bNodes
+                StringBuilder sb = new StringBuilder(bnodePrefix);
+                sb.append(currentEntity.getBlankNodeId().getLabelString());
+                uri = sb.toString();
+            } else {
+                uri = currentEntity.getURI();
+            }
+            Representation representation = vf.createRepresentation(uri);
             Iterator<Node> it = data.iterator();
             while(it.hasNext()){ 
                 //data contains field,value pairs
@@ -579,7 +689,15 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
         Collection<Node> nodes = new ArrayList<Node>();
         ExtendedIterator<Triple> it = indexingDataset.getDefaultGraph().find(subject, property, null);
         while(it.hasNext()){
-            nodes.add(it.next().getObject());
+            //STANBOL-765: we need also to transform bnodes to URIs for the
+            //RDFBackend implementation
+            Node object = it.next().getObject();
+            if(bnodePrefix != null && object.isBlank()){
+                StringBuilder sb = new StringBuilder(bnodePrefix);
+                sb.append(object.getBlankNodeId().getLabelString());
+                object = Node.createURI(sb.toString());
+            }
+            nodes.add(object);
         }
         it.close();
         return nodes;
@@ -589,10 +707,36 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
         Collection<Node> nodes = new ArrayList<Node>();
         ExtendedIterator<Triple> it = indexingDataset.getDefaultGraph().find(null, property, object);
         while(it.hasNext()){
-            nodes.add(it.next().getSubject());
+            Node subject = it.next().getSubject();
+            //STANBOL-765: we need also to transform bnodes to URIs for the
+            //RDFBackend implementation
+            if(bnodePrefix != null && subject.isBlank()){
+                StringBuilder sb = new StringBuilder(bnodePrefix);
+                sb.append(subject.getBlankNodeId().getLabelString());
+                subject = Node.createURI(sb.toString());
+            }
+            nodes.add(subject);
         }
         it.close();
         return nodes;
+    }
+    /**
+     * Since STANBOL-765 BNodes are converted to URIs if a {@link #bnodePrefix}
+     * is configured. This also means that one needs to expect calls to the
+     * {@link RDFBackend} interface with transformed Nodes. <p>
+     * This method ensures that if someone requests an uri {@link Node} for a
+     * URI that represents a transformed Bnode (when the URI starts with 
+     * {@link #bnodePrefix}) that the according bnode {@link Node} is created
+     * @param node the node
+     * @return
+     */
+    @Override
+    public Node createURI(String uri) {
+        if(bnodePrefix != null && uri.startsWith(bnodePrefix)){
+            return Node.createAnon(AnonId.create(uri.substring(bnodePrefix.length())));
+        } else {
+            return super.createURI(uri);
+        }
     }
     
 }
