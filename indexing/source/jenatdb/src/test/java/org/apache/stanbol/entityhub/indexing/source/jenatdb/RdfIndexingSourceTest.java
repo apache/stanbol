@@ -16,8 +16,11 @@
 */
 package org.apache.stanbol.entityhub.indexing.source.jenatdb;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterable;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterator;
@@ -59,7 +62,7 @@ public class RdfIndexingSourceTest {
      * The methods resets the "user.dir" system property
      */
     @BeforeClass
-    public static void initTestRootFolder(){
+    public static void initTestRootFolder() throws IOException {
         String baseDir = System.getProperty("basedir");
         if(baseDir == null){
             baseDir = System.getProperty("user.dir");
@@ -72,6 +75,41 @@ public class RdfIndexingSourceTest {
         //configurations via classpath
         //store the current user.dir and reset it after the tests
         System.setProperty("user.dir", testRoot);
+
+        //we need also to delete results of previous runs of the test
+        File testConfigs = new File(testRoot,"testConfigs");
+        if(testConfigs.exists()){
+            log.info(" ... clean old test data");
+            for(File testConfig : testConfigs.listFiles()){
+                if(testConfig.getName().charAt(0) == '.'){
+                    continue; //ignore hidden files
+                }
+                log.info("  > {}",testConfig);
+                if(testConfig.isDirectory()){
+                    File dest = new File(testConfig,FilenameUtils.separatorsToSystem("indexing/destination"));
+                    if(dest.isDirectory()){
+                        FileUtils.deleteDirectory(dest);
+                        log.info("    - deleted {}",dest);
+                    } else {
+                        log.info("    - not present {}",dest);
+                    }
+                    File dist = new File(testConfig,FilenameUtils.separatorsToSystem("indexing/dist"));
+                    if(dist.isDirectory()){
+                        FileUtils.deleteDirectory(dist);
+                        log.info("    - deleted {}",dist);
+                    } else {
+                        log.info("    - not present {}",dist);
+                    }
+                    File tdb = new File(testConfig,FilenameUtils.separatorsToSystem("indexing/resources/tdb"));
+                    if(tdb.isDirectory()){
+                        FileUtils.deleteDirectory(tdb);
+                        log.info("    - deleted {}",tdb);
+                    } else {
+                        log.info("    - not present {}",tdb);
+                    }
+                }
+            }
+        } // else no old data present
     }
     /**
      * resets the "user.dir" system property the the original value
@@ -162,7 +200,31 @@ public class RdfIndexingSourceTest {
             9, count), 
             9, count);
     }
-
+    @Test
+    public void testBNodeSupport(){
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"bnode",CONFIG_ROOT+"bnode"){};
+        EntityDataIterable iterable = config.getDataInterable();
+        assertNotNull(iterable);
+        assertEquals(iterable.getClass(), RdfIndexingSource.class);
+        assertTrue(iterable.needsInitialisation());
+        iterable.initialise();
+        ((RdfIndexingSource)iterable).debug();
+        EntityDataIterator it = iterable.entityDataIterator();
+        long count = 0;
+        while(it.hasNext()){
+            String entity = it.next();
+            log.info("validate Entity "+entity);
+            assertNotNull(entity);
+            validateRepresentation(it.getRepresentation(), entity);
+            count++;
+        }
+        //check if all entities where indexed
+        //Expected are 3 entities First France from france.rdf
+        //and two from BNode Entities in bnode.nt
+        assertEquals(String.format("> %s Entities expected but only %s processed!",
+            3, count), 
+            3, count);
+    }
     /**
      * @param it
      * @param entity
