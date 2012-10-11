@@ -415,21 +415,32 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
                 sb.append(value.getBlankNodeId().getLabelString());
                 source.addReference(field, sb.toString());
             } else {
-                if(!bnodeIgnored){
-                    bnodeIgnored = true;
-                    log.warn("The Indexed RDF Data do contain Blank Nodes. Those are "
-                        + "ignored unless the '{}' parameter is set to valid URI. "
-                        + "If this parameter is set Bnodes are converted to URIs by "
-                        + "using {bnode-prefix}{bnodeId} (see STANBOL-765)",
-                        PARAM_BNODE_PREFIX);
-                }
-                log.debug("ignoreing blank node value {} for field {} and Resource {}!",
-                    new Object[]{value,field,source.getId()});
+                logIgnoredBnode(log, source, field, value);
             }
         }  else {
             log.warn("ignoreing value {} for field {} and Resource {} because it is of an unsupported type!",
                     new Object[]{value,field,source.getId()});
         } //end different value node type
+    }
+    /**
+     * Logs that a BNode was ignored (only the first time). Also debugs the
+     * ignored triple.
+     * @param log the logger to use
+     * @param s subject
+     * @param p predicate
+     * @param o object
+     */
+    protected void logIgnoredBnode(Logger log, Object s, Object p, Object o) {
+        if(!bnodeIgnored){
+            bnodeIgnored = true;
+            log.warn("The Indexed RDF Data do contain Blank Nodes. Those are "
+                + "ignored unless the '{}' parameter is set to valid URI. "
+                + "If this parameter is set Bnodes are converted to URIs by "
+                + "using {bnode-prefix}{bnodeId} (see STANBOL-765)",
+                PARAM_BNODE_PREFIX);
+        }
+        log.debug("ignoreing blank node value(s) for Triple {},{},{}!",
+            new Object[]{s,p,o});
     }
     /**
      * Implementation of the iterator over the entities stored in a
@@ -516,15 +527,14 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
                 while(nextEntity == null && resultSet.hasNext()){
                     Binding firstValid = resultSet.nextBinding();
                     Node entityNode = firstValid.get(entityVar);
-                    if(entityNode.isURI() && //only uri nodes are valid                  
-                            // it's unbelievable, but Jena URIs might be empty!
-                            !entityNode.toString().isEmpty()){
+                    if((entityNode.isURI() && !entityNode.toString().isEmpty()) ||
+                            entityNode.isBlank() && bnodePrefix != null){
                       //store it temporarily in nextBinding
                         nextBinding = firstValid; 
                         //store it as next (first) entity
                         nextEntity = entityNode;
                     } else {
-                        log.warn(String.format("Current Entity %s is not a URI Node -> ignored",entityNode));
+                        logIgnoredBnode(log,entityNode,firstValid.get(fieldVar),firstValid.get(valueVar));
                     }
                 }
             } else {
@@ -617,7 +627,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
                         processSolution(binding);
                     }
                 } else {
-                    log.warn(String.format("Current Entity '%s' is not a valid URI Node -> skiped",entityNode));
+                    logIgnoredBnode(log,entityNode,binding.get(fieldVar),binding.get(valueVar));
                 }
             }
             if(!next){ // exit the loop but still no new entity ... that means
