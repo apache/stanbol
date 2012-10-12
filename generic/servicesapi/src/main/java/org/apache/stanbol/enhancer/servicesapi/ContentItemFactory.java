@@ -23,7 +23,6 @@ import java.io.OutputStream;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 
 /**
  * OSGI service to be used to create {@link ContentItem}s and Blobs.
@@ -54,7 +53,7 @@ public interface ContentItemFactory {
      * Note the only a generated ID will be added to the passed prefix. So passed
      * values should typically end with an separator char (e.g. '/', '#', ':').
      * Implementors might want to use
-     * {@link ContentItemHelper#streamDigest(InputStream, java.io.OutputStream, String)
+     * {@link org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper#streamDigest(InputStream, java.io.OutputStream, String)
      * for generating an ID while reading the data from the ContentSource.
      * @param source The content source
      * @return the {@link ContentItem} with a generated id and the passed
