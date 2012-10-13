@@ -23,12 +23,9 @@ import java.util.Hashtable;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.cm.file.ConfigurationHandler;
-import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
-import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
+import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.yard.Cache;
 import org.apache.stanbol.entityhub.servicesapi.yard.CacheStrategy;
@@ -36,7 +33,6 @@ import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import aQute.bnd.service.BndListener;
 import aQute.lib.osgi.Builder;
 import aQute.lib.osgi.Jar;
 
@@ -100,17 +96,17 @@ public final class OsgiConfigurationUtil {
         }
         //the cache
         //name the Cache is the same as for the Yard.
-        config.put(SiteConfiguration.CACHE_ID, getYardID(indexingConfig));
-        config.put(SiteConfiguration.CACHE_STRATEGY, CacheStrategy.all);
+        config.put(ReferencedSiteConfiguration.CACHE_ID, getYardID(indexingConfig));
+        config.put(ReferencedSiteConfiguration.CACHE_STRATEGY, CacheStrategy.all);
         //Entity Dereferencer (optional)
-        if(addProperty(SiteConfiguration.ACCESS_URI, config, indexingConfig)){
-            addProperty(SiteConfiguration.ENTITY_DEREFERENCER_TYPE, config, indexingConfig,
+        if(addProperty(ReferencedSiteConfiguration.ACCESS_URI, config, indexingConfig)){
+            addProperty(ReferencedSiteConfiguration.ENTITY_DEREFERENCER_TYPE, config, indexingConfig,
                 "Referenced Site for " + indexingConfig.getName() +
                 " (including a full local Cache)");
         }
         //Entity Searcher (optional)
-        if(addProperty(SiteConfiguration.QUERY_URI, config, indexingConfig)){
-            addProperty(SiteConfiguration.ENTITY_SEARCHER_TYPE, config, indexingConfig);
+        if(addProperty(ReferencedSiteConfiguration.QUERY_URI, config, indexingConfig)){
+            addProperty(ReferencedSiteConfiguration.ENTITY_SEARCHER_TYPE, config, indexingConfig);
         }
         //General Properties
         addProperty(SiteConfiguration.DEFAULT_EXPIRE_DURATION, config, indexingConfig,DEFAULT_EXPIRE_DURATION);

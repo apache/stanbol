@@ -63,13 +63,13 @@ import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
-import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.core.yard.AbstractYard;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
+import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
@@ -831,6 +831,9 @@ public class SolrYard extends AbstractYard implements Yard {
                                         + " in 'solrconfig.xml'", e);
             }
             throw new YardException("Error while performing Query on SolrServer: " + query.getQuery(), e);
+        }
+        if(query.getQueryType() == SolrQueryFactory.MLT_QUERY_TYPE){
+            log.info("{}",response);
         }
         long queryTime = System.currentTimeMillis();
         // return a queryResultList

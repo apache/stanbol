@@ -118,8 +118,7 @@ public class DummyIndexingDestination implements IndexingDestination {
         
         @Override
         public String getName() {
-            // TODO Auto-generated method stub
-            return null;
+            return "dummyYard";
         }
         
         @Override
@@ -155,6 +154,10 @@ public class DummyIndexingDestination implements IndexingDestination {
         @Override
         public Representation create() throws YardException {
             return InMemoryValueFactory.getInstance().createRepresentation("urn:"+System.currentTimeMillis()+"-"+Math.random());
+        }
+        @Override
+        public void removeAll() throws YardException {
+            throw new UnsupportedOperationException("I think this is not needed for testing");
         }
     };
     @Override

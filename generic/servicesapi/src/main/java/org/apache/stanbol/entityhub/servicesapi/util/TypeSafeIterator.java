@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.core.utils;
+package org.apache.stanbol.entityhub.servicesapi.util;
 
 import java.util.Iterator;
 

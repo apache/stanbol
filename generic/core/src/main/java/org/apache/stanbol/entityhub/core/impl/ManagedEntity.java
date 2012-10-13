@@ -19,7 +19,6 @@ package org.apache.stanbol.entityhub.core.impl;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.apache.stanbol.entityhub.core.utils.ToStringIterator;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
@@ -27,6 +26,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
+import org.apache.stanbol.entityhub.servicesapi.util.ToStringIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

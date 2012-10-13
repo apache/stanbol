@@ -83,7 +83,6 @@ import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
-import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.jersey.parsers.FieldQueryReader;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
@@ -106,6 +105,7 @@ import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration
 import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
+import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

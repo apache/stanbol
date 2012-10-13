@@ -92,24 +92,6 @@
       <version>0.11.0-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
 
     <dependency> <!-- for the Main (command line utility) -->
       <groupId>commons-cli</groupId>
@@ -151,32 +133,6 @@
       <version>0.11.0-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-      </exclusions>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>tdb</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>arq</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>xerces</groupId>
-      <artifactId>xercesImpl</artifactId>
-      <scope>runtime</scope>
-    </dependency>
 
     <!-- dependencies for the vcard source -->
     <dependency>
@@ -185,54 +141,13 @@
       <version>0.11.0-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
-    <dependency>
-      <groupId>org.mnode.ical4j</groupId>
-      <artifactId>ical4j-vcard</artifactId>
-      <version>0.9.4</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mnode.ical4j</groupId>
-      <artifactId>ical4j</artifactId>
-      <version>1.0.2</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>backport-util-concurrent</groupId>
-      <artifactId>backport-util-concurrent</artifactId>
-      <version>3.1</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ccil.cowan.tagsoup</groupId>
-      <artifactId>tagsoup</artifactId>
-      <version>1.2.1</version>
-      <scope>runtime</scope>
-    </dependency>
+
         
     <!-- dependencies of the solr yard destination -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.destination.solryard</artifactId>
       <version>0.11.0-SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.10.1-SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>

@@ -31,6 +31,7 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.utils.SiteUtils;
 import org.apache.stanbol.entityhub.servicesapi.site.ManagedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ManagedSiteConfiguration;
@@ -126,7 +127,7 @@ public class ManagedSiteComponent {
                 PROHIBITED_SITE_IDS));
         }
         log.info(" > initialise Managed Site {}",siteConfiguration.getId());
-        SiteUtils.extractSiteMetadata(siteConfiguration);
+        SiteUtils.extractSiteMetadata(siteConfiguration, InMemoryValueFactory.getInstance());
         //Initialise the Yard
         final String yardId = siteConfiguration.getYardId();
         String yardFilterString = String.format("(&(%s=%s)(%s=%s))", 

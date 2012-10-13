@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
+//import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -63,11 +63,12 @@ public final class SiteUtils {
      * This method implements the extracting of those information from the
      * configuration.
      * @param siteConfiguration the configuration
+     * @param vf The {@link ValueFactory} used to create values of the returned
+     * Map.
      * @return the metadata for the parsed configuration
      */
-    public static Map<String,Object> extractSiteMetadata(SiteConfiguration siteConfiguration) {
+    public static Map<String,Object> extractSiteMetadata(SiteConfiguration siteConfiguration, ValueFactory vf) {
         Map<String,Object> siteMetadata = new HashMap<String,Object>();
-        ValueFactory vf = InMemoryValueFactory.getInstance();
         if(siteConfiguration.getAttribution() != null){
             siteMetadata.put(NamespaceEnum.cc.getNamespace()+"attributionName", 
                 vf.createText(siteConfiguration.getAttribution()));

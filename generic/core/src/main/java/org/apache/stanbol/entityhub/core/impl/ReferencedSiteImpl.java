@@ -676,7 +676,7 @@ public class ReferencedSiteImpl implements Site {
                 PROHIBITED_SITE_IDS));
         }
         log.info(" > initialise Referenced Site {}", siteConfiguration.getName());
-        this.siteMetadata = extractSiteMetadata(siteConfiguration);
+        this.siteMetadata = extractSiteMetadata(siteConfiguration,InMemoryValueFactory.getInstance());
 
         // if the accessUri is the same as the queryUri and both the
         // dereferencer and
