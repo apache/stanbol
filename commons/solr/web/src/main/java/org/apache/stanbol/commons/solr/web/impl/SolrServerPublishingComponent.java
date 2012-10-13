@@ -40,6 +40,7 @@ import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.servlet.SolrDispatchFilter;
 import org.apache.stanbol.commons.solr.SolrConstants;
+import org.apache.stanbol.commons.solr.SolrServerAdapter;
 import org.apache.stanbol.commons.solr.utils.ServiceReferenceRankingComparator;
 import org.apache.stanbol.commons.solr.web.dispatch.DelegatingSolrDispatchFilter;
 import org.osgi.framework.BundleContext;
@@ -300,7 +301,13 @@ public class SolrServerPublishingComponent {
             if(server == null){
                 server  = (CoreContainer)tracker.getService(ref);
             }
-            filter = new SolrFilter(server);
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(SolrServerPublishingComponent.class.getClassLoader());
+            try {
+                filter = new SolrFilter(server);
+            }finally {
+                Thread.currentThread().setContextClassLoader(classLoader);
+            }
             Dictionary<String,Object> filterPrpoerties = new Hashtable<String,Object>();
             filterPrpoerties.put("path-prefix", serverPrefix);
             String filterPrefix = serverPrefix+"/.*";
