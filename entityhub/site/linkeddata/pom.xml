@@ -84,25 +84,25 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.11.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
+     <!-- dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
       <version>0.9.0-incubating</version>
       <scope>provided</scope>
-    </dependency>
+    </dependency -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.11.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.11.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

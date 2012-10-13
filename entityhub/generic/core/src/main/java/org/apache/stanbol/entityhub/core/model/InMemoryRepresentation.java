@@ -29,14 +29,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.stanbol.entityhub.core.utils.TextIterator;
-import org.apache.stanbol.entityhub.core.utils.TypeSafeIterator;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.UnsupportedTypeException;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
+import org.apache.stanbol.entityhub.servicesapi.util.TextIterator;
+import org.apache.stanbol.entityhub.servicesapi.util.TypeSafeIterator;
 
 
 public class InMemoryRepresentation implements Representation,Cloneable {

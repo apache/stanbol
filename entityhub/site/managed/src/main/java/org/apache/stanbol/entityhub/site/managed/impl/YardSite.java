@@ -26,8 +26,8 @@ import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
 import org.apache.stanbol.entityhub.core.model.EntityImpl;
+import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
-import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.core.utils.SiteUtils;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
@@ -44,6 +44,7 @@ import org.apache.stanbol.entityhub.servicesapi.site.ManagedSiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.Site;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
+import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.slf4j.Logger;
@@ -68,7 +69,7 @@ public final class YardSite implements ManagedSite {
     public YardSite(Yard yard, SiteConfiguration config) {
         this.yard = yard;
         this.config = config;
-        this.siteMetadata = extractSiteMetadata(config);
+        this.siteMetadata = extractSiteMetadata(config,InMemoryValueFactory.getInstance());
         //all entities of managed sites are locally cached - so we can add this
         //to the site metadata
         this.siteMetadata.put(RdfResourceEnum.isChached.getUri(), (Object)Boolean.TRUE);

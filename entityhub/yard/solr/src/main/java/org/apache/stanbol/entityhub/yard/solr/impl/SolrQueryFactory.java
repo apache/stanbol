@@ -192,6 +192,7 @@ public class SolrQueryFactory {
                     query.set(MIN_DOC_FREQ, 1);
                     query.set(MIN_TERM_FREQ, 1);
                     query.set(INTERESTING_TERMS, "details");
+                    query.set("mlt.boost", true); //testing
                     List<String> indexFields = new ArrayList<String>();
                     for(String field : fields){
                         IndexField indexField = new IndexField(Collections.singletonList(field), 
@@ -247,13 +248,14 @@ public class SolrQueryFactory {
         }
         if (queryString.length() > 0) {
             String qs = queryString.toString();
-            log.debug("QueryString: {}", qs);
+            log.info("QueryString: {}", qs);
             if (MLT_QUERY_TYPE.equals(query.getQueryType())) {
                 query.set(CommonParams.FQ, qs);
             } else {
                 query.setQuery(qs);
             }
         }
+        log.info("Solr Query: {}",query);
         return query;
     }
 

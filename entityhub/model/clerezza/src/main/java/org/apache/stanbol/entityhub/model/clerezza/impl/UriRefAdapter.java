@@ -22,7 +22,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.entityhub.core.utils.AdaptingIterator.Adapter;
+import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator.Adapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

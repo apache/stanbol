@@ -19,7 +19,7 @@ package org.apache.stanbol.entityhub.model.clerezza.utils;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.entityhub.core.utils.AdaptingIterator.Adapter;
+import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator.Adapter;
 
 /**
  * Needed because UriRefs and Literals use the RDF representation for the

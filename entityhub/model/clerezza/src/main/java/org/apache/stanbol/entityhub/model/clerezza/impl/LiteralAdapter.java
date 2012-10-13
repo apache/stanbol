@@ -23,7 +23,7 @@ import org.apache.clerezza.rdf.core.NoConvertorException;
 import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.impl.SimpleLiteralFactory;
-import org.apache.stanbol.entityhub.core.utils.AdaptingIterator.Adapter;
+import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator.Adapter;
 import org.apache.stanbol.entityhub.model.clerezza.RdfResourceUtils;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;

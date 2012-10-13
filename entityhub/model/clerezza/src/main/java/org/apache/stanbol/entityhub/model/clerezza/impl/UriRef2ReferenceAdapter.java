@@ -17,7 +17,7 @@
 package org.apache.stanbol.entityhub.model.clerezza.impl;
 
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.entityhub.core.utils.AdaptingIterator.Adapter;
+import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator.Adapter;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 
