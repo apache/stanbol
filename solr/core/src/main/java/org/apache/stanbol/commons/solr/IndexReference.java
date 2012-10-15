@@ -17,14 +17,12 @@
 package org.apache.stanbol.commons.solr;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrCore;
 import org.osgi.framework.Constants;
@@ -198,5 +196,10 @@ public class IndexReference {
         if(getServer() != null){
             filterString.append(String.format(CONSTRAINT, SolrConstants.PROPERTY_SERVER_NAME,getServer()));
         }
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("IndexReference[server:%s,index:%s]",getServer(),getIndex());
     }
 }
