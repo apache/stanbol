@@ -109,6 +109,10 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
             coreName = reference.getIndex();
         }
     }
+    @Override
+    public void open() {
+        super.open(true); //track all services by default
+    }
     
     @Override
     public SolrServer addingService(ServiceReference reference) {
@@ -122,7 +126,20 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
             		"EmbeddedSolrServer for IndexReference {}",reference,this.reference);
         }
         if(trackingSolrCore){
-            SolrCore core = (SolrCore)service;
+            SolrCore core; 
+            //as we (might) track all services the Class of the returned service
+            //might not be the same as for this classloader
+            if(service instanceof SolrCore){ 
+                    core = (SolrCore)service;
+            } else {
+                log.warn("SolrCore fitting to IndexReference {} is incompatible to the" +
+                		"classloader of bundle [{}]{} - Service [{}] ignored!",
+                		new Object[]{reference,context.getBundle().getBundleId(),
+                		             context.getBundle().getSymbolicName()},
+                		             reference.getProperty(Constants.SERVICE_ID));
+                context.ungetService(reference);
+                return null;
+            }
             coreName = core.getName();
             CoreDescriptor descriptior = core.getCoreDescriptor();
             if(descriptior == null){ //core not registered with a container!
@@ -132,7 +149,17 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
                 server = descriptior.getCoreContainer();
             }
         } else {
-            server = (CoreContainer)service;
+            if(service instanceof CoreContainer){ 
+                    server = (CoreContainer)service;
+            } else {
+                log.warn("Solr CoreContainer fitting to IndexReference {} is incompatible to the" +
+                        "classloader of bundle [{}]{} - Service [{}] ignored!",
+                        new Object[]{reference,context.getBundle().getBundleId(),
+                                     context.getBundle().getSymbolicName()},
+                                     reference.getProperty(Constants.SERVICE_ID));
+                context.ungetService(reference);
+                return null;
+            }
             coreName = this.coreName;
         }
         return new EmbeddedSolrServer(server, coreName);

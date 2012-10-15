@@ -18,12 +18,10 @@ package org.apache.stanbol.commons.solr;
 
 import static org.apache.stanbol.commons.solr.SolrConstants.*;
 import static org.osgi.framework.Constants.SERVICE_ID;
-import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -33,13 +31,11 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathFactory;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.core.CloseHook;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
@@ -299,7 +295,7 @@ public class SolrServerAdapter {
          * (Rupert Westenthaler 20010209)
          */
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(SolrServerAdapter.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader(CoreContainer.class.getClassLoader());
         return classLoader;
     }
     /**

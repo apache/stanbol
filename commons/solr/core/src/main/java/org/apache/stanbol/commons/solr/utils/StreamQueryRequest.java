@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.commons.solr.utils;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 
