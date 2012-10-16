@@ -72,6 +72,19 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 License  -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+
+            <!-- AL20 License, see src/main/resources/README -->
+            <exclude>src/main/resources/META-INF/default/seo_rules.sem</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
     </plugins>
   </build>
 
