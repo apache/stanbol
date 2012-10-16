@@ -129,6 +129,8 @@
             <exclude>src/test/resources/html-res.txt</exclude>
             <exclude>src/test/resources/pdf-res.txt</exclude>
             <exclude>src/test/resources/mail-multipart-test.eml</exclude>
+
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
           </excludes>
         </configuration>
       </plugin>

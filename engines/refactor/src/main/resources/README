@@ -13,8 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-The following files are provided under the Apache License, Version 2.0:
+All listed files are provided under the 
 
-sample-scheme.skos.rdf.xml
+    Apache License, Version 2.0
+    
+This includes the following files:
 
-
+	META-INF/default/seo_rules.sem

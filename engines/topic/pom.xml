@@ -80,8 +80,9 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- AL20 licensed files. See src/test/resources/README -->
-            <exclude>src/test/resources/classifier/topics_abstracts_snippet.tsv</exclude>
+            <!-- AL20 licensed files. See src/main/resources/README -->
+            <exclude>src/main/resources/install-config/default-topic-model.solrindex.ref</exclude>
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
           </excludes>
         </configuration>
       </plugin>

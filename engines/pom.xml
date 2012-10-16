@@ -43,23 +43,27 @@
 
   <modules>
     <module>opennlp-ner</module>
-	<module>langdetect</module>
+  	<module>langdetect</module>
     <module>langid</module>
     <module>topic</module>
     <module>metaxa</module>
-	<module>htmlextractor</module>
-	<module>xmpextractor</module>
+    <module>htmlextractor</module>
+    <module>xmpextractor</module>
     <module>tika</module>
     <module>entitytagging</module>
     <module>keywordextraction</module>
     <module>refactor</module>
+    
     <!-- Enhancement Engines using external services -->
     <module>celi</module> <!-- http://linguagrid.org -->
     <module>geonames</module> <!-- http://geonames.org -->
     <module>opencalais</module> <!-- http://opencalais.com/ -->
     <module>zemanta</module> <!-- htt://zemanta.com -->
+    
     <!-- DBpedia.org Spotlight Enhancement Engines (STANBOL-706) -->
     <module>dbpedia-spotlight</module>
+    
+    <!-- UIMA based engines -->
     <module>uimaremote</module>
     <module>uimatotriples</module>
     <module>uimalocal-template</module>

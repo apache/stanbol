@@ -77,6 +77,8 @@
           <excludes>
             <!-- AL20 licensed files: See src/test/resources/README -->
             <exclude>src/test/resources/en.txt</exclude>
+
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
           </excludes>
         </configuration>
       </plugin>
