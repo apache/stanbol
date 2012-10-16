@@ -25,13 +25,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -40,12 +38,13 @@ import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
-import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ibm.icu.lang.UCharacter.SentenceBreak;
 
 public class EnhancementJobHandler implements EventHandler {
 
@@ -69,7 +68,7 @@ public class EnhancementJobHandler implements EventHandler {
      * contentItems and the values are the objects used to interrupt the 
      * requesting thread as soon as the enhancement process has finished. 
      */
-    private Map<EnhancementJob,Object> processingJobs;
+    private Map<EnhancementJob,EnhancementJobObserver> processingJobs;
     private final ReadWriteLock processingLock = new ReentrantReadWriteLock();
     private Thread observerDaemon;
     
@@ -85,11 +84,11 @@ public class EnhancementJobHandler implements EventHandler {
         this.engineManager = engineManager;
         processingLock.writeLock().lock();
         try {
-            processingJobs = new LinkedHashMap<EnhancementJob,Object>();
+            processingJobs = new LinkedHashMap<EnhancementJob,EnhancementJobObserver>();
         } finally{
             processingLock.writeLock().unlock();
         }
-        observerDaemon = new Thread(new EnhancementJobObserver());
+        observerDaemon = new Thread(new EnhancementJobObserverDaemon());
         observerDaemon.setName("Event Job Manager Observer Daemon");
         observerDaemon.setDaemon(true);
         observerDaemon.start();
@@ -134,19 +133,19 @@ public class EnhancementJobHandler implements EventHandler {
      * @return An object that will get {@link Object#notifyAll()} as soon as
      * {@link EnhancementJob#isFinished()} or this instance is deactivated
      */
-    public Object register(EnhancementJob enhancementJob){
+    public EnhancementJobObserver register(EnhancementJob enhancementJob){
         final boolean init;
-        Object o;
+        EnhancementJobObserver observer;
         processingLock.writeLock().lock();
         try {
             if(enhancementJob == null || processingJobs == null){
                 return null;
             }
-            o = processingJobs.get(enhancementJob);
-            if(o == null){
-                o = new Object();
-                logJobInfo(enhancementJob, "Add EnhancementJob:");
-                processingJobs.put(enhancementJob, o);
+            observer = processingJobs.get(enhancementJob);
+            if(observer == null){
+                observer = new EnhancementJobObserver(enhancementJob);
+                logJobInfo(log, enhancementJob, "Add EnhancementJob:",false);
+                processingJobs.put(enhancementJob, observer);
                 init = true;
             } else {
                 init = false;
@@ -155,6 +154,7 @@ public class EnhancementJobHandler implements EventHandler {
             processingLock.writeLock().unlock();
         }
         if(init){
+            observer.acquire();
             enhancementJob.startProcessing();
             log.debug("++ w: {}","init execution");
             enhancementJob.getLock().writeLock().lock();
@@ -166,7 +166,7 @@ public class EnhancementJobHandler implements EventHandler {
                 enhancementJob.getLock().writeLock().unlock();
             }
         }
-        return o;
+        return observer;
     }
 
     @Override
@@ -283,18 +283,21 @@ public class EnhancementJobHandler implements EventHandler {
      */
     private void finish(EnhancementJob job){
         processingLock.writeLock().lock();
-        Object o;
+        EnhancementJobObserver observer;
         try {
-            o = processingJobs.remove(job);
+            observer = processingJobs.remove(job);
         } finally {
             processingLock.writeLock().unlock();
         }
-        if(o != null) {
-            synchronized (o) {
-                logJobInfo(job, "Finished EnhancementJob:");
+        if(observer != null) {
+            try {
+                logJobInfo(log, job, "Finished EnhancementJob:",false);
                 log.debug("++ n: finished processing ContentItem {} with Chain {}",
                     job.getContentItem().getUri(),job.getChainName());
-                o.notifyAll();
+            } finally {
+                //release the semaphore to send signal to the EventJobManager waiting
+                //for the results
+                observer.release();
             }
         } else {
             log.warn("EnhancementJob for ContentItem {} is not " +
@@ -335,15 +338,16 @@ public class EnhancementJobHandler implements EventHandler {
      * Logs basic infos about the Job as INFO and detailed infos as DEBUG
      * @param job
      */
-    protected void logJobInfo(EnhancementJob job, String header) {
+    protected static void logJobInfo(Logger log, EnhancementJob job, String header, boolean logExecutions) {
         if(header != null){
             log.info(header);
         }
-        log.info("   state: {}",job.isFinished()?"finished":job.isFailed()?"failed":"processing");
-        log.info("   chain: {}",job.getChainName());
+        log.info("   finished:     {}",job.isFinished());
+        log.info("   state:        {}",job.isFailed()?"failed":"processing");
+        log.info("   chain:        {}",job.getChainName());
         log.info("   content-item: {}", job.getContentItem().getUri());
-        log.debug("   executions:");
-        if(log.isDebugEnabled()){
+        if(logExecutions){
+            log.info("  executions:");
             for(NonLiteral completedExec : job.getCompleted()){
                 log.info("    - {} completed",getEngine(job.getExecutionMetadata(), 
                     job.getExecutionNode(completedExec)));
@@ -354,16 +358,87 @@ public class EnhancementJobHandler implements EventHandler {
             }
         }
     }
+    public class EnhancementJobObserver{
+        
+        private static final int MIN_WAIT_TIME = 500;
+        private final EnhancementJob enhancementJob;
+        private final Semaphore semaphore;
+        
+        private EnhancementJobObserver(EnhancementJob job){
+            if(job == null){
+                throw new IllegalArgumentException("The parsed EnhancementJob MUST NOT be NULL!");
+            }
+            this.enhancementJob = job;
+            this.semaphore = new Semaphore(1);
+        }
+
+        protected void acquire() {
+            try {
+                semaphore.acquire();
+            } catch (InterruptedException e) {
+                log.warn("Interrupted while acquireing Semaphore for EnhancementJob "
+                        + enhancementJob + "!",e);
+            }
+        }
+        
+        protected void release() {
+            semaphore.release();
+        }
+
+        public boolean hasCompleted() {
+            enhancementJob.getLock().readLock().lock();
+            try {
+                return enhancementJob.isFinished();
+            } finally {
+                enhancementJob.getLock().readLock().unlock();
+            }
+        }
+
+        public void waitForCompletion(int maxEnhancementJobWaitTime) {
+            if(semaphore.availablePermits() < 1){
+                // The only permit is taken by the EnhancementJobHander
+                try {
+                    semaphore.tryAcquire(1,
+                        Math.max(MIN_WAIT_TIME, maxEnhancementJobWaitTime),TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    //interupted
+                }
+            } else if(!hasCompleted()){
+                int wait = Math.max(100, maxEnhancementJobWaitTime/10);
+                log.warn("Unexpected permit available for Semaphore of "
+                    + "EnhancementJob of ContentItem {}. Fallback to wait({})"
+                    + "for detecting if Job has finished. While the fallback "
+                    + "should ensure correct Enhancement results this indicates a "
+                    + "Bug in the EventHobManager. Please feel free to report "
+                    + "This on dev@stanbol.apache.org or the Apache Stanbol "
+                    + "Issue Tracker.",enhancementJob.getContentItem().getUri(),wait);
+                try {
+                    Thread.currentThread().wait(wait);
+                } catch (InterruptedException e) {
+                    //interupted
+                }
+            }// else completed
+        }
+        
+    }
+    
+    
     /**
      * Currently only used to debug the number of currently registered
      * Enhancements Jobs (if there are some)
      * @author Rupert Westenthaler
      */
-    private class EnhancementJobObserver implements Runnable {
+    private class EnhancementJobObserverDaemon implements Runnable {
 
+        /**
+         * The logger of the Observer. Can be used to configure Loglevel specificly
+         * 
+         */
+        private Logger observerLog = LoggerFactory.getLogger(EnhancementJobObserverDaemon.class);
+        
         @Override
         public void run() {
-            log.debug(" ... init EnhancementJobObserver");
+            observerLog.debug(" ... init EnhancementJobObserver");
             while(processingJobs != null){
                 try {
                     Thread.sleep(10000);
@@ -382,13 +457,13 @@ public class EnhancementJobHandler implements EventHandler {
                     readLock.unlock();
                 }
                 if(!jobs.isEmpty()){
-                    log.info(" -- {} active Enhancement Jobs",jobs.size());
-                    if(log.isDebugEnabled()){
+                    observerLog.info(" -- {} active Enhancement Jobs",jobs.size());
+                    if(observerLog.isDebugEnabled()){
                         for(EnhancementJob job : jobs){
                             Lock jobLock = job.getLock().readLock();
                             jobLock.lock();
                             try {
-                                logJobInfo(job,null);
+                                logJobInfo(observerLog,job,null,true);
                             } finally {
                                 jobLock.unlock();
                             }
