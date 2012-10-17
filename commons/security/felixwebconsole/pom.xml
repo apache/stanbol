@@ -49,7 +49,10 @@
 			<extensions>true</extensions>
 			<configuration>
 				<instructions>
-					<Export-Package>org.apache.stanbol.commons.security,org.apache.stanbol.commons.security.auth</Export-Package>
+				    <Import-Package>
+                      org.apache.felix.webconsole; provide:=true,
+                      *
+				    </Import-Package>
 					<DynamicImport-Package>*</DynamicImport-Package>
 				</instructions>
 			</configuration>

@@ -20,14 +20,10 @@ package org.apache.stanbol.commons.authentication.basic;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.security.AccessControlException;
 
 import javax.security.auth.Subject;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

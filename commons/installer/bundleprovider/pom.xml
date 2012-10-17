@@ -53,9 +53,15 @@
         <configuration>
           <instructions>
             <Bundle-Activator>
-              org.apache.stanbol.commons.installer.provider.bundle.impl.Activator</Bundle-Activator>
+              org.apache.stanbol.commons.installer.provider.bundle.impl.Activator
+            </Bundle-Activator>
+            <Import-Package>
+              org.osgi.framework,
+              org.apache.stanbol.commons.installer.provider.bundle,
+              *
+            </Import-Package>
             <Export-Package>
-              org.apache.stanbol.commons.installer.provider.bundle
+              org.apache.stanbol.commons.installer.provider.bundle;version=${project.version}; provide:=true,
             </Export-Package>
             <Private-Package>
               org.apache.stanbol.commons.installer.provider.bundle.impl

@@ -63,14 +63,10 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.commons.opennlp
+              org.apache.stanbol.commons.opennlp;version=${project.version} 
             </Export-Package>
-            <Private-Package>
-              org.apache.stanbol.commons.opennlp.impl.*
-            </Private-Package>
-            <Embed-Dependency></Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
+              org.apache.stanbol.commons.opennlp;version=${project.version},
               *
             </Import-Package>
           </instructions>

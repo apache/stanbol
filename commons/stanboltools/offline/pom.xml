@@ -56,7 +56,13 @@
         <configuration>
           <instructions>
             <Bundle-Activator>org.apache.stanbol.commons.stanboltools.offline.Activator</Bundle-Activator>
-            <Export-Package>org.apache.stanbol.commons.stanboltools.offline</Export-Package>
+            <Import-Package>
+              org.apache.stanbol.commons.stanboltools.offline,
+              *
+            </Import-Package>
+            <Export-Package>
+              org.apache.stanbol.commons.stanboltools.offline;version=${project.version}
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

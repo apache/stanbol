@@ -57,6 +57,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              at.newmedialab.ldpath.api.backend; provide:=true,
+              *
+            </Import-Package>
             <Export-Package>
               org.apache.stanbol.commons.ldpath.clerezza.*;version=${project.version}
             </Export-Package>
