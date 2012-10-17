@@ -37,6 +37,19 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              org.apache.stanbol.contenthub.servicesapi.store.solr; provide:=true,
+              *
+            </Import-Package>
+            <Export-Package>
+              org.apache.stanbol.contenthub.store.solr.manager;version=${project.version},
+              org.apache.stanbol.contenthub.store.solr.util;version=${project.version}
+            </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.contenthub.store.solr
+            </Private-Package>
             <!-- We need to provide the default SolrYard indexConfigurations 
               to the DataFileProvider infrastructure -->
             <Data-Files>

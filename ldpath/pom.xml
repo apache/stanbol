@@ -40,6 +40,21 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              org.apache.stanbol.contenthub.servicesapi.ldpath; provide:=true,
+              *
+            </Import-Package>
+            <Export-Package>
+            </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.contenthub.ldpath.solr,
+            </Private-Package>
+            <Embed-Dependency>
+            </Embed-Dependency>
+          </instructions>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>

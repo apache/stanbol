@@ -41,8 +41,14 @@
               the 0.0.0 version -->
             <Import-Package>
               javax.ws.rs.*; version="[0,2)",
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              org.apache.stanbol.contenthub.servicesapi.store; provide:=true,
               *
             </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.contenthub.store.clerezza
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
