@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.commons.opennlp;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
