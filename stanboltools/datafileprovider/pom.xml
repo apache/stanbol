@@ -57,10 +57,11 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.commons.stanboltools.datafileprovider,
-              org.apache.stanbol.commons.stanboltools.datafileprovider.bundle,
+              org.apache.stanbol.commons.stanboltools.datafileprovider;version=${project.version}; provide:=true
             </Export-Package>
-            <Private-Package>org.apache.stanbol.commons.stanboltools.datafileprovider.impl.*</Private-Package>
+            <Private-Package>
+              org.apache.stanbol.commons.stanboltools.datafileprovider.impl.*
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>

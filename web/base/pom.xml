@@ -65,8 +65,14 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.commons.web.*,freemarker.cache.*,freemarker.template.*,freemarker.core
+              org.apache.stanbol.commons.web.base;version=${project.version},
+              org.apache.stanbol.commons.web.base.*;version=${project.version}
             </Export-Package>
+            <_exportcontents> <!-- used instead of Export-Package to preserve the embedded jar -->
+              freemarker.cache.*;version=${freemarker-version},
+              freemarker.template.*;version=${freemarker-version},
+              freemarker.core;version=${freemarker-version}
+            </_exportcontents>
             <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
             </Embed-Dependency>
             <Embed-Dependency>freemarker</Embed-Dependency>
@@ -87,6 +93,11 @@
               !javax.el,
               !org.slf4j.spi,
               !org.zeroturnaround.javarebel,
+              org.apache.stanbol.commons.web.base,
+              org.apache.stanbol.commons.web.base.*,
+              freemarker.cache.*,
+              freemarker.template.*,
+              freemarker.core,
               *
             </Import-Package>
           </instructions>

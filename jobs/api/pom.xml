@@ -50,12 +50,13 @@
         <configuration>
           <instructions>
             <Import-Package>
-            org.apache.commons.codec.*,
-            org.slf4j.*
+              org.apache.stanbol.commons.jobs.api,
+              org.apache.stanbol.commons.jobs.impl,
+              *
             </Import-Package>
             <Export-Package>
-            org.apache.stanbol.commons.jobs.api.*,
-            org.apache.stanbol.commons.jobs.impl.*
+              org.apache.stanbol.commons.jobs.api;version=${project.version}; provide:=true,
+              org.apache.stanbol.commons.jobs.impl;version=${project.version}; provide:=true
             </Export-Package>
           </instructions>
         </configuration>

@@ -57,8 +57,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.commons.indexedgraph,
+              *
+            </Import-Package>
             <Export-Package>
-              org.apache.stanbol.commons.indexedgraph.*;version=${project.version}
+              org.apache.stanbol.commons.indexedgraph;version=${project.version},
+              org.apache.clerezza.rdf.core; provide:=true
             </Export-Package>
           </instructions>
         </configuration>

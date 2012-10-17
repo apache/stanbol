@@ -47,6 +47,13 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
+            <configuration>
+                <instructions>
+                    <Export-Package><!-- export packages of implemented Interfaces -->
+                      org.apache.stanbol.commons.security.auth; provide:=true
+                    </Export-Package>
+                </instructions>
+            </configuration>
       </plugin>
     </plugins>
   </build>
