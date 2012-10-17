@@ -51,8 +51,13 @@
           <instructions>
             <!-- Export-Package> org.apache.stanbol.reasoners.jena.* </Export-Package -->
             <Import-Package>
-            org.apache.stanbol.reasoners.servicesapi.*,
-            *</Import-Package>
+              org.apache.stanbol.reasoners.servicesapi.*; provide:=true,
+              *
+            </Import-Package>
+            <Export-Package>
+              org.apache.stanbol.reasoners.jena; provide:=true,
+              org.apache.stanbol.reasoners.jena.filters
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

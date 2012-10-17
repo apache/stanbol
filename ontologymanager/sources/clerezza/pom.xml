@@ -57,6 +57,7 @@
 							org.apache.stanbol.ontologymanager.sources.clerezza.*;version=${project.version}
 						</Export-Package>
 						<Import-Package>
+						    org.apache.stanbol.ontologymanager.servicesapi.io;provide:=true,
 							org.apache.clerezza.rdf.core.*,
 							org.slf4j.*,
 							*

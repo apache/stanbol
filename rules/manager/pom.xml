@@ -59,6 +59,9 @@
             </Export-Package>
             <Import-Package>
               org.slf4j.*,
+              org.apache.stanbol.rules.base.api; provide:=true,
+              com.hp.hpl.jena.sparql.function; provide:=true,
+              com.hp.hpl.jena.sparql.pfunction; provide:=true,
               *
             </Import-Package>
             <_nouses>true</_nouses>

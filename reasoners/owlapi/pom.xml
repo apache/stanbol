@@ -54,9 +54,12 @@
             org.semanticweb.owlapi.model.*,
             org.semanticweb.owlapi.reasoner.*,
             org.semanticweb.owlapi.util.*,
-            org.apache.stanbol.reasoners.servicesapi.*,
+            org.apache.stanbol.reasoners.servicesapi.*; provide:=true,
             org.slf4j.*
             </Import-Package>
+            <Export-Package>
+              org.apache.stanbol.reasoners.owlapi; provide:=true
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

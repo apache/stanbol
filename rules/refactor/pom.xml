@@ -48,10 +48,11 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.rules.refactor.*
+              org.apache.stanbol.rules.refactor.api; provide:=true,
+              org.apache.stanbol.rules.refactor.imppl
             </Export-Package>
             <Import-Package>
-            org.apache.xerces.*;version=2.7.1,
+              org.apache.xerces.*;version=2.7.1,
               org.slf4j.*,
               *
             </Import-Package>

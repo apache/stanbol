@@ -60,6 +60,9 @@
             </Export-Package>
             <Import-Package>
               org.slf4j.*,
+              org.apache.stanbol.ontologymanager.ontonet.api; provide:=true,
+              org.apache.stanbol.ontologymanager.ontonet.api.scope; provide:=true,
+              org.apache.stanbol.ontologymanager.servicesapi.session; provide:=true,
               *
             </Import-Package>
             <_nouses>true</_nouses>

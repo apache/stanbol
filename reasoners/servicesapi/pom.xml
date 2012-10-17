@@ -50,10 +50,11 @@
         <configuration>
           <instructions>
             <Import-Package>
-            org.slf4j.*
+              org.slf4j.*,
+              *
             </Import-Package>
             <Export-Package>
-            org.apache.stanbol.reasoners.servicesapi.*
+              org.apache.stanbol.reasoners.servicesapi.*
             </Export-Package>
           </instructions>
         </configuration>

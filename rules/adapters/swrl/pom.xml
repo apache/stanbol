@@ -57,6 +57,9 @@
             </Export-Package>
             <Import-Package>
               org.slf4j.*,
+              org.apache.stanbol.rules.adapters; provide:=true,
+              org.apache.stanbol.rules.base.api; provide:=true,
+              org.semanticweb.owlapi.model; provide:=true,
               *
             </Import-Package>
             <_nouses>true</_nouses>

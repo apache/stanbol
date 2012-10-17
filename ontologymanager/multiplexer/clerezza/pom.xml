@@ -60,6 +60,10 @@
             <Import-Package>
               org.osgi.*,
               org.slf4j.*,
+              org.apache.stanbol.ontologymanager.servicesapi.scope; provide:=true,
+              org.apache.stanbol.ontologymanager.servicesapi.ontology; provide:=true,
+              org.apache.stanbol.ontologymanager.servicesapi.collector; provide:=true,
+              org.apache.stanbol.ontologymanager.servicesapi.session; provide:=true,
               *
             </Import-Package>
             <Private-Package>

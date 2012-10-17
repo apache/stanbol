@@ -52,10 +52,14 @@
               OSGI-INF
             </Bundle-ClassPath>
             <Export-Package>
-              org.apache.stanbol.ontologymanager.registry.*;version=${project.version}
+              org.apache.stanbol.ontologymanager.registry.api; provide:=true,
+              org.apache.stanbol.ontologymanager.registry.api.model; provide:=true,
+              org.apache.stanbol.ontologymanager.registry.impl.*,
+              org.apache.stanbol.ontologymanager.registry.io
             </Export-Package>
             <Import-Package>
               org.slf4j.*,
+              org.apache.stanbol.ontologymanager.servicesapi.io; provide:=true,
               *
             </Import-Package>
             <Private-Package>

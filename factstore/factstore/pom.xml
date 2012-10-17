@@ -54,12 +54,16 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.factstore.api.*
+              org.apache.stanbol.factstore.api; provide:=true,
+              org.apache.stanbol.factstore.derby,
+              org.apache.stanbol.factstore.model,
+              org.apache.stanbol.factstore.web.*
             </Export-Package>
             <!-- Derby is only used through the JDBC API but needs to be in
             the classpath of the caller to be able to create a new DB. -->
             <Import-Package>
               javax.ws.rs.*; version="[0,2)",
+              org.apache.stanbol.commons.web.base; provide:=true,
               org.apache.derby.jdbc,
               *
             </Import-Package>

@@ -50,9 +50,12 @@
         <configuration>
           <instructions>
             <Import-Package>
-            org.apache.stanbol.reasoners.servicesapi.*,
+            org.apache.stanbol.reasoners.servicesapi.*; provide:=true,
             org.slf4j.*
             </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.reasoners.manager
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>

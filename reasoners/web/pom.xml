@@ -56,7 +56,7 @@
 							org.coode.owlapi.*,
 							uk.ac.manchester.cs.owl.owlapi.*,
 							org.apache.commons.io.*,
-							org.apache.stanbol.commons.web.base.*,
+							org.apache.stanbol.commons.web.base.*; provide:=true,
 							org.apache.stanbol.commons.jobs.api.*,
 							org.apache.stanbol.commons.jobs.impl.*,
 							org.apache.stanbol.commons.owl.*,
