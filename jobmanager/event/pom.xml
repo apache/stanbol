@@ -59,6 +59,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.9.0,0.11)",
+              *
+            </Import-Package>
             <Export-Package>
               org.apache.stanbol.enhancer.jobmanager.event;version=${project.version}
             </Export-Package>
