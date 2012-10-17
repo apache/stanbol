@@ -64,12 +64,12 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
-              org.apache.stanbol.entityhub.yard.clerezza;version=${project.version},
-            </Export-Package>
+            <Import-Package>
+              org.apache.stanbol.entityhub.servicesapi.yard; provide:=true,
+              *
+            </Import-Package>
             <Private-Package>
-              org.apache.stanbol.entityhub.yard.clerezza.impl;version=${project.version},
-              org.apache.stanbol.entityhub.yard.clerezza.impl.adapter;version=${project.version}
+              org.apache.stanbol.entityhub.yard.clerezza.impl;version=${project.version}
             </Private-Package>
           </instructions>
         </configuration>

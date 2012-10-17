@@ -605,6 +605,7 @@ public class SolrYard extends AbstractYard implements Yard {
                     try {
                         _registeredServerTracker = new RegisteredSolrServerTracker(
                             context.getBundleContext(), indexReference, null);
+                        log.info(" ... start tracking for SolrCore based on {}",indexReference);
                         _registeredServerTracker.open(); //start tracking
                     } catch (InvalidSyntaxException e) {
                         throw new YardException("Unable to track configured SolrServer'"+
