@@ -65,6 +65,15 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.entityhub.servicesapi; provide:=true,
+              org.apache.stanbol.entityhub.servicesapi.site; provide:=true,
+              org.apache.stanbol.entityhub.servicesapi.yard; provide:=true,
+              org.apache.stanbol.entityhub.servicesapi.mapping; provide:=true,
+              org.apache.stanbol.entityhub.servicesapi.model; provide:=true,
+              org.apache.stanbol.entityhub.servicesapi.query; provide:=true,
+              *
+            </Import-Package>
             <Export-Package>
               org.apache.stanbol.entityhub.core;version=${project.version},
               org.apache.stanbol.entityhub.core.mapping;version=${project.version},

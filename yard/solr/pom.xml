@@ -64,23 +64,19 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.entityhub.servicesapi.site; provide:=true,
+              *
+            </Import-Package>
             <Export-Package>
               org.apache.stanbol.entityhub.yard.solr.defaults;version=${project.version},
               org.apache.stanbol.entityhub.yard.solr.model;version=${project.version},
               org.apache.stanbol.entityhub.yard.solr.query;version=${project.version}
             </Export-Package>
-            <!-- NOTE: The exclusion of javax.xml.stream assumes that only serialised
-                 java objects are used as serialisation to and from the SolrServer
-                 and therefore no XML API is needed -->
-            <Import-Package>
-              *
-            </Import-Package>
             <Private-Package>
               org.apache.stanbol.entityhub.yard.solr.impl;version=${project.version},
               org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;version=${project.version}
             </Private-Package>
-            <Embed-Dependency>
-            </Embed-Dependency>
             <!-- 
               We need to provide the default SolrYard indexConfigurations to
               the DataFileProvider infrastructure

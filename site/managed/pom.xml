@@ -62,6 +62,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.entityhub.servicesapi.site; provide:=true,
+              *
+            </Import-Package>
             <Export-Package>
               org.apache.stanbol.entityhub.site.managed;version=${project.version}
             </Export-Package>
