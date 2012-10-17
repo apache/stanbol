@@ -14,7 +14,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.enhancer.engines.keywordextraction.linking;
+package org.apache.stanbol.enhancer.engines.keywordextraction.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +29,10 @@ import java.util.Set;
 
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
-import org.apache.stanbol.enhancer.engines.keywordextraction.impl.ProcessingState;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinkerConfig.RedirectProcessingMode;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.Suggestion.MATCH;
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.EntityLinkerConfig.RedirectProcessingMode;
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.Suggestion.MATCH;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.AnalysedContent;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntitySearcher;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
@@ -57,6 +58,7 @@ public class EntityLinker {
      */
     private final Map<String,LinkedEntity> linkedEntities = new HashMap<String,LinkedEntity>();
     
+    private Integer lookupLimit;
     /**
      * After {@link #process()}ing this returns the entities linked for the
      * parsed {@link AnalysedContent}.
@@ -79,6 +81,7 @@ public class EntityLinker {
         this.entitySearcher = taxonomy;
         this.config = config;
         this.state = new ProcessingState(content.getAnalysedText());
+        this.lookupLimit  = Math.max(10,config.getMaxSuggestions()*2);
     }
     /**
      * Steps over the sentences, chunks, tokens of the {@link #sentences}

@@ -17,7 +17,6 @@
 package org.apache.stanbol.enhancer.engines.keywordextraction.linking;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 

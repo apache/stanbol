@@ -21,8 +21,6 @@ package org.apache.stanbol.enhancer.engines.keywordextraction.linking;
 
 import java.util.Iterator;
 
-import opennlp.tools.util.Span;
-
 import org.apache.stanbol.commons.opennlp.TextAnalyzer;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
