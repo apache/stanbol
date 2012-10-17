@@ -16,8 +16,6 @@
 */
 package org.apache.stanbol.commons.solr.managed.standalone;
 
-import java.util.ServiceLoader;
-
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;

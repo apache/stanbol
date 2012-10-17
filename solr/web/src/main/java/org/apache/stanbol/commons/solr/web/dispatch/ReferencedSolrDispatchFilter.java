@@ -16,19 +16,15 @@
 */
 package org.apache.stanbol.commons.solr.web.dispatch;
 
-import java.io.IOException;
 
 import javax.servlet.Filter;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.solr.core.CoreContainer;
-import org.apache.solr.core.CoreContainer.Initializer;
 import org.apache.solr.servlet.SolrDispatchFilter;
 import org.apache.stanbol.commons.solr.SolrServerAdapter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
-import org.xml.sax.SAXException;
 
 /**
  * Special version of the {@link SolrDispatchFilter} (implemented based on the

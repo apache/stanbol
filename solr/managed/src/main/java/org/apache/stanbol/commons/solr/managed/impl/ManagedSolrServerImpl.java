@@ -24,8 +24,8 @@ import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_SERVER_PUBL
 import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_SERVER_RANKING;
 import static org.apache.stanbol.commons.solr.managed.ManagedIndexConstants.INDEX_NAME;
 import static org.apache.stanbol.commons.solr.managed.ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY;
-import static org.apache.stanbol.commons.solr.managed.impl.ManagementUtils.getArchiveCoreName;
-import static org.apache.stanbol.commons.solr.managed.impl.ManagementUtils.substituteProperty;
+import static org.apache.stanbol.commons.solr.managed.util.ManagementUtils.getArchiveCoreName;
+import static org.apache.stanbol.commons.solr.managed.util.ManagementUtils.substituteProperty;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,6 +67,7 @@ import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedIndexState;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.commons.solr.managed.standalone.ClassPathDataFileProvider;
+import org.apache.stanbol.commons.solr.managed.util.ManagementUtils;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileListener;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;

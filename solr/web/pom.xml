@@ -57,13 +57,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
-              org.apache.stanbol.commons.solr.web;version=${project.version},
-              org.apache.stanbol.commons.solr.web.dispatch;version=${project.version}
-            </Export-Package>
             <Import-Package>
+              org.apache.stanbol.commons.solr.web.dispatch,
               *
             </Import-Package>
+            <Export-Package>
+              org.apache.stanbol.commons.solr.web.dispatch;version=${project.version}
+            </Export-Package>
             <Private-Package>
               org.apache.stanbol.commons.solr.web.impl;version=${project.version},
               org.apache.stanbol.commons.solr.web.utils;version=${project.version}
@@ -85,13 +85,13 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.10.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.10.1-SNAPSHOT</version>
     </dependency>
 
     <!--  OSGI framework dependencies -->
