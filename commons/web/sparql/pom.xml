@@ -56,8 +56,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.commons.web.base; provide:=true,
+              *;
+            </Import-Package>
             <Export-Package>
-              org.apache.stanbol.commons.web.sparql.*
+              org.apache.stanbol.commons.web.sparql;version=${project.version},
+              org.apache.stanbol.commons.web.sparql.*;version=${project.version}
             </Export-Package>
             <Import-Package>*</Import-Package>
           </instructions>
@@ -67,12 +72,6 @@
   </build>
 
   <dependencies>
-    <!-- To be able use ServiceReferenceRankingComparator -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.9.0-incubating</version>
-    </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>

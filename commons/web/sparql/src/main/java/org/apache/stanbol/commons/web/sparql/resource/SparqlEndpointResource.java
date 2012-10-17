@@ -23,6 +23,7 @@ import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -49,7 +50,6 @@ import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.DescribeQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
-import org.apache.stanbol.commons.solr.utils.ServiceReferenceRankingComparator;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.osgi.framework.BundleContext;
@@ -81,6 +81,29 @@ import com.sun.jersey.api.view.Viewable;
 @Path("/sparql")
 public class SparqlEndpointResource extends BaseStanbolResource {
 
+    private static final Comparator<ServiceReference> SERVICE_RANKING_COMPARATOR = new Comparator<ServiceReference>() {
+        
+        public int compare(ServiceReference ref1, ServiceReference ref2) {
+            int r1,r2;
+            Object tmp = ref1.getProperty(Constants.SERVICE_RANKING);
+            r1 = tmp != null ? ((Integer)tmp).intValue() : 0;
+            tmp = (Integer)ref2.getProperty(Constants.SERVICE_RANKING);
+            r2 = tmp != null ? ((Integer)tmp).intValue() : 0;
+            if(r1 == r2){
+                tmp = (Long)ref1.getProperty(Constants.SERVICE_ID);
+                long id1 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
+                tmp = (Long)ref2.getProperty(Constants.SERVICE_ID);
+                long id2 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
+                //the lowest id must be first -> id1 < id2 -> [id1,id2] -> return -1
+                return id1 < id2 ? -1 : id2 == id1 ? 0 : 1; 
+            } else {
+                //the highest ranking MUST BE first -> r1 < r2 -> [r2,r1] -> return 1
+                return r1 < r2 ? 1:-1;
+            }
+        }        
+        
+    };
+    
     private ServletContext servletContext;
 
     protected TcManager tcManager;
@@ -192,7 +215,7 @@ public class SparqlEndpointResource extends BaseStanbolResource {
             getFilter(graphUri));
         if (refs != null) {
             if (refs.length > 1) {
-                Arrays.sort(refs, ServiceReferenceRankingComparator.INSTANCE);
+                Arrays.sort(refs, SERVICE_RANKING_COMPARATOR);
             }
             for (ServiceReference ref : refs) {
                 registeredGraphs.put(ref, (TripleCollection) bundleContext.getService(ref));
