@@ -84,11 +84,9 @@ import org.slf4j.LoggerFactory;
  * 
  * @author ogrisel, rwesten
  */
-@Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the
-// baseUri
-// is
-// required!
-specVersion = "1.1", metatype = true, immediate = true, inherit = true)
+@Component(configurationFactory = true, 
+    policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
+    specVersion = "1.1", metatype = true, immediate = true, inherit = true)
 @Service
 @org.apache.felix.scr.annotations.Properties(value = {@Property(name = EnhancementEngine.PROPERTY_NAME)})
 public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException>
@@ -96,29 +94,25 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Property
-    // (value = "dbpedia")
+    @Property // (value = "dbpedia")
     public static final String REFERENCED_SITE_ID = "org.apache.stanbol.enhancer.engines.entitytagging.referencedSiteId";
 
     @Property(boolValue = false)
     public static final String PERSON_STATE = "org.apache.stanbol.enhancer.engines.entitytagging.personState";
 
-    @Property
-    // (value = "dbp-ont:Person")
+    @Property // (value = "dbp-ont:Person")
     public static final String PERSON_TYPE = "org.apache.stanbol.enhancer.engines.entitytagging.personType";
 
     @Property(boolValue = false)
     public static final String ORG_STATE = "org.apache.stanbol.enhancer.engines.entitytagging.organisationState";
 
-    @Property
-    // (value = "dbp-ont:Organisation")
+    @Property // (value = "dbp-ont:Organisation")
     public static final String ORG_TYPE = "org.apache.stanbol.enhancer.engines.entitytagging.organisationType";
 
     @Property(boolValue = false)
     public static final String PLACE_STATE = "org.apache.stanbol.enhancer.engines.entitytagging.placeState";
 
-    @Property
-    // (value = "dbp-ont:Place")
+    @Property // (value = "dbp-ont:Place")
     public static final String PLACE_TYPE = "org.apache.stanbol.enhancer.engines.entitytagging.placeType";
     /**
      * Use the RDFS label as default
