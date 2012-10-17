@@ -35,6 +35,21 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              org.apache.stanbol.contenthub.servicesapi.store; provide:=true,
+              *
+            </Import-Package>
+            <Export-Package>
+            </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.contenthub.store.inmemory
+            </Private-Package>
+            <Embed-Dependency>
+            </Embed-Dependency>
+          </instructions>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
