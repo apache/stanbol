@@ -59,11 +59,22 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+                        <Import-Package>
+                            org.apache.stanbol.enhancer.servicesapi; provide:=true,
+                            org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+                            *
+                        </Import-Package>
 						<Export-Package>
-							org.apache.stanbol.enhancer.engines.dbpspotlight.annotate;version=${project.version}
+							org.apache.stanbol.enhancer.engines.dbpspotlight;version=${project.version}
 						</Export-Package>
-						<Embed-Dependency>
-						</Embed-Dependency>
+						<Private-Package>
+                            org.apache.stanbol.enhancer.engines.dbpspotlight.annotate,
+                            org.apache.stanbol.enhancer.engines.dbpspotlight.candidates,
+                            org.apache.stanbol.enhancer.engines.dbpspotlight.disambiguate,
+                            org.apache.stanbol.enhancer.engines.dbpspotlight.model,
+                            org.apache.stanbol.enhancer.engines.dbpspotlight.spot,
+                            org.apache.stanbol.enhancer.engines.dbpspotlight.utils
+						</Private-Package>
 						<!-- configure a dbpedia chain  -->
 				        <Install-Path>config</Install-Path>
 					</instructions>
@@ -101,11 +112,6 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-core</artifactId>
 		</dependency>
 
 		<dependency>

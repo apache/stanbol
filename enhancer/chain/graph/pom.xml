@@ -58,11 +58,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
-              org.apache.stanbol.enhancer.chain.graph;version=${project.version}
-            </Export-Package>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              *
+            </Import-Package>
             <Private-Package>
-              org.apache.stanbol.enhancer.chain.graph.impl;version=${project.version}
+              org.apache.stanbol.enhancer.chain.graph.impl
             </Private-Package>
           </instructions>
         </configuration>

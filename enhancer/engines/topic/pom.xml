@@ -61,10 +61,18 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              *
+            </Import-Package>
             <Export-Package>
-              org.apache.stanbol.enhancer.topic.*;version=${project.version},
-              org.apache.stanbol.enhancer.engine.topic.*;version=${project.version}
+              org.apache.stanbol.enhancer.topic;version=${project.version},
+              org.apache.stanbol.enhancer.topic.training;version=${project.version}
             </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engine.topic
+            </Private-Package>
             <Install-Path>install-config</Install-Path>
             <Data-Files>data-files</Data-Files>
             <Data-Files-Priority>-100</Data-Files-Priority>
@@ -284,7 +292,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.10.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>

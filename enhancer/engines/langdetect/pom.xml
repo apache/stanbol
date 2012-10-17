@@ -56,9 +56,9 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>
+						<Private-Package>
 							org.apache.stanbol.enhancer.engines.langdetect;version=${project.version}
-						</Export-Package>
+						</Private-Package>
 						<Embed-Dependency>
 							langdetect;scope=compile,jsonic;scope=compile
 						</Embed-Dependency>
@@ -67,7 +67,9 @@
 							!com.google.inject.*,
 							!org.seasar.framework.*,
 							!org.springframework.*,
-							*
+			                org.apache.stanbol.enhancer.servicesapi; provide:=true,
+			                org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+			                *
 						</Import-Package>
 					</instructions>
 				</configuration>
