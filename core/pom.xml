@@ -51,7 +51,9 @@
 			<extensions>true</extensions>
 			<configuration>
 				<instructions>
-					<Export-Package>org.apache.stanbol.commons.security,org.apache.stanbol.commons.security.auth</Export-Package>
+					<Export-Package>
+					  org.apache.stanbol.commons.security;version=${project.version},
+					  org.apache.stanbol.commons.security.auth;version=${project.version}</Export-Package>
 					<DynamicImport-Package>*</DynamicImport-Package>
 				</instructions>
 			</configuration>
