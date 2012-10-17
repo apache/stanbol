@@ -816,7 +816,7 @@ public class StoreResource extends BaseStanbolResource {
         this.pageSize = pageSize;
         this.recentlyEnhanced = new ArrayList<DocumentResult>();
 
-        if (!(solrSearch instanceof SolrSearchImpl)) {
+        if (!(solrSearch instanceof SolrSearch)) {
             throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Failed to obtain default implementation for SolrSearch").build());
         }
