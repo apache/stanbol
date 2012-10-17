@@ -28,6 +28,11 @@
       <artifactId>org.osgi.core</artifactId>
       <version>1.4.0</version>
     </bundle>
+    <!-- bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>1.4.0</version>
+    </bundle  -->
     <bundle>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr</artifactId>
@@ -58,11 +63,11 @@
       <artifactId>org.apache.felix.dependencymanager.runtime</artifactId>
       <version>3.0.0</version>
     </bundle>
-    <bundle>
+    <!-- bundle>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.deploymentadmin</artifactId>
       <version>0.9.0</version>
-    </bundle>
+    </bundle -->
     <bundle> <!-- OSGi Command Line Shell support -->
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.gogo.runtime</artifactId>
@@ -82,11 +87,6 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.http.whiteboard</artifactId>
       <version>2.2.0</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-      <version>1.4.0</version>
     </bundle>
   </startLevel>
 
