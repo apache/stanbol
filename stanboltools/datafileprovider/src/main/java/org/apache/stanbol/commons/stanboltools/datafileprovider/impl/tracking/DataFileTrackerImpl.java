@@ -431,13 +431,13 @@ public final class DataFileTrackerImpl implements DataFileTracker {
                     }
                 } //else this listener is already in the notified state ... ignore
             }
-            if(is != null) { //the created InputStream was not sent to a Listener
-                try {
-                    is.close(); //clean up
-                } catch (IOException e) {
-                    //ignore
-                }
-            }
+//            if(is != null) { //the created InputStream was not sent to a Listener
+//                try {
+//                    is.close(); //clean up
+//                } catch (IOException e) {
+//                    //ignore
+//                }
+//            }
         }
     }
 }
