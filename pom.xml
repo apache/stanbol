@@ -58,6 +58,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jersey-version>1.12</jersey-version>
+    <freemarker-version>2.3.19</freemarker-version>
+    <solr-version>3.2.0</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
     <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
   </properties>
@@ -164,6 +166,8 @@
               <Bundle-Vendor>Apache Stanbol (Incubating)</Bundle-Vendor>
               <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
               <_versionpolicy>$${version;===;${@}}</_versionpolicy>
+              <_provider-policy>[$(version;===;$(@)),$(version;=+;$(@)))</_provider-policy>    
+              <_consumer-policy>[$(version;===;$(@)),$(version;+;$(@)))</_consumer-policy>
           </instructions>
         </configuration>
       </plugin>
@@ -824,7 +828,7 @@
       <dependency>
         <groupId>org.freemarker</groupId>
         <artifactId>freemarker</artifactId>
-        <version>2.3.19</version>
+        <version>${freemarker-version}</version>
       </dependency>
 
       <!-- Jettison -->
@@ -905,12 +909,12 @@
       <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-solrj</artifactId>
-        <version>3.2.0</version>
+        <version>${solr-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-core</artifactId>
-        <version>3.2.0</version>
+        <version>${solr-version}</version>
         <exclusions>
             <exclusion>
                 <groupId>org.slf4j</groupId>
@@ -921,95 +925,95 @@
       <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-commons-csv</artifactId>
-        <version>3.2.0</version>
+        <version>${solr-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-noggit</artifactId>
-        <version>3.2.0</version>
+        <version>${solr-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-dataimporthandler</artifactId>
-        <version>3.2.0</version>
+        <version>${solr-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-dataimporthandler-extras</artifactId>
-        <version>3.2.0</version>
+        <version>${solr-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-analysis-extras</artifactId>
-        <version>3.2.0</version>
+        <version>${solr-version}</version>
       </dependency>
       <!-- other Solr bundles currently not used
     <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-clustering</artifactId>
-        <version>3.2.0</version>
-            </dependency>
+        <version>${solr-version}</version>
+    </dependency>
     <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-cell</artifactId>
-        <version>3.2.0</version>
-            </dependency>
+        <version>${solr-version}</version>
+    </dependency>
     <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-carrot2-core</artifactId>
-        <version>3.2.0</version>
-            </dependency>   -->
+        <version>${solr-version}</version>
+    </dependency>   -->
 
     <!--  Lucene Bundles -->
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-core</artifactId>
-      <version>3.2.0</version>
+      <version>${solr-version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-analyzers</artifactId>
-      <version>3.2.0</version>
+      <version>${solr-version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-highlighter</artifactId>
-      <version>3.2.0</version>
+      <version>${solr-version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-memory</artifactId>
-      <version>3.2.0</version>
+      <version>${solr-version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-misc</artifactId>
-      <version>3.2.0</version>
+      <version>${solr-version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-queries</artifactId>
-      <version>3.2.0</version>
+      <version>${solr-version}</version>
     </dependency>
     <!-- Snowball moved to analyzer in 3.1<dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-snowball</artifactId>
-        <version>3.2.0</version>
-            </dependency>  -->
+        <version>${solr-version}</version>
+    </dependency>  -->
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-spellchecker</artifactId>
-      <version>3.2.0</version>
+      <version>${solr-version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-spatial</artifactId>
-      <version>3.2.0</version>
+      <version>${solr-version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-icu</artifactId>
-      <version>3.2.0</version>
+      <version>${solr-version}</version>
     </dependency>
     <dependency>
       <groupId>com.ibm.icu</groupId>
@@ -1019,29 +1023,29 @@
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-xercesImpl</artifactId>
-      <version>3.2.0</version>
+      <version>${solr-version}</version>
     </dependency>
     <!-- other unused Lucene bundes
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-grouping</artifactId>
-        <version>3.2.0</version>
-            </dependency>
+        <version>${solr-version}</version>
+    </dependency>
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-queryparser</artifactId>
-        <version>3.2.0</version>
-            </dependency>
+        <version>${solr-version}</version>
+    </dependency>
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-smartcn</artifactId>
-        <version>3.2.0</version>
-            </dependency>
+        <version>${solr-version}</version>
+    </dependency>
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-stempel</artifactId>
-        <version>3.2.0</version>
-            </dependency>
+        <version>${solr-version}</version>
+    </dependency>
     -->
     <!-- Other Solr/Lucene dependendies -->
     <!-- StAX Parser (used by Solr/Lucene) -->
