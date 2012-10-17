@@ -14,7 +14,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.enhancer.engines.keywordextraction.linking;
+package org.apache.stanbol.enhancer.engines.keywordextraction.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Chunk;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.Suggestion.MATCH;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntitySearcher;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 

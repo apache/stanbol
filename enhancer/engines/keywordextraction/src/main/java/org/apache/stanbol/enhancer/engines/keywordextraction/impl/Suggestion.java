@@ -17,11 +17,12 @@
 /**
  * 
  */
-package org.apache.stanbol.enhancer.engines.keywordextraction.linking;
+package org.apache.stanbol.enhancer.engines.keywordextraction.impl;
 
 import java.util.Comparator;
 import java.util.Iterator;
 
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntitySearcher;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
