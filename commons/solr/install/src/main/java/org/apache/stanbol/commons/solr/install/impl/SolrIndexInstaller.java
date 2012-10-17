@@ -16,8 +16,8 @@
  */
 package org.apache.stanbol.commons.solr.install.impl;
 
-import static org.apache.stanbol.commons.solr.IndexInstallerConstants.PROPERTY_ARCHIVE_FORMAT;
-import static org.apache.stanbol.commons.solr.IndexInstallerConstants.SOLR_INDEX_ARCHIVE_RESOURCE_TYPE;
+import static org.apache.stanbol.commons.solr.install.IndexInstallerConstants.PROPERTY_ARCHIVE_FORMAT;
+import static org.apache.stanbol.commons.solr.install.IndexInstallerConstants.SOLR_INDEX_ARCHIVE_RESOURCE_TYPE;
 import static org.apache.stanbol.commons.solr.managed.ManagedIndexConstants.INDEX_NAME;
 import static org.apache.stanbol.commons.solr.utils.ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION;
 import static org.apache.stanbol.commons.solr.utils.ConfigUtils.SUPPORTED_SOLR_ARCHIVE_FORMAT;
@@ -43,7 +43,7 @@ import org.apache.sling.installer.api.tasks.ResourceTransformer;
 import org.apache.sling.installer.api.tasks.TaskResource;
 import org.apache.sling.installer.api.tasks.TaskResourceGroup;
 import org.apache.sling.installer.api.tasks.TransformationResult;
-import org.apache.stanbol.commons.solr.IndexInstallerConstants;
+import org.apache.stanbol.commons.solr.install.IndexInstallerConstants;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.commons.solr.utils.ServiceReferenceRankingComparator;
 import org.osgi.framework.Constants;

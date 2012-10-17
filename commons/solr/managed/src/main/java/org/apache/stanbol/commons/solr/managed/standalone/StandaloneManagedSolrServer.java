@@ -16,9 +16,9 @@
 */
 package org.apache.stanbol.commons.solr.managed.standalone;
 
-import static org.apache.stanbol.commons.solr.managed.impl.ManagementUtils.getArchiveCoreName;
-import static org.apache.stanbol.commons.solr.managed.impl.ManagementUtils.getMetadata;
-import static org.apache.stanbol.commons.solr.managed.impl.ManagementUtils.substituteProperty;
+import static org.apache.stanbol.commons.solr.managed.util.ManagementUtils.getArchiveCoreName;
+import static org.apache.stanbol.commons.solr.managed.util.ManagementUtils.getMetadata;
+import static org.apache.stanbol.commons.solr.managed.util.ManagementUtils.substituteProperty;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +47,7 @@ import org.apache.solr.core.SolrCore;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedIndexState;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
-import org.apache.stanbol.commons.solr.managed.impl.ManagementUtils;
+import org.apache.stanbol.commons.solr.managed.util.ManagementUtils;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.slf4j.Logger;

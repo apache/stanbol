@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.commons.solr.install.impl;
 
-import static org.apache.stanbol.commons.solr.IndexInstallerConstants.PROPERTY_ARCHIVE_FORMAT;
+import static org.apache.stanbol.commons.solr.install.IndexInstallerConstants.PROPERTY_ARCHIVE_FORMAT;
 import static org.apache.stanbol.commons.solr.managed.ManagedIndexConstants.INDEX_ARCHIVES;
 import static org.apache.stanbol.commons.solr.managed.ManagedIndexConstants.INDEX_NAME;
 

@@ -19,8 +19,6 @@ package org.apache.stanbol.commons.solr.web.dispatch;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import javax.naming.Context;
-
 import org.apache.solr.core.CoreContainer;
 import org.apache.stanbol.commons.solr.SolrConstants;
 import org.apache.stanbol.commons.solr.utils.ServiceReferenceRankingComparator;

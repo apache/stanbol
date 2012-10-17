@@ -302,7 +302,7 @@ public class SolrServerPublishingComponent {
                 server  = (CoreContainer)tracker.getService(ref);
             }
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader(SolrServerPublishingComponent.class.getClassLoader());
+            Thread.currentThread().setContextClassLoader(CoreContainer.class.getClassLoader());
             try {
                 filter = new SolrFilter(server);
             }finally {
