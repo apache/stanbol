@@ -60,13 +60,18 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              *
+            </Import-Package>
             <Export-Package>
-              org.apache.stanbol.enhancer.engines.keywordextraction.linking;version=${project.version},
-              org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl;version=${project.version},
+              org.apache.stanbol.enhancer.engines.keywordextraction.impl;version=${project.version},
               org.apache.stanbol.enhancer.engines.keywordextraction.engine;version=${project.version},
+              org.apache.stanbol.enhancer.engines.keywordextraction.linking;version=${project.version}; provide:=true,
             </Export-Package>
             <Private-Package>
-              org.apache.stanbol.enhancer.engines.keywordextraction.impl;version=${project.version}
+              org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl
             </Private-Package>
           </instructions>
         </configuration>
