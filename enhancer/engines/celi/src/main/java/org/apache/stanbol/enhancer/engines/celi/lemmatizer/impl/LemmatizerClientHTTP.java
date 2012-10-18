@@ -132,12 +132,18 @@ public class LemmatizerClientHTTP {
 					Element lemmaElm = (Element) lemmasList.item(j);
 					String lemma = lemmaElm.getTextContent();
 					NodeList features = ((Element)lemmaElm.getParentNode()).getElementsByTagNameNS("*","LexicalFeature");
-					Hashtable<String,String> featuresMap=new Hashtable<String,String>();
+					Hashtable<String,List<String>> featuresMap=new Hashtable<String,List<String>>();
 					for(int k=0;features!=null && k<features.getLength();k++){
 						Element feat = (Element) features.item(k);
 						String name = feat.getAttribute("name");
 						String value = feat.getTextContent();
-						featuresMap.put(name, value);
+						List<String> values=null;
+						if(featuresMap.containsKey(name))
+							values=featuresMap.get(name);
+						else
+							values=new Vector<String>();
+						values.add(value);
+						featuresMap.put(name, values);
 					}
 					Reading r=new Reading(lemma, featuresMap);
 					readings.add(r);
