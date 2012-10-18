@@ -2,10 +2,10 @@ package org.apache.stanbol.enhancer.nlp.morpho;
 
 import org.apache.clerezza.rdf.core.UriRef;
 
-public enum Number {
+public enum NumberFeature {
     /**
-     * MULTEXT-East feature Number="count" (Nouns in Serbian, Macedonian, Bulgarian), e.g., Bulgarian яка/як,
-     * язовира/язовир, яда/яд, юргана/юрган, юбилея/юбилей, ъгъла/ъгъл
+     * MULTEXT-East feature Number="count" (Nouns in Serbian, Macedonian, Bulgarian), e.g., Bulgarian ÑÐºÐ°/ÑÐº,
+     * ÑÐ·Ð¾Ð²Ð¸Ñ€Ð°/ÑÐ·Ð¾Ð²Ð¸Ñ€, ÑÐ´Ð°/ÑÐ´, ÑŽÑ€Ð³Ð°Ð½Ð°/ÑŽÑ€Ð³Ð°Ð½, ÑŽÐ±Ð¸Ð»ÐµÑ/ÑŽÐ±Ð¸Ð»ÐµÐ¹, ÑŠÐ³ÑŠÐ»Ð°/ÑŠÐ³ÑŠÐ»
      */
     CountNumber,
     /**
@@ -42,7 +42,7 @@ public enum Number {
     static final String OLIA_NAMESPACE = "http://purl.org/olia/olia.owl#";
     UriRef uri;
 
-    Number() {
+    NumberFeature() {
         uri = new UriRef(OLIA_NAMESPACE + name());
     }
 

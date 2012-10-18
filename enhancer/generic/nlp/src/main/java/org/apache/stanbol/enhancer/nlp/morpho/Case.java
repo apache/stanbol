@@ -13,6 +13,7 @@ import org.apache.clerezza.rdf.core.UriRef;
  * {@link #getParent()} and {@link #getTenses()}.
  */
 public enum Case {
+	
     /**
      * AbessiveCase expresses the lack or absence of the referent of the noun it marks. It has the meaning of
      * the English preposition 'without' (Pei and Gaynor 1954: 3,35; Gove, et al. 1966: 3).
@@ -220,7 +221,7 @@ public enum Case {
      * InstrumentalCase indicates that the referent of the noun it marks is the means of the accomplishment of
      * the action expressed by the clause (http://purl.org/linguistics/gold/Instrumental)
      */
-    nstrumental,
+    Instrumental,
     /**
      * InterablativeCase expresses that the referent of the noun it marks is the location from between which
      * another referent is moving. It has the meaning 'from inbetween'.
@@ -450,6 +451,12 @@ public enum Case {
      * Hakulinen 1961: 70). X along, across Y. (http://purl.org/linguistics/gold/Translative)
      */
     Translative,
+    /**
+     * In many inflecting languages, there occur lexemes whose form does not change throughout the paradigm, e.g.,
+	 * Russian papa "dad". For such forms, the category uninflected may be assigned. However, Uninflected is not to be confused with BaseForm 
+	 * that applies to forms in a paradigm where overt marking exists. Uninflected is a characteristic of lexemes, not individual tokens.
+     */
+    Uninflected,
     /**
      * Vocative case marks a noun whose referent is being addressed.
      * (http://www.sil.org/linguistics/glossaryoflinguisticterms/WhatIsVocativeCase.htm 17.11.06)

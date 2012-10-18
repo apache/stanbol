@@ -88,7 +88,21 @@ public enum LexicalCategory {
      * membership, such as negative particle, which are `unassigned' to any of the standard part-of-speech
      * categories. (http://www.ilc.cnr.it/EAGLES96/annotate/node16.html#mp 19.09.06)
      */
-    Unique, ;
+    Unique,
+    /**
+     * A numeral is a word, functioning most typically as an adjective or pronoun, 	that expresses a number, 
+     * and relation to the number, such as one of the following: Quantity, Sequence, Frequency, Fraction.
+	 * (http://www.sil.org/linguistics/GlossaryOfLinguisticTerms/WhatIsANumeral.htm 19.09.06)
+     */
+    Numeral,
+    /**
+     * Clitic Element covers only one aspect of the original MULTEXT-East (and ISOcat) definitions of cliticness, i.e., that an element is a clitic
+     */
+    Clitic,
+    /**
+     * Proper nouns (also called proper names) are the names of unique entities. (http://en.wikipedia.org/wiki/Noun 19.09.06)
+     */
+    ProperNoun,;
     static final String OLIA_NAMESPACE = "http://purl.org/olia/olia.owl#";
 
     UriRef uri;

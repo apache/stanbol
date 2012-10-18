@@ -1,7 +1,9 @@
 package org.apache.stanbol.enhancer.nlp.morpho;
 
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.UriRef;
@@ -50,7 +52,6 @@ public enum Tense {
     ;
     static final String OLIA_NAMESPACE = "http://purl.org/olia/olia.owl#";
     UriRef uri;
-    Set<Tense> tenses;
     Tense parent;
     
     Tense() {
@@ -66,11 +67,6 @@ public enum Tense {
     Tense(String name,Tense parent) {
         uri = new UriRef(OLIA_NAMESPACE + (name == null ? name() : name));
         this.parent = parent;
-        EnumSet<Tense> tenses  = EnumSet.of(this);
-        if(parent != null){
-            tenses.addAll(parent.tenses);
-        }
-        this.tenses = Collections.unmodifiableSet(tenses);
     }
     /**
      * Getter for the parent tense (e.g.
@@ -98,7 +94,7 @@ public enum Tense {
      * tenses.
      */
     public Set<Tense> getTenses() {
-        return tenses;
+        return transitiveClosureMap.get(this);
     }
     
     public UriRef getUri() {
@@ -108,5 +104,28 @@ public enum Tense {
     @Override
     public String toString() {
         return uri.getUnicodeString();
+    }
+    
+    /**
+     * This is needed because one can not create EnumSet instances before the
+     * initialization of an Enum has finished.<p>
+     * To keep using the much faster {@link EnumSet} a static member initialised
+     * in an static {} block is used as a workaround. The {@link Tense#getTenses()}
+     * method does use this static member instead of a member variable
+     */
+    private static final Map<Tense,Set<Tense>> transitiveClosureMap;
+    
+    static {
+        transitiveClosureMap = new EnumMap<Tense,Set<Tense>>(Tense.class);
+        for(Tense tense : Tense.values()){
+            Set<Tense> parents = EnumSet.of(tense);
+            Set<Tense> transParents = transitiveClosureMap.get(tense.getParent());
+            if(transParents != null){
+                parents.addAll(transParents);
+            } else if(tense.getParent() != null){
+                parents.add(tense.getParent());
+            } // else no parent
+            transitiveClosureMap.put(tense, parents);
+        }
     }
 }
