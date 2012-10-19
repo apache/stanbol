@@ -20,6 +20,7 @@ import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.PHRASE_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getAnalysedText;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
+import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.isLangaugeConfigured;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -146,7 +147,7 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
         if(language == null){
             return CANNOT_ENHANCE;
         }
-        if(!isLangaugeConfigured(language,false)){
+        if(!isLangaugeConfigured(this,languageConfiguration,language,false)){
            return CANNOT_ENHANCE; 
         }
         if(getAnalysedText(this,ci,false) == null) {
@@ -173,6 +174,7 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
     public void computeEnhancements(ContentItem ci) throws EngineException {
         AnalysedText at = getAnalysedText(this, ci, true);
         String language = getLanguage(this, ci, true);
+        isLangaugeConfigured(this, languageConfiguration, language, true);
         ChunkerME chunker = initChunker(language);
         if(chunker == null){
             return;
@@ -379,31 +381,9 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
         super.deactivate(context);
     }
     
-
-    /**
-     * Used in {@link #canEnhance(ContentItem)} to check if a {@link ContentItem}
-     * should be processed based on the language configuration of this engine.
-     * @param language the language
-     * @param exception <code>false</code> id used in {@link #canEnhance(ContentItem)}
-     * and <code>true</code> when called from {@link #computeEnhancements(ContentItem)}
-     * @return the state
-     * @throws IllegalStateException if exception is <code>true</code> and the
-     * language is not configured as beeing processed.
-     */
-    boolean isLangaugeConfigured(String language, boolean exception){
-        boolean state = languageConfiguration.isLanguage(language);
-        if(!state && exception){
-            throw new IllegalStateException("Language "+language+" is not included "
-                    + "by the LanguageConfiguration of this engine (name "+ getName()
-                    + "). As this is also checked in canEnhancer this may indicate an Bug in the "
-                    + "used EnhancementJobManager!");
-        } else {
-            return state;
-        }
-    }
    
     private ChunkerME initChunker(String language) {
-        isLangaugeConfigured(language, true); //check if the parsed language is ok
+        isLangaugeConfigured(this,languageConfiguration,language, true); //check if the parsed language is ok
         String modelName = languageConfiguration.getParameter(language, MODEL_PARAM_NAME);
         ChunkerModel model;
         try {
