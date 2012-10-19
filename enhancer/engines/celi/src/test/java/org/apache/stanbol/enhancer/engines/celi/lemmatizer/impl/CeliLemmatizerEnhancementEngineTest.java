@@ -80,7 +80,7 @@ public class CeliLemmatizerEnhancementEngineTest {
 	private static final String TEXT = "Torino è la principale città del Piemonte.";
 	private static final String TERM = "casa";
 
-	public CeliLemmatizerEnhancementEngine initEngine(boolean completeMorphoAnalysis) throws IOException, ConfigurationException {
+	private CeliLemmatizerEnhancementEngine initEngine(boolean completeMorphoAnalysis) throws IOException, ConfigurationException {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EnhancementEngine.PROPERTY_NAME, "celiLemmatizer");
         properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
@@ -92,11 +92,11 @@ public class CeliLemmatizerEnhancementEngineTest {
 		return morphoAnalysisEngine;
 	}
 
-	public static void shutdownEngine(CeliLemmatizerEnhancementEngine morphoAnalysisEngine) {
+	private static void shutdownEngine(CeliLemmatizerEnhancementEngine morphoAnalysisEngine) {
 		morphoAnalysisEngine.deactivate(null);
 	}
 
-    public static ContentItem wrapAsContentItem(final String text) throws IOException {
+    private static ContentItem wrapAsContentItem(final String text) throws IOException {
         return ciFactory.createContentItem(new StringSource(text));
     }
 
@@ -114,11 +114,7 @@ public class CeliLemmatizerEnhancementEngineTest {
         try {
 			morphoAnalysisEngine.computeEnhancements(ci);
         } catch (EngineException e) {
-            if (e.getCause() != null && e.getCause() instanceof UnknownHostException) {
-                log.warn("Celi Service not reachable -> offline? -> deactivate test");
-                return;
-            }
-            throw e;
+            RemoteServiceHelper.checkServiceUnavailable(e);
         }
 
 		TestUtils.logEnhancements(ci);

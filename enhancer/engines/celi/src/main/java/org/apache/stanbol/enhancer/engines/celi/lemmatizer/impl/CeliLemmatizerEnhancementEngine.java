@@ -258,57 +258,15 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 	}
 
 	private List<CeliMorphoFeatures> convertLexicalEntryToMorphFeatures(LexicalEntry le, String lang) {
-		CeliTagSetRegistry mappings = CeliTagSetRegistry.getInstance();
 		List<CeliMorphoFeatures> result = new Vector<CeliMorphoFeatures>();
 		if (!le.termReadings.isEmpty()) {
 			for (Reading r : le.termReadings) {
-				CeliMorphoFeatures morphoFeature = new CeliMorphoFeatures(r.getLemma());
-				for (Entry<String, List<String>> entry : r.lexicalFeatures.entrySet()) {
-
-					String feature = entry.getKey();
-					for (String value : entry.getValue()) {
-						try {
-							if (feature.equals("POS")) {
-								LexicalCategory pos = mappings.getPosTagset(lang).getTag(value).getCategory();
-								if (pos != null)
-									morphoFeature.addPos(pos);
-							} else if (feature.equals("CASE")) {
-								Case c = mappings.getCaseTagset(lang).getTag(value).getCase();
-								if (c != null)
-									morphoFeature.addCase(c);
-							} else if (feature.equals("GENDER")) {
-								Gender gen = mappings.getGenderTagset(lang).getTag(value).getGender();
-								if (gen != null)
-									morphoFeature.addGender(gen);
-							} else if (feature.equals("NUMBER")) {
-								NumberFeature num = mappings.getNumberTagset(lang).getTag(value).getNumber();
-								if (num != null)
-									morphoFeature.addNumber(num);
-							} else if (feature.equals("PERSON")) {
-								Person pers = mappings.getPersonTagset(lang).getTag(value).getPerson();
-								if (pers != null)
-									morphoFeature.addPerson(pers);
-							} else if (feature.equals("VERB_FORM") || feature.equals("VFORM")) {
-								VerbMood vForm = mappings.getVerbFormTagset(lang).getTag(value).getVerbForm();
-								if (vForm != null)
-									morphoFeature.addVerbForm(vForm);
-							} else if (feature.equals("TENSE") || feature.equals("VERB_TENSE")) {
-								TagSet<TenseTag> map = mappings.getTenseTagset(lang);
-								TenseTag tagg = map.getTag(value);
-								Tense tense = tagg.getTense();
-								if (tense != null)
-									morphoFeature.addTense(tense);
-							}
-						} catch (Exception e) {
-							System.err.println(entry.getKey() + " " + value);
-						}
-					}
-
+				CeliMorphoFeatures morphoFeature = CeliMorphoFeatures.parseFrom(r, lang);
+				if(morphoFeature != null){
+				    result.add(morphoFeature);
 				}
-				result.add(morphoFeature);
 			}
 		}
-
 		return result;
 	}
 
