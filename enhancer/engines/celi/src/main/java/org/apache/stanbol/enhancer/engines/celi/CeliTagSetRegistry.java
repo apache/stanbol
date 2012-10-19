@@ -346,8 +346,6 @@ public final class CeliTagSetRegistry {
         }
         if (t == null) {
             // warn about missing mappings for Tags to Olia!
-            log.warn("Unrecoquniced {} '{}' for Language {}", new Object[] {clazz.getSimpleName(), tag,
-                                                                            language});
             Map<String,T> u = unmapped.get(language);
             if (u == null) {
                 u = new HashMap<String,T>();
@@ -376,6 +374,8 @@ public final class CeliTagSetRegistry {
                     throw new IllegalStateException("Unable to instantiate " + clazz.getSimpleName()
                                                     + "with String tag '" + tag + "'!", e);
                 }
+                log.warn("added unrecognized {} '{}' for Language {}", new Object[] {clazz.getSimpleName(), tag,
+                                                                                language});
                 u.put(tag, t);
             }
         }

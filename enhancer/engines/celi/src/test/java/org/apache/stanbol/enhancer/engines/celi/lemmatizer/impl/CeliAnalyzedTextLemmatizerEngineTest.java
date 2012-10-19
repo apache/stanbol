@@ -54,7 +54,7 @@ public class CeliAnalyzedTextLemmatizerEngineTest {
      * Data for the GERMAN test
      */
     public static final String de_verb = "verbrachten";
-    public static final String de_adjective = "sensationellen"; //"schönen";
+    public static final String de_adjective = "kaiserlichen";//"sensationellen"; //"schönen";
     public static final String de_noun = "Urlaub";
     
     public static final String de_text = String.format(
@@ -120,21 +120,21 @@ public class CeliAnalyzedTextLemmatizerEngineTest {
             RemoteServiceHelper.checkServiceUnavailable(e);
         }
         //now validate the enhancements
-        boolean foundVerbrachten = false;
-        boolean foundSchonen = false;
-        boolean foundUrlaub = false;
+        boolean foundVerb = false;
+        boolean foundAdjective = false;
+        boolean foundNoun = false;
         for(Iterator<Token> tokens = at.getTokens(); tokens.hasNext();){
             Token token = tokens.next();
             log.info("Token: {}",token);
             List<Value<MorphoFeatures>> mfs = token.getAnnotations(NlpAnnotations.MORPHO_ANNOTATION);
             if(de_verb.equals(token.getSpan())){
-                foundVerbrachten = !mfs.isEmpty();
+                foundVerb = !mfs.isEmpty();
                 validateMorphFeatureProbability(mfs,LexicalCategory.Verb,de_verbProb);
             } else if(de_adjective.equals(token.getSpan())){
-                foundSchonen = !mfs.isEmpty();
+                foundAdjective = !mfs.isEmpty();
                 validateMorphFeatureProbability(mfs,LexicalCategory.Adjective,de_adjectiveProb);
             } else if(de_noun.equals(token.getSpan())){
-                foundUrlaub = !mfs.isEmpty();
+                foundNoun = !mfs.isEmpty();
                 validateMorphFeatureProbability(mfs,LexicalCategory.Noun,de_nounProb);
             }
             for(Value<MorphoFeatures> mf : mfs){
@@ -142,9 +142,9 @@ public class CeliAnalyzedTextLemmatizerEngineTest {
                 Assert.assertNotNull(mf.value().getLemma());
             }
         }
-        Assert.assertTrue("No MorphoFeatures found for 'verbrachten'!",foundVerbrachten);
-        Assert.assertTrue("No MorphoFeatures found for 'schönen'!",foundSchonen);
-        Assert.assertTrue("No MorphoFeatures found for 'Urlaub'!",foundUrlaub);
+        Assert.assertTrue("No MorphoFeatures found for '"+de_verb+"'!",foundVerb);
+        Assert.assertTrue("No MorphoFeatures found for '"+de_adjective+"'!",foundAdjective);
+        Assert.assertTrue("No MorphoFeatures found for '"+de_noun+"'!",foundNoun);
     }
     private void validateMorphFeatureProbability(List<Value<MorphoFeatures>> mfs, LexicalCategory lc, double prob) {
         for(Value<MorphoFeatures> mf : mfs){
