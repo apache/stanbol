@@ -1,9 +1,5 @@
 package org.apache.stanbol.enhancer.nlp.morpho;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
-
 import org.apache.clerezza.rdf.core.UriRef;
 /**
  * Enumeration representing the different verbal moods based on the <a* href="http://purl.org/olia/olia.owl">OLIA</a> Ontology

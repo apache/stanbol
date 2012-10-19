@@ -1,18 +1,11 @@
 package org.apache.stanbol.enhancer.nlp.morpho;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.nlp.model.Token;
-import org.apache.stanbol.enhancer.nlp.model.annotation.Annotation;
-import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,173 +14,232 @@ import org.slf4j.LoggerFactory;
  * Represents a morphological interpretation of a {@link Token word}. 
  * Words might have different interpretations (typically depending on the POS)
  * so this Tag allows to add information about all possible interpretations
- * to a single word. 
- * This is needed if no POS information are present or if POS tags are
- * ambiguous or of low confidence.<p>
- * <b>TODO</b>s:<ul>
- * <li> I would like to have {@link Case}, {@link Tense}, ... 
- * as own Annotations. However AFAIK those are all grouped to a
- * single interpretation of the Token (driven by the POS tag).</li>
- * <li> Maybe add a possibility to add unmapped information as
- * <code>Map&lt;String,List&lt;String&gt;&gt;</code>
- * </ul>
+ * to a single word.<br>
+ * Note that the oder of added values via the different add** methods is preserved
+ * for lists returned by the get**List() methods. The get**() methods will return
+ * the first element of the list.
  * @author Rupert Westenthaler
- *
+ * @author Alessio Bosca
  */
 public class MorphoFeatures {
     
-    private static final Logger log = LoggerFactory.getLogger(MorphoFeatures.class);
-
-    /**
-     * 
-     */
-    private final Collection<PosTag> posTags;
-    private final Set<String> posStrings;
-    private final Set<LexicalCategory> posLc;
+    
     private final String lemma;
+    /*
+     * NOTE: uses internally Objects to represent the different morphological
+     * features. This is because the assumption is that for most words most of
+     * the features will not be set AND that even if set most of the time there
+     * will be a single value.
+     * As this data structure will potentially instantiated for each word of an
+     * text this lazy initialization can save a lot of heap memory!
+     */
+    private Object posTags;
+    private Object genderTags;
+    private Object numberTags;
+    private Object caseFeatureTags;
+    private Object personTags;
+    private Object definitnessTags;
+    private Object verbFormTags;
+    private Object tenseTags;
     
-    private Gender gender;
-    
-    private Number number;
-    
-    private Case caseFeature;
-    
-    private Tense tense;
-    
-    private Definitness definitness;
 
-    public MorphoFeatures(String lemma, PosTag...posTags) {
-        if(lemma == null){
-            throw new IllegalArgumentException("The parsed lemma MUST NOT be NULL!");
-        }
-        if(posTags == null || posTags.length == 0){
-            throw new IllegalArgumentException("The parsed POS tag(s) MUST NOT be NULL nor empty!");
+    public MorphoFeatures(String lemma){
+        if(lemma == null || lemma.isEmpty()){
+            throw new IllegalArgumentException("The parsed lemma MUST NOT be NULL nor empty!");
         }
         this.lemma = lemma;
-        Set<PosTag> tagSet = new HashSet<PosTag>(Arrays.asList(posTags));
-        if(tagSet.remove(null) && tagSet.isEmpty()){
-            throw new IllegalArgumentException("The parsed POS tag(s) MUST NOT contain only NULL values!");
-        }
-        this.posTags = Collections.unmodifiableSet(tagSet);
-        //init fast lookup for category and string
-        this.posStrings = new HashSet<String>(posTags.length);
-        this.posLc = EnumSet.noneOf(LexicalCategory.class);
-        for(PosTag pos : tagSet){
-            this.posStrings.add(pos.getTag());
-            if(pos.getCategory() != null){
-                this.posLc.add(pos.getCategory());
-            }
-        }
     }
     
-    /**
-     * Checks if the parsed {@link LexicalCategory} is present
-     * for this Lemma.<p>
-     * This method will only work if the POS tag set used by
-     * the Lemmatizer is mapped to lexical categories.
-     */
-    public final boolean isLexicalCategory(LexicalCategory lc){
-        return posLc.contains(lc);
-    }
 
-    /**
-     * Checks if the parsed POS tag is present for this Lemma<p>
-     * NOTE that this method will only work if the POS tag set
-     * used by the POS tagger is the same of as of the 
-     * Lemmatizer.
-     * @param tag the tag
-     * @return if the parsed POS tag is valid for this Lemma
-     */
-    public final boolean isPosTag(String tag){
-        return posStrings.contains(tag);
-    }
-    public final Collection<PosTag> getPosTags(){
-        return posTags;
-    }
-    
-    public final Gender getGender() {
-        return gender;
-    }
-    
-    public final void setGender(Gender gender) {
-        this.gender = gender;
-    }
-
-    public final Number getNumber() {
-        return number;
-    }
-    
-    public final void setNumber(Number number) {
-        this.number = number;
-    }
     
     public final String getLemma() {
         return lemma;
     }
-    public final Definitness getDefinitness() {
-        return definitness;
-    }
-    public final void setDefinitness(Definitness definitness) {
-        this.definitness = definitness;
-    }
-    public void setTense(Tense tense) {
-        this.tense = tense;
-    }
-    public Tense getTense() {
-        return tense;
-    }
-    public final void setCase(Case caseFeature) {
-        this.caseFeature = caseFeature;
-    }
-    public final Case getCase() {
-        return caseFeature;
+    
+    public final void addCase(CaseTag caseFeature) {
+        caseFeatureTags = addTo(caseFeatureTags,caseFeature,CaseTag.class);
     }
     
+    public final CaseTag getCase(){
+        return getValue(caseFeatureTags, CaseTag.class);
+    }
+    
+    public final List<CaseTag> getCaseList(){
+        return getValues(caseFeatureTags, CaseTag.class);
+    }
+
+    public final void addDefinitness(DefinitnessTag definitness) {
+        definitnessTags = addTo(definitnessTags,definitness,DefinitnessTag.class);
+    }
+    public final DefinitnessTag getDefinitness(){
+        return getValue(definitnessTags, DefinitnessTag.class);
+    }
+    
+    public final List<DefinitnessTag> getDefinitnessList(){
+        return getValues(definitnessTags, DefinitnessTag.class);
+    }
+
+    public final void addGender(GenderTag gender) {
+        genderTags = addTo(genderTags,gender,GenderTag.class);
+    }
+
+    public final GenderTag getGender(){
+        return getValue(genderTags, GenderTag.class);
+    }
+    
+    public final List<GenderTag> getGenderList(){
+        return getValues(genderTags, GenderTag.class);
+    }
+
+    public final void addNumber(NumberTag number) {
+        numberTags = addTo(numberTags,number,NumberTag.class);
+    }
+
+    public final NumberTag getNumber(){
+        return getValue(numberTags, NumberTag.class);
+    }
+    
+    public final List<NumberTag> getNumberList(){
+        return getValues(numberTags, NumberTag.class);
+    }
+
+    public void addPerson(PersonTag person) {
+        personTags = addTo(personTags,person,PersonTag.class);
+    }
+
+    public final PersonTag getPerson(){
+        return getValue(personTags, PersonTag.class);
+    }
+    
+    public final List<PersonTag> getPersonList(){
+        return getValues(personTags, PersonTag.class);
+    }
+
+    public void addPos(PosTag pos) {
+        posTags = addTo(posTags,pos,PosTag.class);
+    }
+
+    public final PosTag getPos(){
+        return getValue(posTags, PosTag.class);
+    }
+    
+    public final List<PosTag> getPosList(){
+        return getValues(posTags, PosTag.class);
+    }
+
+    public void addTense(TenseTag tense) {
+        tenseTags = addTo(tenseTags,tense,TenseTag.class);
+    }
+
+    public final TenseTag getTense(){
+        return getValue(tenseTags, TenseTag.class);
+    }
+    
+    public final List<TenseTag> getTenseList(){
+        return getValues(tenseTags, TenseTag.class);
+    }
+    
+    public void addVerbForm(VerbMoodTag verbForm) {
+        verbFormTags = addTo(verbFormTags,verbForm,VerbMoodTag.class);
+    }
+
+    public final VerbMoodTag getVerbMood(){
+        return getValue(verbFormTags, VerbMoodTag.class);
+    }
+    
+    public final List<VerbMoodTag> getVerbMoodList(){
+        return getValues(verbFormTags, VerbMoodTag.class);
+    }
+
+    @Override
+    public int hashCode() {
+        return lemma.hashCode() + posTags.hashCode() + genderTags.hashCode() + personTags.hashCode() + caseFeatureTags.hashCode() + definitnessTags.hashCode() + verbFormTags.hashCode() + tenseTags.hashCode();
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof MorphoFeatures && lemma.equals(((MorphoFeatures) o).lemma)) {
+            MorphoFeatures lt = (MorphoFeatures) o;
+            return ((genderTags != null && genderTags.equals(lt.genderTags)) || (genderTags == null && lt.genderTags == null)) && ((caseFeatureTags != null && caseFeatureTags.equals(lt.caseFeatureTags)) || (caseFeatureTags == null && lt.caseFeatureTags == null))
+                    && ((tenseTags != null && tenseTags.equals(lt.tenseTags)) || (tenseTags == null && lt.tenseTags == null)) && ((numberTags != null && numberTags.equals(lt.numberTags)) || (numberTags == null && lt.numberTags == null))
+                    && ((definitnessTags != null && definitnessTags.equals(lt.definitnessTags)) || (definitnessTags == null && lt.definitnessTags == null)) && ((personTags != null && personTags.equals(lt.personTags)) || (personTags == null && lt.personTags == null))
+                    && ((verbFormTags != null && verbFormTags.equals(lt.verbFormTags)) || (verbFormTags == null && lt.verbFormTags == null));
+        } else {
+            return false;
+        }
+    }
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("MorphoTag(");
+        StringBuilder sb = new StringBuilder("MorphoTag( lemma:");
         sb.append(lemma);
-        sb.append("|pos:").append(posStrings);
-        if(gender != null){
-            sb.append("|gender:").append(gender);
+        if(posTags != null){
+            sb.append("| ").append(posTags);
         }
-        if(caseFeature != null){
-            sb.append("|case:").append(caseFeature);
+        if(genderTags != null){
+            sb.append("| ").append(genderTags);
         }
-        if(tense != null){
-            sb.append("|tense:").append(tense);
+        if(numberTags != null){
+            sb.append("| ").append(numberTags);
         }
-        if(number != null){
-            sb.append("|number:").append(number);
+        if(personTags != null){
+            sb.append("| ").append(personTags);
         }
-        if(definitness != null){
-            sb.append("|definitness:").append(definitness);
+        if(definitnessTags != null){
+            sb.append("| ").append(definitnessTags);
+        }
+        if(caseFeatureTags != null){
+            sb.append("| ").append(caseFeatureTags);
+        }
+        if(verbFormTags != null){
+            sb.append("| ").append(verbFormTags);
+        }
+        if(tenseTags != null){
+            sb.append("|tense:").append(tenseTags);
         }
         sb.append(')');
         return sb.toString();
     }
-    @Override
-    public int hashCode() {
-        return lemma.hashCode()+posStrings.hashCode();
+    /* ------------------------------------------------------------
+     * Utility methods to read/write data to the Object fields
+     * by using lazzy initialization of single or multiple (List)
+     * values.
+     * ------------------------------------------------------------
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> Object addTo(Object field,T value,Class<T> clazz){
+        if(value == null){
+            return field;
+        } else if(field == null){
+            return value;
+        } else if(field instanceof List<?>){
+            ((Collection<T>)field).add(value);
+            return field;
+        } else {
+            List<T> list = new ArrayList<T>(3);
+            list.add((T)field);
+            list.add(value);
+            return list;
+        }
     }
     
-    @Override
-    public boolean equals(Object o) {
-        if(o instanceof MorphoFeatures && lemma.equals(((MorphoFeatures)o).lemma) &&
-            posStrings.equals(((MorphoFeatures)o).posStrings)){
-            MorphoFeatures lt = (MorphoFeatures)o;
-            return ((gender != null && gender.equals(lt.gender)) ||
-                    (gender == null && lt.gender == null)) &&
-                   ((caseFeature != null && caseFeature.equals(lt.caseFeature)) ||
-                    (caseFeature == null && lt.caseFeature == null)) &&
-                   ((tense != null && tense.equals(lt.tense)) ||
-                    (tense == null && lt.tense == null)) &&
-                   ((number != null && number.equals(lt.number)) ||
-                    (number == null && lt.number == null)) &&
-                   ((definitness != null && definitness.equals(lt.definitness)) ||
-                    (definitness == null && lt.definitness == null));
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static <T> T getValue(Object field, Class<T> clazz){
+        if(field == null){
+            return null;
+        } else if(field instanceof List<?>){
+            return (T)((List) field).get(0);
         } else {
-            return false;
+            return (T)field;
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static <T> List<T> getValues(Object field, Class<T> clazz){
+        if(field == null){
+            return Collections.EMPTY_LIST;
+        } else if(field instanceof List<?>){
+            return (List<T>) field;
+        } else {
+            return Collections.singletonList((T)field);
         }
     }
 }

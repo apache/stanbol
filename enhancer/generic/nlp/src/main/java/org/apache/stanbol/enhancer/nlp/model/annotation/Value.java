@@ -8,7 +8,7 @@ import java.util.Set;
 public final class Value<T> {
 
     /**
-     * For Values that do not have a probability we use {@link Double#NaN}
+     * For Values that do not have a probability we use <code>-1.0d</code>
      */
     public static final double UNKNOWN_PROBABILITY = -1.0d;
     

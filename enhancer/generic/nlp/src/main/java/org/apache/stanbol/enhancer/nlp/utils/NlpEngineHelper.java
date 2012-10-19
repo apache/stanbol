@@ -99,6 +99,30 @@ public final class NlpEngineHelper {
         }
     }
     /**
+     * Used in {@link #canEnhance(ContentItem)} to check if a {@link ContentItem}
+     * should be processed based on the language configuration of this engine.
+     * @param engine the {@link EnhancementEngine} calling this method
+     * @param languageConfiguration the language configuration
+     * @param language the language
+     * @param exception <code>false</code> id used in {@link #canEnhance(ContentItem)}
+     * and <code>true</code> when called from {@link #computeEnhancements(ContentItem)}
+     * @return the state
+     * @throws IllegalStateException if exception is <code>true</code> and the
+     * language is not configured as beeing processed.
+     */
+    public static boolean isLangaugeConfigured(EnhancementEngine engine, LanguageConfiguration languageConfiguration, String language, boolean exception){
+        boolean state = languageConfiguration.isLanguage(language);
+        if(!state && exception){
+            throw new IllegalStateException("Language "+language+" is not included "
+                    + "by the LanguageConfiguration of this engine (name "+ engine.getName()
+                    + "). As this is also checked in canEnhancer this may indicate an Bug in the "
+                    + "used EnhancementJobManager!");
+        } else {
+            return state;
+        }
+    }
+    
+    /**
      * Retrieves - or if not present - creates the {@link AnalysedText} content
      * part for the parsed {@link ContentItem}. If the {@link Blob} with the
      * mime type '<code>text/plain</code>' is present this method

@@ -4,8 +4,9 @@ import org.apache.clerezza.rdf.core.UriRef;
 
 public enum NumberFeature {
     /**
-     * MULTEXT-East feature Number="count" (Nouns in Serbian, Macedonian, Bulgarian), e.g., Bulgarian ÑÐºÐ°/ÑÐº,
-     * ÑÐ·Ð¾Ð²Ð¸Ñ€Ð°/ÑÐ·Ð¾Ð²Ð¸Ñ€, ÑÐ´Ð°/ÑÐ´, ÑŽÑ€Ð³Ð°Ð½Ð°/ÑŽÑ€Ð³Ð°Ð½, ÑŽÐ±Ð¸Ð»ÐµÑ/ÑŽÐ±Ð¸Ð»ÐµÐ¹, ÑŠÐ³ÑŠÐ»Ð°/ÑŠÐ³ÑŠÐ»
+     * MULTEXT-East feature Number="count" (Nouns in Serbian, Macedonian, Bulgarian), 
+     * e.g., Bulgarian яка/як, язовира/язовир, яда/яд, юргана/юрган, юбилея/юбилей, 
+     * ъгъла/ъгъл (http://purl.org/olia/mte/multext-east.owl#CountNumber)
      */
     CountNumber,
     /**
