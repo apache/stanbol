@@ -57,8 +57,12 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.impl.EnginesTracker;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ExecutionPlanHelper {
+    
+    private final static Logger log = LoggerFactory.getLogger(ExecutionPlanHelper.class);
     
     private static LiteralFactory lf = LiteralFactory.getInstance();
     
@@ -184,7 +188,14 @@ public final class ExecutionPlanHelper {
                 current = new HashSet<NonLiteral>();
                 prevOrder = order;
             }
-            current.add(writeExecutionNode(ep, epNode, name, optional.contains(name), prev));
+            try {
+                current.add(writeExecutionNode(ep, epNode, name, optional.contains(name), prev));
+            } catch (RuntimeException e){
+                //add the engine and class to ease debugging in such cases
+                log.error("Exception while writing ExecutionNode for Enhancement Eninge: "
+                    + engine +"(class: "+engine.getClass()+")",e);
+                throw e; //rethrow it
+            }
         }
         return ep.getGraph();
     }
