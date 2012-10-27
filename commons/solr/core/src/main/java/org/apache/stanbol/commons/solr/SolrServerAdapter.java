@@ -120,7 +120,7 @@ public class SolrServerAdapter {
     private final CloseHook closeHook = new CloseHook() {
         
         @Override
-        public void close(SolrCore core) {
+        public void preClose(SolrCore core) {
             Collection<String> names = server.getCoreNames(core);
             if(names != null){
                 synchronized (registrations) {
@@ -142,6 +142,11 @@ public class SolrServerAdapter {
             }
             //update the OSGI service for the CoreContainer
             updateServerRegistration();
+        }
+
+        @Override
+        public void postClose(SolrCore core) {
+            //nothing to do
         }
     };
     /**
@@ -180,6 +185,10 @@ public class SolrServerAdapter {
         File solrCof = new File(solrDir,parsedServerProperties.getSolrXml());
         ClassLoader classLoader = updateContextClassLoader();
         try {
+            log.info(">> +++++++++++++++++++++++");
+            XPathFactory.newInstance();
+            log.info(">>  {}",org.xml.sax.InputSource.class.getClassLoader());
+            log.info(">> +++++++++++++++++++++++");
             container.load(solrDir.getAbsolutePath(), solrCof);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
