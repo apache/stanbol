@@ -178,6 +178,10 @@ public class KeywordLinkingEngine
      */
     public static final boolean DEFAULT_DEREFERENCE_ENTITIES_STATE = true;
     /**
+     * Allows to add a list of fields that are included when dereferencing Entities
+     */
+    public static final String DEREFERENCE_ENTITIES_FIELDS = "org.apache.stanbol.enhancer.engines.keywordextraction.dereferenceFields";
+    /**
      * Additional fields added for dereferenced entities
      */
     private static final Collection<String> DEREFERENCE_FIELDS = Arrays.asList(
@@ -550,7 +554,7 @@ public class KeywordLinkingEngine
      * {@link #DEREFERENCE_ENTITIES} configuration.
      * @param properties the configuration
      */
-    protected final void activateEntityDereference(Dictionary<String,Object> properties) {
+    protected final void activateEntityDereference(Dictionary<String,Object> properties) throws ConfigurationException {
         Object value = properties.get(DEREFERENCE_ENTITIES);
         if(value instanceof Boolean){
             dereferenceEntitiesState = ((Boolean)value).booleanValue();
@@ -560,9 +564,32 @@ public class KeywordLinkingEngine
             dereferenceEntitiesState = DEFAULT_DEREFERENCE_ENTITIES_STATE;
         }
         if(dereferenceEntitiesState){
-            linkerConfig.getSelectedFields().addAll(DEREFERENCE_FIELDS);
-        }
-    }
+            value = properties.get(DEREFERENCE_ENTITIES_FIELDS);
+            if(value instanceof String[]){
+                for(String field : (String[])value){
+                    if(field != null && !field.isEmpty()){
+                        linkerConfig.getSelectedFields().add(field);
+                    }
+                }
+            } else if(value instanceof Collection<?>){
+                for(Object field : (Collection<?>)value){
+                    if(field != null && !field.toString().isEmpty()){
+                        linkerConfig.getSelectedFields().add(field.toString());
+                    }
+                }
+            } else if(value instanceof String){
+                if(!value.toString().isEmpty()){
+                    linkerConfig.getSelectedFields().add(value.toString());
+                }
+            } else if(value != null){
+                throw new ConfigurationException(DEREFERENCE_ENTITIES_FIELDS, 
+                    "Dereference Entities_Fields MUST BE parsed as String[], Collection<String> or "
+                    + "String (single value). The actual value '"+value+"'(type: '"+value.getClass() 
+                    + "') is NOT supported");
+            } else { //value == null -> add the default fields
+                linkerConfig.getSelectedFields().addAll(DEREFERENCE_FIELDS);
+            }
+        }    }
 
     /**
      * Initialise the {@link TextAnalyzer} component.<p>
