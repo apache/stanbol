@@ -82,6 +82,14 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
+          <configuration>
+            <!-- Need to exlude the Pos enum because it creates a
+                 IndexArrayOutOfBoundException - most likely because
+                 of character encoding issues  -->
+            <sourceExcludes>
+              **/enhancer/nlp/pos/Pos.java
+            </sourceExcludes>
+          </configuration>
       </plugin>
     </plugins>
   </build>

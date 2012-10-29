@@ -52,23 +52,26 @@ public interface NlpAnnotations {
      */
     Annotation<String,MorphoFeatures> MORPHO_ANNOTATION = new Annotation<String,MorphoFeatures>(
             "stanbol.enhancer.nlp.morpho",MorphoFeatures.class);
-    
-    Annotation<String,CaseTag> CASE_ANNOTATION = new Annotation<String,CaseTag>(
-            "stanbol.enhancer.nlp.morpho.case",CaseTag.class);
 
-    Annotation<String,GenderTag> GENDER_ANNOTATION = new Annotation<String,GenderTag>(
-            "stanbol.enhancer.nlp.morpho.gender",GenderTag.class);
-
-    Annotation<String,NumberTag> NUMBER_ANNOTATION = new Annotation<String,NumberTag>(
-            "stanbol.enhancer.nlp.morpho.number",NumberTag.class);
-    
-    Annotation<String,PersonTag> PERSON_ANNOTATION = new Annotation<String,PersonTag>(
-            "stanbol.enhancer.nlp.morpho.person",PersonTag.class);
-
-    Annotation<String,TenseTag> TENSE_ANNOTATION = new Annotation<String,TenseTag>(
-            "stanbol.enhancer.nlp.morpho.tense",TenseTag.class);
-
-    Annotation<String,VerbMoodTag> VERB_MOOD_ANNOTATION = new Annotation<String,VerbMoodTag>(
-            "stanbol.enhancer.nlp.morpho.verb-mood",VerbMoodTag.class);
+    /* 
+     * Currently only used as part of MorphoFeatures
+     */
+//    Annotation<String,CaseTag> CASE_ANNOTATION = new Annotation<String,CaseTag>(
+//            "stanbol.enhancer.nlp.morpho.case",CaseTag.class);
+//
+//    Annotation<String,GenderTag> GENDER_ANNOTATION = new Annotation<String,GenderTag>(
+//            "stanbol.enhancer.nlp.morpho.gender",GenderTag.class);
+//
+//    Annotation<String,NumberTag> NUMBER_ANNOTATION = new Annotation<String,NumberTag>(
+//            "stanbol.enhancer.nlp.morpho.number",NumberTag.class);
+//    
+//    Annotation<String,PersonTag> PERSON_ANNOTATION = new Annotation<String,PersonTag>(
+//            "stanbol.enhancer.nlp.morpho.person",PersonTag.class);
+//
+//    Annotation<String,TenseTag> TENSE_ANNOTATION = new Annotation<String,TenseTag>(
+//            "stanbol.enhancer.nlp.morpho.tense",TenseTag.class);
+//
+//    Annotation<String,VerbMoodTag> VERB_MOOD_ANNOTATION = new Annotation<String,VerbMoodTag>(
+//            "stanbol.enhancer.nlp.morpho.verb-mood",VerbMoodTag.class);
 
 }

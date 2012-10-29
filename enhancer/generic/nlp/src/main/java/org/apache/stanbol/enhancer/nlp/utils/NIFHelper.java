@@ -33,6 +33,7 @@ import org.apache.stanbol.enhancer.nlp.nif.SsoOntology;
 import org.apache.stanbol.enhancer.nlp.nif.StringOntology;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
+import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -238,9 +239,15 @@ public final class NIFHelper {
     public static void writePos(MGraph graph, Annotated annotated, UriRef segmentUri) {
         Value<PosTag> posTag = annotated.getAnnotation(NlpAnnotations.POS_ANNOTATION);
         if(posTag != null){
-            if(posTag.value().getCategory() != null){
-                graph.add(new TripleImpl(segmentUri, SsoOntology.oliaLink.getUri(), 
-                    posTag.value().getCategory().getUri()));
+            if(posTag.value().isMapped()){
+                for(Pos pos : posTag.value().getPos()){
+                    graph.add(new TripleImpl(segmentUri, SsoOntology.oliaLink.getUri(), 
+                        pos.getUri()));
+                }
+                for(LexicalCategory cat : posTag.value().getCategories()){
+                    graph.add(new TripleImpl(segmentUri, SsoOntology.oliaLink.getUri(), 
+                        cat.getUri()));
+                }
             }
             graph.add(new TripleImpl(segmentUri, SsoOntology.posTag.getUri(), 
                 lf.createTypedLiteral(posTag.value().getTag())));

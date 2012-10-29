@@ -3,6 +3,7 @@ package org.apache.stanbol.enhancer.nlp.pos.olia;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
+import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 
 public class Spanish {
@@ -25,70 +26,70 @@ public class Spanish {
 //        PAROLE.getProperties().put("olia.linkingModel", 
 //            new UriRef("http://purl.org/olia/???"));
         PAROLE.addTag(new PosTag("AO", LexicalCategory.Adjective));
-        PAROLE.addTag(new PosTag("AQ", LexicalCategory.Adjective));
-        PAROLE.addTag(new PosTag("CC", LexicalCategory.Conjuction));
-        PAROLE.addTag(new PosTag("CS", LexicalCategory.Conjuction));
-        PAROLE.addTag(new PosTag("DA", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("DD", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("DE", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("DI", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("DN", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("DP", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("DT", LexicalCategory.PronounOrDeterminer));
+        PAROLE.addTag(new PosTag("AQ", Pos.QualifierAdjective));
+        PAROLE.addTag(new PosTag("CC", Pos.CoordinatingConjunction));
+        PAROLE.addTag(new PosTag("CS", Pos.SubordinatingConjunction));
+        PAROLE.addTag(new PosTag("DA", Pos.Article));
+        PAROLE.addTag(new PosTag("DD", Pos.DemonstrativeDeterminer));
+        PAROLE.addTag(new PosTag("DE", Pos.ExclamatoryDeterminer));
+        PAROLE.addTag(new PosTag("DI", Pos.IndefiniteDeterminer));
+        PAROLE.addTag(new PosTag("DN", Pos.Numeral,Pos.Determiner));
+        PAROLE.addTag(new PosTag("DP", Pos.PossessiveDeterminer));
+        PAROLE.addTag(new PosTag("DT", Pos.InterrogativeDeterminer));
         PAROLE.addTag(new PosTag("Faa", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fat", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fc", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fd", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fe", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fg", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fh", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fia", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fit", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fp", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fpa", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fpt", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fs", LexicalCategory.Punctuation));
-        PAROLE.addTag(new PosTag("Fx", LexicalCategory.Punctuation));
+        PAROLE.addTag(new PosTag("Fat", Pos.ExclamativePoint));
+        PAROLE.addTag(new PosTag("Fc", Pos.Comma));
+        PAROLE.addTag(new PosTag("Fd", Pos.Colon));
+        PAROLE.addTag(new PosTag("Fe", Pos.Quote));
+        PAROLE.addTag(new PosTag("Fg", Pos.Hyphen));
+        PAROLE.addTag(new PosTag("Fh", Pos.Slash));
+        PAROLE.addTag(new PosTag("Fia", Pos.InvertedQuestionMark));
+        PAROLE.addTag(new PosTag("Fit", Pos.QuestionMark));
+        PAROLE.addTag(new PosTag("Fp", Pos.Point));
+        PAROLE.addTag(new PosTag("Fpa", Pos.OpenParenthesis));
+        PAROLE.addTag(new PosTag("Fpt", Pos.CloseParenthesis));
+        PAROLE.addTag(new PosTag("Fs", Pos.SuspensionPoints));
+        PAROLE.addTag(new PosTag("Fx", Pos.SemiColon));
         PAROLE.addTag(new PosTag("Fz", LexicalCategory.Punctuation));
         PAROLE.addTag(new PosTag("I", LexicalCategory.Interjection));
-        PAROLE.addTag(new PosTag("NC", LexicalCategory.Noun));
-        PAROLE.addTag(new PosTag("NP", LexicalCategory.Noun));
-        PAROLE.addTag(new PosTag("P0", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("PD", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("PE", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("PI", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("PN", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("PP", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("PR", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("PT", LexicalCategory.PronounOrDeterminer));
-        PAROLE.addTag(new PosTag("PX", LexicalCategory.PronounOrDeterminer));
+        PAROLE.addTag(new PosTag("NC", Pos.CommonNoun));
+        PAROLE.addTag(new PosTag("NP", Pos.ProperNoun));
+        PAROLE.addTag(new PosTag("P0", Pos.Pronoun)); //TODO: CliticPronoun is missing
+        PAROLE.addTag(new PosTag("PD", Pos.DemonstrativePronoun));
+        PAROLE.addTag(new PosTag("PE", Pos.ExclamatoryPronoun));
+        PAROLE.addTag(new PosTag("PI", Pos.IndefinitePronoun));
+        PAROLE.addTag(new PosTag("PN", Pos.Pronoun)); //TODO: NumeralPronoun is missing
+        PAROLE.addTag(new PosTag("PP", Pos.PersonalPronoun));
+        PAROLE.addTag(new PosTag("PR", Pos.RelativePronoun));
+        PAROLE.addTag(new PosTag("PT", Pos.InterrogativePronoun));
+        PAROLE.addTag(new PosTag("PX", Pos.PossessivePronoun));
         PAROLE.addTag(new PosTag("RG", LexicalCategory.Adverb));
-        PAROLE.addTag(new PosTag("RN", LexicalCategory.Adverb));
-        PAROLE.addTag(new PosTag("SP", LexicalCategory.Adposition));
-        PAROLE.addTag(new PosTag("VAG", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VAI", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VAM", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VAN", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VAP", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VAS", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VMG", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VMI", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VMM", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VMN", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VMP", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VMS", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VSG", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VSI", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VSM", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VSN", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VSP", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("VSS", LexicalCategory.Verb));
-        PAROLE.addTag(new PosTag("W", LexicalCategory.Quantifier)); //date times
-        PAROLE.addTag(new PosTag("X", null)); //unknown
-        PAROLE.addTag(new PosTag("Y", null)); //abbreviation
-        PAROLE.addTag(new PosTag("Z", null)); //Figures
-        PAROLE.addTag(new PosTag("Zm", LexicalCategory.Quantifier)); //currency
-        PAROLE.addTag(new PosTag("Zp", LexicalCategory.Quantifier)); //percentage
+        PAROLE.addTag(new PosTag("RN", Pos.NegativeAdverb));
+        PAROLE.addTag(new PosTag("SP", Pos.Preposition));
+        PAROLE.addTag(new PosTag("VAG", Pos.StrictAuxiliaryVerb, Pos.Gerund));
+        PAROLE.addTag(new PosTag("VAI", Pos.StrictAuxiliaryVerb, Pos.IndicativeVerb));
+        PAROLE.addTag(new PosTag("VAM", Pos.StrictAuxiliaryVerb, Pos.ImperativeVerb));
+        PAROLE.addTag(new PosTag("VAN", Pos.StrictAuxiliaryVerb, Pos.Infinitive));
+        PAROLE.addTag(new PosTag("VAP", Pos.StrictAuxiliaryVerb, Pos.Participle));
+        PAROLE.addTag(new PosTag("VAS", Pos.StrictAuxiliaryVerb, Pos.SubjunctiveVerb));
+        PAROLE.addTag(new PosTag("VMG", Pos.MainVerb, Pos.Gerund));
+        PAROLE.addTag(new PosTag("VMI", Pos.MainVerb, Pos.IndicativeVerb));
+        PAROLE.addTag(new PosTag("VMM", Pos.MainVerb, Pos.ImperativeVerb));
+        PAROLE.addTag(new PosTag("VMN", Pos.MainVerb, Pos.Infinitive));
+        PAROLE.addTag(new PosTag("VMP", Pos.MainVerb, Pos.Participle));
+        PAROLE.addTag(new PosTag("VMS", Pos.MainVerb, Pos.SubjunctiveVerb));
+        PAROLE.addTag(new PosTag("VSG", Pos.ModalVerb, Pos.Gerund));
+        PAROLE.addTag(new PosTag("VSI", Pos.ModalVerb, Pos.IndicativeVerb));
+        PAROLE.addTag(new PosTag("VSM", Pos.ModalVerb, Pos.ImperativeVerb));
+        PAROLE.addTag(new PosTag("VSN", Pos.ModalVerb, Pos.Infinitive));
+        PAROLE.addTag(new PosTag("VSP", Pos.ModalVerb, Pos.Participle));
+        PAROLE.addTag(new PosTag("VSS", Pos.ModalVerb, Pos.SubjunctiveVerb));
+        PAROLE.addTag(new PosTag("W", Pos.Date)); //date times
+        PAROLE.addTag(new PosTag("X")); //unknown
+        PAROLE.addTag(new PosTag("Y", Pos.Abbreviation)); //abbreviation
+        PAROLE.addTag(new PosTag("Z", Pos.Image)); //Figures
+        PAROLE.addTag(new PosTag("Zm", Pos.Symbol)); //currency
+        PAROLE.addTag(new PosTag("Zp", Pos.Symbol)); //percentage
         
         
     }
