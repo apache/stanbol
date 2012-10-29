@@ -20,6 +20,12 @@ import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.SENTIMENT_ANNOTATIO
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getAnalysedText;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -31,46 +37,24 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.lucene.messages.NLS;
-import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.engines.sentiment.api.SentimentClassifier;
-import org.apache.stanbol.enhancer.engines.sentiment.classifiers.SentiWSComponent;
-import org.apache.stanbol.enhancer.engines.sentiment.classifiers.SentiWordNet;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
-import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
-import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Annotation;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
-import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
-import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A Stanbol engine that associates sentiment values with the tokens created by the POS tagging engine.
