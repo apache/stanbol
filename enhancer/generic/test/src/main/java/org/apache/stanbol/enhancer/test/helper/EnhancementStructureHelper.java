@@ -1,3 +1,19 @@
+/*
+* Licensed to the Apache Software Foundation (ASF) under one or more
+* contributor license agreements.  See the NOTICE file distributed with
+* this work for additional information regarding copyright ownership.
+* The ASF licenses this file to You under the Apache License, Version 2.0
+* (the "License"); you may not use this file except in compliance with
+* the License.  You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 package org.apache.stanbol.enhancer.test.helper;
 
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
@@ -319,10 +335,16 @@ public class EnhancementStructureHelper {
         // check if the relation to the text annotation is set
         assertTrue(relationToTextAnnotationIterator.hasNext());
         while (relationToTextAnnotationIterator.hasNext()) {
-            // test if the referred annotations are text annotations
+            // test if the referred annotations are text annotations or
+            // the referenced annotations is a fise:EntityAnnotation AND also a
+            // dc:requires link is defined (STANBOL-766)
             UriRef referredTextAnnotation = (UriRef) relationToTextAnnotationIterator.next().getObject();
-            assertTrue(enhancements.filter(referredTextAnnotation, RDF_TYPE,
-                    ENHANCER_TEXTANNOTATION).hasNext());
+            assertTrue("fise:EntityAnnotations MUST BE dc:related to a fise:TextAnnotation OR dc:requires and dc:related to the same fise:EntityAnnotation",
+                enhancements.filter(referredTextAnnotation, RDF_TYPE,
+                    ENHANCER_TEXTANNOTATION).hasNext() || (
+                enhancements.filter(referredTextAnnotation, RDF_TYPE,
+                    ENHANCER_ENTITYANNOTATION).hasNext() && 
+                    enhancements.filter(entityAnnotation, Properties.DC_REQUIRES, referredTextAnnotation).hasNext()));
         }
 
         // test if an entity is referred
