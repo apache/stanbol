@@ -168,7 +168,7 @@ public class LanguageConfiguration {
             int sepIndex = line.indexOf(';');
             String lang = sepIndex < 0 ? line : line.substring(0, sepIndex).trim();
             lang = lang.toLowerCase();
-            if(lang.charAt(0) == '!'){ //exclude
+            if(lang.length() > 0 && lang.charAt(0) == '!'){ //exclude
                 lang = lang.substring(1);
                 if(configuredLanguages.containsKey(lang)){
                     throw new ConfigurationException(property, 
