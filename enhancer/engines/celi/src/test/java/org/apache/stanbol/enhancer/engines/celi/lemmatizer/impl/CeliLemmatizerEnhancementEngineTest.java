@@ -115,6 +115,7 @@ public class CeliLemmatizerEnhancementEngineTest {
 			morphoAnalysisEngine.computeEnhancements(ci);
         } catch (EngineException e) {
             RemoteServiceHelper.checkServiceUnavailable(e);
+            return; //Deactivate this test
         }
 
 		TestUtils.logEnhancements(ci);

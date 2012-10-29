@@ -4,8 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.text.DefaultEditorKit.PasteAction;
-
 import org.apache.stanbol.enhancer.nlp.model.tag.Tag;
 import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.morpho.Case;
@@ -23,6 +21,7 @@ import org.apache.stanbol.enhancer.nlp.morpho.TenseTag;
 import org.apache.stanbol.enhancer.nlp.morpho.VerbMood;
 import org.apache.stanbol.enhancer.nlp.morpho.VerbMoodTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
+import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -401,14 +400,14 @@ public final class CeliTagSetRegistry {
         ITALIAN.addTag(new PosTag("DETPOSS", LexicalCategory.PronounOrDeterminer));
         ITALIAN.addTag(new PosTag("DETWH", LexicalCategory.PronounOrDeterminer));
         ITALIAN.addTag(new PosTag("CHEWH", LexicalCategory.PronounOrDeterminer));
-        ITALIAN.addTag(new PosTag("CLI", LexicalCategory.Clitic));
+        ITALIAN.addTag(new PosTag("CLI")); //not mapped
         ITALIAN.addTag(new PosTag("CONJ", LexicalCategory.Conjuction));
         ITALIAN.addTag(new PosTag("CONGWH", LexicalCategory.Conjuction));
         ITALIAN.addTag(new PosTag("PREP", LexicalCategory.Adposition));
         ITALIAN.addTag(new PosTag("V", LexicalCategory.Verb));
         ITALIAN.addTag(new PosTag("INT", LexicalCategory.Interjection));
         ITALIAN.addTag(new PosTag("NEG", LexicalCategory.Adverb));
-        ITALIAN.addTag(new PosTag("NUM", LexicalCategory.Numeral));
+        ITALIAN.addTag(new PosTag("NUM", Pos.Numeral));
         getInstance().addPosTagset(ITALIAN);
     }
 
@@ -424,7 +423,7 @@ public final class CeliTagSetRegistry {
         GERMAN.addTag(new PosTag("PREPART", LexicalCategory.Adposition));
         GERMAN.addTag(new PosTag("V", LexicalCategory.Verb));
         GERMAN.addTag(new PosTag("INT", LexicalCategory.Interjection));
-        GERMAN.addTag(new PosTag("NUM", LexicalCategory.Numeral));
+        GERMAN.addTag(new PosTag("NUM", Pos.Numeral));
         getInstance().addPosTagset(GERMAN);
     }
 
@@ -433,7 +432,7 @@ public final class CeliTagSetRegistry {
         DANISH.addTag(new PosTag("N", LexicalCategory.Noun));
         DANISH.addTag(new PosTag("NF", LexicalCategory.Noun));
         DANISH.addTag(new PosTag("NN", LexicalCategory.Noun));
-        DANISH.addTag(new PosTag("NP", LexicalCategory.ProperNoun));
+        DANISH.addTag(new PosTag("NP", LexicalCategory.Noun));//ProperNoun));
         DANISH.addTag(new PosTag("ADJ", LexicalCategory.Adjective));
         DANISH.addTag(new PosTag("ADV", LexicalCategory.Adverb));
         DANISH.addTag(new PosTag("ART", LexicalCategory.PronounOrDeterminer));
@@ -443,7 +442,7 @@ public final class CeliTagSetRegistry {
         DANISH.addTag(new PosTag("V", LexicalCategory.Verb));
         DANISH.addTag(new PosTag("INT", LexicalCategory.Interjection));
         DANISH.addTag(new PosTag("INVAR", LexicalCategory.Residual));
-        DANISH.addTag(new PosTag("NUM", LexicalCategory.Numeral));
+        DANISH.addTag(new PosTag("NUM", Pos.Numeral));
         getInstance().addPosTagset(DANISH);
     }
 
@@ -453,7 +452,7 @@ public final class CeliTagSetRegistry {
         RUSSIAN.addTag(new PosTag("NF", LexicalCategory.Noun));
         RUSSIAN.addTag(new PosTag("NM", LexicalCategory.Noun));
         RUSSIAN.addTag(new PosTag("NN", LexicalCategory.Noun));
-        RUSSIAN.addTag(new PosTag("NP", LexicalCategory.ProperNoun));
+        RUSSIAN.addTag(new PosTag("NP", LexicalCategory.Noun));//ProperNoun));
         RUSSIAN.addTag(new PosTag("NPLUR", LexicalCategory.Noun));
         RUSSIAN.addTag(new PosTag("ADJ", LexicalCategory.Adjective));
         RUSSIAN.addTag(new PosTag("ADV", LexicalCategory.Adverb));
@@ -462,7 +461,7 @@ public final class CeliTagSetRegistry {
         RUSSIAN.addTag(new PosTag("PREP", LexicalCategory.Adposition));
         RUSSIAN.addTag(new PosTag("V", LexicalCategory.Verb));
         RUSSIAN.addTag(new PosTag("INT", LexicalCategory.Interjection));
-        RUSSIAN.addTag(new PosTag("NUM", LexicalCategory.Numeral));
+        RUSSIAN.addTag(new PosTag("NUM", Pos.Numeral));
         RUSSIAN.addTag(new PosTag("NUMNON", LexicalCategory.PronounOrDeterminer));
         RUSSIAN.addTag(new PosTag("PART", LexicalCategory.Unique));
         getInstance().addPosTagset(RUSSIAN);
@@ -480,7 +479,7 @@ public final class CeliTagSetRegistry {
         ROMANIAN.addTag(new PosTag("V", LexicalCategory.Verb));
         ROMANIAN.addTag(new PosTag("I", LexicalCategory.Interjection));
         ROMANIAN.addTag(new PosTag("INVAR", LexicalCategory.Residual));
-        ROMANIAN.addTag(new PosTag("NU", LexicalCategory.Numeral));
+        ROMANIAN.addTag(new PosTag("NU", Pos.Numeral));
         ROMANIAN.addTag(new PosTag("R", LexicalCategory.Residual));
         ROMANIAN.addTag(new PosTag("U", LexicalCategory.Unique));
         getInstance().addPosTagset(ROMANIAN);

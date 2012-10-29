@@ -118,6 +118,7 @@ public class CeliAnalyzedTextLemmatizerEngineTest {
             engine.computeEnhancements(ci);
         } catch (EngineException e) {
             RemoteServiceHelper.checkServiceUnavailable(e);
+            return; //deactivate test
         }
         //now validate the enhancements
         boolean foundVerb = false;
@@ -149,7 +150,7 @@ public class CeliAnalyzedTextLemmatizerEngineTest {
     private void validateMorphFeatureProbability(List<Value<MorphoFeatures>> mfs, LexicalCategory lc, double prob) {
         for(Value<MorphoFeatures> mf : mfs){
             for(PosTag pos : mf.value().getPosList()){
-                if(pos.getCategory() == lc){
+                if(pos.hasCategory(lc)){
                     Assert.assertEquals(prob, mf.probability());
                 }
             }

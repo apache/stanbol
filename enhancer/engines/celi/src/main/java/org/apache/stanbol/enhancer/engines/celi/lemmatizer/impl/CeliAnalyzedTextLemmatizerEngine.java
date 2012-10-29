@@ -9,8 +9,10 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.soap.SOAPException;
 
@@ -144,19 +146,27 @@ public class CeliAnalyzedTextLemmatizerEngine extends AbstractEnhancementEngine<
             Token token = at.addToken(term.getFrom(), term.getTo());
             //Now try to get POS annotations for the Token
             for(Value<PosTag> posAnno : token.getAnnotations(NlpAnnotations.POS_ANNOTATION)){
-                if(posAnno.value().getCategory() != null){
-                    tokenLexCats.put(posAnno.value().getCategory(), posAnno.probability());
+                if(posAnno.value().isMapped()){
+                    for(LexicalCategory cat :posAnno.value().getCategories()){
+                        if(!tokenLexCats.containsKey(cat)){ //do not override with lover prob
+                            tokenLexCats.put(cat, posAnno.probability());
+                        }
+                    }
                 }
             }
             for(Reading reading : term.getTermReadings()){
                 MorphoFeatures mf = CeliMorphoFeatures.parseFrom(reading, language);
                 //add the readings (MorphoFeatures)
                 if(mf != null){
-                    //use the POS tags of the morpho analysis and compair it
+                    //use the POS tags of the morpho analysis and compare it
                     //with existing POS tags.
                     double posProbability = -1;
+                    Set<LexicalCategory> mfCats = EnumSet.noneOf(LexicalCategory.class);
                     for(PosTag mfPos : mf.getPosList()){
-                        Double prob = tokenLexCats.get(mfPos.getCategory());
+                        mfCats.addAll(mfPos.getCategories());
+                    }
+                    for(LexicalCategory mfCat : mfCats){
+                        Double prob = tokenLexCats.get(mfCat);
                         if(prob != null && posProbability < prob){
                             posProbability = prob;
                         }

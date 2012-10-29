@@ -116,8 +116,10 @@ public class CeliMorphoFeatures extends MorphoFeatures{
 		result.add(new TripleImpl(textAnnotation, CeliLemmatizerEnhancementEngine.hasLemmaForm, 
 		    new PlainLiteralImpl(getLemma(), lang)));
 		for(PosTag pos: getPosList()){
-		    if(pos.getCategory() != null){
-		        result.add(new TripleImpl(textAnnotation, RDF_TYPE, pos.getCategory().getUri()));
+		    if(pos.isMapped()){
+		        for(LexicalCategory cat : pos.getCategories()){
+		            result.add(new TripleImpl(textAnnotation, RDF_TYPE, cat.getUri()));
+		        }
 		    }
 		}
 		for(NumberTag num : getNumberList()){
