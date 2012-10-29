@@ -50,7 +50,7 @@
     <module>tika</module>
     <module>entitytagging</module>
     <module>keywordextraction</module>
-    <module>refactor</module>
+    <!-- <module>refactor</module> -->
     <!-- Enhancement Engines using external services -->
     <module>celi</module> <!-- http://linguagrid.org -->
     <module>geonames</module> <!-- http://geonames.org -->
