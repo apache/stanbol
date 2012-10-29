@@ -429,7 +429,13 @@ public class EntityLinkerConfig {
      * @param maxSearchTokens the maxSearchTokens to set
      */
     public final void setMaxSearchTokens(int maxSearchTokens) {
-        this.maxSearchTokens = maxSearchTokens;
+        if(maxSearchTokens == 0){
+            this.maxSearchTokens = DEFAULT_MAX_SEARCH_TOKENS;
+        } else if (maxSearchTokens < 0){
+            throw new IllegalArgumentException("The maxSearchToken value MUST BE >= 0 (0 for setting the default)");
+        } else {
+            this.maxSearchTokens = maxSearchTokens;
+        }
     }
     /**
      * Getter for the case sensitive matching state

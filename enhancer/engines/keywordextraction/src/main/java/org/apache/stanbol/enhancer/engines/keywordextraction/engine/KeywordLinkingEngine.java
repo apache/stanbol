@@ -204,7 +204,7 @@ public class KeywordLinkingEngine
      * This parameter allows to configure the maximum distance surounding the current
      * "processable" Token other "processable" tokens can be included in searches.
      */
-    public static final String MAX_SEARCH_TOKEN_DISTANCE = "org.apache.stanbol.enhancer.engines.keywordextraction.masSearchTokenDistance";
+    public static final String MAX_SEARCH_TOKEN_DISTANCE = "org.apache.stanbol.enhancer.engines.keywordextraction.maxSearchTokenDistance";
     
     /**
      * {@link NlpAnnotations#POS_ANNOTATION POS annotations} with a lower
@@ -289,7 +289,10 @@ public class KeywordLinkingEngine
      */
     private static final int DEFAULT_ENTITY_SEARCHER_LIMIT = 10;
 
-    private EntitySearcher entitySearcher;
+    /**
+     * The entitySearcher used for linking
+     */
+    protected EntitySearcher entitySearcher;
     private EntityLinkerConfig linkerConfig;
     
     private TextProcessingConfig defaultTextProcessingConfig;
@@ -300,7 +303,7 @@ public class KeywordLinkingEngine
     // "LabelTokenizerManager labelTokenizer" and not "LabelTokenizer labelTokenizer"
     @org.apache.felix.scr.annotations.Reference(referenceInterface=LabelTokenizerManager.class,
             bind="bindLabelTokenizer",unbind="unbindLabelTokenizer")
-    private LabelTokenizer labelTokenizer;
+    protected LabelTokenizer labelTokenizer;
 
     protected void bindLabelTokenizer(LabelTokenizerManager ltm){
         labelTokenizer = ltm;
@@ -930,14 +933,14 @@ public class KeywordLinkingEngine
             try {
                 maxSearchDistance = Integer.valueOf(value.toString());
             } catch(NumberFormatException e){
-                throw new ConfigurationException(MAX_SEARCH_TOKENS, "Values MUST be valid Integer values > 0",e);
+                throw new ConfigurationException(MAX_SEARCH_TOKEN_DISTANCE, "Values MUST be valid Integer values > 0",e);
             }
         } else {
             maxSearchDistance = null;
         }
         if(maxSearchDistance != null){
             if(maxSearchDistance < 1){
-                throw new ConfigurationException(MAX_SEARCH_TOKENS, "Values MUST be valid Integer values > 0");
+                throw new ConfigurationException(MAX_SEARCH_TOKEN_DISTANCE, "Values MUST be valid Integer values > 0");
             }
             linkerConfig.setMaxSearchDistance(maxSearchDistance);
         }
