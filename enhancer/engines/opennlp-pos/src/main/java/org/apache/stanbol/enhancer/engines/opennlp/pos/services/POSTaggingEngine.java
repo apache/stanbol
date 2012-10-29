@@ -255,17 +255,18 @@ public class POSTaggingEngine extends AbstractEnhancementEngine<RuntimeException
             posTag(tokenList, posTagger,tagSet,adhocTags);
             
         }
-        
-        logAnnotations(at);
+        if(log.isTraceEnabled()){
+            logAnnotations(at);
+        }
     }
     
     private void logAnnotations(AnalysedText at){
         Iterator<Span> it = at.getEnclosed(EnumSet.of(SpanTypeEnum.Sentence, SpanTypeEnum.Token));
         while(it.hasNext()){
             Span span = it.next();
-            log.info(" > {}",span);
+            log.trace(" > {}",span);
             for(Value<PosTag> value : span.getAnnotations(POS_ANNOTATION)){
-                log.info("   - {}",value);
+                log.trace("   - {}",value);
             }
         }
     }
