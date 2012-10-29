@@ -228,7 +228,9 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
                 }
                 String[] tokenStrings = tokenTextList.toArray(new String[tokenTextList.size()]);
                 String[] tokenPos = posList.toArray(new String[tokenTextList.size()]);
-                log.info("Tokens: {}"+Arrays.toString(tokenStrings));
+                if(log.isTraceEnabled()){
+                    log.trace("Tokens: {}"+Arrays.toString(tokenStrings));
+                }
                 tokenTextList.clear(); //free memory
                 posList.clear(); //free memory
                 
@@ -236,7 +238,9 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
                 
                 String[] chunkTags = chunker.chunk(tokenStrings, tokenPos);
                 double[] chunkProb = chunker.probs();
-                log.info("Chunks: {}"+Arrays.toString(chunkTags));
+                if(log.isTraceEnabled()){
+                    log.trace("Chunks: {}"+Arrays.toString(chunkTags));
+                }
                 tokenStrings = null; //free memory
                 tokenPos = null; //free memory
                 
@@ -294,7 +298,9 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
         } finally {
             ci.getLock().writeLock().unlock();
         }
-        logChunks(at);
+        if(log.isTraceEnabled()){
+            logChunks(at);
+        }
     }
 
     private void logChunks(AnalysedText at){
@@ -302,12 +308,12 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
         while(it.hasNext()){
             Span span = it.next();
             if(span.getType() == SpanTypeEnum.Chunk){
-                log.info(" > {} {}",span,span.getSpan());
+                log.trace(" > {} {}",span,span.getSpan());
             } else {
-                log.info(" > {}",span);
+                log.trace(" > {}",span);
             }
             for(Value<PhraseTag> value : span.getAnnotations(PHRASE_ANNOTATION)){
-                log.info("   - {}",value);
+                log.trace("   - {}",value);
             }
         }
     }
