@@ -14,7 +14,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.enhancer.engines.keywordextraction.linking;
+package org.apache.stanbol.enhancer.engines.keywordextraction.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,10 +22,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import opennlp.tools.util.Span;
 
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText;
+import org.apache.stanbol.enhancer.nlp.model.Section;
+import org.apache.stanbol.enhancer.nlp.model.Token;
 
 /**
  * The occurrence of an detected Entity within the content. <p>
@@ -69,19 +69,17 @@ public class LinkedEntity {
         private final int end;
         private final String context;
 
-        private Occurrence(AnalysedText sentence,int token) {
-            this(sentence,token,1);
+        private Occurrence(Section sentence,Token token) {
+            this(sentence,token,token);
         }
-        private Occurrence(AnalysedText sentence,int startToken,int tokenSpan){
-            this.start = sentence.getOffset()+sentence.getTokens().get(startToken).getStart();
-            this.end = sentence.getOffset()+sentence.getTokens().get(startToken+tokenSpan-1).getEnd();
-            String context = sentence.getText();
+        private Occurrence(Section sentence,Token start,Token end){
+            this.start = start.getStart();
+            this.end = end.getEnd();
+            String context = sentence.getSpan();
             if(context.length() > MAX_CONTEXT_LENGTH){
-                Span contextTokenSpan = new Span(
-                    Math.max(0, startToken-CONTEXT_TOKEN_COUNT),
-                    Math.min(startToken+tokenSpan+CONTEXT_TOKEN_COUNT, sentence.getTokens().size())-1);
-                context = context.substring(sentence.getTokens().get(contextTokenSpan.getStart()).getStart(),
-                    sentence.getTokens().get(contextTokenSpan.getEnd()).getEnd());
+                context = start.getContext().getSpan().substring(
+                    Math.max(0, this.start-CONTEXT_TOKEN_COUNT),
+                    Math.min(this.end+CONTEXT_TOKEN_COUNT, start.getContext().getEnd())-1);
             }
             this.context = context;
         }
@@ -148,18 +146,17 @@ public class LinkedEntity {
     }
    /**
      * Creates a new Linked Entity including the first {@link Occurrence}
-     * @param sentence the sentence (context) for the occurrence.
+     * @param section the sentence (context) for the occurrence.
      * @param startToken the index of the start token
      * @param tokenSpan the number of token included in this span
      * @param suggestions the entity suggestions
      * @param types the types of the linked entity. 
      */
-    protected LinkedEntity(AnalysedText sentence,int startToken,int tokenSpan, 
+    protected LinkedEntity(Section section,Token startToken,Token endToken, 
                            List<Suggestion> suggestions, Set<UriRef> types) {
-        this(sentence.getText().substring(
-            sentence.getTokens().get(startToken).getStart(), 
-            sentence.getTokens().get(tokenSpan).getEnd()),suggestions,types);
-        addOccurrence(sentence, startToken,tokenSpan);
+        this(startToken.getSpan().substring(startToken.getStart(), endToken.getEnd()),
+            suggestions,types);
+        addOccurrence(section, startToken,endToken);
     }
     /**
      * Getter for the selected text
@@ -183,8 +180,8 @@ public class LinkedEntity {
      * @param tokenSpan the number of tokens included in this span
      * @return the new Occurrence also added to {@link #getOccurrences()}
      */
-    protected Occurrence addOccurrence(AnalysedText sentence,int startToken,int tokenSpan){
-        Occurrence o = new Occurrence(sentence, startToken, tokenSpan);
+    protected Occurrence addOccurrence(Section section,Token startToken,Token tokenSpan){
+        Occurrence o = new Occurrence(section, startToken, tokenSpan);
         occurrences.add(o);
         return o;
     }

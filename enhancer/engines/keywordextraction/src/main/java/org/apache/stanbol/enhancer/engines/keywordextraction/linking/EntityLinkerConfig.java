@@ -22,14 +22,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import opennlp.tools.chunker.Chunker;
-import opennlp.tools.postag.POSTagger;
-
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText;
-import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Chunk;
-import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.Suggestion.MATCH;
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.EntityLinker;
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.Suggestion;
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.Suggestion.MATCH;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 
@@ -68,6 +64,13 @@ public class EntityLinkerConfig {
      * more mapped to the actual label of an result.
      */
     public static final int DEFAULT_MAX_SEARCH_TOKENS = 2;
+    /**
+     * Default value for the maximum distance tokens are
+     * considered to be used (in addition to the currently processed on)
+     * for searches of Entities.<p>
+     * The default is set to <code>3</code> 
+     */
+    private static final int DEFAULT_MAX_SEARCH_DISTANCE = 3;
 
     /**
      * Default value for {@link #getNameField()} (rdfs:label)
@@ -186,6 +189,12 @@ public class EntityLinkerConfig {
      * more mapped to the actual label of an result.
      */
     private int maxSearchTokens = DEFAULT_MAX_SEARCH_TOKENS;
+    /**
+     * Defines the maximum distance tokens are
+     * considered to be used (in addition to the currently processed on)
+     * for searches of Entities.<p>
+     */
+    private int maxSearchDistance = DEFAULT_MAX_SEARCH_DISTANCE;
     
     private boolean caseSensitiveMatchingState = DEFAULT_CASE_SENSITIVE_MATCHING_STATE;
     /**
@@ -580,6 +589,31 @@ public class EntityLinkerConfig {
             throw new IllegalArgumentException("minimum Token Match Facter MUST be > 0 <= 1 (parsed: "+minTokenMatchFactor+")!");
         } else {
             this.minTokenMatchFactor = minTokenMatchFactor;
+        }
+    }
+    /**
+     * Getter for the maximum distance tokens are
+     * considered to be used (in addition to the currently processed on)
+     * for searches of Entities.
+     * @return the maximum search token distance
+     */
+    public int getMaxSearchDistance() {
+        return maxSearchDistance;
+    }
+    /**
+    /**
+     * Getter for the maximum distance tokens are
+     * considered to be used (in addition to the currently processed on)
+     * for searches of Entities.
+     * @param maxSearchDistance the maximum search token distance. If
+     * values &lt;= 0 are parsed the value is set to
+     *  {@link #DEFAULT_MAX_SEARCH_DISTANCE}
+     */
+    public void setMaxSearchDistance(int maxSearchDistance) {
+        if(maxSearchDistance <= 0){
+            maxSearchDistance = DEFAULT_MAX_SEARCH_DISTANCE;
+        } else {
+            this.maxSearchDistance = maxSearchDistance;
         }
     }
 }

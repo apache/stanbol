@@ -69,7 +69,8 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
     public Collection<? extends Representation> lookup(String field,
                                            Set<String> includeFields,
                                            List<String> search,
-                                           String... languages) throws IllegalStateException {
+                                           String[] languages,
+                                           Integer limit) throws IllegalStateException {
         //build the query and than return the result
         Site site = getSearchService();
         if(site == null){
@@ -77,8 +78,10 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
         }
         FieldQuery query = EntitySearcherUtils.createFieldQuery(site.getQueryFactory(), 
             field, includeFields, search, languages);
-        if(limit != null){
+        if(limit != null && limit > 0){
             query.setLimit(limit);
+        } else if(this.limit != null){
+            query.setLimit(this.limit);
         }
         QueryResultList<Representation> results;
         try {

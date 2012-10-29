@@ -16,9 +16,12 @@
 */
 package org.apache.stanbol.enhancer.engines.keywordextraction.engine;
 
+import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getAnalysedText;
+import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 import static org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum.getFullName;
 
-import java.io.IOException;
+import java.lang.Integer; //preserve this!
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -26,17 +29,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
@@ -51,35 +54,36 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.opennlp.OpenNLP;
-import org.apache.stanbol.commons.opennlp.TextAnalyzer;
-import org.apache.stanbol.commons.opennlp.TextAnalyzer.TextAnalyzerConfig;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.AnalysedContent;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinker;
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.EntityLinker;
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.LinkedEntity;
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.Suggestion;
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.LinkedEntity.Occurrence;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinkerConfig;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntitySearcher;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.LinkedEntity;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.Suggestion;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinkerConfig.RedirectProcessingMode;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.LinkedEntity.Occurrence;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntitySearcher;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.LabelTokenizer;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.LabelTokenizerManager;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.TextProcessingConfig;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl.EntityhubSearcher;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl.OpenNlpAnalysedContentFactory;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl.ReferencedSiteSearcher;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl.TrackingEntitySearcher;
-import org.apache.stanbol.enhancer.servicesapi.Blob;
+import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
+import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
+import org.apache.stanbol.enhancer.nlp.model.Token;
+import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
+import org.apache.stanbol.enhancer.nlp.pos.Pos;
+import org.apache.stanbol.enhancer.nlp.pos.PosTag;
+import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
-import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
-import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
@@ -88,7 +92,11 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * TODO: Split "Engine" and "EngineConfiguration" in two classes
+ * @author Rupert Westenthaler
+ *
+ */
 @Component(
     configurationFactory = true, 
     policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
@@ -119,12 +127,17 @@ import org.slf4j.LoggerFactory;
         intValue=EntityLinkerConfig.DEFAULT_MIN_SEARCH_TOKEN_LENGTH),
     @Property(name=KeywordLinkingEngine.MIN_TOKEN_MATCH_FACTOR,floatValue=
             EntityLinkerConfig.DEFAULT_MIN_TOKEN_MATCH_FACTOR),
-    @Property(name=KeywordLinkingEngine.KEYWORD_TOKENIZER,boolValue=false),
+    //Can no longer be supported with the new NLP chain!
+    //@Property(name=KeywordLinkingEngine.KEYWORD_TOKENIZER,boolValue=false),
     @Property(name=KeywordLinkingEngine.MAX_SUGGESTIONS,
         intValue=EntityLinkerConfig.DEFAULT_SUGGESTIONS),
-    @Property(name=KeywordLinkingEngine.PROCESSED_LANGUAGES,value=""),
+    @Property(name=KeywordLinkingEngine.PROCESS_ONLY_PROPER_NOUNS_STATE,
+        boolValue=KeywordLinkingEngine.DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE),
+    @Property(name=KeywordLinkingEngine.PROCESSED_LANGUAGES,
+        cardinality=Integer.MAX_VALUE,
+        value={"*"}),
     @Property(name=KeywordLinkingEngine.DEFAULT_MATCHING_LANGUAGE,value=""),
-    @Property(name=KeywordLinkingEngine.TYPE_MAPPINGS,cardinality=1000),
+    @Property(name=KeywordLinkingEngine.TYPE_MAPPINGS,cardinality=Integer.MAX_VALUE),
     @Property(name=KeywordLinkingEngine.DEREFERENCE_ENTITIES,
         boolValue=KeywordLinkingEngine.DEFAULT_DEREFERENCE_ENTITIES_STATE),
     @Property(name=Constants.SERVICE_RANKING,intValue=0)
@@ -158,16 +171,77 @@ public class KeywordLinkingEngine
     public static final String CASE_SENSITIVE = "org.apache.stanbol.enhancer.engines.keywordextraction.caseSensitive";
     public static final String REDIRECT_FIELD = "org.apache.stanbol.enhancer.engines.keywordextraction.redirectField";
     public static final String REDIRECT_PROCESSING_MODE = "org.apache.stanbol.enhancer.engines.keywordextraction.redirectMode";
-    public static final String MIN_SEARCH_TOKEN_LENGTH = "org.apache.stanbol.enhancer.engines.keywordextraction.minSearchTokenLength";
     public static final String MAX_SUGGESTIONS = "org.apache.stanbol.enhancer.engines.keywordextraction.maxSuggestions";
-    public static final String PROCESSED_LANGUAGES = "org.apache.stanbol.enhancer.engines.keywordextraction.processedLanguages";
     public static final String MIN_FOUND_TOKENS= "org.apache.stanbol.enhancer.engines.keywordextraction.minFoundTokens";
     public static final String DEFAULT_MATCHING_LANGUAGE = "org.apache.stanbol.enhancer.engines.keywordextraction.defaultMatchingLanguage";
-    public static final String MIN_POS_TAG_PROBABILITY = "org.apache.stanbol.enhancer.engines.keywordextraction.minPosTagProbability";
     public static final String TYPE_MAPPINGS = "org.apache.stanbol.enhancer.engines.keywordextraction.typeMappings";
-    public static final String KEYWORD_TOKENIZER = "org.apache.stanbol.enhancer.engines.keywordextraction.keywordTokenizer";
+    //public static final String KEYWORD_TOKENIZER = "org.apache.stanbol.enhancer.engines.keywordextraction.keywordTokenizer";
     public static final String MIN_TOKEN_MATCH_FACTOR = "org.apache.stanbol.enhancer.engines.keywordextraction.minTokenMatchFactor";
 //  public static final String ENABLE_CHUNKER = "org.apache.stanbol.enhancer.engines.keywordextraction.enableChunker";
+    //Search parameters
+    /**
+     * Used as fallback in case a {@link Token} does not have a {@link PosTag} or 
+     * {@link NlpAnnotations#POS_ANNOTATION POS annotations} do have a low confidence.
+     * In such cases only words that are longer than  this value will be considerd for
+     * linking
+     */
+    public static final String MIN_SEARCH_TOKEN_LENGTH = "org.apache.stanbol.enhancer.engines.keywordextraction.minSearchTokenLength";
+    /**
+     * The maximum number of {@link Token} used as search terms with the 
+     * {@link EntitySearcher#lookup(String, Set, java.util.List, String[], Integer)}
+     * method
+     */
+    public static final String MAX_SEARCH_TOKENS = "org.apache.stanbol.enhancer.engines.keywordextraction.masSearchTokens";
+    /**
+     * The maximum number of {@link Token} searched around a "processable" Token for
+     * additional search tokens.<p>
+     * As an Example in the text section "at the University of Munich a new procedure to"
+     * only "Munich" would be classified as {@link Pos#ProperNoun} and considered as
+     * "processible". However for searching it makes sence to use additional Tokens to
+     * reduce (or correctly rank) the expected high number of results for "Munich".
+     * Because of that "matchable" words suronding the "processable" are considered as
+     * included for searches.<p>
+     * This parameter allows to configure the maximum distance surounding the current
+     * "processable" Token other "processable" tokens can be included in searches.
+     */
+    public static final String MAX_SEARCH_TOKEN_DISTANCE = "org.apache.stanbol.enhancer.engines.keywordextraction.masSearchTokenDistance";
+    
+    /**
+     * {@link NlpAnnotations#POS_ANNOTATION POS annotations} with a lower
+     * confidence than this value will be ignored.
+     */
+    public static final String MIN_POS_TAG_PROBABILITY = "org.apache.stanbol.enhancer.engines.keywordextraction.minPosTagProbability";
+    /**
+     * If enabled only {@link Pos#ProperNoun}, {@link Pos#Foreign} and {@link Pos#Acronym} are Matched. If
+     * deactivated all Tokens with the category {@link LexicalCategory#Noun} and 
+     * {@link LexicalCategory#Residual} are considered for matching.<p>
+     * This property allows an easy configuration of the matching that is sufficient for most usage scenarios.
+     * Users that need to have more control can configure language specific mappings by using
+     * {@link #PARAM_LEXICAL_CATEGORIES}, {@link #PARAM_POS_TYPES}, {@link #PARAM_POS_TAG} and
+     * {@link #PARAM_POS_PROBABILITY} in combination with the {@link #PROCESSED_LANGUAGES}
+     * configuration.<p>
+     * The {@link #DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE default} if this is <code>false</code>
+     */
+    public static final String PROCESS_ONLY_PROPER_NOUNS_STATE = "org.apache.stanbol.enhancer.engines.keywordextraction.properNounsState";
+    public static final boolean DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE = false;
+    public static Set<Pos> DEFAULT_PROCESSED_POS_TYPES = TextProcessingConfig.DEFAULT_PROCESSED_POS;
+    public static Set<LexicalCategory> DEFAULT_PROCESSED_LEXICAL_CATEGORIES = TextProcessingConfig.DEFAULT_PROCESSED_LEXICAL_CATEGORIES;
+    /**
+     * Allows to configure the processed languages by using the syntax supported by {@link LanguageConfiguration}.
+     * In addition this engine supports language specific configurations for matched {@link LexicalCategory}
+     * {@link Pos} and String POS tags as well as Pos annotation probabilities by using the parameters
+     * {@link #PARAM_LEXICAL_CATEGORIES}, {@link #PARAM_POS_TYPES}, {@link #PARAM_POS_TAG} and
+     * {@link #PARAM_POS_PROBABILITY}.<p>
+     * See the documentation of {@link LanguageConfiguration} for details of the Syntax.
+     */
+    public static final String PROCESSED_LANGUAGES = "org.apache.stanbol.enhancer.engines.keywordextraction.processedLanguages";
+    /*
+     * Parameters used for language specific text processing configurations
+     */
+    public static final String PARAM_LEXICAL_CATEGORIES = "lc";
+    public static final String PARAM_POS_TYPES = "pos";
+    public static final String PARAM_POS_TAG = "tag";
+    public static final String PARAM_POS_PROBABILITY = "prob";
     /**
      * Adds the dereference feature (STANBOL-333) also to this engine.
      * This will be replaced by STANBOL-336. 
@@ -177,6 +251,10 @@ public class KeywordLinkingEngine
      * The default state to dereference entities set to <code>true</code>.
      */
     public static final boolean DEFAULT_DEREFERENCE_ENTITIES_STATE = true;
+    /**
+     * Allows to add a list of fields that are included when dereferencing Entities
+     */
+    public static final String DEREFERENCE_ENTITIES_FIELDS = "org.apache.stanbol.enhancer.engines.keywordextraction.dereferenceFields";
     /**
      * Additional fields added for dereferenced entities
      */
@@ -200,28 +278,40 @@ public class KeywordLinkingEngine
      * The languages this engine is configured to enhance. An empty List is
      * considered as active for any language
      */
-    private Set<String> languages = DEFAULT_LANGUAGES;
+    private LanguageConfiguration languages = new LanguageConfiguration(PROCESSED_LANGUAGES, new String[]{"*"});
     /**
      * The literal representing the LangIDEngine as creator.
      */
     public static final Literal LANG_ID_ENGINE_NAME = LiteralFactory.getInstance().createTypedLiteral("org.apache.stanbol.enhancer.engines.langid.LangIdEnhancementEngine");
-    
+
+    /**
+     * The default value for the LIMIT of the {@link EntitySearcher}
+     */
+    private static final int DEFAULT_ENTITY_SEARCHER_LIMIT = 10;
+
     private EntitySearcher entitySearcher;
     private EntityLinkerConfig linkerConfig;
-    private TextAnalyzerConfig nlpConfig;
     
-    /**
-     * The reference to the OpenNLP component
-     */
-    @org.apache.felix.scr.annotations.Reference
-    private OpenNLP openNLP;
-    //TextAnalyzer was changed to have a scope of a single request ( call to
-    //#computeEnhancement!
-    //private TextAnalyzer textAnalyser;
-    /**
-     * Used to create {@link AnalysedContent} instances for parsed content items
-     */
-    private OpenNlpAnalysedContentFactory analysedContentFactory;
+    private TextProcessingConfig defaultTextProcessingConfig;
+    private Map<String,TextProcessingConfig> textProcessingConfigs = new HashMap<String,TextProcessingConfig>();
+    
+    //NOTE as I want to inject an instance of LabelTokenizerManager I need to implement my own
+    //bind/unbind methods as the generated methods would expect a field 
+    // "LabelTokenizerManager labelTokenizer" and not "LabelTokenizer labelTokenizer"
+    @org.apache.felix.scr.annotations.Reference(referenceInterface=LabelTokenizerManager.class,
+            bind="bindLabelTokenizer",unbind="unbindLabelTokenizer")
+    private LabelTokenizer labelTokenizer;
+
+    protected void bindLabelTokenizer(LabelTokenizerManager ltm){
+        labelTokenizer = ltm;
+    }
+    
+    protected void unbindLabelTokenizer(LabelTokenizerManager ltm){
+        labelTokenizer = null;
+    }
+    
+    
+    
     /**
      * The literalFactory used to create typed literals
      */
@@ -282,44 +372,36 @@ public class KeywordLinkingEngine
     public KeywordLinkingEngine() {
     }
     /**
-     * Internal Constructor used by {@link #createInstance(OpenNLP, EntitySearcher, EntityLinkerConfig)}
-     * @param openNLP
-     * @param entitySearcher
-     * @param config
+     * Internal Constructor used by {@link #createInstance(EntitySearcher, TextProcessingConfig, EntityLinkerConfig)}
+     * @param entitySearcher The component used to lookup Entities
+     * @param textProcessingConfig The configuration on how to use the {@link AnalysedText} content part of
+     * processed {@link ContentItem}s
+     * @param linkingConfig the configuration for the EntityLinker
      */
-    protected KeywordLinkingEngine(OpenNLP openNLP,EntitySearcher entitySearcher,
-                                   TextAnalyzerConfig nlpConfig,EntityLinkerConfig linkingConfig){
-        this.openNLP = openNLP;
+    protected KeywordLinkingEngine(EntitySearcher entitySearcher,TextProcessingConfig textProcessingConfig, 
+                                   EntityLinkerConfig linkingConfig, LabelTokenizer labelTokenizer){
         this.linkerConfig = linkingConfig != null ? linkingConfig : new EntityLinkerConfig();
-        this.nlpConfig = nlpConfig != null ? nlpConfig : new TextAnalyzerConfig();
-        this.analysedContentFactory = OpenNlpAnalysedContentFactory.getInstance(openNLP,nlpConfig);
+        this.defaultTextProcessingConfig = textProcessingConfig != null ? textProcessingConfig : new TextProcessingConfig();
+        this.textProcessingConfigs = Collections.emptyMap();
         this.entitySearcher = entitySearcher;
+        this.labelTokenizer = labelTokenizer;
     }
     /**
      * Allows to create an instance that can be used outside of an OSGI
      * environment. This is mainly intended for unit tests.
-     * @param openNLP The {@link OpenNLP} instance used for natural language processing
-     * @param entitySearcher the searcher used to lookup terms
-     * @param config the configuration or <code>null</code> to use the defaults
+     * @param entitySearcher The component used to lookup Entities
+     * @param textProcessingConfig The configuration on how to use the {@link AnalysedText} content part of
+     * processed {@link ContentItem}s
+     * @param linkingConfig the configuration for the EntityLinker
      * @return the created engine instance
      */
-    public static KeywordLinkingEngine createInstance(OpenNLP openNLP,
-                                                      EntitySearcher entitySearcher,
-                                                      TextAnalyzerConfig nlpConfig,
-                                                      EntityLinkerConfig linkingConfig){
-        return new KeywordLinkingEngine(openNLP,entitySearcher,nlpConfig,linkingConfig);
+    public static KeywordLinkingEngine createInstance(EntitySearcher entitySearcher,
+                                                      TextProcessingConfig textProcessingConfig,
+                                                      EntityLinkerConfig linkingConfig,
+                                                      LabelTokenizer labelTokenizer){
+        return new KeywordLinkingEngine(entitySearcher,textProcessingConfig,linkingConfig,labelTokenizer);
     }
 
-
-    /**
-     * Checks if the parsed language is enabled for processing.
-     * @param language The language to process
-     * @return the processing state for the parsed language.
-     */
-    protected boolean isProcessableLanguages(String language) {
-        return languages.isEmpty() || languages.contains(language);
-    }
-    
     @Override
     public Map<String,Object> getServiceProperties() {
         return Collections.unmodifiableMap(Collections.singletonMap(
@@ -329,70 +411,57 @@ public class KeywordLinkingEngine
 
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
-        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null){
-            return ENHANCE_ASYNC; //KeywordLinking now supports async processing
-        } else {
+        log.info("canEnhancer {}",ci.getUri());
+        if(isOfflineMode() && !entitySearcher.supportsOfflineMode()){
+            log.warn("{} '{}' is inactive because EntitySearcher does not support Offline mode!",
+                getClass().getSimpleName(),getName());
             return CANNOT_ENHANCE;
         }
+        String language = getLanguage(this, ci, false);
+        if(language == null || !languages.isLanguage(language)){
+            log.debug("Engine {} ignores ContentItem {} becuase language {} is not condigured.",
+                new Object[]{ getName(), ci.getUri(), language});
+            return CANNOT_ENHANCE;
+        }
+        //we need a detected language, the AnalyzedText contentPart with
+        //Tokens.
+        AnalysedText at = getAnalysedText(this, ci, false);
+        return at != null && at.getTokens().hasNext() ?
+                ENHANCE_ASYNC : CANNOT_ENHANCE;
     }
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
+        log.info(" enhance ci {}",ci.getUri());
         if(isOfflineMode() && !entitySearcher.supportsOfflineMode()){
-            throw new EngineException("Offline mode is not supported by the Component used to lookup Entities");
+            throw new EngineException(this,ci,"Offline mode is not supported by the used EntitySearcher!",null);
         }
-        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
-        if(contentPart == null){
-            throw new IllegalStateException("No ContentPart with a supported Mime Type"
-                    + "found for ContentItem "+ci.getUri()+"(supported: '"
-                    + SUPPORTED_MIMETYPES+"') -> this indicates that canEnhance was" 
-                    + "NOT called and indicates a bug in the used EnhancementJobManager!");
-        }
-        String text;
-        try {
-            text = ContentItemHelper.getText(contentPart.getValue());
-        } catch (IOException e) {
-            throw new InvalidContentException(String.format("Unable to extract "
-                +" text from ContentPart %s of ContentItem %s!",
-                contentPart.getKey(),ci.getUri()),e);
-        }
-        if (text.trim().length() == 0) {
-            // TODO: make the length of the data a field of the ContentItem
-            // interface to be able to filter out empty items in the canEnhance
-            // method
-            log.warn("ContentPart {} of ContentItem does not contain any Text to extract knowledge from",
-                contentPart.getKey(), ci);
-            return;
-        }
-        //Determine the language
-        String language;
-        ci.getLock().readLock().lock();
-        try {
-         language = extractLanguage(ci);
-        } finally {
-            ci.getLock().readLock().unlock();
-        }
-        if(isProcessableLanguages(language)){
+        AnalysedText at = getAnalysedText(this, ci, true);
+        log.info("  > AnalysedText {}",at);
+        String language = getLanguage(this, ci, true);
+        if(log.isDebugEnabled()){
             log.debug("computeEnhancements for ContentItem {} language {} text={}", 
-                new Object []{ci.getUri().getUnicodeString(), language, StringUtils.abbreviate(text, 100)});
-            
-            EntityLinker entityLinker = new EntityLinker(
-                analysedContentFactory.create(text, language),
-                entitySearcher, linkerConfig);
-            //process
-            entityLinker.process();
-            //write results (requires a write lock)
-            ci.getLock().writeLock().lock();
-            try {
-                writeEnhancements(ci, entityLinker.getLinkedEntities().values(), language);
-            } finally {
-                ci.getLock().writeLock().unlock();
-            }
-        } else {
-            log.debug("ignore ContentItem {} because language '{}' is not configured to" +
-            		"be processed by this engine.",ci.getUri().getUnicodeString(),language);
+                new Object []{ci.getUri().getUnicodeString(), language, StringUtils.abbreviate(at.getSpan(), 100)});
         }
-        
+        log.info("  > Language {}",language);
+        TextProcessingConfig tpc = textProcessingConfigs.get(language);
+        if(tpc == null){
+            tpc = defaultTextProcessingConfig;
+            log.info("    ... with default TextProcessingConfig");
+        } else {
+            log.info("    ... with language specific TextProcessingConfig");
+        }
+        EntityLinker entityLinker = new EntityLinker(at,language, 
+            defaultTextProcessingConfig, entitySearcher, linkerConfig, labelTokenizer);
+        //process
+        entityLinker.process();
+        //write results (requires a write lock)
+        ci.getLock().writeLock().lock();
+        try {
+            writeEnhancements(ci, entityLinker.getLinkedEntities().values(), language);
+        } finally {
+            ci.getLock().writeLock().unlock();
+        }
     }
 
     /**
@@ -474,38 +543,6 @@ public class KeywordLinkingEngine
             }
         }
     }
-    /**
-     * Extracts the language of the parsed ContentItem by using
-     * {@link EnhancementEngineHelper#getLanguage(ContentItem)} and "en" as
-     * default.
-     * @param ci the content item
-     * @return the language
-     */
-    private String extractLanguage(ContentItem ci) {
-        String lang = EnhancementEngineHelper.getLanguage(ci);
-//        if(lang != null){
-//        MGraph metadata = ci.getMetadata();
-//        Iterator<Triple> langaugeEnhancementCreatorTriples = 
-//            metadata.filter(null, Properties.DC_CREATOR, LANG_ID_ENGINE_NAME);
-//        if(langaugeEnhancementCreatorTriples.hasNext()){
-//            String lang = EnhancementEngineHelper.getString(metadata, 
-//                langaugeEnhancementCreatorTriples.next().getSubject(), 
-//                Properties.DC_LANGUAGE);
-        if(lang != null){
-            return lang;
-        } else {
-            log.warn("Unable to extract language for ContentItem %s! The Enhancement of the %s is missing the %s property",
-                new Object[]{ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm(),Properties.DC_LANGUAGE});
-            log.warn(" ... return 'en' as default");
-            return "en";
-        }
-//        } else {
-//            log.warn("Unable to extract language for ContentItem %s! Is the %s active?",
-//                ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm());
-//            log.warn(" ... return 'en' as default");
-//            return "en";
-//        }
-    }
 
     
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -525,7 +562,7 @@ public class KeywordLinkingEngine
      * call<ul>
      * <li> {@link #activateEntitySearcher(ComponentContext, Dictionary)}
      * <li> {@link #initEntityLinkerConfig(Dictionary, EntityLinkerConfig)} and
-     * <li> {@link #activateTextAnalyzerConfig(Dictionary)}
+     * <li> {@link #activateTextProcessingConfig(Dictionary)}
      * <li> {@link #dereferenceEntitiesState} (needs to be called after 
      * {@link #initEntityLinkerConfig(Dictionary, EntityLinkerConfig)})
      * </ul>
@@ -539,7 +576,7 @@ public class KeywordLinkingEngine
     protected void activate(ComponentContext context) throws ConfigurationException {
         super.activate(context);
         Dictionary<String,Object> properties = context.getProperties();
-        activateTextAnalyzerConfig(properties);
+        activateTextProcessingConfig(properties);
         activateEntitySearcher(context, properties);
         activateEntityLinkerConfig(properties);
         activateEntityDereference(properties);
@@ -550,7 +587,7 @@ public class KeywordLinkingEngine
      * {@link #DEREFERENCE_ENTITIES} configuration.
      * @param properties the configuration
      */
-    protected final void activateEntityDereference(Dictionary<String,Object> properties) {
+    protected final void activateEntityDereference(Dictionary<String,Object> properties) throws ConfigurationException {
         Object value = properties.get(DEREFERENCE_ENTITIES);
         if(value instanceof Boolean){
             dereferenceEntitiesState = ((Boolean)value).booleanValue();
@@ -560,9 +597,32 @@ public class KeywordLinkingEngine
             dereferenceEntitiesState = DEFAULT_DEREFERENCE_ENTITIES_STATE;
         }
         if(dereferenceEntitiesState){
-            linkerConfig.getSelectedFields().addAll(DEREFERENCE_FIELDS);
-        }
-    }
+            value = properties.get(DEREFERENCE_ENTITIES_FIELDS);
+            if(value instanceof String[]){
+                for(String field : (String[])value){
+                    if(field != null && !field.isEmpty()){
+                        linkerConfig.getSelectedFields().add(field);
+                    }
+                }
+            } else if(value instanceof Collection<?>){
+                for(Object field : (Collection<?>)value){
+                    if(field != null && !field.toString().isEmpty()){
+                        linkerConfig.getSelectedFields().add(field.toString());
+                    }
+                }
+            } else if(value instanceof String){
+                if(!value.toString().isEmpty()){
+                    linkerConfig.getSelectedFields().add(value.toString());
+                }
+            } else if(value != null){
+                throw new ConfigurationException(DEREFERENCE_ENTITIES_FIELDS, 
+                    "Dereference Entities_Fields MUST BE parsed as String[], Collection<String> or "
+                    + "String (single value). The actual value '"+value+"'(type: '"+value.getClass() 
+                    + "') is NOT supported");
+            } else { //value == null -> add the default fields
+                linkerConfig.getSelectedFields().addAll(DEREFERENCE_FIELDS);
+            }
+        }    }
 
     /**
      * Initialise the {@link TextAnalyzer} component.<p>
@@ -575,27 +635,10 @@ public class KeywordLinkingEngine
      * 
      * @param configuration the OSGI component configuration
      */
-    protected final void activateTextAnalyzerConfig(Dictionary<String,Object> configuration) throws ConfigurationException {
-        nlpConfig = new TextAnalyzerConfig();
-        Object value;
-        value = configuration.get(PROCESSED_LANGUAGES);
-        if(value == null){
-            this.languages = DEFAULT_LANGUAGES;
-        } else if (value.toString().trim().isEmpty()){
-            this.languages = Collections.emptySet();
-        } else {
-            String[] languageArray = value.toString().split(",");
-            languages = new HashSet<String>();
-            for(String language : languageArray){
-                if(language != null){
-                    language = language.trim();
-                    if(!language.isEmpty()){
-                        languages.add(language);
-                    }
-                }
-            }
-        }
-        value = configuration.get(MIN_POS_TAG_PROBABILITY);
+    protected final void activateTextProcessingConfig(Dictionary<String,Object> configuration) throws ConfigurationException {
+        //Parse the default text processing configuration
+        defaultTextProcessingConfig = new TextProcessingConfig();
+        Object value = configuration.get(MIN_POS_TAG_PROBABILITY);
         double minPosTagProb;
         if(value instanceof Number){
             minPosTagProb = ((Number)value).doubleValue();
@@ -614,19 +657,133 @@ public class KeywordLinkingEngine
                 "The configured min POS tag probability MUST BE in the range [0..1] " +
                 "or < 0 to deactivate this feature (parsed value "+value+")!");
         }
-        nlpConfig.setMinPosTagProbability(minPosTagProb);
-        value = configuration.get(KEYWORD_TOKENIZER);
-        //the keyword tokenizer config
+        defaultTextProcessingConfig.setMinPosAnnotationProbability(minPosTagProb);
+        defaultTextProcessingConfig.setMinExcludePosAnnotationProbability(minPosTagProb/2d);
+        //set the default LexicalTypes
+        value = configuration.get(PROCESS_ONLY_PROPER_NOUNS_STATE);
+        boolean properNounState;
         if(value instanceof Boolean){
-            nlpConfig.forceKeywordTokenizer((Boolean)value);
-        } else if(value != null && !value.toString().isEmpty()){
-            nlpConfig.forceKeywordTokenizer(Boolean.valueOf(value.toString()));
+            properNounState = ((Boolean)value).booleanValue();
+        } else if (value != null){
+            properNounState = Boolean.parseBoolean(value.toString());
+        } else {
+            properNounState = DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE;
         }
-        //nlpConfig.enablePosTypeChunker(false);
-        //nlpConfig.enableChunker(false);
-        analysedContentFactory = OpenNlpAnalysedContentFactory.getInstance(openNLP,nlpConfig);
+        if(properNounState){
+            defaultTextProcessingConfig.setProcessedLexicalCategories(Collections.EMPTY_SET);
+            defaultTextProcessingConfig.setProcessedPos(DEFAULT_PROCESSED_POS_TYPES);
+            log.debug("> ProperNoun matching activated (matched Pos: {})",
+                defaultTextProcessingConfig.getProcessedPos());
+        } else {
+            defaultTextProcessingConfig.setProcessedLexicalCategories(DEFAULT_PROCESSED_LEXICAL_CATEGORIES);
+            defaultTextProcessingConfig.setProcessedPos(Collections.EMPTY_SET);
+            log.debug("> Noun matching activated (matched LexicalCategories: {})",
+                defaultTextProcessingConfig.getProcessedLexicalCategories());
+        }
+        //parse the language configuration
+        value = configuration.get(PROCESSED_LANGUAGES);
+        if(value instanceof String){
+            throw new ConfigurationException(PROCESSED_LANGUAGES, "Unable to configure "
+                + getClass().getSimpleName()+" '"+getName()+": 'Comma separated String "
+                + "is not supported for configurung the processed languages for the because "
+                + "the comma is used as separator for values of the parameters '"
+                + PARAM_LEXICAL_CATEGORIES+"', '"+ PARAM_POS_TYPES+"'and'"+PARAM_POS_TAG
+                + "! Users need to use String[] or Collection<?> instead!");
+        }
+        languages.setConfiguration(configuration);
+        Map<String,String> defaultConfig = languages.getDefaultParameters();
+        if(!defaultConfig.isEmpty()){
+            applyLanguageParameter(defaultTextProcessingConfig,null,defaultConfig);
+        }
+        for(String lang : languages.getExplicitlyIncluded()){
+            TextProcessingConfig tpc = defaultTextProcessingConfig.clone();
+            applyLanguageParameter(tpc, lang, languages.getParameters(lang));
+            this.textProcessingConfigs.put(lang, tpc);
+        }
     }
 
+    private void applyLanguageParameter(TextProcessingConfig tpc, String language, Map<String,String> config) throws ConfigurationException {
+        Set<LexicalCategory> lexCats = parseEnumParam(config, PROCESSED_LANGUAGES, language, PARAM_LEXICAL_CATEGORIES, LexicalCategory.class);
+        Set<Pos> pos = parseEnumParam(config, PROCESSED_LANGUAGES, language,PARAM_POS_TYPES, Pos.class);
+        Set<String> tags = parsePosTags(config.get(PARAM_POS_TAG));
+        Double prob = null;
+        String paramVal = config.get(PARAM_POS_PROBABILITY);
+        if(paramVal != null && !paramVal.trim().isEmpty()){
+            try {
+                prob = Double.parseDouble(paramVal.trim());
+            } catch (NumberFormatException e) {
+                throw new ConfigurationException(PROCESSED_LANGUAGES, "Unable to parse parameter '"
+                    + PARAM_POS_PROBABILITY+"="+paramVal.trim()
+                    + "' from the "+(language == null ? "default" : language)
+                    + " language configuration", e);
+            }
+        }
+        if(!lexCats.isEmpty() || !pos.isEmpty() || !tags.isEmpty()){
+            log.info(" > use spefic language Configuration for language {}",
+                getClass().getSimpleName(),getName());
+            log.info("   - LexCat: {}",lexCats);
+            log.info("   - Pos: {}",pos);
+            log.info("   - Tags: {}",tags);
+            tpc.setProcessedLexicalCategories(lexCats);
+            tpc.setProcessedPos(pos);
+            tpc.setProcessedPosTags(tags);
+        }
+        if(prob != null){
+            tpc.setMinPosAnnotationProbability(prob);
+            tpc.setMinExcludePosAnnotationProbability(prob/2d);
+        }
+    }
+    private Set<String> parsePosTags(String value) {
+        if(value == null || value.isEmpty()){
+            return Collections.EMPTY_SET;
+        } else {
+            Set<String> tags = new HashSet<String>();
+            for(String entry : value.split(",")){
+                entry = entry.trim();
+                if(!entry.isEmpty()){
+                    tags.add(entry);
+                }
+            }
+            return tags;
+        }
+    }
+
+    /**
+     * Utility to parse Enum members out of a comma separated string
+     * @param config the config
+     * @param property the property (only used for error handling)
+     * @param param the key of the config used to obtain the config
+     * @param enumClass the {@link Enum} class
+     * @return the configured members of the Enum or an empty set if none 
+     * @throws ConfigurationException if a configured value was not part of the enum
+     */
+    private <T extends Enum<T>> Set<T> parseEnumParam(Map<String,String> config,
+        String property, String language, //params used for logging
+        String param,Class<T> enumClass) throws ConfigurationException {
+        Set<T> enumSet;
+        String val = config.get(param);
+        if(val == null){
+            enumSet = Collections.emptySet();
+        } else {
+            enumSet = EnumSet.noneOf(enumClass);
+            for(String entry : val.split(",")){
+                entry = entry.trim();
+                if(!entry.isEmpty()){
+                    try {
+                        enumSet.add(Enum.valueOf(enumClass,entry.toString()));
+                    } catch (IllegalArgumentException e) {
+                        throw new ConfigurationException(property, 
+                            "'"+entry +"' of param '"+param+"' for language '"
+                            + (language == null ? "default" : language)
+                            + "'is not a member of the enum "+ enumClass.getSimpleName()
+                            + "(configured : '"+val+"')!" ,e);
+                    }
+                }
+            }
+        }
+        return enumSet;
+    }
+    
     /**
      * Configures the parsed {@link EntityLinkerConfig} with the values of the
      * following properties:<ul>
@@ -743,6 +900,48 @@ public class KeywordLinkingEngine
             }
             linkerConfig.setMinSearchTokenLength(minSearchTokenLength);
         }
+        //init MAX_SEARCH_TOKENS
+        value = configuration.get(MAX_SEARCH_TOKENS);
+        Integer maxSearchTokens;
+        if(value instanceof Integer){
+            maxSearchTokens = (Integer)value;
+        } else if (value != null){
+            try {
+                maxSearchTokens = Integer.valueOf(value.toString());
+            } catch(NumberFormatException e){
+                throw new ConfigurationException(MAX_SEARCH_TOKENS, "Values MUST be valid Integer values > 0",e);
+            }
+        } else {
+            maxSearchTokens = null;
+        }
+        if(maxSearchTokens != null){
+            if(maxSearchTokens < 1){
+                throw new ConfigurationException(MAX_SEARCH_TOKENS, "Values MUST be valid Integer values > 0");
+            }
+            linkerConfig.setMaxSearchTokens(maxSearchTokens);
+        }
+        
+        //init the MAX_SEARCH_TOKEN_DISTANCE
+        value = configuration.get(MAX_SEARCH_TOKEN_DISTANCE);
+        Integer maxSearchDistance;
+        if(value instanceof Integer){
+            maxSearchDistance = (Integer)value;
+        } else if (value != null){
+            try {
+                maxSearchDistance = Integer.valueOf(value.toString());
+            } catch(NumberFormatException e){
+                throw new ConfigurationException(MAX_SEARCH_TOKENS, "Values MUST be valid Integer values > 0",e);
+            }
+        } else {
+            maxSearchDistance = null;
+        }
+        if(maxSearchDistance != null){
+            if(maxSearchDistance < 1){
+                throw new ConfigurationException(MAX_SEARCH_TOKENS, "Values MUST be valid Integer values > 0");
+            }
+            linkerConfig.setMaxSearchDistance(maxSearchDistance);
+        }
+
         //init the REDIRECT_PROCESSING_MODE
         value = configuration.get(REDIRECT_PROCESSING_MODE);
         if(value != null){
@@ -753,6 +952,7 @@ public class KeywordLinkingEngine
                     Arrays.toString(RedirectProcessingMode.values()));
             }
         }
+        
         //init the DEFAULT_LANGUAGE
         value = configuration.get(DEFAULT_MATCHING_LANGUAGE);
         if(value != null){
@@ -766,6 +966,7 @@ public class KeywordLinkingEngine
                 linkerConfig.setDefaultLanguage(defaultLang);
             }
         }
+        
         // init MIN_TOKEN_MATCH_FACTOR
         value=configuration.get(MIN_TOKEN_MATCH_FACTOR);
         float minTokenMatchFactor;
@@ -873,9 +1074,9 @@ public class KeywordLinkingEngine
         }
         //TODO: make limit configurable!
         if(Entityhub.ENTITYHUB_IDS.contains(referencedSiteName.toLowerCase())){
-            entitySearcher = new EntityhubSearcher(context.getBundleContext(),10);
+            entitySearcher = new EntityhubSearcher(context.getBundleContext(),DEFAULT_ENTITY_SEARCHER_LIMIT);
         } else {
-            entitySearcher = new ReferencedSiteSearcher(context.getBundleContext(),referencedSiteName,10);
+            entitySearcher = new ReferencedSiteSearcher(context.getBundleContext(),referencedSiteName,DEFAULT_ENTITY_SEARCHER_LIMIT);
         }
     }
     /**
@@ -891,7 +1092,7 @@ public class KeywordLinkingEngine
     protected void deactivate(ComponentContext context) {
         super.deactivate(context);
         deactivateEntitySearcher();
-        deactivateTextAnalyzerConfig();
+        deactivateTextProcessingConfig();
         deactivateEntityLinkerConfig();
         deactivateEntityDereference();
     }
@@ -907,10 +1108,9 @@ public class KeywordLinkingEngine
      * Deactivates the {@link TextAnalyzer} as well as resets the set of languages
      * to process to {@link #DEFAULT_LANGUAGES}
      */
-    protected void deactivateTextAnalyzerConfig() {
-        this.nlpConfig = null;
-        this.analysedContentFactory = null;
-        languages = DEFAULT_LANGUAGES;
+    protected void deactivateTextProcessingConfig() {
+        this.languages.setDefault(); //reset to the default
+        this.textProcessingConfigs.clear();
     }
 
     /**

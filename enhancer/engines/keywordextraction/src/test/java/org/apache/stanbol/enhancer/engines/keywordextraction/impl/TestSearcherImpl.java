@@ -74,7 +74,7 @@ public class TestSearcherImpl implements EntitySearcher {
     public Collection<? extends Representation> lookup(String field,
                                            Set<String> includeFields,
                                            List<String> search,
-                                           String... languages) throws IllegalStateException {
+                                           String[] languages,Integer numResults) throws IllegalStateException {
         if(field.equals(nameField)){
             //we do not need sorting
             //Representation needs to implement equals, therefore results filters multiple matches

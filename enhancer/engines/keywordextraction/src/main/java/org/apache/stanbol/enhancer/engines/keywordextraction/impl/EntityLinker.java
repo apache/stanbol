@@ -14,7 +14,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.enhancer.engines.keywordextraction.linking;
+package org.apache.stanbol.enhancer.engines.keywordextraction.impl;
+
+import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,10 +30,16 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
-import org.apache.stanbol.enhancer.engines.keywordextraction.impl.ProcessingState;
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.ProcessingState.TokenData;
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.Suggestion.MATCH;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinkerConfig.RedirectProcessingMode;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.Suggestion.MATCH;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntitySearcher;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.LabelTokenizer;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.TextProcessingConfig;
+import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
+import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
+import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
@@ -44,9 +52,10 @@ import org.slf4j.LoggerFactory;
 public class EntityLinker {
     
     private final Logger log = LoggerFactory.getLogger(EntityLinker.class);
-
-    private final EntityLinkerConfig config;
-    private final AnalysedContent content;
+    
+    private final EntityLinkerConfig linkerConfig;
+    private final TextProcessingConfig textProcessingConfig;
+    private final AnalysedText analysedText;
     private final EntitySearcher entitySearcher;
     /**
      * The state of the current processing
@@ -57,6 +66,175 @@ public class EntityLinker {
      */
     private final Map<String,LinkedEntity> linkedEntities = new HashMap<String,LinkedEntity>();
     
+    private Integer lookupLimit;
+    
+    private LabelTokenizer labelTokenizer;
+    
+
+    public EntityLinker(AnalysedText analysedText, String language,
+                        TextProcessingConfig textProcessingConfig,
+                        EntitySearcher entitySearcher,
+                        EntityLinkerConfig linkerConfig,
+                        LabelTokenizer labelTokenizer) {
+        this.analysedText = analysedText;
+        this.entitySearcher = entitySearcher;
+        this.linkerConfig = linkerConfig;
+        this.textProcessingConfig = textProcessingConfig;
+        this.labelTokenizer = labelTokenizer;
+        this.state = new ProcessingState(analysedText,language,textProcessingConfig,linkerConfig);
+        this.lookupLimit  = Math.max(10,linkerConfig.getMaxSuggestions()*2);
+    }
+    /**
+     * Steps over the sentences, chunks, tokens of the {@link #sentences}
+     */
+    public void process() throws EngineException {
+        //int debugedIndex = 0;
+        while(state.next()) {
+            ProcessingState.TokenData token = state.getToken();
+            if(log.isDebugEnabled()){
+                log.debug("--- preocess Token {}: {} (pos:{}) chunk: {}",
+                    new Object[]{token.index,token.token, 
+                                 token.token.getAnnotations(POS_ANNOTATION),
+                                 token.inChunk != null ? 
+                                         (token.inChunk.chunk + " "+ token.inChunk.chunk.getSpan()) : 
+                                             "none"});
+            }
+            List<String> searchStrings = new ArrayList<String>(linkerConfig.getMaxSearchTokens());
+            searchStrings.add(token.token.getSpan());
+            //Determine the range we are allowed to search for tokens
+            final int minIncludeIndex;
+            int maxIndcludeIndex;
+            if(token.inChunk != null && !textProcessingConfig.isIgnoreChunks()){
+                minIncludeIndex = Math.max(
+                    state.getConsumedIndex()+1, 
+                    token.inChunk.startToken);
+                maxIndcludeIndex = token.inChunk.endToken;
+            } else {
+                maxIndcludeIndex = state.getTokens().size() - 1;
+                minIncludeIndex = state.getConsumedIndex() + 1;
+            }
+            int prevIndex,pastIndex; //search away from the currently active token
+            int distance = 0;
+            do {
+                distance++;
+                prevIndex = token.index-distance;
+                pastIndex = token.index+distance;
+                if(minIncludeIndex <= prevIndex){
+                    TokenData prevToken = state.getTokens().get(prevIndex);
+                    if(log.isDebugEnabled()){
+                        log.debug("    {} {}:'{}' (pos:{})",new Object[]{
+                            prevToken.isMatchable? '+':'-',prevToken.index,
+                            prevToken.token.getSpan(),
+                            prevToken.token.getAnnotations(POS_ANNOTATION)
+                        });
+                    }
+                    if(prevToken.isMatchable){
+                        searchStrings.add(0,prevToken.token.getSpan());
+                    }
+                }
+                if(maxIndcludeIndex >= pastIndex){
+                    TokenData pastToken = state.getTokens().get(pastIndex);
+                    if(log.isDebugEnabled()){
+                        log.debug("    {} {}:'{}' (pos:{})",new Object[]{
+                            pastToken.isMatchable? '+':'-',pastToken.index,
+                            pastToken.token.getSpan(),
+                            pastToken.token.getAnnotations(POS_ANNOTATION)
+                        });
+                    }
+                    if(pastToken.isMatchable){
+                        searchStrings.add(pastToken.token.getSpan());
+                    }
+                }
+            } while(searchStrings.size() < linkerConfig.getMaxSearchTokens() && distance <
+                    linkerConfig.getMaxSearchDistance() &&
+                    (prevIndex > minIncludeIndex || pastIndex < maxIndcludeIndex));
+            //we might have an additional element in the list
+            if(searchStrings.size() > linkerConfig.getMaxSearchTokens()){
+                searchStrings = searchStrings.subList(0, linkerConfig.getMaxSearchTokens());
+            }
+            log.debug("  >> searchStrings {}",searchStrings);
+            //search for Entities
+            List<Suggestion> suggestions = lookupEntities(searchStrings);
+            if(!suggestions.isEmpty()){
+                //update the suggestions based on the best match
+                int bestMatchCount = suggestions.get(0).getMatchCount();
+                Iterator<Suggestion> it = suggestions.iterator();
+                while(it.hasNext()){
+                    Suggestion suggestion = it.next();
+                    //suggestions that match less tokens as the best match
+                    //need to be updated to PARTIAL
+                    if(suggestion.getMatchCount() < bestMatchCount){
+                        suggestion.setMatch(MATCH.PARTIAL);
+                    }
+                    //Filter matches with less than config.getMinFoundTokens()
+                    //if matchcount is less than of the best match
+                    if(suggestion.getMatchCount() < bestMatchCount &&
+                            suggestion.getMatchCount() < linkerConfig.getMinFoundTokens()){
+                        it.remove();
+                    } else { //calculate the score
+                        double suggestionMatchScore = suggestion.getMatchCount()*suggestion.getMatchScore();
+                        //how good is the current match in relation to the best one
+                        double spanScore = suggestion.getMatchCount()/bestMatchCount;
+                        //how good is the match to the span selected by this suggestion
+                        double textScore = suggestionMatchScore/suggestion.getSpan();
+                        //how good is the match in relation to the tokens of the suggested label
+                        double labelScore = suggestionMatchScore/suggestion.getLabelTokenCount();
+                        suggestion.setScore(spanScore*spanScore*textScore*labelScore);
+                    }
+                }
+                Suggestion oldBestRanked = suggestions.get(0); //for debugging
+                //resort by score
+                Collections.sort(suggestions, Suggestion.SCORE_COMPARATOR);
+                //this should never happen ... but the
+                //matchcount of the best match MUST NOT change
+                //after the sort by score!
+                if(bestMatchCount != suggestions.get(0).getMatchCount()){
+                    log.warn("The match count for the top Ranked Suggestion for {} " +
+                    		"changed after resorting based on Scores!",
+                        state.getTokenText(suggestions.get(0).getStart(),bestMatchCount));
+                    log.warn("  originalbest   : {}",oldBestRanked);
+                    log.warn(" currnet ranking : {}",suggestions);
+                    log.warn("  ... this will result in worng confidence values relative to the best match");
+                }
+                //remove all suggestions > config.maxSuggestions
+                if(suggestions.size() > linkerConfig.getMaxSuggestions()){
+                    suggestions.subList(linkerConfig.getMaxSuggestions(),suggestions.size()).clear();
+                }
+                if(log.isDebugEnabled()){
+                    log.debug("  >> Suggestions:");
+                    int i=0;
+                    for(Suggestion s : suggestions){
+                        log.debug("   - {}: {}",i,s);
+                        i++;
+                    }
+                }
+                //process redirects
+                if(linkerConfig.getRedirectProcessingMode() != RedirectProcessingMode.IGNORE){
+                    for(Suggestion suggestion : suggestions){
+                        processRedirects(suggestion);
+                    }
+                }
+                int start = suggestions.get(0).getStart();
+                int span = suggestions.get(0).getSpan();
+                //Store the linking results
+                String selectedText = state.getTokenText(start,span);
+                //float score;
+                LinkedEntity linkedEntity = linkedEntities.get(selectedText);
+                if(linkedEntity == null){
+                    linkedEntity = new LinkedEntity(selectedText,
+                        suggestions, getLinkedEntityTypes(suggestions.subList(0, 1)));
+                    linkedEntities.put(selectedText, linkedEntity);
+                }
+                linkedEntity.addOccurrence(state.getSentence(), 
+                    //NOTE: The end Token is "start+span-1"
+                    state.getTokens().get(start).token, state.getTokens().get(start+span-1).token);
+                //set the next token to process to the next word after the
+                //currently found suggestion
+                state.setConsumed(start+span-1);
+            }
+            
+        }
+    }
     /**
      * After {@link #process()}ing this returns the entities linked for the
      * parsed {@link AnalysedContent}.
@@ -64,133 +242,6 @@ public class EntityLinker {
      */
     public final Map<String,LinkedEntity> getLinkedEntities() {
         return linkedEntities;
-    }
-    public EntityLinker(AnalysedContent content,EntitySearcher taxonomy,EntityLinkerConfig config){
-        if(config == null){
-            throw new IllegalArgumentException("The parsed TaxonomyLinkerConfig MUST NOT be NULL!");
-        }
-        if(taxonomy == null){
-            throw new IllegalArgumentException("The parsed Taxonomy MUST NOT be NULL!");
-        }
-        if(content == null){
-            throw new IllegalArgumentException("The parsed AnalysedContent MUST NOT be NULL!");
-        }
-        this.content = content;
-        this.entitySearcher = taxonomy;
-        this.config = config;
-        this.state = new ProcessingState(content.getAnalysedText());
-    }
-    /**
-     * Steps over the sentences, chunks, tokens of the {@link #sentences}
-     */
-    public void process() throws EngineException {
-        int debugedIndex = 0;
-        while(state.next()) {
-            if(log.isDebugEnabled() && (state.getTokenIndex() > debugedIndex || state.getTokenIndex() ==  0)){
-                debugedIndex = state.getTokenIndex();
-                Token token = state.getToken();
-                log.debug(" {} {} (pos:{}|prop:{})",new Object[]{
-                    isProcessableToken(token)? '+':'-',
-                    token.getText(),token.getPosTags(),token.getPosProbabilities()
-                });
-            }
-            if(isProcessableToken(state.getToken())){
-                List<String> searchStrings = new ArrayList<String>(config.getMaxSearchTokens());
-                searchStrings.add(state.getToken().getText());
-                //get the list of all tokens that can possible be matched
-                int includeTokenIndex = state.getTokenIndex();
-                includeTokenIndex++;
-                while(searchStrings.size() < config.getMaxSearchTokens() && //more search strings
-                        (includeTokenIndex <= (state.getChunk() != null ? //still within
-                                state.getChunk().getEnd() : //the chunk
-                                    state.getSentence().getTokens().size()-1))){ //or sentence
-                    Token included = state.getSentence().getTokens().get(includeTokenIndex);
-                    if(log.isDebugEnabled()  && includeTokenIndex > debugedIndex){
-                        debugedIndex = includeTokenIndex;
-                        log.debug(" {} {} (pos:{}|prop:{})",new Object[]{
-                            isProcessableToken(included)? '+':'-',
-                            included.getText(),included.getPosTags(),included.getPosProbabilities()
-                        });
-                    }
-                    includeTokenIndex++;
-                    if(isProcessableToken(included)){
-                        searchStrings.add(included.getText());
-                    }
-                }
-                //search for Entities
-                List<Suggestion> suggestions = lookupEntities(searchStrings);
-                if(!suggestions.isEmpty()){
-                    //update the suggestions based on the best match
-                    int bestMatchCount = suggestions.get(0).getMatchCount();
-                    Iterator<Suggestion> it = suggestions.iterator();
-                    while(it.hasNext()){
-                        Suggestion suggestion = it.next();
-                        //suggestions that match less tokens as the best match
-                        //need to be updated to PARTIAL
-                        if(suggestion.getMatchCount() < bestMatchCount){
-                            suggestion.setMatch(MATCH.PARTIAL);
-                        }
-                        //Filter matches with less than config.getMinFoundTokens()
-                        //if matchcount is less than of the best match
-                        if(suggestion.getMatchCount() < bestMatchCount &&
-                                suggestion.getMatchCount() < config.getMinFoundTokens()){
-                            it.remove();
-                        } else { //calculate the score
-                            double suggestionMatchScore = suggestion.getMatchCount()*suggestion.getMatchScore();
-                            //how good is the current match in relation to the best one
-                            double spanScore = suggestion.getMatchCount()/bestMatchCount;
-                            //how good is the match to the span selected by this suggestion
-                            double textScore = suggestionMatchScore/suggestion.getSpan();
-                            //how good is the match in relation to the tokens of the suggested label
-                            double labelScore = suggestionMatchScore/suggestion.getLabelTokenCount();
-                            suggestion.setScore(spanScore*spanScore*textScore*labelScore);
-                        }
-                    }
-                    Suggestion oldBestRanked = suggestions.get(0); //for debugging
-                    //resort by score
-                    Collections.sort(suggestions, Suggestion.SCORE_COMPARATOR);
-                    //this should never happen ... but the
-                    //matchcount of the best match MUST NOT change
-                    //after the sort by score!
-                    if(bestMatchCount != suggestions.get(0).getMatchCount()){
-                        log.warn("The match count for the top Ranked Suggestion for {} " +
-                        		"changed after resorting based on Scores!",
-                            state.getTokenText(suggestions.get(0).getStart(),bestMatchCount));
-                        log.warn("  originalbest   : {}",oldBestRanked);
-                        log.warn(" currnet ranking : {}",suggestions);
-                        log.warn("  ... this will result in worng confidence values relative to the best match");
-                    }
-                    //remove all suggestions > config.maxSuggestions
-                    if(suggestions.size() > config.getMaxSuggestions()){
-                        suggestions.subList(config.getMaxSuggestions(),suggestions.size()).clear();
-                    }
-                    
-                    //process redirects
-                    if(config.getRedirectProcessingMode() != RedirectProcessingMode.IGNORE){
-                        for(Suggestion suggestion : suggestions){
-                            processRedirects(suggestion);
-                        }
-                    }
-                    int start = suggestions.get(0).getStart();
-                    int span = suggestions.get(0).getSpan();
-                    //Store the linking results
-                    String selectedText = state.getTokenText(start,span);
-                    //float score;
-                    LinkedEntity linkedEntity = linkedEntities.get(selectedText);
-                    if(linkedEntity == null){
-                        linkedEntity = new LinkedEntity(selectedText,
-                            suggestions, getLinkedEntityTypes(suggestions.subList(0, 1)));
-                        linkedEntities.put(selectedText, linkedEntity);
-                    }
-                    linkedEntity.addOccurrence(
-                        state.getSentence(), start, span);
-                    //set the next token to process to the next word after the
-                    //currently found suggestion
-                    state.setConsumed(start+span-1);
-                }
-                
-            } //else do not process this token
-        }
     }
     /**
      * Retrieves all {@link EntitySearcher#getTypeField()} values of the parsed
@@ -206,10 +257,10 @@ public class EntityLinker {
         Collection<String> conceptTypes = new HashSet<String>();
         for(Suggestion suggestion : suggestions){
             for(Iterator<Reference> types = 
-                suggestion.getRepresentation().getReferences(config.getTypeField()); 
+                suggestion.getRepresentation().getReferences(linkerConfig.getTypeField()); 
                 types.hasNext();conceptTypes.add(types.next().getReference()));
         }
-        Map<String,UriRef> typeMappings = config.getTypeMappings();
+        Map<String,UriRef> typeMappings = linkerConfig.getTypeMappings();
         Set<UriRef> dcTypes = new HashSet<UriRef>();
         for(String conceptType : conceptTypes){
             UriRef dcType = typeMappings.get(conceptType);
@@ -217,8 +268,8 @@ public class EntityLinker {
                 dcTypes.add(dcType);
             }
         }
-        if(dcTypes.isEmpty() && config.getDefaultDcType() != null){
-            dcTypes.add(config.getDefaultDcType());
+        if(dcTypes.isEmpty() && linkerConfig.getDefaultDcType() != null){
+            dcTypes.add(linkerConfig.getDefaultDcType());
         }
         return dcTypes;
     }
@@ -231,7 +282,7 @@ public class EntityLinker {
      */
     private void processRedirects(Suggestion suggestion) {
         //if mode is IGNORE -> nothing to do
-        if(config.getRedirectProcessingMode() == RedirectProcessingMode.IGNORE){
+        if(linkerConfig.getRedirectProcessingMode() == RedirectProcessingMode.IGNORE){
             return;
         }
         //in case results for queries are locally cached it might be the case
@@ -241,14 +292,14 @@ public class EntityLinker {
             return; //Redirects for ResultMatch are already processed ... ignore
         }
         Representation result = suggestion.getResult();
-        Iterator<Reference> redirects = result.getReferences(config.getRedirectField());
-        switch (config.getRedirectProcessingMode()) {
+        Iterator<Reference> redirects = result.getReferences(linkerConfig.getRedirectField());
+        switch (linkerConfig.getRedirectProcessingMode()) {
             case ADD_VALUES:
                 while(redirects.hasNext()){
                     Reference redirect = redirects.next();
                     if(redirect != null){
                         Representation redirectedEntity = entitySearcher.get(redirect.getReference(),
-                            config.getSelectedFields());
+                            linkerConfig.getSelectedFields());
                         if(redirectedEntity != null){
                             for(Iterator<String> fields = redirectedEntity.getFieldNames();fields.hasNext();){
                                 String field = fields.next();
@@ -264,7 +315,7 @@ public class EntityLinker {
                     Reference redirect = redirects.next();
                     if(redirect != null){
                         Representation redirectedEntity = entitySearcher.get(redirect.getReference(),
-                            config.getSelectedFields());
+                            linkerConfig.getSelectedFields());
                         if(redirectedEntity != null){
                             //copy the original result score
                             redirectedEntity.set(RdfResourceEnum.resultScore.getUri(),
@@ -289,14 +340,20 @@ public class EntityLinker {
     private List<Suggestion> lookupEntities(List<String> searchStrings) throws EngineException {
         Collection<? extends Representation> results;
         try {
-            results = entitySearcher.lookup(config.getNameField(),config.getSelectedFields(),
-            searchStrings, state.getSentence().getLanguage(),config.getDefaultLanguage());
+            results = entitySearcher.lookup(linkerConfig.getNameField(),
+                linkerConfig.getSelectedFields(),
+                searchStrings, 
+                new String[]{state.getLanguage(),linkerConfig.getDefaultLanguage()},
+                lookupLimit);
         } catch (RuntimeException e) {
             throw new EngineException(e.getMessage(),e);
         }
+        log.debug("   - found {} entities ...",results.size());
         List<Suggestion> suggestions = new ArrayList<Suggestion>();
         for(Representation result : results){ 
+            log.debug("    > {}",result.getId());
             Suggestion match = matchLabels(result);
+            log.debug("      < {}",match);
             if(match.getMatch() != MATCH.NONE){
                 suggestions.add(match);
             }                    
@@ -342,11 +399,11 @@ public class EntityLinker {
      */
     private Suggestion matchLabels(Representation rep) {
         String curLang = state.getLanguage(); //language of the current sentence
-        String defLang = config.getDefaultLanguage(); //configured default language 
+        String defLang = linkerConfig.getDefaultLanguage(); //configured default language 
 //        Iterator<Text> labels = rep.get(config.getNameField(), //get all labels
 //            state.getLanguage(), //in the current language
 //            config.getDefaultLanguage()); //and the default language
-        Iterator<Text> labels = rep.getText(config.getNameField());
+        Iterator<Text> labels = rep.getText(linkerConfig.getNameField());
         Suggestion match = new Suggestion(rep);
         Collection<Text> defaultLabels = new ArrayList<Text>();
         boolean matchedCurLangLabel = false;
@@ -378,18 +435,21 @@ public class EntityLinker {
      */
     private void matchLabel(Suggestion match, Text label) {
         String text = label.getText();
-        if(!config.isCaseSensitiveMatching()){
+        if(!linkerConfig.isCaseSensitiveMatching()){
             text = text.toLowerCase(); //TODO use language of label for Locale
         }
         //Tokenize the label and remove remove tokens without alpha numerical chars
-        String[] unprocessedLabelTokens = content.tokenize(text);
+        String[] unprocessedLabelTokens = labelTokenizer.tokenize(text,
+            state.getLanguage()); //TODO: maybe check of Pos.Foreign
+        if(unprocessedLabelTokens == null){ //no tokenizer available
+            log.info("Unable to tokenize {} language texts. Will process untokenized label {}",
+                state.getLanguage(),text);
+            unprocessedLabelTokens = new String[]{text}; //there is already a warning
+        }
         int offset = 0;
         for(int i=0;i<unprocessedLabelTokens.length;i++){
-            boolean hasAlpha = false;
-            for(int j=0;!hasAlpha && j<unprocessedLabelTokens[i].length();j++){
-                hasAlpha = Character.isLetterOrDigit(unprocessedLabelTokens[i].charAt(j));
-            }
-            if(!hasAlpha){
+            boolean hasAlphaNumericChar = Utils.hasAlphaNumericChar(unprocessedLabelTokens[i]);
+            if(!hasAlphaNumericChar){
                 offset++;
             } else if(offset > 0){
                 unprocessedLabelTokens[i-offset] = unprocessedLabelTokens[i];
@@ -410,26 +470,27 @@ public class EntityLinker {
         //ensure the correct order of the tokens in the suggested entity
         boolean search = true;
         int firstFoundIndex = -1;
+        int firstProcessableFoundIndex = -1;
         int lastFoundIndex = -1;
+        int lastProcessableFoundIndex = -1;
         int firstFoundLabelIndex = -1;
         int lastfoundLabelIndex = -1;
-        Token currentToken;
+        TokenData currentToken;
         String currentTokenText;
         int currentTokenLength;
         int notFound = 0;
-        float minTokenMatchFactor = config.getMinTokenMatchFactor();
+        float minTokenMatchFactor = linkerConfig.getMinTokenMatchFactor();
         //search for matches within the correct order
-        for(int currentIndex = state.getTokenIndex();
-                currentIndex < state.getSentence().getTokens().size() 
+        for(int currentIndex = state.getToken().index;
+                currentIndex < state.getTokens().size() 
                 && search ;currentIndex++){
-            currentToken = state.getSentence().getTokens().get(currentIndex);
-            if(currentToken.hasAplhaNumericChar()){
-                currentTokenText = currentToken.getText();
-                if(!config.isCaseSensitiveMatching()){
+            currentToken = state.getTokens().get(currentIndex);
+            if(currentToken.hasAlphaNumeric){
+                currentTokenText = currentToken.token.getSpan();
+                if(!linkerConfig.isCaseSensitiveMatching()){
                     currentTokenText = currentTokenText.toLowerCase();
                 }
                 currentTokenLength = currentTokenText.length();
-                boolean isProcessable = isProcessableToken(currentToken);
                 boolean found = false;
                 float matchFactor = 0f;
                 //iteration starts at the next token after the last matched one
@@ -460,8 +521,12 @@ public class EntityLinker {
                 }
                 //int found = text.indexOf(currentToken.getText().toLowerCase());
                 if(found){ //found
-                    if(isProcessable){
+                    if(currentToken.isMatchable){
                         foundProcessableTokens++; //only count processable Tokens
+                        if(firstProcessableFoundIndex < 0){
+                            firstProcessableFoundIndex = currentIndex;
+                        }
+                        lastProcessableFoundIndex = currentIndex;
                     }
                     foundTokens++;
                     foundTokenMatch = foundTokenMatch + matchFactor; //sum up the matches
@@ -472,7 +537,7 @@ public class EntityLinker {
                     lastFoundIndex = currentIndex;
                 } else { //not found
                     notFound++;
-                    if(isProcessable || notFound > config.getMaxNotFound()){
+                    if(currentToken.isMatchable || notFound > linkerConfig.getMaxNotFound()){
                         //stop as soon as a token that needs to be processed is
                         //not found in the label or the maximum number of tokens
                         //that are not processable are not found
@@ -483,17 +548,16 @@ public class EntityLinker {
         }
         //search backwards for label tokens until firstFoundLabelIndex if there
         //are unconsumed Tokens in the sentence before state.getTokenIndex
-        int currentIndex = state.getTokenIndex()-1;
+        int currentIndex = state.getToken().index-1;
         int labelIndex = firstFoundLabelIndex-1;
         notFound = 0;
         search = true;
         while(search && labelIndex >= 0 && currentIndex > state.getConsumedIndex()){
             String labelTokenText = labelTokens[labelIndex];
             if(labelTokenSet.remove(labelTokenText)){ //still not matched
-                currentToken = state.getSentence().getTokens().get(currentIndex);
-                boolean isProcessable = isProcessableToken(currentToken);
-                currentTokenText = currentToken.getText();
-                if(!config.isCaseSensitiveMatching()){
+                currentToken = state.getTokens().get(currentIndex);
+                currentTokenText = currentToken.token.getSpan();
+                if(!linkerConfig.isCaseSensitiveMatching()){
                     currentTokenText = currentTokenText.toLowerCase();
                 }
                 currentTokenLength = currentTokenText.length();
@@ -510,8 +574,9 @@ public class EntityLinker {
                     }
                 }
                 if(found){ //found
-                    if(isProcessable){
+                    if(currentToken.isMatchable){
                         foundProcessableTokens++; //only count processable Tokens
+                        firstProcessableFoundIndex = currentIndex;
                     }
                     foundTokens++;
                     foundTokenMatch = foundTokenMatch + matchFactor; //sum up the matches
@@ -519,7 +584,7 @@ public class EntityLinker {
                     currentIndex --;
                 } else {
                     notFound++;
-                    if(isProcessable || notFound > config.getMaxNotFound()){
+                    if(currentToken.isMatchable || notFound > linkerConfig.getMaxNotFound()){
                         //stop as soon as a token that needs to be processed is
                         //not found in the label or the maximum number of tokens
                         //that are not processable are not found
@@ -533,6 +598,7 @@ public class EntityLinker {
         //e.g. if given and family name of persons are switched
         MATCH labelMatch; 
         int coveredTokens = lastFoundIndex-firstFoundIndex+1;
+        int coveredProcessableTokens = lastProcessableFoundIndex-firstProcessableFoundIndex+1;
         float labelMatchScore = (foundTokenMatch/(float)labelTokens.length);
         //Matching rules
         // - if less than config#minTokenFound() than accept only EXACT
@@ -541,19 +607,20 @@ public class EntityLinker {
         //   match (this will be very rare
         if(foundProcessableTokens > 0 && match.getMatchCount() <= foundProcessableTokens) {
             String currentText = state.getTokenText(firstFoundIndex,coveredTokens);
-            if(config.isCaseSensitiveMatching() ? currentText.equals(text) : currentText.equalsIgnoreCase(text)){ 
+            if(linkerConfig.isCaseSensitiveMatching() ? currentText.equals(text) : currentText.equalsIgnoreCase(text)){ 
                 labelMatch = MATCH.EXACT;
                 //set found to covered: May be lower because only
                 //processable tokens are counted, but Exact also checks
                 //of non-processable!
                 foundTokens = coveredTokens;
-            } else if((foundProcessableTokens >= config.getMinFoundTokens() ||
+                foundProcessableTokens = coveredProcessableTokens;
+            } else if((foundProcessableTokens >= linkerConfig.getMinFoundTokens() ||
                     //NOTE (rwesten, 2012-05-21): Do not check if all covered
                     //  Tokens are found, but if all Tokens of the Label are
                     //  matched! (STANBOL-622)
                     //foundTokens == coveredTokens) && 
-                    foundTokens >= labelTokens.length) &&
-                    labelMatchScore >= 0.6f){
+                    foundTokens >= labelTokens.length)){ //&&
+                    //labelMatchScore >= 0.6f){
                 //same as above
                 //if(foundTokens == coveredTokens){
                 if(foundTokens == labelTokens.length && foundTokens == coveredTokens){
@@ -568,7 +635,9 @@ public class EntityLinker {
                 if(match.getMatchCount() < foundProcessableTokens ||
                         match.getMatchCount() == foundProcessableTokens && 
                         labelMatch.ordinal() > match.getMatch().ordinal()){
-                    match.updateMatch(labelMatch, firstFoundIndex, coveredTokens, foundTokens,
+//                    match.updateMatch(labelMatch, firstFoundIndex, coveredTokens, foundTokens,
+//                        foundTokenMatch/foundTokens,label,labelTokens.length);
+                    match.updateMatch(labelMatch, firstProcessableFoundIndex, coveredProcessableTokens, foundProcessableTokens,
                         foundTokenMatch/foundTokens,label,labelTokens.length);
                 } //else this match is not better as the existing one
             } //else ignore labels with MATCH.NONE
@@ -614,27 +683,5 @@ public class EntityLinker {
         }
         return f > b ? f : b;
     }
-    
-    /**
-     * Checks if the current token of {@link #state} is processable. 
-     * @param token the {@link Token} to check.
-     * @return <code>true</code> if the parsed token needs to be processed.
-     * Otherwise <code>false</code>
-     */
-    private boolean isProcessableToken(Token token) {
-        Boolean processToken = null;
-        String[] posTags = token.getPosTags();
-        double[] posProb = token.getPosProbabilities();
-        if(posTags != null){
-            int i=0;
-            do {
-                processToken = content.processPOS(posTags[i],posProb[i]);
-                i++;
-            } while(processToken == null && i<posTags.length);
-        }
-        if(processToken == null) {
-             processToken = token.getText().length() >= config.getMinSearchTokenLength();
-        }
-        return processToken;
-    }
+
 }
