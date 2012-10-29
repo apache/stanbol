@@ -625,6 +625,11 @@ public class EntityLinker {
                 //if(foundTokens == coveredTokens){
                 if(foundTokens == labelTokens.length && foundTokens == coveredTokens){
                     labelMatch = MATCH.FULL;
+                    //set found to covered: May be lower because only
+                    //processable tokens are counted, but FULL also checks
+                    //of non-processable!
+                    foundTokens = coveredTokens;
+                    foundProcessableTokens = coveredProcessableTokens;
                 } else {
                     labelMatch = MATCH.PARTIAL;
                 }

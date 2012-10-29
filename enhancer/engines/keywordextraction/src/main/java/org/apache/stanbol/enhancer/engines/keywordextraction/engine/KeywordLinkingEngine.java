@@ -455,7 +455,7 @@ public class KeywordLinkingEngine
             log.info("    ... with language specific TextProcessingConfig");
         }
         EntityLinker entityLinker = new EntityLinker(at,language, 
-            defaultTextProcessingConfig, entitySearcher, linkerConfig, labelTokenizer);
+            tpc, entitySearcher, linkerConfig, labelTokenizer);
         //process
         entityLinker.process();
         //write results (requires a write lock)

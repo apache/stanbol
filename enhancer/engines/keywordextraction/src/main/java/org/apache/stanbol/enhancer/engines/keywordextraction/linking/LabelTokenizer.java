@@ -11,7 +11,7 @@ public interface LabelTokenizer {
 
     /**
      * Key used to configure the languages supported for tokenizing labels.
-     * If not present the asumption is that the tokenizer supports all languages.
+     * If not present the assumption is that the tokenizer supports all languages.
      */
     String SUPPORTED_LANUAGES = "enhancer.engines.keywordextraction.labeltokenizer.languages";
     
