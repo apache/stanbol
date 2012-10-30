@@ -93,4 +93,12 @@ public abstract class AbstractEnhancementEngine<A extends Exception,D extends Ex
     public final String getName(){
         return name;
     }
+    /**
+     * Prints the simple name of the Class and the configured Name.
+     */
+    @Override
+    public String toString() {
+        return String.format("%s(name=%s)", getClass().getSimpleName(),name);
+    }
+
 }

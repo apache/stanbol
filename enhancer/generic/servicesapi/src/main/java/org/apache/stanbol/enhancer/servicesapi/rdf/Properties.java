@@ -61,11 +61,27 @@ public class Properties {
             + "created");
 
     /**
+     * Modification date of a resource. Used by Stanbol Enhancer to annotate the 
+     * modification date of the enhancement if it was changed by an other
+     * enhancement engine as the one creating it. Multiple changes of the
+     * creating enhancement engines are not considered as modifications.
+     */
+    public static final UriRef DC_MODIFIED = new UriRef(NamespaceEnum.dc
+            + "modified");
+
+    /**
      * The entity responsible for the creation of a resource. Used by Stanbol Enhancer to
      * annotate the enhancement engine that created an enhancement
      */
     public static final UriRef DC_CREATOR = new UriRef(NamespaceEnum.dc
             + "creator");
+    /**
+     * The entity contributed to a resource. Used by Stanbol Enhancer to
+     * annotate the enhancement engine that changed an enhancement originally
+     * created by an other enhancemetn engine
+     */
+    public static final UriRef DC_CONTRIBUTOR = new UriRef(NamespaceEnum.dc
+            + "contributor");
 
     /**
      * The nature or genre of the resource. Stanbol Enhancer uses this property to refer to
