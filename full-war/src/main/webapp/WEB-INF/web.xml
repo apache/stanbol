@@ -39,6 +39,10 @@
                 <param-name>stanbol.home</param-name> 
                 <param-value>${sling.home}</param-value> 
         </init-param> 
+        <init-param> <!-- set the sling file installer dir to {working-dir}/stanbol/fileinstall -->
+                <param-name>sling.fileinstall.dir</param-name>
+                <param-value>${sling.home}/fileinstall</param-value>
+        </init-param>
         <load-on-startup>100</load-on-startup>
     </servlet>
 
