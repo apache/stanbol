@@ -42,6 +42,7 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
@@ -64,6 +65,8 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link EnhancementEngine} that summarizes {@link Token} level
@@ -73,15 +76,19 @@ import org.osgi.service.component.ComponentContext;
  *
  */
 @Component(immediate = true, metatype = true, 
-configurationFactory = true, //allow multiple instances
-policy = ConfigurationPolicy.OPTIONAL) //create a default instance with the default configuration
+    policy=ConfigurationPolicy.OPTIONAL,
+    configurationFactory=true) //allow multiple instances to be configured
 @Service
 @Properties(value={
-    @Property(name= EnhancementEngine.PROPERTY_NAME,value="sentiment-summarization"),
+    @Property(name= EnhancementEngine.PROPERTY_NAME,value=SentimentSummarizationEngine.DEFAULT_ENGINE_NAME),
     @Property(name=Constants.SERVICE_RANKING,intValue=-100) //give the default instance a ranking < 0
 })
 public class SentimentSummarizationEngine  extends AbstractEnhancementEngine<RuntimeException,RuntimeException> {
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    
+    public static final String DEFAULT_ENGINE_NAME = "sentiment-summarization";
+    
     //TODO: change this to a real sentiment ontology
     /**
      * The property used to write the sum of all positive classified words
@@ -110,11 +117,12 @@ public class SentimentSummarizationEngine  extends AbstractEnhancementEngine<Run
     @Override
     @Activate
     protected void activate(ComponentContext ctx) throws ConfigurationException {
+        log.info(" activate {} with config {}",getClass().getSimpleName(),ctx.getProperties());
         super.activate(ctx);
     }
     
     @Override
-    @Activate
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
         super.deactivate(ctx);
     }
