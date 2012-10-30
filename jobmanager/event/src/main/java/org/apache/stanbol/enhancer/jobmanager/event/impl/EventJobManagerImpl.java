@@ -21,6 +21,7 @@ import static org.apache.stanbol.enhancer.jobmanager.event.Constants.TOPIC_JOB_M
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.felix.scr.annotations.Activate;
@@ -30,6 +31,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.enhancer.jobmanager.event.impl.EnhancementJobHandler.EnhancementJobObserver;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
@@ -58,6 +60,8 @@ public class EventJobManagerImpl implements EnhancementJobManager {
     private final Logger log = LoggerFactory.getLogger(EventJobManagerImpl.class);
     
     public static final int DEFAULT_SERVICE_RANKING = 0;
+
+    private static final int MAX_ENHANCEMENT_JOB_WAIT_TIME = 10*1000;
     
     @Reference
     protected ChainManager chainManager;
@@ -127,16 +131,10 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         EnhancementJob job = new EnhancementJob(ci, chain.getName(), chain.getExecutionPlan(),isDefaultChain);
         //start the execution
         //wait for the results
-        Object object = jobHandler.register(job);
-        while(!job.isFinished() & jobHandler != null){
-            synchronized (object) {
-                try {
-                    object.wait();
-                } catch (InterruptedException e) {
-                    log.debug("Interupped for EnhancementJob if ContentItem {}",
-                        job.getContentItem().getUri());
-                }
-            }
+        EnhancementJobObserver observer = jobHandler.register(job);
+        //TODO: allow configuring a max completion time (e.g. 1min)
+        while(!observer.hasCompleted() & jobHandler != null){
+            observer.waitForCompletion(MAX_ENHANCEMENT_JOB_WAIT_TIME);
         }
         log.info("{} EnhancementJob for ContentItem {} after {}ms",
             new Object[]{ job.isFailed() ? "Failed" : "Finished",
@@ -148,7 +146,12 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         //      RESTful interface of the Enhancer!
         //ci.getMetadata().addAll(job.getExecutionMetadata());
         if(job.isFailed()){
-            throw new ChainException(job.getErrorMessage(), job.getError());
+        	Exception e = job.getError();
+        	if (e instanceof SecurityException) {
+        		throw (SecurityException)e;
+        	} else {
+        		throw new ChainException(job.getErrorMessage(), e);
+        	}
         }
         if(!job.isFinished()){
             throw new ChainException("EnhancementJobManager was deactivated while" +

@@ -23,13 +23,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-    <version>0.10.0-incubating-SNAPSHOT</version>
+    <version>0.10.0-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.chain.graph</artifactId>
-  <version>0.10.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancer Chain: GraphChain</name>
@@ -42,12 +42,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/chain/graph/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/chain/graph/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/chain/graph/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/chain/graph/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
@@ -58,11 +58,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
-              org.apache.stanbol.enhancer.chain.graph;version=${project.version}
-            </Export-Package>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              *
+            </Import-Package>
             <Private-Package>
-              org.apache.stanbol.enhancer.chain.graph.impl;version=${project.version}
+              org.apache.stanbol.enhancer.chain.graph.impl
             </Private-Package>
           </instructions>
         </configuration>
@@ -85,7 +87,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>
     
     <dependency>

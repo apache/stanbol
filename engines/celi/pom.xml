@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-		<version>0.10.0-incubating-SNAPSHOT</version>
+		<version>0.10.0-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 
@@ -25,16 +25,15 @@
 	<artifactId>org.apache.stanbol.enhancer.engines.celi</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>Apache Stanbol Enhancer Enhancement Engine: CELI  </name>
-	<description></description>
+	<name>Apache Stanbol Enhancer Enhancement Engine : CELI Engine</name>
+	<description>Enhancement Engine using the CELI service.</description>
 	<inceptionYear>2012</inceptionYear>
-
 
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-            <version>0.10.0-incubating-SNAPSHOT</version>
+            <version>0.10.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -78,13 +77,13 @@
         <dependency>
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.enhancer.test</artifactId>
-            <version>0.10.0-incubating-SNAPSHOT</version>
+            <version>0.10.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 		<dependency>
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.enhancer.core</artifactId>
-            <version>0.10.0-incubating-SNAPSHOT</version>
+            <version>0.10.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 	    <dependency><!--  for debugging enhancements -->
@@ -126,18 +125,21 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+                        <Import-Package>
+                            org.apache.stanbol.enhancer.servicesapi; provide:=true,
+                            org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+                            *
+                        </Import-Package>
+					    <Export-Package>
+					        org.apache.stanbol.enhancer.engines.celi
+					    </Export-Package>
 						<Private-Package>
-							org.apache.stanbol.enhancer.engines.celi.ner.impl.*, 
-							org.apache.stanbol.enhancer.engines.celi.langid.impl.*, 
-							org.apache.stanbol.enhancer.engines.celi.classification.impl.*, 
-							org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.*
+							org.apache.stanbol.enhancer.engines.celi.ner.impl, 
+							org.apache.stanbol.enhancer.engines.celi.langid.impl, 
+							org.apache.stanbol.enhancer.engines.celi.classification.impl, 
+							org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl,
+                            org.apache.stanbol.enhancer.engines.celi.utils
 						</Private-Package>
-						<!-- <Embed-Dependency>true</Embed-Dependency> 
-						<Embed-Transitive>true</Embed-Transitive>  -->
-						<Import-Package>
-							org.apache.http,
-							*;resolution:=optional
-						</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

@@ -17,10 +17,11 @@
 package org.apache.stanbol.enhancer.servicesapi;
 
 import java.io.InputStream;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.LockableMGraph;
 
 /**
  * A unit of content that Stanbol Enhancer can enhance.
@@ -51,12 +52,13 @@ public interface ContentItem {
     /**
      * Read/write lock used to synchronise access to the {@link #getMetadata()
      * metadata} and the content parts of this content item.<p>
-     * The lock used by the {@link LockableMGraph#getLock()} MUST BE the same
-     * as the lock returned by this Instance. This is to avoid deadlocks when
-     * using a lock while iterating over the {@link #getMetadata() metadata} and
-     * simultaneously accessing the content parts. In other words
-     * calling <code> contentItem.getLock() == contentItem.getMetadata().getLock()</code>
-     * MUST BE <code>true</code>
+     * The lock needs to be used for reading and writing information from/to
+     * the ContentItem. In case the {@link MGraph} retured by {@link #getMetadata()}
+     * is an instanceof used by the {@link org.apache.clerezza.rdf.core.access.LockableMGraph}
+     * the {@link Lock} returned by this mehtod is the same as used by the
+     * metadata.This is to avoid deadlocks when using a lock while iterating over 
+     * the {@link #getMetadata() metadata} and simultaneously accessing the content 
+     * parts.
      *  
      * @return the lock used for the content parts and the {@link LockableMGraph}
      * containing the metadata of this content item.
@@ -64,7 +66,7 @@ public interface ContentItem {
     ReadWriteLock getLock();
     
     /** Optional metadata */
-    LockableMGraph getMetadata();
+    MGraph getMetadata();
     
     /**
      * The main content of this content item

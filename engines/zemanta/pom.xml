@@ -23,13 +23,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-    <version>0.10.0-incubating-SNAPSHOT</version>
+    <version>0.10.0-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.zemanta</artifactId>
-  <version>0.10.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancer Enhancement Engine : Zemanta Tagging</name>
@@ -38,12 +38,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/zemanta/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/zemanta/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/zemanta/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/zemanta/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
@@ -62,9 +62,17 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              *
+            </Import-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.engines.zemanta.impl.*
             </Private-Package>
+            <Export-Package>
+              org.apache.stanbol.enhancer.engines.zemanta
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -79,7 +87,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -119,13 +127,13 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.test</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -17,13 +17,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-    <version>0.10.0-incubating-SNAPSHOT</version>
+    <version>0.10.0-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engine.topic</artifactId>
-  <version>0.10.0-incubating-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancer Enhancement Engine : Topic Classification</name>
@@ -41,12 +41,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/topic/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/topic/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/topic/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/topic/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
@@ -61,10 +61,18 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              *
+            </Import-Package>
             <Export-Package>
-              org.apache.stanbol.enhancer.topic.*;version=${project.version},
-              org.apache.stanbol.enhancer.engine.topic.*;version=${project.version}
+              org.apache.stanbol.enhancer.topic;version=${project.version},
+              org.apache.stanbol.enhancer.topic.training;version=${project.version}
             </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engine.topic
+            </Private-Package>
             <Install-Path>install-config</Install-Path>
             <Data-Files>data-files</Data-Files>
             <Data-Files-Priority>-100</Data-Files-Priority>
@@ -80,8 +88,9 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- AL20 licensed files. See src/test/resources/README -->
-            <exclude>src/test/resources/classifier/topics_abstracts_snippet.tsv</exclude>
+            <!-- AL20 licensed files. See src/main/resources/README -->
+            <exclude>src/main/resources/install-config/default-topic-model.solrindex.ref</exclude>
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
           </excludes>
         </configuration>
       </plugin>
@@ -273,22 +282,22 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.11.0-incubating-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.10.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>    
   </dependencies>
 

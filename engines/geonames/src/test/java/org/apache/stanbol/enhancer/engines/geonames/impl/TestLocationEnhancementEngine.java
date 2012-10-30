@@ -44,6 +44,7 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -129,7 +130,7 @@ public class TestLocationEnhancementEngine {
     }
 
     @Test
-    public void testLocationEnhancementEngine() throws IOException {
+    public void testLocationEnhancementEngine() throws IOException, EngineException {
         //create a content item
         ContentItem ci = getContentItem("urn:org.apache:stanbol.enhancer:text:content-item:person", CONTEXT);
         //add three text annotations to be consumed by this test
@@ -140,18 +141,8 @@ public class TestLocationEnhancementEngine {
         try {
             locationEnhancementEngine.computeEnhancements(ci);
         } catch (EngineException e) {
-            if (e.getCause() instanceof UnknownHostException) {
-                log.warn("Unable to test LocationEnhancemetEngine when offline! -> skipping this test", e.getCause());
-                return;
-            } else if (e.getCause() instanceof SocketTimeoutException) {
-                log.warn("Seams like the geonames.org webservice is currently unavailable -> skipping this test", e.getCause());
-                return;
-            } else if (e.getMessage().contains("overloaded with requests")) {
-                log.warn(
-                        "Seams like the geonames.org webservice is currently unavailable -> skipping this test",
-                        e.getCause());
-                return;
-            }
+            RemoteServiceHelper.checkServiceUnavailable(e, "overloaded with requests");
+            return;
         }
         Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
@@ -169,7 +160,9 @@ public class TestLocationEnhancementEngine {
         int entityAnnotationCount = validateAllEntityAnnotations(ci.getMetadata(),expectedValues);
         //two suggestions for New Zealand and one hierarchy entry for the first
         //suggestion
-        assertEquals(2, entityAnnotationCount);
+        //NOTE 2012-10-10: changed expected value back to "3" as geonames.org
+        //   again returns "Oceania" as parent for "New Zealand"
+        assertEquals(3, entityAnnotationCount);
     }
 
 

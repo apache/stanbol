@@ -493,6 +493,8 @@ public class LocationEnhancementEngine
         if (requiresEnhancements != null) {
             for (NonLiteral requires : requiresEnhancements) {
                 graph.add(new TripleImpl(entityAnnotation, DC_REQUIRES, requires));
+                //STANBOL-767: also add dc:relation link
+                graph.add(new TripleImpl(entityAnnotation, DC_RELATION, requires));
             }
         }
         graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_REFERENCE, entityRef));

@@ -15,11 +15,8 @@
  */
 package org.apache.stanbol.enhancer.engine.disambiguation.mlt;
 
-import static org.apache.commons.lang.StringUtils.getLevenshteinDistance;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_CONTRIBUTOR;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDFS_LABEL;
 
 import java.io.IOException;
@@ -290,19 +287,22 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
             QueryResultList<Entity> results;
             log.info(" - Query '{}' for {}@{} with context '{}'",
                 new Object[]{site.getId(),savedEntityLabel,contentLangauge,disambiguationContext});
-            try {
-                results = query(site, savedEntityLabel, contentLangauge,
-                    disambiguationContext);
-            } catch (SiteException e) {
-                //TODO we could also try to catch those errors ...
-                throw new EngineException("Unable to disambiguate Mention of '"
-                        + savedEntity.getName()+"' on Entityhub Site '"+
-                        site.getId()+"!",e);
+            if(!StringUtils.isBlank(disambiguationContext)){
+                try {
+                    results = query(site, savedEntityLabel, contentLangauge,
+                        disambiguationContext);
+                } catch (SiteException e) {
+                    //TODO we could also try to catch those errors ...
+                    throw new EngineException("Unable to disambiguate Mention of '"
+                            + savedEntity.getName()+"' on Entityhub Site '"+
+                            site.getId()+"!",e);
+                }
+                log.debug(" - {} results returned by query {}", results.size(), results.getQuery());
+                //match the results with the suggestions
+                disambiguateSuggestions(results, savedEntity);
+            } else {
+                log.debug(" - not disambiguated because of empty context!");
             }
-            log.debug(" - {} results returned by query {}", results.size(), results.getQuery());
-    
-            //match the results with the suggestions
-            disambiguateSuggestions(results, savedEntity);
         }
         //(3) Write back the Results of the Disambiguation process
         // NOTE (rwesten): In the original version of Kritarth this was done as
@@ -329,7 +329,6 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
                                                    String savedEntityLabel,
                                                    String language,
                                                    String extractionContext) throws SiteException {
-
         FieldQuery query = dbpediaSite.getQueryFactory().createFieldQuery();
         if(savedEntityLabel != null && !savedEntityLabel.isEmpty()){
             Constraint labelConstraint;
