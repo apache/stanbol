@@ -65,15 +65,19 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Core of our EnhancementEngine, separated from the OSGi service to make it easier to test this.
+ * Core of the NER EnhancementEngine(s), separated from the OSGi service to make 
+ * it easier to test this.
  */
-public class NEREngineCore implements EnhancementEngine {
+public abstract class NEREngineCore 
+        extends AbstractEnhancementEngine<IOException,RuntimeException> 
+        implements EnhancementEngine {
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
     /**
      * Contains the only supported mimetype {@link #TEXT_PLAIN_MIMETYPE}
@@ -82,18 +86,10 @@ public class NEREngineCore implements EnhancementEngine {
             Collections.singleton(TEXT_PLAIN_MIMETYPE);
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private static Map<String,UriRef> entityTypes = new HashMap<String,UriRef>();
-    static {
-        entityTypes.put("person", OntologicalClasses.DBPEDIA_PERSON);
-        entityTypes.put("location", OntologicalClasses.DBPEDIA_PLACE);
-        entityTypes.put("organization", OntologicalClasses.DBPEDIA_ORGANISATION);
-    }
     
-    private OpenNLP openNLP;
-
-    private final String defaultLang;
-
-    private final Set<String> processedLangs;
+    protected OpenNLP openNLP;
+    
+    protected NEREngineConfig config;
     
     /** Comments about our models */
     public static final Map<String, String> DATA_FILE_COMMENTS;
@@ -101,28 +97,28 @@ public class NEREngineCore implements EnhancementEngine {
         DATA_FILE_COMMENTS = new HashMap<String, String>();
         DATA_FILE_COMMENTS.put("Default data files", "provided by the org.apache.stanbol.defaultdata bundle");
     }
-
-    public NEREngineCore(OpenNLP openNLP, String defaultLanguage, Set<String> processedLanguages) throws InvalidFormatException, IOException{
+    /**
+     * If used sub classes MUST ensure that {@link #openNLP} and {@link #config}
+     * are set before calling {@link #canEnhance(ContentItem)} or
+     * {@link #computeEnhancements(ContentItem)}
+     */
+    protected NEREngineCore(){}
+    
+    NEREngineCore(OpenNLP openNLP, NEREngineConfig config) throws InvalidFormatException, IOException{
+        if(openNLP == null){
+            throw new IllegalArgumentException("The parsed OpenNLP instance MUST NOT be NULL!");
+        }
+        if(config == null){
+            throw new IllegalArgumentException("The parsed NER engine configuration MUST NOT be NULL!");
+        }
         this.openNLP = openNLP;
-        this.defaultLang = defaultLanguage;
-        this.processedLangs = Collections.unmodifiableSet(processedLanguages);
+        this.config = config;
     }
     
-    NEREngineCore(DataFileProvider dfp,String defaultLanguage, Set<String> processedLanguages) throws InvalidFormatException, IOException {
-        this(new OpenNLP(dfp),defaultLanguage,processedLanguages);
+    NEREngineCore(DataFileProvider dfp,NEREngineConfig config) throws InvalidFormatException, IOException {
+        this(new OpenNLP(dfp),config);
     }
 
-//    protected TokenNameFinderModel buildNameModel(String name, UriRef typeUri) throws IOException {
-//        //String modelRelativePath = String.format("en-ner-%s.bin", name);
-//        TokenNameFinderModel model = openNLP.getNameModel(name, "en");
-//        // register the name finder instances for matching owl class
-////        entityTypes.put(name, new Object[] {typeUri, model});
-//        return model;
-//    }
-    @Override
-    public String getName() {
-        return getClass().getName();
-    }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
         //first check the langauge before processing the content (text)
@@ -133,10 +129,9 @@ public class NEREngineCore implements EnhancementEngine {
                 + "method! -> This indicated an Bug in the implementation of the "
                 + "EnhancementJobManager!");
         }
-        if(!isProcessedLangage(language)){
-            throw new IllegalStateException("The language '"+language+"' of ContentItem "+ci.getUri() 
-                + " is not configured to be processed by this NER engine instance "
-                + "(processed "+processedLangs+"): This is also checked in the canEnhance "
+        if(!isNerModel(language)){
+            throw new IllegalStateException("For the language '"+language+"' of ContentItem "+ci.getUri() 
+                + " no NER model is configured: This is also checked in the canEnhance "
                 + "method! -> This indicated an Bug in the implementation of the "
                 + "EnhancementJobManager!");
         }
@@ -167,14 +162,29 @@ public class NEREngineCore implements EnhancementEngine {
             new Object[]{contentPart.getKey(),ci.getUri().getUnicodeString(), 
                          StringUtils.abbreviate(text, 100)});
         try {
-            for (Map.Entry<String,UriRef> type : entityTypes.entrySet()) {
-                String typeLabel = type.getKey();
-                UriRef typeUri = type.getValue();
-                TokenNameFinderModel nameFinderModel = openNLP.getNameModel(typeLabel, language);
-                if(nameFinderModel == null){
-                    log.info("No NER Model for {} and language {} available!",typeLabel,language);
-                } else {
-                    findNamedEntities(ci, text, language, typeUri, typeLabel, nameFinderModel);
+            if(config.isProcessedLangage(language)){
+                for (String defaultModelType : config.getDefaultModelTypes()) {
+                    TokenNameFinderModel nameFinderModel = openNLP.getNameModel(defaultModelType, language);
+                    if(nameFinderModel == null){
+                        log.info("No NER Model for {} and language {} available!",defaultModelType,language);
+                    } else {
+                        findNamedEntities(ci, text, language, nameFinderModel);
+                    }
+                }
+            } //else do not use default models for languages other than the processed one
+            //process for additional models
+            for(String additionalModel : config.getSpecificNerModles(language)){
+                TokenNameFinderModel nameFinderModel;
+                try {
+                    nameFinderModel = openNLP.getModel(TokenNameFinderModel.class, 
+                        additionalModel, null);
+                    findNamedEntities(ci, text, language, nameFinderModel);
+                } catch (IOException e) {
+                    log.warn("Unable to load TokenNameFinderModel model for language '"+language
+                        + "' (model: "+additionalModel+")",e);
+                } catch (RuntimeException e){
+                    log.warn("Error while creating ChunkerModel for language '"+language
+                        + "' (model: "+additionalModel+")",e);
                 }
             }
         } catch (Exception e) {
@@ -189,8 +199,6 @@ public class NEREngineCore implements EnhancementEngine {
     protected void findNamedEntities(final ContentItem ci,
                                      final String text,
                                      final String lang,
-                                     final UriRef typeUri,
-                                     final String typeLabel,
                                      final TokenNameFinderModel nameFinderModel) {
 
         if (ci == null) {
@@ -206,8 +214,10 @@ public class NEREngineCore implements EnhancementEngine {
         } else {
             language = null;
         }
-        log.debug("findNamedEntities typeUri={}, type={}, text=", 
-                new Object[]{ typeUri, typeLabel, StringUtils.abbreviate(text, 100) });
+        if(log.isDebugEnabled()){
+            log.debug("findNamedEntities model={},  language={}, text=", 
+                    new Object[]{ nameFinderModel, language, StringUtils.abbreviate(text, 100) });
+        }
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         MGraph g = ci.getMetadata();
         Map<String,List<NameOccurrence>> entityNames = extractNameOccurrences(nameFinderModel, text);
@@ -228,7 +238,9 @@ public class NEREngineCore implements EnhancementEngine {
                         new PlainLiteralImpl(name, language)));
                     g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, 
                         new PlainLiteralImpl(occurrence.context, language)));
-                    g.add(new TripleImpl(textAnnotation, DC_TYPE, typeUri));
+                    if(occurrence.type != null){
+                        g.add(new TripleImpl(textAnnotation, DC_TYPE, occurrence.type));
+                    }
                     g.add(new TripleImpl(textAnnotation, ENHANCER_CONFIDENCE, literalFactory
                             .createTypedLiteral(occurrence.confidence)));
                     if (occurrence.start != null && occurrence.end != null) {
@@ -399,8 +411,9 @@ public class NEREngineCore implements EnhancementEngine {
                 int start = tokenSpans[nameSpans[j].getStart()].getStart();
                 int absoluteStart = sentenceSpans[i].getStart() + start;
                 int absoluteEnd = absoluteStart + name.length();
-                NameOccurrence occurrence = new NameOccurrence(name, absoluteStart, absoluteEnd, context,
-                        confidence);
+                UriRef mappedType = config.getMappedType(nameSpans[j].getType());
+                NameOccurrence occurrence = new NameOccurrence(name, absoluteStart, absoluteEnd, 
+                    mappedType, context, confidence);
 
                 List<NameOccurrence> occurrences = nameOccurrences.get(name);
                 if (occurrences == null) {
@@ -416,11 +429,12 @@ public class NEREngineCore implements EnhancementEngine {
     }
 
     public int canEnhance(ContentItem ci) {
-        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null 
-                && isProcessedLangage(extractLanguage(ci))){
-                return ENHANCE_ASYNC; //The NER engine now supports Async processing!
+        if(ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null &&
+                isNerModel(extractLanguage(ci))){
+            return ENHANCE_ASYNC;
+        } else {
+            return CANNOT_ENHANCE;
         }
-        return CANNOT_ENHANCE;
     }
 
     /**
@@ -445,38 +459,6 @@ public class NEREngineCore implements EnhancementEngine {
     }
 
     /**
-     * The default language
-     * @return the defaultLang
-     */
-    public String getDefaultLanguage() {
-        return defaultLang;
-    }
-    /**
-     * Checks if the parsed language is enabled for processing.
-     * If <code>null</code> is parsed as language this returns <code>false</code>
-     * even if processing of all languages is enabled. <p>
-     * NOTE: If this Method returns <code>true</code> this does
-     * not mean that text with this language can be actually processed because this
-     * also requires that the NER model for this language are available via the
-     * parsed {@link OpenNLP} instance.
-     * @param lang the language
-     * @return the state
-     */
-    public boolean isProcessedLangage(String lang){
-        return lang != null && (processedLangs.isEmpty() || processedLangs.contains(lang));
-    }
-    /*
-     * The following Utility extracts the language from the metadata of the
-     * parsed Content Item.
-     * This Utility is actually a copy of the same form the KeywordExtractionEngine.
-     * TODO: change this to a global Utility as soon as STANBOL Enhancement
-     * Structure is defined
-     */
-    /**
-     * The literal representing the LangIDEngine as creator.
-     */
-    public static final Literal LANG_ID_ENGINE_NAME = LiteralFactory.getInstance().createTypedLiteral("org.apache.stanbol.enhancer.engines.langid.LangIdEnhancementEngine");
-    /**
      * Extracts the language of the parsed ContentItem by using
      * {@link EnhancementEngineHelper#getLanguage(ContentItem)} and 
      * {@link #defaultLang} as default
@@ -485,26 +467,26 @@ public class NEREngineCore implements EnhancementEngine {
      */
     private String extractLanguage(ContentItem ci) {
         String lang = EnhancementEngineHelper.getLanguage(ci);
-//        MGraph metadata = ci.getMetadata();
-//        Iterator<Triple> langaugeEnhancementCreatorTriples = 
-//            metadata.filter(null, Properties.DC_CREATOR, LANG_ID_ENGINE_NAME);
-//        if(langaugeEnhancementCreatorTriples.hasNext()){
-//            String lang = EnhancementEngineHelper.getString(metadata, 
-//                langaugeEnhancementCreatorTriples.next().getSubject(), 
-//                Properties.DC_LANGUAGE);
         if(lang != null){
             return lang;
         } else {
-            log.info("Unable to extract language for ContentItem %s! The Enhancement of the %s is missing the %s property",
-                new Object[]{ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm(),Properties.DC_LANGUAGE});
-            log.info(" ... return '{}' as default",defaultLang);
-            return defaultLang;
+            log.info("Unable to extract language for ContentItem %s!",ci.getUri().getUnicodeString());
+            log.info(" ... return '{}' as default",config.getDefaultLanguage());
+            return config.getDefaultLanguage();
         }
-//        } else {
-//            log.info("Unable to extract language for ContentItem {}! Is the {} active?",
-//                ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm());
-//            log.info(" ... return '{}' as default",defaultLang);
-//            return defaultLang;
-//        }
+    }
+    /**
+     * This Method checks if this configuration does have a NER model for the
+     * parsed language. This checks if the pased language 
+     * {@link #isProcessedLangage(String)} and any {@link #getDefaultModelTypes()}
+     * is present OR if any {@link #getSpecificNerModles(String)} is configured for the
+     * parsed language.
+     * @param lang The language to check
+     * @return if there is any NER model configured for the parsed language
+     */
+    public boolean isNerModel(String lang){
+        return (config.isProcessedLangage(lang) && !config.getDefaultModelTypes().isEmpty()) ||
+               !config.getSpecificNerModles(lang).isEmpty();
+                
     }
 }

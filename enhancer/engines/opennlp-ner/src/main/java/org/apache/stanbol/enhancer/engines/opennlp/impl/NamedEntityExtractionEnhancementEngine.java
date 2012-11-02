@@ -20,23 +20,19 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
-import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
-import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
@@ -49,7 +45,7 @@ import org.osgi.service.component.ComponentContext;
     immediate = true,
     inherit = true,
     configurationFactory = true, 
-    policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
+    policy = ConfigurationPolicy.OPTIONAL,
     specVersion = "1.1", 
     label = "%stanbol.NamedEntityExtractionEnhancementEngine.name", 
     description = "%stanbol.NamedEntityExtractionEnhancementEngine.description")
@@ -58,14 +54,16 @@ import org.osgi.service.component.ComponentContext;
     @Property(name=EnhancementEngine.PROPERTY_NAME,value="ner"),
     @Property(name=NamedEntityExtractionEnhancementEngine.PROCESSED_LANGUAGES,value=""),
     @Property(name=NamedEntityExtractionEnhancementEngine.DEFAULT_LANGUAGE,value=""),
-    @Property(name=Constants.SERVICE_RANKING,intValue=0)
+    //set the ranking of the default config to a negative value (ConfigurationPolicy.OPTIONAL) 
+    @Property(name=Constants.SERVICE_RANKING,intValue=-100) 
 })
+@Reference(name="openNLP",referenceInterface=OpenNLP.class, 
+    cardinality=ReferenceCardinality.MANDATORY_UNARY,
+    policy=ReferencePolicy.STATIC)
 public class NamedEntityExtractionEnhancementEngine 
-        extends AbstractEnhancementEngine<IOException,RuntimeException> 
+        extends NEREngineCore
         implements EnhancementEngine, ServiceProperties {
 
-    private EnhancementEngine engineCore;
-    
     public static final String DEFAULT_DATA_OPEN_NLP_MODEL_LOCATION = "org/apache/stanbol/defaultdata/opennlp";
 
     /**
@@ -89,61 +87,60 @@ public class NamedEntityExtractionEnhancementEngine
      * {@link ServiceProperties#ORDERING_CONTENT_EXTRACTION}
      */
     public static final Integer defaultOrder = ORDERING_CONTENT_EXTRACTION;
-
-    private ServiceRegistration dfpServiceRegistration;
-    
-    @Reference
-    private OpenNLP openNLP;
+    /**
+     * Bind method of {@link NEREngineCore#openNLP}
+     * @param openNlp
+     */
+    protected void bindOpenNLP(OpenNLP openNlp){
+        this.openNLP = openNlp;
+    }
+    /**
+     * Unbind method of {@link NEREngineCore#openNLP}
+     * @param openNLP
+     */
+    protected void unbindOpenNLP(OpenNLP openNLP){
+        this.openNLP = null;
+    }
     
     protected void activate(ComponentContext ctx) throws IOException, ConfigurationException {
         super.activate(ctx);
+        config = new NEREngineConfig();
         // Need to register the default data before loading the models
         Object value = ctx.getProperties().get(DEFAULT_LANGUAGE);
-        final String defaultLanguage;
         if(value != null && !value.toString().isEmpty()){
-            defaultLanguage = value.toString();
-        } else {
-            defaultLanguage = null;
-        }
+            config.setDefaultLanguage(value.toString());
+        } //else no default language
+        
         value = ctx.getProperties().get(PROCESSED_LANGUAGES);
-        final Set<String> processedLanguages;
         if(value instanceof String[]){
-            processedLanguages = new HashSet<String>(Arrays.asList((String[]) value));
-            processedLanguages.remove(null); //remove null
-            processedLanguages.remove(""); //remove empty
+            config.getProcessedLanguages().addAll(Arrays.asList((String[]) value));
+            config.getProcessedLanguages().remove(null); //remove null
+            config.getProcessedLanguages().remove(""); //remove empty
         } else if (value instanceof Collection<?>){
-            processedLanguages = new HashSet<String>();
             for(Object o : ((Collection<?>)value)){
                 if(o != null){
-                    processedLanguages.add(o.toString());
+                    config.getProcessedLanguages().add(o.toString());
                 }
             }
-            processedLanguages.remove(""); //remove empty
+            config.getProcessedLanguages().remove(""); //remove empty
         } else if(value != null && !value.toString().isEmpty()){
             //if a single String is parsed we support ',' as seperator
             String[] languageArray = value.toString().split(",");
-            processedLanguages = new HashSet<String>(Arrays.asList(languageArray));
-            processedLanguages.remove(null); //remove null
-            processedLanguages.remove(""); //remove empty
-        } else { //no configuration
-            processedLanguages = Collections.emptySet();
-        }
-        if(!processedLanguages.isEmpty() && defaultLanguage != null &&
-                !processedLanguages.contains(defaultLanguage)){
+            config.getProcessedLanguages().addAll(Arrays.asList(languageArray));
+            config.getProcessedLanguages().remove(null); //remove null
+            config.getProcessedLanguages().remove(""); //remove empty
+        } //else no configuration
+        if(!config.getProcessedLanguages().isEmpty() && config.getDefaultLanguage() != null &&
+                !config.getProcessedLanguages().contains(config.getDefaultLanguage())){
             throw new ConfigurationException(PROCESSED_LANGUAGES, "The list of" +
-            		"processed Languages "+processedLanguages+" MUST CONTAIN the" +
-            		"configured default language '"+defaultLanguage+"'!");
+            		"processed Languages "+config.getProcessedLanguages()+" MUST CONTAIN the" +
+            		"configured default language '"+config.getDefaultLanguage()+"'!");
         }
-        engineCore = new NEREngineCore(openNLP, defaultLanguage, processedLanguages);
     }
 
     protected void deactivate(ComponentContext ctx) {
+        config = null;
         super.deactivate(ctx);
-        if(dfpServiceRegistration != null) {
-            dfpServiceRegistration.unregister();
-            dfpServiceRegistration = null;
-        }
-        engineCore = null;
     }
     
     @Override
@@ -152,22 +149,22 @@ public class NamedEntityExtractionEnhancementEngine
             (Object) defaultOrder));
     }
 
-    @Override
-    public int canEnhance(ContentItem ci) throws EngineException {
-        checkCore();
-        return engineCore.canEnhance(ci);
-    }
+//    @Override
+//    public int canEnhance(ContentItem ci) throws EngineException {
+//        checkCore();
+//        return engineCore.canEnhance(ci);
+//    }
 
-    @Override
-    public void computeEnhancements(ContentItem ci) throws EngineException {
-        checkCore();
-        engineCore.computeEnhancements(ci);
-    }
+//    @Override
+//    public void computeEnhancements(ContentItem ci) throws EngineException {
+//        checkCore();
+//        engineCore.computeEnhancements(ci);
+//    }
     
-    private void checkCore() {
-        if(engineCore == null) {
-            throw new IllegalStateException("EngineCore not initialized");
-        }
-    }
+//    private void checkCore() {
+//        if(engineCore == null) {
+//            throw new IllegalStateException("EngineCore not initialized");
+//        }
+//    }
 
 }

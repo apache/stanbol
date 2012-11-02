@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.enhancer.engines.opennlp.impl;
 
+import org.apache.clerezza.rdf.core.UriRef;
+
 public class NameOccurrence {
 
     public final String name;
@@ -28,11 +30,14 @@ public class NameOccurrence {
 
     public final Double confidence;
 
-    public NameOccurrence(String name, Integer start, Integer end,
+    public final UriRef type;
+
+    public NameOccurrence(String name, Integer start, Integer end, UriRef type,
             String context, Double confidence) {
         this.start = start;
         this.end = end;
         this.name = name;
+        this.type = type;
         this.context = context;
         this.confidence = confidence;
     }
@@ -40,8 +45,8 @@ public class NameOccurrence {
     @Override
     public String toString() {
         return String.format(
-                "[name='%s', start='%d', end='%d', confidence='%f', context='%s']",
-                name, start, end, confidence, context);
+                "[name='%s', start='%d', end='%d', type='%s', confidence='%f', context='%s']",
+                name, start, end, type, confidence, context);
     }
 
 }

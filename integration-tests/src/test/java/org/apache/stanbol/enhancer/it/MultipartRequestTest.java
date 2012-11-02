@@ -184,7 +184,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
             "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
             "http://fise.iks-project.eu/ontology/entity-label.*Paris",
-            "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
+            "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*NamedEntityExtractionEnhancementEngine",
             "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley")
         .getContent();
         log.debug("Content:\n{}\n",content);
@@ -223,7 +223,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
             "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
             "http://fise.iks-project.eu/ontology/entity-label.*Paris",
-            "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
+            "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*NamedEntityExtractionEnhancementEngine",
             "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley")
         .getContent();
         log.debug("Content:\n{}\n",content);
@@ -258,7 +258,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
             "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
             "http://fise.iks-project.eu/ontology/entity-label.*Paris",
-            "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
+            "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*NamedEntityExtractionEnhancementEngine",
             "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley")
         .getContent();
         log.debug("Content:\n{}\n",content);
@@ -294,7 +294,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
              "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
              "http://purl.org/dc/terms/language.*en",
              "http://fise.iks-project.eu/ontology/entity-label.*Paris",
-             "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
+             "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*NamedEntityExtractionEnhancementEngine",
              "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley")
          .getContent();
         log.debug("Content:\n{}\n",content);
@@ -371,7 +371,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
             "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
             "http://fise.iks-project.eu/ontology/entity-label.*Paris",
-            "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
+            "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*NamedEntityExtractionEnhancementEngine",
             "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley",
             //check also for expeted entities extracted from the secret Text part!
             "http://fise.iks-project.eu/ontology/entity-label.*Berlin",
@@ -512,7 +512,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
             "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
             "http://fise.iks-project.eu/ontology/entity-label.*Paris",
-            "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
+            "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*NamedEntityExtractionEnhancementEngine",
             "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley",
             //additional enhancements based on parsed metadata
             "http://fise.iks-project.eu/ontology/entity-reference.*http://dbpedia.org/resource/Germany.*",

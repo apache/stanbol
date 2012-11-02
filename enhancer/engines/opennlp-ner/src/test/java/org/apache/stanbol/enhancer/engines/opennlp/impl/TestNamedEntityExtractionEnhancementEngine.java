@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.opennlp.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
 import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateAllTextAnnotations;
 
 import java.io.IOException;
@@ -29,6 +30,8 @@ import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
@@ -59,16 +62,19 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
     
     public static final String FAKE_BUNDLE_SYMBOLIC_NAME = "FAKE_BUNDLE_SYMBOLIC_NAME";
 
-    @SuppressWarnings("unchecked")
     @BeforeClass
     public static void setUpServices() throws IOException {
         nerEngine = new NEREngineCore(new ClasspathDataFileProvider(FAKE_BUNDLE_SYMBOLIC_NAME),
-            "en",Collections.EMPTY_SET);
+            new NEREngineConfig()){};
     }
 
     public static ContentItem wrapAsContentItem(final String id,
-            final String text) throws IOException {
-    	return ciFactory.createContentItem(new UriRef(id),new StringSource(text));
+            final String text, String language) throws IOException {
+    	ContentItem ci =  ciFactory.createContentItem(new UriRef(id),new StringSource(text));
+    	if(language != null){
+    	    ci.getMetadata().add(new TripleImpl(ci.getUri(), DC_LANGUAGE, new PlainLiteralImpl(language)));
+    	}
+    	return ci;
     }
 
     @Test
@@ -124,7 +130,7 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
     @Test
     public void testComputeEnhancements()
             throws EngineException, IOException {
-        ContentItem ci = wrapAsContentItem("my doc id", SINGLE_SENTENCE);
+        ContentItem ci = wrapAsContentItem("urn:test:content-item:single:sentence", SINGLE_SENTENCE,"en");
         nerEngine.computeEnhancements(ci);
         Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());

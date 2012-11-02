@@ -76,7 +76,7 @@ public class DefaultChainTest extends EnhancerTestBase {
                 "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
                 "http://purl.org/dc/terms/language.*en",
                 "http://fise.iks-project.eu/ontology/entity-label.*Paris",
-                "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
+                "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*NamedEntityExtractionEnhancementEngine",
                 "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley",
                 //the following two lines test the use of plain literals (see STANBOL-509)
                 "http://fise.iks-project.eu/ontology/selected-text.*\"Bob Marley\"@en",
