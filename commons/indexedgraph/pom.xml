@@ -59,11 +59,11 @@
           <instructions>
             <Import-Package>
               org.apache.stanbol.commons.indexedgraph,
+              org.apache.clerezza.rdf.core; provide:=true,
               *
             </Import-Package>
             <Export-Package>
-              org.apache.stanbol.commons.indexedgraph;version=${project.version},
-              org.apache.clerezza.rdf.core; provide:=true
+              org.apache.stanbol.commons.indexedgraph;version=${project.version}
             </Export-Package>
           </instructions>
         </configuration>
