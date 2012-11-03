@@ -22,7 +22,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.demo.ehealth</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>0.10.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Demo: ehealth</name>
@@ -47,6 +47,10 @@
         <configuration>
           <instructions>
             <Install-Path>config</Install-Path>
+            <Data-Files>datafiles</Data-Files>
+            <Data-Files-Priority>
+              -100
+            </Data-Files-Priority>
           </instructions>
         </configuration>
       </plugin>
