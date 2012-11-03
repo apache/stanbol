@@ -69,7 +69,7 @@
 
 
     <!-- boolean type: "true" or "false" used to store values with the datatype "xsd:boolean" -->
-    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true"/>
+    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="false"/>
     <!--Binary data type. The data should be sent/retrieved in as Base64 encoded Strings.
         Currently not used by the SolrYard implementation, but reserved for future use. -->
     <fieldtype name="binary" class="solr.BinaryField"/>
@@ -83,11 +83,11 @@
       for all numeric fields of that types. See Solr documentation for
       suitable values and examples.
     -->
-    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
-    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
-    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
-    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
-    <fieldType name="date" class="solr.TrieDateField" omitNorms="true" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" omitNorms="false" positionIncrementGap="0"/>
+    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" omitNorms="false" positionIncrementGap="0"/>
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" omitNorms="false" positionIncrementGap="0"/>
+    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" omitNorms="false" positionIncrementGap="0"/>
+    <fieldType name="date" class="solr.TrieDateField" omitNorms="false" precisionStep="0" positionIncrementGap="0"/>
 
     <!--
      Numeric field types that index each value at various levels of precision
@@ -99,11 +99,11 @@
      indexed per value, slightly larger index size, and faster range queries.
      A precisionStep of 0 disables indexing at different precision levels.
     -->
-    <fieldType name="tint" class="solr.TrieIntField" precisionStep="8" omitNorms="true" positionIncrementGap="0"/>
-    <fieldType name="tfloat" class="solr.TrieFloatField" precisionStep="8" omitNorms="true" positionIncrementGap="0"/>
-    <fieldType name="tlong" class="solr.TrieLongField" precisionStep="8" omitNorms="true" positionIncrementGap="0"/>
-    <fieldType name="tdouble" class="solr.TrieDoubleField" precisionStep="8" omitNorms="true" positionIncrementGap="0"/>
-    <fieldType name="tdate" class="solr.TrieDateField" omitNorms="true" precisionStep="6" positionIncrementGap="0"/>
+    <fieldType name="tint" class="solr.TrieIntField" precisionStep="8" omitNorms="false" positionIncrementGap="0"/>
+    <fieldType name="tfloat" class="solr.TrieFloatField" precisionStep="8" omitNorms="false" positionIncrementGap="0"/>
+    <fieldType name="tlong" class="solr.TrieLongField" precisionStep="8" omitNorms="false" positionIncrementGap="0"/>
+    <fieldType name="tdouble" class="solr.TrieDoubleField" precisionStep="8" omitNorms="false" positionIncrementGap="0"/>
+    <fieldType name="tdate" class="solr.TrieDateField" omitNorms="false" precisionStep="6" positionIncrementGap="0"/>
 
     <!-- not used
     <fieldType name="random" class="solr.RandomSortField" indexed="true" />

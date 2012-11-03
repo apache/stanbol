@@ -60,7 +60,7 @@ public class FieldValueFilter implements EntityProcessor{
     
     @Override
     public Representation process(Representation source) {
-        if(!includeEmpty && values.isEmpty()){ //no filter set
+        if(includeEmpty && values.isEmpty()){ //no filter set
             return source;
         }
         Iterator<Reference> refs = source.getReferences(field);
@@ -68,7 +68,8 @@ public class FieldValueFilter implements EntityProcessor{
             return source;
         }
         while(refs.hasNext()){
-            if(values.contains(refs.next().getReference())){
+            //NOTE: if !includeEmpty values may be NULL (any value accepted)
+            if(values == null || values.contains(refs.next().getReference())){
                 return source;
             }
         }
@@ -100,12 +101,11 @@ public class FieldValueFilter implements EntityProcessor{
             log.info("configured Field: {}",field);
         }
         value = config.get(PARAM_VALUES);
-        if(value == null || value.toString().isEmpty()){
-            throw new IllegalArgumentException("Missing required Parameter "+PARAM_VALUES+". Set to '*' to deactivate Filtering");
-        } else if(value instanceof String){
+        if(value instanceof String){
             String stringValue = value.toString().trim();
             if(stringValue.equals("*")){ // * -> deactivate Filtering
                 this.values = Collections.emptySet();
+                this.includeEmpty = true;
             } else {
                 Set<String> values = new HashSet<String>();
                 for(String fieldValue : stringValue.split(";")){
@@ -128,6 +128,7 @@ public class FieldValueFilter implements EntityProcessor{
             if(typeArray.length == 0 || //if an empty array or
                     typeArray.length == 1 && typeArray[0].equals("*")){ //only a * is parsed
                 this.values = Collections.emptySet(); // than deactivate filtering
+                this.includeEmpty = true;
             } else {
                 Set<String> values = new HashSet<String>();
                 for(String filterString : typeArray){
@@ -145,9 +146,8 @@ public class FieldValueFilter implements EntityProcessor{
                     this.values = values;
                 }
             }
-        } else {
-            throw new IllegalArgumentException("Type of parameter "+PARAM_VALUES+'='+value+
-                "(type:"+value.getClass()+") is not supported MUST be String or String[]!");
+        } else {// no values (accept all entities with any value)
+            values = Collections.emptySet();
         }
     }
 
