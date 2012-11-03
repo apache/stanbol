@@ -32,6 +32,8 @@ import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.commons.opennlp.OpenNLP;
+import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
@@ -39,6 +41,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -57,14 +60,28 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
             + " without any name.\n"
             + "A new paragraph is being written. This paragraph has two sentences.";
 
+    
+    public static final String EHEALTH = "Whereas activation of the HIV-1 enhancer following T-cell " 
+            + "stimulation is mediated largely through binding of the transcription factor NF-kappa "
+            + "B to two adjacent kappa B sites in the HIV-1 long terminal repeat, activation of the "
+            + "HIV-2 enhancer in monocytes and T cells is dependent on four cis-acting elements : a "
+            + "single kappa B site, two purine-rich binding sites , PuB1 and PuB2 , and a pets site .";
+    
     private static ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
-    static NEREngineCore nerEngine;
+    private NEREngineCore nerEngine;
     
     public static final String FAKE_BUNDLE_SYMBOLIC_NAME = "FAKE_BUNDLE_SYMBOLIC_NAME";
-
+    public static OpenNLP openNLP;
+    
     @BeforeClass
-    public static void setUpServices() throws IOException {
-        nerEngine = new NEREngineCore(new ClasspathDataFileProvider(FAKE_BUNDLE_SYMBOLIC_NAME),
+    public static void initDataFileProvicer(){
+        DataFileProvider dataFileProvider = new ClasspathDataFileProvider(FAKE_BUNDLE_SYMBOLIC_NAME);
+        openNLP = new OpenNLP(dataFileProvider);
+    }
+    
+    @Before
+    public void setUpServices() throws IOException {
+        nerEngine = new NEREngineCore(openNLP,
             new NEREngineConfig()){};
     }
 
@@ -141,5 +158,26 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
         int textAnnotationCount = validateAllTextAnnotations(g,SINGLE_SENTENCE,expectedValues);
         assertEquals(3, textAnnotationCount);
     }
+    @Test
+    public void testCustomModel() throws EngineException, IOException {
+        ContentItem ci = wrapAsContentItem("urn:test:content-item:single:sentence", EHEALTH,"en");
+        //this test does not use default models
+        nerEngine.config.getDefaultModelTypes().clear(); 
+        //but instead a custom model provided by the test data
+        nerEngine.config.addCustomNameFinderModel("en", "bionlp2004-DNA-en.bin");
+        nerEngine.config.setMappedType("DNA", new UriRef("http://www.bootstrep.eu/ontology/GRO#DNA"));
+        nerEngine.computeEnhancements(ci);
+        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
+        expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(nerEngine.getClass().getName()));
+        //adding null as expected for confidence makes it a required property
+        expectedValues.put(Properties.ENHANCER_CONFIDENCE, null);
+        //and dc:type values MUST be the URI set as mapped type
+        expectedValues.put(Properties.DC_TYPE, new UriRef("http://www.bootstrep.eu/ontology/GRO#DNA"));
+        MGraph g = ci.getMetadata();
+        int textAnnotationCount = validateAllTextAnnotations(g,EHEALTH,expectedValues);
+        assertEquals(6, textAnnotationCount);
+    }
+    
 
 }
