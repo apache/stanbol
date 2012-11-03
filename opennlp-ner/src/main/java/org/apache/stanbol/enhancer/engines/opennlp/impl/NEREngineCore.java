@@ -400,10 +400,10 @@ public abstract class NEREngineCore
             String[] tokens = Span.spansToStrings(tokenSpans, sentence);
             Span[] nameSpans = finder.find(tokens);
             double[] probs = finder.probs();
-            String[] names = Span.spansToStrings(nameSpans, tokens);
             //int lastStartPosition = 0;
-            for (int j = 0; j < names.length; j++) {
-                String name = names[j];
+            for (int j = 0; j < nameSpans.length; j++) {
+                String name = sentence.substring(tokenSpans[nameSpans[j].getStart()].getStart(), 
+                    tokenSpans[nameSpans[j].getEnd()-1].getEnd());
                 Double confidence = 1.0;
                 for (int k = nameSpans[j].getStart(); k < nameSpans[j].getEnd(); k++) {
                     confidence *= probs[k];

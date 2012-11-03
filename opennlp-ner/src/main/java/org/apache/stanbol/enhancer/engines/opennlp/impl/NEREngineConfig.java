@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
@@ -49,19 +50,34 @@ public class NEREngineConfig {
     
     private String defaultLanguage;
     
-    public void addNerModel(String lang, String modelFileName){
+    public synchronized void addCustomNameFinderModel(String lang, String modelFileName){
         if(lang == null || lang.isEmpty()){
             throw new IllegalArgumentException("The parsed lanaguage MUST NOT be NULL or empty!");
         }
         if(modelFileName == null || modelFileName.isEmpty()){
             throw new IllegalArgumentException("The parsed NER model name MUST NOT be NULL or empty!");
         }
-        Collection<String> langModels = additionalNerModels.get(lang);
-        if(langModels == null){
-            langModels = new ArrayList<String>();
-            additionalNerModels.put(lang, langModels);
+        Collection<String> currentModels = additionalNerModels.get(lang);
+        if(currentModels == null){
+            currentModels = new CopyOnWriteArrayList<String>();
+            additionalNerModels.put(lang, currentModels);
         }
-        langModels.add(modelFileName);
+        currentModels.add(modelFileName);
+    }
+    
+    public synchronized void removeCustomNameFinderModel(String lang, String modelFileName){
+        if(lang == null || lang.isEmpty()){
+            throw new IllegalArgumentException("The parsed lanaguage MUST NOT be NULL or empty!");
+        }
+        if(modelFileName == null || modelFileName.isEmpty()){
+            throw new IllegalArgumentException("The parsed NER model name MUST NOT be NULL or empty!");
+        }
+        Collection<String> currentModels = additionalNerModels.get(lang);
+        if(currentModels != null && //if models for that language are present
+                currentModels.remove(modelFileName) && // and the model was actually remove
+                currentModels.isEmpty()){ //no other models present for this language
+            additionalNerModels.remove(lang);
+        }
     }
         
     public Set<String> getProcessedLanguages() {
@@ -89,11 +105,7 @@ public class NEREngineConfig {
     public String getDefaultLanguage() {
         return defaultLanguage;
     }
-    
-    public void setDefaultModelTypes(Set<String> defaultModelTypes) {
-        this.defaultModelTypes = defaultModelTypes;
-    }
-    
+        
     public Set<String> getDefaultModelTypes() {
         return defaultModelTypes;
     }
@@ -106,5 +118,16 @@ public class NEREngineConfig {
     
     public UriRef getMappedType(String namedEntityType){
         return typeMappings.get(namedEntityType);
+    }
+    public void setMappedType(String namedEntityType,UriRef dcType){
+        if(namedEntityType != null && !namedEntityType.isEmpty()){
+            if(dcType == null){
+                typeMappings.remove(namedEntityType);
+            } else {
+                typeMappings.put(namedEntityType, dcType);
+            }
+        } else {
+            throw new IllegalArgumentException("The parsed NamedEntity type MUST NOT be NULL nor empty!");
+        }
     }
 }
