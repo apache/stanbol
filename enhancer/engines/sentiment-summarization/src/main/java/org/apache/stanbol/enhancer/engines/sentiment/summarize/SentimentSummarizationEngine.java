@@ -18,6 +18,8 @@ package org.apache.stanbol.enhancer.engines.sentiment.summarize;
 
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.PHRASE_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.SENTIMENT_ANNOTATION;
+import static org.apache.stanbol.enhancer.servicesapi.ServiceProperties.ENHANCEMENT_ENGINE_ORDERING;
+import static org.apache.stanbol.enhancer.servicesapi.ServiceProperties.ORDERING_EXTRACTION_ENHANCEMENT;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.createTextEnhancement;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
@@ -26,9 +28,11 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SE
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -59,6 +63,7 @@ import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
@@ -83,7 +88,7 @@ import org.slf4j.LoggerFactory;
     @Property(name= EnhancementEngine.PROPERTY_NAME,value=SentimentSummarizationEngine.DEFAULT_ENGINE_NAME),
     @Property(name=Constants.SERVICE_RANKING,intValue=-100) //give the default instance a ranking < 0
 })
-public class SentimentSummarizationEngine  extends AbstractEnhancementEngine<RuntimeException,RuntimeException> {
+public class SentimentSummarizationEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     
@@ -161,6 +166,10 @@ public class SentimentSummarizationEngine  extends AbstractEnhancementEngine<Run
             ci.getLock().writeLock().unlock();
         }
         
+    }
+    @Override
+    public Map<String,Object> getServiceProperties() {
+        return Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING, (Object)ORDERING_EXTRACTION_ENHANCEMENT);
     }
     /**
      * 
@@ -310,6 +319,5 @@ public class SentimentSummarizationEngine  extends AbstractEnhancementEngine<Run
             }
         }
         return content.substring(beginPos, endPos);
-    }
-    
+    }    
 }

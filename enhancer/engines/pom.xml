@@ -60,6 +60,8 @@
     <module>dbpedia-spotlight</module>
     
     <!-- NLP engines -->
+    <module>opennlp-sentence</module>
+    <module>opennlp-token</module>
     <module>opennlp-pos</module>
     <module>opennlp-chunker</module>
     <module>sentiment-wordclassifier</module>

@@ -50,6 +50,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.enhancer.engines.opennlp.chunker.model.PhraseTagSetRegistry;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
+import org.apache.stanbol.enhancer.nlp.NlpProcessingRole;
+import org.apache.stanbol.enhancer.nlp.NlpServiceProperties;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
 import org.apache.stanbol.enhancer.nlp.model.Chunk;
@@ -66,6 +68,7 @@ import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.osgi.framework.Constants;
@@ -93,13 +96,22 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties(value={
         @Property(name=EnhancementEngine.PROPERTY_NAME,value="opennlp-chunker"),
-        @Property(name=ChunkingEngine.CONFIG_LANGUAGES,
+        @Property(name=OpenNlpChunkingEngine.CONFIG_LANGUAGES,
             value = {"de;model=OpenNLP_1.5.1-German-Chunker-TigerCorps07.zip","*"}),
-        @Property(name=ChunkingEngine.MIN_CHUNK_SCORE),
+        @Property(name=OpenNlpChunkingEngine.MIN_CHUNK_SCORE),
         @Property(name=Constants.SERVICE_RANKING,intValue=-100) //give the default instance a ranking < 0
 })
-public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> {
+public class OpenNlpChunkingEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties {
 
+    private static final Map<String,Object> SERVICE_PROPERTIES;
+    static {
+        Map<String,Object> props = new HashMap<String,Object>();
+        props.put(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING, 
+            ServiceProperties.ORDERING_NLP_CHUNK);
+        props.put(NlpServiceProperties.ENHANCEMENT_ENGINE_NLP_ROLE, 
+            NlpProcessingRole.Chunking);
+        SERVICE_PROPERTIES = Collections.unmodifiableMap(props);
+    }
     /**
      * Language configuration. Takes a list of ISO language codes of supported languages. Currently supported
      * are the languages given as default value.
@@ -112,7 +124,7 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
 
     private static final String MODEL_PARAM_NAME = "model";
 
-    private static Logger log = LoggerFactory.getLogger(ChunkingEngine.class);
+    private static Logger log = LoggerFactory.getLogger(OpenNlpChunkingEngine.class);
 
     private LanguageConfiguration languageConfiguration = new LanguageConfiguration(CONFIG_LANGUAGES, 
         new String []{"de;"+MODEL_PARAM_NAME+"=OpenNLP_1.5.1-German-Chunker-TigerCorps07.zip","*"});
@@ -302,7 +314,12 @@ public class ChunkingEngine extends AbstractEnhancementEngine<RuntimeException,R
             logChunks(at);
         }
     }
-
+    
+    @Override
+    public Map<String,Object> getServiceProperties() {
+        return SERVICE_PROPERTIES;
+    }
+    
     private void logChunks(AnalysedText at){
         Iterator<Span> it = at.getEnclosed(EnumSet.of(SpanTypeEnum.Sentence, SpanTypeEnum.Chunk));
         while(it.hasNext()){

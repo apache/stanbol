@@ -6,9 +6,11 @@ import static org.apache.stanbol.enhancer.nlp.utils.NIFHelper.writeSpan;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getAnalysedText;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -40,6 +42,7 @@ import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
@@ -55,7 +58,7 @@ import org.slf4j.LoggerFactory;
 @Properties(value={
         @Property(name= EnhancementEngine.PROPERTY_NAME,value="nlp2rdf")
 })
-public class Nlp2RdfMetadataEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> {
+public class Nlp2RdfMetadataEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties{
 
     private final Logger log = LoggerFactory.getLogger(Nlp2RdfMetadataEngine.class);
     //TODO: replace this with a reald ontology
@@ -170,6 +173,12 @@ public class Nlp2RdfMetadataEngine extends AbstractEnhancementEngine<RuntimeExce
         } finally {
             ci.getLock().writeLock().unlock();
         }
+    }
+
+    @Override
+    public Map<String,Object> getServiceProperties() {
+        return Collections.singletonMap(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING, 
+            (Object)ServiceProperties.ORDERING_POST_PROCESSING);
     }
 
 

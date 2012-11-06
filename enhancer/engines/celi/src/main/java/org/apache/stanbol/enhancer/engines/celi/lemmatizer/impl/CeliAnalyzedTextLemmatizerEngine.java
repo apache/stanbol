@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,8 @@ import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
 import org.apache.stanbol.enhancer.engines.celi.CeliMorphoFeatures;
 import org.apache.stanbol.enhancer.engines.celi.utils.Utils;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
+import org.apache.stanbol.enhancer.nlp.NlpProcessingRole;
+import org.apache.stanbol.enhancer.nlp.NlpServiceProperties;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
@@ -51,6 +54,15 @@ import org.osgi.service.component.ComponentContext;
     @Property(name = CeliConstants.CELI_TEST_ACCOUNT, boolValue = false) })
 public class CeliAnalyzedTextLemmatizerEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 
+    private static final Map<String,Object> SERVICE_PROPERTIES;
+    static {
+        Map<String,Object> props = new HashMap<String,Object>();
+        props.put(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING, 
+            ServiceProperties.ORDERING_NLP_LEMMATIZE);
+        props.put(NlpServiceProperties.ENHANCEMENT_ENGINE_NLP_ROLE, 
+            NlpProcessingRole.Lemmatize);
+        SERVICE_PROPERTIES = Collections.unmodifiableMap(props);
+    }
     
     /**
      * This ensures that no connections to external services are made if Stanbol is started in offline mode as the OnlineMode service will only be available if OfflineMode is deactivated.
@@ -65,12 +77,6 @@ public class CeliAnalyzedTextLemmatizerEngine extends AbstractEnhancementEngine<
     @Property(value={"it", "da", "de", "ru","ro"})
     public static final String PROPERTY_SUPPORTED_LANGUAGES = "org.apache.stanbol.enhancer.engines.celi.lemmatizer.languages";
     
-    /**
-     * The default value for the Execution of this Engine. Currently set to 
-     * {@link ServiceProperties#ORDERING_CONTENT_EXTRACTION}
-     */
-    public static final Integer defaultOrder = ServiceProperties.ORDERING_CONTENT_EXTRACTION;
-
     private LanguageConfiguration languageConfig = new LanguageConfiguration(
         PROPERTY_SUPPORTED_LANGUAGES, new String[]{"it", "da", "de", "ru","ro"});
     
@@ -182,7 +188,7 @@ public class CeliAnalyzedTextLemmatizerEngine extends AbstractEnhancementEngine<
     
     @Override
     public Map<String, Object> getServiceProperties() {
-        return Collections.unmodifiableMap(Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING, (Object) defaultOrder));
+        return SERVICE_PROPERTIES;
     }
 
 }

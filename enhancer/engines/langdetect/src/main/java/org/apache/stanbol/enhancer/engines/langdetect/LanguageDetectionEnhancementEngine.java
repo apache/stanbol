@@ -87,14 +87,14 @@ public class LanguageDetectionEnhancementEngine
     public static final String MAX_SUGGESTED_PROP = "org.apache.stanbol.enhancer.engines.langdetect.max-suggested";
 
     /**
-     * The default value for the Execution of this Engine. Currently set to
-     * {@link ServiceProperties#ORDERING_PRE_PROCESSING} - 2<p>
+     * The default value for the Execution of this Engine (
+     * {@link ServiceProperties#ORDERING_NLP_LANGAUGE_DETECTION})<p>
      * NOTE: this information is used by the default and weighed {@link Chain}
      * implementation to determine the processing order of 
      * {@link EnhancementEngine}s. Other {@link Chain} implementation do not
      * use this information.
      */
-    public static final Integer defaultOrder = ORDERING_PRE_PROCESSING - 2;
+    public static final Integer defaultOrder = ServiceProperties.ORDERING_NLP_LANGAUGE_DETECTION;
 
     /**
      * This contains the only MIME type directly supported by this enhancement engine.
@@ -266,7 +266,7 @@ public class LanguageDetectionEnhancementEngine
     }
 
     public Map<String, Object> getServiceProperties() {
-        return Collections.unmodifiableMap(Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING, (Object) defaultOrder));
+        return Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING, (Object) defaultOrder);
     }
 
 }
