@@ -154,6 +154,16 @@
     
     <!-- NLP processing engines (all STANBOL-733 and sub-tasks) -->
     
+    <bundle><!-- sentence detection with OpenNLP -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.opennlp.sentence</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
+    <bundle><!-- OpenNLP based tokenizing of Texts -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.opennlp.token</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
     <bundle><!-- POS tagging with OpenNLP -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.pos</artifactId>
