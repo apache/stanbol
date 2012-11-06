@@ -176,7 +176,7 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
         expectedValues.put(Properties.DC_TYPE, new UriRef("http://www.bootstrep.eu/ontology/GRO#DNA"));
         MGraph g = ci.getMetadata();
         int textAnnotationCount = validateAllTextAnnotations(g,EHEALTH,expectedValues);
-        assertEquals(6, textAnnotationCount);
+        assertEquals(7, textAnnotationCount);
     }
     
 
