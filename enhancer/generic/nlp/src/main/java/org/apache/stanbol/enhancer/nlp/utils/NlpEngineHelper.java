@@ -3,10 +3,13 @@ package org.apache.stanbol.enhancer.nlp.utils;
 import static java.util.Collections.singleton;
 
 import java.io.IOException;
+import java.util.Dictionary;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.stanbol.enhancer.nlp.NlpProcessingRole;
+import org.apache.stanbol.enhancer.nlp.NlpServiceProperties;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextFactory;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
@@ -14,6 +17,7 @@ import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.slf4j.Logger;
@@ -203,5 +207,30 @@ public final class NlpEngineHelper {
             return null;
         }
     }
-    
+    /**
+     * Parsed the {@link NlpProcessingRole} typically provided by the 
+     * {@link ServiceProperties#getServiceProperties()} provided by some
+     * EnhancementEngines.<p>
+     * This supports both {@link NlpProcessingRole} as well as String values
+     * using the {@link NlpProcessingRole#name()}.
+     * @param properties the properties (typically retrieved from the
+     * {@link ServiceProperties#getServiceProperties()} method)
+     * @return the NLP processing role or <code>null</code> if not present OR
+     * an error while parsing.
+     */
+    public static NlpProcessingRole getNlpProcessingRole(Map<String,Object> properties){
+        Object value = properties.get(NlpServiceProperties.ENHANCEMENT_ENGINE_NLP_ROLE);
+        if(value instanceof NlpProcessingRole){
+            return (NlpProcessingRole)value;
+        } else if(value != null){
+            try {
+                return NlpProcessingRole.valueOf(value.toString());
+            } catch (IllegalArgumentException e) {
+                log.warn("Unknown NLP processing role {} -> return null",value);
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
 }
