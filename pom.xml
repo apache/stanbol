@@ -45,14 +45,14 @@
     <module>opennlp-ner</module>
   	<module>langdetect</module>
     <module>langid</module>
-    <module>topic</module>
+    <!-- module>topic</module-->
     <module>metaxa</module>
     <module>htmlextractor</module>
     <module>xmpextractor</module>
     <module>tika</module>
-    <module>entitytagging</module>
-    <module>keywordextraction</module>
-    <module>refactor</module>
+    <!-- module>entitytagging</module -->
+    <!-- module>keywordextraction</module -->
+    <!-- module>refactor</module -->
     
     <!-- Enhancement Engines using external services -->
     <module>celi</module> <!-- http://linguagrid.org -->
