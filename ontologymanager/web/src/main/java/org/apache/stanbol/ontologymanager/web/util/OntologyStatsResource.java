@@ -23,11 +23,11 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.OntologyCollector;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.servicesapi.session.Session;
 import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
+import org.apache.stanbol.ontologymanager.web.resources.AbstractOntologyAccessResource;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 
@@ -37,7 +37,7 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
  * @author alexdma
  * 
  */
-public class OntologyStatsResource extends BaseStanbolResource {
+public class OntologyStatsResource extends AbstractOntologyAccessResource {
 
     private Set<OntologyCollector> handles;
 
@@ -47,11 +47,13 @@ public class OntologyStatsResource extends BaseStanbolResource {
 
     public OntologyStatsResource(ServletContext context,
                                  UriInfo uriInfo,
+                                 OWLOntologyID key,
                                  OWLOntology o,
                                  Set<OWLOntologyID> identifiers,
                                  Set<OntologyCollector> handles) {
         this.servletContext = context;
         this.uriInfo = uriInfo;
+        this.submitted = key;
         this.o = o;
         this.identifiers = identifiers;
         this.handles = handles;
@@ -60,7 +62,8 @@ public class OntologyStatsResource extends BaseStanbolResource {
     public Set<String> getAliases() {
         Set<String> aliases = new HashSet<String>();
         for (OWLOntologyID alias : identifiers)
-            if (!o.getOntologyID().equals(alias)) aliases.add(OntologyUtils.encode(alias));
+            // if (!o.getOntologyID().equals(alias))
+            aliases.add(OntologyUtils.encode(alias));
         return Collections.unmodifiableSet(aliases);
     }
 

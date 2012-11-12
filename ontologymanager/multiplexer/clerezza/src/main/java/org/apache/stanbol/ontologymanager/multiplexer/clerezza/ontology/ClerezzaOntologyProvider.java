@@ -534,7 +534,11 @@ public class ClerezzaOntologyProvider implements
         log.info("Adding alias for ontology entry.");
         log.info(" ... Primary key : {}", primaryKey);
         log.info(" ... Alias : {}", alias);
-        // TODO check that they do not map to two different ontologies.
+        // Check that they do not map to two different ontologies.
+        OWLOntologyID already = checkAlias(primaryKey, alias);
+        /*if (already != null) throw new IllegalArgumentException*/log.warn(alias
+                                                                + " is already an alias for primary key "
+                                                                + already);
         // XXX a SPARQL query could come in handy.
         // Nothing to do but defer to the meta graph,
         new MetaGraphManager(tcManager, keymap.graph).updateAddAlias(primaryKey, alias);
@@ -542,10 +546,20 @@ public class ClerezzaOntologyProvider implements
         return true;
     }
 
+    protected OWLOntologyID checkAlias(OWLOntologyID primaryKey, OWLOntologyID alias) {
+        for (OWLOntologyID primary : listPrimaryKeys())
+            if (listAliases(primary).contains(alias) && !alias.equals(primary)) return primary;
+        return null;
+    }
+
     @Override
     public OWLOntologyID createBlankOntologyEntry(OWLOntologyID publicKey) {
         log.info("Creating new orphan entry.");
         log.info(" ... Public key : {}", publicKey);
+
+        if (getStatus(publicKey) != Status.NO_MATCH) throw new IllegalArgumentException(
+                "Public key " + publicKey + "is already registered");
+
         /*
          * TODO keep this object from being created on every call once we get totally rid of the
          * OntologyToTcMapper class.
@@ -880,15 +894,19 @@ public class ClerezzaOntologyProvider implements
 
     @Override
     public <O> O getStoredOntology(OWLOntologyID reference, Class<O> returnType, boolean merge) {
-
-        if (!hasOntology(reference)) throw new IllegalArgumentException("No ontology with public key "
-                                                                        + reference + " found.");
-        String key = /* getKey(reference); */
-        keymap.getMapping(reference).getUnicodeString();
-        if (key == null || key.isEmpty()) {
-            log.warn("No key found for IRI {}", reference);
-            return null;
-        } else return getStoredOntology(key, returnType, merge);
+        switch (getStatus(reference)) {
+            case NO_MATCH:
+                throw new IllegalArgumentException("No ontology with public key " + reference + " found.");
+            case UNCHARTED:
+                log.warn("No key found for IRI {}", reference);
+                return null;
+            case ORPHAN:
+                throw new OrphanOntologyKeyException(reference);
+            default:
+                String key = /* getKey(reference); */
+                keymap.getMapping(reference).getUnicodeString();
+                return getStoredOntology(key, returnType, merge);
+        }
     }
 
     @Override
@@ -952,7 +970,6 @@ public class ClerezzaOntologyProvider implements
     }
 
     @Override
-    @Deprecated
     public boolean hasOntology(IRI ontologyIri) {
         // ontologyIri = URIUtils.sanitizeID(ontologyIri);
         return hasOntology(new OWLOntologyID(ontologyIri));
@@ -960,12 +977,20 @@ public class ClerezzaOntologyProvider implements
 
     @Override
     public boolean hasOntology(OWLOntologyID id) {
-        if (id == null || id.isAnonymous()) throw new IllegalArgumentException(
+        Status stat = getStatus(id);
+        if (stat == Status.ORPHAN) throw new OrphanOntologyKeyException(id);
+        return getStatus(id) == Status.MATCH;
+    }
+
+    @Override
+    public Status getStatus(OWLOntologyID publicKey) {
+        if (publicKey == null || publicKey.isAnonymous()) throw new IllegalArgumentException(
                 "Cannot check for an anonymous ontology.");
-        UriRef graphName = keymap.getMapping(id);
-        if (graphName == null) return false;
-        if (!store.listTripleCollections().contains(graphName)) throw new OrphanOntologyKeyException(id);
-        return true;
+        if (!new MetaGraphManager(tcManager, keymap.graph).exists(publicKey)) return Status.NO_MATCH;
+        UriRef graphName = keymap.getMapping(publicKey);
+        if (graphName == null) return Status.UNCHARTED;
+        if (store.listTripleCollections().contains(graphName)) return Status.MATCH;
+        else return Status.ORPHAN;
     }
 
     /**
@@ -988,20 +1013,28 @@ public class ClerezzaOntologyProvider implements
     public Set<OWLOntologyID> listAliases(OWLOntologyID publicKey) {
         if (publicKey == null || publicKey.isAnonymous()) throw new IllegalArgumentException(
                 "Cannot locate aliases for null or anonymous public keys.");
-        Set<OWLOntologyID> aliases = new HashSet<OWLOntologyID>();
+        final Set<OWLOntologyID> aliases = new HashSet<OWLOntologyID>();
+        computeAliasClosure(publicKey, aliases);
+        aliases.remove(publicKey);
+        return aliases;
+    }
+
+    protected void computeAliasClosure(OWLOntologyID publicKey, Set<OWLOntologyID> target) {
+        target.add(publicKey);
         TripleCollection meta = getMetaGraph(TripleCollection.class);
         UriRef ont = keymap.buildResource(publicKey);
+        Set<Resource> resources = new HashSet<Resource>();
         // Forwards
-        for (Iterator<Triple> it = meta.filter(ont, OWL.sameAs, null); it.hasNext();) {
-            Resource r = it.next().getObject();
-            if (r instanceof UriRef) aliases.add(keymap.buildPublicKey((UriRef) r));
-        }
+        for (Iterator<Triple> it = meta.filter(ont, OWL.sameAs, null); it.hasNext();)
+            resources.add(it.next().getObject());
         // Backwards
-        for (Iterator<Triple> it = meta.filter(null, OWL.sameAs, ont); it.hasNext();) {
-            Resource r = it.next().getSubject();
-            if (r instanceof UriRef) aliases.add(keymap.buildPublicKey((UriRef) r));
-        }
-        return aliases;
+        for (Iterator<Triple> it = meta.filter(null, OWL.sameAs, ont); it.hasNext();)
+            resources.add(it.next().getSubject());
+        for (Resource r : resources)
+            if (r instanceof UriRef) {
+                OWLOntologyID newKey = keymap.buildPublicKey((UriRef) r);
+                if (!target.contains(newKey)) computeAliasClosure(newKey, target);
+            }
     }
 
     @Override
@@ -1048,6 +1081,8 @@ public class ClerezzaOntologyProvider implements
         if (data == null) throw new IllegalArgumentException("No data to load ontologies from.");
         if (formatIdentifier == null || formatIdentifier.trim().isEmpty()) throw new IllegalArgumentException(
                 "A non-null, non-blank format identifier is required for parsing the data stream.");
+        checkReplaceability(references);
+
         // This method only tries the supplied format once.
         log.debug("Trying to parse data stream with format {}", formatIdentifier);
         TripleCollection rdfData = parser.parse(data, formatIdentifier);
@@ -1062,6 +1097,7 @@ public class ClerezzaOntologyProvider implements
                                      Origin<?>... references) throws IOException {
         log.debug("Loading {}", ontologyIri);
         if (ontologyIri == null) throw new IllegalArgumentException("Ontology IRI cannot be null.");
+        checkReplaceability(references);
 
         IRI location = null;
         if (force) location = null;
@@ -1124,6 +1160,7 @@ public class ClerezzaOntologyProvider implements
     public OWLOntologyID loadInStore(Object ontology, final boolean force, Origin<?>... origins) {
 
         if (ontology == null) throw new IllegalArgumentException("No ontology supplied.");
+        checkReplaceability(origins);
         long before = System.currentTimeMillis();
 
         TripleCollection graph; // The final graph
@@ -1140,7 +1177,19 @@ public class ClerezzaOntologyProvider implements
         // XXX Force is ignored for the content, but the imports?
 
         // TODO Profile this method. Are we getting rid of rdfData after adding its triples?
-        OWLOntologyID publicKey = OWLUtils.extractOntologyID(rdfData);
+        OWLOntologyID extractedId = OWLUtils.extractOntologyID(rdfData);
+
+        OWLOntologyID publicKey = null;
+
+        for (int i = 0; i < origins.length && publicKey == null; i++) {
+            if (origins[i] != null) {
+                Object ref = origins[i].getReference();
+                if (ref instanceof OWLOntologyID) publicKey = (OWLOntologyID) ref;
+            }
+        }
+
+        if (publicKey == null) publicKey = extractedId;
+
         if (publicKey == null) {
             IRI z;
             if (origins.length > 0 && origins[0] != null) {
@@ -1235,15 +1284,19 @@ public class ClerezzaOntologyProvider implements
         for (Origin<?> origin : origins)
             if (origin != null) {
                 Object reff = origin.getReference();
-                if (reff instanceof IRI) {
-                    OWLOntologyID physical = new OWLOntologyID((IRI) reff);
-                    if (!physical.equals(publicKey)) {
-                        // keymap.setMapping(physical, uriref);
-                        new MetaGraphManager(tcManager, keymap.graph).updateAddAlias(publicKey, physical);
-                        mappedIds += " , " + physical;
-                    }
+                OWLOntologyID alias = null;
+                if (reff instanceof IRI) alias = new OWLOntologyID((IRI) reff);
+                else if (reff instanceof OWLOntologyID) alias = (OWLOntologyID) reff;
+                if (!alias.equals(publicKey)) {
+                    // keymap.setMapping(physical, uriref);
+                    addAlias(publicKey, alias);
+                    mappedIds += " , " + alias;
                 }
             }
+        if (extractedId != null && !extractedId.equals(publicKey)) {
+            addAlias(publicKey, extractedId);
+            mappedIds += " , " + extractedId;
+        }
 
         // Do this AFTER registering the ontology, otherwise import cycles will cause infinite loops.
         if (resolveImports) {
@@ -1338,6 +1391,15 @@ public class ClerezzaOntologyProvider implements
                     key);
         else log.info("Setting {} as the resource locator for ontology {}", locator, key);
         keymap.mapLocator(locator, new UriRef(key));
+    }
+
+    protected void checkReplaceability(Origin<?>... origins) {
+        for (Origin<?> or : origins) {
+            if (or == null || !(or.getReference() instanceof OWLOntologyID)) continue;
+            OWLOntologyID key = (OWLOntologyID) or.getReference();
+            if (getStatus(key) == Status.MATCH) throw new IllegalStateException(
+                    "Public key " + key + " matches an existing non-orphan entry. Cannot replace.");
+        }
     }
 
     /**

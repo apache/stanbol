@@ -49,9 +49,9 @@ class MetaGraphManager {
 
     private MGraph graph;
 
-    private TcManager tcManager;
-
     private Logger log = LoggerFactory.getLogger(getClass());
+
+    private TcManager tcManager;
 
     public MetaGraphManager(TcManager tcManager, MGraph graph) {
         this.tcManager = tcManager;
@@ -110,6 +110,13 @@ class MetaGraphManager {
         if (match == null) return new UriRef(OntologyUtils.encode(publicKey));
         else return match;
 
+    }
+
+    public boolean exists(final OWLOntologyID publicKey) {
+        UriRef publicKeyUriRef = new UriRef(OntologyUtils.encode(publicKey));
+        if (graph.filter(publicKeyUriRef, RDF.type, ENTRY_URIREF).hasNext()) return true;
+        if (graph.filter(publicKeyUriRef, OWL.sameAs, null).hasNext()) return true;
+        return false;
     }
 
     public void updateAddAlias(OWLOntologyID subject, OWLOntologyID object) {

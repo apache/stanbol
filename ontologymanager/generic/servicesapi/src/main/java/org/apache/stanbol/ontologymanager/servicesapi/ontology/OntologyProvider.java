@@ -45,6 +45,36 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public interface OntologyProvider<S> {
 
     /**
+     * The status of a stored ontology entry in the {@link OntologyProvider}.
+     * 
+     * @author alexdma
+     * 
+     */
+    public enum Status {
+
+        /**
+         * A non-null ontology object can be obtained by querying the ontology provider for this entry.
+         */
+        MATCH,
+
+        /**
+         * No such entry is registered as either a primary key or an alias in the ontology provider.
+         */
+        NO_MATCH,
+
+        /**
+         * The entry is registered and assigned a graph name, but the corresponding graph cannot be found.
+         */
+        ORPHAN,
+
+        /**
+         * The entry is registered but not assigned a graph.
+         */
+        UNCHARTED
+
+    }
+
+    /**
      * The key used to configure the prefix to be used for addressing ontologies stored by this provider.
      */
     public String GRAPH_PREFIX = "org.apache.stanbol.ontologymanager.ontonet.graphPrefix";
@@ -153,6 +183,8 @@ public interface OntologyProvider<S> {
      * @return the ontology key set.
      */
     Set<OWLOntologyID> getPublicKeys();
+
+    Status getStatus(OWLOntologyID publicKey);
 
     /**
      * Returns the storage system used by this ontology provider (e.g. a {@link TcProvider} or an
@@ -270,6 +302,9 @@ public interface OntologyProvider<S> {
      * <br>
      * Implementations are typically faster than calling {@link #getStoredOntology(IRI, Class)} and checking
      * if the returned value is not null.
+     * 
+     * @deprecated the notion of "having an ontology" has become ambiguous. Please use
+     *             {@link #getStatus(OWLOntologyID)} and verify its value.
      * 
      * @param publicKey
      *            the ontology id. If there is both an ontology IRI and a version IRI, both must match the

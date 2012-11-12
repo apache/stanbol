@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
-import org.apache.stanbol.ontologymanager.servicesapi.collector.OntologyCollector;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 
 @Deprecated

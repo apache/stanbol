@@ -14,18 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.collector;
+package org.apache.stanbol.ontologymanager.ontonet.api.session;
 
 @Deprecated
-public class UnmodifiableOntologyCollectorException extends OntologyCollectorModificationException {
+public class NonReferenceableSessionException extends
+        org.apache.stanbol.ontologymanager.servicesapi.session.NonReferenceableSessionException {
 
     /**
      * 
      */
-    private static final long serialVersionUID = 18384908686644080L;
+    private static final long serialVersionUID = -5824276516809214914L;
 
-    public UnmodifiableOntologyCollectorException(OntologyCollector collector) {
-        super(collector);
+    public NonReferenceableSessionException() {
+        super();
+    }
+
+    public NonReferenceableSessionException(String message) {
+        super(message);
+    }
+
+    public NonReferenceableSessionException(Throwable cause) {
+        super(cause);
     }
 
 }

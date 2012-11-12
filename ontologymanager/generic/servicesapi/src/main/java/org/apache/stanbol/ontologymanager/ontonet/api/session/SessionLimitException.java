@@ -14,18 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.collector;
+package org.apache.stanbol.ontologymanager.ontonet.api.session;
 
 @Deprecated
-public class UnmodifiableOntologyCollectorException extends OntologyCollectorModificationException {
+public class SessionLimitException extends
+        org.apache.stanbol.ontologymanager.servicesapi.session.SessionLimitException {
 
     /**
      * 
      */
-    private static final long serialVersionUID = 18384908686644080L;
+    private static final long serialVersionUID = 3820288680568447463L;
 
-    public UnmodifiableOntologyCollectorException(OntologyCollector collector) {
-        super(collector);
+    public SessionLimitException(int limit) {
+        super(limit);
+    }
+
+    public SessionLimitException(int limit, String message) {
+        super(limit, message);
+
+    }
+
+    public SessionLimitException(int limit, Throwable cause) {
+        super(limit, cause);
+
     }
 
 }

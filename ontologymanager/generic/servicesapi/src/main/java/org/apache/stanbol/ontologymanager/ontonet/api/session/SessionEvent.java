@@ -14,18 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.collector;
+package org.apache.stanbol.ontologymanager.ontonet.api.session;
 
 @Deprecated
-public class UnmodifiableOntologyCollectorException extends OntologyCollectorModificationException {
+public class SessionEvent extends org.apache.stanbol.ontologymanager.servicesapi.session.SessionEvent {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 18384908686644080L;
+    public SessionEvent(Session session, OperationType operationType) {
+        super(session, operationType);
+    }
 
-    public UnmodifiableOntologyCollectorException(OntologyCollector collector) {
-        super(collector);
+    @Override
+    public Session getSession() {
+        // TODO Auto-generated method stub
+        org.apache.stanbol.ontologymanager.servicesapi.session.Session session = super.getSession();
+        if (session instanceof Session) return (Session) session;
+        else throw new UnsupportedOperationException("Referenced session must be from the deprecated API.");
     }
 
 }

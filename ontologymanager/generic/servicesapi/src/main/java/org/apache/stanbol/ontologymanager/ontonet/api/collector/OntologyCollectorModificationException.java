@@ -16,8 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.collector;
 
-import org.apache.stanbol.ontologymanager.servicesapi.collector.OntologyCollector;
-
 @Deprecated
 public class OntologyCollectorModificationException extends
         org.apache.stanbol.ontologymanager.servicesapi.collector.OntologyCollectorModificationException {
