@@ -30,7 +30,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>partialbundlelist</packaging>
 
-  <name>Apache Stanbol Launchers OSGi Framework Bundle List</name>
+  <name>Apache Stanbol Bundlelist for the OSGi Framework</name>
   <description>This is a Maven project which produces the partial list containing the OSGi framework bundles</description>
 
   <scm>

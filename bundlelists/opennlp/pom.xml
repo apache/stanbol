@@ -26,7 +26,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>partialbundlelist</packaging>
 
-  <name>Apache Stanbol Data: Bundle List for OpenNLP</name>
+  <name>Apache Stanbol Bundlelist for OpenNLP Models</name>
     <description>When added this will ensure that all language and
        NER models provided by OpenNLP are included by an
        Apache Stanbol launcher</description>

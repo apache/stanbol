@@ -30,7 +30,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>partialbundlelist</packaging>
 
-  <name>Apache Stanbol Launchers Clerezza Shell Bundle List</name>
+  <name>Apache Stanbol Bundlelist for the Clerezza Shell</name>
   <description>This is a Maven project which produces the partial list containing for bundles providing the clerezza shell with ssh access</description>
 
   <scm>
