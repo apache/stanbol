@@ -30,7 +30,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>partialbundlelist</packaging>
 
-  <name>Apache Stanbol Launchers Commons Bundle List </name>
+  <name>Apache Stanbol Bundlelist for Commons Libraries</name>
   <description>This is a Maven project which produces the partial list containing the common bundles that are used throughout the Stanbol.</description>
 
   <scm>

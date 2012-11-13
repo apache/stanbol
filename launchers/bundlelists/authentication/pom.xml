@@ -30,7 +30,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>partialbundlelist</packaging>
 
-  <name>Apache Stanbol Launchers Authentication Bundle List </name>
+  <name>Apache Stanbol Bundlelist for Authentication</name>
   <description>This is a Maven project which produces the partial list containing the bundles related to Authentication.</description>
 
   <scm>
