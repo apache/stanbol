@@ -79,7 +79,6 @@
         <module>opennlp/lang/en</module>
         <module>opennlp/ner/en</module>
         <module>registries/default</module>
-        <module>bundlelists/defaultdata</module>
       </modules>
     </profile>
     <profile>
@@ -119,7 +118,6 @@
         <module>opennlp/ner/en</module>
         <module>opennlp/ner/es</module>
         <module>opennlp/ner/nl</module>
-        <module>bundlelists/opennlp</module>
       </modules>
     </profile>
     <profile>
