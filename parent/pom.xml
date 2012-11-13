@@ -163,7 +163,7 @@
           <configuration>
             <instructions>
               <Bundle-DocURL>http://stanbol.apache.org</Bundle-DocURL>
-              <Bundle-Vendor>Apache Stanbol (Incubating)</Bundle-Vendor>
+              <Bundle-Vendor>Apache Stanbol</Bundle-Vendor>
               <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
               <_versionpolicy>$${version;===;${@}}</_versionpolicy>
               <_provider-policy>[$(version;===;$(@)),$(version;=+;$(@)))</_provider-policy>    
@@ -192,7 +192,7 @@
               </goals>
               <configuration>
                 <properties>
-                  <service.vendor>Apache Stanbol (incubating)</service.vendor>
+                  <service.vendor>Apache Stanbol</service.vendor>
                 </properties>
               </configuration>
             </execution>
@@ -201,6 +201,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
+          <version>2.3.2</version>
           <configuration>
             <tagBase>
               https://svn.apache.org/repos/asf/stanbol/tags/
