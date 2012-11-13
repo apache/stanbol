@@ -203,7 +203,7 @@
           <artifactId>maven-release-plugin</artifactId>
           <configuration>
             <tagBase>
-              https://svn.apache.org/repos/asf/incubator/stanbol/tags/
+              https://svn.apache.org/repos/asf/stanbol/tags/
             </tagBase>
           </configuration>
         </plugin>
