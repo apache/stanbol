@@ -23,28 +23,25 @@ This source repository holds artifacts that are used to provide
 
 * data files (NER models, Entity data ...)
 * configurations of stanbol components or well known datasets, spefic domains
-* bundlelists as used by the Apache Sling to easily add multiple bunldes to
-    launchers.
 
 This also contains the default configuration used with the default Stanbol
-Launchers.
-Generally this is a good place for users that want to build their own launcher
-to look for examples.
+Launchers. Have a look at the defaultdata and opennlp bundlelists in the
+launchers/bundlelists folder. Generally this is a good place for users that
+want to build their own launcher to look for examples.
 
 ## Management of Data Files 
 
 To avoid loading subversion repository with large binary files this artifacts
-are typically not included but need to be build/precomputed or downloaded
-form other sites.
-The the documentations of the according module for details.
+are typically not included but need to be build/precomputed or downloaded form
+other sites. The the documentations of the according module for details.
 
 Modules of this repository tree are typically NOT part of the Stanbol reactor.
-Because they are considered optional and typically it is necessary to download/
-precompute some resources users might not want to do for each build.
+Because they are considered optional and typically it is necessary to
+download/ precompute some resources users might not want to do for each build.
 
 Bundles used as default configuration by the Stanbol Launchers are also
 available by included Maven repositories and will be downloaded during the
-normal Stanbol build (if not yet available in the local cache). 
+normal Stanbol build (if not yet available in the local cache).
 
 ## OpenNLP
 
@@ -79,6 +76,3 @@ package several configuration files (e.g. the configuration of several OSGI
 Services).
 
 See {stanbol-root}/commons/installer/bundleprovider for details.
-
-
-
