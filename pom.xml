@@ -27,7 +27,7 @@
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>source-assembly</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <name>Apache Stanbol Releasing Source Assembly Descriptor</name>
@@ -45,9 +45,9 @@
   </licenses>
   
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/source-assembly-1.0.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/source-assembly-1.0.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/source-assembly-1.0.0</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/releasing/source-assembly</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/releasing/source-assembly</developerConnection>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>
