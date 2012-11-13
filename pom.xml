@@ -82,12 +82,7 @@
 
     <module>demos/webvie</module>
 
-    <module>launchers/bundlelists/osgiframework</module>
-    <module>launchers/bundlelists/stanbolcommons</module>
-    <module>launchers/bundlelists/defaultdata</module>
-    <module>launchers/bundlelists/opennlp</module>
-    <module>launchers/bundlelists/authentication</module>
-    <module>launchers/bundlelists/zzshell</module>
+    <module>launchers/bundlelists</module>
     <module>launchers/full</module>
     <module>integration-tests</module>
 
