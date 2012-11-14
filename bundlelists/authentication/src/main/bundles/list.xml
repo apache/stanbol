@@ -48,5 +48,10 @@
         <artifactId>org.apache.stanbol.commons.security.fexilwebconsole</artifactId>
         <version>0.10.0-SNAPSHOT</version>
     </bundle>
+    <bundle>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.usermanagement</artifactId>
+        <version>0.10.0-SNAPSHOT</version>
+    </bundle>
   </startLevel>
 </bundles>
