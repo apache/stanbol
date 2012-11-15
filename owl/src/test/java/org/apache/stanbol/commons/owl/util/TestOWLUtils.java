@@ -19,8 +19,10 @@ package org.apache.stanbol.commons.owl.util;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 
@@ -75,12 +77,13 @@ public class TestOWLUtils {
         // Try a low triple limit (the ontology IRI triple is much further).
         InputStream content = getClass().getResourceAsStream(location);
         OWLOntologyID id = OWLUtils.guessOntologyID(content, parser, RDF_XML, 10);
-        assertNull(id);
+        assertTrue(id.isAnonymous());
 
         // Try again with no limit
         content = getClass().getResourceAsStream(location);
         id = OWLUtils.guessOntologyID(content, parser, RDF_XML);
         assertNotNull(id);
+        assertFalse(id.isAnonymous());
         assertEquals(new OWLOntologyID(ontologyIri), id);
     }
 
@@ -115,24 +118,27 @@ public class TestOWLUtils {
         // Low triple limit: guessing should fail.
         InputStream content = getClass().getResourceAsStream(location);
         OWLOntologyID id = OWLUtils.guessOntologyID(content, parser, RDF_XML, 10);
-        assertNull(id);
+        assertTrue(id.isAnonymous());
 
         // Reasonable triple limit with low offset: guessing should return the unversioned ID.
         content = getClass().getResourceAsStream(location);
         id = OWLUtils.guessOntologyID(content, parser, RDF_XML, 256, 1);
         assertNotNull(id);
+        assertFalse(id.isAnonymous());
         assertEquals(new OWLOntologyID(ontologyIri), id);
 
         // Reasonable triple limit with auto offset: guessing should succeed.
         content = getClass().getResourceAsStream(location);
         id = OWLUtils.guessOntologyID(content, parser, RDF_XML, 256);
         assertNotNull(id);
+        assertFalse(id.isAnonymous());
         assertEquals(expectedOntId, id);
 
         // No triple limit: guessing should succeed.
         content = getClass().getResourceAsStream(location);
         id = OWLUtils.guessOntologyID(content, parser, RDF_XML);
         assertNotNull(id);
+        assertFalse(id.isAnonymous());
         assertEquals(expectedOntId, id);
     }
 
@@ -177,12 +183,13 @@ public class TestOWLUtils {
         // No triple limit but offset < 102 : guessing should fail.
         InputStream content = getClass().getResourceAsStream(location);
         OWLOntologyID id = OWLUtils.guessOntologyID(content, parser, TURTLE, -1, 99);
-        assertNull(id);
+        assertTrue(id.isAnonymous());
 
         // Try again, setting limit = 1024 (offset = 102) should work.
         content = getClass().getResourceAsStream(location);
         id = OWLUtils.guessOntologyID(content, parser, TURTLE, 1024);
         assertNotNull(id);
+        assertFalse(id.isAnonymous());
         assertEquals(expectedOntId, id);
     }
 

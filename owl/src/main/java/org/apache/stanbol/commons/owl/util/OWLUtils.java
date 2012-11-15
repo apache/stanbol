@@ -134,12 +134,14 @@ public class OWLUtils {
         OntologyLookaheadMGraph graph = new OntologyLookaheadMGraph(limit, versionIriOffset);
         try {
             parser.parse(graph, bIn, format);
-        } catch (RuntimeException e) {}
+        } catch (RuntimeException e) {
+            log.error("Parsing failed for format {}. Returning null.", format);
+        }
         OWLOntologyID result;
 
         if (graph.getOntologyIRI() == null) { // No Ontology ID found
             log.warn(" *** No ontology ID found, ontology has a chance of being anonymous.");
-            result = null;
+            result = new OWLOntologyID();
         } else {
             // bIn.reset(); // reset set the stream to the start
             IRI oiri = IRI.create(graph.getOntologyIRI().getUnicodeString());
