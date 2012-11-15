@@ -27,18 +27,17 @@ need
 
     $ export MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256M"
 
-If you want to skip the tests, add `-DskipTests` to the Maven command.
-
-
-## Building Apache Stanbol
-
-This builds the Apache Stanbol plus available Enhancement Engines and a
+The following builds the Apache Stanbol plus available Enhancement Engines and a
 default set of linked open data for the EntityHub. If you want to have a ready
 to use version of Apache Stanbol, this is the way to go.
 
 In the Apache Stanbol source directory type
 
     $ mvn install
+
+If you want to skip the tests, use :
+
+    $ mvn install -Dmaven.test.skip=true
     
 
 ### Launching the Apache Stanbol Server
