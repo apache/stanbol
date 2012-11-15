@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -536,9 +537,8 @@ public class ClerezzaOntologyProvider implements
         log.info(" ... Alias : {}", alias);
         // Check that they do not map to two different ontologies.
         OWLOntologyID already = checkAlias(primaryKey, alias);
-        /*if (already != null) throw new IllegalArgumentException*/log.warn(alias
-                                                                + " is already an alias for primary key "
-                                                                + already);
+        /* if (already != null) throw new IllegalArgumentException */log
+                .warn(alias + " is already an alias for primary key " + already);
         // XXX a SPARQL query could come in handy.
         // Nothing to do but defer to the meta graph,
         new MetaGraphManager(tcManager, keymap.graph).updateAddAlias(primaryKey, alias);
@@ -1094,10 +1094,9 @@ public class ClerezzaOntologyProvider implements
     public OWLOntologyID loadInStore(final IRI ontologyIri,
                                      String formatIdentifier,
                                      boolean force,
-                                     Origin<?>... references) throws IOException {
+                                     Origin<?>... origins) throws IOException {
         log.debug("Loading {}", ontologyIri);
         if (ontologyIri == null) throw new IllegalArgumentException("Ontology IRI cannot be null.");
-        checkReplaceability(references);
 
         IRI location = null;
         if (force) location = null;
@@ -1113,6 +1112,11 @@ public class ClerezzaOntologyProvider implements
         }
 
         log.info("found {} in {}", ontologyIri, location);
+
+        // Add the physical IRI to the origins.
+        origins = Arrays.copyOf(origins, origins.length + 1);
+        origins[origins.length - 1] = Origin.create(ontologyIri);
+        checkReplaceability(origins);
 
         // Get ordered list of preferred/supported formats, or use the specified one.
         List<String> supported = OntologyUtils.getPreferredSupportedFormats(parser.getSupportedFormats());
@@ -1137,7 +1141,7 @@ public class ClerezzaOntologyProvider implements
                      * formats again. Also, we provide the ontologyIRI as the preferred key, since we already
                      * know it.
                      */
-                    OWLOntologyID key = loadInStore(is, currentFormat, force, Origin.create(ontologyIri));
+                    OWLOntologyID key = loadInStore(is, currentFormat, force, origins);
                     // If parsing failed, an exception will be thrown before getting here, so no risk.
                     // if (key != null && !key.isEmpty()) setLocatorMapping(ontologyIri, key);
                     return key;
@@ -1163,12 +1167,14 @@ public class ClerezzaOntologyProvider implements
         checkReplaceability(origins);
         long before = System.currentTimeMillis();
 
-        TripleCollection graph; // The final graph
+        TripleCollection targetGraph; // The final graph
         TripleCollection rdfData; // The supplied ontology converted to TripleCollection
 
         if (ontology instanceof OWLOntology) {
+            // This will be in memory!
             rdfData = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph((OWLOntology) ontology);
         } else if (ontology instanceof TripleCollection) {
+            // This might be in memory or in persistent storage.
             rdfData = (TripleCollection) ontology;
         } else throw new UnsupportedOperationException(
                 "This ontology provider can only accept objects assignable to " + TripleCollection.class
@@ -1176,86 +1182,107 @@ public class ClerezzaOntologyProvider implements
 
         // XXX Force is ignored for the content, but the imports?
 
-        // TODO Profile this method. Are we getting rid of rdfData after adding its triples?
-        OWLOntologyID extractedId = OWLUtils.extractOntologyID(rdfData);
+        // Now we proceed to assign the primary key to the ontology.
+        OWLOntologyID primaryKey = null;
 
-        OWLOntologyID publicKey = null;
+        /*
+         * Compute aliases
+         */
+        UriRef graphName = null;
+        List<OWLOntologyID> overrides = new ArrayList<OWLOntologyID>(); // Priority aliases.
+        List<IRI> sources = new ArrayList<IRI>(); // Second-choice aliases.
 
-        for (int i = 0; i < origins.length && publicKey == null; i++) {
-            if (origins[i] != null) {
-                Object ref = origins[i].getReference();
-                if (ref instanceof OWLOntologyID) publicKey = (OWLOntologyID) ref;
+        // Scan origins ONCE.
+        for (int i = 0; i < origins.length; i++) {
+            Origin<?> origin = origins[i];
+            log.debug("Found origin at index {}", i);
+            if (origin == null) {
+                log.warn("Null origin at index {}. Skipping.", i);
+                continue;
+            }
+            Object ref = origin.getReference();
+            if (ref == null) {
+                log.warn("Null reference at index {}. Skipping.", i);
+                continue;
+            }
+            log.debug(" ... Reference is a {}", ref.getClass().getCanonicalName());
+            log.debug(" ... Value : {}", ref);
+            if (ref instanceof OWLOntologyID) {
+                OWLOntologyID key = (OWLOntologyID) ref;
+                if (primaryKey == null) {
+                    primaryKey = key;
+                    log.debug(" ... assigned as primary key.");
+                } else if (primaryKey.equals(key)) {
+                    log.debug(" ... matches primary key. Skipping.");
+                } else {
+                    overrides.add(key);
+                    log.debug(" ... assigned as a priority alias for {}", primaryKey);
+                }
+            } else if (ref instanceof IRI) {
+                sources.add((IRI) ref);
+                log.debug(" ... assigned as a secondary alias (source) for {}", primaryKey);
+            } else if (ref instanceof UriRef) {
+                if (graphName != null) log.warn("Graph name already assigned as {}. Skipping.", graphName);
+                else {
+                    graphName = (UriRef) ref;
+                    log.debug(" ... assigned as a graph name for {}", primaryKey);
+                }
+            } else {
+                log.warn("Unhandled type for origin at index {} : {}. Skipping.", i, ref.getClass());
             }
         }
 
-        if (publicKey == null) publicKey = extractedId;
+        // The actual logical ID will be dereferenceable no matter what.
+        OWLOntologyID extractedId = OWLUtils.extractOntologyID(rdfData);
+        if (primaryKey == null) primaryKey = extractedId; // Not overridden: set as primary key.
+        else overrides.add(extractedId); // Overridden: must be an alias anyway.
 
-        if (publicKey == null) {
+        if (primaryKey == null) // No overrides, no extracted ID.
+        {
             IRI z;
-            if (origins.length > 0 && origins[0] != null) {
-                Object reff = origins[0].getReference();
-                if (reff instanceof IRI) z = (IRI) reff; // No version IRI here
-                else if (reff instanceof UriRef) z = IRI.create(((UriRef) reff).getUnicodeString());
-                else z = IRI.create(getClass().getCanonicalName() + "-time:" + System.currentTimeMillis());
-            } else z = IRI.create(getClass().getCanonicalName() + "-time:" + System.currentTimeMillis());
-            publicKey = new OWLOntologyID(z);
+            // The first IRI found becomes the primary key.
+            if (!sources.isEmpty()) z = sources.iterator().next();
+            else // Try the graph name
+            if (graphName != null) z = IRI.create(graphName.getUnicodeString());
+            else // Extrema ratio : compute a timestamped primary key.
+            z = IRI.create(getClass().getCanonicalName() + "-time:" + System.currentTimeMillis());
+            primaryKey = new OWLOntologyID(z);
         }
 
         // Check if it is possible to avoid reloading the ontology content from its source.
         boolean mustLoad = true;
-        if (!force) {
-            Set<UriRef> stored = store.listTripleCollections();
-            if (origins.length > 0 && origins[0] != null && origins[0].getReference() instanceof UriRef) {
-                UriRef ref = (UriRef) origins[0].getReference();
-
-                if (stored.contains(ref)) {
-                    boolean condition = true; // Any failed check will make it false
-
-                    /*
-                     * Check if the stored Ontology ID (versionIRI included) matches matches that of the
-                     * ontology source. XXX note that anonymous ontologies should be considered a match... or
-                     * should they not?
-                     */
-                    OWLOntologyID idFromSrc = OWLUtils.extractOntologyID(rdfData);
-                    OWLOntologyID idFromStore = OWLUtils.extractOntologyID(store.getTriples(ref));
-                    condition &= (idFromSrc == null && idFromStore == null) || idFromSrc.equals(idFromStore);
-
-                    // Finally, a size check
-                    if (condition && rdfData instanceof TripleCollection) condition &= store.getTriples(ref)
-                            .size() == rdfData.size();
-
-                    mustLoad &= !condition;
-                }
-            }
+        if (!force && graphName != null && store.listTripleCollections().contains(graphName)) {
+            boolean condition = true; // Any failed check will abort the scan.
+            // Check if the extracted ontology ID matches that of the supplied graph.
+            // XXX note that anonymous ontologies should be considered a match... or should they not?
+            TripleCollection tc = store.getTriples(graphName);
+            OWLOntologyID idFromStore = OWLUtils.extractOntologyID(tc);
+            condition &= (extractedId == null && idFromStore == null) || extractedId.equals(idFromStore);
+            // Finally, a size check
+            // FIXME not a good policy for graphs that change without altering the size.
+            if (condition && rdfData instanceof TripleCollection) condition &= tc.size() == rdfData.size();
+            mustLoad &= !condition;
         }
 
-        // The policy here is to avoid copying the triples from a graph already in the store.
-        // FIXME not a good policy for graphs that change
-        String iri = null;
-        if (publicKey.getOntologyIRI() != null) iri = publicKey.getOntologyIRI().toString();
-        if (publicKey.getVersionIRI() != null) iri += ":::" + publicKey.getVersionIRI().toString();
-        // s will become the graph name
-        String s = (iri.startsWith(prefix + "::")) ? "" : (prefix + "::");
-        s += iri;
-        UriRef uriref;
-        if (mustLoad) {
-            uriref = new UriRef(URIUtils.sanitize(s));
-            log.debug("Storing ontology with graph ID {}", uriref);
-            try {
-                graph = store.createMGraph(uriref);
-            } catch (EntityAlreadyExistsException e) {
-                if (uriref.equals(e.getEntityName())) graph = store.getMGraph(uriref);
-                else graph = store.createMGraph(uriref);
-            }
-            graph.addAll(rdfData);
+        if (!mustLoad && graphName != null) {
+            log.debug("Graph with ID {} already in store. Default action is to skip storage.", graphName);
+            targetGraph = store.getTriples(graphName);
         } else {
+            String iri = null;
+            if (primaryKey.getOntologyIRI() != null) iri = primaryKey.getOntologyIRI().toString();
+            if (primaryKey.getVersionIRI() != null) iri += ":::" + primaryKey.getVersionIRI().toString();
+            // s will become the graph name
+            String s = (iri.startsWith(prefix + "::")) ? "" : (prefix + "::");
+            s += iri;
+            graphName = new UriRef(URIUtils.sanitize(s));
+            log.debug("Storing ontology with graph ID {}", graphName);
             try {
-                uriref = (UriRef) origins[0].getReference();
-            } catch (ClassCastException cex) {
-                uriref = new UriRef(s);
+                targetGraph = store.createMGraph(graphName);
+            } catch (EntityAlreadyExistsException e) {
+                if (graphName.equals(e.getEntityName())) targetGraph = store.getMGraph(graphName);
+                else targetGraph = store.createMGraph(graphName);
             }
-            log.debug("Graph with ID {} already in store. Default action is to skip storage.", origins[0]);
-            graph = store.getTriples(uriref);
+            targetGraph.addAll(rdfData);
         }
 
         // All is already sanitized by the time we get here.
@@ -1263,48 +1290,32 @@ public class ClerezzaOntologyProvider implements
         // Now do the mappings
         String mappedIds = "";
         // Discard unconventional ontology IDs with only the version IRI
-        if (publicKey != null && publicKey.getOntologyIRI() != null) {
+        if (primaryKey != null && primaryKey.getOntologyIRI() != null) {
             // Versioned or not, the real ID mapping is always added
-            keymap.setMapping(publicKey, uriref);
-            mappedIds += publicKey;
+            keymap.setMapping(primaryKey, graphName);
+            mappedIds += primaryKey;
             // TODO map unversioned ID as well?
-            Triple t = new TripleImpl(keymap.buildResource(publicKey), SIZE_IN_TRIPLES_URIREF, LiteralFactory
-                    .getInstance().createTypedLiteral(Integer.valueOf(rdfData.size())));
+            Triple t = new TripleImpl(keymap.buildResource(primaryKey), SIZE_IN_TRIPLES_URIREF,
+                    LiteralFactory.getInstance().createTypedLiteral(Integer.valueOf(rdfData.size())));
             getMetaGraph(MGraph.class).add(t);
         }
-        /*
-         * Make an ontology ID out of the originally supplied IRI (which might be the physical one and differ
-         * from the logical one!)
-         * 
-         * If we find out that it differs from the "real ID", we map this one too.
-         * 
-         * TODO how safe is this if there was a mapping earlier?
-         */
 
-        for (Origin<?> origin : origins)
-            if (origin != null) {
-                Object reff = origin.getReference();
-                OWLOntologyID alias = null;
-                if (reff instanceof IRI) alias = new OWLOntologyID((IRI) reff);
-                else if (reff instanceof OWLOntologyID) alias = (OWLOntologyID) reff;
-                if (!alias.equals(publicKey)) {
-                    // keymap.setMapping(physical, uriref);
-                    addAlias(publicKey, alias);
-                    mappedIds += " , " + alias;
-                }
+        // Add aliases.
+        for (IRI source : sources)
+            if (source != null) overrides.add(new OWLOntologyID(source));
+        for (OWLOntologyID alias : overrides)
+            if (alias != null && !alias.equals(primaryKey)) {
+                addAlias(primaryKey, alias);
+                mappedIds += " , " + alias;
             }
-        if (extractedId != null && !extractedId.equals(publicKey)) {
-            addAlias(publicKey, extractedId);
-            mappedIds += " , " + extractedId;
-        }
 
         // Do this AFTER registering the ontology, otherwise import cycles will cause infinite loops.
         if (resolveImports) {
             // Scan resources of type owl:Ontology, but only get the first.
-            Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
+            Iterator<Triple> it = targetGraph.filter(null, RDF.type, OWL.Ontology);
             if (it.hasNext()) {
                 // Scan import statements for the one owl:Ontology considered.
-                Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
+                Iterator<Triple> it2 = targetGraph.filter(it.next().getSubject(), OWL.imports, null);
                 while (it2.hasNext()) {
                     Resource obj = it2.next().getObject();
                     log.info("Resolving import target {}", obj);
@@ -1325,7 +1336,7 @@ public class ClerezzaOntologyProvider implements
                         } else {
                             log.info("Requested import already stored. Setting dependency only.");
                         }
-                        descriptor.setDependency(publicKey, id);
+                        descriptor.setDependency(primaryKey, id);
                     } catch (UnsupportedFormatException e) {
                         log.warn("Failed to parse format for resource " + obj, e);
                         // / XXX configure to continue?
@@ -1338,12 +1349,12 @@ public class ClerezzaOntologyProvider implements
         }
 
         log.debug(" Ontology {}", mappedIds);
-        if (graph != null) log.debug(" ... ({} triples)", graph.size());
-        log.debug(" ... primary public key : {}", publicKey);
+        if (targetGraph != null) log.debug(" ... ({} triples)", targetGraph.size());
+        log.debug(" ... primary public key : {}", primaryKey);
         // log.debug("--- {}", URIUtils.sanitize(s));
         log.debug("Time: {} ms", (System.currentTimeMillis() - before));
         // return URIUtils.sanitize(s);
-        return publicKey;
+        return primaryKey;
     }
 
     @Override
