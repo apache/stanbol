@@ -91,6 +91,7 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.clerezza.rdf.ontologies.OWL;
+import org.apache.stanbol.commons.owl.util.OWL2Constants;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
@@ -306,6 +307,16 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
             // remove old statement
             o.remove(t);
         }
+
+        // Versioning.
+        OWLOntologyID id = OWLUtils.extractOntologyID(o);
+        if (id != null && !id.isAnonymous() && id.getVersionIRI() == null) {
+            UriRef viri = new UriRef(requestUri.toString());
+            log.debug("Setting version IRI for export : {}", viri);
+            o.add(new TripleImpl(new UriRef(id.getOntologyIRI().toString()), new UriRef(
+                    OWL2Constants.OWL_VERSION_IRI), viri));
+        }
+
         log.debug("Exported as Clerezza Graph in {} ms. Handing over to writer.", System.currentTimeMillis()
                                                                                   - before);
         return o;
@@ -566,7 +577,8 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
                     InputStream content = new FileInputStream(file);
                     // ClerezzaOWLUtils.guessOntologyID(new FileInputStream(file), Parser.getInstance(), f);
                     OWLOntologyID guessed = OWLUtils.guessOntologyID(content, Parser.getInstance(), f);
-                    if (guessed != null && ontologyProvider.hasOntology(guessed)) {
+
+                    if (guessed != null && !guessed.isAnonymous() && ontologyProvider.hasOntology(guessed)) {
                         rb = Response.status(Status.CONFLICT);
                         this.submitted = guessed;
                         if (headers.getAcceptableMediaTypes().contains(MediaType.TEXT_HTML_TYPE)) {
@@ -591,7 +603,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
                     log.debug(">>> FAILURE format {} (parse error)", f);
                     failed++;
                 }
-            } while ((key == null || key.isAnonymous()) && itf.hasNext());
+            } while ((key == null/* || key.isAnonymous() */) && itf.hasNext());
             if (key == null || key.isAnonymous() && rb == null) {
                 if (failed > 0) throw new WebApplicationException(BAD_REQUEST);
                 else if (unsupported > 0) throw new WebApplicationException(UNSUPPORTED_MEDIA_TYPE);
@@ -604,24 +616,26 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
                 throw new WebApplicationException(e, BAD_REQUEST);
             }
         } else if (!aliases.isEmpty()) // No content but there are aliases.
-        for (Origin<?> origin : keys)
-            if (origin.getReference() instanceof OWLOntologyID) {
-                OWLOntologyID primary = ((OWLOntologyID) origin.getReference());
-                if (ontologyProvider.getStatus(primary) != org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider.Status.NO_MATCH) for (OWLOntologyID alias : aliases)
-                    try {
-                        if (ontologyProvider.addAlias(primary, alias) && key == null) key = alias;
-                    } catch (IllegalArgumentException ex) {
-                        log.warn("Cannot add alias");
-                        log.warn(" ... ontology key: {}", primary);
-                        log.warn(" ... alias: {}", alias);
-                        log.warn(" ... reason: ", ex);
-                        continue;
-                    }
-            } else {
-                log.error("Bad request");
-                log.error(" file is: {}", file);
-                throw new WebApplicationException(BAD_REQUEST);
-            }
+        {
+            for (Origin<?> origin : keys)
+                if (origin.getReference() instanceof OWLOntologyID) {
+                    OWLOntologyID primary = ((OWLOntologyID) origin.getReference());
+                    if (ontologyProvider.getStatus(primary) != org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider.Status.NO_MATCH) for (OWLOntologyID alias : aliases)
+                        try {
+                            if (ontologyProvider.addAlias(primary, alias) && key == null) key = alias;
+                        } catch (IllegalArgumentException ex) {
+                            log.warn("Cannot add alias");
+                            log.warn(" ... ontology key: {}", primary);
+                            log.warn(" ... alias: {}", alias);
+                            log.warn(" ... reason: ", ex);
+                            continue;
+                        }
+                }
+        } else {
+            log.error("Bad request");
+            log.error(" file is: {}", file);
+            throw new WebApplicationException(BAD_REQUEST);
+        }
 
         if (key != null && !key.isAnonymous()) {
             String uri = OntologyUtils.encode(key);

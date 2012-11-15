@@ -113,10 +113,13 @@ public class OfflineAccessTest {
         repository.addAll(Arrays.asList(new Object[] {root, child11, child12, child13, child21, type1, type2,
                                                       type3, pd1, pd2}));
 
+        initOfflineAccess();
     }
-
-    @Test
-    public void testOfflineAccess() {
+    
+    /**
+     * no longer a test ... as it needs to run before all others
+     */
+    private static void initOfflineAccess() {
         try {
             offlineAccess = new OfflineAccess(repository);
         } catch (Exception e) {

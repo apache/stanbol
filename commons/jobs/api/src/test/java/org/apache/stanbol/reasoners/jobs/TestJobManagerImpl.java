@@ -112,24 +112,34 @@ public class TestJobManagerImpl {
         }));
     }
 
+    /**
+     * Ensures that the tests are called in the correct order
+     * @throws ExecutionException 
+     * @throws InterruptedException 
+     */
     @Test
-    public void contains() {
+    public void testJobManagerImpl() throws InterruptedException, ExecutionException{
+        contains();
+        future();
+        interrupt();
+        ping();
+    }
+    
+    private void contains() {
         log.info("Testing hasJob(String id)");
         for (String id : jobs) {
             assertTrue(jobManager.hasJob(id));
         }
     }
 
-    @Test
-    public void future() throws InterruptedException, ExecutionException {
+    private void future() throws InterruptedException, ExecutionException {
         log.info("Testing monitoring");
         for (int i = 0; i < jobs.size(); i++) {
             assertNotNull(jobManager.ping(jobs.get(i)));
         }
     }
 
-    @Test
-    public void ping() throws InterruptedException, ExecutionException {
+    private void ping() throws InterruptedException, ExecutionException {
         log.info("Testing ping(String id)");
         for (int i = 0; i < jobs.size(); i++) {
             log.info("Waiting 0.5 sec before checking status");
@@ -145,8 +155,7 @@ public class TestJobManagerImpl {
      * To test the interaction with the Future object, for interrupting jobs. Jobs are canceled, but they
      * persist in the manager.
      */
-    @Test
-    public void interrupt() {
+    private void interrupt() {
         log.info("Testing the Future object (for monitoring)");
         // We interrupt the first numberOfJobs/2 processes
         int numberToInterrupt = jobs.size() / 2;

@@ -1,0 +1,5 @@
+li              { display: list-item }
+ul {
+	list-style-type: disc;
+	list-style-position: inside;
+	}

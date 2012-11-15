@@ -16,9 +16,10 @@
  */
 package org.apache.stanbol.commons.solr.managed;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,9 +31,9 @@ import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.Set;
 
-import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -121,12 +122,23 @@ public class ManagedSolrServerTest {
         managedSolrServer.getSolrIndexDirectory("");
     }
 
+    /**
+     * Ensures that the three tests testing the API are called in the right order
+     */
     @Test
-    public void testGetManagedIndexes() {
+    public void testManagedSolrServer() throws IOException {
+        testGetManagedIndexes();
+        testIsManagedIndex();
+        testDefaultIndexInitialisation();
+    }
+    
+    private void testGetManagedIndexes() {
+        log.info("test getManagedIndeces");
         Set<String> expected = new HashSet<String>(expectedIndexNames);
         Collection<IndexMetadata> present = managedSolrServer.getIndexes(ManagedIndexState.ACTIVE);
         Collection<String> presentNames = new ArrayList<String>();
         for (IndexMetadata metadata : present) {
+            log.info(" ... {}", metadata);
             presentNames.add(metadata.getIndexName());
             assertTrue(expected.remove(metadata.getIndexName()));
             // test that the index dir is the expected location
@@ -138,22 +150,20 @@ public class ManagedSolrServerTest {
             presentNames+")!",expected.isEmpty());
     }
 
-    @Test
-    public void testIsManagedIndex() {
+    private void testIsManagedIndex() {
         for (String name : expectedIndexNames) {
             assertTrue(managedSolrServer.isManagedIndex(name));
         }
         assertFalse(managedSolrServer.isManagedIndex("notAnIndex" + System.currentTimeMillis()));
     }
 
-    @Test
-    public void testDefaultIndexInitialisation() throws IOException {
+    private void testDefaultIndexInitialisation() throws IOException {
         // this is actually tested already by the initialisation of the
         // SolrYardTest ...
         String indexName = "testIndexInitialisation_" + System.currentTimeMillis();
         IndexMetadata metadata = managedSolrServer.createSolrIndex(indexName, 
             TEST_SOLR_CONFIG_NAME, null);
-        Assert.assertNotNull("The metadata returned after creating index "+
+        assertNotNull("The metadata returned after creating index "+
             indexName+" MUST NOT be NULL!",metadata);
         File indexDir = new File(metadata.getDirectory());
         assertEquals(new File(expectedManagedDirectory, indexName), indexDir);

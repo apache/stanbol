@@ -31,6 +31,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.servicesapi.io.Origin;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider.Status;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -61,6 +63,8 @@ public class TestOntologyReconciliation {
         reset();
     }
 
+    private String location_nameless = "/ontologies/nameless_ontology.owl";
+
     private Logger log = LoggerFactory.getLogger(getClass());
 
     /*
@@ -69,8 +73,7 @@ public class TestOntologyReconciliation {
      */
     @Test
     public void anonymousFromStream() throws Exception {
-        String location = "/ontologies/nameless_ontology.owl";
-        InputStream in = getClass().getResourceAsStream(location);
+        InputStream in = getClass().getResourceAsStream(location_nameless);
         in.mark(Integer.MAX_VALUE);
         OWLOntologyManager onMgr = OWLManager.createOWLOntologyManager();
         OWLOntology o1 = onMgr.loadOntologyFromOntologyDocument(in);
@@ -88,13 +91,48 @@ public class TestOntologyReconciliation {
     }
 
     /*
+     * If an anonymous ontology is loaded from a stream and at least one override is provided, the first
+     * override should be the primary key, while every other override should be an alias for that key.
+     */
+    @Test
+    public void anonymousFromStreamWithCustomKeys() throws Exception {
+        OWLOntologyID myKey = new OWLOntologyID(IRI.create("nameless"), IRI.create(getClass()
+                .getCanonicalName() + "#anonymousFromStreamWithCustomKeys()"));
+        OWLOntologyID alias = new OWLOntologyID(IRI.create("nameless"), IRI.create(getClass()
+                .getCanonicalName() + "#anonymousFromStreamWithCustomKeys().alias"));
+        InputStream in = getClass().getResourceAsStream(location_nameless);
+        in.mark(Integer.MAX_VALUE);
+        OWLOntologyManager onMgr = OWLManager.createOWLOntologyManager();
+        OWLOntology o1 = onMgr.loadOntologyFromOntologyDocument(in);
+        assertTrue(o1.isAnonymous());
+        in.reset();
+        // in = getClass().getResourceAsStream(location); // use if stream cannot be reset
+        OWLOntologyID key = ontologyProvider.loadInStore(in, RDF_XML, false, Origin.create(myKey),
+            Origin.create(alias));
+        assertNotNull(key);
+        assertFalse(key.isAnonymous());
+        assertEquals(myKey, key);
+        log.info("Anonymous ontology loaded with non-anonymous public key {} (submitted)", key);
+
+        assertEquals(1, ontologyProvider.listAliases(key).size());
+        for (OWLOntologyID al : ontologyProvider.listAliases(key)) {
+            assertFalse(al.isAnonymous());
+            log.info("Named alias detected {}", al);
+        }
+
+        // Now retrieve using the alias
+        OWLOntology o2 = ontologyProvider.getStoredOntology(alias, OWLOntology.class, false);
+        assertTrue(o2.isAnonymous());
+        assertEquals(o1.getAxioms(), o2.getAxioms()); // Cannot equal OWLOntology objects
+    }
+
+    /*
      * Anonymous ontologies loaded from a URL must reconcile with a public key that matches the resource URL
      * in its ontology IRI.
      */
     @Test
     public void anonymousFromURL() throws Exception {
-        String location = "/ontologies/nameless_ontology.owl";
-        URL in = getClass().getResource(location);
+        URL in = getClass().getResource(location_nameless);
         OWLOntologyManager onMgr = OWLManager.createOWLOntologyManager();
         OWLOntology o1 = onMgr.loadOntologyFromOntologyDocument(IRI.create(in));
         assertTrue(o1.isAnonymous());
@@ -104,6 +142,46 @@ public class TestOntologyReconciliation {
         assertFalse(key.isAnonymous());
         log.info("Anonymous ontology loaded with non-anonymous public key {}", key);
         OWLOntology o2 = ontologyProvider.getStoredOntology(key, OWLOntology.class, false);
+        assertTrue(o2.isAnonymous());
+        assertEquals(o1.getAxioms(), o2.getAxioms()); // Cannot equal OWLOntology objects
+    }
+
+    /*
+     * If an anonymous ontology is loaded from a URL and at least one override is provided, the first override
+     * should be the primary key, while everything else, including the URL, should be an alias for that key.
+     */
+    @Test
+    public void anonymousFromURLWithCustomKeys() throws Exception {
+        OWLOntologyID myKey = new OWLOntologyID(IRI.create("nameless"), IRI.create(getClass()
+                .getCanonicalName() + "#anonymousFromURLWithCustomKeys()"));
+        OWLOntologyID alias = new OWLOntologyID(IRI.create("nameless"), IRI.create(getClass()
+                .getCanonicalName() + "#anonymousFromURLWithCustomKeys().alias"));
+        URL url = getClass().getResource(location_nameless);
+        OWLOntologyManager onMgr = OWLManager.createOWLOntologyManager();
+        OWLOntology o1 = onMgr.loadOntologyFromOntologyDocument(IRI.create(url));
+        assertTrue(o1.isAnonymous());
+
+        OWLOntologyID key = ontologyProvider.loadInStore(IRI.create(url), RDF_XML, false,
+            Origin.create(myKey), Origin.create(alias));
+        assertNotNull(key);
+        assertFalse(key.isAnonymous());
+        assertEquals(myKey, key);
+        log.info("Anonymous ontology loaded with non-anonymous public key {} (submitted)", key);
+
+        // should have 2 aliases: the physical location and the submitted alias.
+        assertEquals(2, ontologyProvider.listAliases(key).size());
+        for (OWLOntologyID al : ontologyProvider.listAliases(key)) {
+            assertFalse(al.isAnonymous());
+            log.info("Named alias detected {}", al);
+        }
+
+        // Now retrieve using the alias...
+        OWLOntology o2 = ontologyProvider.getStoredOntology(alias, OWLOntology.class, false);
+        assertTrue(o2.isAnonymous());
+        assertEquals(o1.getAxioms(), o2.getAxioms()); // Cannot equal OWLOntology objects
+
+        // ... and using the physical IRI
+        o2 = ontologyProvider.getStoredOntology(new OWLOntologyID(IRI.create(url)), OWLOntology.class, false);
         assertTrue(o2.isAnonymous());
         assertEquals(o1.getAxioms(), o2.getAxioms()); // Cannot equal OWLOntology objects
     }
@@ -220,7 +298,7 @@ public class TestOntologyReconciliation {
 
         // The unversioned ID should return no match...
         OWLOntologyID unversioned = new OWLOntologyID(key.getOntologyIRI());
-        assertFalse(ontologyProvider.hasOntology(unversioned));
+        assertSame(Status.NO_MATCH, ontologyProvider.getStatus(unversioned));
 
         // ...but a query on the available versions should return only the public key.
         Set<OWLOntologyID> versions = ontologyProvider.listVersions(key.getOntologyIRI());
@@ -246,7 +324,7 @@ public class TestOntologyReconciliation {
         log.info(" -- (matches actual ontology ID).");
 
         // The unversioned ID should still return no match...
-        assertFalse(ontologyProvider.hasOntology(unversioned));
+        assertSame(Status.NO_MATCH, ontologyProvider.getStatus(unversioned));
 
         // ...but a query on the available versions should return both public keys now.
         versions = ontologyProvider.listVersions(key.getOntologyIRI());

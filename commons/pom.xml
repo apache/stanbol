@@ -65,6 +65,8 @@
     <module>launchpad</module>
     <module>security/core</module>
     <module>security/authentication.basic</module>
+    <module>security/felixwebconsole</module>
+    <module>security/usermanagement</module>
     <module>caslight</module>
 
     <module>testing/jarexec</module>
