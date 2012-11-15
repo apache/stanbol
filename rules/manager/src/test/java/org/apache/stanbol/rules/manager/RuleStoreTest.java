@@ -91,9 +91,29 @@ public class RuleStoreTest {
     }
 
     public static RuleStore store = null;
-
+    
+    /**
+     * Calls all the other (now private) test methods to ensure the correct
+     * order of execution
+     * @throws Exception
+     */
     @Test
-    public void createRecipeTest() throws Exception {
+    public void testRuleStore() throws Exception {
+        createRecipeTest();
+        addRuleToRecipeTest();
+        getRecipeTest();
+        getNotExistingRuleByNameInRecipeTest();
+        getNotExistingRuleByIdInRecipeTest();
+        getExistingRuleByIdInRecipeTest();
+        getExistingRuleByNameInRecipeTest();
+        findRecipesByDescriptionTest();
+        findRulesByDescriptionTest();
+        findRulesByNameTest();
+        removeRuleInRecipeTest();
+        removeRecipeTest();
+    }
+    
+    private void createRecipeTest() throws Exception {
         Recipe recipe = store.createRecipe(new UriRef(
                 "http://incubator.apache.com/stanbol/rules/test/recipeA"), "The text recipe named A.");
 
@@ -105,8 +125,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test
-    public void addRuleToRecipeTest() throws Exception {
+    private void addRuleToRecipeTest() throws Exception {
         Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         String separator = System.getProperty("line.separator");
@@ -129,8 +148,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test
-    public void getRecipeTest() throws Exception {
+    private void getRecipeTest() throws Exception {
         Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         if (recipe == null) {
@@ -143,8 +161,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test
-    public void getNotExistingRuleByNameInRecipeTest() throws Exception {
+    private void getNotExistingRuleByNameInRecipeTest() throws Exception {
         Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         try {
@@ -156,8 +173,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test
-    public void getNotExistingRuleByIdInRecipeTest() throws Exception {
+    private void getNotExistingRuleByIdInRecipeTest() throws Exception {
         Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         try {
@@ -169,8 +185,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test
-    public void getExistingRuleByIdInRecipeTest() throws Exception {
+    private void getExistingRuleByIdInRecipeTest() throws Exception {
         Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         try {
@@ -182,8 +197,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test
-    public void getExistingRuleByNameInRecipeTest() throws Exception {
+    private void getExistingRuleByNameInRecipeTest() throws Exception {
         Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         try {
@@ -195,8 +209,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test
-    public void findRecipesByDescriptionTest() throws Exception {
+    private void findRecipesByDescriptionTest() throws Exception {
         RecipeList recipes = store.findRecipesByDescription("recipe named A");
         if (recipes.isEmpty()) {
             Assert.fail();
@@ -206,8 +219,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test
-    public void findRulesByDescriptionTest() throws Exception {
+    private void findRulesByDescriptionTest() throws Exception {
         RuleList rules = store.findRulesByDescription("a test rule.");
         if (rules.isEmpty()) {
             Assert.fail();
@@ -216,8 +228,7 @@ public class RuleStoreTest {
         }
     }
 
-    @Test
-    public void findRulesByNameTest() throws Exception {
+    private void findRulesByNameTest() throws Exception {
         RuleList rules = store.findRulesByName("1");
 
         if (rules.isEmpty()) {
@@ -227,8 +238,7 @@ public class RuleStoreTest {
         }
     }
 
-    @Test
-    public void removeRuleInRecipeTest() throws Exception {
+    private void removeRuleInRecipeTest() throws Exception {
         Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         String tmp = recipe.toString();
@@ -245,8 +255,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test
-    public void removeRecipeTest() throws Exception {
+    private void removeRecipeTest() throws Exception {
 
         RecipeList recipeListInitial = store.listRecipes();
         Recipe[] initialRecipes = new Recipe[recipeListInitial.size()];
