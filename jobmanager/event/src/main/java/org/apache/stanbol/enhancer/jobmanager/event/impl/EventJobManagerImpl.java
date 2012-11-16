@@ -53,7 +53,8 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties(value={
     //register with a ranking lower than 0 to allow easy overriding by specific
-    @Property(name=Constants.SERVICE_RANKING,intValue=EventJobManagerImpl.DEFAULT_SERVICE_RANKING)
+    @Property(name=Constants.SERVICE_RANKING,intValue=EventJobManagerImpl.DEFAULT_SERVICE_RANKING),
+    @Property(name=EventJobManagerImpl.MAX_ENHANCEMENT_JOB_WAIT_TIME,intValue=EventJobManagerImpl.DEFAULT_MAX_ENHANCEMENT_JOB_WAIT_TIME)
 })
 public class EventJobManagerImpl implements EnhancementJobManager {
 
@@ -61,7 +62,9 @@ public class EventJobManagerImpl implements EnhancementJobManager {
     
     public static final int DEFAULT_SERVICE_RANKING = 0;
 
-    private static final int MAX_ENHANCEMENT_JOB_WAIT_TIME = 10*1000;
+    public static final String MAX_ENHANCEMENT_JOB_WAIT_TIME = "stanbol.maxEnhancementJobWaitTime";
+
+    public static final int DEFAULT_MAX_ENHANCEMENT_JOB_WAIT_TIME = 10 * 1000;
     
     @Reference
     protected ChainManager chainManager;
@@ -72,6 +75,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
 
     private ServiceRegistration jobHandlerRegistration;
     private EnhancementJobHandler jobHandler;
+    private int maxEnhancementJobWaitTime = DEFAULT_MAX_ENHANCEMENT_JOB_WAIT_TIME;
     
     
     /**
@@ -88,6 +92,11 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         properties.put(org.osgi.service.event.EventConstants.EVENT_TOPIC, TOPIC_JOB_MANAGER);
         jobHandlerRegistration = ctx.getBundleContext().registerService(
             EventHandler.class.getName(), jobHandler, properties);
+        
+        Object maxWaitTime = ctx.getProperties().get(MAX_ENHANCEMENT_JOB_WAIT_TIME);
+        if (maxWaitTime instanceof Integer) {
+            this.maxEnhancementJobWaitTime = (Integer) maxWaitTime;
+        }
     }
     /**
      * Unregisters the {@link EnhancementJobHandler}
@@ -124,7 +133,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         }
         if(chain == null){
             throw new IllegalArgumentException("Unable to enhance ContentItem '"+ci.getUri()+
-                "' because NULL was parsed as enhancement chain");
+                "' because NULL was passed as enhancement chain");
         }
         long start = System.currentTimeMillis();
         boolean isDefaultChain = chain.equals(chainManager.getDefault());
@@ -134,7 +143,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         EnhancementJobObserver observer = jobHandler.register(job);
         //TODO: allow configuring a max completion time (e.g. 1min)
         while(!observer.hasCompleted() & jobHandler != null){
-            observer.waitForCompletion(MAX_ENHANCEMENT_JOB_WAIT_TIME);
+            observer.waitForCompletion(maxEnhancementJobWaitTime);
         }
         log.info("{} EnhancementJob for ContentItem {} after {}ms",
             new Object[]{ job.isFailed() ? "Failed" : "Finished",
@@ -155,8 +164,8 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         }
         if(!job.isFinished()){
             throw new ChainException("EnhancementJobManager was deactivated while" +
-            		"enhancing the parsed ContentItem "+job.getContentItem()+
-            		"(EnhancementJobManager type: "+getClass()+")!");
+            		" enhancing the passed ContentItem "+job.getContentItem()+
+            		" (EnhancementJobManager type: "+getClass()+")");
         }
     }
 
