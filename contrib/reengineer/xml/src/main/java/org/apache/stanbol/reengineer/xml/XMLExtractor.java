@@ -42,7 +42,7 @@ import org.apache.stanbol.ontologymanager.servicesapi.collector.DuplicateIDExcep
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
-import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -172,7 +172,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
             IRI[] locations = onManager.getOfflineConfiguration().getOntologySourceLocations()
                     .toArray(new IRI[0]);
-            OntologyInputSource xmlowlSrc = new RootOntologyIRISource(IRI.create(XML_OWL.URI),
+            OntologyInputSource xmlowlSrc = new RootOntologySource(IRI.create(XML_OWL.URI),
                     OWLOntologyManagerFactory.createOWLOntologyManager(locations));
 
             scope = onManager.createOntologyScope(scopeID, xmlowlSrc

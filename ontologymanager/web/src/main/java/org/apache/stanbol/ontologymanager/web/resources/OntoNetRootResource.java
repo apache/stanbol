@@ -561,7 +561,6 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
              * Because the ontology provider's load method could fail after only one attempt without resetting
              * the stream, we might have to do that ourselves.
              */
-
             List<String> formats;
             if (format != null && !format.trim().isEmpty()) formats = Collections.singletonList(format);
             else // The RESTful API has its own list of preferred formats
@@ -604,7 +603,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
                     failed++;
                 }
             } while ((key == null/* || key.isAnonymous() */) && itf.hasNext());
-            if (key == null || key.isAnonymous() && rb == null) {
+            if ((key == null || key.isAnonymous()) && rb == null) {
                 if (failed > 0) throw new WebApplicationException(BAD_REQUEST);
                 else if (unsupported > 0) throw new WebApplicationException(UNSUPPORTED_MEDIA_TYPE);
             }

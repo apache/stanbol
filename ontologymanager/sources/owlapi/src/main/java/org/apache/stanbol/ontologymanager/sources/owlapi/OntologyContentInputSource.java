@@ -27,7 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An input source that parses an in-memory {@link OWLOntology} object from an input stream.
+ * An input source that tries to parse an in-memory {@link OWLOntology} object from an input stream. This
+ * ontology input source will try to resolve imports and fail if one cannot be resolved. To setup a custom
+ * configuration, such as adding IRI mappers, the constructor
+ * {@link #OntologyContentInputSource(InputStream, OWLOntologyManager)} can be used with a configured
+ * {@link OWLOntologyManager}.
  * 
  * @author alexdma
  * 

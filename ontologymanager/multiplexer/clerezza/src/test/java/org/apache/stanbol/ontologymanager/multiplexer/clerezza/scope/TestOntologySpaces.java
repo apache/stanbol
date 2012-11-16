@@ -87,7 +87,7 @@ public class TestOntologySpaces {
         OWLDataFactory df = mgr.getOWLDataFactory();
 
         ont = mgr.createOntology(baseIri);
-        inMemorySrc = new RootOntologySource(ont, null);
+        inMemorySrc = new RootOntologySource(ont);
         // Let's state that Linus is a human being
         OWLClass cHuman = df.getOWLClass(IRI.create(baseIri + "/" + Constants.humanBeing));
         OWLIndividual iLinus = df.getOWLNamedIndividual(IRI.create(baseIri + "/" + Constants.linus));
@@ -99,7 +99,7 @@ public class TestOntologySpaces {
 
         dropSrc = getLocalSource("/ontologies/droppedcharacters.owl", mgr);
         nonexSrc = getLocalSource("/ontologies/nonexistentcharacters.owl", mgr);
-        minorSrc = new RootOntologySource(ont2, null);
+        minorSrc = new RootOntologySource(ont2);
 
     }
 

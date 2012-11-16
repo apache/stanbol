@@ -161,6 +161,8 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
                     content.reset();
                 } catch (IOException e) {
                     log.debug("Failed to reset data stream while parsing format {}.", f);
+                    // No way to retry if the stream cannot be reset. Must recreate it.
+                    break;
                 }
             }
         } while (!loaded && itf.hasNext());
@@ -170,8 +172,11 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
             log.debug("Root ontology is a {}.", getRootOntology().getClass().getCanonicalName());
         } else {
             // Rollback graph creation, if any
-            if (tcProvider != null && tcProvider != null) tcProvider.deleteTripleCollection(name);
-            throw new OntologyLoadingException("All parsers failed. Giving up.");
+            if (tcProvider != null && tcProvider != null) {
+                tcProvider.deleteTripleCollection(name);
+                log.error("Parsing failed. Deleting triple collection {}", name);
+            }
+            throw new OntologyLoadingException("Parsing failed. Giving up.");
         }
 
         log.debug("Input source initialization completed in {} ms.", (System.currentTimeMillis() - before));

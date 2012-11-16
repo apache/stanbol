@@ -36,7 +36,7 @@ import org.apache.stanbol.ontologymanager.multiplexer.clerezza.Constants;
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
 import org.apache.stanbol.ontologymanager.sources.owlapi.ParentPathInputSource;
-import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -95,7 +95,7 @@ public class TestStorage {
     @Test
     public void storedOntologyOutlivesScope() throws Exception {
         String ephemeralScopeId = "CaducousScope";
-        OntologyInputSource<OWLOntology> ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
+        OntologyInputSource<OWLOntology> ois = new RootOntologySource(IRI.create(getClass().getResource(
             "/ontologies/nonexistentcharacters.owl")));
         OWLOntologyID ontologyId = ois.getRootOntology().getOntologyID();
         Scope scope = onManager.createOntologyScope(ephemeralScopeId);
