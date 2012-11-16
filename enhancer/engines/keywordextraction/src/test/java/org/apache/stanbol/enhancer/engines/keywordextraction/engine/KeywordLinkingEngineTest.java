@@ -232,8 +232,8 @@ public class KeywordLinkingEngineTest {
     @Test
     public void testEntityLinkerWithNouns() throws Exception {
         TextProcessingConfig tpc = new TextProcessingConfig();
-        tpc.setProcessedLexicalCategories(KeywordLinkingEngine.DEFAULT_PROCESSED_LEXICAL_CATEGORIES);
-        tpc.setProcessedPos(Collections.EMPTY_SET);
+        tpc.setLinkedLexicalCategories(TextProcessingConfig.DEFAULT_LINKED_LEXICAL_CATEGORIES);
+        tpc.setLinkedPos(Collections.EMPTY_SET);
         EntityLinkerConfig config = new EntityLinkerConfig();
         config.setRedirectProcessingMode(RedirectProcessingMode.FOLLOW);
         EntityLinker linker = new EntityLinker(TEST_ANALYSED_TEXT,"en",
@@ -259,8 +259,8 @@ public class KeywordLinkingEngineTest {
     @Test
     public void testEntityLinkerWithProperNouns() throws Exception {
         TextProcessingConfig tpc = new TextProcessingConfig();
-        tpc.setProcessedLexicalCategories(Collections.EMPTY_SET);
-        tpc.setProcessedPos(KeywordLinkingEngine.DEFAULT_PROCESSED_POS_TYPES);
+        tpc.setLinkedLexicalCategories(Collections.EMPTY_SET);
+        tpc.setLinkedPos(TextProcessingConfig.DEFAULT_LINKED_POS);
         EntityLinkerConfig config = new EntityLinkerConfig();
         config.setRedirectProcessingMode(RedirectProcessingMode.FOLLOW);
         EntityLinker linker = new EntityLinker(TEST_ANALYSED_TEXT,"en",

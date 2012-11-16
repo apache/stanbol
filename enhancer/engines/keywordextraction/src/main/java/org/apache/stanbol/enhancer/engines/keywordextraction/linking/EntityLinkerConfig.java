@@ -26,6 +26,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.EntityLinker;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.Suggestion;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.Suggestion.MATCH;
+import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 
@@ -70,7 +71,7 @@ public class EntityLinkerConfig {
      * for searches of Entities.<p>
      * The default is set to <code>3</code> 
      */
-    private static final int DEFAULT_MAX_SEARCH_DISTANCE = 3;
+    public static final int DEFAULT_MAX_SEARCH_DISTANCE = 3;
 
     /**
      * Default value for {@link #getNameField()} (rdfs:label)
@@ -94,6 +95,13 @@ public class EntityLinkerConfig {
      * The default for case sensitive matching is set to <code>false</code>
      */
     public static final boolean DEFAULT_CASE_SENSITIVE_MATCHING_STATE = false;
+    /**
+     * By default Lemma based matching is deactivated.
+     */
+    public static final boolean DEFAULT_LEMMA_MATCHING_STATE = false;
+    public static final double DEFAULT_MIN_LABEL_SCORE = 0.75;
+    public static final double DEFAULT_MIN_TEXT_SCORE = 0.4;
+    public static final double DEFAULT_MIN_MATCH_SCORE = 0.3;
     /**
      * Default mapping for Concept types to dc:type values added for
      * TextAnnotations.
@@ -258,9 +266,17 @@ public class EntityLinkerConfig {
      * still used for calculating the confidence
      */
     private float minTokenMatchFactor;
+    /**
+     * If lemmas are used instead of the Tokens as present in the text to search
+     * and match Entities within the linked vocabulary
+     */
+    private boolean lemmaMatchingState = DEFAULT_LEMMA_MATCHING_STATE;
+    private double minLabelScore = DEFAULT_MIN_LABEL_SCORE;
+    private double minTextScore = DEFAULT_MIN_TEXT_SCORE;
+    private double minMatchScore = DEFAULT_MIN_MATCH_SCORE;
     
     /**
-     * Default constructor the initialises the configuration with the 
+     * Default constructor the initializes the configuration with the 
      * default values
      */
     public EntityLinkerConfig(){
@@ -622,4 +638,100 @@ public class EntityLinkerConfig {
             this.maxSearchDistance = maxSearchDistance;
         }
     }
+    public boolean isLemmaMatching() {
+        return lemmaMatchingState;
+    }
+    
+    public void setLemmaMatchingState(Boolean lemmaMatchingState) {
+        if(lemmaMatchingState == null){
+            this.lemmaMatchingState = DEFAULT_LEMMA_MATCHING_STATE;
+        } else {
+            this.lemmaMatchingState = lemmaMatchingState;
+        }
+    }
+    /**
+     * The minimum LabelScore required to suggest an Entity.<p>
+     * The "Label Score" [0..1] represents how much of the
+     * Label of an Entity matches with the Text. It compares the number
+     * of Tokens of the Label with the number of Tokens matched to the
+     * Text. Not exact matches for Tokens, or if the Tokens within the 
+     * label do appear in an other order than in the text do also 
+     * reduce this score.
+     * @return the minimum required LabelScore
+     */
+    public double getMinLabelScore() {
+        return minLabelScore;
+    }
+    /**
+     * Setter for the minimum label score for suggested entities
+     * @param score the score [0..1] or <code>null</code> to reset
+     * to the default.
+     */
+    public void setMinLabelScore(Double score){
+        if(score == null){
+            minLabelScore = DEFAULT_MIN_LABEL_SCORE;
+        } else if(score > 1 || score < 0) {
+            throw new IllegalArgumentException("The parsed MinLabelScore '"
+                + score + "' MUST BE in the range [0..1]!");
+        } else {
+            minLabelScore = score;
+        }
+    }
+    /**
+     * The minimum Text Score required to suggest an Entity.<p>
+     * The "Text Score" [0..1] represents how well the
+     * Label of an Entity matches to the selected Span in the Text.
+     * It compares the number of matched {@link Token} from
+     * the label with the number of Tokens enclosed by the Span
+     * in the Text an Entity is suggested for. Not exact matches 
+     * for Tokens, or if the Tokens within the label do appear in
+     * an other order than in the text do also reduce this score
+     * @return the minimum required Text Score for labels of suggested
+     * Entities
+     */
+    public double getMinTextScore() {
+        return minTextScore;
+    }
+    /**
+     * Setter for the minimum text score for suggested entities
+     * @param score the score [0..1] or <code>null</code> to reset
+     * to the default.
+     */
+    public void setMinTextScore(Double score){
+        if(score == null){
+            minTextScore = DEFAULT_MIN_TEXT_SCORE;
+        } else if(score > 1 || score < 0) {
+            throw new IllegalArgumentException("The parsed MinTextScore '"
+                + score + "' MUST BE in the range [0..1]!");
+        } else {
+            minTextScore = score;
+        }
+    }    
+    /**
+     * Getter for the minimum match Score of Entity labels against the
+     * Text.<p>
+     * This is the product of the {@link #getMinLabelScore()} with the
+     * {@link #getMinTextScore()} - meaning that this value represents
+     * both how well the label matches the text and how much of the
+     * label is matched with the text.
+     * @return
+     */
+    public double getMinMatchScore() {
+        return minMatchScore;
+    }
+    /**
+     * Setter for the minimum text score for suggested entities
+     * @param score the score [0..1] or <code>null</code> to reset
+     * to the default.
+     */
+    public void setMinMatchScore(Double score){
+        if(score == null){
+            minMatchScore = DEFAULT_MIN_MATCH_SCORE;
+        } else if(score > 1 || score < 0) {
+            throw new IllegalArgumentException("The parsed MinMatchScore '"
+                + score + "' MUST BE in the range [0..1]!");
+        } else {
+            minMatchScore = score;
+        }
+    } 
 }

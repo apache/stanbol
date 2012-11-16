@@ -21,6 +21,8 @@ import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 import static org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum.getFullName;
 
 import java.lang.Integer; //preserve this!
+import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -71,6 +73,7 @@ import org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl.Tracki
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Token;
+import org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
@@ -135,7 +138,10 @@ import org.slf4j.LoggerFactory;
         boolValue=KeywordLinkingEngine.DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE),
     @Property(name=KeywordLinkingEngine.PROCESSED_LANGUAGES,
         cardinality=Integer.MAX_VALUE,
-        value={"*"}),
+        value={"*;lmmtip;uc=LINK", // link multiple matchable tokens in chunks; link upper case words
+               "de;uc=MATCH", //in German all Nouns are upper case
+               "es;lc=Noun", //the OpenNLP POS tagger for Spanish does not support ProperNouns
+               "nl;lc=Noun"}), //same for Dutch 
     @Property(name=KeywordLinkingEngine.DEFAULT_MATCHING_LANGUAGE,value=""),
     @Property(name=KeywordLinkingEngine.TYPE_MAPPINGS,cardinality=Integer.MAX_VALUE),
     @Property(name=KeywordLinkingEngine.DEREFERENCE_ENTITIES,
@@ -164,20 +170,123 @@ public class KeywordLinkingEngine
      */
     public static final Integer DEFAULT_ORDER = ServiceProperties.ORDERING_DEFAULT - 10;
 
-    
+    /**
+     * The id of the Entityhub Site (Referenced or Managed Site) used for matching. <p>
+     * To match against the Entityhub use "entityhub" as value.
+     */
     public static final String REFERENCED_SITE_ID = "org.apache.stanbol.enhancer.engines.keywordextraction.referencedSiteId";
+    /**
+     * The field used to search for labels in the vocabulary linked against
+     */
     public static final String NAME_FIELD = "org.apache.stanbol.enhancer.engines.keywordextraction.nameField";
+    /**
+     * The field used as types for entities. While the type does not influence the
+     * suggestions it is used for the <code>fise:entity-type</code> value of 
+     * <code>fise:EntityAnnotation</code>s and also to determine the
+     * <code>dc:type</code> value of <code>fise:TextAnnotation</code>s via the
+     * configured {@link #TYPE_MAPPINGS}.
+     */
     public static final String TYPE_FIELD = "org.apache.stanbol.enhancer.engines.keywordextraction.typeField";
+    /**
+     * Allows to enable/disable case sensitive matching
+     */
     public static final String CASE_SENSITIVE = "org.apache.stanbol.enhancer.engines.keywordextraction.caseSensitive";
+    /**
+     * The field used to lookup redirects
+     */
     public static final String REDIRECT_FIELD = "org.apache.stanbol.enhancer.engines.keywordextraction.redirectField";
+    /**
+     * If/how redirects (provided by the {@link #REDIRECT_FIELD}) are processed.
+     */
     public static final String REDIRECT_PROCESSING_MODE = "org.apache.stanbol.enhancer.engines.keywordextraction.redirectMode";
+    /**
+     * The maximum number of fise:EntityAnnotations created as suggestion for a fise:TextAnnotation
+     */
     public static final String MAX_SUGGESTIONS = "org.apache.stanbol.enhancer.engines.keywordextraction.maxSuggestions";
-    public static final String MIN_FOUND_TOKENS= "org.apache.stanbol.enhancer.engines.keywordextraction.minFoundTokens";
+    /**
+     * If enabled {@link MorphoFeatures#getLemma()} values are used instead of the {@link Token#getSpan()} to
+     * search/match Entities within the Vocabulary linked against.
+     * @see EntityLinkerConfig#isLemmaMatching()
+     * @see EntityLinkerConfig#DEFAULT_LEMMA_MATCHING_STATE
+     */
+    public static final String LEMMA_MATCHING_STATE = "org.apache.stanbol.enhancer.engines.keywordextraction.lemmaMatching";
+    /**
+     * Can be used to that the "default language" from <code>null</code>
+     * (labels without language tag) to an other value (e.g. "en").<p>
+     * The "default language" is used in addition to the language of the
+     * processed text to search for labels.
+     */
     public static final String DEFAULT_MATCHING_LANGUAGE = "org.apache.stanbol.enhancer.engines.keywordextraction.defaultMatchingLanguage";
+    /**
+     * Allows to configure entity type -> dc:type mappings as used for created
+     * fise:TextAnnotations
+     */
     public static final String TYPE_MAPPINGS = "org.apache.stanbol.enhancer.engines.keywordextraction.typeMappings";
+    /*
+     * THe KEYWORD_TOKENIZER feature is no longer supported by the AnalyzedText based
+     * KeywordLinkingEngine
+     */
     //public static final String KEYWORD_TOKENIZER = "org.apache.stanbol.enhancer.engines.keywordextraction.keywordTokenizer";
+    /**
+     * How well a Token of the Label needs to match a Token of the Text so that they
+     * are considered to match. Matching does only allow differences at the end of the
+     * token (e.g. "London" -> "Londons major")
+     */
     public static final String MIN_TOKEN_MATCH_FACTOR = "org.apache.stanbol.enhancer.engines.keywordextraction.minTokenMatchFactor";
-//  public static final String ENABLE_CHUNKER = "org.apache.stanbol.enhancer.engines.keywordextraction.enableChunker";
+    /**
+     * The minimum number of matching tokens. Only "matchable" tokens are counted.
+     * For full matches (where all tokens of the Label do match tokens in the text)
+     * this parameter is ignored.<p>
+     * This parameter is strongly related with the {@link #MIN_LABEL_MATCH_FACTOR}.
+     * Typical setting are<ul>
+     * <li> <code>{@link #MIN_FOUND_TOKENS}=1</code> and <code>{@link #MIN_LABEL_MATCH_FACTOR} > 0.5</code> (e.g. 0.75)
+     * <li> <code>{@link #MIN_FOUND_TOKENS}=2</code> and <code>{@link #MIN_LABEL_MATCH_FACTOR} <= 0.5</code> (e.g. 0.5)
+     * </ul>
+     * as both settings will ensures that Labels with two tokens where only a single one
+     * does match with the text are not suggested.<p>
+     * If used in combination with an disambiguation Engine one might want to consider
+     * Entities where their labels do match only a single token is such cases a
+     * <code>{@link #MIN_FOUND_TOKENS}=1</code> and <code>{@link #MIN_LABEL_MATCH_FACTOR} <= 0.5</code>
+     * might be also a meaningful configuration. In such cases users will also want to set the
+     * <code>{@link #MAX_SUGGESTIONS} > 10</code>.
+     */
+    public static final String MIN_FOUND_TOKENS = "org.apache.stanbol.enhancer.engines.keywordextraction.minFoundTokens";
+    /**
+     * The "Label Score" [0..1] represents how much of the
+     * Label of an Entity matches with the Text. It compares the number
+     * of Tokens of the Label with the number of Tokens matched to the
+     * Text. Not exact matches for Tokens, or if the Tokens within the 
+     * label do appear in an other order than in the text do also 
+     * reduce this score. <p>
+     * The default is {@link EntityLinkerConfig#DEFAULT_MIN_LABEL_SCORE}
+     * (value: {@value EntityLinkerConfig#DEFAULT_MIN_LABEL_SCORE})
+     */
+    public static final String MIN_LABEL_MATCH_FACTOR = "org.apache.stanbol.enhancer.engines.keywordextraction.minLabelMatchFactor";
+    /**
+     * The "Text Score" [0..1] represents how well the
+     * Label of an Entity matches to the selected Span in the Text.
+     * It compares the number of matched {@link Token} from
+     * the label with the number of Tokens enclosed by the Span
+     * in the Text an Entity is suggested for. Not exact matches 
+     * for Tokens, or if the Tokens within the label do appear in
+     * an other order than in the text do also reduce this score.<p>
+     * The default is {@link EntityLinkerConfig#DEFAULT_MIN_TEXT_SCORE}
+     * (value: {@value EntityLinkerConfig#DEFAULT_MIN_TEXT_SCORE})
+     */
+    public static final String MIN_TEXT_MATCH_FACTOR = "org.apache.stanbol.enhancer.engines.keywordextraction.minTextMatchFactor";
+    /**
+     * Defined as the product of the "Text Score" with the
+     * "Label Score" - meaning that this value represents
+     * both how well the label matches the text and how much of the
+     * label is matched with the text.<p>
+     * The default is {@link EntityLinkerConfig#DEFAULT_MIN_MATCH_SCORE}
+     * (value: {@value EntityLinkerConfig#DEFAULT_MIN_MATCH_SCORE})
+     * @see #MIN_TEXT_MATCH_FACTOR
+     * @see #MIN_LABEL_MATCH_FACTOR
+     */
+    public static final String MIN_MATCH_FACTOR = "org.apache.stanbol.enhancer.engines.keywordextraction.minTextMatchFactor";
+
+    
     //Search parameters
     /**
      * Used as fallback in case a {@link Token} does not have a {@link PosTag} or 
@@ -191,25 +300,28 @@ public class KeywordLinkingEngine
      * {@link EntitySearcher#lookup(String, Set, java.util.List, String[], Integer)}
      * method
      */
-    public static final String MAX_SEARCH_TOKENS = "org.apache.stanbol.enhancer.engines.keywordextraction.masSearchTokens";
+    public static final String MAX_SEARCH_TOKENS = "org.apache.stanbol.enhancer.engines.keywordextraction.maxSearchTokens";
     /**
-     * The maximum number of {@link Token} searched around a "processable" Token for
+     * The maximum number of {@link Token} searched around a linkable Token for
      * additional search tokens.<p>
      * As an Example in the text section "at the University of Munich a new procedure to"
      * only "Munich" would be classified as {@link Pos#ProperNoun} and considered as
-     * "processible". However for searching it makes sence to use additional Tokens to
+     * linkable. However for searching it makes sence to use additional Tokens to
      * reduce (or correctly rank) the expected high number of results for "Munich".
-     * Because of that "matchable" words suronding the "processable" are considered as
+     * Because of that "matchable" words surrounding the linkable are considered as
      * included for searches.<p>
      * This parameter allows to configure the maximum distance surounding the current
-     * "processable" Token other "processable" tokens can be included in searches.
+     * linkable Token other linkable tokens can be included in searches.
      */
     public static final String MAX_SEARCH_TOKEN_DISTANCE = "org.apache.stanbol.enhancer.engines.keywordextraction.maxSearchTokenDistance";
     
     /**
      * {@link NlpAnnotations#POS_ANNOTATION POS annotations} with a lower
      * confidence than this value will be ignored.
+     * @deprecated Please use the {@link #PARAM_POS_PROBABILITY} of the {@link #PROCESSED_LANGUAGES} to
+     * configure the this property. 
      */
+    @Deprecated
     public static final String MIN_POS_TAG_PROBABILITY = "org.apache.stanbol.enhancer.engines.keywordextraction.minPosTagProbability";
     /**
      * If enabled only {@link Pos#ProperNoun}, {@link Pos#Foreign} and {@link Pos#Acronym} are Matched. If
@@ -223,9 +335,10 @@ public class KeywordLinkingEngine
      * The {@link #DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE default} if this is <code>false</code>
      */
     public static final String PROCESS_ONLY_PROPER_NOUNS_STATE = "org.apache.stanbol.enhancer.engines.keywordextraction.properNounsState";
+    /**
+     * Default for the {@link #PROCESS_ONLY_PROPER_NOUNS_STATE} (false)
+     */
     public static final boolean DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE = false;
-    public static Set<Pos> DEFAULT_PROCESSED_POS_TYPES = TextProcessingConfig.DEFAULT_PROCESSED_POS;
-    public static Set<LexicalCategory> DEFAULT_PROCESSED_LEXICAL_CATEGORIES = TextProcessingConfig.DEFAULT_PROCESSED_LEXICAL_CATEGORIES;
     /**
      * Allows to configure the processed languages by using the syntax supported by {@link LanguageConfiguration}.
      * In addition this engine supports language specific configurations for matched {@link LexicalCategory}
@@ -238,10 +351,30 @@ public class KeywordLinkingEngine
     /*
      * Parameters used for language specific text processing configurations
      */
+    // (1) PHRASE level
+    /**
+     * Allows to configure the processed Chunk type (the default is
+     * <code>cc={@link LexicalCategory#Noun Noun}</code> to process only
+     * Noun Phrases). If set to <code>cc</code> (empty value) processing
+     * of chunks is deactivated.
+     */
+    public static final String PARAM_PHRASE_CATEGORIES = "pc";
+    public static final String PARAM_PHRASE_TAG = "ptag";
+    public static final String PARAM_PHRASE_PROBABILITY = "pprob";
+    public static final String PARAM_LINK_MULTI_MATCHABLE_TOKEN_IN_PHRASE = "lmmtip";
+    //(2) TOKEN level
     public static final String PARAM_LEXICAL_CATEGORIES = "lc";
     public static final String PARAM_POS_TYPES = "pos";
     public static final String PARAM_POS_TAG = "tag";
     public static final String PARAM_POS_PROBABILITY = "prob";
+    /**
+     * Parameter used to configure how to deal with upper case tokens
+     */
+    public static final String PARAM_UPPER_CASE = "uc";
+    /**
+     * Enumeration defining valued for the {@link KeywordLinkingEngine#PARAM_UPPER_CASE} parameter
+     */
+    public static enum UPPER_CASE_MODE {NONE,MATCH,LINK};
     /**
      * Adds the dereference feature (STANBOL-333) also to this engine.
      * This will be replaced by STANBOL-336. 
@@ -642,6 +775,11 @@ public class KeywordLinkingEngine
         //Parse the default text processing configuration
         defaultTextProcessingConfig = new TextProcessingConfig();
         Object value = configuration.get(MIN_POS_TAG_PROBABILITY);
+        if(value != null) {
+            log.warn("The Property '{}' is depracated. Please use the parameter '{}' of the "
+                + "'{}' to configure minimum POS tag probabilities!",
+                new Object[]{MIN_POS_TAG_PROBABILITY,PARAM_POS_PROBABILITY,PROCESSED_LANGUAGES});
+        }
         double minPosTagProb;
         if(value instanceof Number){
             minPosTagProb = ((Number)value).doubleValue();
@@ -673,15 +811,15 @@ public class KeywordLinkingEngine
             properNounState = DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE;
         }
         if(properNounState){
-            defaultTextProcessingConfig.setProcessedLexicalCategories(Collections.EMPTY_SET);
-            defaultTextProcessingConfig.setProcessedPos(DEFAULT_PROCESSED_POS_TYPES);
+            defaultTextProcessingConfig.setLinkedLexicalCategories(Collections.EMPTY_SET);
+            defaultTextProcessingConfig.setLinkedPos(TextProcessingConfig.DEFAULT_LINKED_POS);
             log.debug("> ProperNoun matching activated (matched Pos: {})",
-                defaultTextProcessingConfig.getProcessedPos());
+                defaultTextProcessingConfig.getLinkedPos());
         } else {
-            defaultTextProcessingConfig.setProcessedLexicalCategories(DEFAULT_PROCESSED_LEXICAL_CATEGORIES);
-            defaultTextProcessingConfig.setProcessedPos(Collections.EMPTY_SET);
+            defaultTextProcessingConfig.setLinkedLexicalCategories(TextProcessingConfig.DEFAULT_LINKED_LEXICAL_CATEGORIES);
+            defaultTextProcessingConfig.setLinkedPos(Collections.EMPTY_SET);
             log.debug("> Noun matching activated (matched LexicalCategories: {})",
-                defaultTextProcessingConfig.getProcessedLexicalCategories());
+                defaultTextProcessingConfig.getLinkedLexicalCategories());
         }
         //parse the language configuration
         value = configuration.get(PROCESSED_LANGUAGES);
@@ -695,9 +833,11 @@ public class KeywordLinkingEngine
         }
         languages.setConfiguration(configuration);
         Map<String,String> defaultConfig = languages.getDefaultParameters();
+        //apply the default parameters (parameter set for the '*' or '' (empty) language
         if(!defaultConfig.isEmpty()){
             applyLanguageParameter(defaultTextProcessingConfig,null,defaultConfig);
         }
+        //apply language specific configurations
         for(String lang : languages.getExplicitlyIncluded()){
             TextProcessingConfig tpc = defaultTextProcessingConfig.clone();
             applyLanguageParameter(tpc, lang, languages.getParameters(lang));
@@ -706,37 +846,153 @@ public class KeywordLinkingEngine
     }
 
     private void applyLanguageParameter(TextProcessingConfig tpc, String language, Map<String,String> config) throws ConfigurationException {
+        log.info(" > parse language Configuration for language: {}",
+            language == null ? "default":language);
+        //parse Phrase level configuration
+        Set<LexicalCategory> chunkCats = parseEnumParam(config, PROCESSED_LANGUAGES, language, PARAM_PHRASE_CATEGORIES, LexicalCategory.class);
+        Set<String> chunkTags = parseStringTags(config.get(PARAM_PHRASE_TAG));
+        if(chunkCats.isEmpty() && config.containsKey(PARAM_PHRASE_CATEGORIES) &&
+                chunkTags.isEmpty()){
+            log.info("   + enable ignorePhrase");
+            tpc.setIgnoreChunksState(true);
+            tpc.setProcessedPhraseCategories(Collections.EMPTY_SET);
+        } else {
+            tpc.setIgnoreChunksState(false);
+            if(!chunkCats.isEmpty()){
+                log.info("   + set processable Phrase cat {}",chunkCats);
+                tpc.setProcessedPhraseCategories(chunkCats);
+            } else {
+                log.info("   - use processable Phrase cats {}",tpc.getProcessedPhraseCategories());
+            }
+            if(!chunkTags.isEmpty()) {
+                log.info("   + set processable Phrase tags {}",chunkTags);
+                tpc.setProcessedPhraseTags(chunkTags);
+            } else {
+                log.info("   - use processable Phrase tags {}",tpc.getProcessedPhraseTags());
+            }
+        }
+        Double chunkProb = parseNumber(config, PROCESSED_LANGUAGES, language, PARAM_PHRASE_PROBABILITY, Double.class);
+        if(chunkProb != null || //if explicitly set
+                config.containsKey(PARAM_PHRASE_PROBABILITY)){ //set to empty value (set default)
+            log.info("   + set min ChunkTag probability: {}", chunkProb == null ? "default" : chunkProb);
+            tpc.setMinPhraseAnnotationProbability(chunkProb);
+            tpc.setMinExcludePhraseAnnotationProbability(chunkProb == null ? null : chunkProb/2);
+        } else {
+            log.info("   - use min PhraseTag probability: {}",tpc.getMinPhraseAnnotationProbability());
+        }
+        //link multiple matchable Tokens within Chunks
+        Boolean lmmticState = parseState(config, PARAM_LINK_MULTI_MATCHABLE_TOKEN_IN_PHRASE);
+        if(lmmticState != null){
+            log.info("   + set the link multi matchable tokens in Phrase state to : {}",lmmticState);
+            tpc.setLinkMultiMatchableTokensInChunkState(lmmticState);
+        } else {
+            log.info("   - use the link multi matchable tokens in Phrase state to : {}",tpc.isLinkMultiMatchableTokensInChunk());
+        }
+        
+        //parse Token level configuration
         Set<LexicalCategory> lexCats = parseEnumParam(config, PROCESSED_LANGUAGES, language, PARAM_LEXICAL_CATEGORIES, LexicalCategory.class);
         Set<Pos> pos = parseEnumParam(config, PROCESSED_LANGUAGES, language,PARAM_POS_TYPES, Pos.class);
-        Set<String> tags = parsePosTags(config.get(PARAM_POS_TAG));
-        Double prob = null;
+        Set<String> tags = parseStringTags(config.get(PARAM_POS_TAG));
+        if(config.containsKey(PARAM_LEXICAL_CATEGORIES) ||
+                config.containsKey(PARAM_POS_TYPES) ||
+                config.containsKey(PARAM_POS_TAG)){
+            log.info("   + set Linkable Tokens: cat: {}, pos: {}, tags {}",
+                new Object[]{lexCats,pos,tags});
+            tpc.setLinkedLexicalCategories(lexCats);
+            tpc.setLinkedPos(pos);
+            tpc.setLinkedPosTags(tags);
+        } else {
+            log.info("   - use Linkable Tokens: cat: {}, pos: {}, tags {}",
+                new Object[]{tpc.getLinkedLexicalCategories(),
+                             tpc.getLinkedPos(),
+                             tpc.getLinkedPos()});
+        }
+        //min POS tag probability
+        Double prob = parseNumber(config,PROCESSED_LANGUAGES,language, PARAM_POS_PROBABILITY,Double.class);
+        if(prob != null || //explicitly set
+                config.containsKey(PARAM_POS_PROBABILITY)){ //set to empty value (set default)
+            log.info("   + set minimum POS tag probability: {}", prob == null ? "default" : prob);
+            tpc.setMinPosAnnotationProbability(prob);
+            tpc.setMinExcludePosAnnotationProbability(prob == null ? null : prob/2d);
+        } else {
+            log.info("   - use minimum POS tag probability: {}", tpc.getMinPosAnnotationProbability());
+        }
+        //parse upper case
+        Set<UPPER_CASE_MODE> ucMode = parseEnumParam(config, PROCESSED_LANGUAGES,language,PARAM_UPPER_CASE,UPPER_CASE_MODE.class);
+        if(ucMode.size() > 1){
+            throw new ConfigurationException(PROCESSED_LANGUAGES, "Parameter 'uc' (Upper case mode) MUST NOT be multi valued (langauge: "
+                +(language == null ? "default":language)+", parsed value='"+config.get(PARAM_UPPER_CASE)+"')!");
+        }
+        if(!ucMode.isEmpty()){
+            UPPER_CASE_MODE mode = ucMode.iterator().next();
+            log.info("   + set upper case token mode to {}", mode);
+            switch (mode) {
+                case NONE:
+                    tpc.setMatchUpperCaseTokensState(false);
+                    tpc.setLinkUpperCaseTokensState(false);
+                    break;
+                case MATCH:
+                    tpc.setMatchUpperCaseTokensState(true);
+                    tpc.setLinkUpperCaseTokensState(false);
+                    break;
+                case LINK:
+                    tpc.setMatchUpperCaseTokensState(true);
+                    tpc.setLinkUpperCaseTokensState(true);
+                    break;
+                default:
+                    log.warn("Unsupported {} entry {} -> set defaults",UPPER_CASE_MODE.class.getSimpleName(),mode);
+                    tpc.setMatchUpperCaseTokensState(null);
+                    tpc.setLinkUpperCaseTokensState(null);
+                    break;
+            }
+        } else {
+            log.info("   - use upper case token mode: match={}, link={}", tpc.isMatchUpperCaseTokens(), tpc.isLinkUpperCaseTokens());
+        }
+    }
+
+    private Boolean parseState(Map<String,String> config, String param){
+        String value = config.get(param);
+        return value == null && config.containsKey(param) ? Boolean.TRUE :
+            value != null ? new Boolean(value) : null;
+    }
+    
+    private <T extends Number> T parseNumber(Map<String,String> config, 
+            String property, String language, String param, Class<T> clazz) throws ConfigurationException {
         String paramVal = config.get(PARAM_POS_PROBABILITY);
         if(paramVal != null && !paramVal.trim().isEmpty()){
             try {
-                prob = Double.parseDouble(paramVal.trim());
+                //all Number subclasses do have a String constructor!
+                return clazz.getConstructor(String.class).newInstance(paramVal.trim());
             } catch (NumberFormatException e) {
-                throw new ConfigurationException(PROCESSED_LANGUAGES, "Unable to parse parameter '"
+                throw new ConfigurationException(property, "Unable to parse "
+                    + clazz.getSimpleName()+" from Parameter '"
                     + PARAM_POS_PROBABILITY+"="+paramVal.trim()
                     + "' from the "+(language == null ? "default" : language)
                     + " language configuration", e);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalStateException("Unable to create new "+clazz.getSimpleName()
+                    +"("+paramVal.trim()+"::String)",e);
+            } catch (SecurityException e) {
+                throw new IllegalStateException("Unable to create new "+clazz.getSimpleName()
+                    +"("+paramVal.trim()+"::String)",e);
+            } catch (InstantiationException e) {
+                throw new IllegalStateException("Unable to create new "+clazz.getSimpleName()
+                    +"("+paramVal.trim()+"::String)",e);
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException("Unable to create new "+clazz.getSimpleName()
+                    +"("+paramVal.trim()+"::String)",e);
+            } catch (InvocationTargetException e) {
+                throw new IllegalStateException("Unable to create new "+clazz.getSimpleName()
+                    +"("+paramVal.trim()+"::String)",e);
+            } catch (NoSuchMethodException e) {
+                throw new IllegalStateException("Unable to create new "+clazz.getSimpleName()
+                    +"("+paramVal.trim()+"::String)",e);
             }
         }
-        if(!lexCats.isEmpty() || !pos.isEmpty() || !tags.isEmpty()){
-            log.info(" > use spefic language Configuration for language {}",
-                getClass().getSimpleName(),getName());
-            log.info("   - LexCat: {}",lexCats);
-            log.info("   - Pos: {}",pos);
-            log.info("   - Tags: {}",tags);
-            tpc.setProcessedLexicalCategories(lexCats);
-            tpc.setProcessedPos(pos);
-            tpc.setProcessedPosTags(tags);
-        }
-        if(prob != null){
-            tpc.setMinPosAnnotationProbability(prob);
-            tpc.setMinExcludePosAnnotationProbability(prob/2d);
-        }
+        return null;
     }
-    private Set<String> parsePosTags(String value) {
+    
+    private Set<String> parseStringTags(String value) {
         if(value == null || value.isEmpty()){
             return Collections.EMPTY_SET;
         } else {
@@ -820,6 +1076,7 @@ public class KeywordLinkingEngine
             }
             linkerConfig.setNameField(value.toString());
         }
+        
         //init case sensitivity
         value = configuration.get(CASE_SENSITIVE);
         if(value instanceof Boolean){
@@ -827,6 +1084,7 @@ public class KeywordLinkingEngine
         } else if(value != null && !value.toString().isEmpty()){
             linkerConfig.setCaseSensitiveMatchingState(Boolean.valueOf(value.toString()));
         } //if NULL or empty use default
+        
         //init TYPE_FIELD
         value = configuration.get(TYPE_FIELD);
         if(value != null){
@@ -835,6 +1093,7 @@ public class KeywordLinkingEngine
             }
             linkerConfig.setTypeField(value.toString());
         }
+        
         //init REDIRECT_FIELD
         value = configuration.get(REDIRECT_FIELD);
         if(value != null){
@@ -843,6 +1102,7 @@ public class KeywordLinkingEngine
             }
             linkerConfig.setRedirectField(value.toString());
         }
+        
         //init MAX_SUGGESTIONS
         value = configuration.get(MAX_SUGGESTIONS);
         Integer maxSuggestions;
@@ -863,6 +1123,7 @@ public class KeywordLinkingEngine
             }
             linkerConfig.setMaxSuggestions(maxSuggestions);
         }
+        
         //init MIN_FOUND_TOKENS
         value = configuration.get(MIN_FOUND_TOKENS);
         Integer minFoundTokens;
@@ -883,6 +1144,60 @@ public class KeywordLinkingEngine
             }
             linkerConfig.setMinFoundTokens(minFoundTokens);
         }
+        
+        //init Label Score parameters
+        value = configuration.get(MIN_LABEL_MATCH_FACTOR);
+        Double minLabelMatchFactor = null;
+        if(value instanceof Number){
+            minLabelMatchFactor = Double.valueOf(((Number)value).doubleValue());
+        } else if(value != null){
+            try {
+                minLabelMatchFactor = Double.valueOf(value.toString());
+            } catch (NumberFormatException e) {
+                throw new ConfigurationException(MIN_LABEL_MATCH_FACTOR, "Parsed value '"
+                        +value+"' is not an valid double!");
+            }
+        }
+        try {
+            linkerConfig.setMinLabelScore(minLabelMatchFactor);
+        } catch (IllegalArgumentException e){
+            throw new ConfigurationException(MIN_LABEL_MATCH_FACTOR, e.getMessage());
+        }
+        value = configuration.get(MIN_TEXT_MATCH_FACTOR);
+        Double minTextMatchFactor = null;
+        if(value instanceof Number){
+            minTextMatchFactor = Double.valueOf(((Number)value).doubleValue());
+        } else if(value != null){
+            try {
+                minTextMatchFactor = Double.valueOf(value.toString());
+            } catch (NumberFormatException e) {
+                throw new ConfigurationException(MIN_TEXT_MATCH_FACTOR, "Parsed value '"
+                        +value+"' is not an valid double!");
+            }
+        }
+        try {
+            linkerConfig.setMinTextScore(minTextMatchFactor);
+        } catch (IllegalArgumentException e){
+            throw new ConfigurationException(MIN_TEXT_MATCH_FACTOR, e.getMessage());
+        }
+        value = configuration.get(MIN_MATCH_FACTOR);
+        Double minMatchFactor = null;
+        if(value instanceof Number){
+            minMatchFactor = Double.valueOf(((Number)value).doubleValue());
+        } else if(value != null){
+            try {
+                minMatchFactor = Double.valueOf(value.toString());
+            } catch (NumberFormatException e) {
+                throw new ConfigurationException(MIN_MATCH_FACTOR, "Parsed value '"
+                        +value+"' is not an valid double!");
+            }
+        }
+        try {
+            linkerConfig.setMinMatchScore(minMatchFactor);
+        } catch (IllegalArgumentException e){
+            throw new ConfigurationException(MIN_MATCH_FACTOR, e.getMessage());
+        }
+        
         // init MIN_SEARCH_TOKEN_LENGTH
         value = configuration.get(MIN_SEARCH_TOKEN_LENGTH);
         Integer minSearchTokenLength;
@@ -903,6 +1218,15 @@ public class KeywordLinkingEngine
             }
             linkerConfig.setMinSearchTokenLength(minSearchTokenLength);
         }
+        
+        //init LEMMA_MATCHING_STATE
+        value = configuration.get(LEMMA_MATCHING_STATE);
+        if(value instanceof Boolean){
+            linkerConfig.setLemmaMatchingState((Boolean)value);
+        } else if (value != null){
+            linkerConfig.setLemmaMatchingState(Boolean.parseBoolean(value.toString()));
+        }
+        
         //init MAX_SEARCH_TOKENS
         value = configuration.get(MAX_SEARCH_TOKENS);
         Integer maxSearchTokens;

@@ -19,9 +19,15 @@
  */
 package org.apache.stanbol.enhancer.engines.keywordextraction.impl;
 
+import static org.apache.stanbol.enhancer.engines.keywordextraction.impl.LabelMatch.DEFAULT_LABEL_TOKEN_COMPARATOR;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
+import org.apache.stanbol.enhancer.engines.keywordextraction.impl.Suggestion.MATCH;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntitySearcher;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
@@ -38,24 +44,19 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
  * @author Rupert Westenthaler
  *
  */
-public class Suggestion implements Comparable<Suggestion>{
-    private MATCH match = MATCH.NONE;
-    private int start = 0;
-    private int span = 0;
-    private int matchCount = 0;
-    private Text label;
-    private int labelTokenCount = 0;
+public class Suggestion {
+    
+    private List<LabelMatch> labelMatches = new ArrayList<LabelMatch>();
+    private boolean labelMatchesSorted = true;
     private final Representation result;
     private Representation redirectsTo;
     private boolean redirectProcessed;
-    
     private double score;
     /**
-     * The score of the matches (e.g. when a match is based on stemming or some
-     * oder kind of fuzziness, than matchers might assign a match score than
-     * 1.0.
+     * used to allow overriding the MATCH of this suggestion
      */
-    private float matchScore;
+    private MATCH match;
+    
     public static enum MATCH {
         /**
          * No match (to less tokens, wrong oder ...)
@@ -85,128 +86,19 @@ public class Suggestion implements Comparable<Suggestion>{
 //        this.resultScore = result.getFirst(RdfResourceEnum.resultScore.getUri(), Float.class);
     }
     /**
-     * Updates this suggestion 
-     * @param match the math type
-     * @param start the start position of this suggestion
-     * @param span the number of token this suggestion spans
-     * @param count the number of token that match with the suggestion within the span
-     * @param matchScore the score of the match. MUST BE in the range between 
-     * <code>[0..1]</code>. For {@link MATCH#EXACT} and {@link MATCH#NONE} this
-     * parameter is ignored and the value is set to <code>1</code>, <code>0</code>
-     * respectively.
-     * @param label the label that matches the tokens
-     * @param labelTokenCount the number of tokens of the label
+     * Adds an new LabelMatch to this suggestion
+     * @param labelMatch the labelMatch
      */
-    protected void updateMatch(MATCH match,int start, int span,int count,float matchScore,Text label,int labelTokenCount){
-        this.match = match;
-        //check the validity of the parameters to avoid later errors that are
-        //than hard to debug
-        if(match == MATCH.NONE){
-            this.span = 0;
-            this.matchCount = 0;
-            this.matchScore = 0f;
-            this.label = null;
-        } else {
-            if(span < 1 || count < 1){
-                throw new IllegalArgumentException("For "+match+" matches the token span and count MUST BE > 0");
-            }
-            if(match == MATCH.PARTIAL){
-                if(span <= count && labelTokenCount <= count){
-                    throw new IllegalArgumentException("For "+match+" matches the (token span OR label token count) MUST BE > than the token count!");
-                }
-            } else {
-                if(span != count){
-                    throw new IllegalArgumentException("For "+match+" matches the token span '"
-                            +span+"' MUST BE equals to the token count '"+count+"' (label: '"
-                            +label.getText()+"')!");
-                }
-            }
+    public void addLabelMatch(LabelMatch labelMatch){
+        if(labelMatch == null || labelMatch.getMatch() == MATCH.NONE){
+            return; //ignore null an MATCH.NONE entries
         }
-        this.start = start;
-        this.span = span;
-        this.label = label;
-        if(match == MATCH.EXACT){ //for exact matches the matchScore needs to be
-            this.matchScore = 1f; // ignored and set to 1.0f
-            this.matchCount = span; //and the match count needs to be equals to the span
-            this.labelTokenCount = span;
-        } else {
-            if(matchScore > 1f){
-                throw new IllegalArgumentException("The matchScore MUST NOT be greater than one (parsed value = "+matchScore+")");
-            }
-            this.matchScore = matchScore;
-            this.matchCount = count;
-            this.labelTokenCount = labelTokenCount;
+        labelMatches.add(labelMatch);
+        if(labelMatches.size() > 1){
+            labelMatchesSorted = false;
         }
     }
-    /**
-     * Getter for the number of Tokens of the label. Usually needed to calculate
-     * the score (how good the label matches)
-     * @return the labelTokenCount
-     */
-    public final int getLabelTokenCount() {
-        return labelTokenCount;
-    }
-    /**
-     * Setter for the {@link MATCH} type of this suggestion
-     * @param match the match type
-     */
-    protected void setMatch(MATCH match) {
-        this.match = match;
-    }
-
-    /**
-     * Getter for the the type of the match
-     * @return The type of the match
-     */
-    public final MATCH getMatch() {
-        return match;
-    }
-    /**
-     * Getter for the matching score. This is a modifier in the range
-     * between [0..1] that tells about the quality of the matches for the
-     * {@link #getMatchCount() matched} tokens. <p>
-     * As an example if a match is based on stemming a word a label matcher
-     * implementation might want to assign a matching score below <code>1</code>.
-     * Score calculations that use the {@link #getMatchCount()} should use
-     * <code>{@link #getMatchCount()} * {@link #getMatchScore()}</code> as a
-     * bases.
-     * @return the matchScore
-     */
-    public final float getMatchScore() {
-        return matchScore;
-    }
-    /**
-     * Getter for the start index of this Suggestion
-     * @return the start token index for this suggestion
-     */
-    public int getStart() {
-        return start;
-    }
-    /**
-     * Getter for the number of the token matched by this suggestion
-     * @return The number of the token matched by this suggestion
-     */
-    public final int getSpan() {
-        return span;
-    }
-    /**
-     * Getter for the he number of matching tokens.
-     * @return The number of matching tokens.
-     */
-    public final int getMatchCount(){
-        return matchCount;
-    }
-    /**
-     * The actual label of the {@link #getResult() result} that produced the
-     * based match for the given search tokens.
-     * @return the label
-     */
-    public final Text getMatchedLabel() {
-        return label;
-    }
-    protected final void setMatchedLabel(Text label){
-        this.label = label;
-    }
+    
     /**
      * Getter for the best label in the given language
      * @param suggestion the suggestion
@@ -218,14 +110,15 @@ public class Suggestion implements Comparable<Suggestion>{
         Representation rep = getRepresentation();
         //start with the matched label -> so if we do not find a better one
         //we will use the matched!
-        Text label = this.label;
+        Text matchedLabel = getMatchedLabel();
+        Text label = matchedLabel;
         // 1. check if the returned Entity does has a label -> if not return null
         // add labels (set only a single label. Use "en" if available!
         Iterator<Text> labels = rep.getText(nameField);
         boolean matchFound = false;
         while (labels.hasNext() && !matchFound) {
             Text actLabel = labels.next();
-            if (label == null) { //take any label at first
+            if(label == null){
                 label = actLabel;
             }
             //now we have already a label check the language
@@ -234,25 +127,38 @@ public class Suggestion implements Comparable<Suggestion>{
             if (actLang != null && actLang.startsWith(language)) {
                 //prefer labels with the correct language
                 label = actLabel;
-                if(this.label.getText().equalsIgnoreCase(label.getText())){
+                if(matchedLabel != null && matchedLabel.getText().equalsIgnoreCase(label.getText())){
                     //found label in that language that exactly matches the
                     //label used to match the text
                     matchFound = true; 
                 }
             }
         }
-        if (label == null) { //if no label was found ... return the one used for the match
-            label = getMatchedLabel();
-        }
         return label;
 
     }
+
+    /**
+     * Shorthand for {@link #getLabelMatch()}.getMatchedLabel()
+     * @return the label or <code>null</code> if {@link MATCH#NONE}
+     */
+    public Text getMatchedLabel() {
+        return getLabelMatch().getMatchedLabel();
+    }
+    protected void setMatch(MATCH matchType) {
+        this.match = matchType;
+    }
+    /**
+     * Getter for the {@link MATCH}. If not manually set
+     * this forwards to {@link #getLabelMatch()}.getMatch()
+     * @return the {@link MATCH} of this suggestion
+     */
+    public MATCH getMatch() {
+        return match != null ? match : getLabelMatch().getMatch();
+    }
+
     public final Representation getResult(){
         return result;
-    }
-    @Override
-    public String toString() {
-        return label+"[m="+match+(match != MATCH.NONE ? ",c="+matchCount+",s="+span+']':"]");
     }
     /**
      * The {@link RdfResourceEnum#entityRank entity rank} of the {@link #getResult() result}.
@@ -334,35 +240,44 @@ public class Suggestion implements Comparable<Suggestion>{
     public final Representation getRepresentation(){
         return redirectsTo == null ? result : redirectsTo;
     }
-    
     /**
-     * Compares {@link Suggestion} first based on the {@link Suggestion#getMatch()} value
-     * and secondly based on the {@link RdfResourceEnum#entityRank}.
+     * Getter for the top ranked LabelMatch.
+     * @return the top ranked {@link LabelMatch} or {@link LabelMatch#NONE}
+     * if no match is present.
      */
-    public static final Comparator<Suggestion> MATCH_TYPE_SUGGESTION_COMPARATOR = new Comparator<Suggestion>() {
-        @Override
-        public int compare(Suggestion arg0, Suggestion arg1) {
-            if(arg0.match != arg1.match){
-                return arg1.match.ordinal() - arg0.match.ordinal(); //higher ordinal first
-            } else if(arg0.match == MATCH.NONE){
-                return 0; //do not further sort entries that do not match
-            } else {
-                Float arg0Rank = arg0.getEntityRank();
-                if(arg0Rank == null){
-                    arg0Rank = Float.valueOf(0);
-                }
-                Float arg1Rank = arg1.getEntityRank();
-                if(arg1Rank == null){
-                    arg1Rank = Float.valueOf(0);
-                }
-                return arg1Rank.compareTo(arg0Rank); //higher ranks first
-            }
+    public final LabelMatch getLabelMatch(){
+        if(!labelMatchesSorted){
+            Collections.sort(labelMatches, LabelMatch.DEFAULT_LABEL_TOKEN_COMPARATOR);
         }
-    };
+        return labelMatches.isEmpty() ? LabelMatch.NONE : labelMatches.get(0);
+    }
+    /**
+     * Getter for the sorted list with all {@link LabelMatch}s of this Suggestion
+     * @return the sorted LabelMatches. Guaranteed NOT <code>null</code> and
+     * NOT empty. In case no match is present a singleton list containing
+     * {@link LabelMatch#NONE} is returned.
+     */
+    public final List<LabelMatch> getLabelMatches(){
+        if(!labelMatchesSorted){
+            Collections.sort(labelMatches, LabelMatch.DEFAULT_LABEL_TOKEN_COMPARATOR);
+        }
+        if(labelMatches.isEmpty()){
+            return Collections.singletonList(LabelMatch.NONE);
+        } else {
+            return labelMatches;
+        }
+    }
+    @Override
+    public String toString() {
+        return labelMatches.isEmpty() ? "no match" :labelMatches.get(0)
+                + " for "+result.getId()
+                +(redirectsTo != null ? " redirected to "+redirectsTo.getId() : "");
+    }
+
     /**
      * Compares {@link Suggestion}s based on the {@link Suggestion#getScore()}.
      * In case the scores are equals the call is forwarded to the
-     * {@link Suggestion#DEFAULT_SUGGESTION_COMPARATOR}.<p>
+     * {@link Suggestion#DEFAULT_LABEL_TOKEN_COMPARATOR}.<p>
      * This is NOT the default {@link Comparator} because score values are
      * usually only calculated relative to the best matching suggestions and
      * therefore only available later.
@@ -372,32 +287,32 @@ public class Suggestion implements Comparable<Suggestion>{
         public int compare(Suggestion arg0, Suggestion arg1) {
             return arg0.getScore() > arg1.getScore() ? -1 : //bigger score first
                 arg0.getScore() < arg1.getScore() ? 1 : 
-                    DEFAULT_SUGGESTION_COMPARATOR.compare(arg0, arg1);
+                    DEFAULT_LABEL_TOKEN_COMPARATOR.compare(arg0.getLabelMatch(), arg1.getLabelMatch());
         }
     };
     /**
-     * Compares {@link Suggestion} first based on the {@link Suggestion#getMatchCount()} 
-     * number of matched tokens. If the number of the matched tokens is equals or
-     * any of the parsed {@link Suggestion} instances has {@link MATCH#NONE} it
-     * forwards the request to the {@link #MATCH_TYPE_SUGGESTION_COMPARATOR}.
+     * Compares {@link Suggestion} first based on the {@link Suggestion#getMatch()} value
+     * and secondly based on the {@link RdfResourceEnum#entityRank}.
      */
-    public static final Comparator<Suggestion> DEFAULT_SUGGESTION_COMPARATOR = new Comparator<Suggestion>() {
+    public static final Comparator<Suggestion> MATCH_TYPE_SUGGESTION_COMPARATOR = new Comparator<Suggestion>() {
         @Override
         public int compare(Suggestion arg0, Suggestion arg1) {
-            if(arg0.match == MATCH.NONE || arg1.match == MATCH.NONE ||
-                    arg0.matchCount == arg1.matchCount){
-                return MATCH_TYPE_SUGGESTION_COMPARATOR.compare(arg0, arg1);
+            int labelMatch = DEFAULT_LABEL_TOKEN_COMPARATOR.compare(arg0.getLabelMatch(), arg1.getLabelMatch());
+            if(labelMatch == 0){
+                Float arg0Rank = arg0.getEntityRank();
+                if(arg0Rank == null){
+                    arg0Rank = Float.valueOf(0);
+                }
+                Float arg1Rank = arg1.getEntityRank();
+                if(arg1Rank == null){
+                    arg1Rank = Float.valueOf(0);
+                }
+                return arg1Rank.compareTo(arg0Rank); //higher ranks first
             } else {
-                return arg1.matchCount - arg0.matchCount; //bigger should be first
+                return labelMatch;
             }
         }
     };
-    /**
-     * Implementation of the {@link Comparable} interface using
-     * {@link #MATCH_TYPE_SUGGESTION_COMPARATOR}.
-     */
-    @Override
-    public int compareTo(Suggestion other) {
-        return DEFAULT_SUGGESTION_COMPARATOR.compare(this, other);
-    }
+
+    
 }
