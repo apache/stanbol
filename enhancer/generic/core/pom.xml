@@ -39,12 +39,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/generic/core/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/core/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/generic/core/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/core/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
@@ -55,13 +55,18 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              *
+            </Import-Package>
             <Export-Package>
               org.apache.stanbol.enhancer.contentitem.inmemory;version=${project.version},
               org.apache.stanbol.enhancer.contentitem.file;version=${project.version}
             </Export-Package>
             <Private-Package>
-              org.apache.stanbol.enhancer.chainmanager.impl;version=${project.version},
-              org.apache.stanbol.enhancer.enginemanager.impl;version=${project.version}
+              org.apache.stanbol.enhancer.chainmanager.impl,
+              org.apache.stanbol.enhancer.enginemanager.impl
             </Private-Package>
           </instructions>
         </configuration>

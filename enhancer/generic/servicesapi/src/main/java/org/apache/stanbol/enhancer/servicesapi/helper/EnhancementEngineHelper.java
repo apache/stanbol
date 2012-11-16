@@ -16,11 +16,13 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.helper;
 
+import static java.util.Collections.singleton;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -35,6 +37,7 @@ import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.TypedLiteral;
@@ -205,6 +208,23 @@ public class EnhancementEngineHelper {
         return enhancement;
     }
     /**
+     * Adds the parsed {@link EnhancementEngine} as dc:contributer to the
+     * enhancement and also sets the dc:modified property accordingly
+     * @param metadata the {@link ContentItem#getMetadata()}
+     * @param enhancement the enhancement
+     * @param engine the engine
+     */
+    public static void addContributingEngine(MGraph metadata, UriRef enhancement,
+                                             EnhancementEngine engine){
+        LiteralFactory literalFactory = LiteralFactory.getInstance();
+        // TODO: use a public dereferencing URI instead?
+        metadata.add(new TripleImpl(enhancement, Properties.DC_CONTRIBUTOR,
+            literalFactory.createTypedLiteral(engine.getClass().getName())));
+        //set the modification date to the current date.
+        set(metadata,enhancement,Properties.DC_MODIFIED,new Date(),literalFactory);
+    }
+    
+    /**
      * Create a new extraction instance in the metadata-graph of the content
      * item along with default properties (dc:creator and dc:created) and return
      * the UriRef of the extraction so that engines can further add
@@ -287,6 +307,76 @@ public class EnhancementEngineHelper {
             return null;
         }
     }
+    /**
+     * Replaces all current values of the property for the resource
+     * with the parsed value
+     * @param graph the graph
+     * @param resource the resource
+     * @param property the property
+     * @param value the value
+     */
+    public static void set(MGraph graph, NonLiteral resource, UriRef property, Resource value){
+        set(graph,resource,property,value == null ? null : singleton(value),null);
+    }
+    /**
+     * Replaces all current values of the property for the resource
+     * with the parsed values
+     * @param graph the graph
+     * @param resource the resource
+     * @param property the property
+     * @param value the value
+     */
+    public static void set(MGraph graph, NonLiteral resource, UriRef property, Collection<Resource> values){
+        set(graph,resource,property,values,null);
+    }
+
+    /**
+     * Replaces all current values of the property for the resource
+     * with the parsed value
+     * @param graph the graph
+     * @param resource the resource
+     * @param property the property
+     * @param value the value. In case it is an instance of {@link Resource} it
+     * is directly added to the graph. Otherwise the parsed {@link LiteralFactory}
+     * is used to create a {@link TypedLiteral} for the parsed value.
+     * @param literalFactory the {@link LiteralFactory} used in case the parsed
+     * value is not an {@link Resource}
+     */
+    public static void set(MGraph graph, NonLiteral resource, UriRef property,
+                           Object value, LiteralFactory literalFactory){
+        set(graph,resource,property,value == null ? null : singleton(value),literalFactory);
+    }
+    /**
+     * Replaces all current values of the property for the resource
+     * with the parsed values
+     * @param graph the graph
+     * @param resource the resource
+     * @param property the property
+     * @param value the value. In case it is an instance of {@link Resource} it
+     * is directly added to the graph. Otherwise the parsed {@link LiteralFactory}
+     * is used to create a {@link TypedLiteral} for the parsed value.
+     * @param literalFactory the {@link LiteralFactory} used in case the parsed
+     * value is not an {@link Resource}
+     */
+    public static void set(MGraph graph, NonLiteral resource, UriRef property,
+                               Collection<?> values, LiteralFactory literalFactory){
+        Iterator<Triple> currentValues = graph.filter(resource, property, null);
+        while(currentValues.hasNext()){
+            currentValues.next();
+            currentValues.remove();
+        }
+        if(values != null){
+            for(Object value : values){
+                if(value instanceof Resource){
+                    graph.add(new TripleImpl(resource, property, (Resource) value));
+                } else if (value != null){
+                    graph.add(new TripleImpl(resource, property, 
+                        literalFactory.createTypedLiteral(value)));
+                }
+            }
+        }
+    }
+    
     /**
      * Getter for the typed literal values of the property for a resource
      * @param <T> the java class the literal value needs to be converted to.
