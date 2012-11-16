@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.opennlp.impl;
 
+import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.NER_ANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
@@ -54,11 +55,15 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
+import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
+import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Section;
 import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Token;
+import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
+import org.apache.stanbol.enhancer.nlp.ner.NerTag;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -89,6 +94,7 @@ public abstract class NEREngineCore
     protected OpenNLP openNLP;
     
     protected NEREngineConfig config;
+    
     
     /** Comments about our models */
     public static final Map<String, String> DATA_FILE_COMMENTS;
@@ -486,18 +492,22 @@ public abstract class NEREngineCore
                 for (int k = nameSpans[j].getStart(); k < nameSpans[j].getEnd(); k++) {
                     confidence *= probs[k];
                 }
-                int absoluteStart = tokens.get(nameSpans[j].getStart()).getStart();
-                int absoluteEnd = absoluteStart + name.length();
-                UriRef mappedType = config.getMappedType(nameSpans[j].getType());
-                NameOccurrence occurrence = new NameOccurrence(name, absoluteStart, absoluteEnd, 
-                    mappedType, context, confidence);
-
+                int start = tokens.get(nameSpans[j].getStart()).getStart();
+                int end = start + name.length();
+                NerTag nerTag = config.getNerTag(nameSpans[j].getType());
+                //create the occurrence for writing fise:TextAnnotations
+                NameOccurrence occurrence = new NameOccurrence(name, start, end, nerTag.getType(),
+                    context, confidence);
                 List<NameOccurrence> occurrences = nameOccurrences.get(name);
                 if (occurrences == null) {
                     occurrences = new ArrayList<NameOccurrence>();
                 }
                 occurrences.add(occurrence);
                 nameOccurrences.put(name, occurrences);
+                //add also the NerAnnotation to the AnalysedText
+                Chunk chunk = at.addChunk(start, end);
+                //TODO: build AnnotationModel based on the configured Mappings
+                chunk.addAnnotation(NER_ANNOTATION, Value.value(nerTag, confidence));
             }
         }
         finder.clearAdaptiveData();
@@ -553,9 +563,9 @@ public abstract class NEREngineCore
                 int start = tokenSpans[nameSpans[j].getStart()].getStart();
                 int absoluteStart = sentenceSpans[i].getStart() + start;
                 int absoluteEnd = absoluteStart + name.length();
-                UriRef mappedType = config.getMappedType(nameSpans[j].getType());
+                NerTag nerTag = config.getNerTag(nameSpans[j].getType());
                 NameOccurrence occurrence = new NameOccurrence(name, absoluteStart, absoluteEnd, 
-                    mappedType, context, confidence);
+                    nerTag.getType(),context, confidence);
 
                 List<NameOccurrence> occurrences = nameOccurrences.get(name);
                 if (occurrences == null) {
