@@ -90,8 +90,9 @@ public class TagSet<T extends Tag<T>> implements Iterable<T>{
         return languages;
     }
     /**
-     * Adds an PosTag 
-     * @param tag
+     * Adds an PosTag. This will replace any existing
+     * Tag with the same {@link Tag#getTag()} value! 
+     * @param tag the tag to add to this TagSet
      */
     public void addTag(T tag){
         if(tag != null){
@@ -100,7 +101,10 @@ public class TagSet<T extends Tag<T>> implements Iterable<T>{
                     + "because it is already assigned to "+tag.getAnnotationModel());
             }
             tag.setAnnotationModel(this);
-            tag2PosTag.put(tag.getTag(), tag);
+            T oldTag = tag2PosTag.put(tag.getTag(), tag);
+            if(oldTag != null && this.equals(oldTag.getAnnotationModel())){
+                oldTag.setAnnotationModel(null);
+            }
         }
     }
     

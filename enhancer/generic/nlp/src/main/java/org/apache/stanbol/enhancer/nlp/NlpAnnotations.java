@@ -11,6 +11,7 @@ import org.apache.stanbol.enhancer.nlp.morpho.NumberTag;
 import org.apache.stanbol.enhancer.nlp.morpho.PersonTag;
 import org.apache.stanbol.enhancer.nlp.morpho.TenseTag;
 import org.apache.stanbol.enhancer.nlp.morpho.VerbMoodTag;
+import org.apache.stanbol.enhancer.nlp.ner.NerTag;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 
@@ -25,7 +26,11 @@ public interface NlpAnnotations {
      */
     Annotation<String,PosTag> POS_ANNOTATION = new Annotation<String,PosTag>(
             "stanbol.enhancer.nlp.pos", PosTag.class);
-    
+    /**
+     * 
+     */
+    Annotation<String,NerTag> NER_ANNOTATION = new Annotation<String,NerTag>(
+            "stanbol.enhancer.nlp.ner", NerTag.class);
     
     /**
      * The Phrase {@link Annotation} added by chunker to a group of

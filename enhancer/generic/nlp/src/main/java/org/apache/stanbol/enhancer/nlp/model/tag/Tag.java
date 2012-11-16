@@ -42,7 +42,7 @@ public abstract class Tag<T extends Tag<T>> { //lol ??!! is that how to define T
     
     @Override
     public String toString() {
-        return String.format("{} %s ", getClass().getSimpleName(), tag);
+        return String.format("%s %s ", getClass().getSimpleName(), tag);
     }
     
     @Override
