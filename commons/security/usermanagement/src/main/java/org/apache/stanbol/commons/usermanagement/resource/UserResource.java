@@ -33,9 +33,11 @@ import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.LockableMGraph;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
@@ -195,6 +197,8 @@ public class UserResource {
 		systemGraph.addAll(assertedGraph);
 	}
 	
+
+	
 	/** 
 	 * Endpoint-style user creation
 	 * takes a little bunch of Turtle
@@ -207,35 +211,21 @@ public class UserResource {
 	@Path("add-user")
 	public Response addUser(String userData) {
 		
-		System.out.println("addUser called with "+userData);
+		// System.out.println("addUser called with "+userData);
 		
-		Graph inputGraph;
-		
-		try {
-			inputGraph = parser.parse(new ByteArrayInputStream(
-					userData.getBytes("utf-8")), "text/turtle");
-		} catch (IOException ex) {
-			log.error("parsing error with userData", ex);
-			throw new WebApplicationException(ex, 500);
-		}
+		Graph inputGraph = readData(userData);
 		
 		// TODO validate - check it's a user addition here
 		
-		System.out.println("inputGraph.size() = "+inputGraph.size());
-		
-		Object[] stuff = inputGraph.toArray();
-		for(int i=0;i<stuff.length;i++){
-			System.out.println("as array - "+stuff[i]);
-		}
-		Iterator<Triple> agents = inputGraph.filter(null, FOAF.Agent, null);
+		Iterator<Triple> agents = inputGraph.filter(null, null, FOAF.Agent);
 		
 		while(agents.hasNext()){
 			NonLiteral userNode = agents.next().getSubject();
 			Iterator<Triple> userTriples = inputGraph.filter(userNode, null, null);
-			System.out.println("userTriples : "+userTriples);
+			// System.out.println("userTriples : "+userTriples);
 			while(userTriples.hasNext()){
 				Triple userTriple = userTriples.next();
-				System.out.println("triple : "+userTriple);
+				// System.out.println("triple : "+userTriple);
 				systemGraph.add(userTriple);
 			}
 		}	
@@ -251,12 +241,49 @@ public class UserResource {
 	@POST
 	@Consumes("text/turtle")
 	@Path("change-user")
-	public Response changeUser(String data){
+	public Response changeUser(String userData){
 		ResponseBuilder responseBuilder = Response.noContent();
 		
-		// might want to echo accepted data
-		// responseBuilder.entity("dummy");
-		// responseBuilder.type("text/turtle");
+		Graph inputGraph = readData(userData);
+		
+		Iterator<Triple> changes = inputGraph.filter(null, null, new UriRef("http://purl.org/stuff/usermanagement#Change"));
+		
+		while(changes.hasNext()){
+			Triple changeTriple = changes.next();
+			
+			NonLiteral changeNode = changeTriple.getSubject();
+			
+			// need to create the predicateUriRef from the Resource, but this didn't work... other methods?
+			// Resource predicate = inputGraph.filter(changeNode, new UriRef("http://purl.org/stuff/usermanagement#predicate"), null).next().getObject();
+			// UriRef predicateUriRef = new UriRef(predicate.toString());
+			
+			// System.out.println("predicateUriRef = "+predicateUriRef);
+			
+			UriRef predicateUriRef = new UriRef("http://clerezza.org/2009/08/platform#userName");
+			
+			Resource oldValue = inputGraph.filter(changeNode, new UriRef("http://purl.org/stuff/usermanagement#oldValue"), null).next().getObject();
+			
+			Resource newValue = inputGraph.filter(changeNode, new UriRef("http://purl.org/stuff/usermanagement#newValue"), null).next().getObject();
+			
+			Triple oldTriple = systemGraph.filter(null, predicateUriRef, oldValue).next();
+			Triple newTriple = new TripleImpl(oldTriple.getSubject(), predicateUriRef, newValue);
+			
+			System.out
+			.println("BEFORE ========================================================");
+	serializer.serialize(System.out, systemGraph,
+			SupportedFormat.TURTLE);
+	
+			systemGraph.remove(oldTriple);
+			systemGraph.add(newTriple);
+			
+			System.out
+			.println("AFTER ========================================================");
+	serializer.serialize(System.out, systemGraph,
+			SupportedFormat.TURTLE);
+		}
+		
+	//	Iterator<Triple> agents = inputGraph.filter(null, null, FOAF.Agent);
+		// TODO validate - check it's a user addition here
 		responseBuilder.type("text/turtle");
 		return responseBuilder.build();
 	}
@@ -277,13 +304,39 @@ public class UserResource {
 		serializer.serialize(baos, getUser(userName).getGraph(),
 				SupportedFormat.TURTLE);
 		String serialized = new String(baos.toByteArray(), "utf-8");
-		System.out.println("User = "+serialized);
+		// System.out.println("User = "+serialized);
 		return Response.ok(serialized).build();
 	}
 	
 	// ///////////////////////////////////////////////////////////////////////
 	// helper methods
 
+	/**
+	 * Read string into graph
+	 * 
+	 * @param data Turtle string
+	 * @return graph from Turtle
+	 */
+	private Graph readData(String data) {
+		
+		Graph inputGraph;
+		
+		try {
+			inputGraph = parser.parse(new ByteArrayInputStream(
+					data.getBytes("utf-8")), "text/turtle");
+		} catch (IOException ex) {
+			log.error("parsing error with userData", ex);
+			throw new WebApplicationException(ex, 500);
+		}
+//		System.out.println("inputGraph.size() = "+inputGraph.size());
+//		
+//		Object[] stuff = inputGraph.toArray();
+//		for(int i=0;i<stuff.length;i++){
+//			System.out.println("as array - "+stuff[i]);
+//		}
+		return inputGraph;
+	}
+	
 	private GraphNode getUser(@QueryParam("userName") String userName) {
 		Iterator<Triple> iter = systemGraph.filter(null, PLATFORM.userName,
 				new PlainLiteralImpl(userName));
