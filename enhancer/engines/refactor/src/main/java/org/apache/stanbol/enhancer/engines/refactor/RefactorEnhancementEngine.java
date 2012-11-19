@@ -71,7 +71,7 @@ import org.apache.stanbol.ontologymanager.servicesapi.session.SessionLimitExcept
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.ontologymanager.sources.clerezza.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.sources.clerezza.GraphSource;
-import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.apache.stanbol.rules.base.api.AlreadyExistingRecipeException;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
@@ -480,7 +480,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
                 }
                 try {
                     // TODO replace with a Clerezza equivalent
-                    ontologySpace.addOntology(new RootOntologyIRISource(physicalIRI, sharedManager));
+                    ontologySpace.addOntology(new RootOntologySource(physicalIRI, sharedManager));
                     success.add(url);
                 } catch (OWLOntologyCreationException e) {
                     log.error("Failed to load ontology from physical location " + physicalIRI

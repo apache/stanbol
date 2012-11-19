@@ -101,7 +101,7 @@ import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.sources.clerezza.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.sources.owlapi.OntologyContentInputSource;
-import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.apache.stanbol.ontologymanager.web.util.OntologyPrettyPrintResource;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
@@ -579,7 +579,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
     public Response manageOntology(String iri, @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
         try {
-            session.addOntology(new RootOntologyIRISource(IRI.create(iri)));
+            session.addOntology(new RootOntologySource(IRI.create(iri)));
         } catch (UnmodifiableOntologyCollectorException e) {
             throw new WebApplicationException(e, FORBIDDEN);
         } catch (OWLOntologyCreationException e) {
@@ -666,7 +666,8 @@ public class SessionResource extends AbstractOntologyAccessResource {
                         log.debug("Creating ontology input source...");
                         b4buf = System.currentTimeMillis();
                         OWLOntologyID guessed = OWLUtils.guessOntologyID(content, Parser.getInstance(), f);
-                        if (ontologyProvider.hasOntology(guessed)) {
+                        if (guessed != null && !guessed.isAnonymous()
+                            && ontologyProvider.hasOntology(guessed)) {
                             rb = Response.status(Status.CONFLICT);
                             this.submitted = guessed;
                             if (headers.getAcceptableMediaTypes().contains(MediaType.TEXT_HTML_TYPE)) {
@@ -675,7 +676,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
                             }
                         } else {
                             content = new BufferedInputStream(new FileInputStream(file));
-                            src = new GraphContentInputSource(content, format, ontologyProvider.getStore());
+                            src = new GraphContentInputSource(content, f, ontologyProvider.getStore());
                         }
                         log.debug("Done in {} ms", System.currentTimeMillis() - b4buf);
                         log.info("SUCCESS parse with format {}.", f);
@@ -690,7 +691,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
                 log.debug("No more formats to try.");
             } else if (location != null) {
                 try {
-                    src = new RootOntologyIRISource(location);
+                    src = new RootOntologySource(location);
                 } catch (Exception e) {
                     log.error("Failed to load ontology from " + location, e);
                     throw new WebApplicationException(e, BAD_REQUEST);

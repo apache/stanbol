@@ -56,7 +56,7 @@ import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyNetworkConfigurationUtils;
 import org.apache.stanbol.ontologymanager.sources.owlapi.BlankOntologySource;
-import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.io.FileDocumentSource;
 import org.semanticweb.owlapi.io.IRIDocumentSource;
@@ -363,7 +363,7 @@ public class ScopeManagerImpl extends ScopeRegistryImpl implements ONManager {
                     corespc.tearDown();
                     for (int i = 0; i < cores.length; i++)
                         try {
-                            corespc.addOntology(new RootOntologyIRISource(IRI.create(cores[i])));
+                            corespc.addOntology(new RootOntologySource(IRI.create(cores[i])));
                         } catch (Exception ex) {
                             log.warn("Failed to import ontology " + cores[i], ex);
                             continue;
@@ -375,7 +375,7 @@ public class ScopeManagerImpl extends ScopeRegistryImpl implements ONManager {
                 sc.getCustomSpace().tearDown();
                 for (String locationIri : customs) {
                     try {
-                        OntologyInputSource<?> src = new RootOntologyIRISource(IRI.create(locationIri));
+                        OntologyInputSource<?> src = new RootOntologySource(IRI.create(locationIri));
                         sc.getCustomSpace().addOntology(src);
                         log.debug("Added ontology from location {}", locationIri);
                     } catch (UnmodifiableOntologyCollectorException e) {

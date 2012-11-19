@@ -30,6 +30,7 @@ import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
@@ -42,7 +43,6 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,9 +50,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -83,9 +84,11 @@ import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
@@ -104,7 +107,6 @@ import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.sources.clerezza.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.sources.clerezza.GraphSource;
-import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.apache.stanbol.ontologymanager.web.util.OntologyPrettyPrintResource;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
@@ -593,8 +595,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         ResponseBuilder rb;
         if (scope == null) rb = Response.status(NOT_FOUND);
         else try {
-            OWLOntologyID key = scope.getCustomSpace()
-                    .addOntology(new RootOntologyIRISource(IRI.create(iri)));
+            OWLOntologyID key = scope.getCustomSpace().addOntology(new RootOntologySource(IRI.create(iri)));
             URI created = getCreatedResource(OntologyUtils.encode(key));
             rb = Response.created(created);
         } catch (UnmodifiableOntologyCollectorException e) {
@@ -653,19 +654,34 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         }
         boolean fileOk = file != null && file.canRead() && file.exists();
         if (fileOk || location != null || library != null) { // File and location take precedence
+
+            // src = new GraphContentInputSource(content, format, ontologyProvider.getStore());
+
             // Then add the file
             OntologyInputSource<?> src = null;
             if (fileOk) {
-                Collection<String> formats;
-                if (format == null || "".equals(format.trim())) formats = OntologyUtils.getPreferredFormats();
-                else formats = Collections.singleton(format);
-
-                for (String f : formats)
+                /*
+                 * Because the ontology provider's load method could fail after only one attempt without
+                 * resetting the stream, we might have to do that ourselves.
+                 */
+                List<String> formats;
+                if (format != null && !format.trim().isEmpty()) formats = Collections.singletonList(format);
+                else // The RESTful API has its own list of preferred formats
+                formats = Arrays.asList(new String[] {RDF_XML, TURTLE, X_TURTLE, N3, N_TRIPLE, OWL_XML,
+                                                      FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON});
+                int unsupported = 0, failed = 0;
+                Iterator<String> itf = formats.iterator();
+                if (!itf.hasNext()) throw new OntologyLoadingException("No suitable format found or defined.");
+                do {
+                    String f = itf.next();
                     try {
-                        // Use a buffered stream that can be reset for multiple attempts.
-                        InputStream content = new BufferedInputStream(new FileInputStream(file));
+                        // Re-instantiate the stream on every attempt
+                        InputStream content = new FileInputStream(file);
+                        // ClerezzaOWLUtils.guessOntologyID(new FileInputStream(file), Parser.getInstance(),
+                        // f);
                         OWLOntologyID guessed = OWLUtils.guessOntologyID(content, Parser.getInstance(), f);
-                        if (ontologyProvider.hasOntology(guessed)) {
+                        if (guessed != null && !guessed.isAnonymous()
+                            && ontologyProvider.hasOntology(guessed)) {
                             rb = Response.status(Status.CONFLICT);
                             this.submitted = guessed;
                             if (headers.getAcceptableMediaTypes().contains(MediaType.TEXT_HTML_TYPE)) {
@@ -674,35 +690,28 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                             }
                             break;
                         } else {
-                            content = new BufferedInputStream(new FileInputStream(file));
-                            src = new GraphContentInputSource(content, format, ontologyProvider.getStore());
-                            break;
+                            content = new FileInputStream(file);
+                            log.debug("Recreated input stream for format {}", f);
+                            src = new GraphContentInputSource(content, f, ontologyProvider.getStore());
                         }
-                    } catch (OntologyLoadingException e) {
-                        // throw new WebApplicationException(e, BAD_REQUEST);
-                        continue;
+                    } catch (UnsupportedFormatException e) {
+                        log.warn(
+                            "POST method failed for media type {}. This should not happen (should fail earlier)",
+                            headers.getMediaType());
+                        // rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
+                        unsupported++;
                     } catch (IOException e) {
-                        // throw new WebApplicationException(e, BAD_REQUEST);
-                        continue;
+                        log.debug(">>> FAILURE format {} (I/O error)", f);
+                        failed++;
+                    } catch (Exception e) { // SAXParseException and others
+                        log.debug(">>> FAILURE format {} (parse error)", f);
+                        failed++;
                     }
-            } else if (location != null) {
-                try {
-                    src = new RootOntologyIRISource(location);
-                } catch (Exception e) {
-                    log.error("Failed to load ontology from " + location, e);
-                    throw new WebApplicationException(e, BAD_REQUEST);
-                }
-            } else if (library != null) { // This comes last, since it will most likely have a value.
-                try {
-                    src = new LibrarySource(library, regMgr);
-                } catch (Exception e) {
-                    log.error("Failed to load ontology library " + library, e);
-                    throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-                }
-            } else {
-                log.error("Bad request");
-                log.error(" file is: {}", file);
-                throw new WebApplicationException(BAD_REQUEST);
+                } while (src == null && itf.hasNext());
+//                if (src == null) {
+//                    if (failed > 0) throw new WebApplicationException(BAD_REQUEST);
+//                    else if (unsupported > 0) throw new WebApplicationException(UNSUPPORTED_MEDIA_TYPE);
+//                }
             }
 
             if (src != null) {
@@ -713,11 +722,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                 OntologyUtils.encode(key);
                 // uri = uri.substring((ontologyProvider.getGraphPrefix() + "::").length());
                 if (uri != null && !uri.isEmpty()) {
-                    rb = Response.seeOther(URI.create("/ontonet/ontology/" + scope.getID() + "/" + uri)/*
-                                                                                                        * getCreatedResource
-                                                                                                        * (
-                                                                                                        * uri)
-                                                                                                        */);
+                    rb = Response.seeOther(URI.create("/ontonet/ontology/" + scope.getID() + "/" + uri));
                 } else rb = Response.ok();
             } else if (rb == null) rb = Response.status(INTERNAL_SERVER_ERROR);
         }
@@ -774,7 +779,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         // Then ontology sources
         if (coreOntologies != null) for (String ont : coreOntologies)
             if (ont != null && !ont.isEmpty()) try {
-                srcs.add(new RootOntologyIRISource(IRI.create(ont)));
+                srcs.add(new RootOntologySource(IRI.create(ont)));
             } catch (Exception e2) {
                 // If this fails too, throw a bad request.
                 throw new WebApplicationException(e2, BAD_REQUEST);

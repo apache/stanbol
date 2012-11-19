@@ -16,13 +16,21 @@
  */
 package org.apache.stanbol.ontologymanager.sources.owlapi;
 
+import static org.apache.stanbol.ontologymanager.sources.owlapi.Entities.ALEX;
+import static org.apache.stanbol.ontologymanager.sources.owlapi.Entities.BEGONA;
+import static org.apache.stanbol.ontologymanager.sources.owlapi.Entities.FOAF_KNOWS;
+import static org.apache.stanbol.ontologymanager.sources.owlapi.Entities.FOAF_KNOWS_AP;
+import static org.apache.stanbol.ontologymanager.sources.owlapi.Entities.FOAF_PERSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.Set;
@@ -34,6 +42,7 @@ import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -43,6 +52,12 @@ import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
+/**
+ * Test suite for the correctness of {@link OntologyInputSource} implementations based on the OWL API.
+ * 
+ * @author alexdma
+ * 
+ */
 public class TestOWLAPIInputSources {
 
     private static OWLDataFactory df;
@@ -50,6 +65,28 @@ public class TestOWLAPIInputSources {
     @BeforeClass
     public static void setUp() {
         df = OWLManager.getOWLDataFactory();
+    }
+
+    @Test
+    public void fromInputStream() throws Exception {
+        InputStream in = getClass().getResourceAsStream("/ontologies/dummy-01.turtle.rdf");
+        OntologyInputSource<OWLOntology> src = new OntologyContentInputSource(in);
+        assertNotNull(src);
+        assertNull(src.getOrigin());
+        OWLOntology o = src.getRootOntology();
+        assertNotNull(o);
+        OWLAxiom ax = df.getOWLClassAssertionAxiom(FOAF_PERSON, ALEX);
+        assertTrue(o.containsAxiom(ax));
+        ax = df.getOWLClassAssertionAxiom(FOAF_PERSON, BEGONA);
+        assertTrue(o.containsAxiom(ax));
+
+        // Not knowing how the foaf:knows assertion is interpreted, we check for either (but not both!).
+        ax = df.getOWLObjectPropertyAssertionAxiom(FOAF_KNOWS, ALEX, BEGONA);
+        OWLAxiom ann = df.getOWLAnnotationAssertionAxiom(FOAF_KNOWS_AP, ALEX.getIRI(), BEGONA.getIRI());
+        assertTrue(o.containsAxiom(ann) || o.containsAxiom(ax));
+        assertFalse(o.containsAxiom(ann) && o.containsAxiom(ax));
+
+        assertSame(3, o.getAxiomCount()); // No other axioms exist.
     }
 
     @Test
@@ -132,7 +169,7 @@ public class TestOWLAPIInputSources {
     public void testOfflineSingleton() throws Exception {
         URL url = getClass().getResource("/ontologies/mockfoaf.rdf");
         assertNotNull(url);
-        OntologyInputSource<OWLOntology> coreSource = new RootOntologyIRISource(IRI.create(url));
+        OntologyInputSource<OWLOntology> coreSource = new RootOntologySource(IRI.create(url));
         assertNotNull(df);
         /*
          * To check it fetched the correct ontology, we look for a declaration of the bogus class foaf:Perzon

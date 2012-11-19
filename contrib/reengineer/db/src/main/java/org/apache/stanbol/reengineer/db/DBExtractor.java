@@ -16,7 +16,7 @@ import org.apache.stanbol.ontologymanager.servicesapi.collector.DuplicateIDExcep
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
-import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -199,7 +199,7 @@ public class DBExtractor implements Reengineer {
             log.info("Ontology {} created.", iri);
 
             scope = onManager.createOntologyScope(reengineeringScopeID,
-                (OntologyInputSource<?>) new RootOntologyIRISource(IRI.create(DBS_L1.URI)));
+                (OntologyInputSource<?>) new RootOntologySource(IRI.create(DBS_L1.URI)));
 
             // scope.setUp();
 

@@ -36,7 +36,6 @@ import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
 import org.apache.stanbol.ontologymanager.servicesapi.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.servicesapi.session.Session;
 import org.apache.stanbol.ontologymanager.servicesapi.session.Session.State;
-import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -57,8 +56,8 @@ public class TestSessions {
     @BeforeClass
     public static void setup() throws Exception {
         OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(null);
-        src1 = new RootOntologySource(mgr.createOntology(baseIri), null);
-        src2 = new RootOntologySource(mgr.createOntology(baseIri2), null);
+        src1 = new RootOntologySource(mgr.createOntology(baseIri));
+        src2 = new RootOntologySource(mgr.createOntology(baseIri2));
         reset();
     }
 
@@ -148,8 +147,8 @@ public class TestSessions {
     // @Test
     public void zombieSessionClearsContents() throws Exception {
         Session ses = sessionManager.createSession();
-        ses.addOntology(new RootOntologyIRISource((IRI.create(getClass().getResource(
-            "/ontologies/mockfoaf.rdf")))));
+        ses.addOntology(new RootOntologySource((IRI
+                .create(getClass().getResource("/ontologies/mockfoaf.rdf")))));
         OWLOntologyID expectedKey = new OWLOntologyID(IRI.create("http://xmlns.com/foaf/0.1/"));
         assertTrue(ontologyProvider.hasOntology(expectedKey));
         sessionManager.destroySession(ses.getID());

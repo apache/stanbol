@@ -54,7 +54,7 @@ import org.apache.stanbol.ontologymanager.servicesapi.ontology.OWLExportable;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.sources.clerezza.GraphSource;
-import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -163,7 +163,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
             log.debug("Origin wraps a {}", ref.getClass().getCanonicalName());
             if (ref instanceof IRI) try {
                 log.debug("Deferring addition to physical IRI {} (if available).", ref);
-                key = addOntology(new RootOntologyIRISource((IRI) ref));
+                key = addOntology(new RootOntologySource((IRI) ref));
             } catch (OWLOntologyCreationException e) {
                 throw new RuntimeException(e);
             }

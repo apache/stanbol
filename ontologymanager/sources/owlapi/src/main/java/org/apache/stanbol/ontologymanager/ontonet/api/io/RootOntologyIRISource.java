@@ -22,7 +22,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 @Deprecated
 public class RootOntologyIRISource extends
-        org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologyIRISource {
+        org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource {
 
     public RootOntologyIRISource(IRI rootPhysicalIri) throws OWLOntologyCreationException {
         super(rootPhysicalIri);
@@ -33,7 +33,7 @@ public class RootOntologyIRISource extends
     }
 
     public RootOntologyIRISource(IRI rootPhysicalIri, OWLOntologyManager manager, boolean ignoreIriMappers) throws OWLOntologyCreationException {
-        super(rootPhysicalIri, manager, ignoreIriMappers);
+        this(rootPhysicalIri, manager);
     }
 
 }
