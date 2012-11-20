@@ -27,6 +27,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.ldviewable.mbw.LdViewableWriter;
+import org.apache.stanbol.commons.ldviewable.mbw.ViewableWriter;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
@@ -43,10 +44,13 @@ import freemarker.cache.TemplateLoader;
  */
 @Component(immediate = true, metatype = true)
 @Service
-public class UserManagementWebFragment implements WebFragment {
+public class LdViewableWebFragment implements WebFragment {
 
 	@Reference
 	private LdViewableWriter ldViewableWriter;
+	
+	@Reference
+	private ViewableWriter viewableWriter;
 	
 	private static final String NAME = "ld-viewable";
 
@@ -72,6 +76,7 @@ public class UserManagementWebFragment implements WebFragment {
 	public Set<Object> getJaxrsResourceSingletons() {
 		Set<Object> instances = new HashSet<Object>();
 		instances.add(ldViewableWriter);
+		instances.add(viewableWriter);
 		return instances;
 	}
 
