@@ -74,7 +74,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Implementation of the <a href="http://code.google.com/p/google-refine/wiki/ReconciliationServiceApi">
