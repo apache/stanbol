@@ -120,7 +120,7 @@
     </dependency>
 
     <!-- Jersey -->
-    <dependency>
+<dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>

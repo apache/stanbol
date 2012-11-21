@@ -44,7 +44,7 @@ import org.apache.stanbol.ontologymanager.store.model.ImportsForOntology;
 import org.apache.stanbol.ontologymanager.store.rest.LockManagerImp;
 import org.apache.stanbol.ontologymanager.store.rest.ResourceManagerImp;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 @Path("/ontology/{ontologyPath:.+}/imports")
 public class OntologyImports extends BaseStanbolResource {

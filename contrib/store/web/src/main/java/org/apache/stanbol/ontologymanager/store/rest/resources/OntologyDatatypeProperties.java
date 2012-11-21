@@ -44,7 +44,7 @@ import org.apache.stanbol.ontologymanager.store.rest.ResourceManagerImp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 
 @Path("/ontology/{ontologyPath:.+}/datatypeProperties")
