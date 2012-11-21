@@ -23,7 +23,6 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import org.apache.stanbol.commons.web.base.processor.FreemarkerViewProcessor;
 import org.apache.stanbol.commons.web.base.writers.GraphWriter;
 import org.apache.stanbol.commons.web.base.writers.JenaModelWriter;
 import org.apache.stanbol.commons.web.base.writers.ResultSetWriter;
@@ -67,7 +66,7 @@ public class JerseyEndpointApplication extends Application {
 
         TemplateLoader[] loadersArray = templateLoaders.toArray(new TemplateLoader[templateLoaders.size()]);
         MultiTemplateLoader templateLoader = new MultiTemplateLoader(loadersArray);
-        singletons.add(new FreemarkerViewProcessor(templateLoader));
+        //singletons.add(new FreemarkerViewProcessor(templateLoader));
         return singletons;
     }
 

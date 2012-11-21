@@ -48,7 +48,7 @@ public class HomeWebFragment implements WebFragment {
 
     private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/commons/web/home/static";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/commons/web/home/templates";
+    private static final String TEMPLATE_PATH = "/templates";
 
     private BundleContext bundleContext;
 
