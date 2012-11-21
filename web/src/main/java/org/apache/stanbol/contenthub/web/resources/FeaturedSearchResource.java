@@ -63,7 +63,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * This class is the web resource which provides RESTful and HTTP interfaces for

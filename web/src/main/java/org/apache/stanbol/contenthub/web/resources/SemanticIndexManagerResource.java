@@ -53,7 +53,7 @@ import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * This class the the web resource to handle the RESTful requests and HTML view of the LDProgram management
