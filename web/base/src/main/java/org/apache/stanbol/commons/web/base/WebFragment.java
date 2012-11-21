@@ -61,12 +61,6 @@ public interface WebFragment {
      */
     Set<Object> getJaxrsResourceSingletons();
 
-    /**
-     * @return a template load instance that can be used by the FreemarkerViewProcessor for building the HTML
-     *         UI incrementally. If this is an instance of ClassTemplateLoader, the class path visibility
-     *         should be exported using the Export-Package bundle declaration.
-     */
-    TemplateLoader getTemplateLoader();
 
     /**
      * CSS and favicon resources to be linked in the head of all HTML pages controlled by the NavigationMixin

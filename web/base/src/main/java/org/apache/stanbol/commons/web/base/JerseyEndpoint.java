@@ -175,7 +175,6 @@ public class JerseyEndpoint {
             navigationLinks.addAll(fragment.getNavigationLinks());
             app.contributeClasses(fragment.getJaxrsResourceClasses());
             app.contributeSingletons(fragment.getJaxrsResourceSingletons());
-            app.contributeTemplateLoader(fragment.getTemplateLoader());
             String staticPath = fragment.getStaticResourceClassPath();
             if (staticPath != null) {
                 String resourceAlias = (applicationAlias.endsWith("/") ? applicationAlias.substring(0,
