@@ -1,6 +1,7 @@
 package org.apache.stanbol.enhancer.engines.celi;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,13 +10,11 @@ import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.morpho.Case;
 import org.apache.stanbol.enhancer.nlp.morpho.CaseTag;
 import org.apache.stanbol.enhancer.nlp.morpho.Definitness;
-import org.apache.stanbol.enhancer.nlp.morpho.DefinitnessTag;
 import org.apache.stanbol.enhancer.nlp.morpho.Gender;
 import org.apache.stanbol.enhancer.nlp.morpho.GenderTag;
 import org.apache.stanbol.enhancer.nlp.morpho.NumberFeature;
 import org.apache.stanbol.enhancer.nlp.morpho.NumberTag;
 import org.apache.stanbol.enhancer.nlp.morpho.Person;
-import org.apache.stanbol.enhancer.nlp.morpho.PersonTag;
 import org.apache.stanbol.enhancer.nlp.morpho.Tense;
 import org.apache.stanbol.enhancer.nlp.morpho.TenseTag;
 import org.apache.stanbol.enhancer.nlp.morpho.VerbMood;
@@ -51,14 +50,12 @@ public final class CeliTagSetRegistry {
     private final Map<String,TagSet<NumberTag>> numberMappingsByLanguage = new HashMap<String,TagSet<NumberTag>>();
     private final Map<String,Map<String,NumberTag>> unmappedNumberTagsByLanguage = new HashMap<String,Map<String,NumberTag>>();
 
-    private final Map<String,TagSet<PersonTag>> personMappingsByLanguage = new HashMap<String,TagSet<PersonTag>>();
-    private final Map<String,Map<String,PersonTag>> unmappedPersonTagsByLanguage = new HashMap<String,Map<String,PersonTag>>();
+    private final Map<String,Map<String,Person>> personMappingsByLanguage = new HashMap<String,Map<String,Person>>();
 
     private final Map<String,TagSet<CaseTag>> caseMappingsByLanguage = new HashMap<String,TagSet<CaseTag>>();
     private final Map<String,Map<String,CaseTag>> unmappedCaseTagsByLanguage = new HashMap<String,Map<String,CaseTag>>();
 
-    private final Map<String,TagSet<DefinitnessTag>> definitenessMappingsByLanguage = new HashMap<String,TagSet<DefinitnessTag>>();
-    private final Map<String,Map<String,DefinitnessTag>> unmappedDefinitnessTagsByLanguage = new HashMap<String,Map<String,DefinitnessTag>>();
+    private final Map<String,Map<String,Definitness>> definitenessMappingsByLanguage = new HashMap<String,Map<String,Definitness>>();
 
     private final Map<String,TagSet<VerbMoodTag>> verbFormMappingsByLanguage = new HashMap<String,TagSet<VerbMoodTag>>();
     private final Map<String,Map<String,VerbMoodTag>> unmappedVerbMoodTagsByLanguage = new HashMap<String,Map<String,VerbMoodTag>>();
@@ -156,7 +153,7 @@ public final class CeliTagSetRegistry {
      *            the {@link String} tag as returned by CELI
      * @return the {@link NumberTag}
      */
-    public NumberTag getNumberTag(String language, String tag) {
+    public NumberTag getNumber(String language, String tag) {
         return getTag(numberMappingsByLanguage, unmappedNumberTagsByLanguage, NumberTag.class, language, tag);
     }
 
@@ -166,8 +163,8 @@ public final class CeliTagSetRegistry {
      * @param mappings
      *            expressed with a {@link TagSet}
      */
-    private void addPersonTagset(TagSet<PersonTag> model) {
-        for (String lang : model.getLanguages()) {
+    private void addPersonMappings(Map<String,Person> model, String...langs) {
+        for (String lang : langs) {
             if (personMappingsByLanguage.put(lang, model) != null) {
                 throw new IllegalStateException("Multiple Models for Language '" + lang
                                                 + "'! This is an error in the static confituration of "
@@ -186,8 +183,9 @@ public final class CeliTagSetRegistry {
      *            the {@link String} tag as returned by CELI
      * @return the {@link PersonTag}
      */
-    public PersonTag getPersonTag(String language, String tag) {
-        return getTag(personMappingsByLanguage, unmappedPersonTagsByLanguage, PersonTag.class, language, tag);
+    public Person getPerson(String language, String tag) {
+        Map<String,Person> langMappings = personMappingsByLanguage.get(language);
+        return langMappings == null ? null : langMappings.get(tag);
     }
 
     /**
@@ -226,8 +224,8 @@ public final class CeliTagSetRegistry {
      * @param mappings
      *            expressed with a {@link TagSet}
      */
-    private void addDefinitnessTagset(TagSet<DefinitnessTag> model) {
-        for (String lang : model.getLanguages()) {
+    private void addDefinitnessTagset(Map<String,Definitness> model,String...langs) {
+        for (String lang : langs) {
             if (definitenessMappingsByLanguage.put(lang, model) != null) {
                 throw new IllegalStateException("Multiple Models for Language '" + lang
                                                 + "'! This is an error in the static confituration of "
@@ -246,9 +244,9 @@ public final class CeliTagSetRegistry {
      *            the {@link String} tag as returned by CELI
      * @return the {@link DefinitnessTag}
      */
-    public DefinitnessTag getDefinitnessTag(String language, String tag) {
-        return getTag(definitenessMappingsByLanguage, unmappedDefinitnessTagsByLanguage,
-            DefinitnessTag.class, language, tag);
+    public Definitness getDefinitnessTag(String language, String tag) {
+        Map<String,Definitness> langMappings = definitenessMappingsByLanguage.get(language);
+        return langMappings == null ? null : langMappings.get(tag);
     }
 
     /**
@@ -514,13 +512,15 @@ public final class CeliTagSetRegistry {
         getInstance().addNumberTagset(NUMBER);
     }
 
-    public static final TagSet<PersonTag> PERSON = new TagSet<PersonTag>("CELI PERSON tags", "da", "de",
-            "it", "ro", "ru");
+    //add the person models
     static {
-        PERSON.addTag(new PersonTag("FIRST", Person.First));
-        PERSON.addTag(new PersonTag("SECOND", Person.Second));
-        PERSON.addTag(new PersonTag("THIRD", Person.Third));
-        getInstance().addPersonTagset(PERSON);
+        Map<String,Person> model = new HashMap<String,Person>();
+        model.put("FIRST", Person.First);
+        model.put("SECOND", Person.Second);
+        model.put("THIRD", Person.Third);
+        getInstance().addPersonMappings(
+            Collections.unmodifiableMap(model), 
+            "da", "de","it", "ro", "ru");
     }
 
     public static final TagSet<CaseTag> CASE = new TagSet<CaseTag>("CELI CASE tags", "da", "de", "it", "ro",
@@ -542,12 +542,14 @@ public final class CeliTagSetRegistry {
         getInstance().addCaseTagset(CASE);
     }
 
-    public static final TagSet<DefinitnessTag> DEFINITNESS = new TagSet<DefinitnessTag>(
-            "CELI DEFINITNESS tags", "da", "de", "it", "ro", "ru");
+    //definitness models
     static {
-        DEFINITNESS.addTag(new DefinitnessTag("DEF", Definitness.Definite));
-        DEFINITNESS.addTag(new DefinitnessTag("INDEF", Definitness.Indefinite));
-        getInstance().addDefinitnessTagset(DEFINITNESS);
+        Map<String,Definitness> model = new HashMap<String,Definitness>();
+        model.put("DEF", Definitness.Definite);
+        model.put("INDEF", Definitness.Indefinite);
+        getInstance().addDefinitnessTagset(
+            Collections.unmodifiableMap(model), 
+            "da", "de", "it", "ro", "ru");
     }
 
     public static final TagSet<VerbMoodTag> VERB_FORM = new TagSet<VerbMoodTag>("CELI VERB FORM tags", "da",

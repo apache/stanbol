@@ -91,7 +91,7 @@ public class TextProcessingConfig implements Cloneable{
      * By default linking of chunks with multiple matchable tokens is enabled.
      * This is useful to link Entities represented by two common nouns.  
      */
-    private static final boolean DEFAULT_LINK_MULTIPLE_MATCHABLE_TOKENS_IN_CHUNKS_STATE = true;
+    public static final boolean DEFAULT_LINK_MULTIPLE_MATCHABLE_TOKENS_IN_CHUNKS_STATE = true;
     
     /**
      * The set of {@link PosTag#getCategory()} considered for EntityLinking

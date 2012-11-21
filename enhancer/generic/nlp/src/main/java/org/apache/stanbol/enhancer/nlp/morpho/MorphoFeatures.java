@@ -37,8 +37,8 @@ public class MorphoFeatures {
     private Object genderTags;
     private Object numberTags;
     private Object caseFeatureTags;
-    private Object personTags;
-    private Object definitnessTags;
+    private Object personValue;
+    private Object definitnessValue;
     private Object verbFormTags;
     private Object tenseTags;
     
@@ -68,15 +68,15 @@ public class MorphoFeatures {
         return getValues(caseFeatureTags, CaseTag.class);
     }
 
-    public final void addDefinitness(DefinitnessTag definitness) {
-        definitnessTags = addTo(definitnessTags,definitness,DefinitnessTag.class);
+    public final void addDefinitness(Definitness definitness) {
+        definitnessValue = addTo(definitnessValue,definitness,Definitness.class);
     }
-    public final DefinitnessTag getDefinitness(){
-        return getValue(definitnessTags, DefinitnessTag.class);
+    public final Definitness getDefinitness(){
+        return getValue(definitnessValue, Definitness.class);
     }
     
-    public final List<DefinitnessTag> getDefinitnessList(){
-        return getValues(definitnessTags, DefinitnessTag.class);
+    public final List<Definitness> getDefinitnessList(){
+        return getValues(definitnessValue, Definitness.class);
     }
 
     public final void addGender(GenderTag gender) {
@@ -103,16 +103,16 @@ public class MorphoFeatures {
         return getValues(numberTags, NumberTag.class);
     }
 
-    public void addPerson(PersonTag person) {
-        personTags = addTo(personTags,person,PersonTag.class);
+    public void addPerson(Person person) {
+        personValue = addTo(personValue,person,Person.class);
     }
 
-    public final PersonTag getPerson(){
-        return getValue(personTags, PersonTag.class);
+    public final Person getPerson(){
+        return getValue(personValue, Person.class);
     }
     
-    public final List<PersonTag> getPersonList(){
-        return getValues(personTags, PersonTag.class);
+    public final List<Person> getPersonList(){
+        return getValues(personValue, Person.class);
     }
 
     public void addPos(PosTag pos) {
@@ -153,7 +153,7 @@ public class MorphoFeatures {
 
     @Override
     public int hashCode() {
-        return lemma.hashCode() + posTags.hashCode() + genderTags.hashCode() + personTags.hashCode() + caseFeatureTags.hashCode() + definitnessTags.hashCode() + verbFormTags.hashCode() + tenseTags.hashCode();
+        return lemma.hashCode() + posTags.hashCode() + genderTags.hashCode() + personValue.hashCode() + caseFeatureTags.hashCode() + definitnessValue.hashCode() + verbFormTags.hashCode() + tenseTags.hashCode();
     }
     @Override
     public boolean equals(Object o) {
@@ -161,7 +161,7 @@ public class MorphoFeatures {
             MorphoFeatures lt = (MorphoFeatures) o;
             return ((genderTags != null && genderTags.equals(lt.genderTags)) || (genderTags == null && lt.genderTags == null)) && ((caseFeatureTags != null && caseFeatureTags.equals(lt.caseFeatureTags)) || (caseFeatureTags == null && lt.caseFeatureTags == null))
                     && ((tenseTags != null && tenseTags.equals(lt.tenseTags)) || (tenseTags == null && lt.tenseTags == null)) && ((numberTags != null && numberTags.equals(lt.numberTags)) || (numberTags == null && lt.numberTags == null))
-                    && ((definitnessTags != null && definitnessTags.equals(lt.definitnessTags)) || (definitnessTags == null && lt.definitnessTags == null)) && ((personTags != null && personTags.equals(lt.personTags)) || (personTags == null && lt.personTags == null))
+                    && ((definitnessValue != null && definitnessValue.equals(lt.definitnessValue)) || (definitnessValue == null && lt.definitnessValue == null)) && ((personValue != null && personValue.equals(lt.personValue)) || (personValue == null && lt.personValue == null))
                     && ((verbFormTags != null && verbFormTags.equals(lt.verbFormTags)) || (verbFormTags == null && lt.verbFormTags == null));
         } else {
             return false;
@@ -180,11 +180,11 @@ public class MorphoFeatures {
         if(numberTags != null){
             sb.append("| ").append(numberTags);
         }
-        if(personTags != null){
-            sb.append("| ").append(personTags);
+        if(personValue != null){
+            sb.append("| ").append(personValue);
         }
-        if(definitnessTags != null){
-            sb.append("| ").append(definitnessTags);
+        if(definitnessValue != null){
+            sb.append("| ").append(definitnessValue);
         }
         if(caseFeatureTags != null){
             sb.append("| ").append(caseFeatureTags);

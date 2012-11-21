@@ -2,53 +2,31 @@ package org.apache.stanbol.enhancer.engines.celi;
 
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.Vector;
 
 import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.CeliLemmatizerEnhancementEngine;
 import org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.Reading;
 import org.apache.stanbol.enhancer.nlp.model.Token;
-import org.apache.stanbol.enhancer.nlp.model.annotation.Annotation;
-import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.morpho.Case;
 import org.apache.stanbol.enhancer.nlp.morpho.CaseTag;
 import org.apache.stanbol.enhancer.nlp.morpho.Definitness;
-import org.apache.stanbol.enhancer.nlp.morpho.DefinitnessTag;
-import org.apache.stanbol.enhancer.nlp.morpho.Gender;
 import org.apache.stanbol.enhancer.nlp.morpho.GenderTag;
 import org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures;
-import org.apache.stanbol.enhancer.nlp.morpho.NumberFeature;
 import org.apache.stanbol.enhancer.nlp.morpho.NumberTag;
 import org.apache.stanbol.enhancer.nlp.morpho.Person;
-import org.apache.stanbol.enhancer.nlp.morpho.PersonTag;
 import org.apache.stanbol.enhancer.nlp.morpho.Tense;
 import org.apache.stanbol.enhancer.nlp.morpho.TenseTag;
-import org.apache.stanbol.enhancer.nlp.morpho.VerbMood;
 import org.apache.stanbol.enhancer.nlp.morpho.VerbMoodTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
-import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Represents a morphological interpretation of a {@link Token word}. Words might have different interpretations (typically depending on the POS) so this Tag allows to add information about all possible interpretations to a single word. This is
@@ -91,9 +69,9 @@ public class CeliMorphoFeatures extends MorphoFeatures{
                 } else if (feature.equals("GENDER")) {
                     morphoFeature.addGender(tagRegistry.getGenderTag(lang,value));
                 } else if (feature.equals("NUMBER")) {
-                    morphoFeature.addNumber(tagRegistry.getNumberTag(lang,value));
+                    morphoFeature.addNumber(tagRegistry.getNumber(lang,value));
                 } else if (feature.equals("PERSON")) {
-                    morphoFeature.addPerson(tagRegistry.getPersonTag(lang,value));
+                    morphoFeature.addPerson(tagRegistry.getPerson(lang,value));
                 } else if (feature.equals("VERB_FORM") || feature.equals("VFORM")) {
                     morphoFeature.addVerbForm(tagRegistry.getVerbMoodTag(lang,value));
                 } else if (feature.equals("TENSE") || feature.equals("VERB_TENSE")) {
@@ -127,20 +105,16 @@ public class CeliMorphoFeatures extends MorphoFeatures{
 		        result.add(new TripleImpl(textAnnotation, HAS_NUMBER, num.getNumber().getUri()));
 		    }
 		}
-		for(PersonTag pers : getPersonList()){
-		    if(pers.getPerson() != null){
-		        result.add(new TripleImpl(textAnnotation, HAS_PERSON, pers.getPerson().getUri()));
-		    }
+		for(Person pers : getPersonList()){
+	        result.add(new TripleImpl(textAnnotation, HAS_PERSON, pers.getUri()));
 		}
 		for(GenderTag gender : getGenderList()){
 		    if(gender.getGender() != null){
 		        result.add(new TripleImpl(textAnnotation, HAS_GENDER, gender.getGender().getUri()));
 		    }
 		}
-		for(DefinitnessTag def : getDefinitnessList()){
-		    if(def.getDefinitness() != null){
-		        result.add(new TripleImpl(textAnnotation, HAS_DEFINITENESS, def.getDefinitness().getUri()));
-		    }
+		for(Definitness def : getDefinitnessList()){
+	        result.add(new TripleImpl(textAnnotation, HAS_DEFINITENESS, def.getUri()));
 		}
 		for(CaseTag caseFeat : getCaseList()){
 		    if(caseFeat.getCase() != null){

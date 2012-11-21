@@ -41,7 +41,7 @@ public class AnalysedTextUtils {
         ci.getLock().readLock().lock();
         try {
             return ci.getPart(AnalysedText.ANALYSED_TEXT_URI, AnalysedText.class);
-        }catch (NoSuchPartException e) {
+        } catch (NoSuchPartException e) {
             return null;
         } finally {
             ci.getLock().readLock().unlock();
