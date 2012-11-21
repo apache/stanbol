@@ -54,7 +54,7 @@ import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Abstract super class for all Enhancer endpoint that do also provide the
