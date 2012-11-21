@@ -75,11 +75,6 @@ public class TopicClassifierFragment implements WebFragment {
     }
 
     @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
-    }
-
-    @Override
     public List<LinkResource> getLinkResources() {
         return Collections.emptyList();
     }
