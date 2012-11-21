@@ -93,7 +93,7 @@ public abstract class AbstractEnhancerUiResource extends AbstractEnhancerResourc
     @GET
     @Produces(TEXT_HTML)
     public Response get(@Context HttpHeaders headers) {
-        ResponseBuilder res = Response.ok(new Viewable("index", this), TEXT_HTML);
+        ResponseBuilder res = Response.ok(new Viewable("index", this, AbstractEnhancerUiResource.class), TEXT_HTML);
         addCORSOrigin(servletContext, res, headers);
         return res.build();
     }
