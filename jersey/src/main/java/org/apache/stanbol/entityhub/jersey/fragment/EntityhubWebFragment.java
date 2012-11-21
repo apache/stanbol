@@ -133,8 +133,4 @@ public class EntityhubWebFragment implements WebFragment {
         return STATIC_RESOURCE_PATH;
     }
     
-    @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
-    }
 }
