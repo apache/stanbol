@@ -86,11 +86,6 @@ public class LdViewableWebFragment implements WebFragment {
 	}
 
 	@Override
-	public TemplateLoader getTemplateLoader() {
-		return new ClassTemplateLoader(getClass(), "foobar");
-	}
-
-	@Override
 	public List<LinkResource> getLinkResources() {
 		List<LinkResource> resources = new ArrayList<LinkResource>();
 		return resources;
