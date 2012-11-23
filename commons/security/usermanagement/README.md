@@ -14,7 +14,7 @@ Add user:
 
           [] a foaf:Agent ; 
              cz:userName "Hugo Ball" . ' \
-         http://127.0.0.1:8080/user-management/add-user
+         http://localhost:8080/user-management/add-user
 
 Delete user:
 
@@ -27,7 +27,7 @@ Delete user:
 
           [] a foaf:Agent ; 
              cz:userName "Tristan Tzara" . ' \
-         http://127.0.0.1:8080/user-management/delete-user
+         http://localhost:8080/user-management/delete-user
 
 Change userName :
 
@@ -39,7 +39,7 @@ Change userName :
                     :predicate cz:userName; \
                     :oldValue 'Hugo Ball'; \
                     :newValue 'Tristan Tzara' . " \
-          http://127.0.0.1:8080/user-management/change-user
+          http://localhost:8080/user-management/change-user
 
 Plus get user Turtle :
 
