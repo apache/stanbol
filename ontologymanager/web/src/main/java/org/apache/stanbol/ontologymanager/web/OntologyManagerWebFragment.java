@@ -63,8 +63,6 @@ public class OntologyManagerWebFragment implements WebFragment {
 
     private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/ontologymanager/web/static";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/ontologymanager/web/templates";
-
     private BundleContext bundleContext;
 
     @Reference
@@ -150,11 +148,6 @@ public class OntologyManagerWebFragment implements WebFragment {
     @Override
     public String getStaticResourceClassPath() {
         return STATIC_RESOURCE_PATH;
-    }
-
-    @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
     }
 
 }

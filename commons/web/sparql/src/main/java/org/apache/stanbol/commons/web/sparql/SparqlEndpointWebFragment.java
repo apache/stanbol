@@ -48,8 +48,6 @@ public class SparqlEndpointWebFragment implements WebFragment {
 
     private static final String NAME = "sparql";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/commons/web/sparql/templates";
-
     private BundleContext bundleContext;
 
     @Override
@@ -77,11 +75,6 @@ public class SparqlEndpointWebFragment implements WebFragment {
     @Override
     public String getStaticResourceClassPath() {
         return null;
-    }
-
-    @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
     }
 
     @Override

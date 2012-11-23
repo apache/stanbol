@@ -52,7 +52,6 @@ public class CMSAdapterWebFragment implements WebFragment {
     private static final String NAME = "cmsadapter";
 
     private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/cmsadapter/web/static";
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/cmsadapter/web/templates";
 
     private BundleContext bundleContext;
 
@@ -93,11 +92,6 @@ public class CMSAdapterWebFragment implements WebFragment {
             logger.warn("Error in creating JAXB provider, ", e);
         }
         return singletons;
-    }
-
-    @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
     }
 
     @Override

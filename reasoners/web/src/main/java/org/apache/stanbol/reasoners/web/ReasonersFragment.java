@@ -58,8 +58,6 @@ public class ReasonersFragment implements WebFragment {
 
     private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/reasoners/web/static";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/reasoners/web/templates";
-
     @Reference
     ONManager onm;
 
@@ -122,11 +120,6 @@ public class ReasonersFragment implements WebFragment {
     @Override
     public String getStaticResourceClassPath() {
         return STATIC_RESOURCE_PATH;
-    }
-
-    @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
     }
 
     @Activate
