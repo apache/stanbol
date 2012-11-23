@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -53,6 +55,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.ldviewable.LdViewable;
 import org.apache.clerezza.rdf.ontologies.PERMISSION;
 import org.apache.stanbol.commons.security.PasswordUtil;
+import org.apache.stanbol.commons.usermanagement.Ontology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,12 +85,14 @@ public class UserResource {
 
 	@GET
 	@Path("users")
+	@Produces("text/html")
 	public LdViewable listUsers() {
 		return new LdViewable("listUser.ftl", getUserType(), this.getClass());
 	}
 
 	@GET
 	@Path("user/{username}")
+	@Produces("text/html")
 	public LdViewable editUser(@PathParam("username") String userName) {
 		return new LdViewable("editUser.ftl", getUser(userName),
 				this.getClass());
@@ -95,6 +100,7 @@ public class UserResource {
 
 	@GET
 	@Path("view-user")
+	@Produces("text/html")
 	public LdViewable viewUser(@QueryParam("userName") String userName) {
 		return new LdViewable("edit.ftl", getUser(userName), this.getClass());
 	}
@@ -105,6 +111,8 @@ public class UserResource {
 	 */
 	@POST
 	@Path("store-user")
+	// @Consumes("multipart/form-data")
+	@Consumes("application/x-www-form-urlencoded")
 	public Response storeUser(@Context UriInfo uriInfo,
 			@FormParam("userName") String userName,
 			@FormParam("email") String email,
@@ -143,7 +151,7 @@ public class UserResource {
 		serializer.serialize(System.out, userNode.getGraph(),
 				SupportedFormat.TURTLE);
 
-		URI pageUri = uriInfo.getBaseUriBuilder().path("/system/console")
+		URI pageUri = uriInfo.getBaseUriBuilder().path("system/console/usermanagement")
 				.build();
 
 		// header Cache-control: no-cache, just in case intermediaries are
@@ -173,6 +181,7 @@ public class UserResource {
 	 */
 	@POST
 	@Path("replace-subgraph")
+	@Consumes("multipart/form-data")
 	public void replaceSubGraph(@QueryParam("graph") UriRef graphUri,
 			@FormParam("assert") String assertedString,
 			@FormParam("revoke") String revokedString,
@@ -196,99 +205,134 @@ public class UserResource {
 		}
 		systemGraph.addAll(assertedGraph);
 	}
-	
 
-	
-	/** 
-	 * Endpoint-style user creation
-	 * takes a little bunch of Turtle
+	/**
+	 * Endpoint-style user creation takes a little bunch of Turtle e.g. [] a
+	 * foaf:Agent ; cz:userName "Hugo Ball" .
 	 * 
 	 * @param userData
-	 * @return
+	 * @return HTTP/1.1 204 No Content
 	 */
 	@POST
 	@Consumes("text/turtle")
 	@Path("add-user")
 	public Response addUser(String userData) {
-		
-		// System.out.println("addUser called with "+userData);
-		
+
+		log.debug(("addUser called with " + userData));
+
 		Graph inputGraph = readData(userData);
-		
-		// TODO validate - check it's a user addition here
-		
+
 		Iterator<Triple> agents = inputGraph.filter(null, null, FOAF.Agent);
-		
-		while(agents.hasNext()){
-			NonLiteral userNode = agents.next().getSubject();
-			Iterator<Triple> userTriples = inputGraph.filter(userNode, null, null);
-			// System.out.println("userTriples : "+userTriples);
-			while(userTriples.hasNext()){
-				Triple userTriple = userTriples.next();
-				// System.out.println("triple : "+userTriple);
-				systemGraph.add(userTriple);
-			}
-		}	
-		
-		// it's not actually creating a resource at this URI so this 
+
+		NonLiteral userNode = agents.next().getSubject();
+		Iterator<Triple> userTriples = inputGraph.filter(userNode, null, null);
+		while (userTriples.hasNext()) {
+			Triple userTriple = userTriples.next();
+			systemGraph.add(userTriple);
+		}
+
+		// it's not actually creating a resource at this URI so this
 		// seems the most appropriate response
-		ResponseBuilder responseBuilder = Response.noContent();
-		
-		return responseBuilder.build();
+		return Response.noContent().build();
 	}
-	
-	// TODO add/remove
+
+	/**
+	 * Endpoint-style user deletion takes a little bunch of Turtle e.g. [] a
+	 * foaf:Agent ; cz:userName "Hugo Ball" .
+	 * 
+	 * @param userData
+	 * @return HTTP/1.1 204 No Content
+	 */
+	@POST
+	@Consumes("text/turtle")
+	@Path("delete-user")
+	public Response deleteUser(String userData) {
+
+		log.debug("deleteUser called with " + userData);
+
+		Graph inputGraph = readData(userData);
+
+		Iterator<Triple> userNameTriples = inputGraph.filter(null,
+				PLATFORM.userName, null);
+
+		Literal userNameNode = (Literal) userNameTriples.next().getObject();
+
+		Iterator<Triple> userTriples = systemGraph.filter(null, null,
+				userNameNode);
+
+		Triple userTriple = userTriples.next();
+		Iterator<Triple> systemUserTriples = systemGraph.filter(
+				userTriple.getSubject(), null, null);
+
+		// gives concurrent mod exception otherwise
+		ArrayList<Triple> tripleBuffer = new ArrayList<Triple>();
+		while (systemUserTriples.hasNext()) {
+			tripleBuffer.add(systemUserTriples.next());
+		}
+		systemGraph.removeAll(tripleBuffer);
+
+		// it's not actually creating a resource at this URI so this
+		// seems the most appropriate response
+		return Response.noContent().build();
+	}
+
 	@POST
 	@Consumes("text/turtle")
 	@Path("change-user")
-	public Response changeUser(String userData){
-		ResponseBuilder responseBuilder = Response.noContent();
-		
+	public Response changeUser(String userData) {
+
+		log.debug("deleteUser called with " + userData);
+
 		Graph inputGraph = readData(userData);
-		
-		Iterator<Triple> changes = inputGraph.filter(null, null, new UriRef("http://purl.org/stuff/usermanagement#Change"));
-		
-		while(changes.hasNext()){
+
+		Iterator<Triple> changes = inputGraph.filter(null, null,
+				Ontology.Change);
+
+		while (changes.hasNext()) {
 			Triple changeTriple = changes.next();
-			
+
 			NonLiteral changeNode = changeTriple.getSubject();
+
+			// need to create the predicateUriRef from the Resource, but this
+			// didn't work... other methods?
+
+			UriRef predicateUriRef = (UriRef)inputGraph
+					.filter(changeNode, Ontology.predicate, null).next()
+					.getObject();
+			// UriRef predicateUriRef = (UriRef)predicate;
+
+			 System.out.println("predicateUriRef = " + predicateUriRef);
+
+//			 UriRef predicateUriRef = new UriRef(
+//			 "http://clerezza.org/2009/08/platform#userName");
 			
-			// need to create the predicateUriRef from the Resource, but this didn't work... other methods?
-			// Resource predicate = inputGraph.filter(changeNode, new UriRef("http://purl.org/stuff/usermanagement#predicate"), null).next().getObject();
-			// UriRef predicateUriRef = new UriRef(predicate.toString());
 			
-			// System.out.println("predicateUriRef = "+predicateUriRef);
-			
-			UriRef predicateUriRef = new UriRef("http://clerezza.org/2009/08/platform#userName");
-			
-			Resource oldValue = inputGraph.filter(changeNode, new UriRef("http://purl.org/stuff/usermanagement#oldValue"), null).next().getObject();
-			
-			Resource newValue = inputGraph.filter(changeNode, new UriRef("http://purl.org/stuff/usermanagement#newValue"), null).next().getObject();
-			
-			Triple oldTriple = systemGraph.filter(null, predicateUriRef, oldValue).next();
-			Triple newTriple = new TripleImpl(oldTriple.getSubject(), predicateUriRef, newValue);
-			
-			System.out
-			.println("BEFORE ========================================================");
-	serializer.serialize(System.out, systemGraph,
-			SupportedFormat.TURTLE);
-	
+
+			Resource oldValue = inputGraph
+					.filter(changeNode, Ontology.oldValue, null).next()
+					.getObject();
+
+			Triple oldTriple = systemGraph.filter(null, predicateUriRef,
+					oldValue).next();
+
 			systemGraph.remove(oldTriple);
+
+			Resource newValue = inputGraph
+					.filter(changeNode, Ontology.newValue, null).next()
+					.getObject();
+
+			Triple newTriple = new TripleImpl(oldTriple.getSubject(),
+					predicateUriRef, newValue);
+
 			systemGraph.add(newTriple);
-			
-			System.out
-			.println("AFTER ========================================================");
-	serializer.serialize(System.out, systemGraph,
-			SupportedFormat.TURTLE);
 		}
-		
-	//	Iterator<Triple> agents = inputGraph.filter(null, null, FOAF.Agent);
-		// TODO validate - check it's a user addition here
-		responseBuilder.type("text/turtle");
-		return responseBuilder.build();
+
+		// it's not actually creating a resource at this URI so this
+		// seems the most appropriate response
+		return Response.noContent().build();
 	}
-	
-	/** 
+
+	/**
 	 * RESTful access to individual user data
 	 * 
 	 * @param userName
@@ -307,39 +351,54 @@ public class UserResource {
 		// System.out.println("User = "+serialized);
 		return Response.ok(serialized).build();
 	}
-	
+
 	// ///////////////////////////////////////////////////////////////////////
 	// helper methods
 
 	/**
 	 * Read string into graph
 	 * 
-	 * @param data Turtle string
+	 * @param data
+	 *            Turtle string
 	 * @return graph from Turtle
 	 */
 	private Graph readData(String data) {
-		
+
 		Graph inputGraph;
-		
+
 		try {
-			inputGraph = parser.parse(new ByteArrayInputStream(
-					data.getBytes("utf-8")), "text/turtle");
+			inputGraph = parser.parse(
+					new ByteArrayInputStream(data.getBytes("utf-8")),
+					"text/turtle");
 		} catch (IOException ex) {
 			log.error("parsing error with userData", ex);
 			throw new WebApplicationException(ex, 500);
 		}
-//		System.out.println("inputGraph.size() = "+inputGraph.size());
-//		
-//		Object[] stuff = inputGraph.toArray();
-//		for(int i=0;i<stuff.length;i++){
-//			System.out.println("as array - "+stuff[i]);
-//		}
+		// System.out.println("inputGraph.size() = "+inputGraph.size());
+		//
+		// Object[] stuff = inputGraph.toArray();
+		// for(int i=0;i<stuff.length;i++){
+		// System.out.println("as array - "+stuff[i]);
+		// }
 		return inputGraph;
 	}
-	
+
 	private GraphNode getUser(@QueryParam("userName") String userName) {
+		return getNamedUser(userName);
+	}
+
+	private GraphNode getNamedUser(String userName) {
 		Iterator<Triple> iter = systemGraph.filter(null, PLATFORM.userName,
 				new PlainLiteralImpl(userName));
+		if (!iter.hasNext()) {
+			return null;
+		}
+		return new GraphNode(iter.next().getSubject(), systemGraph);
+	}
+
+	private GraphNode getNamedUser(Resource nameResource) {
+		Iterator<Triple> iter = systemGraph.filter(null, PLATFORM.userName,
+				nameResource);
 		if (!iter.hasNext()) {
 			return null;
 		}
