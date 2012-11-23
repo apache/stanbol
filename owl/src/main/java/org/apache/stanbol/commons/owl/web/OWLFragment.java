@@ -50,8 +50,6 @@ public class OWLFragment implements WebFragment {
 
     private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/owl/web/static";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/owl/web/templates";
-
     private BundleContext bundleContext;
 	
 	
@@ -80,11 +78,6 @@ public class OWLFragment implements WebFragment {
 	@Override
 	public Set<Object> getJaxrsResourceSingletons() {
 		return Collections.emptySet();
-	}
-
-	@Override
-	public TemplateLoader getTemplateLoader() {
-		return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
 	}
 
 	@Override
