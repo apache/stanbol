@@ -49,7 +49,10 @@
     <module>metaxa</module>
     <module>tika</module>
     <module>entitytagging</module>
-    <module>keywordextraction</module>
+    <!-- No longer in this branch. was moved to entityhublinking
+     module>keywordextraction</module -->
+    <module>entitylinking</module>
+    <module>entityhublinking</module>
     <!-- <module>refactor</module> -->
     <!-- Enhancement Engines using external services -->
     <module>celi</module> <!-- http://linguagrid.org -->
