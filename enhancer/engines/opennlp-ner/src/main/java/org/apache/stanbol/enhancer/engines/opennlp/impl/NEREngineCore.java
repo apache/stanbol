@@ -597,17 +597,26 @@ public abstract class NEREngineCore
         if (null == text) {
             return null;
         }
-        Charset UTF8 = Charset.forName("UTF-8");
-        byte[] bytes = text.getBytes(UTF8);
-        for (int i = 0; i < bytes.length; i++) {
-            byte ch = bytes[i];
+        StringBuilder sb = null; //initialised on the first replacement
+        for (int i = 0; i < text.length(); i++) {
+            int ch = text.codePointAt(i);
             // remove any characters outside the valid UTF-8 range as well as all control characters
             // except tabs and new lines
-            if (!((ch > 31 && ch < 253) || ch == '\t' || ch == '\n' || ch == '\r')) {
-                bytes[i] = ' ';
+            //NOTE: rewesten (2012-11-21) replaced the original check with the one
+            // found at http://blog.mark-mclaren.info/2007/02/invalid-xml-characters-when-valid-utf8_5873.html
+            if (!((ch == 0x9) ||
+                    (ch == 0xA) ||
+                    (ch == 0xD) ||
+                    ((ch >= 0x20) && (ch <= 0xD7FF)) ||
+                    ((ch >= 0xE000) && (ch <= 0xFFFD)) ||
+                    ((ch >= 0x10000) && (ch <= 0x10FFFF)))){
+                if(sb == null){
+                    sb = new StringBuilder(text);
+                }
+                sb.setCharAt(i, ' ');
             }
         }
-        return new String(bytes, UTF8);
+        return sb == null ? text : sb.toString();
     }
 
     /**
