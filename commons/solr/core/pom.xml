@@ -267,10 +267,6 @@
       <artifactId>commons-collections</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.stax-api-1.0</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.woodstox</artifactId>
     </dependency>
