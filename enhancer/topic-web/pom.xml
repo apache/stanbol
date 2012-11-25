@@ -36,12 +36,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/topic-web/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/topic-web/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/topic-web/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/topic-web/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
@@ -64,6 +64,7 @@
             </Embed-Dependency>
             <Import-Package>
               javax.ws.rs.*; version="[0,2)",
+              org.apache.stanbol.commons.web.base; provide:=true,
               *
             </Import-Package>
           </instructions>
@@ -114,6 +115,10 @@
 
     <!-- Jersey -->
     <dependency>
+    	<groupId>org.apache.stanbol</groupId>
+  		<artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
+    </dependency>
+<dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>

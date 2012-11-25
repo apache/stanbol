@@ -39,12 +39,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/metaxa/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/metaxa/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/metaxa/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/metaxa/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
@@ -110,8 +110,13 @@
               !schemasMicrosoftComOfficeWord,
               org.w3c.dom,
               javax.xml.namespace,
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
               *
             </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engines.metaxa.*
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -129,6 +134,8 @@
             <exclude>src/test/resources/html-res.txt</exclude>
             <exclude>src/test/resources/pdf-res.txt</exclude>
             <exclude>src/test/resources/mail-multipart-test.eml</exclude>
+
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
           </excludes>
         </configuration>
       </plugin>

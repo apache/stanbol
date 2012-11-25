@@ -24,6 +24,7 @@ import static org.apache.stanbol.enhancer.engines.dbpspotlight.Constants.PARAM_S
 import static org.apache.stanbol.enhancer.engines.dbpspotlight.Constants.PARAM_SUPPORT;
 import static org.apache.stanbol.enhancer.engines.dbpspotlight.Constants.PARAM_URL_KEY;
 import static org.apache.stanbol.enhancer.engines.dbpspotlight.Constants.UTF8;
+import static org.apache.stanbol.enhancer.engines.dbpspotlight.utils.SpotlightEngineUtils.getConnectionTimeout;
 import static org.apache.stanbol.enhancer.engines.dbpspotlight.utils.XMLParser.loadXMLFromInputStream;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 
@@ -125,6 +126,8 @@ public class DBPSpotlightCandidatesEnhancementEngine extends
 	/** holds the sparql restriction for the results, if the user wishes one */
 	private String spotlightSparql;
 
+    private int connectionTimeout;
+
 	/**
 	 * Used by OSGI to instantiate the engine. Expects 
 	 * {@link #activate(ComponentContext)} to be called before usage
@@ -135,8 +138,9 @@ public class DBPSpotlightCandidatesEnhancementEngine extends
 	 * Used by unit tests
 	 * @param spotlightUrl
 	 */
-	protected DBPSpotlightCandidatesEnhancementEngine(URL spotlightUrl){
+	protected DBPSpotlightCandidatesEnhancementEngine(URL spotlightUrl,int connectionTimeout){
 		this.spotlightUrl = spotlightUrl;
+		this.connectionTimeout = connectionTimeout;
 	}
 	
 	/**
@@ -156,6 +160,7 @@ public class DBPSpotlightCandidatesEnhancementEngine extends
 		Dictionary<String, Object> properties = ce.getProperties();
 		//parse the URL of the RESTful service
 		spotlightUrl = SpotlightEngineUtils.parseSpotlightServiceURL(properties);
+        connectionTimeout = SpotlightEngineUtils.getConnectionTimeout(properties);
 		spotlightSpotter = properties.get(PARAM_SPOTTER) == null ? null
 				: (String) properties.get(PARAM_SPOTTER);
 		spotlightDisambiguator = properties.get(PARAM_DISAMBIGUATOR) == null ? null
@@ -275,7 +280,13 @@ public class DBPSpotlightCandidatesEnhancementEngine extends
 					"application/x-www-form-urlencoded");
 			connection.setRequestProperty("Accept", "text/xml");
 
-			connection.setUseCaches(false);
+            //set ConnectionTimeout (if configured)
+            if(connectionTimeout > 0){
+                connection.setConnectTimeout(connectionTimeout*1000);
+                connection.setReadTimeout(connectionTimeout*1000);
+            }
+
+            connection.setUseCaches(false);
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 

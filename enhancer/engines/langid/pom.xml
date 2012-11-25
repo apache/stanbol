@@ -42,12 +42,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langid/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/langid/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langid/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/langid/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
@@ -58,11 +58,14 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              *
+            </Import-Package>
+            <Private-Package>
               org.apache.stanbol.enhancer.engines.langid;version=${project.version}
-            </Export-Package>
-            <Embed-Dependency>
-            </Embed-Dependency>
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -77,6 +80,8 @@
           <excludes>
             <!-- AL20 licensed files: See src/test/resources/README -->
             <exclude>src/test/resources/en.txt</exclude>
+
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
           </excludes>
         </configuration>
       </plugin>

@@ -38,12 +38,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/zemanta/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/zemanta/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/zemanta/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/zemanta/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
@@ -62,9 +62,17 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              *
+            </Import-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.engines.zemanta.impl.*
             </Private-Package>
+            <Export-Package>
+              org.apache.stanbol.enhancer.engines.zemanta
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

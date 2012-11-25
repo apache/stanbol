@@ -36,12 +36,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jersey/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jersey/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jersey/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jersey/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
@@ -60,11 +60,13 @@
             <Export-Package>
               org.apache.stanbol.enhancer.jersey.*
             </Export-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl|httpmime
+            <Embed-Dependency>
+              *;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl|httpmime
             </Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
               javax.ws.rs.*; version="[0,2)",
+              org.apache.stanbol.commons.web.base; provide:=true,
               *
             </Import-Package>
           </instructions>
@@ -101,7 +103,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.10.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -125,6 +127,10 @@
 
     <!-- Jersey -->
     <dependency>
+    	<groupId>org.apache.stanbol</groupId>
+  		<artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
+    </dependency>
+<dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>

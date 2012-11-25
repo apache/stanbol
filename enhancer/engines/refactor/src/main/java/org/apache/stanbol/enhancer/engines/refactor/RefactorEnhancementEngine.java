@@ -58,20 +58,20 @@ import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.collector.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.Origin;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.servicesapi.collector.UnmodifiableOntologyCollectorException;
+import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.servicesapi.io.Origin;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
+import org.apache.stanbol.ontologymanager.servicesapi.session.Session;
+import org.apache.stanbol.ontologymanager.servicesapi.session.SessionLimitException;
+import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
+import org.apache.stanbol.ontologymanager.sources.clerezza.GraphContentInputSource;
+import org.apache.stanbol.ontologymanager.sources.clerezza.GraphSource;
+import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.apache.stanbol.rules.base.api.AlreadyExistingRecipeException;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
@@ -160,7 +160,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Reference
-    ONManager onManager;
+    ScopeManager onManager;
 
     @Reference
     OntologyProvider<TcProvider> ontologyProvider;
@@ -176,7 +176,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
     @Reference
     RuleStore ruleStore;
 
-    private OntologyScope scope;
+    private Scope scope;
 
     @Reference
     SessionManager sessionManager;
@@ -480,7 +480,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
                 }
                 try {
                     // TODO replace with a Clerezza equivalent
-                    ontologySpace.addOntology(new RootOntologyIRISource(physicalIRI, sharedManager));
+                    ontologySpace.addOntology(new RootOntologySource(physicalIRI, sharedManager));
                     success.add(url);
                 } catch (OWLOntologyCreationException e) {
                     log.error("Failed to load ontology from physical location " + physicalIRI
@@ -496,7 +496,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
         for (String s : failed)
             log.info(" >> {} : FAILED", s);
         ontologySpace.setUp();
-        if (!onManager.containsScope(scopeId)) onManager.registerScope(scope);
+        // if (!onManager.containsScope(scopeId)) onManager.registerScope(scope);
         onManager.setScopeActive(scopeId, true);
 
         /*

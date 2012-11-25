@@ -43,12 +43,12 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jobmanager/event/
+            scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jobmanager/event/
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jobmanager/event/
+            scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jobmanager/event/
         </developerConnection>
-        <url>http://incubator.apache.org/stanbol/</url>
+        <url>http://stanbol.apache.org/</url>
     </scm>
 
   <build>
@@ -59,6 +59,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.9.0,0.11)",
+              *
+            </Import-Package>
             <Export-Package>
               org.apache.stanbol.enhancer.jobmanager.event;version=${project.version}
             </Export-Package>

@@ -55,7 +55,7 @@ import org.apache.stanbol.enhancer.servicesapi.ChainManager;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 @Path("/enhancer/chain")
 public class ChainsRootResource extends BaseStanbolResource {

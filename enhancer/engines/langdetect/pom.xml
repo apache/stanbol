@@ -32,7 +32,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : Language Identifier</name>
+  <name>Apache Stanbol Enhancer Enhancement Engine : Language Detection</name>
   <description>language detection for 53 languages based on http://code.google.com/p/language-detection
   </description>
 
@@ -40,12 +40,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langdetect/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/langdetect/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langdetect/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/langdetect/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
 	<build>
@@ -56,9 +56,9 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>
+						<Private-Package>
 							org.apache.stanbol.enhancer.engines.langdetect;version=${project.version}
-						</Export-Package>
+						</Private-Package>
 						<Embed-Dependency>
 							langdetect;scope=compile,jsonic;scope=compile
 						</Embed-Dependency>
@@ -67,7 +67,9 @@
 							!com.google.inject.*,
 							!org.seasar.framework.*,
 							!org.springframework.*,
-							*
+			                org.apache.stanbol.enhancer.servicesapi; provide:=true,
+			                org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+			                *
 						</Import-Package>
 					</instructions>
 				</configuration>
@@ -83,6 +85,8 @@
 					<excludes>
 						<!-- AL20 licensed files: See src/test/resources/README -->
 						<exclude>src/test/resources/*.txt</exclude>
+
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

@@ -41,12 +41,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/geonames/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/geonames/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/geonames/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/geonames/
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
@@ -57,11 +57,17 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engines.refactor
+            </Private-Package>
             <Export-Package>
-              org.apache.stanbol.enhancer.engines.refactor;version=${project.version}
+              org.apache.stanbol.enhancer.engines.refactor.dereferencer
             </Export-Package>
             <Import-Package>
               !javax.xml.stream.*,
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              org.apache.stanbol.ontologymanager.sources.clerezza; provide:=true,
               *
             </Import-Package>
             <!-- TODO those should be bundles! -->
@@ -72,6 +78,19 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 License  -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+
+            <!-- AL20 License, see src/main/resources/README -->
+            <exclude>src/main/resources/META-INF/default/seo_rules.sem</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
     </plugins>
   </build>
 
@@ -96,6 +115,7 @@
     </dependency>
 
     <!-- KReS dependencies -->
+    <!--
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
@@ -119,11 +139,27 @@
         </exclusion>
       </exclusions>
     </dependency>
+    -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
       <version>0.10.0-SNAPSHOT</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.servicesapi</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.sources.clerezza</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.sources.owlapi</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -134,7 +170,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.manager</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.10.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

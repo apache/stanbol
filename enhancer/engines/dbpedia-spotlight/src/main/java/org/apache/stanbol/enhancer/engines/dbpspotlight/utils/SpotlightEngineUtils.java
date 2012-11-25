@@ -22,8 +22,10 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SE
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.Dictionary;
 import java.util.Map.Entry;
 
@@ -280,6 +282,22 @@ public class SpotlightEngineUtils {
 				.createTypedLiteral(annotation.support)));
 		model.add(new TripleImpl(entityAnnotation, PROPERTY_SIMILARITY_SCORE, literalFactory
 				.createTypedLiteral(annotation.similarityScore)));
+	}
+	
+	public static int getConnectionTimeout(Dictionary<String,Object> engineConfig) throws ConfigurationException {
+	    Object value = engineConfig.get(Constants.PARAM_CONNECTION_TIMEOUT);
+	    if(value instanceof Number){
+	        return ((Number) value).intValue();
+	    } else if(value != null){
+	        try {
+	            return Integer.parseInt(value.toString());
+	        } catch (NumberFormatException e) {
+                throw new ConfigurationException(Constants.PARAM_CONNECTION_TIMEOUT, 
+                    "Parsed value MUST be a valid Integer (Seconds)");
+            }
+	    } else {
+	        return -1;
+	    }
 	}
 
 }

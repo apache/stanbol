@@ -15,20 +15,19 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.parent</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: OpenNLP NER Models for English</name>
@@ -47,8 +46,16 @@
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
+
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <downloadWarning>
+*                  
+* WARNING - this build downloads some OpenNLP files that are *not*
+* licensed under the Apache License, and have more restrictive usage
+* terms than the Apache Stanbol code. See STANBOL-545 for more
+* information: https://issues.apache.org/jira/browse/STANBOL-545
+*
+    </downloadWarning>
     <!-- define the path to/home of the OpenNLP modles-->
     <opennlp.model.path>org/apache/stanbol/data/opennlp</opennlp.model.path>
     <opennlp.model.home>http://dev.iks-project.eu/downloads/opennlp/models-1.5</opennlp.model.home>
@@ -87,8 +94,8 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
-            <id>compile</id>
-            <phase>compile</phase>
+            <id>download</id>
+            <phase>generate-resources</phase>
             <configuration>
               <!--
                 TODO: I would like to add an "unless" constraint to the
@@ -100,15 +107,15 @@
                 available!
               -->
               <target>
-                <property name="target.directory" value="${project.basedir}/src/main/resources/${opennlp.model.path}"/>
-                <property name="model.url" value="${opennlp.model.home}"/>
+                <property name="target.directory" value="${project.basedir}/downloads/resources/${opennlp.model.path}" />
+                <property name="model.url" value="${opennlp.model.home}" />
                                 
-                <echo message="copy OpenNLP models"/>
-                <echo message="  FROM ${model.url} "/>
-                <echo message="  TO ${target.directory}"/>
+                <echo message="copy OpenNLP models" />
+                <echo message=" FROM ${model.url} " />
+                <echo message=" TO ${target.directory}" />
 
                 <ant antfile="${basedir}/download_models.xml">
-                  <target name="download"/>
+                  <target name="download" />
                 </ant>
               </target>
             </configuration>

@@ -33,12 +33,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <modules>
@@ -47,6 +47,8 @@
     <module>langid</module>
     <module>topic</module>
     <module>metaxa</module>
+	 <!-- not in this branch
+      module>htmlextractor</module -->
     <module>tika</module>
     <module>entitytagging</module>
     <!-- No longer in this branch. was moved to entityhublinking

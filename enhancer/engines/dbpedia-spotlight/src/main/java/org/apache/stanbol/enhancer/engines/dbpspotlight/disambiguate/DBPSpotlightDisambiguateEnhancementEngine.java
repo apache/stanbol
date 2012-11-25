@@ -138,6 +138,8 @@ public class DBPSpotlightDisambiguateEnhancementEngine extends
 	 * Spotlight, and later for linking of the results
 	 */
 	private Hashtable<String, UriRef> textAnnotationsMap;
+
+    private int connectionTimeout;
 	/**
 	 * Default constructor used by OSGI. It is expected that
 	 * {@link #activate(ComponentContext)} is called before
@@ -149,8 +151,9 @@ public class DBPSpotlightDisambiguateEnhancementEngine extends
 	 * Constructor intended to be used for unit tests
 	 * @param serviceURL
 	 */
-	protected DBPSpotlightDisambiguateEnhancementEngine(URL serviceURL){
+	protected DBPSpotlightDisambiguateEnhancementEngine(URL serviceURL,int connectionTimeout){
 		this.spotlightUrl = serviceURL;
+		this.connectionTimeout = connectionTimeout;
 	}
 	/**
 	 * Initialize all parameters from the configuration panel, or with their
@@ -167,6 +170,7 @@ public class DBPSpotlightDisambiguateEnhancementEngine extends
 
 		Dictionary<String, Object> properties = ce.getProperties();
 		spotlightUrl = SpotlightEngineUtils.parseSpotlightServiceURL(properties);
+        connectionTimeout = SpotlightEngineUtils.getConnectionTimeout(properties);
 		spotlightDisambiguator = properties.get(PARAM_DISAMBIGUATOR) == null ? null
 				: (String) properties.get(PARAM_DISAMBIGUATOR);
 		spotlightTypesRestriction = properties.get(PARAM_RESTRICTION) == null ? null
@@ -296,7 +300,13 @@ public class DBPSpotlightDisambiguateEnhancementEngine extends
 					"application/x-www-form-urlencoded");
 			connection.setRequestProperty("Accept", "text/xml");
 
-			connection.setUseCaches(false);
+            //set ConnectionTimeout (if configured)
+            if(connectionTimeout > 0){
+                connection.setConnectTimeout(connectionTimeout*1000);
+                connection.setReadTimeout(connectionTimeout*1000);
+            }
+
+            connection.setUseCaches(false);
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 
