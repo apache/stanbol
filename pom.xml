@@ -1064,15 +1064,21 @@
     -->
     <!-- Other Solr/Lucene dependendies -->
     <!-- StAX Parser (used by Solr/Lucene) -->
-    <dependency>
+    <!-- dependency> stay api is included in java 1.6
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.stax-api-1.0</artifactId>
       <version>2.1.0</version>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.woodstox</artifactId>
       <version>3.2.9_3</version>
+      <exclusions>
+        <exclusion> <!-- provided from JDK 1.6 via frameworkfragment -->
+          <groupId>org.apache.servicemix.specs</groupId>
+          <artifactId>org.apache.servicemix.specs.stax-api-1.0</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- dependency>
       <groupId>stax</groupId>
