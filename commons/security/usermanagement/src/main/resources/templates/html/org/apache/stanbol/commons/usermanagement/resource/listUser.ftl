@@ -5,19 +5,24 @@
     <thead><tr><th>Name</th><th>login</th><th>email</th><th>groups</th><th>&nbsp;</th></tr></thead>
     <tbody>
         <@ldpath path="fn:sort(^rdf:type)">
+        <#assign fullName>
+            <@ldpath path="foaf:name :: xsd:string"/>
+        </#assign>
         <#assign userName>
             <@ldpath path="platform:userName :: xsd:string"/>
         </#assign>
         <tr>
-            <td>get full name here</td>
+            <td>${fullName}</td>
             <td>${userName}</td>
 
             <#assign mbox>
             <@ldpath path="foaf:mbox" />
             </#assign>
+            
             <#assign email>
             <#if mbox != "">${mbox?substring(7)}</#if>
             </#assign>
+            
             <td>${email}</td>
 
             <td>

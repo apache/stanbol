@@ -106,45 +106,42 @@ public class UserResource {
 	}
 
 	/**
-	 * takes edit form data and pushes into store so far only password change
-	 * implemented (others should be straightforward delete/inserts)
+	 * takes edit form data and pushes into store
+	 * "" values are ignored
 	 */
 	@POST
 	@Path("store-user")
 	// @Consumes("multipart/form-data")
 	@Consumes("application/x-www-form-urlencoded")
 	public Response storeUser(@Context UriInfo uriInfo,
-			@FormParam("userName") String userName,
+			@FormParam("currentUserName") String currentUserName,
+			@FormParam("newUserName") String newUserName,
+			@FormParam("fullName") String fullName,
 			@FormParam("email") String email,
 			@FormParam("password") String password,
 			@FormParam("permission[]") List<String> permission) {
 
-		GraphNode userNode = getUser(userName);
-
-		String passwordSha1 = PasswordUtil.convertPassword(password);
-
-		// System.out.println("new password = "+password);
-		// System.out.println("new passwordSha1 = "+passwordSha1);
+		GraphNode userNode = getUser(currentUserName);
 
 		System.out
 				.println("BEFORE ========================================================");
 		serializer.serialize(System.out, userNode.getGraph(),
 				SupportedFormat.TURTLE);
 
-		Iterator<Literal> oldPasswordsSha1 = userNode
-				.getLiterals(PERMISSION.passwordSha1);
-		Literal oldPasswordSha1 = oldPasswordsSha1.next();
-		// no exception, if there is no value, let it break totally, if more
-		// than one - it is broken elsewhere
+		if(!newUserName.equals("")) {					
+			changeLiteral(userNode, PLATFORM.userName, newUserName);
+		}
+		if(!fullName.equals("")) {					
+			changeLiteral(userNode, FOAF.name, fullName);
+		}
+		if(!password.equals("")) {			
+			String passwordSha1 = PasswordUtil.convertPassword(password);		
+			changeLiteral(userNode, PERMISSION.passwordSha1, passwordSha1);
+		}
 
-		userNode.addPropertyValue(PERMISSION.passwordSha1, passwordSha1);
-		// workaround for possible issue in verification re. PlainLiteral vs.
-		// xsd:string
-		// userNode.addProperty(PERMISSION.passwordSha1, new
-		// PlainLiteralImpl(passwordSha1));
-		// most likely not a problem, and the above will work
-
-		userNode.deleteProperty(PERMISSION.passwordSha1, oldPasswordSha1);
+		if(!email.equals("")) {					
+			changeResource(userNode, FOAF.mbox, new UriRef("mailto:"+email));
+		}
 
 		System.out
 				.println("AFTER ========================================================");
@@ -162,6 +159,74 @@ public class UserResource {
 		// see other my not be the best response, but does seem the best given
 		// the jax-rs things available
 		return Response.seeOther(pageUri).cacheControl(cc).build();
+	}
+
+	/**
+	 * Replaces/inserts literal value for predicate
+	 * assumes there is only one triple for the given predicate
+	 * 
+	 * @param userNode node in systemGraph corresponding to the user to change
+	 * @param predicate property of the triple to change
+	 * @param newValue new value for given predicate
+	 */
+	private void changeLiteral(GraphNode userNode, UriRef predicate, String newValue) {
+		
+		Iterator<Literal> oldValues = userNode
+				.getLiterals(predicate);
+		
+		Literal oldValue = null;
+		
+		if(oldValues.hasNext()) {
+			oldValue = oldValues.next();
+		} 
+
+		// new value is added before deleting old one in case user is modifying their own data
+		// in which case they need triples in place for rights etc.
+		userNode.addPropertyValue(predicate, newValue);
+		
+		if(oldValue != null) {
+		userNode.deleteProperty(predicate, oldValue);
+		}
+		
+		// workaround for possible issue in verification re. PlainLiteral vs.
+		// xsd:string
+		// userNode.addProperty(PERMISSION.passwordSha1, new
+		// PlainLiteralImpl(passwordSha1));
+		// most likely not a problem, and the above will work
+	}
+	
+	/**
+	 * Replaces/inserts resource value for predicate
+	 * assumes there is only one triple for the given predicate
+	 * 
+	 * @param userNode node in systemGraph corresponding to the user to change
+	 * @param predicate property of the triple to change
+	 * @param newValue new value for given predicate
+	 */
+	private void changeResource(GraphNode userNode, UriRef predicate, UriRef newValue) {
+		
+		Iterator<UriRef> oldValues = userNode
+				.getUriRefObjects(predicate);
+		
+		UriRef oldValue = null;
+		
+		if(oldValues.hasNext()) {
+			oldValue = oldValues.next();
+		} 
+
+		// new value is added before deleting old one in case user is modifying their own data
+		// in which case they need triples in place for rights etc.
+		userNode.addPropertyValue(predicate, newValue);
+		
+		if(oldValue != null) {
+		userNode.deleteProperty(predicate, oldValue);
+		}
+		
+		// workaround for possible issue in verification re. PlainLiteral vs.
+		// xsd:string
+		// userNode.addProperty(PERMISSION.passwordSha1, new
+		// PlainLiteralImpl(passwordSha1));
+		// most likely not a problem, and the above will work
 	}
 
 	/**

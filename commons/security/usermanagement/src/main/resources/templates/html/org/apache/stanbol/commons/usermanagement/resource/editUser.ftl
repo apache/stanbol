@@ -3,7 +3,10 @@
 <@namespace sioc="http://rdfs.org/sioc/ns#" />
 
 <form method="post" action="/user-management/store-user">
-User-Name: <input type="text" name="userName" value="<@ldpath path="platform:userName :: xsd:string"/>" /><br/>
+login: <@ldpath path="platform:userName :: xsd:string"/> <br/>
+<input type="hidden" name="currentUserName" value="<@ldpath path="platform:userName :: xsd:string"/>" />
+login: <input type="text" name="newUserName" value="" /><br/>
+Full Name: <input type="text" name="fullName" value="<@ldpath path="foaf:name :: xsd:string"/>" /><br/>
 <#assign mbox>
 <@ldpath path="foaf:mbox" />
 </#assign>
