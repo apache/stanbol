@@ -51,6 +51,11 @@
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
+    <bundle> <!-- NLP processing (STANBOL-733) -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.nlp</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
   </startLevel>
   <!-- LDPath -->
   <startLevel level="30">
@@ -146,23 +151,72 @@
       <artifactId>org.apache.stanbol.enhancer.engines.tika</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
-
-    <!-- Named Entity Recoqunition (NER)-->
-
+    
+    <!-- NLP processing engines (all STANBOL-733 and sub-tasks) -->
+    
+    <bundle><!-- sentence detection with OpenNLP -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.opennlp.sentence</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
+    <bundle><!-- OpenNLP based tokenizing of Texts -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.opennlp.token</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
+    <bundle><!-- POS tagging with OpenNLP -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.opennlp.pos</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
+    <bundle><!-- Chunking tagging with OpenNLP -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.opennlp.chunker</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
     <bundle> <!-- Open NLP based NER -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
+    <!-- NLP metadata to RDF (using NIF 1.0) - NOT YET READY FOR DEFAULT CONFIG
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.nlp2rdf</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>  -->
+    <!-- Sentiment Enhancement Engines -->
+    <bundle><!-- Sentiment Word Classifiers -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.sentiment.wordclassifier</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
+    <!-- NOT YET READY FOR DEFAULT CONFIG
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.sentiment.summarization</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle> -->
+    
     <!-- Entity Extraction/Linking -->
     <bundle><!-- NER linking (depends on the Entityhub) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
-    <bundle><!-- Keyword Extraction from Text (depends on the Entityhub) -->
+    <bundle><!-- Keyword Extraction from Text DEPRECATED! (depends on the Entityhub) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.keywordextraction</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
+    <bundle><!-- EntityLinking based on the Entityhub -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.entitylinking</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
+    <bundle><!-- EntityLinking for the Stanbol Entityhub -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.entityhublinking</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
 

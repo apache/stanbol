@@ -42,30 +42,48 @@
   </scm>
 
   <modules>
-    <module>opennlp-ner</module>
-  	<module>langdetect</module>
-    <module>langid</module>
-    <module>topic</module>
-    <module>metaxa</module>
+	<!-- Content processing / Metadata extraction -->
+    <module>tika</module>
     <module>htmlextractor</module>
     <module>xmpextractor</module>
-    <module>tika</module>
-    <module>entitytagging</module>
-    <module>keywordextraction</module>
+    <module>metaxa</module>
     <module>refactor</module>
-    
-    <!-- Enhancement Engines using external services -->
-    <module>celi</module> <!-- http://linguagrid.org -->
-    <module>geonames</module> <!-- http://geonames.org -->
-    <module>opencalais</module> <!-- http://opencalais.com/ -->
-    <module>zemanta</module> <!-- htt://zemanta.com -->
-    
-    <!-- DBpedia.org Spotlight Enhancement Engines (STANBOL-706) -->
-    <module>dbpedia-spotlight</module>
-    
+
+    <!-- NLP processing engines -->
+	<module>langdetect</module>
+    <module>langid</module>
+    <module>opennlp-sentence</module>
+    <module>opennlp-token</module>
+    <module>opennlp-pos</module>
+    <module>opennlp-ner</module>
+    <module>opennlp-chunker</module>
+    <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
+	<!-- EntityLinking -->
+    <module>entitylinking</module>
+    <module>entityhublinking</module>
+    <module>entitytagging</module>
+    <!-- deprecated -->
+    <module>keywordextraction</module>
+
+	<!-- Categorization -->
+    <module>topic</module>
+
+	<!-- Sentiment -->
+    <module>sentiment-wordclassifier</module>
+    <module>sentiment-summarization</module>
+
     <!-- UIMA based engines -->
     <module>uimaremote</module>
     <module>uimatotriples</module>
     <module>uimalocal-template</module>
+    
+    <!-- Enhancement Engines using external services -->
+    <module>celi</module> <!-- http://linguagrid.org -->
+    <module>dbpedia-spotlight</module> <!-- dbpedia Spotlight -->
+    <module>geonames</module> <!-- http://geonames.org -->
+    <module>opencalais</module> <!-- http://opencalais.com/ -->
+    <module>zemanta</module> <!-- htt://zemanta.com -->
+    
+    
   </modules>
 </project>
