@@ -20,6 +20,12 @@ import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.SENTIMENT_ANNOTATIO
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getAnalysedText;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -31,47 +37,27 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.lucene.messages.NLS;
-import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.engines.sentiment.api.SentimentClassifier;
-import org.apache.stanbol.enhancer.engines.sentiment.classifiers.SentiWSComponent;
-import org.apache.stanbol.enhancer.engines.sentiment.classifiers.SentiWordNet;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
+import org.apache.stanbol.enhancer.nlp.NlpProcessingRole;
+import org.apache.stanbol.enhancer.nlp.NlpServiceProperties;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
-import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
-import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Annotation;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
-import org.apache.stanbol.enhancer.nlp.sentiment.SentimentTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
-import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
-import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A Stanbol engine that associates sentiment values with the tokens created by the POS tagging engine.
@@ -101,7 +87,7 @@ import java.util.Set;
             doubleValue = SentimentEngine.DEFAULT_MIN_POS_CONFIDNECE),
         @Property(name=Constants.SERVICE_RANKING,intValue=-100) //give the default instance a ranking < 0
 })
-public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException,RuntimeException> {
+public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties {
 
     /**
      * Language configuration. Takes a list of ISO language codes of supported languages. Currently supported
@@ -137,6 +123,19 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
     public static final double DEFAULT_MIN_POS_CONFIDNECE = 0.8;
 
     public static final boolean DEFAULT_PROCESS_ADJECTIVES_ONLY = false;
+
+    /**
+     * Service Properties used by this Engine
+     */
+    private static final Map<String,Object> SERVICE_PROPERTIES;
+    static {
+        Map<String,Object> props = new HashMap<String,Object>();
+        props.put(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING, 
+            ServiceProperties.ORDERING_NLP_POS - 1); //after POS tagging
+        props.put(NlpServiceProperties.ENHANCEMENT_ENGINE_NLP_ROLE, 
+            NlpProcessingRole.SentimentTagging);
+        SERVICE_PROPERTIES = Collections.unmodifiableMap(props);
+    }
 
 
     private static Logger log = LoggerFactory.getLogger(SentimentEngine.class);
@@ -280,10 +279,7 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
             if(process){
                 double sentiment = classifier.classifyWord(token.getSpan());
                 if(sentiment != 0.0){
-                    token.addAnnotation(SENTIMENT_ANNOTATION, 
-                        new Value<SentimentTag>(sentiment > 0 ? 
-                                SentimentTag.POSITIVE : SentimentTag.NEGATIVE,
-                                Math.abs(sentiment)));
+                    token.addAnnotation(SENTIMENT_ANNOTATION, new Value<Double>(sentiment));
                 } //else do not set sentiments with 0.0
             }
         }
@@ -343,6 +339,10 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
         this.classifiers.clear();
         langaugeConfig.setDefault();
         super.deactivate(ctx);
+    }
+    @Override
+    public Map<String,Object> getServiceProperties() {
+        return SERVICE_PROPERTIES;
     }
 
 }

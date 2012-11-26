@@ -35,14 +35,12 @@ public abstract class LexicalCategoryClassifier implements SentimentClassifier {
 
     @Override
     public boolean isAdjective(PosTag posTag) {
-        return posTag.getCategory() != null && 
-                LexicalCategory.Adjective == posTag.getCategory();
+        return posTag.hasCategory(LexicalCategory.Adjective);
     }
 
     @Override
     public boolean isNoun(PosTag posTag) {
-        return posTag.getCategory() != null && 
-                LexicalCategory.Noun == posTag.getCategory();
+        return posTag.hasCategory(LexicalCategory.Noun);
     }
 
 }

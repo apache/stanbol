@@ -5,15 +5,26 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
+import org.apache.stanbol.enhancer.nlp.model.impl.SectionImpl;
+import org.apache.stanbol.enhancer.nlp.model.impl.SpanImpl;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.SubstituteLoggerFactory;
+
+import com.ibm.icu.lang.UCharacter.SentenceBreak;
 
 public class AnalysedTextUtils {
+    
+    private static final Logger log = LoggerFactory.getLogger(AnalysedTextUtils.class);
 
     /**
      * Getter for the {@link AnalysedText} content part of the parsed
@@ -30,7 +41,7 @@ public class AnalysedTextUtils {
         ci.getLock().readLock().lock();
         try {
             return ci.getPart(AnalysedText.ANALYSED_TEXT_URI, AnalysedText.class);
-        }catch (NoSuchPartException e) {
+        } catch (NoSuchPartException e) {
             return null;
         } finally {
             ci.getLock().readLock().unlock();
@@ -150,5 +161,47 @@ public class AnalysedTextUtils {
             }
         };
     }
-    
+// NOTE: No longer used ... keep for now in case that we need this functionality.
+//    public static Set<Span> getEnclosed(SortedSet<Span> sortedSet, Span span){
+//        if(span.getType() == SpanTypeEnum.Token){
+//            log.warn("Span {} with SpanType {} parsed to getEnclosing(..). Returned Set will " 
+//                    + "contain the parsed span!");
+//        }
+//        return sortedSet.subSet(new SubSetHelperSpan(span.getStart(), span.getEnd()), 
+//            new SubSetHelperSpan(span.getEnd()));
+//    }
+//    public static <T> Map<Span,T> getEnclosed(SortedMap<Span,T> sortedSet, Span span){
+//        if(span.getType() == SpanTypeEnum.Token){
+//            log.warn("Span {} with SpanType {} parsed to getEnclosing(..). Returned Set will " 
+//                    + "contain the parsed span!");
+//        }
+//        return sortedSet.subMap(new SubSetHelperSpan(span.getStart(), span.getEnd()), 
+//            new SubSetHelperSpan(span.getEnd()));
+//    }
+//    
+//    /**
+//     * Internal helper class used for building {@link SortedSet#subSet(Object, Object)}.
+//     * 
+//     * @author Rupert Westenthaler
+//     *
+//     */
+//    private static class SubSetHelperSpan extends SpanImpl implements Span {
+//        /**
+//         * Create the start constraint for {@link SortedSet#subSet(Object, Object)}
+//         * @param start
+//         * @param end
+//         */
+//        protected SubSetHelperSpan(int start,int end){
+//            super(SpanTypeEnum.Text, //lowest pos type
+//                start,end);
+//        }
+//        /**
+//         * Creates the end constraint for {@link SortedSet#subSet(Object, Object)}
+//         * @param pos
+//         */
+//        protected SubSetHelperSpan(int pos){
+//            super(SpanTypeEnum.Token, //highest pos type,
+//                pos,Integer.MAX_VALUE);
+//        }
+//    }
 }
