@@ -139,6 +139,7 @@ public class TikaEngine
     private ContentItemFactory ciFactory;
     
     private static class MediaTypeAndStream {
+        String uri;
         MediaType mediaType;
         InputStream in;
     }
@@ -265,10 +266,13 @@ public class TikaEngine
     private MediaTypeAndStream extractMediaType(ContentItem ci) {
         MediaTypeAndStream mtas = new MediaTypeAndStream();
         mtas.mediaType = getMediaType(ci.getBlob());
+        mtas.uri = ci.getUri().getUnicodeString();
         if(mtas.mediaType == null || mtas.mediaType.equals(MediaType.OCTET_STREAM)){
             mtas.in = new BufferedInputStream(ci.getStream());
+            Metadata m = new Metadata();
+            m.add(Metadata.RESOURCE_NAME_KEY, mtas.uri);
             try {
-                mtas.mediaType = detector.detect(mtas.in, new Metadata());
+                mtas.mediaType = detector.detect(mtas.in, m);
             } catch (IOException e) {
                 log.warn("Exception while detection the MediaType of the" +
                         "parsed ContentItem "+ci.getUri(),e);
