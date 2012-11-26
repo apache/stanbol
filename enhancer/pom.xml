@@ -63,6 +63,7 @@
     <module>generic/core</module>
     <module>generic/test</module>
     <module>generic/rdfentities</module>
+    <module>generic/nlp</module>
     <module>jobmanager</module>
 
     <module>chain/allactive</module>

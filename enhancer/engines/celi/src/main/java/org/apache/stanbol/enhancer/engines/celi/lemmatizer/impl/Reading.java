@@ -17,13 +17,14 @@
 package org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl;
 
 import java.util.Hashtable;
+import java.util.List;
 
 public class Reading {
 	
 	String lemma;
-	Hashtable<String,String> lexicalFeatures;
+	Hashtable<String,List<String>> lexicalFeatures;
 	
-	public Reading(String lemma, Hashtable<String, String> lexicalFeatures) {
+	public Reading(String lemma, Hashtable<String, List<String>> lexicalFeatures) {
 		super();
 		this.lemma = lemma;
 		this.lexicalFeatures = lexicalFeatures;
@@ -37,11 +38,11 @@ public class Reading {
 		this.lemma = lemma;
 	}
 
-	public Hashtable<String, String> getLexicalFeatures() {
+	public Hashtable<String, List<String>> getLexicalFeatures() {
 		return lexicalFeatures;
 	}
 
-	public void setLexicalFeatures(Hashtable<String, String> lexicalFeatures) {
+	public void setLexicalFeatures(Hashtable<String, List<String>> lexicalFeatures) {
 		this.lexicalFeatures = lexicalFeatures;
 	}
 	

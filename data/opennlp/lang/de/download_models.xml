@@ -37,9 +37,8 @@
         <url url="${model.url}/de-sent.bin"/>
         <!-- url url="${model.url}/de-pos-perceptron.bin"/ -->
         <url url="${model.url}/de-pos-maxent.bin"/>
-        <!-- no Chunker for german
-         <url url="${model.url}/de-chunker.bin"/>
-          -->
+        <!-- Noune Phrase Chunker for German -->
+        <url url="${model.url}/OpenNLP_1.5.1-German-Chunker-TigerCorps07.zip"/>
       </resources>
     </copy>
   </target>

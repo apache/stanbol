@@ -64,6 +64,7 @@
     <!-- Data bundles -->
     <module>defaultdata</module>
     <module>opennlp</module>
+    <module>sentimentdata</module>
 
     <!-- Specific features -->
     <module>authentication</module>
