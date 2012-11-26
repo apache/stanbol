@@ -16,24 +16,18 @@
 
 package org.apache.stanbol.enhancer.engines.opennlp.pos.services;
 
-import static java.util.Collections.singleton;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.initAnalysedText;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTagger;
@@ -55,8 +49,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.enhancer.engines.opennlp.pos.model.PosTagSetRegistry;
-import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
-import org.apache.stanbol.enhancer.nlp.TagSet;
+import org.apache.stanbol.enhancer.nlp.NlpProcessingRole;
+import org.apache.stanbol.enhancer.nlp.NlpServiceProperties;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextFactory;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
@@ -66,6 +60,7 @@ import org.apache.stanbol.enhancer.nlp.model.Span;
 import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
+import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
 import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
@@ -73,8 +68,7 @@ import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
-import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
@@ -96,11 +90,20 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties(value={
         @Property(name= EnhancementEngine.PROPERTY_NAME,value="opennlp-pos"),
-        @Property(name=POSTaggingEngine.CONFIG_LANGUAGES, value = {"*"},cardinality=Integer.MAX_VALUE),
+        @Property(name=OpenNlpPosTaggingEngine.CONFIG_LANGUAGES, value = {"*"},cardinality=Integer.MAX_VALUE),
         @Property(name=Constants.SERVICE_RANKING,intValue=-100) //give the default instance a ranking < 0
 })
-public class POSTaggingEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> {
+public class OpenNlpPosTaggingEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties {
 
+    private static final Map<String,Object> SERVICE_PROPERTIES;
+    static {
+        Map<String,Object> props = new HashMap<String,Object>();
+        props.put(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING, 
+            ServiceProperties.ORDERING_NLP_POS);
+        props.put(NlpServiceProperties.ENHANCEMENT_ENGINE_NLP_ROLE, 
+            NlpProcessingRole.PartOfSpeachTagging);
+        SERVICE_PROPERTIES = Collections.unmodifiableMap(props);
+    }
 
     /**
      * Language configuration. Takes a list of ISO language codes of supported languages. Currently supported
@@ -114,7 +117,7 @@ public class POSTaggingEngine extends AbstractEnhancementEngine<RuntimeException
     private static final String MODEL_NAME_PARAM = "model";
 
 
-    private static Logger log = LoggerFactory.getLogger(POSTaggingEngine.class);
+    private static Logger log = LoggerFactory.getLogger(OpenNlpPosTaggingEngine.class);
 
     //Langauge configuration
     private LanguageConfiguration languageConfig = new LanguageConfiguration(CONFIG_LANGUAGES,new String[]{"*"});
@@ -255,17 +258,24 @@ public class POSTaggingEngine extends AbstractEnhancementEngine<RuntimeException
             posTag(tokenList, posTagger,tagSet,adhocTags);
             
         }
-        
-        logAnnotations(at);
+        if(log.isTraceEnabled()){
+            logAnnotations(at);
+        }
     }
+    
+    @Override
+    public Map<String,Object> getServiceProperties() {
+        return SERVICE_PROPERTIES;
+    }
+    
     
     private void logAnnotations(AnalysedText at){
         Iterator<Span> it = at.getEnclosed(EnumSet.of(SpanTypeEnum.Sentence, SpanTypeEnum.Token));
         while(it.hasNext()){
             Span span = it.next();
-            log.info(" > {}",span);
+            log.trace(" > {}",span);
             for(Value<PosTag> value : span.getAnnotations(POS_ANNOTATION)){
-                log.info("   - {}",value);
+                log.trace("   - {}",value);
             }
         }
     }
