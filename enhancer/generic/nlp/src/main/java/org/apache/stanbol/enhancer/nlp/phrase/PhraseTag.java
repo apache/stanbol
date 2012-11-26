@@ -1,7 +1,7 @@
 package org.apache.stanbol.enhancer.nlp.phrase;
 
-import org.apache.stanbol.enhancer.nlp.Tag;
-import org.apache.stanbol.enhancer.nlp.TagSet;
+import org.apache.stanbol.enhancer.nlp.model.tag.Tag;
+import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 

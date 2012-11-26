@@ -6,7 +6,17 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.nlp.model.impl.AnalysedTextFactoryImpl;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 
+/**
+ * Abstract implementation of the {@link AnalysedTextFactory} that
+ * provides the implementation of the {@link #createAnalysedText(ContentItem, Blob)}
+ * based on the {@link #createAnalysedText(Blob)} method.
+ * <p>
+ * The {@link #getDefaultInstance()} methods returns the in-memory implementation
+ * of the AnalyzedText domain model and should only be used outside of an
+ * OSGI Service as implementation are also registered as OSGI services.
+ */
 public abstract class AnalysedTextFactory {
 
     private static AnalysedTextFactory defaultInstance = new AnalysedTextFactoryImpl();
@@ -29,7 +39,34 @@ public abstract class AnalysedTextFactory {
      * ContentItem.
      * @throws IOException on any error while reading data from the parsed blob
      */
-    public abstract AnalysedText createAnalysedText(ContentItem ci, Blob blob) throws IOException ;
+    public final AnalysedText createAnalysedText(ContentItem ci, Blob blob) throws IOException {
+        ci.getLock().readLock().lock();
+        try {
+            AnalysedText existing = ci.getPart(AnalysedText.ANALYSED_TEXT_URI, AnalysedText.class);
+            throw new IllegalStateException("The AnalysedText ContentPart already exists (impl: "
+                +existing.getClass().getSimpleName()+"| blob: "+existing.getBlob().getMimeType()+")");
+        }catch (NoSuchPartException e) {
+            //this is the expected case
+        }catch (ClassCastException e) {
+            throw new IllegalStateException("A ContentPart with the URI '"
+                + AnalysedText.ANALYSED_TEXT_URI+"' already exists but the parts "
+                + "type is not compatible with "+AnalysedText.class.getSimpleName()+"!",
+                e);
+        } finally {
+            ci.getLock().readLock().unlock();
+        }
+        //create the Analysed text
+        AnalysedText at = createAnalysedText(blob);
+        ci.getLock().writeLock().lock();
+        try {
+            //NOTE: there is a possibility that an other thread has added
+            // the contentpart
+            ci.addPart(AnalysedText.ANALYSED_TEXT_URI, at);
+        } finally {
+            ci.getLock().writeLock().unlock();
+        }
+        return at;
+    }
     /**
      * Creates a AnalysedText instance for the parsed blob.<p>
      * NOTE: This implementation does NOT register the {@link AnalysedText}
