@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.parent</artifactId>
-    <version>0.10.1-incubating-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.sentiment.sentiws</artifactId>
-  <version>1.0.0-incubating-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: SentimentWortschatz Models for German</name>
@@ -44,14 +44,22 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sentiment/sentiws
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/data/sentiment/sentiws
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sentiment/sentiws
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/data/sentiment/sentiws
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
   <properties>
+    <downloadWarning>
+      *
+      * WARNING - this build downloads the SentimentWortschatz files that are *not*
+      * licensed under the Apache License, and have more restrictive usage
+      * terms than the Apache Stanbol code. See STANBOL-545 for more
+      * information: https://issues.apache.org/jira/browse/STANBOL-545
+      *
+    </downloadWarning>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- define the path to/home of the OpenNLP modles-->
     <sentiment.model.path>org/apache/stanbol/data/sentiment/sentiws</sentiment.model.path>
@@ -91,8 +99,8 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
-            <id>compile</id>
-            <phase>compile</phase>
+            <id>download</id>
+            <phase>generate-resources</phase>
             <configuration>
               <!--
                 TODO: I would like to add an "unless" constraint to the
