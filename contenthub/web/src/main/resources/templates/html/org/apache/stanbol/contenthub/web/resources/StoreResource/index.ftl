@@ -58,7 +58,6 @@
           <#list it.recentlyEnhancedItems as item>
             <tr>
               <td>
-                <img src="${it.staticRootUrl}/contenthub/images/edit_icon_16.png" onClick="javascript:editContentItem('${item.localId}', '${item.title?js_string}');" title="Edit this item" />
                 <img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" onClick="javascript:deleteContentItem('${item.localId}');" title="Delete this item" />
               </td>
               <td><a href="${item.dereferencableURI}" title="${item.dereferencableURI}"><#if item.title??>${item.title}<#else>${item.localId}</#if></a></td>
@@ -79,53 +78,57 @@
     </div>
   </div>
 
-  <div id="editingDiv"> </div>
-
-  <h3>Submit Constraints to Content Item for analysis</h3>
+  <h3>Submit Content Item </h3>
   <fieldset>
-    <legend>Give Field:Value for your content</legend>
-    <input type="text" id="fieldTitle" value="title" readonly="readonly"/> : <input type="text" id="valueTitle" />
-    <div id="constraintsDiv" style="max-height:190px;overflow:auto"></div>
-    <br/>
-    <label onClick="javascript:addConstraint();">
-      <img src="${it.staticRootUrl}/contenthub/images/add_icon_16.png" />  Add a new constraint
-    </label>
+    <legend>Optional parameters</legend>
+    <table>
+      <tr>
+      	<td>
+    	  Title : 
+    	</td>
+    	<td>
+    	  <input type="text" id="valueTitle" />
+    	</td>
+      </tr>
+      <tr>
+        <td>
+          Chain Name : 
+    	</td>
+    	<td>
+    	  <input type="text" id="valueChain" />
+    	</td>
+      </tr>
+    </table>
   </fieldset>
   <br/>
   
-  <h3>Submit a new Content Item for analysis</h3>
-  <form method="POST" id="contentForm" accept-charset="utf-8" onSubmit = "return setConstraints();">
+  <form method="POST" id="contentForm" accept-charset="utf-8" onSubmit = "return performSubmit(1);">
     <fieldset>
-      <input type="hidden" id="constraintsContent" name="constraints" value="" />
-      <input type="hidden" name="title" value="" />
-      <input type="hidden" id="uriContent" name="uri" value="" />
+      <input type="hidden" id="title1" name="title" value="" />
+      <input type="hidden" id="chain1" name="chain" value="" />
       <legend>Submit raw text content</legend>
       <p><textarea rows="15" id="contentTextArea" name="content"></textarea></p>
       <p><input type="submit" id="contentSubmit" value="Submit text" /></p>
     </fieldset>
   </form>
 
-  <form method="POST" id="urlForm" accept-charset="utf-8" onSubmit = "return setConstraints();">
+  <form method="POST" id="urlForm" accept-charset="utf-8" onSubmit = "return performSubmit(2);">
     <fieldset>
-      <input type="hidden" id="constraintsURL" name="constraints" value="" />
-      <input type="hidden" name="title" value="" />
-      <input type="hidden" id="uriURL" name="uri" value="" />
+      <input type="hidden" id="title2" name="title" value="" />
+      <input type="hidden" id="chain2" name="chain" value="" />
       <legend>Submit a remote public resource by URL</legend>
       <p>
-        <input name="url" type="text" class="url" />
+        <input name="url" id="url" type="text" class="url" />
         <input type="submit" id="urlSubmit" value="Submit URL" />
       </p>
     </fieldset>
   </form>
 
-  <form method="POST" id="fileForm" accept-charset="utf-8"  enctype="multipart/form-data" onSubmit = "return setConstraints();">
+  <form method="POST" id="fileForm" accept-charset="utf-8"  enctype="multipart/form-data" onSubmit = "return performSubmit(3);">
     <fieldset>
-      <input type="hidden" id="constraintsFile" name="constraints" value="" />
-      <input type="hidden" name="title" value="" />
-      <input type="hidden" id="uriFile" name="uri" value="" />
-      <legend>Upload a local file</legend>
+    <legend>Upload a local file</legend>
       <p>
-        <input id="file" name="file" type="file"/>
+        <input type="file" id="file" name="content"/>
         <input type="submit" id="fileSubmit" value="Submit file" />
       </p>
     </fieldset>
@@ -159,148 +162,46 @@
         window.location.replace("${it.publicBaseUri}contenthub/" + index + "/store/");
     }
     
-    function setConstraints() {
-        var titleStr = document.getElementById("valueTitle").value;
-        var fileStr = document.getElementById("file").value;
-        if((!fileStr || fileStr == "") && (!titleStr || titleStr == "")) {
-            // control for the title input... it must exist
-            alert('You should enter title for your content');
-            return false;
-        }
-        
-        var i;
-        var result = JSON.parse("{}");
-        for(i=0; i<=counter; i++) {
-            if (document.getElementById("textDiv" + i)) {
-                var field = jQuery.trim(document.getElementsByName("fieldText"+i)[0].value);
-                var value = jQuery.trim(document.getElementsByName("valueText"+i)[0].value);
-                if(!field || !value) {
-                    continue;
-                }
-                if(result[field] == null) {
-                    result[field] = new Array();
-                }
-                var values = value.split(",");
-                for(j=0; j<values.length; j++) {
-                    result[field].push(jQuery.trim(values[j]));
-                }
-            }
-        }
-    
-        var constraints = document.getElementsByName('constraints');
-        var title = document.getElementsByName('title');
-        for (var i in constraints) {
-            constraints[i].value = JSON.stringify(result);
-            title[i].value =  document.getElementById('valueTitle').value;
-        }
+    function performSubmit(submissionMethod) {
+    	if(submissionMethod == 1) {
+    		var content = document.getElementById("contentTextArea").value;
+    		if(!content || content == "") {
+    			alert('You should enter non-empty content');
+            	return false;
+    		}
+    		document.getElementById('title1').value = document.getElementById('valueTitle').value;
+    		document.getElementById('chain1').value = document.getElementById('valueChain').value;
+    	} else if(submissionMethod == 2) {
+    	
+    		var url = document.getElementById("url").value;
+    		if(!url || url == "") {
+    			alert('You should enter non-empty URL');
+            	return false;
+    		}
+    		document.getElementById('title2').value = document.getElementById('valueTitle').value;
+    		document.getElementById('chain2').value = document.getElementById('valueChain').value;
+    	} else if(submissionMethod == 3) {
+    		var file = document.getElementById("file").value;
+    		if(!file || file == "") {
+    			alert('You should specify a file to be submitted');
+            	return false;
+    		}
+    		var title = $.trim($("#valueTitle").val());
+    		var chain = $.trim($("#valueChain").val());
+    		var actionStr = "";
+    		if(title != null && title != ""){
+    			actionStr += "?title="+encodeURIComponent(title);
+    		}
+    		if(chain != null && chain != ""){
+    			actionStr += (actionStr != "") ? "&" : "?" 
+    			actionStr += "chain="+encodeURIComponent(chain);
+    		}
+    		document.getElementById('fileForm').action = actionStr;
+    	}
         return true;
     }
   
-    function addConstraint() {
-        var newCons = document.createElement('div');
-        newCons.setAttribute('id','textDiv' + counter);
-        var fieldName = "fieldText"+counter;
-        var valueName = "valueText"+counter;
-        var url = "javascript:removeConstraint(" + counter + ");";
-    
-        newCons.innerHTML = "<br/><input type='text' name=" + fieldName + " />" 
-                 + " : "
-                 + "<input type='text' name=" + valueName + " />"
-                 + "  <img src='${it.staticRootUrl}/contenthub/images/delete_icon_16.png' title='Remove' onClick=" + url + " />";
-           
-        document.getElementById("constraintsDiv").appendChild(newCons);
-        document.getElementsByName(fieldName)[0].focus();
-        counter++;
-    }
-  
-    function removeConstraint(divNo) {
-        var constraintsDiv = document.getElementById('constraintsDiv');
-        constraintsDiv.removeChild(document.getElementById('textDiv'+divNo));
-    }
-
-    function startEditing(set) {
-        if(set) {
-            $("#contentForm").attr("action", "/contenthub/${it.indexName}/store/update");
-            $("#contentSubmit").attr("value", "Update text");
-            $("#urlForm").attr("action", "/contenthub/${it.indexName}/store/update");
-            $("#urlSubmit").attr("value", "Update URL");
-            $("#fileForm").attr("action", "/contenthub/${it.indexName}/store/update");
-            $("#fileSubmit").attr("value", "Update file");
-        }
-        else {
-            $("#contentForm").attr("action", "");
-            $("#contentSubmit").attr("value", "Submit text");
-            $("#urlForm").attr("action", "");
-            $("#urlSubmit").attr("value", "Submit URL");
-            $("#fileForm").attr("action", "");
-            $("#fileSubmit").attr("value", "Submit file");
-        }
-    }
-  
-    function cancelEditing() {
-        var uris = document.getElementsByName('uri');
-        for (var i in uris) {
-            uris[i].value = "";
-        }
-        document.getElementById("editingDiv").innerHTML = "";
-        startEditing(false);
-    }
-
-    function editContentItem(vlocalid, vtitle) {
-        var lurl = "${it.publicBaseUri}contenthub/${it.indexName}/store/edit/" + vlocalid;
-        document.getElementById("constraintsDiv").innerHTML = "";
-        counter=0;
-        $.ajax({
-            url: lurl,
-            type: "GET",
-            async: true,
-            cache: false,
-            success: function(jsonCons) {
-                var contentItem = JSON.parse(jsonCons);
-                if(contentItem != null) {
-                    startEditing(true);
-                    //fill the text content item related components in the user interface
-                    // TODO: use more mimeType
-                    if(contentItem["mimeType"] == "text/plain") {
-                        document.getElementById("contentTextArea").value = contentItem["content"];
-                    } else {
-                        document.getElementById("contentTextArea").value = "";
-                    }
-                    var uris = document.getElementsByName('uri');
-                    for (var i in uris) {
-                        uris[i].value = contentItem["uri"];
-                    }
-                    document.getElementById("editingDiv").innerHTML =   '<img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="Cancel Editing" onClick="javascript:cancelEditing()" />'
-                                        + " You are editing Content Item with title: <b>" + contentItem["title"] + "</b>";
-                    document.getElementById("valueTitle").value = contentItem["title"];
-              
-                    //delete already consumed values from json representation so that they will not be added to the constraints
-                    delete contentItem["content"];
-                    delete contentItem["uri"];
-                    delete contentItem["mimeType"];
-                    delete contentItem["title"];
-              
-                    for(var p in contentItem) {
-                        if(contentItem.hasOwnProperty(p)) {
-                            var fieldHtmlName = getHtmlName(p.toString());
-                            addConstraint();
-                            var createdConstraintIndex = counter - 1;
-                            document.getElementsByName("fieldText"+createdConstraintIndex)[0].value = fieldHtmlName;
-                            document.getElementsByName("valueText"+createdConstraintIndex)[0].value = contentItem[p].substring(1, contentItem[p].length-1);
-                        }
-                    }
-                }  
-            },
-            error: function(content) {
-                alert(result.status + ' ' + result.statusText);
-            }
-        });
-    }  
-  
     function deleteContentItem(vlocalid) {
-        if(vlocalid == document.getElementById("uriContent").value) {
-            cancelEditing();
-        }
         var lurl = "${it.publicBaseUri}contenthub/${it.indexName}/store/" + vlocalid;
         $.ajax({
             url: lurl,

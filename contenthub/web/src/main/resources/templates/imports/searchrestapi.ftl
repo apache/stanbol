@@ -17,10 +17,6 @@
 
 <h3>The RESTful API of the Contenthub Search</h3>
 
-There are two endpoints you can reach from search
-<li>Featured Search</li>
-<li>Related Search</li>
-
 <h3>Featured Search</h3>  
 <table>
 <tbody>
@@ -66,7 +62,7 @@ There are two endpoints you can reach from search
 
 <hr>
 
-
+<!--
 <h3>Related Search</h3>
 
 Related Search provide three sub-endpoints
@@ -204,7 +200,7 @@ Related Search provide three sub-endpoints
 <pre>curl -i -X GET http://localhost:8080/contenthub/search/related/referencedsite?keyword=Paris -H "Accept:application/json"</pre>
 
 <hr>
-
+-->
 <script>
 function selectText(element) {
     var doc = document;
