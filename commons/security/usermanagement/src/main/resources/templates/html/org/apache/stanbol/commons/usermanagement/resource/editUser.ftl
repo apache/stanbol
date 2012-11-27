@@ -7,12 +7,18 @@ login: <@ldpath path="platform:userName :: xsd:string"/> <br/>
 <input type="hidden" name="currentUserName" value="<@ldpath path="platform:userName :: xsd:string"/>" />
 login: <input type="text" name="newUserName" value="" /><br/>
 Full Name: <input type="text" name="fullName" value="<@ldpath path="foaf:name :: xsd:string"/>" /><br/>
+
 <#assign mbox>
 <@ldpath path="foaf:mbox" />
 </#assign>
-<#assign email>
-<#if mbox != "">${mbox?substring(7)}</#if>
-</#assign>
+
+<#attempt>
+   <#assign email>
+      <#if mbox != "">${mbox?substring(7)}</#if>
+   </#assign>
+<#recover>
+</#attempt>
+
 Email : <input type="text" name="email" value="${email}" /><br/>
 Password : <input type="password" name="password" value="" /><br/>
 	Permissions: <ul>
