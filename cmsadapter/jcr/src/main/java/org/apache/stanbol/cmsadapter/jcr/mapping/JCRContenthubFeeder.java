@@ -19,9 +19,7 @@ package org.apache.stanbol.cmsadapter.jcr.mapping;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.jcr.Binary;
 import javax.jcr.ItemNotFoundException;
@@ -32,10 +30,15 @@ import javax.jcr.PropertyIterator;
 import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.Value;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
 
+import org.apache.clerezza.rdf.core.LiteralFactory;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -46,9 +49,10 @@ import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContentItemFilter;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeederException;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
-import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrStore;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,17 +118,17 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
     private List<String> contentProperties;
 
     @Override
-    public void submitContentItemByCMSObject(Object o, String id) {
-        submitContentItemByCMSObject(o, id, null);
+    public void submitContentItemByCMSObject(Object o) {
+        submitContentItemByCMSObject(o, null);
     }
 
     @Override
-    public void submitContentItemByCMSObject(Object o, String id, String indexName) {
+    public void submitContentItemByCMSObject(Object o, String indexName) {
         Node n = (Node) o;
         String actualNodeId = "";
         try {
             actualNodeId = n.getIdentifier();
-            ContentContext contentContext = getContentContextWithBasicInfo(n, id);
+            ContentContext contentContext = getContentContextWithBasicInfo(n);
             processContextAndSubmitToContenthub(contentContext, indexName);
         } catch (RepositoryException e) {
             log.warn("Failed to get basic information of node having id: {}", actualNodeId);
@@ -228,7 +232,7 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
     @Override
     public void deleteContentItemByID(String contentItemID, String indexName) {
         try {
-            solrStore.deleteById(contentItemID, indexName);
+            solrStore.deleteById(attachBaseURI(contentItemID), indexName);
         } catch (StoreException e) {
             log.error(e.getMessage(), e);
         }
@@ -245,7 +249,7 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
         try {
             n = getNodeByPath(contentItemPath);
             try {
-                solrStore.deleteById(n.getIdentifier(), indexName);
+                solrStore.deleteById(attachBaseURI(n.getIdentifier()), indexName);
             } catch (StoreException e) {
                 log.error(e.getMessage(), e);
             }
@@ -266,7 +270,7 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
             nodes = getNodesUnderPath(rootPath);
             for (Node n : nodes) {
                 try {
-                    solrStore.deleteById(n.getIdentifier(), indexName);
+                    solrStore.deleteById(attachBaseURI(n.getIdentifier()), indexName);
                 } catch (StoreException e) {
                     log.error(e.getMessage(), e);
                 }
@@ -292,53 +296,59 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
         return session instanceof Session;
     }
 
-    private void processContextAndSubmitToContenthub(ContentContext contentContext, String indexName) {
-        String id = contentContext.getIdentifier();
+    private void processContextAndSubmitToContenthub(ContentContext contentContext, String indexName) throws RepositoryException {
+        String id = contentContext.getNode().getIdentifier();
+        String contentItemId = contentContext.getIdentifier();
         populateContentContext(contentContext);
         if (contentContext.getContent() == null || contentContext.getContent().length == 0) {
             log.warn("Failed to get content for node having id: {}", id);
             return;
         }
 
-        Map<String,List<Object>> constraints = getConstraintsFromNode(contentContext);
-        if (constraints.isEmpty()) {
-            log.debug("There is no constraint for the node having id: {}", id);
+        MGraph additionalMetadata = getAdditionalMetadataFromNode(contentContext);
+        if (additionalMetadata.isEmpty()) {
+            log.debug("There is no additional metadata for the node having id: {}", id);
         }
 
-        SolrContentItem sci = solrStore.create(contentContext.getContent(), id, contentContext.getNodeName(),
-            contentContext.getContentType(), constraints);
+        ContentItem ci = null;
         try {
-            solrStore.enhanceAndPut(sci, indexName);
+            ci = solrStore.create(contentContext.getContent(), contentItemId, contentContext.getNodeName(),
+                contentContext.getContentType());
+            ci.addPart(ADDITIONAL_METADATA_URI, additionalMetadata);
+            solrStore.enhanceAndPut(ci, indexName, null);
         } catch (StoreException e) {
             log.error(e.getMessage(), e);
         }
         log.info("Document submitted to Contenthub.");
-        log.info("Id: {}", sci.getUri().getUnicodeString());
-        log.info("Mime type: {}", sci.getMimeType());
-        log.info("Constraints: {}", sci.getConstraints().toString());
+        log.info("Id: {}", ci.getUri().getUnicodeString());
+        log.info("Mime type: {}", ci.getMimeType());
     }
 
-    private Map<String,List<Object>> getConstraintsFromNode(ContentContext contentContext) {
-        Map<String,List<Object>> constraints = new HashMap<String,List<Object>>();
+    private MGraph getAdditionalMetadataFromNode(ContentContext contentContext) {
+        MGraph additionalMetadata = new IndexedMGraph();
         try {
             PropertyIterator it = contentContext.getNode().getProperties();
             while (it.hasNext()) {
                 javax.jcr.Property p = it.nextProperty();
-                List<Object> propertyVals = new ArrayList<Object>();
-
                 if (!skipProperty(p)) {
                     if (!p.isMultiple()) {
-                        propertyVals.add(JCRUtils.getTypedPropertyValue(p.getType(), p.getValue()));
+                        additionalMetadata.add(new TripleImpl(new UriRef(contentContext.getIdentifier()),
+                                new UriRef(p.getName()), LiteralFactory.getInstance().createTypedLiteral(
+                                    JCRUtils.getTypedPropertyValue(p.getType(), p.getValue()))));
                     } else {
-                        propertyVals.addAll(JCRUtils.getTypedPropertyValues(p.getType(), p.getValues()));
+                        for (Value value : p.getValues()) {
+                            Object typedValue = JCRUtils.getTypedPropertyValue(p.getType(), value);
+                            additionalMetadata.add(new TripleImpl(new UriRef(contentContext.getIdentifier()),
+                                    new UriRef(p.getName()), LiteralFactory.getInstance().createTypedLiteral(
+                                        typedValue)));
+                        }
                     }
-                    constraints.put(p.getName(), propertyVals);
                 }
             }
         } catch (RepositoryException e) {
             log.warn("Failed to process properties of node having: {}", contentContext.getIdentifier());
         }
-        return constraints;
+        return additionalMetadata;
     }
 
     private boolean skipProperty(javax.jcr.Property p) throws RepositoryException {
@@ -420,15 +430,11 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
     }
 
     private ContentContext getContentContextWithBasicInfo(Node n) throws RepositoryException {
-        return getContentContextWithBasicInfo(n, null);
-    }
-
-    private ContentContext getContentContextWithBasicInfo(Node n, String id) throws RepositoryException {
         ContentContext contentContext = new ContentContext();
-        contentContext.setIdentifier((id == null || id.equals("")) ? n.getIdentifier() : id);
         contentContext.setNode(n);
         contentContext.setNodeType(n.getPrimaryNodeType().getName());
         contentContext.setNodeName(n.getName());
+        contentContext.setIdentifier(attachBaseURI(n.getIdentifier()));
         return contentContext;
     }
 
@@ -507,6 +513,13 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
         } else {
             this.contentProperties = (List<String>) cProps;
         }
+    }
+
+    private String attachBaseURI(String id) {
+        if (!id.contains(":")) {
+            id = CONTENT_ITEM_URI_PREFIX + id;
+        }
+        return id;
     }
 
     /**
