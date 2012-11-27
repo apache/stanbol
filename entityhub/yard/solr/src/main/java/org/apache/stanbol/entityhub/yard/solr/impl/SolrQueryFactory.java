@@ -248,14 +248,14 @@ public class SolrQueryFactory {
         }
         if (queryString.length() > 0) {
             String qs = queryString.toString();
-            log.info("QueryString: {}", qs);
+            log.debug("QueryString: {}", qs);
             if (MLT_QUERY_TYPE.equals(query.getQueryType())) {
                 query.set(CommonParams.FQ, qs);
             } else {
                 query.setQuery(qs);
             }
         }
-        log.info("Solr Query: {}",query);
+        log.debug("Solr Query: {}",query);
         return query;
     }
 
