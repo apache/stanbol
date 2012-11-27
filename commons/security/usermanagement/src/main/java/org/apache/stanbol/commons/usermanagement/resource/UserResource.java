@@ -169,97 +169,6 @@ public class UserResource {
 	}
 
 	/**
-	 * Replaces/inserts literal value for predicate assumes there is only one
-	 * triple for the given predicate
-	 * 
-	 * @param userNode
-	 *            node in systemGraph corresponding to the user to change
-	 * @param predicate
-	 *            property of the triple to change
-	 * @param newValue
-	 *            new value for given predicate
-	 */
-	private void changeLiteral(GraphNode userNode, UriRef predicate,
-			String newValue) {
-
-		Iterator<Triple> oldTriples = systemGraph.filter(
-				(NonLiteral) userNode.getNode(), predicate, null);
-
-		ArrayList<Triple> oldBuffer = new ArrayList<Triple>();
-		
-		System.out.println("\n\n");
-		
-		while (oldTriples.hasNext()) {
-			Triple triple = oldTriples.next();
-
-			System.out.println("*** old triple = "+triple);
-			
-			// check for newValue == oldValue
-			Literal oldLiteral = (Literal) triple.getObject();
-			if (newValue.equals(oldLiteral.getLexicalForm())) {
-				return;
-			}
-
-			oldBuffer.add(triple);
-		}
-
-		// new value is added before deleting old one in case user is modifying
-		// their own data
-		// in which case they need triples in place for rights etc.
-	//	userNode.addPropertyValue(predicate, newValue);
-
-		userNode.addProperty(predicate, new
-				PlainLiteralImpl(newValue));
-		
-		System.out.println("*** systemGraph size before removal = "+systemGraph.size());
-		systemGraph.removeAll(oldBuffer);
-		System.out.println("*** systemGraph size after removal = "+systemGraph.size());
-		// workaround for possible issue in verification re. PlainLiteral vs.
-		// xsd:string
-		// userNode.addProperty(PERMISSION.passwordSha1, new
-		// PlainLiteralImpl(passwordSha1));
-		// most likely not a problem, and the above will work
-	}
-
-	/**
-	 * Replaces/inserts resource value for predicate assumes there is only one
-	 * triple for the given predicate
-	 * 
-	 * @param userNode
-	 *            node in systemGraph corresponding to the user to change
-	 * @param predicate
-	 *            property of the triple to change
-	 * @param newValue
-	 *            new value for given predicate
-	 */
-	private void changeResource(GraphNode userNode, UriRef predicate,
-			UriRef newValue) {
-
-		Iterator<UriRef> oldValues = userNode.getUriRefObjects(predicate);
-
-		UriRef oldValue = null;
-
-		if (oldValues.hasNext()) {
-			oldValue = oldValues.next();
-		}
-
-		// new value is added before deleting old one in case user is modifying
-		// their own data
-		// in which case they need triples in place for rights etc.
-		userNode.addPropertyValue(predicate, newValue);
-
-		if (oldValue != null) {
-			userNode.deleteProperty(predicate, oldValue);
-		}
-
-		// workaround for possible issue in verification re. PlainLiteral vs.
-		// xsd:string
-		// userNode.addProperty(PERMISSION.passwordSha1, new
-		// PlainLiteralImpl(passwordSha1));
-		// most likely not a problem, and the above will work
-	}
-
-	/**
 	 * replaces the subgraph serialized with RDF/XML in <code>revokedString
 	 * </code> with the one from <code>assertedString</code>.
 	 * 
@@ -376,7 +285,7 @@ public class UserResource {
 	@Path("change-user")
 	public Response changeUser(String userData) {
 
-		log.debug("deleteUser called with " + userData);
+		log.debug("changeUser called with " + userData);
 
 		Graph inputGraph = readData(userData);
 
@@ -388,34 +297,42 @@ public class UserResource {
 
 			NonLiteral changeNode = changeTriple.getSubject();
 
-			// need to create the predicateUriRef from the Resource, but this
-			// didn't work... other methods?
+			Literal userName = (Literal) inputGraph
+					.filter(changeNode, PLATFORM.userName, null).next()
+					.getObject();
+
+			NonLiteral userNode = (NonLiteral) systemGraph
+					.filter(null, PLATFORM.userName, userName).next()
+					.getSubject();
 
 			UriRef predicateUriRef = (UriRef) inputGraph
 					.filter(changeNode, Ontology.predicate, null).next()
 					.getObject();
-			// UriRef predicateUriRef = (UriRef)predicate;
 
 			System.out.println("predicateUriRef = " + predicateUriRef);
 
-			// UriRef predicateUriRef = new UriRef(
-			// "http://clerezza.org/2009/08/platform#userName");
+			// handle old value (if it exists)
+			Iterator<Triple> iterator = inputGraph.filter(changeNode,
+					Ontology.oldValue, null);
+			Resource oldValue = null;
 
-			Resource oldValue = inputGraph
-					.filter(changeNode, Ontology.oldValue, null).next()
-					.getObject();
+			if (iterator.hasNext()) {
+				oldValue = iterator.next().getObject();
 
-			Triple oldTriple = systemGraph.filter(null, predicateUriRef,
-					oldValue).next();
+				// Triple oldTriple = systemGraph.filter(null, predicateUriRef,
+				// oldValue).next();
+				Triple oldTriple = systemGraph.filter(userNode,
+						predicateUriRef, oldValue).next();
 
-			systemGraph.remove(oldTriple);
+				systemGraph.remove(oldTriple);
+			}
 
 			Resource newValue = inputGraph
 					.filter(changeNode, Ontology.newValue, null).next()
 					.getObject();
 
-			Triple newTriple = new TripleImpl(oldTriple.getSubject(),
-					predicateUriRef, newValue);
+			Triple newTriple = new TripleImpl(userNode, predicateUriRef,
+					newValue);
 
 			systemGraph.add(newTriple);
 		}
@@ -438,7 +355,7 @@ public class UserResource {
 	public Response getUserTurtle(@PathParam("username") String userName)
 			throws UnsupportedEncodingException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		
+
 		serializer.serialize(baos, getUser(userName).getNodeContext(),
 				SupportedFormat.TURTLE);
 		String serialized = new String(baos.toByteArray(), "utf-8");
@@ -448,6 +365,129 @@ public class UserResource {
 
 	// ///////////////////////////////////////////////////////////////////////
 	// helper methods
+
+	/**
+	 * Replaces/inserts literal value for predicate assumes there is only one
+	 * triple for the given predicate new value is added before deleting old one
+	 * in case user is modifying their own data in which case they need triples
+	 * in place for rights etc.
+	 * 
+	 * @param userNode
+	 *            node in systemGraph corresponding to the user to change
+	 * @param predicate
+	 *            property of the triple to change
+	 * @param newValue
+	 *            new value for given predicate
+	 */
+	private void changeLiteral(GraphNode userNode, UriRef predicate,
+			String newValue) {
+
+		Iterator<Triple> oldTriples = systemGraph.filter(
+				(NonLiteral) userNode.getNode(), predicate, null);
+
+		ArrayList<Triple> oldBuffer = new ArrayList<Triple>();
+
+		// System.out.println("\n\n");
+
+		while (oldTriples.hasNext()) {
+			Triple triple = oldTriples.next();
+
+			// System.out.println("*** old triple = "+triple);
+
+			// shouldn't be necessary, but just to catch the edge case where the
+			// triple has the wrong type of subject
+			// try {
+			// // check for newValue == oldValue
+			// Literal oldLiteral = (Literal) triple.getObject();
+			// if (newValue.equals(oldLiteral.getLexicalForm())) {
+			// return;
+			// }
+			// } catch (Exception e) {
+			//
+			// UriRef oldResource = (UriRef) triple.getObject();
+			//
+			// // check for newValue == oldValue
+			// if (newValue.equals(oldResource)) {
+			// return;
+			// }
+			// }
+
+			Resource oldValue = triple.getObject();
+			if (newValue.equals(oldValue)) {
+				return;
+			}
+
+			oldBuffer.add(triple);
+		}
+
+		// filter appears to see plain literals and xsd:strings as differerent
+		// so not
+		// userNode.addPropertyValue(predicate, newValue);
+		userNode.addProperty(predicate, new PlainLiteralImpl(newValue));
+
+		// System.out.println("*** systemGraph size before removal = "+systemGraph.size());
+		systemGraph.removeAll(oldBuffer);
+		// System.out.println("*** systemGraph size after removal = "+systemGraph.size());
+	}
+
+	/**
+	 * Replaces/inserts resource value for predicate assumes there is only one
+	 * triple for the given predicate
+	 * 
+	 * @param userNode
+	 *            node in systemGraph corresponding to the user to change
+	 * @param predicate
+	 *            property of the triple to change
+	 * @param newValue
+	 *            new value for given predicate
+	 */
+	private void changeResource(GraphNode userNode, UriRef predicate,
+			UriRef newValue) {
+
+		Iterator<Triple> oldTriples = systemGraph.filter(
+				(NonLiteral) userNode.getNode(), predicate, null);
+
+		ArrayList<Triple> oldBuffer = new ArrayList<Triple>();
+
+		// System.out.println("\n\n");
+
+		while (oldTriples.hasNext()) {
+			Triple triple = oldTriples.next();
+
+			System.out.println("*** old triple = " + triple);
+
+			// try {
+			// UriRef oldResource = (UriRef) triple.getObject();
+			//
+			// // check for newValue == oldValue
+			// if (newValue.equals(oldResource)) {
+			// return;
+			// }
+			// } catch (Exception e) {
+			//
+			// Literal oldLiteral = (Literal) triple.getObject();
+			// if (newValue.equals(oldLiteral.getLexicalForm())) {
+			// return;
+			// }
+			// }
+
+			Resource oldValue = triple.getObject();
+			if (newValue.equals(oldValue)) {
+				return;
+			}
+
+			oldBuffer.add(triple);
+		}
+
+		// filter appears to see plain literals and xsd:strings as differerent
+		// so not
+		// userNode.addPropertyValue(predicate, newValue);
+		userNode.addProperty(predicate, newValue);
+
+		// System.out.println("*** systemGraph size before removal = "+systemGraph.size());
+		systemGraph.removeAll(oldBuffer);
+		// System.out.println("*** systemGraph size after removal = "+systemGraph.size());
+	}
 
 	private void serializeTriplesWithSubject(OutputStream stream, GraphNode node) {
 		serializer.serialize(stream, getTriplesWithSubject(node),
@@ -493,28 +533,28 @@ public class UserResource {
 	}
 
 	private GraphNode getNamedUser(String userName) {
-		
-		System.out.println("getting named user = "+userName);
-		
+
+		// System.out.println("getting named user = "+userName);
+
 		Iterator<Triple> iter = systemGraph.filter(null, PLATFORM.userName,
 				new PlainLiteralImpl(userName));
 		if (!iter.hasNext()) {
-			System.out.println("named user not found "+userName);
-			System.out.println("\n\n\n");
-				
+			System.out.println("named user not found " + userName);
+			// System.out.println("\n\n\n");
+
 			return null;
 		}
 		return new GraphNode(iter.next().getSubject(), systemGraph);
 	}
 
-//	private GraphNode getNamedUser(Resource nameResource) {
-//		Iterator<Triple> iter = systemGraph.filter(null, PLATFORM.userName,
-//				nameResource);
-//		if (!iter.hasNext()) {
-//			return null;
-//		}
-//		return new GraphNode(iter.next().getSubject(), systemGraph);
-//	}
+	// private GraphNode getNamedUser(Resource nameResource) {
+	// Iterator<Triple> iter = systemGraph.filter(null, PLATFORM.userName,
+	// nameResource);
+	// if (!iter.hasNext()) {
+	// return null;
+	// }
+	// return new GraphNode(iter.next().getSubject(), systemGraph);
+	// }
 
 	public GraphNode getUserType() {
 		return new GraphNode(FOAF.Agent, systemGraph);
