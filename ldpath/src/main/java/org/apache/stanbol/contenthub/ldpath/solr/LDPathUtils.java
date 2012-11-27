@@ -174,7 +174,7 @@ public class LDPathUtils {
             return new InputStreamReader(new ByteArrayInputStream(
                     program.getBytes(Constants.DEFAULT_ENCODING)), Constants.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {
-            String msg = String.format("Encoding {} should be supported by the system",
+            String msg = String.format("Encoding %s should be supported by the system",
                 Constants.DEFAULT_ENCODING);
             logger.error(msg, e);
             throw new LDPathException(msg, e);
