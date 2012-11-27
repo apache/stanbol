@@ -18,10 +18,11 @@
 package org.apache.stanbol.contenthub.servicesapi.store.solr;
 
 import java.util.List;
-import java.util.Map;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.contenthub.servicesapi.store.Store;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
+import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 
@@ -34,9 +35,11 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
  */
 public interface SolrStore extends Store {
 
+    public static final UriRef TITLE_URI = new UriRef("org.apache.stanbol.contenthub.store.solr.title");
+
     /**
-     * Creates a {@link SolrContentItem} with the given parameters. Created {@link SolrContentItem} is not
-     * persisted, this function just creates the object.
+     * Creates a {@link ContentItem} with the given parameters. Created {@link ContentItem} is not persisted,
+     * this function just creates the object.
      * 
      * @param content
      *            The content itself.
@@ -47,70 +50,71 @@ public interface SolrStore extends Store {
      *            The title for the content item.
      * @param contentType
      *            The mimeType of the content.
-     * @param constraints
-     *            The facets in <code>key:[value1,value2]</code> pairs.
-     * @return Created {@link SolrContentItem}.
-     */
-    SolrContentItem create(byte[] content,
-                           String id,
-                           String title,
-                           String contentType,
-                           Map<String,List<Object>> constraints);
-
-    /**
-     * Sends the {@link SolrContentItem} to the {@link EnhancementJobManager} to enhance the content.
-     * Afterwards saves the item in the default Solr core of the Contenthub.
-     * 
-     * @param sci
-     *            The {@link SolrContentItem} to be enhanced and saved.
-     * @return The unique ID of the {@link SolrContentItem}.
+     * @return Created {@link ContentItem}.
      * @throws StoreException
      */
-    String enhanceAndPut(SolrContentItem sci) throws StoreException;
+    ContentItem create(byte[] content, String id, String title, String contentType) throws StoreException;
 
     /**
-     * Sends the {@link SolrContentItem} to the {@link EnhancementJobManager} to enhance the content.
-     * Afterwards saves the item in the Solr core corresponding to the given <code>indexName</code>.
+     * Sends the {@link ContentItem} to the {@link EnhancementJobManager} to enhance the content. Afterwards
+     * saves the item in the default Solr core of the Contenthub.
      * 
-     * @param sci
-     *            The {@link SolrContentItem} to be enhanced and saved
+     * @param ci
+     *            The {@link ContentItem} to be enhanced and saved.
+     * @param chain
+     *            name of a particular {@link Chain} in which the enhancement engines are ordered according to
+     *            a specific use case or need
+     * @return The unique ID of the {@link ContentItem}.
+     * @throws StoreException
+     */
+    String enhanceAndPut(ContentItem ci, String chain) throws StoreException;
+
+    /**
+     * Sends the {@link ContentItem} to the {@link EnhancementJobManager} to enhance the content. Afterwards
+     * saves the item in the Solr core corresponding to the given <code>indexName</code>.
+     * 
+     * @param ci
+     *            The {@link ContentItem} to be enhanced and saved
      * @param indexName
      *            LDPath program name (name of the Solr core/index) to obtain the corresponding Solr core to
      *            store the content item
-     * @return The unique ID of the {@link SolrContentItem}.
+     * @param chain
+     *            name of a particular {@link Chain} in which the enhancement engines are ordered according to
+     *            a specific use case or need
+     * @return The unique ID of the {@link ContentItem}.
      * @throws StoreException
      */
-    String enhanceAndPut(SolrContentItem sci, String indexName) throws StoreException;
+    String enhanceAndPut(ContentItem ci, String indexName, String chain) throws StoreException;
 
     /**
-     * Stores the passed {@link SolrContentItem} in the Solr core corresponding to the specified
+     * Stores the passed {@link ContentItem} in the Solr core corresponding to the specified
      * <code>indexName</code>. If <code>null</code> is passed as the LDPath program name (index name), the
      * default Solr core of Contenthub is used.
      * 
      * @param ci
-     *            {@link SolrContentItem} to be stored
+     *            {@link ContentItem} to be stored
      * @param indexName
      *            LDPath program name (name of the Solr core/index) to obtain the corresponding Solr core to
      *            store the content item
-     * @return The unique ID of the {@link SolrContentItem}.
+     * @return The unique ID of the {@link ContentItem}.
      * @throws StoreException
      */
-    String put(SolrContentItem ci, String indexName) throws StoreException;
+    String put(ContentItem ci, String indexName) throws StoreException;
 
     /**
-     * Retrieves the {@link SolrContentItem} from the Solr core corresponding to the specified
+     * Retrieves the {@link ContentItem} from the Solr core corresponding to the specified
      * <code>indexName</code>. If <code>null</code> is passed as the LDPath program name (index name), the
      * default Solr core of Contenthub is used.
      * 
      * @param id
-     *            The ID of {@link SolrContentItem} to be retrieved.
+     *            The ID of {@link ContentItem} to be retrieved.
      * @param indexName
      *            LDPath program name (name of the Solr core/index) to obtain the corresponding Solr core from
      *            which the content item will be retrieved
-     * @return {@link SolrContentItem} having the specified id
+     * @return {@link ContentItem} having the specified id
      * @throws StoreException
      */
-    SolrContentItem get(String id, String indexName) throws StoreException;
+    ContentItem get(String id, String indexName) throws StoreException;
 
     /**
      * Deletes the {@link ContentItem} from the default Solr core/index of Contenthub.
