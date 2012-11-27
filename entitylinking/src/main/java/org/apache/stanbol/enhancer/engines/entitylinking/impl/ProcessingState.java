@@ -217,12 +217,12 @@ public class ProcessingState {
      */
     private boolean initNextSentence() {
         section = null;
-        tokens.clear();
         processableTokensIterator = null;
         consumedIndex = -1;
         boolean foundProcessable = false;
         while(!foundProcessable && sections.hasNext()){
             section = sections.next();
+            tokens.clear(); //clear token for each section (STANBOL-818)
             Iterator<Span> enclosed = section.getEnclosed(enclosedSpanTypes);
             ChunkData activeChunk = null;
             while(enclosed.hasNext()){
