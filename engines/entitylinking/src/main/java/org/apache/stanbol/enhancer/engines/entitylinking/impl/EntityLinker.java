@@ -103,8 +103,13 @@ public class EntityLinker {
             searchStrings.add(token.getTokenText());
             //Determine the range we are allowed to search for tokens
             final int minIncludeIndex;
-            int maxIndcludeIndex;
-            if(token.inChunk != null && !textProcessingConfig.isIgnoreChunks()){
+            final int maxIndcludeIndex;
+            //NOTE: testing has shown that using Chunks to restrict search for
+            //      additional matchable tokens does have an negative impact on
+            //      recall. Because of that this restriction is for now deactivated
+            boolean restrirctContextByChunks = false; //TODO: maybe make configurable
+            if(token.inChunk != null && !textProcessingConfig.isIgnoreChunks() &&
+                    restrirctContextByChunks){
                 minIncludeIndex = Math.max(
                     state.getConsumedIndex()+1, 
                     token.inChunk.startToken);
