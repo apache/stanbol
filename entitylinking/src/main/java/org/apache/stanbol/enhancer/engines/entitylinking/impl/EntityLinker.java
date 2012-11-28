@@ -157,7 +157,9 @@ public class EntityLinker {
                     (prevIndex > minIncludeIndex || pastIndex < maxIndcludeIndex));
             //we might have an additional element in the list
             if(searchStrings.size() > linkerConfig.getMaxSearchTokens()){
-                searchStrings = searchStrings.subList(0, linkerConfig.getMaxSearchTokens());
+                searchStrings = searchStrings.subList( //the last part of the list
+                    searchStrings.size()-linkerConfig.getMaxSearchTokens(), 
+                    searchStrings.size());
             }
             log.debug("  >> searchStrings {}",searchStrings);
             //search for Entities
@@ -591,6 +593,9 @@ public class EntityLinker {
                 if(found){ //found
                     if(currentToken.isMatchable){
                         foundProcessableTokens++; //only count processable Tokens
+                        if(lastProcessableFoundIndex < 0){ //if last is not yet set
+                            lastProcessableFoundIndex = currentIndex;
+                        }
                         firstProcessableFoundIndex = currentIndex;
                         foundTokensWithinCoveredProcessableTokens++;
                         if(matchedTokensNotWithinProcessableTokenSpan > 0){
