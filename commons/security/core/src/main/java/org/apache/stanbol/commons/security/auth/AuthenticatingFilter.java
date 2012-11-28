@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -51,7 +52,10 @@ import org.slf4j.LoggerFactory;
 
 @Component(immediate=true)
 @Service(Filter.class)
-@Property(name="pattern",value=".*")
+@Properties(value = {
+    @Property(name="pattern",value=".*"),
+    @Property(name = "service.ranking", intValue = Integer.MAX_VALUE)
+})
 @Reference(name="weightedAuthenticationMethod",
 	cardinality=ReferenceCardinality.MANDATORY_MULTIPLE,
 	policy=ReferencePolicy.DYNAMIC,
