@@ -510,7 +510,7 @@ public class ProcessingState {
                 }
                 if(!matchedPosTag) { //not matched against a POS Tag ...
                     // ... fall back to the token length
-                    isProcessable = token.getSpan().length() != elc.getMinSearchTokenLength();
+                    isProcessable = token.getSpan().length() >= elc.getMinSearchTokenLength();
                 }
             }
             
