@@ -25,9 +25,10 @@
     <version>2-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
+
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.factstore.reactor</artifactId>
-  <version>0.9.0-incubating</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol FactStore Reactor</name>
