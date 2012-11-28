@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -56,6 +57,85 @@ import org.xml.sax.SAXParseException;
  * @version $Id: DOMUtils.java 1068358 2011-02-08 12:58:11Z bdelacretaz $
  */
 public final class DOMUtils {
+
+  /** 
+   * This prints the specified node and all of its children to a PrintStream.
+   * 
+   * @param node a DOM <code>Node</code>
+   */
+  public static void printDOM(Node node, PrintStream out) {
+    
+    int type = node.getNodeType();
+    switch (type) {
+      // print the document element
+      case Node.DOCUMENT_NODE: 
+        out.println("<?xml version=\"1.0\" ?>");
+        printDOM(((Document)node).getDocumentElement(),out);
+        break;
+
+        // print element with attributes
+      case Node.ELEMENT_NODE: 
+        out.print("<");
+        out.print(node.getNodeName());
+        NamedNodeMap attrs = node.getAttributes();
+        for (int i = 0; i < attrs.getLength(); i++) {
+          Node attr = attrs.item(i);
+          out.print(" " + attr.getNodeName().trim() + "=\""
+            + quoteXMLChars(attr.getNodeValue().trim()) + "\"");
+        }
+        out.println(">");
+        
+        NodeList children = node.getChildNodes();
+        if (children != null) {
+          int len = children.getLength();
+          for (int i = 0; i < len; i++) {
+            printDOM(children.item(i),out);
+          }
+        }
+        
+        break;
+        
+        // handle entity reference nodes
+      case Node.ENTITY_REFERENCE_NODE:
+        out.print("&");
+        out.print(node.getNodeName().trim());
+        out.print(";");
+        break;
+        
+        // print cdata sections
+      case Node.CDATA_SECTION_NODE:
+        out.print("<![CDATA[");
+        out.print(node.getNodeValue().trim());
+        out.print("]]>");
+        break;
+        
+        // print text
+      case Node.TEXT_NODE:
+        out.print(quoteXMLChars(node.getNodeValue().trim()));
+        break;
+        
+        // print processing instruction
+      case Node.PROCESSING_INSTRUCTION_NODE:
+        out.print("<?");
+        out.print(node.getNodeName().trim());
+        String data = node.getNodeValue().trim();
+        out.print(" ");
+        out.print(data);
+        out.print("?>");
+        break;
+        
+      default:
+        System.err.println("unknown type " + type);
+        break;
+    }
+    
+    if (type == Node.ELEMENT_NODE) {
+      out.println();
+      out.print("</");
+      out.print(node.getNodeName().trim());
+      out.println('>');
+    }
+  }
 
     /**
      * This prints the given DOM document to System.out with indentation and
@@ -497,5 +577,13 @@ public final class DOMUtils {
         ele.appendChild(child);
         return child;
     }
-
+    
+    public static String quoteXMLChars(String text) {
+      if (text != null) {
+        return text.replace("&", "&amp;").replace("<","&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&apos;");
+      }
+      return text;
+    }
+ 
 }
+
