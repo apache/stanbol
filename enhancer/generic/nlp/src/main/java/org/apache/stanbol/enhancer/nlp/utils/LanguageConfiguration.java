@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.map.CompositeMap;
+import org.apache.commons.collections.map.CompositeMap.MapMutator;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 
@@ -175,25 +177,27 @@ public class LanguageConfiguration {
                         "Langauge '"+lang+"' is both included and excluded (config: "
                         + config+")");
                 }
+                if(sepIndex >= 0){
+                    throw new ConfigurationException(property, 
+                        "The excluded Langauge '"+lang+"' MUST NOT define parameters (config: "
+                        + config+")");
+                }
                 excludedLanguages.add(lang);
             } else if("*".equals(lang)){
                 allowAll = true;
-                parsedDefaultParameters(line, sepIndex);
+                parsedDefaultParameters(line, sepIndex+1);
             } else if(!lang.isEmpty()){
                 if(excludedLanguages.contains(lang)){
                     throw new ConfigurationException(property, 
                         "Langauge '"+lang+"' is both included and excluded (config: "
                         + config+")");
                 }
-                if(sepIndex >= 0){
-                    
-                }
                 configuredLanguages.put(lang,sepIndex >= 0 && sepIndex < line.length()-2 ? 
-                        parseParameters(line.substring(sepIndex, line.length()).trim()) :
+                        parseParameters(line.substring(sepIndex+1, line.length()).trim()) :
                             EMPTY_PARAMS);
             } else { //language tag is empty (line starts with an ';'
                 //this indicates that this is used to configure the default parameters
-                parsedDefaultParameters(line, sepIndex);
+                parsedDefaultParameters(line, sepIndex+1);
             }
         }
     }
@@ -282,7 +286,9 @@ public class LanguageConfiguration {
     }
     
     /**
-     * Returns parsed parameters if <code>{@link #isLanguage(String)} == true</code>
+     * Returns configured parameters if <code>{@link #isLanguage(String)} == true</code>.
+     * The returned map contains {@link #getLanguageParams(String) language specific parameters} 
+     * merged with {@link #getDefaultParameters()}
      * @param language the language
      * @return the parameters or <code>null</code> if none or the parsed language
      * is not active.
@@ -290,16 +296,25 @@ public class LanguageConfiguration {
     public Map<String,String> getParameters(String language){
         if(isLanguage(language)){
             Map<String,String> params = configuredLanguages.get(language);
-            if((params == null || params.isEmpty()) && //if no or empty parameters
-                    !defaultParameters.isEmpty()){ //and there are defaults
+            if(params != null){
+                params = new CompositeMap(params,defaultParameters,CONFIGURATION_MERGER);
+            } else {
                 params = defaultParameters;
-            } else if(params == null){ //do not return NULL
-                params = EMPTY_PARAMS;
             }
             return params;
         } else {
             return null; //to indicate the parsed language is not active
         }
+    }
+    /**
+     * Getter for the language specific parameters. This does NOT include
+     * default parameters.
+     * @param language the language
+     * @return the language specific parameters or <code>null</code> if no
+     * parameters are configured.
+     */
+    public Map<String,String> getLanguageParams(String language){
+        return configuredLanguages.get(language);
     }
     /**
      * Getter for the default parameters
@@ -322,7 +337,8 @@ public class LanguageConfiguration {
     }
     /**
      * Returns the value of the parameter for the language (if present and the
-     * langage is active)
+     * langage is active). This merges language specific parameters with
+     * default parameters.
      * @param language the language
      * @param paramName the name of the param
      * @return the param or <code>null</code> if not present OR the language
@@ -333,5 +349,28 @@ public class LanguageConfiguration {
         return params == null ? null : params.get(paramName);
     }
     
+    MapMutator CONFIGURATION_MERGER = new MapMutator() {
+        
+        @Override
+        @SuppressWarnings("rawtypes")
+        public void resolveCollision(CompositeMap composite, Map existing, Map added, Collection intersect) {
+            //nothing to do as we want the value of the first map
+        }
+        
+        @Override
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        public void putAll(CompositeMap map, Map[] composited, Map mapToAdd) {
+            //add to the first
+            composited[0].putAll(mapToAdd);
+        }
+        
+        @Override
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        public Object put(CompositeMap map, Map[] composited, Object key, Object value) {
+            Object prevResult = map.get(key);
+            Object result = composited[0].put(key,value);
+            return result == null ? prevResult : result;
+        }
+    };
     
 }
