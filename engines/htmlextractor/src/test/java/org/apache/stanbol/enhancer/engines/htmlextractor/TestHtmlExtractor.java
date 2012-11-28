@@ -135,7 +135,7 @@ public class TestHtmlExtractor {
 
         // show triples
         int tripleCounter = model.size();
-        LOG.info("Triples: {}",tripleCounter);
+        LOG.debug("Triples: {}",tripleCounter);
         printTriples(model);
         Set<NonLiteral> roots = ClerezzaRDFUtils.findRoots(model);
         assertTrue(roots.size() > 1);
