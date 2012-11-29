@@ -114,7 +114,6 @@ import at.newmedialab.ldpath.model.programs.Program;
 
 import com.hp.hpl.jena.reasoner.rulesys.builtins.GE;
 import org.apache.stanbol.commons.ldviewable.Viewable;
-import com.sun.research.ws.wadl.HTTPMethods;
 
 /**
  * Resource to provide a REST API for the {@link SiteManager}

@@ -61,7 +61,6 @@ import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.representation.Form;
 /**
  * Utility methods used by several of the RESTful service endpoints of the
  * Entityhub.
