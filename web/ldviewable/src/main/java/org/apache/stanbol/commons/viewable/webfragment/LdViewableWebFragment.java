@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.stanbol.commons.ldviewable.webfragment;
+package org.apache.stanbol.commons.viewable.webfragment;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,8 +26,8 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.ldviewable.mbw.LdViewableWriter;
-import org.apache.stanbol.commons.ldviewable.mbw.ViewableWriter;
+import org.apache.stanbol.commons.viewable.mbw.LdViewableWriter;
+import org.apache.stanbol.commons.viewable.mbw.ViewableWriter;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;

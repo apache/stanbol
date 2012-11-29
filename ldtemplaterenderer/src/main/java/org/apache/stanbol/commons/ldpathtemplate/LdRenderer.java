@@ -162,6 +162,8 @@ public class LdRenderer {
 	 */
 	public void renderPojo(Object pojo, final String templatePath, Writer out) {	
 		Configuration freemarker= new Configuration();
+		freemarker.setDefaultEncoding("utf-8");
+		freemarker.setOutputEncoding("utf-8");
 	    freemarker.setObjectWrapper(new DefaultObjectWrapper());
 		freemarker.setTemplateLoader(templateLoader);
 		try {

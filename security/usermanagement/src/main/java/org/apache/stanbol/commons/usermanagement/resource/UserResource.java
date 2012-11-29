@@ -45,9 +45,9 @@ import org.apache.clerezza.rdf.utils.MGraphUtils.NoSuchSubGraphException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.ldviewable.LdViewable;
 import org.apache.clerezza.rdf.ontologies.PERMISSION;
 import org.apache.stanbol.commons.security.PasswordUtil;
+import org.apache.stanbol.commons.viewable.RdfViewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,20 +77,20 @@ public class UserResource {
         
         @GET
         @Path("users")
-        public LdViewable listUsers(){
-            return new LdViewable("listUser.ftl", getUserType(), this.getClass());
+        public RdfViewable listUsers(){
+            return new RdfViewable("listUser.ftl", getUserType(), this.getClass());
         }
         
 	@GET
 	@Path("user/{username}")
-	public LdViewable editUser(@PathParam("username") String userName) {
-            return new LdViewable("editUser.ftl", getUser(userName), this.getClass());
+	public RdfViewable editUser(@PathParam("username") String userName) {
+            return new RdfViewable("editUser.ftl", getUser(userName), this.getClass());
 	}
 	
 	@GET
 	@Path("view-user") 
-	public LdViewable viewUser(@QueryParam("userName") String userName) {
-		return new LdViewable("edit.ftl", getUser(userName), this.getClass());
+	public RdfViewable viewUser(@QueryParam("userName") String userName) {
+		return new RdfViewable("edit.ftl", getUser(userName), this.getClass());
 	}
 	
 	/**
