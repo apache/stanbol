@@ -34,6 +34,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.semanticweb.owlapi.io.StreamDocumentTarget;
@@ -45,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.manchester.cs.owl.owlapi.mansyntaxrenderer.ManchesterOWLSyntaxOntologyStorer;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Builds a response according to the reasoning output.

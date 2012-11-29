@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.commons.ldviewable;
+package org.apache.stanbol.commons.viewable;
 
 
 /**
@@ -25,7 +25,7 @@ package org.apache.stanbol.commons.ldviewable;
  * application logic is not clearly separated from the presentation but 
  * where backend method are called by the presentation layer.
  * 
- * Users should consider migrate to LdViewable instead where instead of
+ * Users should consider migrate to RdfViewable instead where instead of
  * an arbitrary Object a GraphNode representing a node in a graph is passed,
  * this approach also allows the response to be rendered as RDF.
  *

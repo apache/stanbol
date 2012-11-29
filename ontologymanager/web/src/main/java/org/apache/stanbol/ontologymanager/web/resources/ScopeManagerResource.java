@@ -47,6 +47,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
@@ -57,7 +58,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * The main Web resource of the KReS ontology manager. All the scopes, sessions and ontologies are accessible

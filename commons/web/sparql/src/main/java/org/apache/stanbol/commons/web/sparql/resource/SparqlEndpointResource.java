@@ -50,6 +50,7 @@ import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.DescribeQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.osgi.framework.BundleContext;
@@ -57,7 +58,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * This is the SPARQL endpoint which is used throughout the Stanbol. It uses {@link BundleContext} to retrive

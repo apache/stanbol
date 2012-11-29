@@ -76,6 +76,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
@@ -101,7 +102,6 @@ import org.slf4j.LoggerFactory;
 import at.newmedialab.ldpath.exception.LDPathParseException;
 import at.newmedialab.ldpath.model.programs.Program;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 @Path("/entityhub")
 public class EntityhubRootResource extends BaseStanbolResource {

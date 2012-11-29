@@ -43,6 +43,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
@@ -53,7 +54,6 @@ import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * This class the the web resource to handle the RESTful requests and HTML view of the LDProgram management

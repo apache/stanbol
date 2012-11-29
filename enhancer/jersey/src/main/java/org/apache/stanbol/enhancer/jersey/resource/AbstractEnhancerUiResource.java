@@ -42,6 +42,7 @@ import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
@@ -54,7 +55,6 @@ import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Abstract super class for all Enhancer endpoint that do also provide the

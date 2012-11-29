@@ -29,9 +29,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 @Path("/cmsadapter")
 public class RootResource extends BaseStanbolResource {

@@ -48,6 +48,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -55,7 +56,6 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 @Path("/enhancer/engine")
 public class EnhancementEnginesRootResource extends BaseStanbolResource {

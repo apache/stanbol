@@ -46,6 +46,7 @@ import org.apache.stanbol.commons.jsonld.JsonLd;
 import org.apache.stanbol.commons.jsonld.JsonLdParser;
 import org.apache.stanbol.commons.jsonld.JsonLdProfile;
 import org.apache.stanbol.commons.jsonld.JsonLdProfileParser;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.CorsHelper;
 import org.apache.stanbol.factstore.api.FactStore;
@@ -54,7 +55,6 @@ import org.apache.stanbol.factstore.model.FactSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 @Path("/factstore/facts")
 public class FactsResource extends BaseFactStoreResource {

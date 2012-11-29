@@ -49,6 +49,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.jobs.api.JobManager;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -79,7 +80,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.api.core.HttpRequestContext;
-import org.apache.stanbol.commons.ldviewable.Viewable;
 import com.sun.jersey.multipart.BodyPart;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;

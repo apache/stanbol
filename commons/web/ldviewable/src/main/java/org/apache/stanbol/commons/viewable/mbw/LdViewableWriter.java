@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.commons.ldviewable.mbw;
+package org.apache.stanbol.commons.viewable.mbw;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,12 +33,12 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.ldpathtemplate.LdRenderer;
-import org.apache.stanbol.commons.ldviewable.LdViewable;
+import org.apache.stanbol.commons.viewable.RdfViewable;
 
 @Component
 @Service(LdViewableWriter.class)
 @Produces("text/html")
-public class LdViewableWriter implements MessageBodyWriter<LdViewable> {
+public class LdViewableWriter implements MessageBodyWriter<RdfViewable> {
 
 	@Reference
 	private LdRenderer ldRenderer;
@@ -46,17 +46,17 @@ public class LdViewableWriter implements MessageBodyWriter<LdViewable> {
 	@Override
 	public boolean isWriteable(Class<?> type, Type genericType,
 			Annotation[] annotations, MediaType mediaType) {
-		return LdViewable.class.isAssignableFrom(type);
+		return RdfViewable.class.isAssignableFrom(type);
 	}
 
 	@Override
-	public long getSize(LdViewable t, Class<?> type, Type genericType,
+	public long getSize(RdfViewable t, Class<?> type, Type genericType,
 			Annotation[] annotations, MediaType mediaType) {
 		return -1;
 	}
 
 	@Override
-	public void writeTo(LdViewable t, Class<?> type, Type genericType,
+	public void writeTo(RdfViewable t, Class<?> type, Type genericType,
 			Annotation[] annotations, MediaType mediaType,
 			MultivaluedMap<String, Object> httpHeaders,
 			OutputStream entityStream) throws IOException,

@@ -36,6 +36,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.commons.jobs.api.JobManager;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.reasoners.web.utils.ReasoningServiceResult;
@@ -43,7 +44,6 @@ import org.apache.stanbol.reasoners.web.utils.ResponseTaskBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Return the result of a reasoners background job

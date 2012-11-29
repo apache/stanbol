@@ -22,9 +22,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Adapter to add a VIE based interface for the Stanbol Enhancer

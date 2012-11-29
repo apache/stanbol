@@ -77,6 +77,7 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -84,7 +85,6 @@ import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 public class ContentItemResource extends BaseStanbolResource {
 
