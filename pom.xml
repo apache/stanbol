@@ -57,7 +57,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jersey-version>1.12</jersey-version>
+    <jersey-version>1.15</jersey-version>
     <freemarker-version>2.3.19</freemarker-version>
     <solr-version>3.6.1</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
