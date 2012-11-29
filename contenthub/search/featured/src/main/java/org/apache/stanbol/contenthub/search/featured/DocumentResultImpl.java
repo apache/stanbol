@@ -17,7 +17,6 @@
 package org.apache.stanbol.contenthub.search.featured;
 
 import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
-import org.apache.stanbol.contenthub.store.solr.util.ContentItemIDOrganizer;
 
 public class DocumentResultImpl implements DocumentResult {
 
@@ -27,33 +26,30 @@ public class DocumentResultImpl implements DocumentResult {
     private long enhancementCount;
     private String title;
 
-    public DocumentResultImpl(String uri,
-                                 String mimeType,
-                                 long enhancementCount,
-                                 String title) {
-        this.id = ContentItemIDOrganizer.detachBaseURI(uri);
+    public DocumentResultImpl(String uri, String mimeType, long enhancementCount, String title) {
+        this.id = uri;
         this.mimetype = mimeType;
         this.title = (title == null || title.trim().equals("") ? id : title);
         this.enhancementCount = enhancementCount;
     }
 
     public DocumentResultImpl(String uri,
-                                 String dereferencableURI,
-                                 String mimeType,
-                                 long enhancementCount,
-                                 String title) {
-        this.id = ContentItemIDOrganizer.detachBaseURI(uri);
+                              String dereferencableURI,
+                              String mimeType,
+                              long enhancementCount,
+                              String title) {
+        this.id = uri;
         this.dereferencableURI = dereferencableURI;
         this.mimetype = mimeType;
         this.title = (title == null || title.trim().equals("") ? id : title);
         this.enhancementCount = enhancementCount;
     }
-    
+
     @Override
     public String getLocalId() {
         return this.id;
     }
-    
+
     @Override
     public String getDereferencableURI() {
         return this.dereferencableURI;
@@ -93,5 +89,5 @@ public class DocumentResultImpl implements DocumentResult {
     public void setTitle(String title) {
         this.title = title;
     }
-    
+
 }

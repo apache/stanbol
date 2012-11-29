@@ -64,9 +64,6 @@
             <Export-Package>
               org.apache.stanbol.ontologymanager.web.*
             </Export-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
-            </Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
           </instructions>
         </configuration>
       </plugin>
@@ -102,7 +99,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.10.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -145,6 +142,10 @@
 
     <!-- specific deps for this project -->
     <dependency>
+    	<groupId>org.apache.stanbol</groupId>
+  		<artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
+    </dependency>
+<dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>
@@ -152,11 +153,11 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
     </dependency>
-    <dependency>
+   <!-- <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
       <exclusions>
-        <!-- jaxb is now part of java 6 -->
+        <!- jaxb is now part of java 6 ->
         <exclusion>
           <groupId>com.sun.xml.bind</groupId>
           <artifactId>jaxb-api</artifactId>
@@ -166,7 +167,7 @@
           <artifactId>jaxb-impl</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
@@ -179,15 +180,15 @@
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
     </dependency>    
-    <dependency>
+    <!-- <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
     </dependency>
-    <!-- indirect dependency for freemarker -->
+
     <dependency>
       <groupId>org.codehaus.jettison</groupId>
       <artifactId>jettison</artifactId>
-    </dependency>
+    </dependency> -->
 
     <!-- servlet container, most useful for the tests -->
     <dependency>

@@ -426,6 +426,11 @@ p.note {
   text-align: right;
 }
 
+.metadata {
+  font-size: 85%;
+  color: #666;
+}
+
 .mapContainer {
   margin: 1em auto 1em auto; width: 800px;
 }

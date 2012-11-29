@@ -101,7 +101,7 @@ import org.slf4j.LoggerFactory;
 import at.newmedialab.ldpath.exception.LDPathParseException;
 import at.newmedialab.ldpath.model.programs.Program;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 @Path("/entityhub")
 public class EntityhubRootResource extends BaseStanbolResource {
@@ -370,12 +370,12 @@ public class EntityhubRootResource extends BaseStanbolResource {
                 }
                 if((exists && !update) || (!exists && !create)){
                     return Response.status(Status.BAD_REQUEST).entity(String.format(
-                        "Unable to %s an Entity %s becuase it %s and %s is deactivated. " +
-                        " You might want to set the '%s' parameter to TRUE in your Request",
+                        "Unable to %s an Entity '%s' becuase it %s and request parameter '%s' is set. " +
+                        " To allow both creating and updating of Entities you need to set "+
+                        "'%s=true' in the request",
                         exists ? "update" : "create", entry.getKey(),
-                        exists ? "does already exists " : "does not",
-                        exists ? "updateing existing" : "creating new",
-                        exists ? "does already" : "does not exists",
+                        exists ? "exists " : "does not exist",
+                        exists ? "update=false" : "create=false",
                         exists ? "update" : "create"))
                         .header(HttpHeaders.ACCEPT, accepted).build();
                 }

@@ -54,8 +54,8 @@ import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeederException;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
-import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrStore;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,15 +110,15 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
     }
 
     @Override
-    public void submitContentItemByCMSObject(Object o, String id) {
-        submitContentItemByCMSObject(o, id, null);
+    public void submitContentItemByCMSObject(Object o) {
+        submitContentItemByCMSObject(o, null);
     }
 
     @Override
-    public void submitContentItemByCMSObject(Object o, String id, String indexName) {
+    public void submitContentItemByCMSObject(Object o, String indexName) {
         CmisObject cmisObject = (CmisObject) o;
         if (hasType(cmisObject, BaseTypeId.CMIS_DOCUMENT)) {
-            processDocumentAndSubmitToContenthub((Document) cmisObject, id, indexName);
+            processDocumentAndSubmitToContenthub((Document) cmisObject, indexName);
         }
     }
 
@@ -206,7 +206,7 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
     @Override
     public void deleteContentItemByID(String contentItemID, String indexName) {
         try {
-            solrStore.deleteById(contentItemID, indexName);
+            solrStore.deleteById(attachBaseURI(contentItemID), indexName);
         } catch (StoreException e) {
             log.error(e.getMessage(), e);
         }
@@ -228,7 +228,7 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         }
 
         try {
-            solrStore.deleteById(o.getId(), indexName);
+            solrStore.deleteById(attachBaseURI(o.getId()), indexName);
         } catch (StoreException e) {
             log.error(e.getMessage(), e);
         }
@@ -257,7 +257,7 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         }
         for (Document d : documents) {
             try {
-                solrStore.deleteById(d.getId(), indexName);
+                solrStore.deleteById(attachBaseURI(d.getId()), indexName);
             } catch (StoreException e) {
                 log.error(e.getMessage(), e);
             }
@@ -308,10 +308,6 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
     }
 
     private void processDocumentAndSubmitToContenthub(Document d, String indexName) {
-        processDocumentAndSubmitToContenthub(d, null, indexName);
-    }
-
-    private void processDocumentAndSubmitToContenthub(Document d, String id, String indexName) {
         byte[] content;
         try {
             content = IOUtils.toByteArray(d.getContentStream().getStream());
@@ -325,17 +321,19 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         }
         String mimeType = d.getContentStreamMimeType();
         Map<String,List<Object>> constraints = getConstraintsFromDocument(d);
-        id = (id == null || id.equals("")) ? d.getId() : id;
-        SolrContentItem sci = solrStore.create(content, d.getId(), d.getName(), mimeType, constraints);
+        String id = d.getId();
+        id = attachBaseURI(id);
+        ContentItem ci = null;
         try {
-            solrStore.enhanceAndPut(sci, indexName);
+            ci = solrStore.create(content, id, d.getName(), mimeType);
+            ci.addPart(ADDITIONAL_METADATA_URI, constraints);
+            solrStore.enhanceAndPut(ci, indexName, null);
         } catch (StoreException e) {
             log.error(e.getMessage(), e);
         }
         log.info("Document submitted to Contenthub.");
-        log.info("Id: {}", sci.getUri().getUnicodeString());
-        log.info("Mime type: {}", sci.getMimeType());
-        log.info("Constraints: {}", sci.getConstraints().toString());
+        log.info("Id: {}", ci.getUri().getUnicodeString());
+        log.info("Mime type: {}", ci.getMimeType());
     }
 
     private Map<String,List<Object>> getConstraintsFromDocument(Document d) {
@@ -420,5 +418,12 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
 
     private boolean hasType(CmisObject o, BaseTypeId type) {
         return o.getBaseTypeId().equals(type);
+    }
+
+    private String attachBaseURI(String id) {
+        if (!id.contains(":")) {
+            id = CONTENT_ITEM_URI_PREFIX + id;
+        }
+        return id;
     }
 }

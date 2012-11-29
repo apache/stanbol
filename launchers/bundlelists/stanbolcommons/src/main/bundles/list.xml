@@ -99,7 +99,7 @@
     <bundle>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>1.4</version>
+      <version>2.4</version>
     </bundle>
     <bundle>
       <groupId>org.apache.commons</groupId>
@@ -136,11 +136,11 @@
       <artifactId>json</artifactId>
       <version>20090211_1</version>
     </bundle>
-    <bundle><!-- Stax parser as bundle provided by servicemix.apache.org -->
+    <!-- bundle> Stax is included in JDK 1.6+ 
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.stax-api-1.0</artifactId>
       <version>2.1.0</version>
-    </bundle>
+    </bundle -->
     <bundle> <!-- woodstox Stax impl as bundle provided by servicemix.apache.org -->
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.woodstox</artifactId>
@@ -172,7 +172,7 @@
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
-      <version>1.12</version>
+      <version>1.15</version>
     </bundle>
     <bundle>
       <groupId>org.codehaus.jackson</groupId>
@@ -194,18 +194,18 @@
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
-      <version>1.12</version>
+      <version>1.15</version>
     </bundle>
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-servlet</artifactId>
-      <version>1.12</version>
+      <version>1.15</version>
     </bundle>
     <!-- needed to read data from mime multipart requests -->
     <bundle>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
-      <version>1.12</version>
+      <version>1.15</version>
     </bundle>
     <!-- dependency of jersey-multipart -->
     <bundle>
@@ -419,6 +419,11 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base.jersey</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
     <bundle>

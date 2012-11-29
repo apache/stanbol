@@ -23,9 +23,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import org.apache.stanbol.commons.ldviewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
-import com.sun.jersey.api.view.Viewable;
 
 /**
  * Root JAX-RS resource. The HTML view is implicitly rendered by a freemarker template to be found in the

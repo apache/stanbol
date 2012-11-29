@@ -19,7 +19,6 @@ package org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl;
 import static org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.CeliLemmatizerEnhancementEngine.MORPHOLOGICAL_ANALYSIS;
 import static org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.CeliLemmatizerEnhancementEngine.SERVICE_URL;
 import static org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.CeliLemmatizerEnhancementEngine.hasLemmaForm;
-import static org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.CeliLemmatizerEnhancementEngine.hasMorphoFeature;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
@@ -52,8 +51,12 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.XSD;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
+import org.apache.stanbol.enhancer.engines.celi.CeliMorphoFeatures;
 import org.apache.stanbol.enhancer.engines.celi.testutils.MockComponentContext;
 import org.apache.stanbol.enhancer.engines.celi.testutils.TestUtils;
+import org.apache.stanbol.enhancer.nlp.morpho.Gender;
+import org.apache.stanbol.enhancer.nlp.morpho.NumberFeature;
+import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -69,14 +72,15 @@ import org.slf4j.LoggerFactory;
 
 public class CeliLemmatizerEnhancementEngineTest {
 	
-	//static CeliLemmatizerEnhancementEngine morphoAnalysisEngine = new CeliLemmatizerEnhancementEngine();
+	static final String OLIA_NAMESPACE = "http://purl.org/olia/olia.owl#";
 
     private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
 
     private static final Logger log = LoggerFactory.getLogger(CeliLemmatizerEnhancementEngine.class);
 	private static final String TEXT = "Torino è la principale città del Piemonte.";
+	private static final String TERM = "casa";
 
-	public CeliLemmatizerEnhancementEngine initEngine(boolean completeMorphoAnalysis) throws IOException, ConfigurationException {
+	private CeliLemmatizerEnhancementEngine initEngine(boolean completeMorphoAnalysis) throws IOException, ConfigurationException {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EnhancementEngine.PROPERTY_NAME, "celiLemmatizer");
         properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
@@ -88,11 +92,11 @@ public class CeliLemmatizerEnhancementEngineTest {
 		return morphoAnalysisEngine;
 	}
 
-	public static void shutdownEngine(CeliLemmatizerEnhancementEngine morphoAnalysisEngine) {
+	private static void shutdownEngine(CeliLemmatizerEnhancementEngine morphoAnalysisEngine) {
 		morphoAnalysisEngine.deactivate(null);
 	}
 
-    public static ContentItem wrapAsContentItem(final String text) throws IOException {
+    private static ContentItem wrapAsContentItem(final String text) throws IOException {
         return ciFactory.createContentItem(new StringSource(text));
     }
 
@@ -129,8 +133,7 @@ public class CeliLemmatizerEnhancementEngineTest {
         validateEnhancement(ci.getMetadata(), (UriRef)lemmaTextAnnotation, expectedValues);
         //validate the lemma form TextAnnotation
         int lemmaForms = validateLemmaFormProperty(ci.getMetadata(), lemmaTextAnnotation,"it");
-        assertTrue("Only a single LemmaForm property is expected if '"+
-                MORPHOLOGICAL_ANALYSIS+"=false'",lemmaForms == 1);
+        assertTrue("Only a single LemmaForm property is expected if '"+ MORPHOLOGICAL_ANALYSIS+"=false'",lemmaForms == 1);
         shutdownEngine(morphoAnalysisEngine);
 	}
 
@@ -138,7 +141,7 @@ public class CeliLemmatizerEnhancementEngineTest {
 	
     @Test
     public void testCompleteMorphoAnalysis() throws Exception {
-        ContentItem ci = wrapAsContentItem(TEXT);
+        ContentItem ci = wrapAsContentItem(TERM);
         //add a simple triple to statically define the language of the test
         //content
         ci.getMetadata().add(new TripleImpl(ci.getUri(), DC_LANGUAGE, new PlainLiteralImpl("it")));
@@ -167,10 +170,9 @@ public class CeliLemmatizerEnhancementEngineTest {
         while (textAnnotationIterator.hasNext()) {
             UriRef textAnnotation = (UriRef) textAnnotationIterator.next().getSubject();
             // test if selected Text is added
-            validateTextAnnotation(ci.getMetadata(), textAnnotation,TEXT,expectedValues);
+            validateTextAnnotation(ci.getMetadata(), textAnnotation,TERM,expectedValues);
             textAnnotationCount++;
             //perform additional tests for "hasMorphologicalFeature" and "hasLemmaForm"
-            validateLemmaFormProperty(ci.getMetadata(), textAnnotation,"it");
             validateMorphoFeatureProperty(ci.getMetadata(),textAnnotation);
         }
         log.info("{} TextAnnotations found and validated ...",textAnnotationCount);
@@ -196,8 +198,7 @@ public class CeliLemmatizerEnhancementEngineTest {
             Resource lemmaForms = lemmaFormsIterator.next().getObject();
             assertTrue("Lemma Forms value are expected of type PlainLiteral", lemmaForms instanceof PlainLiteral);
             assertFalse("Lemma forms MUST NOT be empty",((PlainLiteral)lemmaForms).getLexicalForm().isEmpty());
-            assertNotNull("Language of the Lemma Form literal MUST BE the same as for the parsed text",
-               ((PlainLiteral)lemmaForms).getLanguage());
+            assertNotNull("Language of the Lemma Form literal MUST BE not null",((PlainLiteral)lemmaForms).getLanguage());
             assertEquals("Language of the Lemma Form literal MUST BE the same as for the parsed text",
                 lang, ((PlainLiteral)lemmaForms).getLanguage().toString());
         }
@@ -209,19 +210,55 @@ public class CeliLemmatizerEnhancementEngineTest {
      * @param textAnnotation the TextAnnotation to check
      */
     private void validateMorphoFeatureProperty(TripleCollection enhancements, NonLiteral textAnnotation) {
-        Iterator<Triple> morphoFeatureIterator = enhancements.filter(textAnnotation, hasMorphoFeature, null);
-        assertTrue("No Morpho Feature value found for TextAnnotation "+textAnnotation+"!", morphoFeatureIterator.hasNext());
+    	//This taste checks for known morpho features of a given input (constant TERM)
+        Iterator<Triple> morphoFeatureIterator = enhancements.filter(textAnnotation, RDF_TYPE, null);
+        assertTrue("No POS Morpho Feature value found for TextAnnotation "+textAnnotation+"!", morphoFeatureIterator.hasNext());
         while(morphoFeatureIterator.hasNext()){
             Resource morphoFeature = morphoFeatureIterator.next().getObject();
-            assertTrue("Morpho Feature value are expected of typed literal", morphoFeature instanceof TypedLiteral);
-            String feature = ((Literal)morphoFeature).getLexicalForm();
+            assertTrue("Morpho Feature value are expected of typed literal", morphoFeature instanceof UriRef);
+            String feature=((UriRef)morphoFeature).getUnicodeString();
             assertFalse("Morpho Feature MUST NOT be empty",feature.isEmpty());
-            assertTrue("{key}={value} encoding expected (value:"+feature+")",feature.indexOf('=')>0);
-            String[] keyValue = feature.split("=");
-            assertTrue("{key}={value} encoding expected(value:"+feature+")",
-                keyValue.length == 2 && (!keyValue[0].isEmpty()) && (!keyValue[1].isEmpty()));
-            assertEquals("DataType of the Morpho Feature MUST BE xsd:string (for now)",XSD.string,
-               ((TypedLiteral)morphoFeature).getDataType());
+            if(feature.startsWith(OLIA_NAMESPACE)){
+            	String key=feature.substring(OLIA_NAMESPACE.length());
+            	LexicalCategory cat=LexicalCategory.valueOf(key);
+            	assertTrue("Part of Speech of "+TERM+" should be "+LexicalCategory.Noun , (cat==LexicalCategory.Noun));
+            }
         }
+        morphoFeatureIterator = enhancements.filter(textAnnotation, CeliMorphoFeatures.HAS_GENDER, null);
+        assertTrue("No Gender Morpho Feature value found for TextAnnotation "+textAnnotation+"!", morphoFeatureIterator.hasNext());
+        if(morphoFeatureIterator.hasNext()){
+            Resource morphoFeature = morphoFeatureIterator.next().getObject();
+            assertTrue("Morpho Feature value are expected of typed literal", morphoFeature instanceof UriRef);
+            String feature=((UriRef)morphoFeature).getUnicodeString();
+            assertFalse("Morpho Feature MUST NOT be empty",feature.isEmpty());
+            if(feature.startsWith(OLIA_NAMESPACE)){
+            	String key=feature.substring(OLIA_NAMESPACE.length());
+            	Gender cat=Gender.valueOf(key);
+            	assertTrue("Gender of "+TERM+" should be "+Gender.Feminine , (cat==Gender.Feminine));
+            }
+        }
+        morphoFeatureIterator = enhancements.filter(textAnnotation, CeliMorphoFeatures.HAS_NUMBER, null);
+        assertTrue("No Number Morpho Feature value found for TextAnnotation "+textAnnotation+"!", morphoFeatureIterator.hasNext());
+        if(morphoFeatureIterator.hasNext()){
+            Resource morphoFeature = morphoFeatureIterator.next().getObject();
+            assertTrue("Morpho Feature value are expected of typed literal", morphoFeature instanceof UriRef);
+            String feature=((UriRef)morphoFeature).getUnicodeString();
+            assertFalse("Morpho Feature MUST NOT be empty",feature.isEmpty());
+            if(feature.startsWith(OLIA_NAMESPACE)){
+            	String key=feature.substring(OLIA_NAMESPACE.length());
+            	NumberFeature cat=NumberFeature.valueOf(key);
+            	assertTrue("Number of "+TERM+" should be "+Gender.Feminine , (cat==NumberFeature.Singular));
+            }
+        }
+        morphoFeatureIterator = enhancements.filter(textAnnotation, CeliLemmatizerEnhancementEngine.hasLemmaForm, null);
+        assertTrue("No Number Morpho Feature value found for TextAnnotation "+textAnnotation+"!", morphoFeatureIterator.hasNext());
+        if(morphoFeatureIterator.hasNext()){
+            Resource morphoFeature = morphoFeatureIterator.next().getObject();
+            assertTrue("Lemma Forms value are expected of type PlainLiteral", morphoFeature instanceof PlainLiteral);
+            assertFalse("Lemma forms MUST NOT be empty",((PlainLiteral)morphoFeature).getLexicalForm().isEmpty());
+            String feature=((PlainLiteral)morphoFeature).getLexicalForm();
+            assertTrue("Lemma of "+TERM+" should be "+TERM , (feature.equals(TERM)));
+        }
+        
     }
 }

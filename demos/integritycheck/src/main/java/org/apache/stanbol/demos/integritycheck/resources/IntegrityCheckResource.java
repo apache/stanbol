@@ -19,7 +19,7 @@ import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
 import com.sun.jersey.api.view.ImplicitProduces;
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * 

@@ -41,7 +41,7 @@ import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 @Path("/ontonet/registry")
 public class RegistryManagerResource extends BaseStanbolResource {

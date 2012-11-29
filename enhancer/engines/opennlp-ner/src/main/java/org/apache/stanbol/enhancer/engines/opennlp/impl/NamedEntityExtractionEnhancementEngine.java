@@ -51,7 +51,7 @@ import org.osgi.service.component.ComponentContext;
     description = "%stanbol.NamedEntityExtractionEnhancementEngine.description")
 @Service
 @org.apache.felix.scr.annotations.Properties(value={
-    @Property(name=EnhancementEngine.PROPERTY_NAME,value="ner"),
+    @Property(name=EnhancementEngine.PROPERTY_NAME,value="opennlp-ner"),
     @Property(name=NamedEntityExtractionEnhancementEngine.PROCESSED_LANGUAGES,value=""),
     @Property(name=NamedEntityExtractionEnhancementEngine.DEFAULT_LANGUAGE,value=""),
     //set the ranking of the default config to a negative value (ConfigurationPolicy.OPTIONAL) 

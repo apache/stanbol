@@ -6,12 +6,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
+import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
+import org.apache.stanbol.enhancer.nlp.ner.NerTag;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 
@@ -32,10 +35,11 @@ public class NEREngineConfig {
     }
     
     /**
-     * Holds the mappings of rdf:type used by concepts to dc:type values used
-     * by TextAnnotations. 
+     * Holds the configured {@link NerTag}s - the mappings from the
+     * named entity name to the {@link UriRef} type used for the
+     * <code>dc:type</code> value for <code>fise:TextAnnotation</code>s
      */
-    private Map<String,UriRef> typeMappings = new HashMap<String,UriRef>(DEFAULT_ENTITY_TYPE_MAPPINGS);
+    private TagSet<NerTag> nerTagSet = new TagSet<NerTag>("NER TagSet");
     
     private Map<String,Collection<String>> additionalNerModels = new HashMap<String,Collection<String>>();
     /**
@@ -49,6 +53,12 @@ public class NEREngineConfig {
     private Set<String> processedLanguages = new HashSet<String>();
     
     private String defaultLanguage;
+    
+    public NEREngineConfig(){
+        for(Entry<String,UriRef> mapping : DEFAULT_ENTITY_TYPE_MAPPINGS.entrySet()){
+            nerTagSet.addTag(new NerTag(mapping.getKey(), mapping.getValue()));
+        }
+    }
     
     public synchronized void addCustomNameFinderModel(String lang, String modelFileName){
         if(lang == null || lang.isEmpty()){
@@ -115,17 +125,40 @@ public class NEREngineConfig {
         Collection<String> modelNames = additionalNerModels.get(lang);
         return modelNames == null ? Collections.EMPTY_LIST : modelNames;
     }
-    
-    public UriRef getMappedType(String namedEntityType){
-        return typeMappings.get(namedEntityType);
+    /**
+     * Getter for the {@link NerTag} of the parsed Named Entity
+     * name. If not yet present a new {@link NerTag} (with no
+     * <code>dc:type</code> mapping) is created and added to the
+     * configuration.
+     * @param namedEntityType the NamedEntity name.
+     * @return the NerTag. Guaranteed to be not <code>null</code>
+     * @throws IllegalArgumentException if the parsed NamedEntity
+     * type is <code>null</code> or an empty String.
+     */
+    public NerTag getNerTag(String namedEntityType){
+        if(namedEntityType == null || namedEntityType.isEmpty()){
+            throw new IllegalArgumentException("The parsed NamedEntity string MUST NOT be NULL nor empty!");
+        }
+        NerTag tag = nerTagSet.getTag(namedEntityType);
+        if(tag == null){
+            tag = new NerTag(namedEntityType);
+            nerTagSet.addTag(tag);
+        }
+        return tag;
     }
+    /**
+     * Setter for a NamedEntity name &gt; <code>dc:tyoe</code>
+     * mapping.
+     * @param namedEntityType the Named Entity type (as
+     * used by the OpenNLP NameFinder model)
+     * @param dcType the <code>dc:Type</code> used for the
+     * NamedEntity or <code>nulll</code> if non
+     * @throws IllegalArgumentException if the parsed NamedEntity
+     * type is <code>null</code> or an empty String.
+     */
     public void setMappedType(String namedEntityType,UriRef dcType){
         if(namedEntityType != null && !namedEntityType.isEmpty()){
-            if(dcType == null){
-                typeMappings.remove(namedEntityType);
-            } else {
-                typeMappings.put(namedEntityType, dcType);
-            }
+            nerTagSet.addTag(new NerTag(namedEntityType, dcType));
         } else {
             throw new IllegalArgumentException("The parsed NamedEntity type MUST NOT be NULL nor empty!");
         }

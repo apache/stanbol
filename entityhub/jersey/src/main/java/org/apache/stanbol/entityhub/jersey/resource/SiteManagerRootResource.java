@@ -86,7 +86,7 @@ import org.slf4j.LoggerFactory;
 import at.newmedialab.ldpath.exception.LDPathParseException;
 import at.newmedialab.ldpath.model.programs.Program;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Resource to provide a REST API for the {@link SiteManager}.

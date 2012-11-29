@@ -22,7 +22,61 @@ import org.junit.Test;
 
 public class EnhancerConfigurationTest extends EnhancerTestBase {
 
+    public static final String[] EXPECTED_ENGINES = new String[]{
+        "<rdf:Description rdf:about=\"http://localhost:.*/enhancer\">",
+        "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/enhancer#Enhancer\"/>",
+        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/dbpediaLinking\"/>",
+        "<rdfs:label>dbpediaLinking</rdfs:label>",
+        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/langid\"/>",
+        "<rdfs:label>langid</rdfs:label>",
+        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/langdetect\"/>",
+        "<rdfs:label>langdetect</rdfs:label>",
+        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/tika\"/>",
+        "<rdfs:label>tika</rdfs:label>",
+        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/opennlp-sentence\"/>",
+        "<rdfs:label>opennlp-sentence</rdfs:label>",
+        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/opennlp-token\"/>",
+        "<rdfs:label>opennlp-token</rdfs:label>",
+        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/opennlp-pos\"/>",
+        "<rdfs:label>opennlp-pos</rdfs:label>",
+        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/opennlp-ner\"/>",
+        "<rdfs:label>opennlp-ner</rdfs:label>",
+        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/opennlp-chunker\"/>",
+        "<rdfs:label>opennlp-chunker</rdfs:label>",
+        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/sentiment-wordclassifier\"/>",
+        "<rdfs:label>sentiment-wordclassifier</rdfs:label>",
+        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/xmpextractor\"/>",
+        "<rdfs:label>xmpextractor</rdfs:label>",
+//NOT AVAILABLE DURING TESTS, BECAUSE OF OFFLINE MODE!
+//        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/dbpspotlightdisambiguate\"/>",
+//        "<rdfs:label>dbpspotlightdisambiguate</rdfs:label>",
+//        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/dbpspotlightannotate\"/>",
+//        "<rdfs:label>dbpspotlightannotate</rdfs:label>",
+//        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/dbpspotlightcandidates\"/>",
+//        "<rdfs:label>dbpspotlightcandidates</rdfs:label>",
+//        "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/dbpspotlightspot\"/>",
+//        "<rdfs:label>dbpspotlightspot</rdfs:label>",
+        "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/enhancer#EnhancementEngine\"/>"
+    };
+    public static final String[] EXPECTED_CHAINS = new String[]{
+        "<j.0:hasChain rdf:resource=\"http://localhost:.*/enhancer/chain/default\"/>",
+        "<rdfs:label>default</rdfs:label>",
+        "<j.0:hasChain rdf:resource=\"http://localhost:.*/enhancer/chain/language\"/>",
+        "<rdfs:label>language</rdfs:label>",
+        "<j.0:hasChain rdf:resource=\"http://localhost:.*/enhancer/chain/dbpedia-proper-noun\"/>",
+        "<rdfs:label>dbpedia-proper-noun</rdfs:label>",
+        "<j.0:hasChain rdf:resource=\"http://localhost:.*/enhancer/chain/dbpedia-spotlight\"/>",
+        "<rdfs:label>dbpedia-spotlight</rdfs:label>",
+        "<j.0:hasChain rdf:resource=\"http://localhost:.*/enhancer/chain/all-active\"/>",
+        "<rdfs:label>all-active</rdfs:label>",
+        "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/enhancer#EnhancementChain\"/>",    
+    };
     
+    public static final String[] EXPECTED_CONFIG = new String[EXPECTED_CHAINS.length+EXPECTED_ENGINES.length];
+    static {
+        System.arraycopy(EXPECTED_CHAINS, 0, EXPECTED_CONFIG, 0, EXPECTED_CHAINS.length);
+        System.arraycopy(EXPECTED_ENGINES, 0, EXPECTED_CONFIG, EXPECTED_CHAINS.length, EXPECTED_ENGINES.length);
+    }
     
     @Test
     public void testEnhancerConfig() throws IOException{
@@ -31,21 +85,7 @@ public class EnhancerConfigurationTest extends EnhancerTestBase {
             .withHeader("Accept","application/rdf+xml")
         )
         .assertStatus(200)
-        .assertContentRegexp(
-            "<rdf:Description rdf:about=\"http://localhost:.*/enhancer\">",
-            "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/enhancer#Enhancer\"/>",
-            "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/dbpediaLinking\"/>",
-            "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/langid\"/>",
-            "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/langdetect\"/>",
-            "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/tika\"/>",
-            "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/ner\"/>",
-            "<j.0:hasChain rdf:resource=\"http://localhost:.*/enhancer/chain/default\"/>",
-            "<j.0:hasChain rdf:resource=\"http://localhost:.*/enhancer/chain/language\"/>",
-            "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/enhancer#EnhancementChain\"/>",
-            "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/enhancer#EnhancementEngine\"/>",
-            "<rdfs:label>ner</rdfs:label>",
-            "<rdfs:label>language</rdfs:label>"
-         );
+        .assertContentRegexp(EXPECTED_CONFIG);
     }
     @Test
     public void testEngineConfig() throws IOException{
@@ -54,17 +94,7 @@ public class EnhancerConfigurationTest extends EnhancerTestBase {
             .withHeader("Accept","application/rdf+xml")
         )
         .assertStatus(200)
-        .assertContentRegexp(
-            "<rdf:Description rdf:about=\"http://localhost:.*/enhancer\">",
-            "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/enhancer#Enhancer\"/>",
-            "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/dbpediaLinking\"/>",
-            "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/langid\"/>",
-            "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/langdetect\"/>",
-            "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/tika\"/>",
-            "<j.0:hasEngine rdf:resource=\"http://localhost:.*/enhancer/engine/ner\"/>",
-            "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/enhancer#EnhancementEngine\"/>",
-            "<rdfs:label>ner</rdfs:label>"
-         );
+        .assertContentRegexp(EXPECTED_ENGINES);
     }
     @Test
     public void testChainConfig() throws IOException{
@@ -73,14 +103,7 @@ public class EnhancerConfigurationTest extends EnhancerTestBase {
             .withHeader("Accept","application/rdf+xml")
         )
         .assertStatus(200)
-        .assertContentRegexp(
-            "<rdf:Description rdf:about=\"http://localhost:.*/enhancer\">",
-            "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/enhancer#Enhancer\"/>",
-            "<j.0:hasChain rdf:resource=\"http://localhost:.*/enhancer/chain/default\"/>",
-            "<j.0:hasChain rdf:resource=\"http://localhost:.*/enhancer/chain/language\"/>",
-            "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/enhancer#EnhancementChain\"/>",
-            "<rdfs:label>language</rdfs:label>"
-        );
+        .assertContentRegexp(EXPECTED_CHAINS);
     }
     @Test
     public void testSparqlConfig() throws IOException{
@@ -109,6 +132,7 @@ public class EnhancerConfigurationTest extends EnhancerTestBase {
             "<binding name=\"chain\">",
             "<uri>http://localhost:.*/enhancer/chain/default</uri>",
             "<uri>http://localhost:.*/enhancer/chain/language</uri>",
+            "<uri>http://localhost:.*/enhancer/chain/dbpedia-proper-noun</uri>",
             "<binding name=\"name\">",
             "<literal>default</literal>",
             "<literal>language</literal>"

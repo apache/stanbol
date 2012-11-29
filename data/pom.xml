@@ -15,7 +15,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -117,6 +118,19 @@
         <module>opennlp/ner/en</module>
         <module>opennlp/ner/es</module>
         <module>opennlp/ner/nl</module>
+      </modules>
+    </profile>
+    <profile>
+      <!--
+       Profile including all OpenNLP language and NER modules
+       -->
+      <id>sentiment</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>sentiment/sentiws</module>
+        <module>sentiment/sentiwordnet</module>
       </modules>
     </profile>
     <profile>

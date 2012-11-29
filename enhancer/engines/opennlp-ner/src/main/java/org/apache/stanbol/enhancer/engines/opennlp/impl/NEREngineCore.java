@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.opennlp.impl;
 
+import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.NER_ANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
@@ -41,23 +42,28 @@ import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.namefind.TokenNameFinderModel;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
-import opennlp.tools.tokenize.SimpleTokenizer;
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.Span;
 
 import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
+import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
+import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
+import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
+import org.apache.stanbol.enhancer.nlp.model.Chunk;
+import org.apache.stanbol.enhancer.nlp.model.Section;
+import org.apache.stanbol.enhancer.nlp.model.Sentence;
+import org.apache.stanbol.enhancer.nlp.model.Token;
+import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
+import org.apache.stanbol.enhancer.nlp.ner.NerTag;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -66,8 +72,6 @@ import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
-import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
-import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +94,7 @@ public abstract class NEREngineCore
     protected OpenNLP openNLP;
     
     protected NEREngineConfig config;
+    
     
     /** Comments about our models */
     public static final Map<String, String> DATA_FILE_COMMENTS;
@@ -135,32 +140,45 @@ public abstract class NEREngineCore
                 + "method! -> This indicated an Bug in the implementation of the "
                 + "EnhancementJobManager!");
         }
-        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
-        if(contentPart == null){
-            throw new IllegalStateException("No ContentPart with Mimetype '"
-                + TEXT_PLAIN_MIMETYPE+"' found for ContentItem "+ci.getUri()
-                + ": This is also checked in the canEnhance method! -> This "
-                + "indicated an Bug in the implementation of the "
-                + "EnhancementJobManager!");
+        final AnalysedText at = AnalysedTextUtils.getAnalysedText(ci);
+        //validate data in the AnalysedText
+        final String text;
+        if(at != null && at.getTokens().hasNext()){ //if the AnalysedText is present and tokens are present
+            if(log.isDebugEnabled()){
+                log.debug("computeEnhancements from AnalysedText ContentPart of ContentItem {}: text={}",
+                    ci.getUri().getUnicodeString(), StringUtils.abbreviate(at.getSpan(), 100));
+            }
+            text = null;
+        } else { //no AnalysedText with tokens ...
+            //fallback to processing the plain text is still supported
+            Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+            if(contentPart == null){
+                throw new IllegalStateException("No ContentPart with Mimetype '"
+                    + TEXT_PLAIN_MIMETYPE+"' found for ContentItem "+ci.getUri()
+                    + ": This is also checked in the canEnhance method! -> This "
+                    + "indicated an Bug in the implementation of the "
+                    + "EnhancementJobManager!");
+            }
+            try {
+                text = ContentItemHelper.getText(contentPart.getValue());
+            } catch (IOException e) {
+                throw new InvalidContentException(this, ci, e);
+            }
+            if (text.trim().length() == 0) {
+                // TODO: make the length of the data a field of the ContentItem
+                // interface to be able to filter out empty items in the canEnhance
+                // method
+                log.warn("ContentPart {} of ContentItem {} does not contain any text" +
+                        "to extract knowledge from in ContentItem {}", 
+                        contentPart.getKey(),ci);
+                return;
+            }
+            if(log.isDebugEnabled()){
+                log.debug("computeEnhancements from ContentPart {} of ContentItem {}: text={}",
+                    new Object[]{contentPart.getKey(),ci.getUri().getUnicodeString(), 
+                                 StringUtils.abbreviate(text, 100)});
+            }
         }
-        String text;
-        try {
-            text = ContentItemHelper.getText(contentPart.getValue());
-        } catch (IOException e) {
-            throw new InvalidContentException(this, ci, e);
-        }
-        if (text.trim().length() == 0) {
-            // TODO: make the length of the data a field of the ContentItem
-            // interface to be able to filter out empty items in the canEnhance
-            // method
-            log.warn("ContentPart {} of ContentItem {} does not contain any text" +
-            		"to extract knowledge from in ContentItem {}", 
-            		contentPart.getKey(),ci);
-            return;
-        }
-        log.debug("computeEnhancements from ContentPart {} of ContentItem {}: text={}",
-            new Object[]{contentPart.getKey(),ci.getUri().getUnicodeString(), 
-                         StringUtils.abbreviate(text, 100)});
         try {
             if(config.isProcessedLangage(language)){
                 for (String defaultModelType : config.getDefaultModelTypes()) {
@@ -168,7 +186,7 @@ public abstract class NEREngineCore
                     if(nameFinderModel == null){
                         log.info("No NER Model for {} and language {} available!",defaultModelType,language);
                     } else {
-                        findNamedEntities(ci, text, language, nameFinderModel);
+                        findNamedEntities(ci, at, text, language, nameFinderModel);
                     }
                 }
             } //else do not use default models for languages other than the processed one
@@ -178,7 +196,7 @@ public abstract class NEREngineCore
                 try {
                     nameFinderModel = openNLP.getModel(TokenNameFinderModel.class, 
                         additionalModel, null);
-                    findNamedEntities(ci, text, language, nameFinderModel);
+                    findNamedEntities(ci, at, text, language, nameFinderModel);
                 } catch (IOException e) {
                     log.warn("Unable to load TokenNameFinderModel model for language '"+language
                         + "' (model: "+additionalModel+")",e);
@@ -197,6 +215,7 @@ public abstract class NEREngineCore
     }
 
     protected void findNamedEntities(final ContentItem ci,
+                                     final AnalysedText at,
                                      final String text,
                                      final String lang,
                                      final TokenNameFinderModel nameFinderModel) {
@@ -204,8 +223,9 @@ public abstract class NEREngineCore
         if (ci == null) {
             throw new IllegalArgumentException("Parsed ContentItem MUST NOT be NULL");
         }
-        if (text == null) {
-            log.warn("NULL was parsed as text for content item " + ci.getUri().getUnicodeString() + "! -> call ignored");
+        if (at == null && text == null) {
+            log.warn("NULL was parsed as AnalysedText AND Text for content item " 
+                    + ci.getUri() + ". One of the two MUST BE present! -> call ignored");
             return;
         }
         final Language language;
@@ -216,11 +236,17 @@ public abstract class NEREngineCore
         }
         if(log.isDebugEnabled()){
             log.debug("findNamedEntities model={},  language={}, text=", 
-                    new Object[]{ nameFinderModel, language, StringUtils.abbreviate(text, 100) });
+                    new Object[]{ nameFinderModel, language, 
+                                  StringUtils.abbreviate(at != null ? at.getSpan() : text, 100) });
         }
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         MGraph g = ci.getMetadata();
-        Map<String,List<NameOccurrence>> entityNames = extractNameOccurrences(nameFinderModel, text);
+        Map<String,List<NameOccurrence>> entityNames;
+        if(at != null){
+            entityNames = extractNameOccurrences(nameFinderModel, at, lang);
+        } else {
+            entityNames = extractNameOccurrences(nameFinderModel, text,lang);
+        }
         //lock the ContentItem while writing the RDF data for found Named Entities
         ci.getLock().writeLock().lock();
         try {
@@ -282,32 +308,74 @@ public abstract class NEREngineCore
         }
     }
 
+    @Deprecated
     public Collection<String> extractPersonNames(String text) {
-        return extractNames(getNameModel("person","en"),text);
+        return extractPersonNames(text, "en");
+    }
+    public Collection<String> extractPersonNames(String text,String lang) {
+        return extractNames(getNameModel("person",lang),text);
     }
 
+    @Deprecated
     public Collection<String> extractLocationNames(String text) {
-        return extractNames(getNameModel("location","en"), text);
+        return extractLocationNames(text,"en");
     }
-
+    
+    public Collection<String> extractLocationNames(String text,String lang) {
+        return extractNames(getNameModel("location",lang), text);
+    }
+    
+    @Deprecated
     public Collection<String> extractOrganizationNames(String text) {
-        return extractNames(getNameModel("organization","en"), text);
+        return extractOrganizationNames(text,"en");
     }
-
+    public Collection<String> extractOrganizationNames(String text,String lang) {
+        return extractNames(getNameModel("organization",lang), text);
+    }
+    /**
+     * extracts the PersonName occurrences for English language texts
+     * @param text
+     * @return
+     * @deprecated use {@link #extractLocationNameOccurrences(String,String)} instead
+     */
+    @Deprecated
     public Map<String,List<NameOccurrence>> extractPersonNameOccurrences(String text) {
-        return extractNameOccurrences(getNameModel("person","en"), text);
+        return this.extractPersonNameOccurrences(text, "en");
     }
-
+    public Map<String,List<NameOccurrence>> extractPersonNameOccurrences(String text, String lang) {
+        return extractNameOccurrences(getNameModel("person",lang), text, lang);
+    }
+    /**
+     * extracts the LocationName occurrences for English language texts
+     * @param text
+     * @return
+     * @deprecated use {@link #extractLocationNameOccurrences(String,String)} instead
+     */
+    @Deprecated
     public Map<String,List<NameOccurrence>> extractLocationNameOccurrences(String text) {
-        return extractNameOccurrences(getNameModel("location","en"), text);
+        return extractLocationNameOccurrences(text, "en");
+    }
+    
+    public Map<String,List<NameOccurrence>> extractLocationNameOccurrences(String text,String lang) {
+        return extractNameOccurrences(getNameModel("location",lang), text,lang);
     }
 
+    /**
+     * extracts the OrganizationName occurrences for English language texts
+     * @param text
+     * @return
+     * @deprecated use {@link #extractOrganizationNamesOccurrences(String,String)} instead
+     */
+    @Deprecated
     public Map<String,List<NameOccurrence>> extractOrganizationNameOccurrences(String text) {
-        return extractNameOccurrences(getNameModel("organization","en"), text);
+        return extractOrganizationNameOccurrences(text,"en");
+    }
+    public Map<String,List<NameOccurrence>> extractOrganizationNameOccurrences(String text,String lang) {
+        return extractNameOccurrences(getNameModel("organization",lang), text,lang);
     }
 
     protected Collection<String> extractNames(TokenNameFinderModel nameFinderModel, String text) {
-        return extractNameOccurrences(nameFinderModel, text).keySet();
+        return extractNameOccurrences(nameFinderModel, text, nameFinderModel.getLanguage()).keySet();
     }
 
     /**
@@ -339,16 +407,28 @@ public abstract class NEREngineCore
                 type,language),e);
         }
     }
+    /**
+     * Loads the {@link SentenceModel} for the parsed language or
+     * English as fallback if one for the language is not available
+     * @param language
+     * @return
+     */
     private SentenceModel getSentenceModel(String language) {
         try {
             SentenceModel model = openNLP.getSentenceModel(language);
             if(model != null){
                 return model;
-            } else {
-                throw new IllegalStateException(String.format(
-                    "Unable to built Model for extracting sentences from '%s' " +
-                    "language texts because the model data could not be loaded.",
-                    language));
+            } else { //fallback to english
+                log.info("No sentence detection modle for {}. fallback to English");    
+                model = openNLP.getSentenceModel("en");
+                if(model == null){
+                    throw new IllegalStateException(String.format(
+                        "Unable to built Model for extracting sentences neither for '%s' " +
+                        "nor the fallback language 'en'.",
+                        language));
+                } else {
+                    return model;
+                }
             }
         } catch (InvalidFormatException e) {
             throw new IllegalStateException(String.format(
@@ -360,10 +440,82 @@ public abstract class NEREngineCore
                 language),e);
         }
     }
-    
-    protected Map<String,List<NameOccurrence>> extractNameOccurrences(TokenNameFinderModel nameFinderModel,
-                                                                      String text) {
+    /**
+     * THis method extracts NamedEntity occurrences by using existing {@link Token}s and 
+     * {@link Sentence}s in the parsed {@link AnalysedText}.
+     * @param nameFinderModel the model used to find NamedEntities
+     * @param at the Analysed Text
+     * @param language the language of the text
+     * @return the found named Entity Occurrences
+     */
+    protected Map<String,List<NameOccurrence>> extractNameOccurrences(TokenNameFinderModel nameFinderModel, 
+        AnalysedText at, String language) {
+        // version with explicit sentence endings to reflect heading / paragraph
+        // structure of an HTML or PDF document converted to text
 
+        NameFinderME finder = new NameFinderME(nameFinderModel);
+        Map<String,List<NameOccurrence>> nameOccurrences = new LinkedHashMap<String,List<NameOccurrence>>();
+        List<Section> sentences = new ArrayList<Section>();
+        //Holds the tokens of the previouse (pos 0) current (pos 1) and next (pos 2) sentence
+        AnalysedTextUtils.appandToList(at.getSentences(), sentences);
+        if(!sentences.isEmpty()){ //no sentence annotations
+            sentences.add(at); //process as a single section
+        }
+        for (int i=0;i<sentences.size();i++) {
+            String sentence = sentences.get(i).getSpan();
+            
+            // build a context by concatenating three sentences to be used for
+            // similarity ranking / disambiguation + contextual snippet in the
+            // extraction structure
+            List<String> contextElements = new ArrayList<String>();
+            contextElements.add(sentence);
+            //three sentences as context
+            String context = at.getSpan().substring(
+                sentences.get(Math.max(0, i-1)).getStart(),
+                sentences.get(Math.min(sentences.size()-1, i+1)).getEnd());
+
+            // get the tokens, words of the current sentence
+            List<Token> tokens = new ArrayList<Token>(32);
+            List<String> words = new ArrayList<String>(32);
+            for(Iterator<Token> it =sentences.get(i).getTokens();it.hasNext();){
+                Token t = it.next();
+                tokens.add(t);
+                words.add(t.getSpan());
+            }
+            Span[] nameSpans = finder.find(words.toArray(new String[words.size()]));
+            double[] probs = finder.probs();
+            //int lastStartPosition = 0;
+            for (int j = 0; j < nameSpans.length; j++) {
+                String name = at.getSpan().substring(tokens.get(nameSpans[j].getStart()).getStart(), 
+                    tokens.get(nameSpans[j].getEnd()-1).getEnd());
+                Double confidence = 1.0;
+                for (int k = nameSpans[j].getStart(); k < nameSpans[j].getEnd(); k++) {
+                    confidence *= probs[k];
+                }
+                int start = tokens.get(nameSpans[j].getStart()).getStart();
+                int end = start + name.length();
+                NerTag nerTag = config.getNerTag(nameSpans[j].getType());
+                //create the occurrence for writing fise:TextAnnotations
+                NameOccurrence occurrence = new NameOccurrence(name, start, end, nerTag.getType(),
+                    context, confidence);
+                List<NameOccurrence> occurrences = nameOccurrences.get(name);
+                if (occurrences == null) {
+                    occurrences = new ArrayList<NameOccurrence>();
+                }
+                occurrences.add(occurrence);
+                nameOccurrences.put(name, occurrences);
+                //add also the NerAnnotation to the AnalysedText
+                Chunk chunk = at.addChunk(start, end);
+                //TODO: build AnnotationModel based on the configured Mappings
+                chunk.addAnnotation(NER_ANNOTATION, Value.value(nerTag, confidence));
+            }
+        }
+        finder.clearAdaptiveData();
+        log.debug("{} name occurrences found: {}", nameOccurrences.size(), nameOccurrences);
+        return nameOccurrences;
+    }    
+    
+    protected Map<String,List<NameOccurrence>> extractNameOccurrences(TokenNameFinderModel nameFinderModel, String text, String language) {
         // version with explicit sentence endings to reflect heading / paragraph
         // structure of an HTML or PDF document converted to text
         String textWithDots = text.replaceAll("\\n\\n", ".\n");
@@ -374,7 +526,7 @@ public abstract class NEREngineCore
         Span[] sentenceSpans = sentenceDetector.sentPosDetect(textWithDots);
 
         NameFinderME finder = new NameFinderME(nameFinderModel);
-        Tokenizer tokenizer = SimpleTokenizer.INSTANCE;
+        Tokenizer tokenizer = openNLP.getTokenizer(language);
         Map<String,List<NameOccurrence>> nameOccurrences = new LinkedHashMap<String,List<NameOccurrence>>();
         for (int i = 0; i < sentenceSpans.length; i++) {
             String sentence = sentenceSpans[i].getCoveredText(text).toString().trim();
@@ -411,9 +563,9 @@ public abstract class NEREngineCore
                 int start = tokenSpans[nameSpans[j].getStart()].getStart();
                 int absoluteStart = sentenceSpans[i].getStart() + start;
                 int absoluteEnd = absoluteStart + name.length();
-                UriRef mappedType = config.getMappedType(nameSpans[j].getType());
+                NerTag nerTag = config.getNerTag(nameSpans[j].getType());
                 NameOccurrence occurrence = new NameOccurrence(name, absoluteStart, absoluteEnd, 
-                    mappedType, context, confidence);
+                    nerTag.getType(),context, confidence);
 
                 List<NameOccurrence> occurrences = nameOccurrences.get(name);
                 if (occurrences == null) {
@@ -445,17 +597,26 @@ public abstract class NEREngineCore
         if (null == text) {
             return null;
         }
-        Charset UTF8 = Charset.forName("UTF-8");
-        byte[] bytes = text.getBytes(UTF8);
-        for (int i = 0; i < bytes.length; i++) {
-            byte ch = bytes[i];
+        StringBuilder sb = null; //initialised on the first replacement
+        for (int i = 0; i < text.length(); i++) {
+            int ch = text.codePointAt(i);
             // remove any characters outside the valid UTF-8 range as well as all control characters
             // except tabs and new lines
-            if (!((ch > 31 && ch < 253) || ch == '\t' || ch == '\n' || ch == '\r')) {
-                bytes[i] = ' ';
+            //NOTE: rewesten (2012-11-21) replaced the original check with the one
+            // found at http://blog.mark-mclaren.info/2007/02/invalid-xml-characters-when-valid-utf8_5873.html
+            if (!((ch == 0x9) ||
+                    (ch == 0xA) ||
+                    (ch == 0xD) ||
+                    ((ch >= 0x20) && (ch <= 0xD7FF)) ||
+                    ((ch >= 0xE000) && (ch <= 0xFFFD)) ||
+                    ((ch >= 0x10000) && (ch <= 0x10FFFF)))){
+                if(sb == null){
+                    sb = new StringBuilder(text);
+                }
+                sb.setCharAt(i, ' ');
             }
         }
-        return new String(bytes, UTF8);
+        return sb == null ? text : sb.toString();
     }
 
     /**

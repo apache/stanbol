@@ -57,7 +57,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jersey-version>1.12</jersey-version>
+    <jersey-version>1.15</jersey-version>
     <freemarker-version>2.3.19</freemarker-version>
     <solr-version>3.6.1</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
@@ -810,6 +810,12 @@
         <version>${jersey-version}</version>
       </dependency>
 
+      <!-- mFreemarker and LDPath Viewable -->
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
+        <version>0.10.0-SNAPSHOT</version>
+      </dependency>
 
       <!-- JAX-RS JSR311 -->
       <!-- NOTE that JAX-RS is included and exported by jersey-core
@@ -1058,15 +1064,21 @@
     -->
     <!-- Other Solr/Lucene dependendies -->
     <!-- StAX Parser (used by Solr/Lucene) -->
-    <dependency>
+    <!-- dependency> stay api is included in java 1.6
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.stax-api-1.0</artifactId>
       <version>2.1.0</version>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.woodstox</artifactId>
       <version>3.2.9_3</version>
+      <exclusions>
+        <exclusion> <!-- provided from JDK 1.6 via frameworkfragment -->
+          <groupId>org.apache.servicemix.specs</groupId>
+          <artifactId>org.apache.servicemix.specs.stax-api-1.0</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- dependency>
       <groupId>stax</groupId>

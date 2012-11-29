@@ -17,6 +17,8 @@
 
 package org.apache.stanbol.contenthub.web.resources;
 
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.OPTIONS;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -30,15 +32,11 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
-import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.OPTIONS;
-import static javax.ws.rs.HttpMethod.POST;
 
-import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -47,9 +45,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -78,7 +74,6 @@ import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -86,28 +81,23 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.search.featured.util.SolrContentItemConverter;
-import org.apache.stanbol.contenthub.search.solr.SolrSearchImpl;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.search.solr.SolrSearch;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
-import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrStore;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
-import org.apache.stanbol.contenthub.web.util.JSONUtils;
+import org.apache.stanbol.contenthub.web.util.RestUtil;
+import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
-import org.codehaus.jettison.json.JSONException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.Viewable;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataBodyPart;
-import com.sun.jersey.multipart.FormDataParam;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Resource to provide a CRU[D] REST API for content items and there related enhancements.
@@ -116,8 +106,6 @@ import com.sun.jersey.multipart.FormDataParam;
  * content item URI.
  * <p>
  * Retrieval is achieved using simple GET requests on the content item or enhancement public URIs.
- * <p>
- * Update is achieved by issue a PUT request on an existing content item public URI.
  */
 @Path("/contenthub/{index}/store")
 public class StoreResource extends BaseStanbolResource {
@@ -219,26 +207,10 @@ public class StoreResource extends BaseStanbolResource {
     }
 
     @OPTIONS
-    @Path("/edit/{uri:.+}")
-    public Response handleCorsPreflightEdit(@Context HttpHeaders headers) {
-        ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
-        return res.build();
-    }
-
-    @OPTIONS
     @Path("/{uri:.+}")
     public Response handleCorsPreflightURI(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers, POST, DELETE, OPTIONS);
-        return res.build();
-    }
-
-    @OPTIONS
-    @Path("/update")
-    public Response handleCorsPreflightUpdate(@Context HttpHeaders headers) {
-        ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        enableCORS(servletContext, res, headers, DELETE, OPTIONS);
         return res.build();
     }
 
@@ -249,7 +221,7 @@ public class StoreResource extends BaseStanbolResource {
     /**
      * Cool URI handler for the uploaded resource.
      * 
-     * @param contentURI
+     * @param uri
      *            The URI of the resource in the Stanbol Contenthub store
      * @param headers
      *            HTTP headers
@@ -257,9 +229,9 @@ public class StoreResource extends BaseStanbolResource {
      */
     @GET
     @Path("/content/{uri:.+}")
-    public Response getContent(@PathParam(value = "uri") String contentURI, @Context HttpHeaders headers) throws StoreException {
-
-        ContentItem ci = solrStore.get(contentURI, indexName);
+    public Response getContent(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws StoreException {
+        uri = RestUtil.nullify(uri);
+        ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
@@ -268,7 +240,7 @@ public class StoreResource extends BaseStanbolResource {
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (mt.toString().startsWith(TEXT_HTML)) {
                 URI pageUri = uriInfo.getBaseUriBuilder().path("/contenthub").path(indexName)
-                        .path("store/page").path(contentURI).build();
+                        .path("store/page").path(uri).build();
                 ResponseBuilder rb = Response.temporaryRedirect(pageUri);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
@@ -279,14 +251,14 @@ public class StoreResource extends BaseStanbolResource {
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (RDF_MEDIA_TYPES.contains(mt.toString())) {
                 URI metadataUri = uriInfo.getBaseUriBuilder().path("/contenthub").path(indexName)
-                        .path("store/metadata").path(contentURI).build();
+                        .path("store/metadata").path(uri).build();
                 ResponseBuilder rb = Response.temporaryRedirect(metadataUri);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             }
         }
         URI rawUri = uriInfo.getBaseUriBuilder().path("/contenthub").path(indexName).path("store/raw")
-                .path(contentURI).build();
+                .path(uri).build();
         ResponseBuilder rb = Response.temporaryRedirect(rawUri);
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -299,7 +271,7 @@ public class StoreResource extends BaseStanbolResource {
      * @param type
      *            Type can be {@code "metadata"} or {@code "raw"}. Based on the type, related parts of the
      *            content item will be prepared for download.
-     * @param contentURI
+     * @param uri
      *            URI of the resource in the Stanbol Contenthub store
      * @param format
      *            Rdf serialization format of metadata
@@ -310,51 +282,30 @@ public class StoreResource extends BaseStanbolResource {
     @GET
     @Path("/download/{type}/{uri:.+}")
     public Response downloadContentItem(@PathParam(value = "type") String type,
-                                        @PathParam(value = "uri") String contentURI,
+                                        @PathParam(value = "uri") String uri,
                                         @QueryParam(value = "format") String format,
                                         @Context HttpHeaders headers) throws IOException, StoreException {
-
-        ContentItem ci = solrStore.get(contentURI, indexName);
+        type = RestUtil.nullify(type);
+        uri = RestUtil.nullify(uri);
+        format = RestUtil.nullify(format);
+        ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
         if (type.equals("metadata")) {
-            String fileName = URLEncoder.encode(contentURI, "utf-8") + "-metadata";
-            File file = new File(fileName);
-            if (file.exists()) {
-                file.delete();
-            }
-            boolean success = file.createNewFile();
-            if (success) {
-                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                serializer.serialize(bos, ci.getMetadata(), format);
-                bos.close();
-            } else {
-                log.error("Failed to create file: {}", fileName);
-            }
+            String fileName = URLEncoder.encode(uri, "utf-8") + "-metadata";
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            serializer.serialize(baos, ci.getMetadata(), format);
+            InputStream is = new ByteArrayInputStream(baos.toByteArray());
 
-            ResponseBuilder response = Response.ok((Object) file);
+            ResponseBuilder response = Response.ok((Object) is);
             response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
             response.type("text/plain");
             addCORSOrigin(servletContext, response, headers);
             return response.build();
         } else if (type.equals("raw")) {
-            // TODO we should return the content directly without the file indirection
-            String fileName = URLEncoder.encode(contentURI, "utf-8") + "-raw";
-            File file = new File(fileName);
-            if (file.exists()) {
-                file.delete();
-            }
-            boolean success = file.createNewFile();
-            if (success) {
-                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                bos.write(IOUtils.toByteArray(ci.getStream()));
-                bos.close();
-            } else {
-                log.error("Failed to create file: {}", fileName);
-            }
-
-            ResponseBuilder response = Response.ok((Object) file);
+            String fileName = URLEncoder.encode(uri, "utf-8") + "-raw";
+            ResponseBuilder response = Response.ok((Object) ci.getStream());
             response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
             response.type(ci.getMimeType());
             addCORSOrigin(servletContext, response, headers);
@@ -369,7 +320,7 @@ public class StoreResource extends BaseStanbolResource {
      * HTTP GET method to retrieve the metadata of the content item. Generally, metadata contains the
      * enhancements of the content item.
      * 
-     * @param contentURI
+     * @param uri
      *            URI id of the resource in the Stanbol Contenthub store
      * @return RDF representation of the metadata of the content item.
      * @throws IOException
@@ -377,9 +328,10 @@ public class StoreResource extends BaseStanbolResource {
      */
     @GET
     @Path("/metadata/{uri:.+}")
-    public Response getContentItemMetaData(@PathParam(value = "uri") String contentURI,
-                                           @Context HttpHeaders headers) throws IOException, StoreException {
-        ContentItem ci = solrStore.get(contentURI, indexName);
+    public Response getContentItemMetaData(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws IOException,
+                                                                                                              StoreException {
+        uri = RestUtil.nullify(uri);
+        ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
@@ -394,7 +346,7 @@ public class StoreResource extends BaseStanbolResource {
     /**
      * HTTP GET method to retrieve the raw content item.
      * 
-     * @param contentURI
+     * @param uri
      *            URI of the resource in the Stanbol Contenthub store
      * @return Raw data of the content item.
      * @throws IOException
@@ -402,9 +354,10 @@ public class StoreResource extends BaseStanbolResource {
      */
     @GET
     @Path("/raw/{uri:.+}")
-    public Response getRawContent(@PathParam(value = "uri") String contentURI, @Context HttpHeaders headers) throws IOException,
-                                                                                                            StoreException {
-        ContentItem ci = solrStore.get(contentURI, indexName);
+    public Response getRawContent(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws IOException,
+                                                                                                     StoreException {
+        uri = RestUtil.nullify(uri);
+        ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
@@ -413,70 +366,78 @@ public class StoreResource extends BaseStanbolResource {
         return rb.build();
     }
 
-    /**
-     * This method creates the JSON string of a content item (to be edited) to display it in the HTML view.
-     * 
-     * @param contentURI
-     *            URI id of the resource in the Stanbol Contenthub store
-     * @return JSON representation of the {@link SolrContentItem}
-     * @throws StoreException
-     */
-    @GET
-    @Path("/edit/{uri:.+}")
-    public Response editContentItem(@PathParam(value = "uri") String contentURI, @Context HttpHeaders headers) throws StoreException {
-        SolrContentItem sci = (SolrContentItem) solrStore.get(contentURI, indexName);
-        if (sci == null) {
-            throw new WebApplicationException(404);
-        }
-
-        String jsonString;
-        try {
-            jsonString = JSONUtils.createJSONString(sci);
-        } catch (JSONException e) {
-            throw new StoreException(e.getMessage(), e);
-        }
-        ResponseBuilder rb = Response.ok(jsonString);
-        addCORSOrigin(servletContext, rb, headers);
-        return rb.build();
-    }
-
     /*
      * Services for content item creation
      */
-    // TODO other parameters like title, ldprogram/index should be considered
-    // for this service
+
     /**
-     * HTTP POST method to create a content item in Contenthub. This is the very basic method to create the
-     * content item. The payload of the POST method should include the raw data of the content item to be
-     * created. This method stores the content in the default Solr index ("contenthub").
+     * HTTP POST method to create a content item in Contenthub. This method takes a {@link ContentItem} object
+     * directly. This means that the values provided for this service will be parsed by the multipart mime
+     * serialization of Content Items. (see the following links: <a href=
      * 
-     * @param data
-     *            Raw data of the content item
+     * "http://incubator.apache.org/stanbol/docs/trunk/components/enhancer/contentitem.html#multipart_mime_serialization"
+     * >Content Item Multipart Serialization</a> and <a
+     * href="http://incubator.apache.org/stanbol/docs/trunk/components/enhancer/enhancerrest.html">Using the
+     * multi-part content item RESTful API extensions</a>)
+     * 
+     * @param ci
+     *            {@link ContentItem} to be stored.
+     * @param title
+     *            The title for the content item. Titles can be used to present summary of the actual content.
+     *            For example, search results are presented by showing the titles of resultant content items.
+     * @param chain
+     *            name of a particular {@link Chain} in which the enhancement engines are ordered according to
+     *            a specific use case or need
      * @param headers
      *            HTTP Headers
-     * @return Redirects to "contenthub/{indexName}/store/content/uri" which shows the content item in the
-     *         HTML view.
-     * @throws URISyntaxException
-     * @throws EngineException
+     * @return URI of the newly created contentitem
      * @throws StoreException
+     * @throws URISyntaxException
      */
     @POST
-    @Consumes(WILDCARD + ";qs=0.5")
-    public Response createContentItem(byte[] data, @Context HttpHeaders headers) throws URISyntaxException,
-                                                                                EngineException,
-                                                                                StoreException {
-        String contentURI = ContentItemHelper.makeDefaultUrn(data).getUnicodeString();
-        return createEnhanceAndRedirect(data, headers.getMediaType(), contentURI, headers);
+    @Consumes(MULTIPART_FORM_DATA)
+    public Response createContentItem(ContentItem ci,
+                                      @QueryParam(value = "title") String title,
+                                      @QueryParam(value = "chain") String chain,
+                                      @Context HttpHeaders headers) throws StoreException, URISyntaxException {
+        title = RestUtil.nullify(title);
+        chain = RestUtil.nullify(chain);
+        MediaType acceptedHeader = RestUtil.getAcceptedMediaType(headers, null);
+        if (title != null) {
+            ci.addPart(SolrStore.TITLE_URI, title);
+        }
+        if (ci.getMetadata() == null || ci.getMetadata().isEmpty()) {
+            solrStore.enhanceAndPut(ci, indexName, chain);
+        } else {
+            solrStore.put(ci, indexName);
+        }
+
+        ResponseBuilder rb = null;
+        if (acceptedHeader != null && acceptedHeader.isCompatible(MediaType.TEXT_HTML_TYPE)) {
+            // use a redirect to point browsers to newly created content
+            rb = Response.seeOther(makeRedirectionURI(ci.getUri().getUnicodeString()));
+        } else {
+            rb = Response.created(new URI(ci.getUri().getUnicodeString()));
+        }
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
     /**
      * HTTP POST method to create a content item in Contenthub.
      * 
-     * @param contentURI
-     *            URI for the content item. If not supplied, Contenthub automatically assigns a unique ID
-     *            (uri) to the content item.
      * @param data
      *            Raw data of the content item
+     * 
+     * @param uri
+     *            URI for the content item. If not supplied, Contenthub automatically assigns a unique ID
+     *            (uri) to the content item.
+     * @param title
+     *            The title for the content item. Titles can be used to present summary of the actual content.
+     *            For example, search results are presented by showing the titles of resultant content items.
+     * @param chain
+     *            name of a particular {@link Chain} in which the enhancement engines are ordered according to
+     *            a specific use case or need
      * @param headers
      *            HTTP headers
      * @return Redirects to "contenthub/{indexName}/store/content/uri" which shows the content item in the
@@ -486,36 +447,40 @@ public class StoreResource extends BaseStanbolResource {
      * @throws StoreException
      */
     @POST
-    @Path("/{uri:.+}")
     @Consumes(WILDCARD)
-    public Response createContentItemWithId(@PathParam(value = "uri") String contentURI,
-                                            byte[] data,
-                                            @Context HttpHeaders headers) throws URISyntaxException,
-                                                                         EngineException,
-                                                                         StoreException {
-        return createEnhanceAndRedirect(data, headers.getMediaType(), contentURI, headers);
+    public Response createContentItemWithURI(byte[] data,
+                                             @QueryParam(value = "uri") String uri,
+                                             @QueryParam(value = "title") String title,
+                                             @QueryParam(value = "chain") String chain,
+                                             @Context HttpHeaders headers) throws URISyntaxException,
+                                                                          EngineException,
+                                                                          StoreException {
+        uri = RestUtil.nullify(uri);
+        title = RestUtil.nullify(title);
+        chain = RestUtil.nullify(chain);
+        if (uri == null) {
+            uri = ContentItemHelper.makeDefaultUrn(data).getUnicodeString();
+        }
+        return createEnhanceAndRedirect(data, headers.getMediaType(), uri, false, title, chain, headers);
     }
 
     /**
      * HTTP POST method to create a content item in Contenthub. This method requires the content to be
      * text-based.
      * 
-     * @param id
-     *            Optinal id for the content item to be created.
+     * @param uri
+     *            Optional URI for the content item to be created.
      * @param content
      *            Actual content in text format. If this parameter is supplied, {@link url} is ommitted.
      * @param url
      *            URL where the actual content resides. If this parameter is supplied (and {@link content} is
      *            {@code null}, then the content is retrieved from this url.
-     * @param jsonCons
-     *            Constraints in JSON format. Constraints are used to add supplementary metadata to the
-     *            content item. For example, author of the content item may be supplied as {author:
-     *            "John Doe"}. Then, this constraint is added to the Solr and will be indexed if the
-     *            corresponding Solr schema includes the author field. Solr indexed can be created/adjusted
-     *            through LDPath programs.
      * @param title
      *            The title for the content item. Titles can be used to present summary of the actual content.
      *            For example, search results are presented by showing the titles of resultant content items.
+     * @param chain
+     *            name of a particular {@link Chain} in which the enhancement engines are ordered according to
+     *            a specific use case or need
      * @param headers
      *            HTTP headers (optional)
      * @return Redirects to "contenthub/{indexName}/store/content/uri" which shows the content item in the
@@ -528,78 +493,29 @@ public class StoreResource extends BaseStanbolResource {
      */
     @POST
     @Consumes(APPLICATION_FORM_URLENCODED)
-    public Response createContentItemFromForm(@FormParam("id") String id,
+    public Response createContentItemFromForm(@FormParam("uri") String uri,
                                               @FormParam("content") String content,
                                               @FormParam("url") String url,
-                                              @FormParam("constraints") String jsonCons,
                                               @FormParam("title") String title,
+                                              @FormParam("chain") String chain,
                                               @Context HttpHeaders headers) throws URISyntaxException,
                                                                            EngineException,
                                                                            MalformedURLException,
                                                                            IOException,
                                                                            StoreException {
-        Map<String,List<Object>> constraints = new HashMap<String,List<Object>>();
-        if (jsonCons != null) {
-            constraints = JSONUtils.convertToMap(jsonCons);
-        }
-        return createContentItemFromForm(id, content, url, null, null, null, headers, constraints, title);
+        uri = RestUtil.nullify(uri);
+        url = RestUtil.nullify(url);
+        title = RestUtil.nullify(title);
+        chain = RestUtil.nullify(chain);
+        return createContentItemFromForm(uri, content, url, headers, title, chain);
     }
 
-    /**
-     * HTTP POST method to create a content item from file. File is read and loaded as the actual content.
-     * 
-     * @param file
-     *            {@link File} which contains the content for the content item.
-     * @param disposition
-     *            Additional information about the {@link file} parameter
-     * @param jsonCons
-     *            Constraints in JSON format. Constraints are used to add supplementary metadata to the
-     *            content item. For example, author of the content item may be supplied as {author:
-     *            "John Doe"}. Then, this constraint is added to the Solr and will be indexed if the
-     *            corresponding Solr schema includes the author field. Solr indexed can be created/adjusted
-     *            through LDPath programs.
-     * @param title
-     *            The title for the content item. Titles can be used to present summary of the actual content.
-     *            For example, search results are presented by showing the titles of resultant content items.
-     * @param headers
-     *            HTTP headers (optional)
-     * @return Redirects to "contenthub/{indexName}/store/content/uri" which shows the content item in the
-     *         HTML view.
-     * @throws URISyntaxException
-     * @throws EngineException
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws StoreException
-     */
-    @POST
-    @Consumes(MULTIPART_FORM_DATA)
-    public Response createContentItemFromForm(@FormDataParam("file") File file,
-                                              @FormDataParam("file") FormDataContentDisposition disposition,
-                                              @FormDataParam("file") FormDataBodyPart body,
-                                              @FormDataParam("constraints") String jsonCons,
-                                              @FormDataParam("title") String title,
-                                              @Context HttpHeaders headers) throws URISyntaxException,
-                                                                           EngineException,
-                                                                           MalformedURLException,
-                                                                           IOException,
-                                                                           StoreException {
-        Map<String,List<Object>> constraints = new HashMap<String,List<Object>>();
-        if (jsonCons != null) {
-            constraints = JSONUtils.convertToMap(jsonCons);
-        }
-        return createContentItemFromForm(file.getName(), null, null, file, disposition, body, headers,
-            constraints, title);
-    }
-
-    private Response createContentItemFromForm(String id,
+    private Response createContentItemFromForm(String uri,
                                                String content,
                                                String url,
-                                               File file,
-                                               FormDataContentDisposition disposition,
-                                               FormDataBodyPart body,
                                                HttpHeaders headers,
-                                               Map<String,List<Object>> constraints,
-                                               String title) throws URISyntaxException,
+                                               String title,
+                                               String chain) throws URISyntaxException,
                                                             EngineException,
                                                             MalformedURLException,
                                                             IOException,
@@ -616,190 +532,80 @@ public class StoreResource extends BaseStanbolResource {
                 data = IOUtils.toByteArray(uc.getInputStream());
                 mt = MediaType.valueOf(uc.getContentType());
             } catch (IOException e) {
-                // TODO: collect remote resource error message for user friendly
-                // feedback
-            }
-        } else if (file != null) {
-            mt = body.getMediaType();
-            data = FileUtils.readFileToByteArray(file);
-            if (title == null || title.isEmpty()) {
-                title = disposition.getFileName();
+                log.error("Failed to obtain content from the remote URL: {}", url, e);
+                throw e;
             }
         }
-
         if (data != null && mt != null) {
-            if (id == null || id.trim().equals("")) {
-                id = ContentItemHelper.makeDefaultUrn(data).getUnicodeString();
+            if (uri == null || uri.trim().equals("")) {
+                uri = ContentItemHelper.makeDefaultUrn(data).getUnicodeString();
             }
-            return createEnhanceAndRedirect(data, mt, id, true, constraints, title, headers);
+            return createEnhanceAndRedirect(data, mt, uri, true, title, chain, headers);
         } else {
-            // TODO: add user-friendly feedback on empty requests from a form
-            ResponseBuilder rb = Response.seeOther(new URI("/contenthub/" + indexName + "/store"));
-            addCORSOrigin(servletContext, rb, headers);
-            return rb.build();
+            log.error(String
+                    .format(
+                        "There should be valid values for the media type and content. Media type: %s, content==null: %b",
+                        mt, content == null));
+            throw new IllegalStateException(
+                    String.format(
+                        "There should be valid values for the media type and content. Media type: %s, content==null: %b",
+                        mt, content == null));
         }
     }
 
     /*
-     * This method takes "title" argument as well as "constraints" so that it would be easy to specify title
-     * while calling RESTful services. If the title is specified explicitly it is set as the title otherwise,
-     * it is searched in the constraints.
+     * This method takes "title" argument so that it would be easy to specify title while calling RESTful
+     * services. If the title is specified explicitly it is set as the title otherwise, it is searched in the
+     * constraints.
      */
     private Response createEnhanceAndRedirect(byte[] content,
                                               MediaType mediaType,
-                                              String contentURI,
+                                              String uri,
                                               boolean useExplicitRedirect,
-                                              Map<String,List<Object>> constraints,
                                               String title,
+                                              String chain,
                                               HttpHeaders headers) throws EngineException,
                                                                   URISyntaxException,
                                                                   StoreException {
 
-        SolrContentItem sci = solrStore.create(content, contentURI, title, mediaType.toString(), constraints);
-        solrStore.enhanceAndPut(sci, indexName);
+        ContentItem ci = solrStore.create(content, uri, title, mediaType.toString());
+        solrStore.enhanceAndPut(ci, indexName, chain);
         if (useExplicitRedirect) {
             // use an redirect to point browsers to newly created content
-            ResponseBuilder rb = Response.seeOther(makeRedirectionURI(sci.getUri().getUnicodeString()));
+            ResponseBuilder rb = Response.seeOther(makeRedirectionURI(ci.getUri().getUnicodeString()));
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         } else {
-            // use the correct way of notifying the RESTful client that the
-            // resource has been successfully created
-            ResponseBuilder rb = Response.created(makeRedirectionURI(sci.getUri().getUnicodeString()));
+            ResponseBuilder rb = Response.created(makeRedirectionURI(ci.getUri().getUnicodeString()));
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
     }
 
-    private URI makeRedirectionURI(String contentURI) throws URISyntaxException {
-        return new URI(uriInfo.getBaseUri() + "contenthub/" + indexName + "/store/content/" + contentURI);
-    }
-
-    /**
-     * HTTP POST method to update an existing content item.
-     * 
-     * @param contentURI
-     *            URI of the content item to be updated.
-     * @param content
-     *            Actual content in text format. If this parameter is supplied, {@link url} is ommitted.
-     * @param url
-     *            URL where the actual content resides. If this parameter is supplied (and {@link content} is
-     *            {@code null}, then the content is retrieved from this url.
-     * @param jsonCons
-     *            Constraints in JSON format. Constraints are used to add supplementary metadata to the
-     *            content item. For example, author of the content item may be supplied as {author:
-     *            "John Doe"}. Then, this constraint is added to the Solr and will be indexed if the
-     *            corresponding Solr schema includes the author field. Solr indexed can be created/adjusted
-     *            through LDPath programs.
-     * @param title
-     *            The title for the content item. Titles can be used to present summary of the actual content.
-     *            For example, search results are presented by showing the titles of resultant content items.
-     * @param headers
-     *            HTTP headers (optional)
-     * @return Redirects to "contenthub/{indexName}/store/content/uri" which shows the content item in the
-     *         HTML view.
-     * @throws URISyntaxException
-     * @throws EngineException
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws StoreException
-     */
-    @POST
-    @Path("/update")
-    @Consumes(APPLICATION_FORM_URLENCODED)
-    public Response updateContentItemFromForm(@FormParam("uri") String contentURI,
-                                              @FormParam("content") String content,
-                                              @FormParam("url") String url,
-                                              @FormParam("constraints") String jsonCons,
-                                              @FormParam("title") String title,
-                                              @Context HttpHeaders headers) throws URISyntaxException,
-                                                                           EngineException,
-                                                                           MalformedURLException,
-                                                                           IOException,
-                                                                           StoreException {
-        if (contentURI != null && !contentURI.isEmpty()) {
-            deleteContentItem(contentURI, headers);
-        }
-        return createContentItemFromForm(null, content, url, jsonCons, title, headers);
-    }
-
-    /**
-     * HTTP POST method to update an existing content item.
-     * 
-     * @param contentURI
-     *            URI of the content item to be updated.
-     * @param file
-     *            {@link File} which contains the content for the content item.
-     * @param disposition
-     *            Additional information about the {@link file} parameter
-     * @param jsonCons
-     *            Constraints in JSON format. Constraints are used to add supplementary metadata to the
-     *            content item. For example, author of the content item may be supplied as {author:
-     *            "John Doe"}. Then, this constraint is added to the Solr and will be indexed if the
-     *            corresponding Solr schema includes the author field. Solr indexed can be created/adjusted
-     *            through LDPath programs.
-     * @param title
-     *            The title for the content item. Titles can be used to present summary of the actual content.
-     *            For example, search results are presented by showing the titles of resultant content items.
-     * @param headers
-     *            HTTP headers (optional)
-     * @return Redirects to "contenthub/{indexName}/store/content/uri" which shows the content item in the
-     *         HTML view.
-     * @throws URISyntaxException
-     * @throws EngineException
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws StoreException
-     */
-    @POST
-    @Path("/update")
-    @Consumes(MULTIPART_FORM_DATA)
-    public Response updateContentItemFromForm(@FormDataParam("uri") String contentURI,
-                                              @FormDataParam("file") File file,
-                                              @FormDataParam("file") FormDataContentDisposition disposition,
-                                              @FormDataParam("file") FormDataBodyPart body,
-                                              @FormDataParam("constraints") String jsonCons,
-                                              @FormDataParam("title") String title,
-                                              @Context HttpHeaders headers) throws URISyntaxException,
-                                                                           EngineException,
-                                                                           MalformedURLException,
-                                                                           IOException,
-                                                                           StoreException {
-        if (contentURI != null && !contentURI.isEmpty()) {
-            deleteContentItem(contentURI, headers);
-        }
-        return createContentItemFromForm(file, disposition, body, jsonCons, title, headers);
+    private URI makeRedirectionURI(String uri) throws URISyntaxException {
+        return new URI(uriInfo.getBaseUri() + "contenthub/" + indexName + "/store/content/" + uri);
     }
 
     /**
      * HTTP DELETE method to delete a content item from Contenhub.
      * 
-     * @param contentURI
+     * @param uri
      *            URI of the content item to be deleted.
      * @return HTTP OK
      * @throws StoreException
      */
     @DELETE
     @Path("/{uri:.+}")
-    public Response deleteContentItem(@PathParam(value = "uri") String contentURI,
-                                      @Context HttpHeaders headers) throws StoreException {
-        ContentItem ci = solrStore.get(contentURI, indexName);
+    public Response deleteContentItem(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws StoreException {
+        uri = RestUtil.nullify(uri);
+        ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-        solrStore.deleteById(contentURI, indexName);
+        solrStore.deleteById(uri, indexName);
         ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
-    }
-
-    private Response createEnhanceAndRedirect(byte[] data,
-                                              MediaType mediaType,
-                                              String contentURI,
-                                              HttpHeaders headers) throws EngineException,
-                                                                  URISyntaxException,
-                                                                  StoreException {
-        return createEnhanceAndRedirect(data, mediaType, contentURI, false, null, null, headers);
     }
 
     /*
@@ -846,15 +652,14 @@ public class StoreResource extends BaseStanbolResource {
 
     @Path("/page/{uri:.+}")
     @Produces(TEXT_HTML)
-    public ContentItemResource getContentItemView(@PathParam(value = "uri") String contentURI) throws IOException,
-                                                                                              StoreException {
-        ContentItem ci = solrStore.get(contentURI, indexName);
+    public ContentItemResource getContentItemView(@PathParam(value = "uri") String uri) throws IOException,
+                                                                                       StoreException {
+        ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-        return new ContentItemResource(contentURI, ci, uriInfo, "/contenthub/" + indexName
-                                                                + "/store/download", tcManager, serializer,
-                servletContext);
+        return new ContentItemResource(uri, ci, uriInfo, "/contenthub/" + indexName + "/store/download",
+                tcManager, serializer, servletContext);
     }
 
     // Helper methods for HTML view

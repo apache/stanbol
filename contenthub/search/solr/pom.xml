@@ -57,6 +57,7 @@
     </plugins>
   </build>
   <dependencies>
+    <!-- Increased version because of the faceted search API additions -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>

@@ -39,7 +39,7 @@ import org.apache.stanbol.cmsadapter.web.utils.RestUtil;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Resource providing services for session management

@@ -56,7 +56,7 @@ import org.apache.clerezza.rdf.core.sparql.query.Query;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Enhancer;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 
 /**

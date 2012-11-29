@@ -60,7 +60,6 @@ public class EnhancerWebFragment implements WebFragment {
 
     private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/enhancer/jersey/static";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/enhancer/jersey/templates";
 
     private BundleContext bundleContext;
 
@@ -111,10 +110,6 @@ public class EnhancerWebFragment implements WebFragment {
         return STATIC_RESOURCE_PATH;
     }
 
-    @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
-    }
 
     @Override
     public List<LinkResource> getLinkResources() {

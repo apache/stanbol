@@ -15,6 +15,9 @@ limitations under the License.
 
 The following files are provided under the Apache License, Version 2.0:
 
-config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-language.config
-config/org.apache.stanbol.enhancer.engines.keywordextraction.engine.KeywordLinkingEngine-entityhub.config
-
+    config/org.apache.stanbol.enhancer.chain.allactive.impl.DefaultChain.properties
+    config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-language.config
+    config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-dbpediapropernoun.config
+    config/org.apache.stanbol.enhancer.engines.entityhublinking.EntityhubLinkingEngine-dbpedia.config
+    config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-default.config
+    config/org.apache.stanbol.enhancer.engines.entityhublinking.EntityhubLinkingEngine-entityhub.config

@@ -49,7 +49,15 @@ public interface ServiceProperties {
     /**
      * Ordering values < {@link ServiceProperties#ORDERING_PRE_PROCESSING} and
      * >= this value indicate, that an enhancement engine performs operations
-     * that are only dependent on the parsed content.
+     * that are only dependent on the parsed content.<p>
+     * <b>NOTE:</b> the NLP processing specific orderings that are defined
+     * within this span
+     * @see #ORDERING_NLP_LANGAUGE_DETECTION
+     * @see #ORDERING_NLP_SENTENCE_DETECTION
+     * @see #ORDERING_NLP_TOKENIZING
+     * @see #ORDERING_NLP_POS
+     * @see #ORDERING_NLP_CHUNK
+     * @See #ORDERING_NLP_LEMMATIZE
      */
     Integer ORDERING_CONTENT_EXTRACTION = 100;
 
@@ -76,5 +84,46 @@ public interface ServiceProperties {
      * operations on existing enhancements.
      */
     Integer ORDERING_POST_PROCESSING = -100;
-
+    
+    /* -------
+     * NLP processing orderings (all within the ORDERING_CONTENT_EXTRACTION range
+     * -------
+     */
+    /**
+     * Ordering values < {@link #ORDERING_PRE_PROCESSING} and >=
+     * {@link #ORDERING_NLP_LANGAUGE_DETECTION} are reserved for engines that detect
+     * the language of an content
+     */
+    Integer ORDERING_NLP_LANGAUGE_DETECTION = ServiceProperties.ORDERING_CONTENT_EXTRACTION + 90;
+    /**
+     * Ordering values < {@link #ORDERING_NLP_LANGAUGE_DETECTION} and >=
+     * {@link #ORDERING_NLP_SENTENCE_DETECTION} are reserved for engines that extract
+     * sections within the text content
+     */
+    Integer ORDERING_NLP_SENTENCE_DETECTION = ServiceProperties.ORDERING_CONTENT_EXTRACTION + 80;
+    /**
+     * Ordering values < {@link #ORDERING_NLP_SENTENCE_DETECTION} and >=
+     * {@link #ORDERING_NLP_TOKENIZING} are reserved for engines that tokenize
+     * the text
+     */
+    Integer ORDERING_NLP_TOKENIZING = ServiceProperties.ORDERING_CONTENT_EXTRACTION + 70;
+    /**
+     * Ordering values < {@link #ORDERING_NLP_TOKENIZING} and >=
+     * {@link #ORDERING_NLP_POS} are reserved for engines that perform
+     * POS (Part of Speech) tagging
+     */
+    Integer ORDERING_NLP_POS = ServiceProperties.ORDERING_CONTENT_EXTRACTION + 60;
+    /**
+     * Ordering values < {@link #ORDERING_NLP_POS} and >=
+     * {@link #ORDERING_NLP_CHUNK} are reserved for engines that annotate
+     * Chunks (such as Noun Phrases) in an text.
+     */
+    Integer ORDERING_NLP_CHUNK = ServiceProperties.ORDERING_CONTENT_EXTRACTION + 50;
+    /**
+     * Ordering values < {@link #ORDERING_NLP_CHUNK} and >=
+     * {@link #ORDERING_NLP_LEMMATIZE} are reserved for engines that lemmatize
+     * texts.<p>
+     * TODO: maybe this should be the same as {@link #ORDERING_NLP_TOKENIZING}
+     */
+    Integer ORDERING_NLP_LEMMATIZE = ServiceProperties.ORDERING_CONTENT_EXTRACTION + 40;
 }

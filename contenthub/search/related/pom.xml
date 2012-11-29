@@ -62,6 +62,8 @@
     </plugins>
   </build>
   <dependencies>
+    <!-- Increased the version because of the API changes such as
+    ReferencedSiteManager-> SiteManager -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>

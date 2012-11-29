@@ -21,7 +21,9 @@ import org.apache.clerezza.rdf.core.UriRef;
 public class NameOccurrence {
 
     public final String name;
-
+    
+    public final UriRef type;
+    
     public final Integer start;
 
     public final Integer end;
@@ -30,14 +32,12 @@ public class NameOccurrence {
 
     public final Double confidence;
 
-    public final UriRef type;
-
     public NameOccurrence(String name, Integer start, Integer end, UriRef type,
             String context, Double confidence) {
-        this.start = start;
-        this.end = end;
         this.name = name;
         this.type = type;
+        this.start = start;
+        this.end = end;
         this.context = context;
         this.confidence = confidence;
     }

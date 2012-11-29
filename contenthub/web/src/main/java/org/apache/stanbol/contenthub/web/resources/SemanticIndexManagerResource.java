@@ -16,11 +16,11 @@
  */
 package org.apache.stanbol.contenthub.web.resources;
 
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.OPTIONS;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
-import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.OPTIONS;
 
 import java.util.List;
 
@@ -53,7 +53,7 @@ import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * This class the the web resource to handle the RESTful requests and HTML view of the LDProgram management
@@ -100,7 +100,7 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
         enableCORS(servletContext, res, headers, DELETE, OPTIONS);
         return res.build();
     }
-    
+
     @OPTIONS
     @Path("/exists")
     public Response handleCorsPreflightExists(@Context HttpHeaders headers) {
@@ -121,14 +121,14 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     @GET
     @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
     public Response retrieveAllPrograms(@Context HttpHeaders headers) {
-        MediaType acceptedHeader = RestUtil.getAcceptedMediaType(headers);
+        MediaType acceptedHeader = RestUtil.getAcceptedMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
         if (acceptedHeader.isCompatible(MediaType.TEXT_HTML_TYPE)) {
-        	return Response.ok(new Viewable("index", this), MediaType.TEXT_HTML).build();
-        } else{
-	        LDProgramCollection ldProgramCollection = programManager.retrieveAllPrograms();
-	        ResponseBuilder rb = Response.ok(ldProgramCollection, MediaType.APPLICATION_JSON);
-	        addCORSOrigin(servletContext, rb, headers);
-	        return rb.build();
+            return Response.ok(new Viewable("index", this), MediaType.TEXT_HTML).build();
+        } else {
+            LDProgramCollection ldProgramCollection = programManager.retrieveAllPrograms();
+            ResponseBuilder rb = Response.ok(ldProgramCollection, MediaType.APPLICATION_JSON);
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         }
     }
 
@@ -151,12 +151,13 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
                                   @FormParam("program") String program,
                                   @Context HttpHeaders headers) throws LDPathException {
 
-        try {
-            programManager.submitProgram(programName, program);
-        } catch (LDPathException e) {
-            logger.error("LDPath program cannot be submitted", e);
-            return Response.status(Status.BAD_REQUEST).entity(e).build();
+        programName = RestUtil.nullify(programName);
+        program = RestUtil.nullify(program);
+        if (programName == null || program == null) {
+            logger.error("LDPath program cannot be submitted");
+            return Response.status(Status.BAD_REQUEST).build();
         }
+        programManager.submitProgram(programName, program);
         ResponseBuilder rb = Response
                 .ok("LDPath program has been successfully saved and corresponding Solr Core has been successfully created.");
         addCORSOrigin(servletContext, rb, headers);
@@ -175,6 +176,7 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     @GET
     @Path("/program")
     public Response getProgramByName(@QueryParam("name") String programName, @Context HttpHeaders headers) {
+        programName = RestUtil.nullify(programName);
         String ldPathProgram = programManager.getProgramByName(programName);
         if (ldPathProgram == null) {
             return Response.status(Status.NOT_FOUND).build();
@@ -197,9 +199,10 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     @DELETE
     @Path("/program/{name}")
     public Response deleteProgram(@PathParam(value = "name") String programName, @Context HttpHeaders headers) {
-    	if(!programManager.isManagedProgram(programName)){
-    	    throw new WebApplicationException(404);
-    	}
+        programName = RestUtil.nullify(programName);
+        if (!programManager.isManagedProgram(programName)) {
+            throw new WebApplicationException(404);
+        }
         programManager.deleteProgram(programName);
         ResponseBuilder rb = Response.ok();
         addCORSOrigin(servletContext, rb, headers);
@@ -218,6 +221,7 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     @GET
     @Path("/exists")
     public Response isManagedProgram(@QueryParam("name") String programName, @Context HttpHeaders headers) {
+        programName = RestUtil.nullify(programName);
         if (programManager.isManagedProgram(programName)) {
             ResponseBuilder rb = Response.ok();
             addCORSOrigin(servletContext, rb, headers);

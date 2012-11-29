@@ -51,7 +51,7 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
             + " geologist who lived in New Zealand and worked at the University of Otago.";
     
     public static final String SINGLE_SENTENCE_WITH_CONTROL_CHARS = "Dr Patrick Marshall (1869 - November 1950) was a" 
-    		+ " \u0014geologist\u0015 who lived in New Zealand and worked at the University of Otago.";
+    		+ " \u0014geologist\u0015 who lived in New\tZealand and worked at the University\nof Otago.";
 
     public static final String MULTI_SENTENCES = "The life of Patrick Marshall\n\n"
             + "Dr Patrick Marshall (1869 - November 1950) was a"
@@ -135,6 +135,8 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
         NameOccurrence firstOccurrence = pmOccurrences.get(0);
         assertEquals("Patrick Marshall", firstOccurrence.name);
         assertFalse(firstOccurrence.context.contains("\u0014"));
+        assertTrue(firstOccurrence.context.contains("\t"));
+        assertTrue(firstOccurrence.context.contains("\n"));
     }
     
     @Test
@@ -176,7 +178,7 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
         expectedValues.put(Properties.DC_TYPE, new UriRef("http://www.bootstrep.eu/ontology/GRO#DNA"));
         MGraph g = ci.getMetadata();
         int textAnnotationCount = validateAllTextAnnotations(g,EHEALTH,expectedValues);
-        assertEquals(6, textAnnotationCount);
+        assertEquals(7, textAnnotationCount);
     }
     
 

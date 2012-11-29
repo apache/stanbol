@@ -50,7 +50,18 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
 import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
+import org.apache.stanbol.enhancer.engines.celi.CeliMorphoFeatures;
+import org.apache.stanbol.enhancer.engines.celi.CeliTagSetRegistry;
 import org.apache.stanbol.enhancer.engines.celi.utils.Utils;
+import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
+import org.apache.stanbol.enhancer.nlp.morpho.Case;
+import org.apache.stanbol.enhancer.nlp.morpho.Gender;
+import org.apache.stanbol.enhancer.nlp.morpho.NumberFeature;
+import org.apache.stanbol.enhancer.nlp.morpho.Person;
+import org.apache.stanbol.enhancer.nlp.morpho.Tense;
+import org.apache.stanbol.enhancer.nlp.morpho.TenseTag;
+import org.apache.stanbol.enhancer.nlp.morpho.VerbMood;
+import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -67,22 +78,16 @@ import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, metatype = true)
 @Service
-@Properties(value = { 
-    @Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiLemmatizer"),
-    @Property(name = CeliConstants.CELI_LICENSE),
-    @Property(name = CeliConstants.CELI_TEST_ACCOUNT,boolValue=false)
-})
+@Properties(value = { @Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiLemmatizer"), @Property(name = CeliConstants.CELI_LICENSE), @Property(name = CeliConstants.CELI_TEST_ACCOUNT, boolValue = false) })
 public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
-	
+	// TODO: check if it is OK to define new properties in the FISE namespace
+	public static final UriRef hasLemmaForm = new UriRef("http://fise.iks-project.eu/ontology/hasLemmaForm");
+
 	/**
-	 * This ensures that no connections to external services are made if Stanbol is started in offline mode 
-	 * as the OnlineMode service will only be available if OfflineMode is deactivated. 
+	 * This ensures that no connections to external services are made if Stanbol is started in offline mode as the OnlineMode service will only be available if OfflineMode is deactivated.
 	 */
 	@Reference
-    private OnlineMode onlineMode; 
-	//TODO: check if it is OK to define new properties in the FISE namespace
-	public static final UriRef hasLemmaForm = new UriRef("http://fise.iks-project.eu/ontology/hasLemmaForm");
-	public static final UriRef hasMorphoFeature = new UriRef("http://fise.iks-project.eu/ontology/hasMorphologicalFeature");
+	private OnlineMode onlineMode;
 
 	private static List<String> supportedLangs = new Vector<String>();
 	static {
@@ -99,17 +104,14 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 	public static final Literal LANG_ID_ENGINE_NAME = LiteralFactory.getInstance().createTypedLiteral("org.apache.stanbol.enhancer.engines.celi.langid.impl.CeliLanguageIdentifierEnhancementEngine");
 
 	/**
-	 * The default value for the Execution of this Engine. Currently set to
-	 * {@link ServiceProperties#ORDERING_CONTENT_EXTRACTION}
+	 * The default value for the Execution of this Engine. Currently set to {@link ServiceProperties#ORDERING_CONTENT_EXTRACTION}
 	 */
 	public static final Integer defaultOrder = ServiceProperties.ORDERING_CONTENT_EXTRACTION;
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
-
 	/**
-	 * This contains the only MIME type directly supported by this enhancement
-	 * engine.
+	 * This contains the only MIME type directly supported by this enhancement engine.
 	 */
 	private static final String TEXT_PLAIN_MIMETYPE = "text/plain";
 
@@ -135,7 +137,7 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 	protected void activate(ComponentContext ctx) throws IOException, ConfigurationException {
 		super.activate(ctx);
 		Dictionary<String, Object> properties = ctx.getProperties();
-        this.licenseKey = Utils.getLicenseKey(properties,ctx.getBundleContext());
+		this.licenseKey = Utils.getLicenseKey(properties, ctx.getBundleContext());
 		String url = (String) properties.get(SERVICE_URL);
 		if (url == null || url.isEmpty()) {
 			throw new ConfigurationException(SERVICE_URL, String.format("%s : please configure the URL of the CELI Web Service (e.g. by" + "using the 'Configuration' tab of the Apache Felix Web Console).", getClass().getSimpleName()));
@@ -159,10 +161,8 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 	@Override
 	public int canEnhance(ContentItem ci) throws EngineException {
 		String language = EnhancementEngineHelper.getLanguage(ci);
-		if(language==null) {
-		    log.warn("Unable to enhance ContentItem {} because language of the Content is unknown." +
-		    		"Please check that a language identification engine is active in this EnhancementChain).",
-		    		ci.getUri());
+		if (language == null) {
+			log.warn("Unable to enhance ContentItem {} because language of the Content is unknown." + "Please check that a language identification engine is active in this EnhancementChain).", ci.getUri());
 		}
 		if (ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES) != null && this.isLangSupported(language))
 			return ENHANCE_ASYNC;
@@ -172,19 +172,15 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 
 	@Override
 	public void computeEnhancements(ContentItem ci) throws EngineException {
-        String language = EnhancementEngineHelper.getLanguage(ci);
-		if (!isLangSupported(language)){
-		    throw new IllegalStateException("Call to computeEnhancement with unsupported language '"
-		            +language+" for ContentItem "+ ci.getUri() +": This is also checked "
-		            + "in the canEnhance method! -> This indicated an Bug in the "
-		            + "implementation of the " + "EnhancementJobManager!");
+		String language = EnhancementEngineHelper.getLanguage(ci);
+		if (!isLangSupported(language)) {
+			throw new IllegalStateException("Call to computeEnhancement with unsupported language '" + language + " for ContentItem " + ci.getUri() + ": This is also checked " + "in the canEnhance method! -> This indicated an Bug in the "
+					+ "implementation of the " + "EnhancementJobManager!");
 		}
-		Language lang = new Language(language); //clerezza language for PlainLiterals
+
 		Entry<UriRef, Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
 		if (contentPart == null) {
-			throw new IllegalStateException("No ContentPart with Mimetype '"
-			        + TEXT_PLAIN_MIMETYPE + "' found for ContentItem " 
-			        + ci.getUri() + ": This is also checked in the canEnhance method! -> This "
+			throw new IllegalStateException("No ContentPart with Mimetype '" + TEXT_PLAIN_MIMETYPE + "' found for ContentItem " + ci.getUri() + ": This is also checked in the canEnhance method! -> This "
 					+ "indicated an Bug in the implementation of the " + "EnhancementJobManager!");
 		}
 		String text;
@@ -198,70 +194,80 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 			return;
 		}
 
-		MGraph g = ci.getMetadata();
-		LiteralFactory literalFactory = LiteralFactory.getInstance();
+		MGraph graph = ci.getMetadata();
 
 		if (this.completeMorphoAnalysis) {
-		    List<LexicalEntry> terms;
-	        try {
-	            terms = this.client.performMorfologicalAnalysis(text, language);
-	        } catch (IOException e) {
-	            throw new EngineException("Error while calling the CELI Lemmatizer"
-	                +" service (configured URL: "
-	                +serviceURL+")!",e);
-	        } catch (SOAPException e) {
-	            throw new EngineException("Error wile encoding/decoding the request/"
-	                +"response to the CELI lemmatizer service!",e);
-	        }
-	        //get a write lock before writing the enhancements
-	        ci.getLock().writeLock().lock();
-	        try {
-				for (LexicalEntry le : terms) {
-				    if(!le.termReadings.isEmpty()){
-    					UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
-    					g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, 
-    					    new PlainLiteralImpl(le.getWordForm(),lang)));
-    					if (le.from >= 0 && le.to > 0) {
-    						g.add(new TripleImpl(textAnnotation, ENHANCER_START, literalFactory.createTypedLiteral(le.from)));
-    						g.add(new TripleImpl(textAnnotation, ENHANCER_END, literalFactory.createTypedLiteral(le.to)));
-                            g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, 
-                                new PlainLiteralImpl(getSelectionContext(text, le.getWordForm(), le.from), lang)));
-    					}
-    					for (Reading r : le.termReadings) {
-    						g.add(new TripleImpl(textAnnotation, hasLemmaForm, 
-    						    new PlainLiteralImpl(r.getLemma(),lang)));
-    						for (Entry<String,String> entry : r.lexicalFeatures.entrySet()) {
-    							g.add(new TripleImpl(textAnnotation, hasMorphoFeature,
-    							    literalFactory.createTypedLiteral(entry.getKey() + "=" + entry.getValue())));
-    						}
-    					}
-				    } //TODO: check if it is OK to ignore lexical entries with no readings
-				}
-	        } finally {
-	            ci.getLock().writeLock().unlock();
-	        }
+			this.addMorphoAnalysisEnhancement(ci, text, language, graph);
 		} else {
-		    String lemmatizedContents;
-	        try {
-	            lemmatizedContents = this.client.lemmatizeContents(text, language);
-            } catch (IOException e) {
-                throw new EngineException("Error while calling the CELI Lemmatizer"
-                    +" service (configured URL: "
-                    +serviceURL+")!",e);
-            } catch (SOAPException e) {
-                throw new EngineException("Error wile encoding/decoding the request/"
-                    +"response to the CELI lemmatizer service!",e);
-            }
-            //get a write lock before writing the enhancements
-            ci.getLock().writeLock().lock();
-            try {
-				UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
-				g.add(new TripleImpl(textEnhancement, hasLemmaForm, 
-				    new PlainLiteralImpl(lemmatizedContents,lang)));
-            } finally {
-                ci.getLock().writeLock().unlock();
-            }
+			this.addLemmatizationEnhancement(ci, text, language, graph);
 		}
+	}
+
+	private void addMorphoAnalysisEnhancement(ContentItem ci, String text, String language, MGraph g) throws EngineException {
+		Language lang = new Language(language); // clerezza language for PlainLiterals
+		List<LexicalEntry> terms;
+		try {
+			terms = this.client.performMorfologicalAnalysis(text, language);
+		} catch (IOException e) {
+			throw new EngineException("Error while calling the CELI Lemmatizer" + " service (configured URL: " + serviceURL + ")!", e);
+		} catch (SOAPException e) {
+			throw new EngineException("Error wile encoding/decoding the request/" + "response to the CELI lemmatizer service!", e);
+		}
+		// get a write lock before writing the enhancements
+		ci.getLock().writeLock().lock();
+		try {
+			LiteralFactory literalFactory = LiteralFactory.getInstance();
+			for (LexicalEntry le : terms) {
+
+				List<CeliMorphoFeatures> mFeatures = this.convertLexicalEntryToMorphFeatures(le, language);
+				for (CeliMorphoFeatures feat : mFeatures) {
+					// Create a text annotation for each interpretation produced by the morphological analyzer
+					UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
+					g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, new PlainLiteralImpl(le.getWordForm(), lang)));
+					if (le.from >= 0 && le.to > 0) {
+						g.add(new TripleImpl(textAnnotation, ENHANCER_START, literalFactory.createTypedLiteral(le.from)));
+						g.add(new TripleImpl(textAnnotation, ENHANCER_END, literalFactory.createTypedLiteral(le.to)));
+						g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, new PlainLiteralImpl(getSelectionContext(text, le.getWordForm(), le.from), lang)));
+					}
+					g.addAll(feat.featuresAsTriples(textAnnotation, lang));
+				}
+			}
+		} finally {
+			ci.getLock().writeLock().unlock();
+		}
+	}
+
+	private void addLemmatizationEnhancement(ContentItem ci, String text, String language, MGraph g) throws EngineException {
+		Language lang = new Language(language); // clerezza language for PlainLiterals
+		String lemmatizedContents;
+		try {
+			lemmatizedContents = this.client.lemmatizeContents(text, language);
+		} catch (IOException e) {
+			throw new EngineException("Error while calling the CELI Lemmatizer" + " service (configured URL: " + serviceURL + ")!", e);
+		} catch (SOAPException e) {
+			throw new EngineException("Error wile encoding/decoding the request/" + "response to the CELI lemmatizer service!", e);
+		}
+		// get a write lock before writing the enhancements
+		ci.getLock().writeLock().lock();
+		try {
+			UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+			g.add(new TripleImpl(textEnhancement, CeliLemmatizerEnhancementEngine.hasLemmaForm, new PlainLiteralImpl(lemmatizedContents, lang)));
+		} finally {
+			ci.getLock().writeLock().unlock();
+		}
+	}
+
+	private List<CeliMorphoFeatures> convertLexicalEntryToMorphFeatures(LexicalEntry le, String lang) {
+		List<CeliMorphoFeatures> result = new Vector<CeliMorphoFeatures>();
+		if (!le.termReadings.isEmpty()) {
+			for (Reading r : le.termReadings) {
+				CeliMorphoFeatures morphoFeature = CeliMorphoFeatures.parseFrom(r, lang);
+				if(morphoFeature != null){
+				    result.add(morphoFeature);
+				}
+			}
+		}
+		return result;
 	}
 
 	private boolean isLangSupported(String language) {

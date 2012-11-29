@@ -27,14 +27,14 @@ import javax.ws.rs.core.MediaType;
  * Utility class for REST services
  */
 public class RestUtil {
-    
+
     public static final Set<String> supportedMediaTypes;
     static {
         Set<String> types = new HashSet<String>();
         types.add(MediaType.APPLICATION_JSON);
         supportedMediaTypes = Collections.unmodifiableSet(types);
     }
-    
+
     /**
      * @param parameter
      *            parameter to be checked
@@ -49,7 +49,7 @@ public class RestUtil {
         }
         return parameter;
     }
-    
+
     public static boolean isJSONaccepted(HttpHeaders headers) {
         if (!headers.getAcceptableMediaTypes().isEmpty()) {
             for (MediaType accepted : headers.getAcceptableMediaTypes()) {
@@ -62,7 +62,7 @@ public class RestUtil {
         }
         return false;
     }
-    
+
     public static boolean isHTMLaccepted(HttpHeaders headers) {
         if (!headers.getAcceptableMediaTypes().isEmpty()) {
             for (MediaType accepted : headers.getAcceptableMediaTypes()) {
@@ -75,9 +75,9 @@ public class RestUtil {
         }
         return false;
     }
-    
-    public static MediaType getAcceptedMediaType(HttpHeaders headers) {
-        MediaType acceptedMediaType = MediaType.APPLICATION_JSON_TYPE; // default
+
+    public static MediaType getAcceptedMediaType(HttpHeaders headers, MediaType defaultMediaType) {
+        MediaType acceptedMediaType = defaultMediaType;
         if (!headers.getAcceptableMediaTypes().isEmpty()) {
             for (MediaType accepted : headers.getAcceptableMediaTypes()) {
                 if (!accepted.isWildcardType()) {

@@ -48,8 +48,6 @@ public class EnhancerVieWebFragment implements WebFragment {
 
     private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/commons/web/vie/static";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/commons/web/vie/templates";
-
     private BundleContext bundleContext;
     
 
@@ -78,11 +76,6 @@ public class EnhancerVieWebFragment implements WebFragment {
     @Override
     public String getStaticResourceClassPath() {
         return STATIC_RESOURCE_PATH;
-    }
-
-    @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
     }
 
     @Override

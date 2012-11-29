@@ -65,7 +65,7 @@ import at.newmedialab.ldpath.model.programs.Program;
 import at.newmedialab.ldpath.model.selectors.PropertySelector;
 import at.newmedialab.ldpath.model.transformers.DoubleTransformer;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 public class LDPathHelper {
     private static final Logger log = LoggerFactory.getLogger(LDPathHelper.class);

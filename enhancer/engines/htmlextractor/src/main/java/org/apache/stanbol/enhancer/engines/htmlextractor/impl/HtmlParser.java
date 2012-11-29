@@ -17,15 +17,17 @@
 package org.apache.stanbol.enhancer.engines.htmlextractor.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
-import javax.xml.parsers.ParserConfigurationException;
-
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.tidy.Tidy;
 
 /**
  * HtmlParser.java
@@ -40,36 +42,65 @@ public class HtmlParser {
      */
     private static final Logger LOG = LoggerFactory.getLogger(HtmlParser.class);
 
-    private Tidy htmlToXmlParser;
-
+    private String baseURI = "";
+    
     public HtmlParser() {
-        this.htmlToXmlParser = new Tidy();
-        this.htmlToXmlParser.setTidyMark(false);
-        this.htmlToXmlParser.setDropEmptyParas(true);
-        this.htmlToXmlParser.setQuiet(true);
-        this.htmlToXmlParser.setQuoteAmpersand(true);
-        this.htmlToXmlParser.setShowWarnings(false);
-        this.htmlToXmlParser.setShowErrors(0);
-        this.htmlToXmlParser.setNumEntities(true);
-        this.htmlToXmlParser.setHideComments(true);
-        this.htmlToXmlParser.setOutputEncoding("UTF-8");
-        this.htmlToXmlParser.setXmlOut(true);
     }
 
 
-    public Document getDOM(String html) {
-        if (html != null) {
-            return getDOM(new ByteArrayInputStream(html.getBytes()), null);
-        }
-        return null;
+    /**
+     * @return the baseURI
+     */
+    public String getBaseURI() {
+      return baseURI;
     }
 
 
-    public synchronized Document getDOM(InputStream html, String charset) {
-        if (charset != null) {
-            htmlToXmlParser.setInputEncoding(charset);
+    /**
+     * @param baseURI the baseURI to set
+     */
+    public void setBaseURI(String baseURI) {
+      this.baseURI = baseURI;
+    }
+
+
+    public Document getDOM(String html) {        
+      if (html != null) {
+        return getDOM(new ByteArrayInputStream(html.getBytes()), null);
+      }
+      return null;
+    }
+
+    public Document getDOM(InputStream html, String charset) {
+        Document doc = null;
+        try {
+            doc = DOMBuilder.jsoup2DOM(Jsoup.parse(html, charset, baseURI));
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        Document doc = htmlToXmlParser.parseDOM(html, null);
         return doc;
+    }
+    
+    public static void main(String[] args) throws Exception {
+      int argv = 0;
+      String encoding = null;
+      while (argv < args.length && args[argv].startsWith("-")) {
+        if (args[argv].equals("-enc")) {
+          encoding = args[++argv];
+        }
+        ++argv;
+      }
+      HtmlParser parser = new HtmlParser();
+      for (int i = argv; i < args.length; ++i) {
+//        parser.setBaseURI(new File(args[i]).toURI().toString());
+        InputStream is = new FileInputStream(args[i]);
+        Document doc = parser.getDOM(is,encoding);
+        OutputStream out = new FileOutputStream(new File(args[i]).getName()+".xml");
+        DOMUtils.writeXml(doc,"UTF-8",null,out);
+        out.close();
+        is.close();
+      }
     }
 }

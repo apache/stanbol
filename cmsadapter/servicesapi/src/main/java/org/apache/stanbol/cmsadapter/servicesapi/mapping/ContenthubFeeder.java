@@ -18,6 +18,8 @@ package org.apache.stanbol.cmsadapter.servicesapi.mapping;
 
 import java.util.Dictionary;
 
+import org.apache.clerezza.rdf.core.UriRef;
+
 /**
  * This interface provides methods to submit and delete content items to/from Contenthub.
  * 
@@ -47,18 +49,16 @@ public interface ContenthubFeeder {
     public static final String PROP_CONTENT_PROPERTIES = "org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder.contentFields";
 
     /**
-     * Creates a content item in Contenthub by leveraging the content repository object itself e.g <b>Node</b>
-     * in JCR, <b>Document</b> in CMIS. If there is an already existing content item in the Contenthub with
-     * the same id, the existing content item should be deleted first.
-     * 
-     * @param o
-     *            Content repository object to be transformed into a content item in Contenthub
-     * @param id
-     *            Optional ID for the content item in Contenthub. If this parameter is specified, it will be
-     *            used as the ID of the content item in Contenthub. Otherwise, the object's own ID in the
-     *            content repository will be used.
+     * When creating a ContentItem from a node, metadata of this node is added as an additional part to
+     * ContentItem through this URI
      */
-    void submitContentItemByCMSObject(Object o, String id);
+    public static final UriRef ADDITIONAL_METADATA_URI = new UriRef(
+            "org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder.additionalMetadata");
+
+    /*
+     * 
+     */
+    public static final String CONTENT_ITEM_URI_PREFIX = "urn:content-item-";
 
     /**
      * Creates a content item in Contenthub by leveraging the content repository object itself e.g <b>Node</b>
@@ -67,15 +67,21 @@ public interface ContenthubFeeder {
      * 
      * @param o
      *            Content repository object to be transformed into a content item in Contenthub
-     * @param id
-     *            Optional ID for the content item in Contenthub. If this parameter is specified, it will be
-     *            used as the ID of the content item in Contenthub. Otherwise, the object's own ID in the
-     *            content repository will be used.
+     */
+    void submitContentItemByCMSObject(Object o);
+
+    /**
+     * Creates a content item in Contenthub by leveraging the content repository object itself e.g <b>Node</b>
+     * in JCR, <b>Document</b> in CMIS. If there is an already existing content item in the Contenthub with
+     * the same id, the existing content item should be deleted first.
+     * 
+     * @param o
+     *            Content repository object to be transformed into a content item in Contenthub
      * @param indexName
      *            Name of the Solr index managed by Contenthub. Specified index will be used to store the
      *            submitted content item
      */
-    void submitContentItemByCMSObject(Object o, String id, String indexName);
+    void submitContentItemByCMSObject(Object o, String indexName);
 
     /**
      * Submits content item by its ID to the Contenthub. If there is an already existing content item in the

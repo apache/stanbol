@@ -18,6 +18,9 @@ package org.apache.stanbol.enhancer.it;
 
 import static org.junit.Assert.fail;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,19 +108,41 @@ public class EnhancerTestBase extends StanbolTestBase {
     }
     public EnhancerTestBase(String endpoint,String...assertEngines){
         super();
-        if(endpoint == null){
-            endpoint = DEFAULT_ENDPOINT;
-        }
-        if(endpoint.charAt(0) != '/')
-            this.endpoint = "/"+endpoint;
-        else{
-            this.endpoint = endpoint;
-        }
+        setEndpoint(endpoint);
         if(assertEngines == null){
             this.assertEngines = DEFAULT_ASSERT_ENGINES;
         } else {
             this.assertEngines = assertEngines;
         }
+    }
+
+    /**
+     * Setter for the endpoint. Keeps care of leading '/' and supports optional query parameter
+     * @param endpoint the endpoint or <code>null</code> to use the default
+     * @param params optional query parameter(s) [key,value,key,value,...]
+     */
+    protected void setEndpoint(String endpoint,String...params) {
+        StringBuilder sb = new StringBuilder();
+        if(endpoint == null){
+            sb.append(DEFAULT_ENDPOINT);;
+        } else if(endpoint.charAt(0) != '/')
+            sb.append("/").append(endpoint);
+        else{
+            sb.append(endpoint);
+        }
+        if(params != null && params.length > 1){
+            for(int i=0;i<params.length-1;i++){
+                sb.append(i==0?'?':'&');
+                sb.append(params[i]).append('=');
+                i++;
+                try {
+                    sb.append(URLEncoder.encode(params[i], "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    throw new IllegalStateException(e.getMessage(),e);
+                }
+            }
+        }
+        this.endpoint = sb.toString();
     }
     public String getEndpoint(){
         return endpoint;

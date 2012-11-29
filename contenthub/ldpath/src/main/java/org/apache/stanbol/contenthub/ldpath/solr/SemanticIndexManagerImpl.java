@@ -19,14 +19,17 @@ package org.apache.stanbol.contenthub.ldpath.solr;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.Resource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -39,6 +42,9 @@ import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.SemanticIndexManager;
 import org.apache.stanbol.contenthub.servicesapi.store.StoreException;
 import org.apache.stanbol.contenthub.store.solr.manager.SolrCoreManager;
+import org.apache.stanbol.enhancer.ldpath.EnhancerLDPath;
+import org.apache.stanbol.enhancer.ldpath.backend.ContentItemBackend;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
 import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
@@ -50,6 +56,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.newmedialab.ldpath.LDPath;
 import at.newmedialab.ldpath.exception.LDPathParseException;
 import at.newmedialab.ldpath.model.programs.Program;
 
@@ -136,7 +143,7 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
 
         // Checks whether there is already a program with the same name
         if (nameProgramMap.containsKey(programName)) {
-            String msg = String.format("There is already an LDProgram with name :  " + programName);
+            String msg = String.format("There is already an LDProgram with name : %s", programName);
             logger.error(msg);
             throw new LDPathException(msg);
         }
@@ -193,23 +200,23 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
 
         return nameProgramMap.get(programName);
     }
-    
+
     @Override
     public Program<Object> getParsedProgramByName(String programName) {
         SiteManagerBackend backend = new SiteManagerBackend(referencedSiteManager);
         String ldPathProgram = getProgramByName(programName);
         ValueFactory vf = InMemoryValueFactory.getInstance();
         EntityhubLDPath ldPath = new EntityhubLDPath(backend, vf);
-    	Program<Object> program = null;
+        Program<Object> program = null;
         try {
             program = ldPath.parseProgram(LDPathUtils.constructReader(ldPathProgram));
         } catch (LDPathParseException e) {
-        	String msg = "Should never happen!!!!! Cannot parse the already stored LDPath program.";
+            String msg = "Should never happen!!!!! Cannot parse the already stored LDPath program.";
             logger.error(msg, e);
         } catch (LDPathException e) {
-        	String msg = "Should never happen!!!!! Cannot parse the already stored LDPath program.";
+            String msg = "Should never happen!!!!! Cannot parse the already stored LDPath program.";
             logger.error(msg, e);
-		}
+        }
         return program;
     }
 
@@ -239,7 +246,7 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
     }
 
     @Override
-    public Map<String,Collection<?>> executeProgram(String programName, Set<String> contexts) throws LDPathException {
+    public Map<String,Collection<?>> executeProgram(String programName, Set<String> contexts, ContentItem ci) throws LDPathException {
         Map<String,Collection<?>> results = new HashMap<String,Collection<?>>();
         SiteManagerBackend backend = new SiteManagerBackend(referencedSiteManager);
         String ldPathProgram = getProgramByName(programName);
@@ -260,6 +267,7 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 Iterator<Object> valueIterator = representation.get(fieldName);
+                if (!valueIterator.hasNext()) continue;
                 Set<Object> values = new HashSet<Object>();
                 while (valueIterator.hasNext()) {
                     values.add(valueIterator.next());
@@ -276,6 +284,30 @@ public class SemanticIndexManagerImpl implements SemanticIndexManager {
                 }
             }
         }
+
+        // execute the LDPath on the given ContentItem
+        ContentItemBackend contentItemBackend = new ContentItemBackend(ci, true);
+        LDPath<Resource> resourceLDPath = new LDPath<Resource>(contentItemBackend, EnhancerLDPath.getConfig());
+        Program<Resource> resourceProgram;
+        try {
+            resourceProgram = resourceLDPath.parseProgram(new StringReader(ldPathProgram));
+            Map<String,Collection<?>> ciBackendResults = resourceProgram.execute(contentItemBackend,
+                ci.getUri());
+            for (Entry<String,Collection<?>> result : ciBackendResults.entrySet()) {
+                if (result.getValue() == null || result.getValue().isEmpty()) continue;
+                if (results.containsKey(result.getKey())) {
+                    @SuppressWarnings("unchecked")
+                    Collection<Object> resultsValue = (Collection<Object>) results.get(result.getKey());
+                    resultsValue.addAll(result.getValue());
+                } else {
+                    results.put(result.getKey(), result.getValue());
+                }
+
+            }
+        } catch (LDPathParseException e) {
+            logger.error("Failed to create Program<Resource> from the LDPath program", e);
+        }
+
         return results;
     }
 }

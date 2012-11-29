@@ -94,11 +94,6 @@ public class ContenthubWebFragment implements WebFragment {
 	}
 
 	@Override
-	public TemplateLoader getTemplateLoader() {
-		return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
-	}
-
-	@Override
 	public List<LinkResource> getLinkResources() {
 		List<LinkResource> resources = new ArrayList<LinkResource>();
 		resources.add(new LinkResource("stylesheet", "style/contenthub.css",

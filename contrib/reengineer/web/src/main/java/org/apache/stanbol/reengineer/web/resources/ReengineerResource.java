@@ -72,7 +72,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/reengineer")

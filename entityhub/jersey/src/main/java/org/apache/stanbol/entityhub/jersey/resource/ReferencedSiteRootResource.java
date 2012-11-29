@@ -113,8 +113,7 @@ import at.newmedialab.ldpath.exception.LDPathParseException;
 import at.newmedialab.ldpath.model.programs.Program;
 
 import com.hp.hpl.jena.reasoner.rulesys.builtins.GE;
-import com.sun.jersey.api.view.Viewable;
-import com.sun.research.ws.wadl.HTTPMethods;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Resource to provide a REST API for the {@link SiteManager}

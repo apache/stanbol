@@ -31,9 +31,9 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
+    		  <groupId>org.apache.felix</groupId>
+    		  <artifactId>maven-bundle-plugin</artifactId>
+    		  <extensions>true</extensions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
-			<version>0.9.0-incubating</version>
+			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
-			<version>0.9.0-incubating</version>
+			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
 		
 		<!-- Enhancer -->
@@ -82,14 +82,26 @@
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>jena</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.chemistry.opencmis</groupId>
-			<artifactId>chemistry-opencmis-client-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.chemistry.opencmis</groupId>
-			<artifactId>chemistry-opencmis-client-impl</artifactId>
-		</dependency>		
+        <dependency>
+          <groupId>org.apache.chemistry.opencmis</groupId>
+          <artifactId>chemistry-opencmis-client-api</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.chemistry.opencmis</groupId>
+          <artifactId>chemistry-opencmis-client-impl</artifactId>
+        </dependency>
+<!--         <dependency> -->
+<!--           <groupId>org.apache.chemistry.opencmis</groupId> -->
+<!--           <artifactId>chemistry-opencmis-commons-api</artifactId> -->
+<!--         </dependency> -->
+<!--         <dependency> -->
+<!--           <groupId>org.apache.chemistry.opencmis</groupId> -->
+<!--           <artifactId>chemistry-opencmis-commons-impl</artifactId> -->
+<!--         </dependency> -->
+<!--         <dependency> -->
+<!--           <groupId>org.apache.chemistry.opencmis</groupId> -->
+<!--           <artifactId>chemistry-opencmis-client-bindings</artifactId> -->
+<!--         </dependency> -->
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.core</artifactId>

@@ -82,10 +82,6 @@ public class UserManagementWebFragment implements WebFragment {
 		return STATIC_RESOURCE_PATH;
 	}
 
-	public TemplateLoader getTemplateLoader() {
-		return new ClassTemplateLoader(getClass(), "foobar");
-	}
-
 	@Override
 	public List<LinkResource> getLinkResources() {
 		List<LinkResource> resources = new ArrayList<LinkResource>();

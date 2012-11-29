@@ -39,7 +39,7 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.demos.crawler.cnn.CNNCrawler;
 import org.apache.stanbol.demos.crawler.web.model.TopicNews;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * This is the web resource for CNN Crawler.

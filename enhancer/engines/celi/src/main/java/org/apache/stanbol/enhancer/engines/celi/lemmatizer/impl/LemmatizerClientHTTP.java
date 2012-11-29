@@ -17,6 +17,7 @@
 package org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -39,6 +40,7 @@ import javax.xml.soap.SOAPPart;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.clerezza.rdf.core.impl.util.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.stanbol.enhancer.engines.celi.utils.Utils;
 import org.slf4j.Logger;
@@ -101,7 +103,12 @@ public class LemmatizerClientHTTP {
         long start = System.currentTimeMillis();
         InputStream stream = con.getInputStream();
         log.debug("Request to {} took {}ms",serviceEP,System.currentTimeMillis()-start);
-
+        if(log.isTraceEnabled()){
+            //log the response if trace is enabled
+            String soapResponse = IOUtils.toString(stream,"UTF-8");
+            log.trace("SoapResponse: \n{}\n",soapResponse);
+            stream = new ByteArrayInputStream(soapResponse.getBytes(Charset.forName("UTF-8")));
+        }
 		// Create SoapMessage
 		MessageFactory msgFactory = MessageFactory.newInstance();
 		SOAPMessage message = msgFactory.createMessage();
@@ -132,12 +139,18 @@ public class LemmatizerClientHTTP {
 					Element lemmaElm = (Element) lemmasList.item(j);
 					String lemma = lemmaElm.getTextContent();
 					NodeList features = ((Element)lemmaElm.getParentNode()).getElementsByTagNameNS("*","LexicalFeature");
-					Hashtable<String,String> featuresMap=new Hashtable<String,String>();
+					Hashtable<String,List<String>> featuresMap=new Hashtable<String,List<String>>();
 					for(int k=0;features!=null && k<features.getLength();k++){
 						Element feat = (Element) features.item(k);
 						String name = feat.getAttribute("name");
 						String value = feat.getTextContent();
-						featuresMap.put(name, value);
+						List<String> values=null;
+						if(featuresMap.containsKey(name))
+							values=featuresMap.get(name);
+						else
+							values=new Vector<String>();
+						values.add(value);
+						featuresMap.put(name, values);
 					}
 					Reading r=new Reading(lemma, featuresMap);
 					readings.add(r);

@@ -17,7 +17,12 @@
 -->
 <project>
   <modelVersion>4.0.0</modelVersion>
-
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>2-SNAPSHOT</version>
+    <relativePath>../parent</relativePath>
+  </parent>
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.reactor</artifactId>
   <version>0.10.0-SNAPSHOT</version>
@@ -38,6 +43,7 @@
     <module>jsonld</module>
 
     <module>web/base</module>
+    <module>web/base.jersey</module>
     <module>web/home</module>
 	<module>web/ldviewable</module>
 	

@@ -48,7 +48,6 @@ public class HomeWebFragment implements WebFragment {
 
     private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/commons/web/home/static";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/commons/web/home/templates";
 
     private BundleContext bundleContext;
 
@@ -77,11 +76,6 @@ public class HomeWebFragment implements WebFragment {
     @Override
     public String getStaticResourceClassPath() {
         return STATIC_RESOURCE_PATH;
-    }
-
-    @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
     }
 
     @Override

@@ -57,7 +57,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * This is the SPARQL endpoint which is used throughout the Stanbol. It uses {@link BundleContext} to retrive

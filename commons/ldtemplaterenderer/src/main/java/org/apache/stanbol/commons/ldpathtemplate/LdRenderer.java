@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 import at.newmedialab.ldpath.api.backend.RDFBackend;
 import at.newmedialab.ldpath.template.engine.TemplateEngine;
 import freemarker.cache.TemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateException;
 
 /**
@@ -87,8 +89,12 @@ public class LdRenderer {
 		
 		@Override
 		public Object findTemplateSource(String name) throws IOException {
+			if (!name.endsWith(".ftl")) {
+				name = name +".ftl";
+			}
+			final String path = TEMPLATES_PATH_IN_BUNDLES+name;
 			for (Bundle bundle : bundles) {
-				URL res = bundle.getResource(TEMPLATES_PATH_IN_BUNDLES+name);
+				URL res = bundle.getResource(path);
 				if (res != null) {
 					return res;
 				}
@@ -142,6 +148,25 @@ public class LdRenderer {
 		engine.setTemplateLoader(templateLoader);
 		try {
 			engine.processFileTemplate(context, templatePath, null, out);
+			out.flush();
+			out.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (TemplateException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * Old school classical freemarker rendering, no LD here
+	 */
+	public void renderPojo(Object pojo, final String templatePath, Writer out) {	
+		Configuration freemarker= new Configuration();
+	    freemarker.setObjectWrapper(new DefaultObjectWrapper());
+		freemarker.setTemplateLoader(templateLoader);
+		try {
+			//should root be a map instead?
+			freemarker.getTemplate(templatePath).process(pojo, out);
 			out.flush();
 			out.close();
 		} catch (IOException e) {

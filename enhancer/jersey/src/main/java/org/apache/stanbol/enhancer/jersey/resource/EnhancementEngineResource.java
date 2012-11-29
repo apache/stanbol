@@ -43,7 +43,7 @@ import org.apache.stanbol.enhancer.servicesapi.impl.SingleEngineChain;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
-import com.sun.jersey.api.view.Viewable;
+import org.apache.stanbol.commons.ldviewable.Viewable;
 
 @Path("/enhancer/engine/{engineName}")
 public class EnhancementEngineResource extends AbstractEnhancerResource {

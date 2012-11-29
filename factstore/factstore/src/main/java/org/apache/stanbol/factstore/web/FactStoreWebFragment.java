@@ -54,8 +54,6 @@ public class FactStoreWebFragment implements WebFragment {
     
     private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/factstore/web/static";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/factstore/web/templates";
-
     private BundleContext bundleContext;
     
     @Reference
@@ -114,9 +112,5 @@ public class FactStoreWebFragment implements WebFragment {
         return STATIC_RESOURCE_PATH;
     }
 
-    @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
-    }
 
 }
