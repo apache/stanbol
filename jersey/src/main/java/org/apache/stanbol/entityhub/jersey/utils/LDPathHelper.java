@@ -40,6 +40,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
@@ -65,7 +66,6 @@ import at.newmedialab.ldpath.model.programs.Program;
 import at.newmedialab.ldpath.model.selectors.PropertySelector;
 import at.newmedialab.ldpath.model.transformers.DoubleTransformer;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 public class LDPathHelper {
     private static final Logger log = LoggerFactory.getLogger(LDPathHelper.class);
