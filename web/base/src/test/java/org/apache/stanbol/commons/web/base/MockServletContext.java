@@ -43,7 +43,7 @@ public final class MockServletContext implements ServletContext {
     private final Map<String,Object> attributes = new HashMap<String,Object>();
 
     protected MockServletContext() {
-        attributes.put(JerseyEndpoint.CORS_ACCESS_CONTROL_EXPOSE_HEADERS,
+        attributes.put(CorsConstants.CORS_ACCESS_CONTROL_EXPOSE_HEADERS,
             new HashSet<String>(Arrays.asList(new String[] {"Location"})));
     }
 

@@ -43,6 +43,7 @@
     <module>jsonld</module>
 
     <module>web/base</module>
+    <module>web/base.jersey</module>
     <module>web/home</module>
 	<module>web/ldviewable</module>
 	

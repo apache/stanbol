@@ -29,11 +29,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import org.apache.wink.common.internal.MultivaluedMapImpl;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
  * Tests issue reported/fix for STANBOL-616
@@ -46,7 +46,7 @@ public class CorsAccessControlAllowMethodTest {
     @Test
     public void testAccessControlAllowMethodTest() {
         ServletContext context = new MockServletContext();
-        context.setAttribute(JerseyEndpoint.CORS_ORIGIN, Collections.singleton("*"));
+        context.setAttribute(CorsConstants.CORS_ORIGIN, Collections.singleton("*"));
         MultivaluedMap<String,String> header = new MultivaluedMapImpl();
         header.add("Origin", "https://issues.apache.org/jira/browse/STANBOL-616");
         header.put("Access-Control-Request-Headers", Arrays.asList("Origin", "Content-Type", "Accept"));
