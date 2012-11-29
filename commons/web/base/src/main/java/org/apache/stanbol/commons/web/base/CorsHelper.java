@@ -16,8 +16,8 @@
  */
 package org.apache.stanbol.commons.web.base;
 
-import static org.apache.stanbol.commons.web.base.JerseyEndpoint.CORS_ORIGIN;
-import static org.apache.stanbol.commons.web.base.JerseyEndpoint.CORS_ACCESS_CONTROL_EXPOSE_HEADERS;
+import static org.apache.stanbol.commons.web.base.CorsConstants.CORS_ORIGIN;
+import static org.apache.stanbol.commons.web.base.CorsConstants.CORS_ACCESS_CONTROL_EXPOSE_HEADERS;
 
 import java.util.Collection;
 import java.util.List;

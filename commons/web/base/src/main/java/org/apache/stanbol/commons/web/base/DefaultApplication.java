@@ -35,10 +35,10 @@ import freemarker.cache.TemplateLoader;
 /**
  * Define the list of available resources and providers to be used by the Stanbol JAX-RS Endpoint.
  */
-public class JerseyEndpointApplication extends Application {
+public class DefaultApplication extends Application {
 
     @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(JerseyEndpointApplication.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultApplication.class);
 
     protected final Set<Class<?>> contributedClasses = new HashSet<Class<?>>();
 

@@ -59,9 +59,6 @@
             <Export-Package>
               org.apache.stanbol.rules.web.*
             </Export-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
-            </Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
               !org.apache.felix.http.jetty, 
               !org.mortbay.jetty.*,
@@ -139,7 +136,7 @@
     	<groupId>org.apache.stanbol</groupId>
   		<artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
     </dependency>
-<dependency>
+    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>
@@ -147,22 +144,23 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
-    </dependency>
+    </dependency> -->
+   
 
     <!-- OSGi tax -->
     <dependency>
