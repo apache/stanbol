@@ -116,7 +116,7 @@
     <!-- Jersey -->
     <dependency>
     	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
+  		<artifactId>org.apache.stanbol.commons.viewable</artifactId>
     </dependency>
 <dependency>
       <groupId>com.sun.jersey</groupId>
