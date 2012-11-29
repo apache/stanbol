@@ -46,6 +46,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
@@ -63,7 +64,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * This class is the web resource which provides RESTful and HTTP interfaces for {@link FeaturedSearch}

@@ -78,6 +78,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.search.featured.util.SolrContentItemConverter;
@@ -97,7 +98,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Resource to provide a CRU[D] REST API for content items and there related enhancements.
