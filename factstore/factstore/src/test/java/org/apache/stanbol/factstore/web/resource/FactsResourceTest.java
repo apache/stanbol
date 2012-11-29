@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.RuntimeDelegate;
 
 import org.apache.stanbol.commons.testing.http.BundleContextMock;
 import org.apache.stanbol.commons.testing.http.ServletContextMock;
@@ -29,6 +30,7 @@ import org.apache.stanbol.factstore.HttpHeadersMock;
 import org.apache.stanbol.factstore.UriInfoMock;
 import org.apache.stanbol.factstore.api.FactStore;
 import org.apache.stanbol.factstore.web.resource.FactsResource;
+import org.apache.wink.common.internal.runtime.RuntimeDelegateImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -40,6 +42,7 @@ public class FactsResourceTest {
 
     @Before
     public void initMocks() {
+        RuntimeDelegate.setInstance(new RuntimeDelegateImpl());
         this.servletContext = new ServletContextMock();
         this.servletContext.putAttribute(BaseStanbolResource.ROOT_URL, "http://localhost:8080");
         BundleContextMock bc = (BundleContextMock) this.servletContext.getAttribute(BundleContext.class
