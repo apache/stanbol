@@ -45,7 +45,7 @@
     <module>web/base</module>
     <module>web/base.jersey</module>
     <module>web/home</module>
-	<module>web/ldviewable</module>
+	<module>web/viewable</module>
 	
     <module>stanboltools/datafileprovider</module>
     <module>stanboltools/offline</module>
