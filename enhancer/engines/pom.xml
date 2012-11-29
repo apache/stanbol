@@ -23,7 +23,7 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
     <version>2-SNAPSHOT</version>
-    <relativePath>../parent</relativePath>
+    <relativePath>../../parent</relativePath>
   </parent>
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.reactor</artifactId>
