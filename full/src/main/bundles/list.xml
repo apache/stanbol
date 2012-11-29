@@ -38,7 +38,7 @@
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
-      <version>1.12</version>
+      <version>1.15</version>
     </bundle>
   </startLevel>
 
