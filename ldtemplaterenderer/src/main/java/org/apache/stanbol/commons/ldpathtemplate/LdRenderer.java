@@ -149,7 +149,6 @@ public class LdRenderer {
 		try {
 			engine.processFileTemplate(context, templatePath, null, out);
 			out.flush();
-			out.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} catch (TemplateException e) {
