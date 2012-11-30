@@ -27,6 +27,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
+import javax.ws.rs.ext.Provider;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -37,6 +38,7 @@ import org.apache.stanbol.commons.viewable.Viewable;
 @Component
 @Service(ViewableWriter.class)
 @Produces("text/html")
+@Provider
 public class ViewableWriter implements MessageBodyWriter<Viewable> {
 
 	@Reference
