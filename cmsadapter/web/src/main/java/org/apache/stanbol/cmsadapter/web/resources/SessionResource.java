@@ -36,10 +36,10 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.stanbol.cmsadapter.core.repository.SessionManager;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.apache.stanbol.cmsadapter.web.utils.RestUtil;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * Resource providing services for session management

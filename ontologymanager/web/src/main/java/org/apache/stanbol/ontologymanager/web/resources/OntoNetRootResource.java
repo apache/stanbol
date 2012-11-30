@@ -94,6 +94,7 @@ import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.stanbol.commons.owl.util.OWL2Constants;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.ontologymanager.multiplexer.clerezza.collector.MGraphMultiplexer;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
@@ -127,7 +128,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
-import org.apache.stanbol.commons.ldviewable.Viewable;
 import com.sun.jersey.multipart.BodyPart;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;

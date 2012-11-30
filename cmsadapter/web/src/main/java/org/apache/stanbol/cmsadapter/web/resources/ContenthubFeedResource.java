@@ -48,10 +48,10 @@ import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeederException;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.apache.stanbol.cmsadapter.web.utils.RestUtil;
+import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
-import org.apache.stanbol.commons.ldviewable.Viewable;
 
 /**
  * This resource provides services to submit content repository objects into Contenthub component. Submitted

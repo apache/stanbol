@@ -27,12 +27,12 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
+  <artifactId>org.apache.stanbol.commons.viewable</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol LDPath Template Viewable</name>
-  <description>A service providing a message body writer for ldpath template viewable</description>
+  <name>Apache Stanbol Template Viewable</name>
+  <description>A service providing classes and message body writer for response rendering with the viewable pattern</description>
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/ldviewable

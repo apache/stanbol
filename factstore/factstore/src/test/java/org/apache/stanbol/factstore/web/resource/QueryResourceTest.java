@@ -20,12 +20,14 @@ import static org.junit.Assert.assertTrue;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.RuntimeDelegate;
 
 import org.apache.stanbol.commons.testing.http.BundleContextMock;
 import org.apache.stanbol.commons.testing.http.ServletContextMock;
 import org.apache.stanbol.factstore.FactStoreMock;
 import org.apache.stanbol.factstore.HttpHeadersMock;
 import org.apache.stanbol.factstore.api.FactStore;
+import org.apache.wink.common.internal.runtime.RuntimeDelegateImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -37,6 +39,7 @@ public class QueryResourceTest {
 
     @Before
     public void initMocks() {
+        RuntimeDelegate.setInstance(new RuntimeDelegateImpl());
         this.servletContext = new ServletContextMock();
         BundleContextMock bc = (BundleContextMock) this.servletContext.getAttribute(BundleContext.class
                 .getName());

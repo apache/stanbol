@@ -165,7 +165,7 @@
     <!-- Jersey and Freemarker -->
     <dependency>
     	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
+  		<artifactId>org.apache.stanbol.commons.viewable</artifactId>
     </dependency>
     <!--  imported via commons.web.base
     
@@ -217,6 +217,11 @@
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -457,7 +457,7 @@
     </bundle>
 	<bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
+      <artifactId>org.apache.stanbol.commons.viewable</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
   </startLevel>

@@ -133,7 +133,7 @@
 
     <dependency>
     	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
+  		<artifactId>org.apache.stanbol.commons.viewable</artifactId>
   		<version>0.10.0-SNAPSHOT</version>
     </dependency>
 
@@ -174,6 +174,13 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.wink</groupId>
+      <artifactId>wink-common</artifactId>
+      <version>1.2.1-incubating</version>
+      <scope>test</scope>
+      <type>jar</type>
     </dependency>
   </dependencies>
 
