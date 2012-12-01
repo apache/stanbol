@@ -151,12 +151,6 @@
       <artifactId>org.apache.servicemix.bundles.regexp</artifactId>
       <version>1.3_3</version>
     </bundle>
-<!-- not a bundle (need to be embedded)
-    <bundle>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpmime</artifactId>
-      <version>4.1.2</version>
-    </bundle>  -->
     <bundle> <!-- only used by the Entityhub -->
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
@@ -337,6 +331,17 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider.bundle
       </artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
+    <!-- Namespace prefix service -->
+    <bundle>
+	  <groupId>org.apache.stanbol</groupId>
+	  <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
+    <bundle> <!-- Provides the Stanbol specific Prefix Mappings: Backward compatibility -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
     <!-- OWL libraries and utilities -->
