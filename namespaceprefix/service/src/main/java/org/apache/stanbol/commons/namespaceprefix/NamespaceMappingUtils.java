@@ -1,0 +1,104 @@
+package org.apache.stanbol.commons.namespaceprefix;
+
+
+import java.util.regex.Pattern;
+
+public class NamespaceMappingUtils {
+    /**
+     * This pattern checks for invalid chars within an prefix.
+     * The used pattern is <code>[^a-zA-Z0-9\-_]</code>. Meaning that prefixes
+     * are allows to include alpha numeric characters including '-' and '_'
+     */
+    private static final Pattern PREFIX_VALIDATION_PATTERN = Pattern.compile("[^a-zA-Z0-9\\-_]");
+    /**
+     * Getter for the prefix for the parsed {prefix}:{localName} value.
+     * If the parsed value does not follow this pattern (but is an URI) than
+     * this method will return <code>null</code>
+     * @param shortNameOrUri the shortName or an URI
+     * @return the prefix or <code>null</code> if an URI was parsed
+     */
+    public static String getPrefix(String shortNameOrUri){
+        //ignore null and empty strings
+        if(shortNameOrUri == null || shortNameOrUri.isEmpty()) {
+            return null; //not a short uri
+        }
+        int index = shortNameOrUri.indexOf(':');
+        if(index < 0 && shortNameOrUri.charAt(0) != '/'){
+            return ""; //default namespace
+        } else if (index > 0){
+            if(shortNameOrUri.length() == (index+1) || //{prefix}: was parsed
+                    shortNameOrUri.charAt(index+1) == '/' || 
+                    (index == 3 && shortNameOrUri.startsWith("urn"))){ 
+                return null; // URI was parsed ({protocol}:/...)
+            } else {
+                return shortNameOrUri.substring(0, index);
+            }
+        } else {
+            return null; //not a short name
+        }
+    }
+    /**
+     * Extracts the namespace form the parsed URI or returns <code>null</code>
+     * of the URI does not contain an namesoace (e.g. http://www.test.org, 
+     * urn:someValue)
+     * @param uri the uri
+     * @return the namespace including the separator ('#' or '/' or ':')
+     */
+    public static String getNamespace(String uri){
+        if(uri == null){
+            return uri;
+        }
+        final int index;
+        if(uri.startsWith("urn:")){
+            index = uri.lastIndexOf(':');
+            if(index < 5){ //urn:?: is the shortest possible namesoace
+                return null;
+            }
+        } else{
+            int protocolIndex = uri.indexOf(":/");
+            if(protocolIndex < 1){
+                return null; //not an absolute URI
+            }
+            index = Math.max(uri.lastIndexOf('#'),uri.lastIndexOf('/'));
+            if(protocolIndex + 3 > index) { //in '{port}://' the 2nd '/' is no namespace
+                return null;
+            }
+        }
+        //do not convert if the parsed uri does not contain a local name
+        if(index > 0) {// and the namespace is not the protocol
+            return uri.substring(0, index+1);
+        } else {
+            return null;
+        }
+    }
+    /**
+     * Uses the {@link NamespacePrefixService#PREFIX_VALIDATION_PATTERN} to check
+     * if the parsed prefix is valid
+     * @param prefix the prefix to check
+     * @return <code>true</code> if valid. Othervise <code>false</code>
+     */
+    public static boolean checkPrefix(String prefix){
+        if(prefix == null){
+            return false;
+        }
+        return !PREFIX_VALIDATION_PATTERN.matcher(prefix).find();
+    }
+    /**
+     * Checks of the parsed namespace is valid. Namespaces starting with
+     * '<code>urn:</code>' need to end with ':'. Otherwise namespaces need to
+     * end with '/' or '#' and contain a protocol (checked by searching ':/').
+     * No further validation on the parsed namespace are done 
+     * @param namespace the namespace
+     * @return <code>true</code> if valid. Othervise <code>false</code>
+     */
+    public static boolean checkNamespace(String namespace){
+        if(namespace == null || namespace.isEmpty()){
+            return false;
+        }
+        return namespace.startsWith("urn:") ?
+                namespace.charAt(namespace.length()-1) == ':' :
+                    (namespace.charAt(namespace.length()-1) == '#' ||
+                    namespace.charAt(namespace.length()-1) == '/') && 
+                    namespace.indexOf(":/") > 0;
+    }
+}
