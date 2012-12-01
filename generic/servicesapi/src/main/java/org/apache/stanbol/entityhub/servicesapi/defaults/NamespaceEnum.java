@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
  * Defines commonly used name spaces to prevent multiple definitions in several
  * classes
  * @author Rupert Westenthaler
- *
  */
 public enum NamespaceEnum {
     /*
@@ -57,48 +56,250 @@ public enum NamespaceEnum {
     fise("http://fise.iks-project.eu/ontology/"),
 
     //First the XML Namespaces
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     xsd("http://www.w3.org/2001/XMLSchema#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     xsi("http://www.w3.org/2001/XMLSchema-instance#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     xml("http://www.w3.org/XML/1998/namespace#"),
     //Start with the semantic Web Namespaces
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     rdf("http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     rdfs("http://www.w3.org/2000/01/rdf-schema#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     owl("http://www.w3.org/2002/07/owl#"),
     //CMIS related
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     atom("http://www.w3.org/2005/Atom"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     cmis("http://docs.oasis-open.org/ns/cmis/core/200908/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     cmisRa("cmis-ra","http://docs.oasis-open.org/ns/cmis/restatom/200908/"),
     //now the JCR related Namespaces
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     jcr("jcr","http://www.jcp.org/jcr/1.0/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     jcrSv("jcr-sv","http://www.jcp.org/jcr/sv/1.0/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     jcrNt("jcr-nt","http://www.jcp.org/jcr/nt/1.0/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     jcrMix("jcr-mix","http://www.jcp.org/jcr/mix/1.0/"),
     //Some well known Namespaces of Ontologies
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     geo("http://www.w3.org/2003/01/geo/wgs84_pos#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     georss("http://www.georss.org/georss/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     gml("http://www.opengis.net/gml/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     dcElements("dc-elements","http://purl.org/dc/elements/1.1/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     dcTerms("dc","http://purl.org/dc/terms/"), // Entityhub prefers DC-Terms, therefore use the "dc" prefix for the terms name space
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     foaf("http://xmlns.com/foaf/0.1/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     vCal("http://www.w3.org/2002/12/cal#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     vCard("http://www.w3.org/2001/vcard-rdf/3.0#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     skos("http://www.w3.org/2004/02/skos/core#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     sioc("http://rdfs.org/sioc/ns#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     siocTypes("sioc-types","http://rdfs.org/sioc/types#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     bio("dc-bio","http://purl.org/vocab/bio/0.1/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     rss("http://purl.org/rss/1.0/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     goodRelations("gr","http://purl.org/goodrelations/v1#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     swrc("http://swrc.ontoware.org/ontology#"), //The Semantic Web for Research Communities Ontology
     //Linked Data Ontologies
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     dbpediaOnt("dbp-ont","http://dbpedia.org/ontology/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     dbpediaProp("dbp-prop","http://dbpedia.org/property/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     geonames("http://www.geonames.org/ontology#"),
     //copyright and license
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     cc("http://creativecommons.org/ns#"),
     //Schema.org (see http://schema.org/docs/schemaorg.owl for the Ontology)
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     schema("http://schema.org/",true),
     /**
      * The W3C Ontology for Media Resources http://www.w3.org/TR/mediaont-10/
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     media("http://www.w3.org/ns/ma-ont#"),
     /*
@@ -107,26 +308,46 @@ public enum NamespaceEnum {
     /**
      * DrugBank is a repository of almost 5000 FDA-approved small molecule and 
      * biotech drugs. 
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     drugbank("http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/"),
     /**
      * Dailymed is published by the National Library of Medicine, 
      * and provides high quality information about marketed drugs.
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     dailymed("http://www4.wiwiss.fu-berlin.de/dailymed/resource/dailymed/"),
     /**
      * SIDER contains information on marketed drugs and their adverse effects. 
      * The information is extracted from public documents and package inserts.
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     sider("http://www4.wiwiss.fu-berlin.de/sider/resource/sider/"),
     /**
      * The Linked Clinical Trials (LinkedCT) project aims at publishing the 
      * first open Semantic Web data source for clinical trials data.
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     linkedct("http://data.linkedct.org/resource/linkedct/"),
     /**
      * STITCH contains information on chemicals and proteins as well as their 
      * interactions and links.
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     stitch("http://www4.wiwiss.fu-berlin.de/stitch/resource/stitch/"),
     /**
@@ -134,39 +355,85 @@ public enum NamespaceEnum {
      * by known disorder-gene associations for exploring all known phenotype and 
      * disease gene associations, indicating the common genetic origin of many 
      * diseases.
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     diseasome("http://www4.wiwiss.fu-berlin.de/diseasome/resource/diseasome/"),
     /**
      * National Cancer Institute Thesaurus (http://www.mindswap.org/2003/CancerOntology/)
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     nci("http://www.mindswap.org/2003/nciOncology.owl#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+     */
     tcm("http://purl.org/net/tcm/tcm.lifescience.ntu.edu.tw/"),
     /**
      * The Music Ontology (http://musicontology.com/)
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     mo("http://purl.org/ontology/mo/"),
     /**
      *  The Time ontology (http://www.w3.org/TR/owl-time/)
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     owlTime("owl-time","http://www.w3.org/2006/time#"),
     /**
      *  The Event ontology (http://purl.org/NET/c4dm/event.owl#)
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     event("http://purl.org/NET/c4dm/event.owl#"),
     /**
      *  The Timeline ontology (http://purl.org/NET/c4dm/timeline.owl#)
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     timeline("http://purl.org/NET/c4dm/timeline.owl#"),
     /**
      *  Relationship: A vocabulary for describing relationships between people
      *  (http://purl.org/vocab/relationship/)
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     rel("http://purl.org/vocab/relationship/"),
     /**
      *  Expression of Core FRBR Concepts in RDF (http://vocab.org/frbr/core)
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     frbr("http://purl.org/vocab/frbr/core#"),
     
+    /**
+     * Special namespace used for disambiguation metadata 
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+     */
+    disambiguation("dis","urn:stanbol.entityhub:disambiguation:"),
     /*
      * Old namespaces still kept for historical reasons
      */
@@ -339,6 +606,13 @@ public enum NamespaceEnum {
      * @param shortUri the short URI
      * @return the full URI if the parsed shortUri uses a prefix defined by this
      * Enumeration. Otherwise (including <code>null</code>) the parsed value.
+    * @deprecated To obtain the fullName for an URI users should use  
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    * <b>NOTE</b> that this service will return <code>null</code> if a shortUri
+    * was parsed AND no mapping for the prefix was defined. This is different to
+    * this version that would return the parsed string.
      */
     public static String getFullName(String shortUri){
         //ignore null and empty strings
@@ -365,7 +639,11 @@ public enum NamespaceEnum {
      * @return the converted URI or the parsed value of <code>null</code> was
      * parsed, no local name was present (e.g. if the namespace itself was parsed)
      * or the parsed namespace is not known.
-     */
+    * @deprecated To obtain the shortName for an URI users should use  
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     public static String getShortName(String fullUri){
         if(fullUri == null){
             return fullUri;
@@ -383,6 +661,10 @@ public enum NamespaceEnum {
     }
     /**
      * @return the defaultPrefix
+    * @deprecated To obtain the default namespace please lookup the prefx '' 
+    * on the the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
     public boolean isDefault() {
         return defaultPrefix;
