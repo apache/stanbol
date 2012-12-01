@@ -75,6 +75,7 @@ import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrQueryFactory.SELECT;
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
+import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
@@ -1244,16 +1245,26 @@ public class SolrYard extends AbstractYard implements Yard {
             String field = fields.next();
             float boost;
             Float fieldBoost = fieldBoostMap == null ? null : fieldBoostMap.get(field);
-            if(documentBoost != null){
-                boost = documentBoost;
-                if(fieldBoost != null){
-                    boost = boost*fieldBoost;
-                }
-            } else if(fieldBoost != null){
-                boost = fieldBoost;
-            } else {
+            //With solr 3.6 one can not set index time boosts on fields that omitNorms
+            //because of that we need to restrict the usage of boosts to those manually
+            //configured in the fieldBoostMap. Before bosts where dropped for fields that
+            //do not support them
+            if(fieldBoost != null){
+                boost = documentBoost != null ? fieldBoost * documentBoost : fieldBoost;
+            } else { 
                 boost = -1;
             }
+            //the old code that does no longer work with Solr 3.6 :(
+//            if(documentBoost != null){
+//                boost = documentBoost;
+//                if(fieldBoost != null){
+//                    boost = boost*fieldBoost;
+//                }
+//            } else if(fieldBoost != null){
+//                boost = fieldBoost;
+//            } else {
+//                boost = -1;
+//            }
             for (Iterator<Object> values = representation.get(field); values.hasNext();) {
                 // now we need to get the indexField for the value
                 Object next = values.next();
@@ -1261,6 +1272,7 @@ public class SolrYard extends AbstractYard implements Yard {
                 try {
                     value = indexValueFactory.createIndexValue(next);
                     for (String fieldName : fieldMapper.getFieldNames(Arrays.asList(field), value)) {
+                        //Set Boosts only for text data types
                         if(boost > 0){
                             inputDocument.addField(fieldName, value.getValue(), boost);
                         } else {
