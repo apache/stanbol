@@ -12,7 +12,9 @@ import javax.jcr.ItemExistsException;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
+import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
+import javax.jcr.Value;
 import javax.jcr.ValueFormatException;
 import javax.jcr.lock.LockException;
 import javax.jcr.nodetype.ConstraintViolationException;
@@ -23,12 +25,16 @@ import javax.jcr.version.VersionException;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.LockableMGraph;
+import org.apache.clerezza.rdf.core.access.LockableMGraphWrapper;
 import org.apache.clerezza.rdf.core.event.FilterTriple;
 import org.apache.clerezza.rdf.core.event.GraphEvent;
 import org.apache.clerezza.rdf.core.event.GraphListener;
 import org.apache.clerezza.rdf.core.impl.SimpleGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.enhancer.core.contentitem.ContentItemImpl;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -37,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class JCRContentItem implements ContentItem, GraphListener {
+public class JCRContentItem  implements ContentItem, GraphListener {
 
     public static final String ENHANCER_ID_PROP = "stanbolEnhancerId";
 
@@ -46,14 +52,19 @@ public class JCRContentItem implements ContentItem, GraphListener {
     private static final String SUBJECT = "subject";
     private static final String JCR_DATA = "jcr:data";
     private static final String JCR_MIME_TYPE = "jcr:mimeType";
+    private static final String CONTENT_PART = "contentPart";
+    private static final String CONTENT_PART_ID = "contentPartId";
+    private static final String RDF_TRIPLE = "triple";
 
     private static final Logger log = LoggerFactory.getLogger(JCRContentItem.class);
 
     private Node jcrNode;
 
+    private String jcrNodePath;
+
     // private static byte[] data;
 
-    public JCRContentItem(String id, Node parent) throws InvalidQueryException,
+    public JCRContentItem(UriRef id, Node parent) throws InvalidQueryException,
             RepositoryException {
         jcrNode = JCRStore.findNodeById(id, parent);
         log.info("constructor with id: " + id);
@@ -74,6 +85,7 @@ public class JCRContentItem implements ContentItem, GraphListener {
             log.info("found no node for id " + id + " creating new one");
             createNode(id, content, mimeType, metadata, parent);
         }
+        jcrNodePath = jcrNode.getPath();
     }
 
     private void createNode(String id, byte[] content, String mimeType,
@@ -115,8 +127,14 @@ public class JCRContentItem implements ContentItem, GraphListener {
         jcrNode.getSession().save();
 
     }
-
-    private void persistTriple(String nameHint, Triple triple)
+    private void persistContentPart(UriRef id, Object contentPart) 
+            throws ItemExistsException, PathNotFoundException, VersionException, 
+            ConstraintViolationException, LockException, RepositoryException {
+        Node cpNode = jcrNode.addNode(CONTENT_PART);
+        cpNode.setProperty(CONTENT_PART_ID,id.getUnicodeString());
+        
+    }
+    private void persistTriple(Node graphNode, String nameHint, Triple triple)
             throws ItemExistsException, PathNotFoundException,
             VersionException, ConstraintViolationException, LockException,
             RepositoryException, ValueFormatException {
@@ -127,8 +145,12 @@ public class JCRContentItem implements ContentItem, GraphListener {
                 name = nameHint;
             }
         }
-
-        Node tripleNode = jcrNode.addNode(name);
+        //TODO:
+        // 1) handle BNodes (create Nodes and use WEAKREFERENCE in triples?)
+        // 2) handle typed literals (use JCR PropertyTypes?)
+        //    Maybe we need an own LiteralFactory
+        // 3) handle Plain literals (use String and additional lang property?)
+        Node tripleNode = graphNode.addNode(RDF_TRIPLE);
         /*
          * TODO: Rupert Westenthaler 25.01.2011
          * Using the toString method of the subject, predicate and object is
@@ -143,6 +165,9 @@ public class JCRContentItem implements ContentItem, GraphListener {
          */
         tripleNode.setProperty(SUBJECT, triple.getSubject().toString());
         tripleNode.setProperty(PREDICATE, triple.getPredicate().toString());
+        Value val;
+        
+        PropertyType
         tripleNode.setProperty(OBJECT, triple.getObject().toString());
         log.info("persisted triple " + triple.getSubject().toString() + " "
                 + triple.getPredicate().toString() + " "
@@ -181,13 +206,12 @@ public class JCRContentItem implements ContentItem, GraphListener {
         return null;
     }
 
-    public MGraph getMetadata() {
+    public LockableMGraph getMetadata() {
         try {
             if (jcrNode == null) {
                 log.warn("entering getMetadata, but no node initialized");
             }
-            MGraph graph = new SimpleMGraph();
-
+            LockableMGraph graph = new LockableMGraphWrapper(new IndexedMGraph());
             // loop over children
             NodeIterator children = jcrNode.getNodes();
             while (children.hasNext()) {
@@ -218,20 +242,18 @@ public class JCRContentItem implements ContentItem, GraphListener {
             return graph;
 
         } catch (ValueFormatException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new IllegalStateException("Unable to parse RDF data from Node '" +
+                    jcrNodePath,e);
         } catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new IllegalStateException("Unable to parse RDF data from Node '" +
+                    jcrNodePath,e);
         } catch (PathNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new IllegalStateException("Unable to parse RDF data from Node '" +
+                    jcrNodePath,e);
         } catch (RepositoryException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new IllegalStateException("Unable to parse RDF data from Node '" +
+                    jcrNodePath,e);
         }
-        return null;
-
     }
 
     public String getMimeType() {
