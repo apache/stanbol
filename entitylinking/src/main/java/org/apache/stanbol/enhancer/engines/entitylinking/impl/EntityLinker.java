@@ -29,8 +29,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.PlainLiteral;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
+import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcherException;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.RedirectProcessingMode;
@@ -39,12 +45,7 @@ import org.apache.stanbol.enhancer.engines.entitylinking.impl.ProcessingState.To
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion.MATCH;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Token;
-import org.apache.stanbol.enhancer.servicesapi.EngineException;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
-import org.apache.stanbol.entityhub.servicesapi.model.Reference;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Text;
-import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +87,7 @@ public class EntityLinker {
     /**
      * Steps over the sentences, chunks, tokens of the {@link #sentences}
      */
-    public void process() throws EngineException {
+    public void process() throws EntitySearcherException {
         //int debugedIndex = 0;
         while(state.next()) {
             TokenData token = state.getToken();
@@ -259,15 +260,15 @@ public class EntityLinker {
      * @return the types values for the {@link LinkedEntity}
      */
     private Set<UriRef> getLinkedEntityTypes(Collection<Suggestion> suggestions){
-        Collection<String> conceptTypes = new HashSet<String>();
+        Collection<UriRef> conceptTypes = new HashSet<UriRef>();
         for(Suggestion suggestion : suggestions){
-            for(Iterator<Reference> types = 
-                suggestion.getRepresentation().getReferences(linkerConfig.getTypeField()); 
-                types.hasNext();conceptTypes.add(types.next().getReference()));
+            for(Iterator<UriRef> types = 
+                suggestion.getEntity().getReferences(linkerConfig.getTypeField()); 
+                types.hasNext();conceptTypes.add(types.next()));
         }
-        Map<String,UriRef> typeMappings = linkerConfig.getTypeMappings();
+        Map<UriRef,UriRef> typeMappings = linkerConfig.getTypeMappings();
         Set<UriRef> dcTypes = new HashSet<UriRef>();
-        for(String conceptType : conceptTypes){
+        for(UriRef conceptType : conceptTypes){
             UriRef dcType = typeMappings.get(conceptType);
             if(dcType != null){
                 dcTypes.add(dcType);
@@ -284,8 +285,9 @@ public class EntityLinker {
      * as configured in the {@link #config}.<p>
      * The results of this method are stored within the parsed {@link Suggestion}s
      * @param suggestion The suggestion to process.
+     * @throws EntitySearcherException 
      */
-    private void processRedirects(Suggestion suggestion) {
+    private void processRedirects(Suggestion suggestion) throws EntitySearcherException {
         //if mode is IGNORE -> nothing to do
         if(linkerConfig.getRedirectProcessingMode() == RedirectProcessingMode.IGNORE){
             return;
@@ -296,19 +298,22 @@ public class EntityLinker {
         if(suggestion.isRedirectedProcessed()){
             return; //Redirects for ResultMatch are already processed ... ignore
         }
-        Representation result = suggestion.getResult();
-        Iterator<Reference> redirects = result.getReferences(linkerConfig.getRedirectField());
+        Entity result = suggestion.getResult();
+        Iterator<UriRef> redirects = result.getReferences(linkerConfig.getRedirectField());
         switch (linkerConfig.getRedirectProcessingMode()) {
             case ADD_VALUES:
+                MGraph entityData = result.getData();
+                UriRef entityUri = result.getUri();
                 while(redirects.hasNext()){
-                    Reference redirect = redirects.next();
+                    UriRef redirect = redirects.next();
                     if(redirect != null){
-                        Representation redirectedEntity = entitySearcher.get(redirect.getReference(),
+                        Entity redirectedEntity = entitySearcher.get(redirect,
                             linkerConfig.getSelectedFields());
                         if(redirectedEntity != null){
-                            for(Iterator<String> fields = redirectedEntity.getFieldNames();fields.hasNext();){
-                                String field = fields.next();
-                                result.add(field, redirectedEntity.get(field));
+                            for(Iterator<Triple> data = redirectedEntity.getData().filter(
+                                redirectedEntity.getUri(), null, null);data.hasNext();){
+                                Triple t = data.next();
+                                entityData.add(new TripleImpl(entityUri,t.getPredicate(),t.getObject()));
                             }
                         }
                         //set that the redirects where searched for this result
@@ -317,15 +322,11 @@ public class EntityLinker {
                 }
             case FOLLOW:
                 while(redirects.hasNext()){
-                    Reference redirect = redirects.next();
+                    UriRef redirect = redirects.next();
                     if(redirect != null){
-                        Representation redirectedEntity = entitySearcher.get(redirect.getReference(),
+                        Entity redirectedEntity = entitySearcher.get(redirect,
                             linkerConfig.getSelectedFields());
                         if(redirectedEntity != null){
-                            //copy the original result score
-                            redirectedEntity.set(RdfResourceEnum.resultScore.getUri(),
-                                result.get(RdfResourceEnum.resultScore.getUri()));
-                            //set the redirect
                             suggestion.setRedirect(redirectedEntity);
                         }
                     }
@@ -341,21 +342,18 @@ public class EntityLinker {
      * entities for.
      * @return The sorted list with the suggestions.
      * If there are no suggestions an empty list will be returned.
+     * @throws EntitySearcherException 
      */
-    private List<Suggestion> lookupEntities(List<String> searchStrings) throws EngineException {
-        Collection<? extends Representation> results;
-        try {
-            results = entitySearcher.lookup(linkerConfig.getNameField(),
-                linkerConfig.getSelectedFields(),
-                searchStrings, 
-                new String[]{state.getLanguage(),linkerConfig.getDefaultLanguage()},
-                lookupLimit);
-        } catch (RuntimeException e) {
-            throw new EngineException(e.getMessage(),e);
-        }
+    private List<Suggestion> lookupEntities(List<String> searchStrings) throws EntitySearcherException {
+        Collection<? extends Entity> results;
+        results = entitySearcher.lookup(linkerConfig.getNameField(),
+            linkerConfig.getSelectedFields(),
+            searchStrings, 
+            new String[]{state.getLanguage(),linkerConfig.getDefaultLanguage()},
+            lookupLimit);
         log.debug("   - found {} entities ...",results.size());
         List<Suggestion> suggestions = new ArrayList<Suggestion>();
-        for(Representation result : results){ 
+        for(Entity result : results){ 
             log.debug("    > {}",result.getId());
             Suggestion suggestion = matchLabels(result);
             log.debug("      < {}",suggestion);
@@ -398,23 +396,23 @@ public class EntityLinker {
      * {@link String#equalsIgnoreCase(String)} to the text covered by the
      * matched token(s). Otherwise also {@link MATCH#FULL} and {@link MATCH#PARTIAL}
      * results are allowed.
-     * @param rep The representation including at least the data for the
+     * @param entity The entity including at least the data for the
      * {@link EntitySearcher#getNameField()} property.
      * @return The result of the matching.
      */
-    private Suggestion matchLabels(Representation rep) {
+    private Suggestion matchLabels(Entity entity) {
         String curLang = state.getLanguage(); //language of the current sentence
         String defLang = linkerConfig.getDefaultLanguage(); //configured default language 
 //        Iterator<Text> labels = rep.get(config.getNameField(), //get all labels
 //            state.getLanguage(), //in the current language
 //            config.getDefaultLanguage()); //and the default language
-        Iterator<Text> labels = rep.getText(linkerConfig.getNameField());
-        Suggestion match = new Suggestion(rep);
-        Collection<Text> defaultLabels = new ArrayList<Text>();
+        Iterator<PlainLiteral> labels = entity.getText(linkerConfig.getNameField());
+        Suggestion match = new Suggestion(entity);
+        Collection<PlainLiteral> defaultLabels = new ArrayList<PlainLiteral>();
         boolean matchedCurLangLabel = false;
         while(labels.hasNext()){
-            Text label = labels.next();
-            String lang = label.getLanguage();
+            PlainLiteral label = labels.next();
+            String lang = label.getLanguage() != null ? label.getLanguage().toString() : null;
             if((lang == null && curLang == null) ||
                     (lang != null && curLang != null && lang.startsWith(curLang))){
                 matchLabel(match, label);
@@ -428,7 +426,7 @@ public class EntityLinker {
         // * no label in the current language or
         // * no MATCH was found in the current language
         if(!matchedCurLangLabel || match.getMatch() == MATCH.NONE){
-            for(Text defaultLangLabel : defaultLabels){
+            for(PlainLiteral defaultLangLabel : defaultLabels){
                 matchLabel(match, defaultLangLabel);
             }
         }
@@ -439,8 +437,8 @@ public class EntityLinker {
      * @param suggestion
      * @param label
      */
-    private void matchLabel(Suggestion suggestion, Text label) {
-        String text = label.getText();
+    private void matchLabel(Suggestion suggestion, PlainLiteral label) {
+        String text = label.getLexicalForm();
         if(!linkerConfig.isCaseSensitiveMatching()){
             text = text.toLowerCase(); //TODO use language of label for Locale
         }

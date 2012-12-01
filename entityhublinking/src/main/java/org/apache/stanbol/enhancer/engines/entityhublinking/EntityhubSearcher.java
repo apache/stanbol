@@ -16,10 +16,10 @@
 */
 package org.apache.stanbol.enhancer.engines.entityhublinking;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,10 +27,11 @@ import java.util.Set;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
+import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcherException;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
-import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -56,32 +57,32 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
     }
     
     @Override
-    public Representation get(String id,Set<String> includeFields) {
-        if(id == null || id.isEmpty()){
+    public Entity get(UriRef id,Set<UriRef> includeFields) throws EntitySearcherException {
+        if(id == null || id.getUnicodeString().isEmpty()){
             return null;
         }
         Entityhub entityhub = getSearchService();
         if(entityhub == null){
-            throw new IllegalStateException("The Entityhub is currently not active");
+            throw new EntitySearcherException("The Entityhub is currently not active");
         }
-        Entity entity;
+        org.apache.stanbol.entityhub.servicesapi.model.Entity entity;
         try {
-            entity = entityhub.getEntity(id);
+            entity = entityhub.getEntity(id.getUnicodeString());
         }  catch (EntityhubException e) {
-            throw new IllegalStateException("Exception while getting "+id+
+            throw new EntitySearcherException("Exception while getting "+id+
                 " from the Entityhub",e);
         }
-        return entity == null ? null : entity.getRepresentation();
+        return entity == null ? null : new EntityhubEntity(entity.getRepresentation());
     }
     @Override
-    public Collection<? extends Representation> lookup(String field,
-                                           Set<String> includeFields,
+    public Collection<? extends Entity> lookup(UriRef field,
+                                           Set<UriRef> includeFields,
                                            List<String> search,
                                            String[] languages,
-                                           Integer limit) throws IllegalStateException {
+                                           Integer limit) throws EntitySearcherException {
         Entityhub entityhub = getSearchService();
         if(entityhub == null){
-            throw new IllegalStateException("The Entityhub is currently not active");
+            throw new EntitySearcherException("The Entityhub is currently not active");
         }
         FieldQuery query = EntitySearcherUtils.createFieldQuery(entityhub.getQueryFactory(),
             field, includeFields, search, languages);
@@ -94,10 +95,14 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
         try {
             results = entityhub.find(query);
         } catch (EntityhubException e) {
-            throw new IllegalStateException("Exception while searchign for "+
+            throw new EntitySearcherException("Exception while searchign for "+
                 search+'@'+Arrays.toString(languages)+"in the Entityhub", e);
         }
-        return results.results();
+        Collection<Entity> entities = new ArrayList<Entity>(results.size());
+        for(Representation result : results){
+            entities.add(new EntityhubEntity(result));
+        }
+        return entities;
     }
 
     @Override
@@ -114,4 +119,5 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
     public Map<UriRef,Collection<Resource>> getOriginInformation() {
         return originInfo;
     }
+    
 }

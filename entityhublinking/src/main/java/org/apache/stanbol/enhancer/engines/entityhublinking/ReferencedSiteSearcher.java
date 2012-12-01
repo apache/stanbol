@@ -16,10 +16,10 @@
 */
 package org.apache.stanbol.enhancer.engines.entityhublinking;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,8 +27,8 @@ import java.util.Set;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
-import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -61,27 +61,27 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
     }
     
     @Override
-    public Representation get(String id,Set<String> includeFields) {
-        if(id == null || id.isEmpty()){
+    public Entity get(UriRef id,Set<UriRef> includeFields) {
+        if(id == null || id.getUnicodeString().isEmpty()){
             return null;
         }
-        Entity entity;
+        org.apache.stanbol.entityhub.servicesapi.model.Entity entity;
         Site site = getSearchService();
         if(site == null){
             throw new IllegalStateException("ReferencedSite "+siteId+" is currently not available");
         }
         try {
-            entity = site.getEntity(id);
+            entity = site.getEntity(id.getUnicodeString());
         }  catch (SiteException e) {
             throw new IllegalStateException("Exception while getting "+id+
                 " from the ReferencedSite "+site.getId(),e);
         }
-        return entity == null ? null : entity.getRepresentation();
+        return entity == null ? null : new EntityhubEntity(entity.getRepresentation());
     }
 
     @Override
-    public Collection<? extends Representation> lookup(String field,
-                                           Set<String> includeFields,
+    public Collection<? extends Entity> lookup(UriRef field,
+                                           Set<UriRef> includeFields,
                                            List<String> search,
                                            String[] languages,
                                            Integer limit) throws IllegalStateException {
@@ -105,8 +105,12 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
                 search+'@'+Arrays.toString(languages)+"in the ReferencedSite "+
                 site.getId(), e);
         }
-        return results.results();
-    }
+        Collection<Entity> entities = new ArrayList<Entity>(results.size());
+        for(Representation result : results){
+            entities.add(new EntityhubEntity(result));
+        }
+        return entities;
+        }
 
     @Override
     public boolean supportsOfflineMode() {

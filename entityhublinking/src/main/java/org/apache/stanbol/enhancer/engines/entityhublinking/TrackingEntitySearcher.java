@@ -20,12 +20,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
-import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.ConfigurationException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 /**
