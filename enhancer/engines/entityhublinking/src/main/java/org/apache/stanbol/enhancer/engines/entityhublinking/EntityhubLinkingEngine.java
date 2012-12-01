@@ -22,10 +22,7 @@ import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLin
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_MATCHING_LANGUAGE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_MIN_SEARCH_TOKEN_LENGTH;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_MIN_TOKEN_SCORE;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_NAME_FIELD;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_REDIRECT_FIELD;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_SUGGESTIONS;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_TYPE_FIELD;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.MIN_SEARCH_TOKEN_LENGTH;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.MIN_TOKEN_SCORE;
@@ -44,7 +41,6 @@ import static org.osgi.framework.Constants.SERVICE_RANKING;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -52,6 +48,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig;
@@ -66,8 +63,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 /**
  * The EntityhubLinkingEngine in NOT an {@link EnhancementEngine} but only an
  * OSGI {@link Component} that allows to configure instances of the
@@ -86,10 +81,10 @@ import org.slf4j.LoggerFactory;
 @org.apache.felix.scr.annotations.Properties(value={
     @Property(name=PROPERTY_NAME),
     @Property(name=EntityhubLinkingEngine.SITE_ID),
-    @Property(name=NAME_FIELD,value=DEFAULT_NAME_FIELD),
+    @Property(name=NAME_FIELD,value="rdfs:label"),
     @Property(name=CASE_SENSITIVE,boolValue=DEFAULT_CASE_SENSITIVE_MATCHING_STATE),
-    @Property(name=TYPE_FIELD,value=DEFAULT_TYPE_FIELD),
-    @Property(name=REDIRECT_FIELD,value=DEFAULT_REDIRECT_FIELD),
+    @Property(name=TYPE_FIELD,value="rdf:type"),
+    @Property(name=REDIRECT_FIELD,value="rdfs:seeAlso"),
     @Property(name=REDIRECT_MODE,options={
         @PropertyOption(
             value='%'+REDIRECT_MODE+".option.ignore",
@@ -118,8 +113,11 @@ import org.slf4j.LoggerFactory;
 })
 public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {
 
-    private final Logger log = LoggerFactory.getLogger(EntityhubLinkingEngine.class);
+    //private final Logger log = LoggerFactory.getLogger(EntityhubLinkingEngine.class);
 
+    @Reference
+    NamespacePrefixService prefixService;
+    
     /**
      * The id of the Entityhub Site (Referenced or Managed Site) used for matching. <p>
      * To match against the Entityhub use "entityhub" as value.
@@ -168,7 +166,7 @@ public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {
     protected void activate(ComponentContext ctx) throws ConfigurationException {
         Dictionary<String,Object> properties = ctx.getProperties();
         bundleContext = ctx.getBundleContext();
-        EntityLinkerConfig linkerConfig = EntityLinkerConfig.createInstance(properties);
+        EntityLinkerConfig linkerConfig = EntityLinkerConfig.createInstance(properties,prefixService);
         TextProcessingConfig textProcessingConfig = TextProcessingConfig.createInstance(properties);
         Object value = properties.get(SITE_ID);
         //init the EntitySource

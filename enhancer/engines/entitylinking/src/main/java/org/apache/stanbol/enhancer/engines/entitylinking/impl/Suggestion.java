@@ -27,10 +27,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.rdf.core.PlainLiteral;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Text;
-import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 
 /**
  * A suggestion of an entity in the {@link EntitySearcher} for a part of the
@@ -47,8 +48,8 @@ public class Suggestion {
     
     private List<LabelMatch> labelMatches = new ArrayList<LabelMatch>();
     private boolean labelMatchesSorted = true;
-    private final Representation result;
-    private Representation redirectsTo;
+    private final Entity entity;
+    private Entity redirectsTo;
     private boolean redirectProcessed;
     private double score;
     /**
@@ -75,11 +76,11 @@ public class Suggestion {
          */
         EXACT,
     }
-    protected Suggestion(Representation result){
-        if(result == null){
+    protected Suggestion(Entity entity){
+        if(entity == null){
             throw new IllegalArgumentException("The parsed Result MUST NOT be NULL!");
         }
-        this.result = result;
+        this.entity = entity;
         //TODO Do no longer use the resultScore as the score. We need to provide an
         //own algorithm to calculate scores!
 //        this.resultScore = result.getFirst(RdfResourceEnum.resultScore.getUri(), Float.class);
@@ -105,28 +106,28 @@ public class Suggestion {
      * @param language the language
      * @return the best match or {@link Suggestion#getMatchedLabel()} if non is found
      */
-    public Text getBestLabel(String nameField, String language){
-        Representation rep = getRepresentation();
+    public PlainLiteral getBestLabel(UriRef nameField, String language){
+        Entity rep = getEntity();
         //start with the matched label -> so if we do not find a better one
         //we will use the matched!
-        Text matchedLabel = getMatchedLabel();
-        Text label = matchedLabel;
+        PlainLiteral matchedLabel = getMatchedLabel();
+        PlainLiteral label = matchedLabel;
         // 1. check if the returned Entity does has a label -> if not return null
         // add labels (set only a single label. Use "en" if available!
-        Iterator<Text> labels = rep.getText(nameField);
+        Iterator<PlainLiteral> labels = rep.getText(nameField);
         boolean matchFound = false;
         while (labels.hasNext() && !matchFound) {
-            Text actLabel = labels.next();
+            PlainLiteral actLabel = labels.next();
             if(label == null){
                 label = actLabel;
             }
             //now we have already a label check the language
-            String actLang = actLabel.getLanguage();
+            Language actLang = actLabel.getLanguage();
             //use startWith to match also en-GB and en-US ...
-            if (actLang != null && actLang.startsWith(language)) {
+            if (actLang != null && actLang.toString().startsWith(language)) {
                 //prefer labels with the correct language
                 label = actLabel;
-                if(matchedLabel != null && matchedLabel.getText().equalsIgnoreCase(label.getText())){
+                if(matchedLabel != null && matchedLabel.getLexicalForm().equalsIgnoreCase(label.getLexicalForm())){
                     //found label in that language that exactly matches the
                     //label used to match the text
                     matchFound = true; 
@@ -141,7 +142,7 @@ public class Suggestion {
      * Shorthand for {@link #getLabelMatch()}.getMatchedLabel()
      * @return the label or <code>null</code> if {@link MATCH#NONE}
      */
-    public Text getMatchedLabel() {
+    public PlainLiteral getMatchedLabel() {
         return getLabelMatch().getMatchedLabel();
     }
     protected void setMatch(MATCH matchType) {
@@ -156,20 +157,19 @@ public class Suggestion {
         return match != null ? match : getLabelMatch().getMatch();
     }
 
-    public final Representation getResult(){
-        return result;
+    public final Entity getResult(){
+        return entity;
     }
     /**
-     * The {@link RdfResourceEnum#entityRank entity rank} of the {@link #getResult() result}.
-     * The entity rank is the relative importance of an entity within an
-     * Collection of Entities (ReferencedSite, Thesaurus, Taxonomy ...).<p>
-     * This method returns the rank of the entity returned by
-     * {@link #getRepresentation()}. Therefore if an redirect is active it will
-     * be the rank of the redirected entity and not of the suggested result.
-     * @return the rank of the entity or <code>null</code> if not available
+     * Getter for the EntityRank of the suggested Entity. In case of a 
+     * redirected Entity it will return the maximum value
      */
     public Float getEntityRank() {
-        return getRepresentation().getFirst(RdfResourceEnum.entityRank.getUri(), Float.class);
+        final Float ranking = entity.getEntityRanking();
+        final Float rdRanking = redirectsTo == null ? null : redirectsTo.getEntityRanking();
+        return rdRanking != null ? 
+                ranking == null || rdRanking.compareTo(ranking) > 0 ? 
+                        rdRanking : ranking : ranking;
     }
     /**
      * @param score the score to set
@@ -196,7 +196,7 @@ public class Suggestion {
      * @param redirect the redirected entity or <code>null</code> if no redirect
      * is present
      */
-    protected void setRedirect(Representation redirect){
+    protected void setRedirect(Entity redirect){
         this.redirectsTo = redirect;
         setRedirectProcessed(true);
     }
@@ -222,7 +222,7 @@ public class Suggestion {
      * @return the entity the {@link #getResult()} redirects to or <code>null</code>
      * if there is no redirect
      */
-    public Representation getRedirect(){
+    public Entity getRedirect(){
         return redirectsTo;
     }
     
@@ -236,8 +236,8 @@ public class Suggestion {
      * {@link #getResult() result} or if present the 
      * {@link #getRedirect() redirected} resource. 
      */
-    public final Representation getRepresentation(){
-        return redirectsTo == null ? result : redirectsTo;
+    public final Entity getEntity(){
+        return redirectsTo == null ? entity : redirectsTo;
     }
     /**
      * Getter for the top ranked LabelMatch.
@@ -269,7 +269,7 @@ public class Suggestion {
     @Override
     public String toString() {
         return labelMatches.isEmpty() ? "no match" :labelMatches.get(0)
-                + " for "+result.getId()
+                + " for "+entity.getId()
                 +(redirectsTo != null ? " redirected to "+redirectsTo.getId() : "");
     }
 

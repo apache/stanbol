@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.stanbol.commons.opennlp.TextAnalyzer;
 import org.apache.stanbol.enhancer.engines.entitylinking.engine.EntityLinkingEngine;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;

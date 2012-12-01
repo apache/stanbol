@@ -30,45 +30,44 @@ import java.util.TreeMap;
 
 import opennlp.tools.tokenize.Tokenizer;
 
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Text;
-import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 
 public class TestSearcherImpl implements EntitySearcher {
 
-    private final String nameField;
+    private final UriRef nameField;
     private final Tokenizer tokenizer;
     
-    private SortedMap<String,Collection<Representation>> data = new TreeMap<String,Collection<Representation>>(String.CASE_INSENSITIVE_ORDER);
-    private Map<String,Representation> entities = new HashMap<String,Representation>();
+    private SortedMap<String,Collection<Entity>> data = new TreeMap<String,Collection<Entity>>(String.CASE_INSENSITIVE_ORDER);
+    private Map<UriRef,Entity> entities = new HashMap<UriRef,Entity>();
     private Map<UriRef,Collection<Resource>> originInfo;
 
     
-    public TestSearcherImpl(String siteId,String nameField, Tokenizer tokenizer) {
+    public TestSearcherImpl(String siteId,UriRef nameField, Tokenizer tokenizer) {
         this.nameField = nameField;
         this.tokenizer = tokenizer;
         this.originInfo = Collections.singletonMap(
-            new UriRef(RdfResourceEnum.site.getUri()), 
+            new UriRef(NamespaceEnum.entityhub+"site"), 
             (Collection<Resource>)Collections.singleton(
                 (Resource)new PlainLiteralImpl(siteId)));
     }
     
     
-    public void addEntity(Representation rep){
-        entities.put(rep.getId(), rep);
-        Iterator<Text> labels = rep.getText(nameField);
+    public void addEntity(Entity rep){
+        entities.put(rep.getUri(), rep);
+        Iterator<PlainLiteral> labels = rep.getText(nameField);
         while(labels.hasNext()){
-            Text label = labels.next();
-            for(String token : tokenizer.tokenize(label.getText())){
-                Collection<Representation> values = data.get(token);
+            PlainLiteral label = labels.next();
+            for(String token : tokenizer.tokenize(label.getLexicalForm())){
+                Collection<Entity> values = data.get(token);
                 if(values == null){
-                    values = new ArrayList<Representation>();
-                    data.put(label.getText(), values);
+                    values = new ArrayList<Entity>();
+                    data.put(label.getLexicalForm(), values);
                 }
                 values.add(rep);
             }
@@ -77,23 +76,23 @@ public class TestSearcherImpl implements EntitySearcher {
     }
     
     @Override
-    public Representation get(String id, Set<String> includeFields) throws IllegalStateException {
+    public Entity get(UriRef id, Set<UriRef> includeFields) throws IllegalStateException {
         return entities.get(id);
     }
 
     @Override
-    public Collection<? extends Representation> lookup(String field,
-                                           Set<String> includeFields,
+    public Collection<? extends Entity> lookup(UriRef field,
+                                           Set<UriRef> includeFields,
                                            List<String> search,
                                            String[] languages,Integer numResults) throws IllegalStateException {
         if(field.equals(nameField)){
             //we do not need sorting
             //Representation needs to implement equals, therefore results filters multiple matches
-            Set<Representation> results = new HashSet<Representation>();
+            Set<Entity> results = new HashSet<Entity>();
             for(String term : search){
                 //TODO: adding 'zzz' to the parsed term is no good solution for
                 //      searching ...
-                for(Collection<Representation> termResults : data.subMap(term, term+"zzz").values()){
+                for(Collection<Entity> termResults : data.subMap(term, term+"zzz").values()){
                     results.addAll(termResults);
                 }
             }
