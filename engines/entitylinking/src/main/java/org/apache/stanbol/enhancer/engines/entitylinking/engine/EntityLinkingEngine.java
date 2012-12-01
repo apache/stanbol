@@ -32,7 +32,9 @@ import java.util.Set;
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
@@ -41,7 +43,9 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
+import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
+import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcherException;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessingConfig;
@@ -57,10 +61,6 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
-import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.model.Reference;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -234,7 +234,12 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
         EntityLinker entityLinker = new EntityLinker(at,language, 
             languageConfig, entitySearcher, linkerConfig, labelTokenizer);
         //process
-        entityLinker.process();
+        try {
+            entityLinker.process();
+        } catch (EntitySearcherException e) {
+            log.error("Unable to link Entities with "+entityLinker,e);
+            throw new EngineException(this, ci, "Unable to link Entities with "+entityLinker, e);
+        }
         //write results (requires a write lock)
         ci.getLock().writeLock().lock();
         try {
@@ -289,26 +294,19 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
                 UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
                 //should we use the label used for the match, or search the
                 //representation for the best label ... currently its the matched one
-                Text label = suggestion.getBestLabel(linkerConfig.getNameField(),language);
-                Representation rep = suggestion.getRepresentation();
-                UriRef uri = new UriRef(rep.getId());
-                metadata.add(new TripleImpl(entityAnnotation, 
-                    Properties.ENHANCER_ENTITY_LABEL, 
-                    label.getLanguage() == null ?
-                            new PlainLiteralImpl(label.getText()) :
-                                new PlainLiteralImpl(label.getText(),
-                                    new Language(label.getLanguage()))));
-                metadata.add(new TripleImpl(entityAnnotation,ENHANCER_ENTITY_REFERENCE,uri));
-                Iterator<Reference> suggestionTypes = rep.getReferences(linkerConfig.getTypeField());
+                PlainLiteral label = suggestion.getBestLabel(linkerConfig.getNameField(),language);
+                Entity entity = suggestion.getEntity();
+                metadata.add(new TripleImpl(entityAnnotation, Properties.ENHANCER_ENTITY_LABEL, label));
+                metadata.add(new TripleImpl(entityAnnotation,ENHANCER_ENTITY_REFERENCE, entity.getUri()));
+                Iterator<UriRef> suggestionTypes = entity.getReferences(linkerConfig.getTypeField());
                 while(suggestionTypes.hasNext()){
                     metadata.add(new TripleImpl(entityAnnotation, 
-                        Properties.ENHANCER_ENTITY_TYPE, new UriRef(suggestionTypes.next().getReference())));
+                        Properties.ENHANCER_ENTITY_TYPE, suggestionTypes.next()));
                 }
                 metadata.add(new TripleImpl(entityAnnotation,
                     Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(suggestion.getScore())));
                 for(UriRef textAnnotation : textAnnotations){
-                    metadata.add(new TripleImpl(entityAnnotation, 
-                        Properties.DC_RELATION, textAnnotation));
+                    metadata.add(new TripleImpl(entityAnnotation, Properties.DC_RELATION, textAnnotation));
                 }
                 //add origin information of the EntiySearcher
                 for(Entry<UriRef,Collection<Resource>> originInfo : entitySearcher.getOriginInformation().entrySet()){
@@ -320,10 +318,11 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
                 //in case dereferencing of Entities is enabled we need also to
                 //add the RDF data for entities
                 if(linkerConfig.isDereferenceEntitiesEnabled() &&
-                        dereferencedEntitis.add(uri)){ //not yet dereferenced
-                    metadata.addAll(
-                        RdfValueFactory.getInstance().toRdfRepresentation(
-                            suggestion.getRepresentation()).getRdfGraph());
+                        dereferencedEntitis.add(entity.getUri())){ //not yet dereferenced
+                    //add all outgoing triples for this entity
+                    //NOTE: do not add all triples as there might be other data in the graph
+                    for(Iterator<Triple> triples = entity.getData().filter(entity.getUri(), null, null);
+                            triples.hasNext();metadata.add(triples.next()));
                 }
             }
         }

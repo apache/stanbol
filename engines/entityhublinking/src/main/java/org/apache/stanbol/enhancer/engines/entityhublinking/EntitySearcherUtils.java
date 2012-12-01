@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.engines.entityhublinking;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
@@ -37,11 +38,11 @@ public class EntitySearcherUtils {
      * @return
      */
     public final static FieldQuery createFieldQuery(FieldQueryFactory factory,
-                                        String field,
-                                        Set<String> includeFields,
+                                        UriRef field,
+                                        Set<UriRef> includeFields,
                                         List<String> search,
                                         String... languages) {
-        if(field == null || field.isEmpty()){
+        if(field == null || field.getUnicodeString().isEmpty()){
             throw new IllegalArgumentException("The parsed search field MUST NOT be NULL nor empty");
         }
         if(search == null || search.isEmpty()){
@@ -50,17 +51,17 @@ public class EntitySearcherUtils {
         //build the query and than return the result
         FieldQuery query = factory.createFieldQuery();
         if(includeFields == null){
-            query.addSelectedField(field);
+            query.addSelectedField(field.getUnicodeString());
         } else {
-            if(!includeFields.contains(field)){
-                query.addSelectedField(field);
+            if(!includeFields.contains(field.getUnicodeString())){
+                query.addSelectedField(field.getUnicodeString());
             }
-            for(String select : includeFields){
-                query.addSelectedField(select);
+            for(UriRef select : includeFields){
+                query.addSelectedField(select.getUnicodeString());
             }
         }
         query.setLimit(20);//TODO make configurable
-        query.setConstraint(field, new TextConstraint(search, languages));
+        query.setConstraint(field.getUnicodeString(), new TextConstraint(search, languages));
         return query;
     }
 

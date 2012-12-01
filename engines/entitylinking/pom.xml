@@ -88,6 +88,12 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
@@ -100,18 +106,6 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
       <version>0.9.0-incubating</version>
-    </dependency>
-    <dependency> <!-- TODO: Remove this dependency -->
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency> <!-- TODO: Remove this dependency -->
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
-      <scope>compile</scope>
     </dependency>
 
     <dependency> <!-- used for the optional OpenNlpLabelTokenizer -->
@@ -153,20 +147,8 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.10.0-SNAPSHOT</version>
       <scope>test</scope>      
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>

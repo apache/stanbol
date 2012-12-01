@@ -44,13 +44,16 @@ import opennlp.tools.tokenize.SimpleTokenizer;
 
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
+import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessingConfig;
@@ -73,14 +76,10 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
-import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -114,56 +113,62 @@ public class EntityLinkingEngineTest {
     private static final String TEST_REFERENCED_SITE_NAME = "dummRefSiteName";
     
     static TestSearcherImpl searcher;
-    static ValueFactory factory = InMemoryValueFactory.getInstance();
-        
-    public static final String NAME = NamespaceEnum.rdfs+"label";
-    public static final String TYPE = NamespaceEnum.rdf+"type";
-    public static final String REDIRECT = NamespaceEnum.rdfs+"seeAlso";
+    
+    public static final UriRef NAME = new UriRef(NamespaceEnum.rdfs+"label");
+    public static final UriRef TYPE = new UriRef(NamespaceEnum.rdf+"type");
+    public static final UriRef REDIRECT = new UriRef(NamespaceEnum.rdfs+"seeAlso");
 
     @BeforeClass
     public static void setUpServices() throws IOException {
         searcher = new TestSearcherImpl(TEST_REFERENCED_SITE_NAME,NAME,SimpleTokenizer.INSTANCE);
         //add some terms to the searcher
-        Representation rep = factory.createRepresentation("urn:test:PatrickMarshall");
-        rep.addNaturalText(NAME, "Patrick Marshall");
-        rep.addReference(TYPE, OntologicalClasses.DBPEDIA_PERSON.getUnicodeString());
-        searcher.addEntity(rep);
-        rep = factory.createRepresentation("urn:test:Geologist");
-        rep.addNaturalText(NAME, "Geologist");
-        rep.addReference(TYPE, NamespaceEnum.skos+"Concept");
-        rep.addReference(REDIRECT, "urn:test:redirect:Geologist");
-        searcher.addEntity(rep);
+        MGraph graph = new IndexedMGraph();
+        UriRef uri = new UriRef("urn:test:PatrickMarshall");
+        graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Patrick Marshall")));
+        graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_PERSON));
+        searcher.addEntity(new Entity(uri, graph));
+        
+        uri = new UriRef("urn:test:Geologist");
+        graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Geologist")));
+        graph.add(new TripleImpl(uri, TYPE, new UriRef(NamespaceEnum.skos+"Concept")));
+        graph.add(new TripleImpl(uri, REDIRECT, new UriRef("urn:test:redirect:Geologist")));
+        searcher.addEntity(new Entity(uri, graph));
         //a redirect
-        rep = factory.createRepresentation("urn:test:redirect:Geologist");
-        rep.addNaturalText(NAME, "Geologe (redirect)");
-        rep.addReference(TYPE, NamespaceEnum.skos+"Concept");
-        searcher.addEntity(rep);
-        rep = factory.createRepresentation("urn:test:NewZealand");
-        rep.addNaturalText(NAME, "New Zealand");
-        rep.addReference(TYPE, OntologicalClasses.DBPEDIA_PLACE.getUnicodeString());
-        searcher.addEntity(rep);
-        rep = factory.createRepresentation("urn:test:UniversityOfOtago");
-        rep.addNaturalText(NAME, "University of Otago");
-        rep.addReference(TYPE, OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString());
-        searcher.addEntity(rep);
-        rep = factory.createRepresentation("urn:test:University");
-        rep.addNaturalText(NAME, "University");
-        rep.addReference(TYPE, NamespaceEnum.skos+"Concept");
-        searcher.addEntity(rep);
-        rep = factory.createRepresentation("urn:test:Otago");
-        rep.addNaturalText(NAME, "Otago");
-        rep.addReference(TYPE, OntologicalClasses.DBPEDIA_PLACE.getUnicodeString());
-        searcher.addEntity(rep);
+        uri = new UriRef("urn:test:redirect:Geologist");
+        graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Geologe (redirect)")));
+        graph.add(new TripleImpl(uri, TYPE, new UriRef(NamespaceEnum.skos+"Concept")));
+        searcher.addEntity(new Entity(uri, graph));
+
+        uri = new UriRef("urn:test:NewZealand");
+        graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("New Zealand")));
+        graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_PLACE));
+        searcher.addEntity(new Entity(uri, graph));
+
+        uri = new UriRef("urn:test:UniversityOfOtago");
+        graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("University of Otago")));
+        graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_ORGANISATION));
+        searcher.addEntity(new Entity(uri, graph));
+        
+        uri = new UriRef("urn:test:University");
+        graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("University")));
+        graph.add(new TripleImpl(uri, TYPE, new UriRef(NamespaceEnum.skos+"Concept")));
+        searcher.addEntity(new Entity(uri, graph));
+
+        uri = new UriRef("urn:test:Otago");
+        graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Otago")));
+        graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_PLACE));
+        searcher.addEntity(new Entity(uri, graph));
         //add a 2nd Otago (Place and University
-        rep = factory.createRepresentation("urn:test:Otago_Texas");
-        rep.addNaturalText(NAME, "Otago (Texas)");
-        rep.addNaturalText(NAME, "Otago");
-        rep.addReference(TYPE, OntologicalClasses.DBPEDIA_PLACE.getUnicodeString());
-        searcher.addEntity(rep);
-        rep = factory.createRepresentation("urn:test:UniversityOfOtago_Texas");
-        rep.addNaturalText(NAME, "University of Otago (Texas)");
-        rep.addReference(TYPE, OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString());
-        searcher.addEntity(rep);
+        uri = new UriRef("urn:test:Otago_Texas");
+        graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Otago (Texas)")));
+        graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Otago")));
+        graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_PLACE));
+        searcher.addEntity(new Entity(uri, graph));
+
+        uri = new UriRef("urn:test:UniversityOfOtago_Texas");
+        graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("University of Otago (Texas)")));
+        graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_ORGANISATION));
+        searcher.addEntity(new Entity(uri, graph));
         
         Value<PhraseTag> nounPhrase = Value.value(new PhraseTag("NP",LexicalCategory.Noun),1d);
         TEST_ANALYSED_TEXT = AnalysedTextFactory.getDefaultInstance().createAnalysedText(
@@ -205,8 +210,7 @@ public class EntityLinkingEngineTest {
         TEST_ANALYSED_TEXT.addToken(start+23,start+24).addAnnotation(POS_ANNOTATION, Value.value(new PosTag(".",Pos.Point),1d));
         
     }
-    private OpenNLP openNLP = new OpenNLP(new ClasspathDataFileProvider(
-        null));
+    private OpenNLP openNLP = new OpenNLP(new ClasspathDataFileProvider(null));
     
     private LabelTokenizer labelTokenizer = new SimpleLabelTokenizer();
 
@@ -302,9 +306,9 @@ public class EntityLinkingEngineTest {
                 Suggestion suggestion = linkedEntity.getSuggestions().get(i);
                 assertEquals("Expecced Suggestion at Rank "+i+" expected: "+
                     expectedSuggestions.get(i)+" suggestion: "+
-                    suggestion.getRepresentation().getId(),
+                    suggestion.getEntity().getId(),
                     expectedSuggestions.get(i), 
-                    suggestion.getRepresentation().getId());
+                    suggestion.getEntity().getId());
                 assertTrue("Score of suggestion "+i+"("+suggestion.getScore()+
                     " > as of the previous one ("+score+")",
                     score >= suggestion.getScore());
@@ -378,7 +382,7 @@ public class EntityLinkingEngineTest {
 //                    +"',entityAnnotation "+entityAnnotation+")",
 //                    0.0 <= confidence.doubleValue());
             //Test the entityhub:site property (STANBOL-625)
-            UriRef ENTITYHUB_SITE = new UriRef(RdfResourceEnum.site.getUri());
+            UriRef ENTITYHUB_SITE = new UriRef(NamespaceEnum.entityhub+"site");
             Iterator<Triple> entitySiteIterator = ci.getMetadata().filter(entityAnnotation, 
                 ENTITYHUB_SITE, null);
             assertTrue("Expected entityhub:site value is missing (entityAnnotation "

@@ -23,37 +23,47 @@ import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 
 /**
  * Interface used to search for Entities (e.g. as defined by a Controlled
  * Vocabulary) Different implementations of this interface allow to use 
- * different sources.
+ * different sources.<p>
+ * <b>NOTE:</b> Implementations that support entity rankings SHOULD provide an
+ * own {@link Entity} implementation that overrides the default 
+ * {@link Entity#getEntityRanking()} implementation.
  * @author Rupert Westenthaler
  */
 public interface EntitySearcher {
     /**
      * Lookup Entities for the parsed parameters.
      * @param field the field used to search for values in the parsed languages
-     * @param includeFields A set of fields that need to be included within the 
+     * @param selectedFields A set of fields that need to be included within the 
      * returned {@link Representation}. The parsed field needs also to be included
      * even if missing in this set. If <code>null</code> only the field needs
      * to be included. Other fields MAY also be included.
      * @param search the tokens to search for. MUST NOT be <code>null</code>
      * @param languages the languages to include in the search 
      * @param limit The maximum number of resutls of <code>null</code> to use the default
-     * @return the Representations found for the specified query
-     * @throws T An exception while searching for concepts
+     * @return the Entities found for the specified query containing information for
+     * all selected fields
+     * @throws EntitySearcherException An exception while searching for concepts
+     * @throws IllegalArgumentException if the parsed field is <code>null</code>;
+     * the list with the search terms is <code>null</code> or empty;
      */
-    Collection<? extends Representation> lookup(String field, Set<String> includeFields, List<String> search, String[] languages,Integer limit) throws IllegalStateException;
+    Collection<? extends Entity> lookup(UriRef field, Set<UriRef> selectedFields, 
+        List<String> search, String[] languages, Integer limit) 
+                throws EntitySearcherException;
     /**
-     * Lookup a concept of the taxonomy by the id.
+     * Lookup an Entity of the linked vocabulary by the id.
      * @param id the id
-     * @param includeFields A set of fields that need to be included within the 
+     * @param selectedFields A set of fields that need to be included within the 
      * returned {@link Representation}. Other fields MAY be also included.
      * @return the concept or <code>null</code> if not found
+     * @throws EntitySearcherException on any error while dereferencing the
+     * Entity with the parsed Id
+     * @throws IllegalArgumentException if the parsed id is <code>null</code>
      */
-    Representation get(String id,Set<String> includeFields) throws IllegalStateException;
+    Entity get(UriRef id,Set<UriRef> selectedFields) throws EntitySearcherException;
     /**
      * Returns <code>true</code> if this EntitySearcher can operate without
      * dependencies to remote services. This is important because Stanbol can
@@ -73,8 +83,8 @@ public interface EntitySearcher {
      * Information in this map are added to each
      * <code>fise:EntityAnnotation</code> linking to
      * an entity returned by this EntitySearcher.   
-     * @return
+     * @return the predicate[1..1] -> predicate[1..*] tuples added to any 
+     * 'fise:EntityAnnotation'.
      */
     Map<UriRef,Collection<Resource>> getOriginInformation();
-    
 }

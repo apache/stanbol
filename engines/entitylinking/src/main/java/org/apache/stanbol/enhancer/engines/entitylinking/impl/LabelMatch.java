@@ -2,8 +2,8 @@ package org.apache.stanbol.enhancer.engines.entitylinking.impl;
 
 import java.util.Comparator;
 
+import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion.MATCH;
-import org.apache.stanbol.entityhub.servicesapi.model.Text;
 
 public class LabelMatch {
     /**
@@ -15,7 +15,7 @@ public class LabelMatch {
     private int start = 0;
     private int span = 0;
     private int processableMatchCount = 0;
-    private Text label;
+    private PlainLiteral label;
     private int labelTokenCount = 0;
     private double score;
     /**
@@ -36,11 +36,11 @@ public class LabelMatch {
      * @param start
      * @param span
      */
-    protected LabelMatch(int start, int span, Text label){
+    protected LabelMatch(int start, int span, PlainLiteral label){
         this(start,span,span,span,1f,label,span);
     }
     
-    protected LabelMatch(int start, int span,int processableMatchCount, int matchCount, float tokenMatchScore,Text label,int labelTokenCount){
+    protected LabelMatch(int start, int span,int processableMatchCount, int matchCount, float tokenMatchScore,PlainLiteral label,int labelTokenCount){
         if(start < 0){
             throw new IllegalArgumentException("parsed start position MUST BE >= 0!");
         }
@@ -114,7 +114,7 @@ public class LabelMatch {
      * based match for the given search tokens.
      * @return the label
      */
-    public Text getMatchedLabel() {
+    public PlainLiteral getMatchedLabel() {
         return label;
     }
     /**
@@ -168,7 +168,7 @@ public class LabelMatch {
         if(match == MATCH.NONE){
             return "no match";
         }
-        StringBuilder sb = new StringBuilder(label.getText());
+        StringBuilder sb = new StringBuilder(label.getLexicalForm());
         sb.append("[m=").append(match);
         sb.append(",s=").append(span);
         sb.append(",c=").append(processableMatchCount).append('(').append(tokenMatchScore).append(")/").append(labelTokenCount);

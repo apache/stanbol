@@ -16,8 +16,6 @@
 */
 package org.apache.stanbol.enhancer.engines.entitylinking.config;
 
-import static org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum.getFullName;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -30,6 +28,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.EntityLinker;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion;
@@ -40,7 +40,6 @@ import org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -200,12 +199,12 @@ public class EntityLinkerConfig {
     /**
      * Additional fields added for dereferenced entities
      */
-    private static final Collection<String> DEFAULT_DEREFERENCED_FIELDS = Arrays.asList(
-        getFullName("rdfs:comment"),
-        getFullName("geo:lat"),
-        getFullName("geo:long"),
-        getFullName("foaf:depiction"),
-        getFullName("dbp-ont:thumbnail"));
+    private static final Collection<UriRef> DEFAULT_DEREFERENCED_FIELDS = Arrays.asList(
+        new UriRef("http://www.w3.org/2000/01/rdf-schema#comment"),
+        new UriRef("http://www.w3.org/2003/01/geo/wgs84_pos#lat"),
+        new UriRef("http://www.w3.org/2003/01/geo/wgs84_pos#long"),
+        new UriRef("http://xmlns.com/foaf/0.1/depiction"),
+        new UriRef("http://dbpedia.org/ontology/thumbnail"));
 
     /**
      * The minimum length of Token to be used for searches in case no
@@ -244,15 +243,18 @@ public class EntityLinkerConfig {
     /**
      * Default value for {@link #getNameField()} (rdfs:label)
      */
-    public static final String DEFAULT_NAME_FIELD = "rdfs:label";
+    public static final UriRef DEFAULT_NAME_FIELD = new UriRef(
+        "http://www.w3.org/2000/01/rdf-schema#label");
     /**
      * Default value for {@link #getTypeField()} (rdf:type)
      */
-    public static final String DEFAULT_TYPE_FIELD = "rdf:type";
+    public static final UriRef DEFAULT_TYPE_FIELD = new UriRef(
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
     /**
      * Default value for {@link #getRedirectField()} (rdf:seeAlso)
      */
-    public static final String DEFAULT_REDIRECT_FIELD = "rdfs:seeAlso";
+    public static final UriRef DEFAULT_REDIRECT_FIELD = new UriRef(
+        "http://www.w3.org/2000/01/rdf-schema#seeAlso");
     /**
      * The default language used to search for labels regardless of the language
      * of the text. The default value is <code>null</code> causing to include
@@ -274,24 +276,24 @@ public class EntityLinkerConfig {
      * Default mapping for Concept types to dc:type values added for
      * TextAnnotations.
      */
-    public static final Map<String,UriRef> DEFAULT_ENTITY_TYPE_MAPPINGS;
+    public static final Map<UriRef,UriRef> DEFAULT_ENTITY_TYPE_MAPPINGS;
     
     static { //the default mappings for the three types used by the Stanbol Enhancement Structure
-        Map<String,UriRef> mappings = new HashMap<String,UriRef>();
-        mappings.put(OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString(), OntologicalClasses.DBPEDIA_ORGANISATION);
-        mappings.put(NamespaceEnum.dbpediaOnt+"Newspaper", OntologicalClasses.DBPEDIA_ORGANISATION);
-        mappings.put(NamespaceEnum.schema+"Organization", OntologicalClasses.DBPEDIA_ORGANISATION);
+        Map<UriRef,UriRef> mappings = new HashMap<UriRef,UriRef>();
+        mappings.put(OntologicalClasses.DBPEDIA_ORGANISATION, OntologicalClasses.DBPEDIA_ORGANISATION);
+        mappings.put(new UriRef("http://dbpedia.org/ontology/Newspaper"), OntologicalClasses.DBPEDIA_ORGANISATION);
+        mappings.put(new UriRef("http://schema.org/Organization"), OntologicalClasses.DBPEDIA_ORGANISATION);
 //        mappings.put(NamespaceEnum.dailymed+"organization",OntologicalClasses.DBPEDIA_ORGANISATION);
         
-        mappings.put(OntologicalClasses.DBPEDIA_PERSON.getUnicodeString(), OntologicalClasses.DBPEDIA_PERSON);
-        mappings.put(NamespaceEnum.foaf+"Person", OntologicalClasses.DBPEDIA_PERSON);
-        mappings.put(NamespaceEnum.schema+"Person", OntologicalClasses.DBPEDIA_PERSON);
+        mappings.put(OntologicalClasses.DBPEDIA_PERSON, OntologicalClasses.DBPEDIA_PERSON);
+        mappings.put(new UriRef("http://xmlns.com/foaf/0.1/Person"), OntologicalClasses.DBPEDIA_PERSON);
+        mappings.put(new UriRef("http://schema.org/Person"), OntologicalClasses.DBPEDIA_PERSON);
 
-        mappings.put(OntologicalClasses.DBPEDIA_PLACE.getUnicodeString(), OntologicalClasses.DBPEDIA_PLACE);
-        mappings.put(NamespaceEnum.schema+"Place", OntologicalClasses.DBPEDIA_PLACE);
-        mappings.put(NamespaceEnum.gml+"_Feature", OntologicalClasses.DBPEDIA_PLACE);
+        mappings.put(OntologicalClasses.DBPEDIA_PLACE, OntologicalClasses.DBPEDIA_PLACE);
+        mappings.put(new UriRef("http://schema.org/Place"), OntologicalClasses.DBPEDIA_PLACE);
+        mappings.put(new UriRef("http://www.opengis.net/gml/_Feature"), OntologicalClasses.DBPEDIA_PLACE);
 
-        mappings.put(OntologicalClasses.SKOS_CONCEPT.getUnicodeString(), OntologicalClasses.SKOS_CONCEPT);
+        mappings.put(OntologicalClasses.SKOS_CONCEPT, OntologicalClasses.SKOS_CONCEPT);
 
 //        UriRef DRUG = new UriRef(NamespaceEnum.drugbank+"drugs");
 //        mappings.put(DRUG.getUnicodeString(), DRUG);
@@ -379,8 +381,8 @@ public class EntityLinkerConfig {
      * Holds the mappings of rdf:type used by concepts to dc:type values used
      * by TextAnnotations. 
      */
-    private Map<String,UriRef> typeMappings;
-    private Map<String, UriRef> unmodTypeMappings;
+    private Map<UriRef,UriRef> typeMappings;
+    private Map<UriRef, UriRef> unmodTypeMappings;
     /**
      * The mode on how to process redirect for Entities. 
      */
@@ -389,12 +391,12 @@ public class EntityLinkerConfig {
      * the default DC Type
      */
     private UriRef defaultDcType;
-    private String nameField;
-    private String redirectField;
-    private String typeField;
-    private Set<String> dereferencedFields = new HashSet<String>();
+    private UriRef nameField;
+    private UriRef redirectField;
+    private UriRef typeField;
+    private Set<UriRef> dereferencedFields = new HashSet<UriRef>();
 
-    private Set<String> __selectedFields;
+    private Set<UriRef> __selectedFields;
     /**
      * The language always included in searches (regardless of the language
      * detected for the text.
@@ -452,7 +454,6 @@ public class EntityLinkerConfig {
     private double minTextScore = DEFAULT_MIN_TEXT_SCORE;
     private double minMatchScore = DEFAULT_MIN_MATCH_SCORE;
 
-    
     /**
      * Default constructor the initializes the configuration with the 
      * default values
@@ -462,7 +463,7 @@ public class EntityLinkerConfig {
         setMaxSuggestions(DEFAULT_SUGGESTIONS);
         setMaxSearchTokens(DEFAULT_MAX_SEARCH_TOKENS);
         setRedirectProcessingMode(DEFAULT_REDIRECT_PROCESSING_MODE);
-        typeMappings = new HashMap<String,UriRef>(DEFAULT_ENTITY_TYPE_MAPPINGS);
+        typeMappings = new HashMap<UriRef,UriRef>(DEFAULT_ENTITY_TYPE_MAPPINGS);
         unmodTypeMappings = Collections.unmodifiableMap(typeMappings);
         setDefaultDcType(typeMappings.remove(null));
         setNameField(DEFAULT_NAME_FIELD);
@@ -477,12 +478,17 @@ public class EntityLinkerConfig {
      * Creates a new {@link EntityLinkerConfig} based on the properties
      * in the parsed {@link Dictionary}
      * @param configuration the configuration
+     * @param prefixService Optionally a namespace prefix service used to
+     * convert '{prefix}:{localname}' parameters in the configuration to URIs.
+     * If <code>null</code> is parsed this feature is not supported and parameters
+     * are not changed.
      * @return the configured {@link EntityLinkerConfig}
      * @throws ConfigurationException if the parsed configuration is not valid
      */
-    public static EntityLinkerConfig createInstance(Dictionary<String,Object> configuration) throws ConfigurationException {
+    public static EntityLinkerConfig createInstance(Dictionary<String,Object> configuration, 
+                                                    NamespacePrefixService prefixService) throws ConfigurationException {
         EntityLinkerConfig elc = new EntityLinkerConfig();
-        setConfiguration(elc, configuration);
+        setConfiguration(elc, configuration, prefixService);
         return elc;
     }
     /**
@@ -490,16 +496,21 @@ public class EntityLinkerConfig {
      * parsed {@link EntityLinkerConfig}.
      * @param linkerConfig the instance to apply the configuration to
      * @param configuration the configuration
+     * @param prefixService Optionally a namespace prefix service used to
+     * convert '{prefix}:{localname}' parameters in the configuration to URIs.
+     * If <code>null</code> is parsed this feature is not supported and parameters
+     * are not changed.
      * @throws ConfigurationException in case the configuration is invalid
      */
-    public static void setConfiguration(EntityLinkerConfig linkerConfig,Dictionary<String,Object> configuration) throws ConfigurationException {
+    public static void setConfiguration(EntityLinkerConfig linkerConfig,Dictionary<String,Object> configuration,NamespacePrefixService prefixService) throws ConfigurationException {
         Object value;
         value = configuration.get(NAME_FIELD);
         if(value != null){
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(NAME_FIELD,"The configured name field MUST NOT be empty");
             }
-            linkerConfig.setNameField(value.toString());
+            linkerConfig.setNameField(new UriRef(
+                getFullName(prefixService,NAME_FIELD,value.toString())));
         }
         
         //init case sensitivity
@@ -516,7 +527,8 @@ public class EntityLinkerConfig {
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(TYPE_FIELD,"The configured name field MUST NOT be empty");
             }
-            linkerConfig.setTypeField(value.toString());
+            linkerConfig.setTypeField(new UriRef(
+                getFullName(prefixService, TYPE_FIELD, value.toString())));
         }
         
         //init REDIRECT_FIELD
@@ -525,7 +537,8 @@ public class EntityLinkerConfig {
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(NAME_FIELD,"The configured name field MUST NOT be empty");
             }
-            linkerConfig.setRedirectField(value.toString());
+            linkerConfig.setRedirectField(new UriRef(
+                getFullName(prefixService,REDIRECT_FIELD,value.toString())));
         }
         
         //init MAX_SUGGESTIONS
@@ -771,7 +784,7 @@ public class EntityLinkerConfig {
                         continue configs;
                     }
                     String targetType = config.length < 2 ? sourceTypes[0] : config[1];
-                    targetType = getFullName(targetType.trim()); //support for ns:localName
+                    targetType = getFullName(prefixService,TYPE_MAPPINGS,targetType.trim()); //support for ns:localName
                     try { //validate
                         new URI(targetType);
                     } catch (URISyntaxException e) {
@@ -782,7 +795,7 @@ public class EntityLinkerConfig {
                     UriRef targetUri = new UriRef(targetType);
                     for(String sourceType : sourceTypes){
                         if(!sourceType.isEmpty()){
-                            sourceType = getFullName(sourceType.trim()); //support for ns:localName
+                            sourceType = getFullName(prefixService,TYPE_MAPPINGS,sourceType.trim()); //support for ns:localName
                             try { //validate
                                 new URI(sourceType);
                                 UriRef old = linkerConfig.setTypeMapping(sourceType, targetUri);
@@ -815,18 +828,21 @@ public class EntityLinkerConfig {
             if(value instanceof String[]){
                 for(String field : (String[])value){
                     if(field != null && !field.isEmpty()){
-                        linkerConfig.getDereferencedFields().add(field);
+                        linkerConfig.getDereferencedFields().add(
+                            new UriRef(getFullName(prefixService,DEREFERENCE_ENTITIES_FIELDS,field)));
                     }
                 }
             } else if(value instanceof Collection<?>){
                 for(Object field : (Collection<?>)value){
                     if(field != null && !field.toString().isEmpty()){
-                        linkerConfig.getDereferencedFields().add(field.toString());
+                        linkerConfig.getDereferencedFields().add(
+                            new UriRef(getFullName(prefixService,DEREFERENCE_ENTITIES_FIELDS,field.toString())));
                     }
                 }
             } else if(value instanceof String){
                 if(!value.toString().isEmpty()){
-                    linkerConfig.getDereferencedFields().add(value.toString());
+                    linkerConfig.getDereferencedFields().add(
+                        new UriRef(getFullName(prefixService,DEREFERENCE_ENTITIES_FIELDS,value.toString())));
                 }
             } else if(value != null){
                 throw new ConfigurationException(DEREFERENCE_ENTITIES_FIELDS, 
@@ -841,24 +857,43 @@ public class EntityLinkerConfig {
         
     }
     
-    
+    private static String getFullName(NamespacePrefixService prefixService, String property,String value) throws ConfigurationException {
+        String prefix = NamespaceMappingUtils.getPrefix(value);
+        if(prefixService == null){
+            if(prefix != null){
+                throw new ConfigurationException(property, "'{prefix}:{localname}' tpye configurations "
+                    + "are not supported if no "+NamespacePrefixService.class.getSimpleName()
+                    + "is present (configured value='"+value+"')!");
+            } else {
+                return value;
+            }
+        } else {
+            String uri = prefixService.getFullName(value);
+            if(uri == null){
+                throw new ConfigurationException(property, "The prefix '"+prefix
+                        + "' as used by the configured value '"+value+"' is unknow to the"
+                        + NamespacePrefixService.class.getSimpleName());
+            }
+            log.debug("mapped '{}' -> '{}'",value,uri);
+            return uri;
+        }
+    }
+        
     /**
      * Getter for the uri of the field used for the names in the taxonomy
      * (e.g. rdfs:label, skos:prefLabel). Needs to return the full URI
      * @return the field used for the names of in the Taxonomy.
      */
-    public final String getNameField() {
+    public final UriRef getNameField() {
         return nameField;
     }
     /**
      * Setter for the uri of the field used for the names in the taxonomy
-     * (e.g. rdfs:label, skos:prefLabel). 
-     * Converts short to full URIy by using the prefixes as registered in the
-     * {@link NamespaceEnum}.
+     * (e.g. rdfs:label, skos:prefLabel).
      * @param nameField the nameField to set
      */
-    public final void setNameField(String nameField) {
-        this.nameField = NamespaceEnum.getFullName(nameField);
+    public final void setNameField(UriRef nameField) {
+        this.nameField = nameField;
         __selectedFields = null;
     }
     /**
@@ -866,41 +901,37 @@ public class EntityLinkerConfig {
      * set that allows to configure the fields that should be dereferenced
      * @return
      */
-    public final Set<String> getDereferencedFields(){
+    public final Set<UriRef> getDereferencedFields(){
         return dereferencedFields;
     }
     /**
      * The field used to follow redirects (typically rdf:seeAlso)
      * @return the redirect field
      */
-    public final String getRedirectField() {
+    public final UriRef getRedirectField() {
         return redirectField;
     }
     /**
      * The field used to follow redirects (typically rdf:seeAlso)
-     * Converts short to full URIy by using the prefixes as registered in the
-     * {@link NamespaceEnum}.
      * @param redirectField the redirectField to set
      */
-    public final void setRedirectField(String redirectField) {
-        this.redirectField = NamespaceEnum.getFullName(redirectField);
+    public final void setRedirectField(UriRef redirectField) {
+        this.redirectField = redirectField;
         __selectedFields = null;
     }
     /**
      * The field used to lookup the types (typically rdf:type)
      * @return the field name used to lookup types
      */
-    public final String getTypeField() {
+    public final UriRef getTypeField() {
         return typeField;
     }
     /**
      * The field used to lookup the types (typically rdf:type)
-     * Converts short to full URIy by using the prefixes as registered in the
-     * {@link NamespaceEnum}.
      * @param typeField the typeField to set
      */
-    public final void setTypeField(String typeField) {
-        this.typeField = NamespaceEnum.getFullName(typeField);
+    public final void setTypeField(UriRef typeField) {
+        this.typeField = typeField;
         __selectedFields = null;
     }
     /**
@@ -1005,15 +1036,15 @@ public class EntityLinkerConfig {
     public void setCaseSensitiveMatchingState(boolean state) {
         this.caseSensitiveMatchingState = state;
     }
-    /**
+    /* REMOVED because getTypemappings.remove(conceptType) can be used anyway
      * Removes the mapping for the parsed concept type
      * @param conceptType the concept type to remove the mapping
      * @return the previously mapped dc:type value or <code>null</code> if
      * no mapping for the parsed concept type was present
-     */
-    public UriRef removeTypeMapping(String conceptType){
+    public UriRef removeTypeMapping(UriRef conceptType){
         return typeMappings.remove(conceptType);
     }
+     */
     /**
      * 
      * @param conceptType the type of the concept or <code>null</code> to
@@ -1031,7 +1062,7 @@ public class EntityLinkerConfig {
             setDefaultDcType(dcType);
             return oldDefault;
         }
-        return typeMappings.put(conceptType, dcType);
+        return typeMappings.put(new UriRef(conceptType), dcType);
     }
     
     /**
@@ -1072,7 +1103,7 @@ public class EntityLinkerConfig {
      * Getter for the read only mappings of type mappings
      * @return the type mappings (read only)
      */
-    public Map<String,UriRef> getTypeMappings() {
+    public Map<UriRef,UriRef> getTypeMappings() {
         return unmodTypeMappings;
     }
     /**
@@ -1305,9 +1336,9 @@ public class EntityLinkerConfig {
      * </ul>
      * @return the selected fields for queries against the linked vocabulary.
      */
-    public Set<String> getSelectedFields() {
+    public Set<UriRef> getSelectedFields() {
         if(__selectedFields == null){
-            Set<String> fields = new HashSet<String>();
+            Set<UriRef> fields = new HashSet<UriRef>();
             fields.add(nameField);
             fields.add(typeField);
             if(redirectProcessingMode != RedirectProcessingMode.IGNORE){
