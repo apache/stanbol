@@ -38,10 +38,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/sentiment-wordtagging/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/sentiment-wordtagging/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/sentiment-wordtagging/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/sentiment-wordtagging/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
