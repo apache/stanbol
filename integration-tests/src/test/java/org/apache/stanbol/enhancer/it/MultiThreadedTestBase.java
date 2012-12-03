@@ -9,17 +9,15 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -592,16 +590,16 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
             }
         }
 
-        void succeed(Request request, UriRef contentItemUri, TripleCollection results,Long rtt) {
-            ExecutionMetadata em = ExecutionMetadata.parseFrom(results, (UriRef)contentItemUri);
-            results.clear(); //we no longer need the results
-            if(em != null){
+        void succeed(Request request, UriRef contentItemUri, TripleCollection results, Long rtt, int size) {
+            ExecutionMetadata em = ExecutionMetadata.parseFrom(results, (UriRef) contentItemUri);
+            results.clear(); // we no longer need the results
+            if (em != null) {
                 synchronized (statistics) {
-                    statistics.addResult(em,rtt);
+                    statistics.addResult(em, rtt, size);
                 }
-            } //no executionData available ... unable to collect statistics
+            } // no executionData available ... unable to collect statistics
             synchronized (registered) {
-                if(registered.remove(request)){
+                if (registered.remove(request)) {
                     completed++;
                     registered.notifyAll();
                 }
@@ -655,7 +653,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
                                      statistics.getAverageRtt(),
                                      statistics.getNumRtt()});
                 }
-                log.info("  processing time (server side)");
+                log.info("  Processing Time (server side)");
                 if(statistics.getNumSamples() < 1){
                     log.info("    - not available. Make shure the used "
                         + "EnhancementJobManager supports ExecutionMetadata!");
@@ -665,6 +663,12 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
                                      statistics.getMinDuration(),
                                      statistics.getAverageDuration(),
                                      statistics.getNumSamples()});
+                    log.info("  Bandwith Consumption (received data)");
+                    log.info("     max: {}KB | min: {}KB | avr: {}KB received over {} requests",
+                        new Object[]{statistics.getMaxReceivedKB(),
+                                     statistics.getMinReceivedKB(),
+                                     statistics.getAverageReceivedKB(),
+                                     statistics.getNumReceivedData()});
                     log.info("Enhancement Engines");
                     for(String name :statistics.getEngineNames()){
                         log.info("  {}: max: {}ms | min: {}ms | avr: {}ms over {} requests",
@@ -705,7 +709,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
             IndexedMGraph graph = new IndexedMGraph();
             try {
                 rdfParser.parse(graph,executor.getStream(), executor.getContentType().getMimeType());
-            }catch (Exception e) {
+            } catch (Exception e) {
                 Assert.fail("Unable to parse RDF data from Response with Content-Type "
                     + executor.getContentType().getMimeType()+" ( "+e.getClass().getSimpleName()
                     + ": "+e.getMessage()+")");
@@ -721,7 +725,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
             Resource contentItemUri = ciIt.next().getObject();
             Assert.assertTrue("ContentItem URI is not an UriRef but an instance of "
                     + contentItemUri.getClass().getSimpleName(), contentItemUri instanceof UriRef);
-            tracker.succeed(request,(UriRef)contentItemUri,graph,rtt);
+            tracker.succeed(request, (UriRef) contentItemUri, graph, rtt, executor.getContent().length());
         }
     }
 
@@ -734,10 +738,14 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         private long maxRtt = -1;
         private long minRtt = Long.MAX_VALUE;
         private long sumRtt = 0;
+        private int numReceivedData;
+        private int maxReceivedBytes = -1;
+        private int minReceivedBytes = Integer.MAX_VALUE;
+        private int sumReceivedBytes = 0;        
         
         private Map<String, long[]> engineStats = new TreeMap<String,long[]>();
         
-        void addResult(ExecutionMetadata em,Long roundTripTime){
+        void addResult(ExecutionMetadata em,Long roundTripTime, Integer receivedBytes){
             Long durationNumber = em.getChainExecution().getDuration();
             long duration;
             if(durationNumber != null){
@@ -762,6 +770,17 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
                 sumRtt = sumRtt+rtt;
                 numRtt++;
             }
+            if (receivedBytes != null) {
+                int rb = receivedBytes;
+                if (rb > maxReceivedBytes) {
+                    maxReceivedBytes = rb;
+                }
+                if (rb < minReceivedBytes) {
+                    minReceivedBytes = rb;
+                }
+                sumReceivedBytes += rb;
+                numReceivedData++;
+            }            
             for(Entry<String,Execution> ex : em.getEngineExecutions().entrySet()){
                 long[] stats = engineStats.get(ex.getKey());
                 if(stats == null){
@@ -811,6 +830,18 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         public int getNumRtt(){
             return numRtt;
         }
+        public int getNumReceivedData() {
+            return numReceivedData;
+        }
+        public int getMaxReceivedKB() {
+            return maxReceivedBytes / 1024;
+        }
+        public int getMinReceivedKB() {
+            return minReceivedBytes / 1024;
+        }
+        public int getAverageReceivedKB() {
+            return sumReceivedBytes <= 0 && numReceivedData <= 0 ? null : Math.round(sumReceivedBytes/numReceivedData/1024);
+        }         
         public Long getMaxDuration(String engine){
             long[] stats = engineStats.get(engine);
             return stats == null ? null : stats[0];
@@ -821,7 +852,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         }
         public Long getAverage(String engine){
             long[] stats = engineStats.get(engine);
-            return stats == null && stats[2] <= 0 && stats[3] <= 0 ? 
+            return stats == null || stats[2] <= 0 || stats[3] <= 0 ? 
                     null : Math.round((double)stats[2]/(double)stats[3]);
         }
         public int getNumSamples(String engine){
