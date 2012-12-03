@@ -23,7 +23,7 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
     <version>0.10.0-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
+    <relativePath>../../enhancer/parent</relativePath>
   </parent>
 
   <artifactId>org.apache.stanbol.enhancer.engine.uimaremote</artifactId>
