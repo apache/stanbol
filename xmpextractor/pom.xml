@@ -37,10 +37,10 @@
 
 	<scm>
 		<connection>
-			scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/xmp/
+			scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmp/
 		</connection>
 		<developerConnection>
-			scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/xmp/
+			scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmp/
 		</developerConnection>
 		<url>http://stanbol.apache.org/</url>
 	</scm>

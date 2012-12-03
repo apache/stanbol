@@ -38,10 +38,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/opennlp-ner/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp-ner/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/opennlp-ner/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp-ner/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

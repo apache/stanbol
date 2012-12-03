@@ -32,10 +32,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/opennlp-pos/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp-pos/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/opennlp-pos/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp-pos/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
