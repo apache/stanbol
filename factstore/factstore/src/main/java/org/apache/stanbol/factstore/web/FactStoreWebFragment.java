@@ -37,9 +37,6 @@ import org.apache.stanbol.factstore.web.resource.QueryResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
-
 /**
  * The FactStore web fragment registers the FactStore documentation and REST
  * resources at the global Stanbol Jersey module.

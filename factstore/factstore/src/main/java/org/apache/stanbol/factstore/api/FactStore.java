@@ -19,9 +19,9 @@ package org.apache.stanbol.factstore.api;
 import java.util.Set;
 
 import org.apache.stanbol.factstore.model.Fact;
+import org.apache.stanbol.factstore.model.FactResultSet;
 import org.apache.stanbol.factstore.model.FactSchema;
 import org.apache.stanbol.factstore.model.Query;
-import org.apache.stanbol.factstore.model.FactResultSet;
 
 public interface FactStore {
 
