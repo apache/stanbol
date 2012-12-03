@@ -26,22 +26,22 @@
     <relativePath>../../parent</relativePath>
   </parent>
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.enhancer.engines.reactor</artifactId>
+  <artifactId>org.apache.stanbol.enhancement-engines.reactor</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Enhancer Engines Reactor</name>
+  <name>Apache Stanbol Enhancement Engines Reactor</name>
   <description>
-    Pseudo project to build Enhancer Engines
+    Pseudo project to build Enhancement Engines
   </description>
   <inceptionYear>2010</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -88,7 +88,6 @@
     <module>geonames</module> <!-- http://geonames.org -->
     <module>opencalais</module> <!-- http://opencalais.com/ -->
     <module>zemanta</module> <!-- htt://zemanta.com -->
-    
-    
   </modules>
+  
 </project>
