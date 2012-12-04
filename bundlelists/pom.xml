@@ -68,6 +68,7 @@
 
     <!-- Components -->
     <module>reasoners</module>
+    <module>rules</module>
 
     <!-- Specific features -->
     <module>authentication</module>
