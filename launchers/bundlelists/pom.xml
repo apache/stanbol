@@ -66,6 +66,9 @@
     <module>opennlp</module>
     <module>sentimentdata</module>
 
+    <!-- Components -->
+    <module>reasoners</module>
+
     <!-- Specific features -->
     <module>authentication</module>
     <module>zzshell</module>

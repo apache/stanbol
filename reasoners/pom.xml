@@ -44,7 +44,6 @@
     <module>jena</module>
     <module>test</module>
     <module>web</module>
-    <module>bundlelist</module>
   </modules>
   
   <profiles>
