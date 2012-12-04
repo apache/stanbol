@@ -43,7 +43,6 @@
     <module>adapters</module>
     <module>refactor</module>
     <module>web</module>
-    <module>bundlelist</module>
   </modules>
 
 </project>
