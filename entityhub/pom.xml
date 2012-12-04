@@ -74,7 +74,6 @@
     <!-- Utils for createing local caches (indexing utils) -->
     <module>indexing</module>
     <module>defaults</module>
-    <module>bundlelist</module>
   </modules>
 
   <profiles>
