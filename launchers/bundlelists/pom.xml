@@ -67,6 +67,7 @@
     <module>sentimentdata</module>
 
     <!-- Components -->
+    <module>cmsadapter</module>
     <module>ontologymanager</module>
     <module>reasoners</module>
     <module>rules</module>
