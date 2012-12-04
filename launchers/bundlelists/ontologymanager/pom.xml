@@ -18,15 +18,15 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
     <version>2-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
+    <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.ontologymanager.bundlelist</artifactId>
+  <artifactId>org.apache.stanbol.launchers.bundlelists.ontologymanager</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>partialbundlelist</packaging>
   
-  <name>Apache Stanbol Ontology Manager Bundle List</name>
+  <name>Apache Stanbol Bundlelist for Ontology Manager</name>
 
   <build>
     <plugins>
