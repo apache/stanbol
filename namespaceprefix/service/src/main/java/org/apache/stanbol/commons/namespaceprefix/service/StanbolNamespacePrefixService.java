@@ -126,7 +126,7 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
             @Override
             public Object addingService(ServiceReference reference) {
                 Object service = bc.getService(reference);
-                if(this.equals(service)){//we need not to track this instance
+                if(StanbolNamespacePrefixService.this.equals(service)){//we need not to track this instance
                     bc.ungetService(reference);
                     return null;
                 }
