@@ -12,7 +12,7 @@ import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate=true)
+@Component(immediate=true, metatype=true)
 @Service
 @Property(name=Constants.SERVICE_RANKING,value="1000000")
 public class DefaultNamespaceMappingsProvider extends NamespacePrefixProviderImpl implements NamespacePrefixProvider {
