@@ -45,6 +45,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
@@ -75,7 +76,6 @@ public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<
     }
     public static final String DEFAULT_ENCODING = "UTF-8";
     
-    @SuppressWarnings("unused")
     private final Logger log = LoggerFactory.getLogger(QueryResultListWriter.class);
     
     @Context
@@ -83,6 +83,10 @@ public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<
     
     protected Serializer getSerializer() {
         return ContextHelper.getServiceFromContext(Serializer.class, servletContext);
+    }
+    
+    private NamespacePrefixService getNsPrefixService(){
+        return ContextHelper.getServiceFromContext(NamespacePrefixService.class, servletContext);
     }
 
     @Override
@@ -109,22 +113,23 @@ public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<
         }
         if (APPLICATION_JSON.equals(mediaTypeString)) {
             try {
-                IOUtils.write(QueryResultsToJSON.toJSON(resultList).toString(4), entityStream,encoding);
+                IOUtils.write(QueryResultsToJSON.toJSON(resultList,getNsPrefixService())
+                    .toString(4), entityStream,encoding);
             } catch (JSONException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
         } else { //RDF
             MGraph resultGraph = QueryResultsToRDF.toRDF(resultList);
-            addFieldQuery(resultList.getQuery(),resultGraph);
+            addFieldQuery(resultList.getQuery(),resultGraph, getNsPrefixService());
             getSerializer().serialize(entityStream, resultGraph, mediaTypeString);
         }
     }
-    private void addFieldQuery(FieldQuery query, MGraph resultGraph) {
+    private void addFieldQuery(FieldQuery query, MGraph resultGraph, NamespacePrefixService nsPrefixService) {
         if(query == null){
             return;
         }
         try {
-            JSONObject fieldQueryJson = FieldQueryToJSON.toJSON(query);
+            JSONObject fieldQueryJson = FieldQueryToJSON.toJSON(query,nsPrefixService);
             if(fieldQueryJson != null){
                 //add the triple with the fieldQuery
                 resultGraph.add(new TripleImpl(

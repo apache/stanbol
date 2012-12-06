@@ -24,7 +24,9 @@ import java.util.Set;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
@@ -44,9 +46,6 @@ import org.apache.stanbol.entityhub.jersey.writers.SignWriter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
-
 @Component(immediate = true, metatype = true)
 @Service
 public class EntityhubWebFragment implements WebFragment {
@@ -55,8 +54,15 @@ public class EntityhubWebFragment implements WebFragment {
     
     private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/entityhub/jersey/static";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/entityhub/jersey/templates";
+//    private static final String TEMPLATE_PATH = "/org/apache/stanbol/entityhub/jersey/templates";
 
+    /**
+     * This service is used to map '{prefix}:{localname}' values to full URIs and
+     * vice versa. 
+     */
+    @Reference
+    protected NamespacePrefixService nsPrefixService;
+    
     private BundleContext bundleContext;
 
     @Activate

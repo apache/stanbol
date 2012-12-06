@@ -16,9 +16,11 @@
  */
 package org.apache.stanbol.entityhub.jersey.resource.reconcile;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -39,10 +41,9 @@ public class ReferencedSiteReconcileResource extends BaseGoogleRefineReconcileRe
     private SiteManager _siteManager;
     private final String siteId;
     
-    
-    
-    public ReferencedSiteReconcileResource(@PathParam(value = "site") String siteId) {
-       super();
+    public ReferencedSiteReconcileResource(@Context ServletContext context,
+                                           @PathParam(value = "site") String siteId) {
+       super(context);
        if (siteId == null || siteId.isEmpty()) {
            log.error("Missing path parameter site={}", siteId);
            throw new WebApplicationException(Response.Status.NOT_FOUND);

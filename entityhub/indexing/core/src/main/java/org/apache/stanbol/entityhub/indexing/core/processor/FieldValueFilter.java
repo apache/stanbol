@@ -16,7 +16,6 @@
 */
 package org.apache.stanbol.entityhub.indexing.core.processor;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,9 +23,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.indexing.core.EntityProcessor;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.slf4j.Logger;
@@ -57,6 +57,8 @@ public class FieldValueFilter implements EntityProcessor{
      * define any values for the configured {@link #field}
      */
     boolean includeEmpty;
+
+    private NamespacePrefixService nsPrefixService;
     
     @Override
     public Representation process(Representation source) {
@@ -92,12 +94,14 @@ public class FieldValueFilter implements EntityProcessor{
 
     @Override
     public void setConfiguration(Map<String,Object> config) {
+        IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
+        nsPrefixService = indexingConfig.getNamespacePrefixService();
         Object value = config.get(PARAM_FIELD);
         if(value == null || value.toString().isEmpty()){
-            this.field = NamespaceEnum.getFullName(DEFAULT_FIELD);
+            this.field = NamespaceMappingUtils.getConfiguredUri(nsPrefixService, DEFAULT_FIELD);
             log.info("Using default Field {}",field);
         } else {
-            this.field = NamespaceEnum.getFullName(DEFAULT_FIELD);
+            this.field = NamespaceMappingUtils.getConfiguredUri(nsPrefixService, value.toString());
             log.info("configured Field: {}",field);
         }
         value = config.get(PARAM_VALUES);
@@ -113,7 +117,7 @@ public class FieldValueFilter implements EntityProcessor{
                         if(fieldValue.isEmpty() || fieldValue.equalsIgnoreCase("null")){
                             this.includeEmpty = true;
                         } else {
-                            values.add(NamespaceEnum.getFullName(fieldValue));
+                            values.add(NamespaceMappingUtils.getConfiguredUri(nsPrefixService, fieldValue));
                         }
                     } 
                 }
@@ -136,7 +140,7 @@ public class FieldValueFilter implements EntityProcessor{
                         if(filterString.isEmpty() || filterString.equalsIgnoreCase("null")){
                             this.includeEmpty = true;
                         } else {
-                            values.add(NamespaceEnum.getFullName(filterString));
+                            values.add(NamespaceMappingUtils.getConfiguredUri(nsPrefixService, filterString));
                         }
                     }
                 }

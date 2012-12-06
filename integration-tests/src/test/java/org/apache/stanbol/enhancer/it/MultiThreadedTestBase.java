@@ -49,12 +49,14 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
+import org.apache.stanbol.commons.namespaceprefix.service.StanbolNamespacePrefixService;
 import org.apache.stanbol.commons.testing.http.Request;
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
 import org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution;
 import org.apache.stanbol.enhancer.servicesapi.helper.execution.ExecutionMetadata;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -69,7 +71,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class MultiThreadedTestBase extends EnhancerTestBase {
-
+    
     /**
      * The name of the Enhancement Chain this test runs against. If not defined
      * the default chain is used.
@@ -120,7 +122,9 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
     protected DefaultHttpClient pooledHttpClient;
     private BasicHttpParams httpParams;
     private PoolingClientConnectionManager connectionManager;
-
+    
+    private NamespacePrefixService nsPrefixService;
+    
     protected MultiThreadedTestBase() {
         this(new String[]{});
     }
@@ -129,6 +133,12 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         super(null,assertEngines);
         //set the endpoint to the default
         setEndpoint(null, ENABLE_EXECUTION_METADATA);
+        try {
+            nsPrefixService = new StanbolNamespacePrefixService(null);
+        } catch (IOException e) {
+            log.warn("Unable to initialise NamespacePrefixService. '{prefix}:{localname}' type "
+                + "will not be supported and cause IllegalArgumentExceptions when used!",e);
+        }
     }
     
     @BeforeClass
@@ -150,7 +160,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
      * @return the Iterator over the contents in the test data
      * @throws IOException on any error while accessing the parsed test data
      */
-    private static Iterator<String> initTestData(TestSettings settings) throws IOException {
+    private Iterator<String> initTestData(TestSettings settings) throws IOException {
         log.info("Read Testdata from '{}'",settings.getTestData());
         File testFile = new File(settings.getTestData());
         InputStream is = null;
@@ -248,7 +258,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
      * @param mediaType the Media-Type of the stream. MUST BE supported by
      * the Apache Clerezza RDF parsers.
      */
-    private static Iterator<String> createRdfDataIterator(InputStream is, MediaType mediaType, final String propertyString) {
+    private Iterator<String> createRdfDataIterator(InputStream is, MediaType mediaType, final String propertyString) {
         final SimpleMGraph graph = new SimpleMGraph();
         try {
             rdfParser.parse(graph, is, mediaType.toString());
@@ -272,8 +282,9 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
                         property = null; //wildcard
                         log.info("Iterate over values of all Triples");
                     } else {
-                        property = new UriRef(NamespaceEnum.getFullName(propertyString));
-                        log.info("Iterate over values of property {}", propertyString);
+                        property = new UriRef(
+                            NamespaceMappingUtils.getConfiguredUri(nsPrefixService, propertyString));
+                        log.info("Iterate over values of property {}", property);
                     }
                     it = graph.filter(null, property, null);
                 }

@@ -1,6 +1,7 @@
 package org.apache.stanbol.entityhub.jersey.parsers;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.ext.RuntimeDelegate;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.representation.Form;
 import com.sun.jersey.server.impl.provider.RuntimeDelegateImpl;
-import javax.ws.rs.ext.RuntimeDelegate;
 
 public class RepresetnationReaderTest {
 

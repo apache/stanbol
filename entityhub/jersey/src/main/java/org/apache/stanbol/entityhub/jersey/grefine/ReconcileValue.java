@@ -35,7 +35,7 @@ public class ReconcileValue {
         this(null,value);
     }
     ReconcileValue(String id, Object value){
-        this.id = id == null ? null : NamespaceEnum.getFullName(id);
+        this.id = id;
         if(value == null){
             throw new IllegalArgumentException("The parsed value MUST NOT be NULL!");
         }

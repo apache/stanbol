@@ -45,6 +45,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -59,7 +61,6 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
@@ -147,6 +148,9 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
     @Reference
     protected Entityhub entityhub;
 
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+    protected NamespacePrefixService nsPrefixService;
+    
     /**
      * This holds the id of the {@link Site} used to lookup Entities or <code>null</code> if the
      * {@link Entityhub} is used.
@@ -270,17 +274,18 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         state = config.get(PLACE_STATE);
         placeState = state == null ? true : Boolean.parseBoolean(state.toString());
         Object type = config.get(PERSON_TYPE);
-        personType = type == null || type.toString().isEmpty() ? null : NamespaceEnum.getFullName(type
-                .toString());
+        personType = type == null || type.toString().isEmpty() ? null : 
+            NamespaceMappingUtils.getConfiguredUri(nsPrefixService,PERSON_TYPE, type.toString());
         type = config.get(ORG_TYPE);
-        orgType = type == null || type.toString().isEmpty() ? null : NamespaceEnum.getFullName(type
-                .toString());
+        orgType = type == null || type.toString().isEmpty() ? null : 
+            NamespaceMappingUtils.getConfiguredUri(nsPrefixService,ORG_TYPE,type.toString());
         type = config.get(PLACE_TYPE);
-        placeType = type == null || type.toString().isEmpty() ? null : NamespaceEnum.getFullName(type
-                .toString());
+        placeType = type == null || type.toString().isEmpty() ? null : 
+            NamespaceMappingUtils.getConfiguredUri(nsPrefixService,PLACE_TYPE,type.toString());
         Object nameField = config.get(NAME_FIELD);
-        this.nameField = nameField == null || nameField.toString().isEmpty() ? NamespaceEnum.rdfs + "label"
-                : NamespaceEnum.getFullName(nameField.toString());
+        this.nameField = nameField == null || nameField.toString().isEmpty() ? 
+                "http://www.w3.org/2000/01/rdf-schema#label" : 
+                    NamespaceMappingUtils.getConfiguredUri(nsPrefixService,NAME_FIELD,nameField.toString());
         Object dereferenceEntities = config.get(DEREFERENCE_ENTITIES);
         this.dereferenceEntities = state == null ? true : Boolean
                 .parseBoolean(dereferenceEntities.toString());
@@ -296,6 +301,8 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         nameField = null;
     }
 
+
+    
     public void computeEnhancements(ContentItem ci) throws EngineException {
         final Site site;
         if (referencedSiteID != null) { // lookup the referenced site

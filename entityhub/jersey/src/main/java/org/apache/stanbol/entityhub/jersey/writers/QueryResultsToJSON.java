@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.entityhub.jersey.writers;
 
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
@@ -27,10 +28,10 @@ final class QueryResultsToJSON {
 
     private QueryResultsToJSON() { /* do not create instances of utility classes */}
 
-    static <T> JSONObject toJSON(QueryResultList<?> resultList) throws JSONException{
+    static <T> JSONObject toJSON(QueryResultList<?> resultList, NamespacePrefixService nsPrefixService) throws JSONException{
         JSONObject jResultList = new JSONObject();
         if(resultList.getQuery() != null){
-            jResultList.put("query", FieldQueryToJSON.toJSON(resultList.getQuery()));
+            jResultList.put("query", FieldQueryToJSON.toJSON(resultList.getQuery(),nsPrefixService));
         }
         jResultList.put("results", convertResultsToJSON(resultList,resultList.getType()));
         return jResultList;

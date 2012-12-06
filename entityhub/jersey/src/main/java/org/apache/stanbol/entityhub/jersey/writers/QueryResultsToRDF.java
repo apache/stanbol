@@ -17,7 +17,6 @@
 package org.apache.stanbol.entityhub.jersey.writers;
 
 import java.io.ByteArrayOutputStream;
-import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 

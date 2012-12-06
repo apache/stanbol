@@ -54,6 +54,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
@@ -142,86 +143,66 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  * 
  */
-@Component(name = "org.apache.stanbol.entityhub.site.referencedSite", configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the
-// baseUri
-// is
-// required!
-specVersion = "1.1", metatype = true, immediate = true)
+@Component(name = "org.apache.stanbol.entityhub.site.referencedSite",
+    configurationFactory = true,
+    policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
+    specVersion = "1.1",
+    metatype = true,
+    immediate = true)
 @Service(value = Site.class)
 @Properties(value = {
-                     @Property(name = SiteConfiguration.ID),
-                     @Property(name = SiteConfiguration.NAME),
-                     @Property(name = SiteConfiguration.DESCRIPTION),
-                     @Property(name = SiteConfiguration.ENTITY_PREFIX, cardinality = 1000),
-                     @Property(name = ACCESS_URI),
-                     @Property(name = ENTITY_DEREFERENCER_TYPE, options = {
-                                                                           @PropertyOption(value = '%'
-                                                                                                   + ENTITY_DEREFERENCER_TYPE
-                                                                                                   + ".option.none", name = ""),
-                                                                           @PropertyOption(value = '%'
-                                                                                                   + ENTITY_DEREFERENCER_TYPE
-                                                                                                   + ".option.sparql", name = "org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer"),
-                                                                           @PropertyOption(value = '%'
-                                                                                                   + ReferencedSiteConfiguration.ENTITY_DEREFERENCER_TYPE
-                                                                                                   + ".option.coolUri", name = "org.apache.stanbol.entityhub.dereferencer.CoolUriDereferencer")}, value = "org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer"),
-                     @Property(name = QUERY_URI), // the deri server has better performance
-                     @Property(name = ENTITY_SEARCHER_TYPE, options = {
-                                                                       @PropertyOption(value = '%'
-                                                                                               + ENTITY_SEARCHER_TYPE
-                                                                                               + ".option.none", name = ""),
-                                                                       @PropertyOption(value = '%'
-                                                                                               + ENTITY_SEARCHER_TYPE
-                                                                                               + ".option.sparql", name = "org.apache.stanbol.entityhub.searcher.SparqlSearcher"),
-                                                                       @PropertyOption(value = '%'
-                                                                                               + ENTITY_SEARCHER_TYPE
-                                                                                               + ".option.sparql-virtuoso", name = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcher"),
-                                                                       @PropertyOption(value = '%'
-                                                                                               + ENTITY_SEARCHER_TYPE
-                                                                                               + ".option.sparql-larq", name = "org.apache.stanbol.entityhub.searcher.LarqSearcher")}, value = "org.apache.stanbol.entityhub.searcher.SparqlSearcher"),
-                     @Property(name = DEFAULT_SYMBOL_STATE, options = {
-                                                                       @PropertyOption( // seems, that name
-                                                                                        // and value are
-                                                                                        // exchanged ...
-                                                                       value = '%' + DEFAULT_SYMBOL_STATE
-                                                                               + ".option.proposed", name = "proposed"),
-                                                                       @PropertyOption(value = '%'
-                                                                                               + DEFAULT_SYMBOL_STATE
-                                                                                               + ".option.active", name = "active")
-                     // the other states make no sense for new symbols
-                     }, value = "proposed"),
-                     @Property(name = DEFAULT_MAPPING_STATE, options = {
-                                                                        @PropertyOption(value = '%'
-                                                                                                + DEFAULT_MAPPING_STATE
-                                                                                                + ".option.proposed", name = "proposed"),
-                                                                        @PropertyOption(value = '%'
-                                                                                                + DEFAULT_MAPPING_STATE
-                                                                                                + ".option.confirmed", name = "confirmed")
-                     // the other states make no sense for new symbols
-                     }, value = "proposed"),
-                     @Property(name = DEFAULT_EXPIRE_DURATION, options = {
-                                                                          @PropertyOption(value = '%'
-                                                                                                  + DEFAULT_EXPIRE_DURATION
-                                                                                                  + ".option.oneMonth", name = ""
-                                                                                                                               + (1000L * 60 * 60 * 24 * 30)),
-                                                                          @PropertyOption(value = '%'
-                                                                                                  + DEFAULT_EXPIRE_DURATION
-                                                                                                  + ".option.halfYear", name = ""
-                                                                                                                               + (1000L * 60 * 60 * 24 * 183)),
-                                                                          @PropertyOption(value = '%'
-                                                                                                  + DEFAULT_EXPIRE_DURATION
-                                                                                                  + ".option.oneYear", name = ""
-                                                                                                                              + (1000L * 60 * 60 * 24 * 365)),
-                                                                          @PropertyOption(value = '%'
-                                                                                                  + DEFAULT_EXPIRE_DURATION
-                                                                                                  + ".option.none", name = "0")}, value = "0"),
-                     @Property(name = CACHE_STRATEGY, options = {
-                                                                 @PropertyOption(value = '%' + CACHE_STRATEGY
-                                                                                         + ".option.none", name = "none"),
-                                                                 @PropertyOption(value = '%' + CACHE_STRATEGY
-                                                                                         + ".option.used", name = "used"),
-                                                                 @PropertyOption(value = '%' + CACHE_STRATEGY
-                                                                                         + ".option.all", name = "all")}, value = "none"),
-                     @Property(name = CACHE_ID), @Property(name = SITE_FIELD_MAPPINGS, cardinality = 1000)})
+        @Property(name = SiteConfiguration.ID),
+        @Property(name = SiteConfiguration.NAME),
+        @Property(name = SiteConfiguration.DESCRIPTION),
+        @Property(name = SiteConfiguration.ENTITY_PREFIX, cardinality = 1000),
+        @Property(name = ACCESS_URI),
+        @Property(name = ENTITY_DEREFERENCER_TYPE,
+            options = {
+                    @PropertyOption(value = '%' + ENTITY_DEREFERENCER_TYPE + ".option.none", name = ""),
+                    @PropertyOption(value = '%' + ENTITY_DEREFERENCER_TYPE + ".option.sparql",
+                        name = "org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer"),
+                    @PropertyOption(value = '%' + ReferencedSiteConfiguration.ENTITY_DEREFERENCER_TYPE
+                            + ".option.coolUri",
+                        name = "org.apache.stanbol.entityhub.dereferencer.CoolUriDereferencer")},
+            value = "org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer"),
+        @Property(name = QUERY_URI), // the deri server has better performance
+        @Property(name = ENTITY_SEARCHER_TYPE,
+            options = {
+                    @PropertyOption(value = '%' + ENTITY_SEARCHER_TYPE + ".option.none", name = ""),
+                    @PropertyOption(value = '%' + ENTITY_SEARCHER_TYPE + ".option.sparql",
+                        name = "org.apache.stanbol.entityhub.searcher.SparqlSearcher"),
+                    @PropertyOption(value = '%' + ENTITY_SEARCHER_TYPE + ".option.sparql-virtuoso",
+                        name = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcher"),
+                    @PropertyOption(value = '%' + ENTITY_SEARCHER_TYPE + ".option.sparql-larq",
+                        name = "org.apache.stanbol.entityhub.searcher.LarqSearcher")},
+            value = "org.apache.stanbol.entityhub.searcher.SparqlSearcher"),
+        @Property(name = DEFAULT_SYMBOL_STATE,
+            options = {
+                    @PropertyOption(value = '%' + DEFAULT_SYMBOL_STATE + ".option.proposed",
+                        name = "proposed"),
+                    @PropertyOption(value = '%' + DEFAULT_SYMBOL_STATE + ".option.active", name = "active")},
+            value = "proposed"),
+        @Property(name = DEFAULT_MAPPING_STATE,
+            options = {
+                    @PropertyOption(value = '%' + DEFAULT_MAPPING_STATE + ".option.proposed",
+                        name = "proposed"),
+                    @PropertyOption(value = '%' + DEFAULT_MAPPING_STATE + ".option.confirmed",
+                        name = "confirmed")}, value = "proposed"),
+        @Property(name = DEFAULT_EXPIRE_DURATION,
+            options = {
+                    @PropertyOption(value = '%' + DEFAULT_EXPIRE_DURATION + ".option.oneMonth", name = ""
+                            + (1000L * 60 * 60 * 24 * 30)),
+                    @PropertyOption(value = '%' + DEFAULT_EXPIRE_DURATION + ".option.halfYear", name = ""
+                            + (1000L * 60 * 60 * 24 * 183)),
+                    @PropertyOption(value = '%' + DEFAULT_EXPIRE_DURATION + ".option.oneYear", name = ""
+                            + (1000L * 60 * 60 * 24 * 365)),
+                    @PropertyOption(value = '%' + DEFAULT_EXPIRE_DURATION + ".option.none", name = "0")},
+            value = "0"),
+        @Property(name = CACHE_STRATEGY, options = {
+                @PropertyOption(value = '%' + CACHE_STRATEGY + ".option.none", name = "none"),
+                @PropertyOption(value = '%' + CACHE_STRATEGY + ".option.used", name = "used"),
+                @PropertyOption(value = '%' + CACHE_STRATEGY + ".option.all", name = "all")}, value = "none"),
+        @Property(name = CACHE_ID), @Property(name = SITE_FIELD_MAPPINGS, cardinality = 1000)})
 public class ReferencedSiteImpl implements Site {
     static final int maxInt = Integer.MAX_VALUE;
     private final Logger log;
@@ -260,8 +241,15 @@ public class ReferencedSiteImpl implements Site {
      * @see #isOfflineMode()
      * @see #ensureOnline(String, Class)
      */
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC, bind = "enableOfflineMode", unbind = "disableOfflineMode", strategy = ReferenceStrategy.EVENT)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+        policy = ReferencePolicy.DYNAMIC,
+        bind = "enableOfflineMode",
+        unbind = "disableOfflineMode",
+        strategy = ReferenceStrategy.EVENT)
     private OfflineMode offlineMode;
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+    private NamespacePrefixService nsPrefixService;
 
     public ReferencedSiteImpl() {
         this(LoggerFactory.getLogger(ReferencedSiteImpl.class));
@@ -298,7 +286,7 @@ public class ReferencedSiteImpl implements Site {
                 } catch (YardException e) {
                     if (siteConfiguration.getEntitySearcherType() == null || isOfflineMode()) {
                         throw new SiteException("Unable to execute query on Cache "
-                                                + siteConfiguration.getCacheId(), e);
+                                + siteConfiguration.getCacheId(), e);
                     } else {
                         log.warn(
                             String.format(
@@ -343,7 +331,7 @@ public class ReferencedSiteImpl implements Site {
                 entity = getEntity(id);
                 if (entity == null) {
                     log.warn("Unable to create Entity for ID that was selected by an FieldQuery (id=" + id
-                             + ")");
+                            + ")");
                 }
                 entities.add(entity);
                 // use the position in the list as resultSocre
@@ -387,7 +375,7 @@ public class ReferencedSiteImpl implements Site {
                 } catch (YardException e) {
                     if (siteConfiguration.getEntitySearcherType() == null || isOfflineMode()) {
                         throw new SiteException("Unable to execute query on Cache "
-                                                + siteConfiguration.getCacheId(), e);
+                                + siteConfiguration.getCacheId(), e);
                     } else {
                         log.warn(
                             String.format(
@@ -432,7 +420,7 @@ public class ReferencedSiteImpl implements Site {
                 } catch (YardException e) {
                     if (siteConfiguration.getEntitySearcherType() == null || isOfflineMode()) {
                         throw new SiteException("Unable to execute query on Cache "
-                                                + siteConfiguration.getCacheId(), e);
+                                + siteConfiguration.getCacheId(), e);
                     } else {
                         log.warn(
                             String.format(
@@ -656,9 +644,8 @@ public class ReferencedSiteImpl implements Site {
 
     @SuppressWarnings("unchecked")
     @Activate
-    protected void activate(final ComponentContext context) throws ConfigurationException,
-                                                           YardException,
-                                                           InvalidSyntaxException {
+    protected void activate(final ComponentContext context) throws ConfigurationException, YardException,
+            InvalidSyntaxException {
         log.debug("in {} activate with properties {}", ReferencedSiteImpl.class.getSimpleName(),
             context.getProperties());
         if (context == null || context.getProperties() == null) {
@@ -676,7 +663,7 @@ public class ReferencedSiteImpl implements Site {
                 PROHIBITED_SITE_IDS));
         }
         log.info(" > initialise Referenced Site {}", siteConfiguration.getName());
-        this.siteMetadata = extractSiteMetadata(siteConfiguration,InMemoryValueFactory.getInstance());
+        this.siteMetadata = extractSiteMetadata(siteConfiguration, InMemoryValueFactory.getInstance());
 
         // if the accessUri is the same as the queryUri and both the
         // dereferencer and
@@ -685,20 +672,21 @@ public class ReferencedSiteImpl implements Site {
         // for both dependencies.
         this.dereferencerEqualsEntitySearcherComponent =
         // (1) accessURI == queryURI
-        siteConfiguration.getAccessUri() != null
-                && siteConfiguration.getAccessUri().equals(siteConfiguration.getQueryUri())
-                &&
-                // (2) entity dereferencer == entity searcher
-                siteConfiguration.getEntityDereferencerType() != null
-                && siteConfiguration.getEntityDereferencerType().equals(
-                    siteConfiguration.getEntitySearcherType());
+                siteConfiguration.getAccessUri() != null
+                        && siteConfiguration.getAccessUri().equals(siteConfiguration.getQueryUri())
+                        &&
+                        // (2) entity dereferencer == entity searcher
+                        siteConfiguration.getEntityDereferencerType() != null
+                        && siteConfiguration.getEntityDereferencerType().equals(
+                            siteConfiguration.getEntitySearcherType());
 
         // init the fieldMapper based on the configuration
         fieldMappings = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
         if (siteConfiguration.getFieldMappings() != null) {
             log.debug(" > Initialise configured field mappings");
             for (String configuredMapping : siteConfiguration.getFieldMappings()) {
-                FieldMapping mapping = FieldMappingUtils.parseFieldMapping(configuredMapping);
+                FieldMapping mapping =
+                        FieldMappingUtils.parseFieldMapping(configuredMapping, nsPrefixService);
                 if (mapping != null) {
                     log.debug("   - add FieldMapping {}", mapping);
                     fieldMappings.addMapping(mapping);
@@ -711,10 +699,12 @@ public class ReferencedSiteImpl implements Site {
         // If a cache is configured init the ServiceTracker used to manage the
         // Reference to the cache!
         if (siteConfiguration.getCacheId() != null) {
-            String cacheFilter = String.format("(&(%s=%s)(%s=%s))", Constants.OBJECTCLASS,
-                Cache.class.getName(), Cache.CACHE_YARD, siteConfiguration.getCacheId());
-            cacheTracker = new ServiceTracker(context.getBundleContext(), context.getBundleContext()
-                    .createFilter(cacheFilter), null);
+            String cacheFilter =
+                    String.format("(&(%s=%s)(%s=%s))", Constants.OBJECTCLASS, Cache.class.getName(),
+                        Cache.CACHE_YARD, siteConfiguration.getCacheId());
+            cacheTracker =
+                    new ServiceTracker(context.getBundleContext(), context.getBundleContext().createFilter(
+                        cacheFilter), null);
             cacheTracker.open();
         }
     }
@@ -736,51 +726,48 @@ public class ReferencedSiteImpl implements Site {
     private void initDereferencerAndEntitySearcher() throws InvalidSyntaxException {
         if (siteConfiguration.getAccessUri() != null && // initialise only if a
                                                         // accessUri
-            !siteConfiguration.getAccessUri().isEmpty() && // is configured
-            siteConfiguration.getEntitySearcherType() != null) {
-            String componentNameFilterString = String.format("(%s=%s)", "component.name",
-                siteConfiguration.getEntitySearcherType());
-            String filterString = String.format("(&(%s=%s)%s)", Constants.OBJECTCLASS,
-                ComponentFactory.class.getName(), componentNameFilterString);
-            ServiceReference[] refs = context.getBundleContext().getServiceReferences(
-                ComponentFactory.class.getName(), componentNameFilterString);
+                !siteConfiguration.getAccessUri().isEmpty() && // is configured
+                siteConfiguration.getEntitySearcherType() != null) {
+            String componentNameFilterString =
+                    String.format("(%s=%s)", "component.name", siteConfiguration.getEntitySearcherType());
+            String filterString =
+                    String.format("(&(%s=%s)%s)", Constants.OBJECTCLASS, ComponentFactory.class.getName(),
+                        componentNameFilterString);
+            ServiceReference[] refs =
+                    context.getBundleContext().getServiceReferences(ComponentFactory.class.getName(),
+                        componentNameFilterString);
             if (refs != null && refs.length > 0) {
                 createEntitySearcherComponent((ComponentFactory) context.getBundleContext().getService(
                     refs[0]));
             } else { // service factory not yet available -> add servicelistener
-                this.searcherComponentFactoryListener = new ComponentFactoryListener(
-                        context.getBundleContext());
+                this.searcherComponentFactoryListener =
+                        new ComponentFactoryListener(context.getBundleContext());
+                // NOTE: here the filter MUST include also the objectClass!
                 context.getBundleContext().addServiceListener(this.searcherComponentFactoryListener,
-                    filterString); // NOTE:
-                                   // here
-                                   // the
-                                   // filter
-                                   // MUST
-                                   // include
-                                   // also
-                                   // the
-                                   // objectClass!
+                    filterString);
             }
             // context.getComponentInstance().dispose();
             // throw an exception to avoid an successful activation
         }
         if (siteConfiguration.getQueryUri() != null
-            && // initialise only if a query URI
-            !siteConfiguration.getQueryUri().isEmpty()
-            && // is configured
-            siteConfiguration.getEntityDereferencerType() != null
-            && !this.dereferencerEqualsEntitySearcherComponent) {
-            String componentNameFilterString = String.format("(%s=%s)", "component.name",
-                siteConfiguration.getEntityDereferencerType());
-            String filterString = String.format("(&(%s=%s)%s)", Constants.OBJECTCLASS,
-                ComponentFactory.class.getName(), componentNameFilterString);
-            ServiceReference[] refs = context.getBundleContext().getServiceReferences(
-                ComponentFactory.class.getName(), componentNameFilterString);
+                && // initialise only if a query URI
+                !siteConfiguration.getQueryUri().isEmpty()
+                && // is configured
+                siteConfiguration.getEntityDereferencerType() != null
+                && !this.dereferencerEqualsEntitySearcherComponent) {
+            String componentNameFilterString =
+                    String.format("(%s=%s)", "component.name", siteConfiguration.getEntityDereferencerType());
+            String filterString =
+                    String.format("(&(%s=%s)%s)", Constants.OBJECTCLASS, ComponentFactory.class.getName(),
+                        componentNameFilterString);
+            ServiceReference[] refs =
+                    context.getBundleContext().getServiceReferences(ComponentFactory.class.getName(),
+                        componentNameFilterString);
             if (refs != null && refs.length > 0) {
                 createDereferencerComponent((ComponentFactory) context.getBundleContext().getService(refs[0]));
             } else { // service factory not yet available -> add servicelistener
-                this.dereferencerComponentFactoryListener = new ComponentFactoryListener(
-                        context.getBundleContext());
+                this.dereferencerComponentFactoryListener =
+                        new ComponentFactoryListener(context.getBundleContext());
                 this.context.getBundleContext().addServiceListener(this.dereferencerComponentFactoryListener,
                     filterString); // NOTE: here the filter MUST
                                    // include also the objectClass!
@@ -806,8 +793,8 @@ public class ReferencedSiteImpl implements Site {
         // multiple component instances because of concurrent calls
         synchronized (this.searcherAndDereferencerLock) {
             if (entitySearcherComponentInstance == null) {
-                this.entitySearcherComponentInstance = factory.newInstance(OsgiUtils.copyConfig(context
-                        .getProperties()));
+                this.entitySearcherComponentInstance =
+                        factory.newInstance(OsgiUtils.copyConfig(context.getProperties()));
                 this.entitySearcher = (EntitySearcher) entitySearcherComponentInstance.getInstance();
             }
             if (dereferencerEqualsEntitySearcherComponent) {
@@ -829,8 +816,8 @@ public class ReferencedSiteImpl implements Site {
         // multiple component instances because of concurrent calls
         synchronized (this.searcherAndDereferencerLock) {
             if (dereferencerComponentInstance == null) {
-                dereferencerComponentInstance = factory.newInstance(OsgiUtils.copyConfig(context
-                        .getProperties()));
+                dereferencerComponentInstance =
+                        factory.newInstance(OsgiUtils.copyConfig(context.getProperties()));
                 this.dereferencer = (EntityDereferencer) dereferencerComponentInstance.getInstance();
             }
         }
@@ -860,14 +847,14 @@ public class ReferencedSiteImpl implements Site {
             if (event.getType() == ServiceEvent.REGISTERED) {
                 log.info("Process ServiceEvent for ComponentFactory {} and State REGISTERED",
                     eventComponentName);
-                ComponentFactory factory = (ComponentFactory) bundleContext.getService(event
-                        .getServiceReference());
+                ComponentFactory factory =
+                        (ComponentFactory) bundleContext.getService(event.getServiceReference());
                 if (siteConfiguration.getEntityDereferencerType() != null
-                    && siteConfiguration.getEntityDereferencerType().equals(eventComponentName)) {
+                        && siteConfiguration.getEntityDereferencerType().equals(eventComponentName)) {
                     createDereferencerComponent(factory);
                 }
                 if (siteConfiguration.getEntitySearcherType() != null
-                    && siteConfiguration.getEntitySearcherType().equals(eventComponentName)) {
+                        && siteConfiguration.getEntitySearcherType().equals(eventComponentName)) {
                     createEntitySearcherComponent(factory);
                 }
             } else {

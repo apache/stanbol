@@ -31,9 +31,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -46,7 +47,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.viewable.Viewable;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.CorsHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
@@ -55,7 +59,6 @@ import org.apache.stanbol.entityhub.jersey.grefine.ReconcileQuery;
 import org.apache.stanbol.entityhub.jersey.grefine.ReconcileValue;
 import org.apache.stanbol.entityhub.jersey.grefine.Utils;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.defaults.SpecialFieldEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -89,8 +92,8 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
 
     private final Logger log = LoggerFactory.getLogger(BaseGoogleRefineReconcileResource.class);
 
-    private static final String NAME_FIELD = NamespaceEnum.rdfs+"label";
-    private static final String TYPE_FIELD = NamespaceEnum.rdf+"type";
+    private static final String NAME_FIELD = "http://www.w3.org/2000/01/rdf-schema#label";
+    private static final String TYPE_FIELD = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
     private static final Collection<String> SELECTED_FIELDS = Collections.unmodifiableList(
         Arrays.asList(NAME_FIELD,TYPE_FIELD));
 
@@ -106,9 +109,13 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
         }
         
     };
+    
+    protected final NamespacePrefixService nsPrefixService;
 
-    protected BaseGoogleRefineReconcileResource(){
+    protected BaseGoogleRefineReconcileResource(ServletContext context){
         super();
+        nsPrefixService = ContextHelper.getServiceFromContext(
+            NamespacePrefixService.class, context);
     }
     
     @OPTIONS
@@ -142,7 +149,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
         if(query != null){
             log.debug("query: {}",query);
             try {
-                jResult = reconcile(ReconcileQuery.parseQuery(query));
+                jResult = reconcile(ReconcileQuery.parseQuery(query,nsPrefixService));
             } catch (JSONException e) {
                 throw new WebApplicationException(
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
@@ -157,7 +164,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
         } else if(queries != null){
             log.debug("multi-query: {}",queries);
             try {
-                jResult = reoncile(ReconcileQuery.parseQueries(queries));
+                jResult = reoncile(ReconcileQuery.parseQueries(queries,nsPrefixService));
             } catch (JSONException e) {
                 throw new WebApplicationException(
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
@@ -323,9 +330,18 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
                         fullText.add(text);
                     }
                 } else if(property.getName().equalsIgnoreCase("similarity")){
-                    similarityFields.add(property.getParameter() != null ? 
-                            NamespaceEnum.getFullName(property.getParameter()) :
-                                SpecialFieldEnum.fullText.getUri()); //the default
+                    String propUri = property.getParameter() != null ? 
+                            nsPrefixService.getFullName(property.getParameter()) :
+                                SpecialFieldEnum.fullText.getUri();
+                    if(propUri != null){
+                        similarityFields.add(propUri);
+                    } else {
+                        //TODO: maybe throw an Exception instead
+                        log.warn("Unknown prefix '{}' used by Google Refine query parameter of property '{}'! "
+                            + "Will use the full text field as fallback",
+                            NamespaceMappingUtils.getPrefix(property.getParameter()),property);
+                        similarityFields.add(SpecialFieldEnum.fullText.getUri());
+                    }
                     for(String text : texts){ //Append the text values to the context
                         similarityContext.append(text).append(' ');
                     }

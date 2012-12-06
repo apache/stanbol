@@ -103,7 +103,7 @@ dbp-ont:birthDate | d=xsd:dateTime
 dbp-ont:deathDate | d=xsd:dateTime
 dbp-ont:populationTotal | d=xsd:long
 dbp-ont:wikiPageExternalLink | d=xsd:anyURI
-dbpedia-owl:areaTotal | d=xsd:double
+dbp-ont:areaTotal | d=xsd:double
 
 # the "DBpedia properties are all key values pairs extracted from the info boxes
 # on the right hand side of Wikipedia pages.

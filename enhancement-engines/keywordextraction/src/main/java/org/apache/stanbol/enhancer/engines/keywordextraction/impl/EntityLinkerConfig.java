@@ -72,15 +72,15 @@ public class EntityLinkerConfig {
     /**
      * Default value for {@link #getNameField()} (rdfs:label)
      */
-    public static final String DEFAULT_NAME_FIELD = "rdfs:label";
+    public static final String DEFAULT_NAME_FIELD = "http://www.w3.org/2000/01/rdf-schema#label";
     /**
      * Default value for {@link #getTypeField()} (rdf:type)
      */
-    public static final String DEFAULT_TYPE_FIELD = "rdf:type";
+    public static final String DEFAULT_TYPE_FIELD = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
     /**
      * Default value for {@link #getRedirectField()} (rdf:seeAlso)
      */
-    public static final String DEFAULT_REDIRECT_FIELD = "rdfs:seeAlso";
+    public static final String DEFAULT_REDIRECT_FIELD = "http://www.w3.org/2000/01/rdf-schema#seeAlso";
     /**
      * The default language used to search for labels regardless of the language
      * of the text. The default value is <code>null</code> causing to include
@@ -99,21 +99,27 @@ public class EntityLinkerConfig {
     
     static { //the default mappings for the three types used by the Stanbol Enhancement Structure
         Map<String,UriRef> mappings = new HashMap<String,UriRef>();
-        mappings.put(OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString(), OntologicalClasses.DBPEDIA_ORGANISATION);
-        mappings.put(NamespaceEnum.dbpediaOnt+"Newspaper", OntologicalClasses.DBPEDIA_ORGANISATION);
-        mappings.put(NamespaceEnum.schema+"Organization", OntologicalClasses.DBPEDIA_ORGANISATION);
+        mappings.put(OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString(), 
+            OntologicalClasses.DBPEDIA_ORGANISATION);
+        mappings.put("http://dbpedia.org/ontology/Newspaper", OntologicalClasses.DBPEDIA_ORGANISATION);
+        mappings.put("http://schema.org/Organization", OntologicalClasses.DBPEDIA_ORGANISATION);
 //        mappings.put(NamespaceEnum.dailymed+"organization",OntologicalClasses.DBPEDIA_ORGANISATION);
         
-        mappings.put(OntologicalClasses.DBPEDIA_PERSON.getUnicodeString(), OntologicalClasses.DBPEDIA_PERSON);
-        mappings.put(NamespaceEnum.foaf+"Person", OntologicalClasses.DBPEDIA_PERSON);
-        mappings.put(NamespaceEnum.schema+"Person", OntologicalClasses.DBPEDIA_PERSON);
+        mappings.put(OntologicalClasses.DBPEDIA_PERSON.getUnicodeString(),
+            OntologicalClasses.DBPEDIA_PERSON);
+        mappings.put("http://xmlns.com/foaf/0.1/Person", OntologicalClasses.DBPEDIA_PERSON);
+        mappings.put("http://schema.org/Person", OntologicalClasses.DBPEDIA_PERSON);
 
-        mappings.put(OntologicalClasses.DBPEDIA_PLACE.getUnicodeString(), OntologicalClasses.DBPEDIA_PLACE);
-        mappings.put(NamespaceEnum.schema+"Place", OntologicalClasses.DBPEDIA_PLACE);
-        mappings.put(NamespaceEnum.gml+"_Feature", OntologicalClasses.DBPEDIA_PLACE);
+        mappings.put(OntologicalClasses.DBPEDIA_PLACE.getUnicodeString(), 
+            OntologicalClasses.DBPEDIA_PLACE);
+        mappings.put("http://schema.org/Place", OntologicalClasses.DBPEDIA_PLACE);
+        mappings.put("http://www.opengis.net/gml/_Feature", OntologicalClasses.DBPEDIA_PLACE);
 
-        mappings.put(OntologicalClasses.SKOS_CONCEPT.getUnicodeString(), OntologicalClasses.SKOS_CONCEPT);
+        mappings.put(OntologicalClasses.SKOS_CONCEPT.getUnicodeString(),
+            OntologicalClasses.SKOS_CONCEPT);
 
+        mappings.put(OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString(), 
+            OntologicalClasses.DBPEDIA_ORGANISATION);
 //        UriRef DRUG = new UriRef(NamespaceEnum.drugbank+"drugs");
 //        mappings.put(DRUG.getUnicodeString(), DRUG);
 //        mappings.put(NamespaceEnum.dbpediaOnt+"Drug", DRUG);
@@ -277,14 +283,13 @@ public class EntityLinkerConfig {
         return nameField;
     }
     /**
-     * Setter for the uri of the field used for the names in the taxonomy
-     * (e.g. rdfs:label, skos:prefLabel). 
-     * Converts short to full URIy by using the prefixes as registered in the
+     * Setter for the uri of the field used for the entities in the vocabulary<p>
+     * <b>NOTE</b>: does NOT support the convertion of short to full URIs
      * {@link NamespaceEnum}.
      * @param nameField the nameField to set
      */
     public final void setNameField(String nameField) {
-        this.nameField = NamespaceEnum.getFullName(nameField);
+        this.nameField = nameField;
         updateSelectedFields();
     }
     /**
@@ -314,13 +319,12 @@ public class EntityLinkerConfig {
         return redirectField;
     }
     /**
-     * The field used to follow redirects (typically rdf:seeAlso)
-     * Converts short to full URIy by using the prefixes as registered in the
-     * {@link NamespaceEnum}.
+     * The field used to follow redirects (typically rdf:seeAlso)<p>
+     * <b>NOTE</b>: does NOT support the convertion of short to full URIs
      * @param redirectField the redirectField to set
      */
     public final void setRedirectField(String redirectField) {
-        this.redirectField = NamespaceEnum.getFullName(redirectField);
+        this.redirectField = redirectField;
         updateSelectedFields();
     }
     /**
@@ -331,13 +335,12 @@ public class EntityLinkerConfig {
         return typeField;
     }
     /**
-     * The field used to lookup the types (typically rdf:type)
-     * Converts short to full URIy by using the prefixes as registered in the
-     * {@link NamespaceEnum}.
+     * The field used to lookup the types (typically rdf:type)<p>
+     * <b>NOTE</b>: does NOT support the convertion of short to full URIs
      * @param typeField the typeField to set
      */
     public final void setTypeField(String typeField) {
-        this.typeField = NamespaceEnum.getFullName(typeField);
+        this.typeField = typeField;
         updateSelectedFields();
     }
     /**

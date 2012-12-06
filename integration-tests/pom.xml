@@ -163,6 +163,24 @@
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
 
+    <!-- namespace prefixes mappings -->
+    <!-- used for the Stress Test Tool configuration -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency> <!-- provides the default Stanbol mappings -->
+     <groupId>org.apache.stanbol</groupId>
+     <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency> <!-- provides the prefix.cc mappings -->
+     <groupId>org.apache.stanbol</groupId>
+     <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>

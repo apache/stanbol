@@ -344,6 +344,11 @@
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
+    <bundle> <!-- Provides the namespace prefixes managed by http://prefix.cc -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
     <!-- OWL libraries and utilities -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>

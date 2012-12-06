@@ -16,8 +16,6 @@
 */
 package org.apache.stanbol.enhancer.engines.keywordextraction.engine;
 
-import static org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum.getFullName;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,7 +34,6 @@ import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
@@ -51,6 +48,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.TextAnalyzerConfig;
@@ -79,7 +78,6 @@ import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
@@ -100,10 +98,10 @@ import org.slf4j.LoggerFactory;
 @org.apache.felix.scr.annotations.Properties(value={
     @Property(name=EnhancementEngine.PROPERTY_NAME),
     @Property(name=KeywordLinkingEngine.REFERENCED_SITE_ID),
-    @Property(name=KeywordLinkingEngine.NAME_FIELD,value=EntityLinkerConfig.DEFAULT_NAME_FIELD),
+    @Property(name=KeywordLinkingEngine.NAME_FIELD,value="rdfs:label"),
     @Property(name=KeywordLinkingEngine.CASE_SENSITIVE,boolValue=EntityLinkerConfig.DEFAULT_CASE_SENSITIVE_MATCHING_STATE),
-    @Property(name=KeywordLinkingEngine.TYPE_FIELD,value=EntityLinkerConfig.DEFAULT_TYPE_FIELD),
-    @Property(name=KeywordLinkingEngine.REDIRECT_FIELD,value=EntityLinkerConfig.DEFAULT_REDIRECT_FIELD),
+    @Property(name=KeywordLinkingEngine.TYPE_FIELD,value="rdf:type"),
+    @Property(name=KeywordLinkingEngine.REDIRECT_FIELD,value="rdfs:seeAlso"),
     @Property(name=KeywordLinkingEngine.REDIRECT_PROCESSING_MODE,options={
         @PropertyOption(
             value='%'+KeywordLinkingEngine.REDIRECT_PROCESSING_MODE+".option.ignore",
@@ -185,11 +183,11 @@ public class KeywordLinkingEngine
      * Additional fields added for dereferenced entities
      */
     private static final Collection<String> DEREFERENCE_FIELDS = Arrays.asList(
-        getFullName("rdfs:comment"),
-        getFullName("geo:lat"),
-        getFullName("geo:long"),
-        getFullName("foaf:depiction"),
-        getFullName("dbp-ont:thumbnail"));
+        "http://www.w3.org/2000/01/rdf-schema#comment",
+        "http://www.w3.org/2003/01/geo/wgs84_pos#lat",
+        "http://www.w3.org/2003/01/geo/wgs84_pos#long",
+        "http://xmlns.com/foaf/0.1/depiction",
+        "http://dbpedia.org/ontology/thumbnail");
     /**
      * The dereferenceEntitiesState as set in {@link #activateEntityDereference(Dictionary)}
      */
@@ -219,6 +217,10 @@ public class KeywordLinkingEngine
      */
     @org.apache.felix.scr.annotations.Reference
     private OpenNLP openNLP;
+    
+    @org.apache.felix.scr.annotations.Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+    protected NamespacePrefixService nsPrefixService;
+
     //TextAnalyzer was changed to have a scope of a single request ( call to
     //#computeEnhancement!
     //private TextAnalyzer textAnalyser;
@@ -685,7 +687,9 @@ public class KeywordLinkingEngine
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(NAME_FIELD,"The configured name field MUST NOT be empty");
             }
-            linkerConfig.setNameField(value.toString());
+            
+            linkerConfig.setNameField(NamespaceMappingUtils.getConfiguredUri(
+                nsPrefixService, NAME_FIELD, value.toString()));
         }
         //init case sensitivity
         value = configuration.get(CASE_SENSITIVE);
@@ -700,7 +704,8 @@ public class KeywordLinkingEngine
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(TYPE_FIELD,"The configured name field MUST NOT be empty");
             }
-            linkerConfig.setTypeField(value.toString());
+            linkerConfig.setTypeField(NamespaceMappingUtils.getConfiguredUri(
+                nsPrefixService, TYPE_FIELD, value.toString()));
         }
         //init REDIRECT_FIELD
         value = configuration.get(REDIRECT_FIELD);
@@ -708,7 +713,8 @@ public class KeywordLinkingEngine
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(NAME_FIELD,"The configured name field MUST NOT be empty");
             }
-            linkerConfig.setRedirectField(value.toString());
+            linkerConfig.setRedirectField(NamespaceMappingUtils.getConfiguredUri(
+                nsPrefixService, REDIRECT_FIELD, value.toString()));
         }
         //init MAX_SUGGESTIONS
         value = configuration.get(MAX_SUGGESTIONS);
@@ -845,7 +851,8 @@ public class KeywordLinkingEngine
                         continue configs;
                     }
                     String targetType = config.length < 2 ? sourceTypes[0] : config[1];
-                    targetType = getFullName(targetType.trim()); //support for ns:localName
+                    targetType = NamespaceMappingUtils.getConfiguredUri(
+                        nsPrefixService,TYPE_MAPPINGS,targetType.trim()); //support for ns:localName
                     try { //validate
                         new URI(targetType);
                     } catch (URISyntaxException e) {
@@ -856,7 +863,8 @@ public class KeywordLinkingEngine
                     UriRef targetUri = new UriRef(targetType);
                     for(String sourceType : sourceTypes){
                         if(!sourceType.isEmpty()){
-                            sourceType = getFullName(sourceType.trim()); //support for ns:localName
+                            sourceType = NamespaceMappingUtils.getConfiguredUri(
+                                nsPrefixService,TYPE_MAPPINGS,sourceType.trim()); //support for ns:localName
                             try { //validate
                                 new URI(sourceType);
                                 UriRef old = linkerConfig.setTypeMapping(sourceType, targetUri);
