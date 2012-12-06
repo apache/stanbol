@@ -37,6 +37,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -52,6 +53,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
+import org.apache.stanbol.commons.namespaceprefix.service.StanbolNamespacePrefixService;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterable;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataProvider;
@@ -217,6 +220,8 @@ public class IndexingConfig {
      */
     private String classpathResourceOffset;
     
+    private NamespacePrefixService namespacePrefixService;
+    
     /**
      * Creates an instance using {@link #DEFAULT_ROOT_PATH} (relative to the
      * working directory) as {@link #getIndexingFolder()} for the indexing
@@ -305,6 +310,13 @@ public class IndexingConfig {
         //set up the root folder for the classpath
         this.classPathRootDir = getConfigClasspathRootFolder();
         log.info("Classpath Indexing Root {}",classPathRootDir);
+        //read the prefixnamespace mappings
+        try {
+            initNamespacePrefixMapper();
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to get create NamespacePrefixMapper",e);
+        }
+        
         //check the main configuration
         this.configuration = loadConfig(INDEXING_PROERTIES,true);
         Object value = configuration.get(KEY_NAME);
@@ -321,6 +333,7 @@ public class IndexingConfig {
         if(value == null || value.toString().isEmpty()){
             value = DEFAULT_INDEX_FIELD_CONFIG_FILE_NAME;
         }
+        
         final File indexFieldConfig = getConfigFile(value.toString());
         if(indexFieldConfig.isFile()){
             try {
@@ -338,7 +351,7 @@ public class IndexingConfig {
                     public void remove() {
                         it.remove();
                     }
-                });
+                },getNamespacePrefixService());
             } catch (IOException e) {
                throw new IllegalStateException("Unable to read Index Field Configuration form '"
                    +indexFieldConfig+"'!",e);
@@ -349,6 +362,26 @@ public class IndexingConfig {
             		"Provide the missing file or use the '"+KEY_INDEX_FIELD_CONFIG+
             		"' in the '"+INDEXING_PROERTIES+"' to configure a different one!");
         }
+    }
+    
+    public NamespacePrefixService getNamespacePrefixService() {
+        return namespacePrefixService;
+    }
+    /**
+     * @param configDir
+     * @throws IOException
+     */
+    private void initNamespacePrefixMapper() throws IOException {
+        File nsPrefixMappings = new File(getConfigFolder(),"namespaceprefix.mappings");
+        if(!nsPrefixMappings.isFile()){
+            FileUtils.writeLines(nsPrefixMappings,"UTF-8",Arrays.asList(
+                "# Syntax: '{prefix}\\t{namespace}\\n",
+                "# where:",
+                "#   {prefix} ... [0..9A..Za..z-_]",
+                "#   {namespace} ... must end with '#' or '/' for URLs and ':' for URNs",
+                "# one mapping per line, multiple prefixes for the same namespace allowed"));
+        }
+        namespacePrefixService = new StanbolNamespacePrefixService(nsPrefixMappings);
     }
 
     /**

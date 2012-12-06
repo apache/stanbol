@@ -38,11 +38,9 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.jersey.resource.EntityhubRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.ReferencedSiteRootResource;
@@ -50,7 +48,6 @@ import org.apache.stanbol.entityhub.jersey.resource.SiteManagerRootResource;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
 import org.apache.stanbol.entityhub.ldpath.backend.AbstractBackend;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
@@ -76,7 +73,7 @@ public class LDPathHelper {
      */
     public static final FieldMapping<Double,Object> RESULT_SCORE_MAPPING = 
         new FieldMapping<Double,Object>(RdfResourceEnum.resultScore.getUri(), 
-            NamespaceEnum.xsd+"double", new PropertySelector<Object>(
+            "http://www.w3.org/2001/XMLSchema#double", new PropertySelector<Object>(
                     InMemoryValueFactory.getInstance().createReference(
                         RdfResourceEnum.resultScore.getUri())), 
                     new DoubleTransformer<Object>(), null);

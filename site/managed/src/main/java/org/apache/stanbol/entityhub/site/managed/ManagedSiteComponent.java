@@ -31,6 +31,9 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.utils.SiteUtils;
 import org.apache.stanbol.entityhub.servicesapi.site.ManagedSite;
@@ -104,8 +107,8 @@ public class ManagedSiteComponent {
 
     private ServiceRegistration managedSiteRegistration;
     
-//    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
-//    protected ConfigurationAdmin configAdmin;
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+    protected NamespacePrefixService nsPrefixService;
     /**
      * Activates this {@link ManagedSiteComponent}. This might be overridden to
      * perform additional configuration. In such cases super should be called
@@ -236,7 +239,7 @@ public class ManagedSiteComponent {
     }
     
     protected void activateManagedSite(Yard yard) {
-        managedSite = new YardSite(yard,siteConfiguration);
+        managedSite = new YardSite(yard,siteConfiguration, nsPrefixService);
         managedSiteRegistration = bundleContext.registerService(
             new String[]{ManagedSite.class.getName(), Site.class.getName()},
             managedSite, siteConfiguration.getConfiguration());

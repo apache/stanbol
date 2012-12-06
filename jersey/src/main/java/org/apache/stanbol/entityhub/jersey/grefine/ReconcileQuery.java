@@ -29,9 +29,9 @@ import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
-import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -134,11 +134,11 @@ public class ReconcileQuery {
         }
     }
     
-    public Collection<ReconcileValue> putProperty(String field, Collection<ReconcileValue> values){
+    public Collection<ReconcileValue> putProperty(String field, Collection<ReconcileValue> values, NamespacePrefixService nsPrefixService){
         if(field == null || field.isEmpty()){
             throw new IllegalArgumentException("The field for an property MUST NOT be NULL!");
         }
-        ReconcileProperty property = ReconcileProperty.parseProperty(field);
+        ReconcileProperty property = ReconcileProperty.parseProperty(field, nsPrefixService);
         if(property != null){
             if(values == null || values.isEmpty()){
                 return properties.remove(values);
@@ -158,7 +158,7 @@ public class ReconcileQuery {
     public Iterable<Entry<ReconcileProperty,Collection<ReconcileValue>>> getProperties(){
         return properties.entrySet();
     }
-    public static Map<String,ReconcileQuery> parseQueries(String queriesString) throws WebApplicationException {
+    public static Map<String,ReconcileQuery> parseQueries(String queriesString,NamespacePrefixService nsPrefixService) throws WebApplicationException {
         JSONObject jQueries;
         try {
             jQueries = new JSONObject(queriesString);
@@ -173,7 +173,7 @@ public class ReconcileQuery {
         while(keys.hasNext()){
             String key = keys.next();
             try {
-                ReconcileQuery query = parseQuery(jQueries.getJSONObject(key));
+                ReconcileQuery query = parseQuery(jQueries.getJSONObject(key), nsPrefixService);
                 queries.put(key, query);
             } catch (JSONException e) {
                 throw new WebApplicationException(
@@ -192,7 +192,7 @@ public class ReconcileQuery {
      * case of the parsed string is not a well formated query. Unsupported
      * Properties are silently ignored (warnings are still logged).
      */
-    public static ReconcileQuery parseQuery(String queryString) throws WebApplicationException {
+    public static ReconcileQuery parseQuery(String queryString, NamespacePrefixService nsPrefixService) throws WebApplicationException {
         JSONObject jQuery;
         try {
             if(queryString.charAt(0) == '{') {
@@ -207,10 +207,10 @@ public class ReconcileQuery {
                 Response.status(Response.Status.BAD_REQUEST).entity(
                     "The parsed query is illegal formatted! \n query: \n"+queryString+"\n").build());
         }
-        return parseQuery(jQuery);
+        return parseQuery(jQuery, nsPrefixService);
     }
     
-    private static ReconcileQuery parseQuery(JSONObject jQuery) throws WebApplicationException {
+    private static ReconcileQuery parseQuery(JSONObject jQuery, NamespacePrefixService nsPrefixService) throws WebApplicationException {
         //query (string)
         //limit (integer), optional
         //type (string| [string]), optional
@@ -235,9 +235,11 @@ public class ReconcileQuery {
         } else if((jTypes = jQuery.optJSONArray("type")) != null){
             types = new HashSet<String>(jTypes.length());
             for(int i=0;i<jTypes.length();i++){
-                String type = NamespaceEnum.getFullName(jTypes.optString(i));
+                String type = nsPrefixService.getFullName(jTypes.optString(i));
                 if(type != null && !type.isEmpty()){
                     types.add(type);
+                } else {
+                    log.warn("Unable to parse entity type from parsed type {}",jTypes.optString(i));
                 }
             }
         } else {
@@ -266,7 +268,7 @@ public class ReconcileQuery {
         JSONArray jProperties = jQuery.optJSONArray("properties");
         if(jProperties != null){
             for(int i=0;i<jProperties.length();i++){
-                parseProperty(reconcileQuery, jProperties.optJSONObject(i));
+                parseProperty(reconcileQuery, jProperties.optJSONObject(i), nsPrefixService);
             }
         }
         return reconcileQuery;
@@ -278,7 +280,7 @@ public class ReconcileQuery {
      * @param reconcileQuery the query to add the property
      * @param jProperty the JSON formatted property
      */
-    private static void parseProperty(ReconcileQuery reconcileQuery,JSONObject jProperty) {
+    private static void parseProperty(ReconcileQuery reconcileQuery,JSONObject jProperty, NamespacePrefixService nsPrefixService) {
         if(jProperty != null){
             //parse property
             String property = jProperty.optString("pid");
@@ -300,7 +302,7 @@ public class ReconcileQuery {
                     log.warn("Ignore Property '{}' because it has no value! \n {}",property,jProperty.toString());
                 } else if(jValue instanceof JSONObject){
                     //Reconciliation data available!
-                    ReconcileValue value = parseValueFromV(jValue);
+                    ReconcileValue value = parseValueFromV(jValue, nsPrefixService);
                     if(value != null){
                         values.add(value);
                     } else {
@@ -314,7 +316,7 @@ public class ReconcileQuery {
                         jValue = jValueArray.opt(j);
                         if(jValue instanceof JSONObject){
                             //Reconciliation data available!
-                            ReconcileValue value = parseValueFromV(jValue);
+                            ReconcileValue value = parseValueFromV(jValue, nsPrefixService);
                             if(value != null){
                                 values.add(value);
                             } else {
@@ -334,7 +336,7 @@ public class ReconcileQuery {
                 }
                 
                 if(!values.isEmpty()){
-                    reconcileQuery.putProperty(property, values);
+                    reconcileQuery.putProperty(property, values, nsPrefixService);
                 }
             }
         }
@@ -346,8 +348,18 @@ public class ReconcileQuery {
      * @return The value or <code>null</code> if the parsed json object does not
      * contain the required information.
      */
-    private static ReconcileValue parseValueFromV(Object jValue) {
+    private static ReconcileValue parseValueFromV(Object jValue, NamespacePrefixService nsPrefixService) {
+        if(jValue == null){
+            return null;
+        }
         String id = ((JSONObject)jValue).optString("id");
+        if(id != null){
+            id = nsPrefixService.getFullName(id);
+            if(id == null){
+                log.warn("Unknown prefix '{}' used by 'id' of element {} -> will use NULL as id",
+                    NamespaceMappingUtils.getPrefix(id),jValue.toString());
+            }
+        }
         String value = ((JSONObject)jValue).optString("name");
         return value != null ? new ReconcileValue(id,value) : null;
     }

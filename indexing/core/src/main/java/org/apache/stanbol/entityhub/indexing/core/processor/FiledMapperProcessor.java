@@ -18,24 +18,19 @@ package org.apache.stanbol.entityhub.indexing.core.processor;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
-import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
-import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
-import org.apache.stanbol.entityhub.core.site.CacheUtils;
 import org.apache.stanbol.entityhub.indexing.core.EntityProcessor;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
-import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 
@@ -45,6 +40,7 @@ public class FiledMapperProcessor implements EntityProcessor{
     public static final String DEFAULT_MAPPINGS_FILE_NAME = "fieldMappings.txt";
     private FieldMapper mapper;
     private ValueFactory vf;
+    private NamespacePrefixService nsPrefixService;
     /**
      * This Constructor relays on that {@link #setConfiguration(Map)} is called
      * afterwards!
@@ -70,7 +66,7 @@ public class FiledMapperProcessor implements EntityProcessor{
         if(mappings == null){
             throw new IllegalArgumentException("The parsed field mappings MUST NOT be NULL!");
         }
-        mapper = FieldMappingUtils.createDefaultFieldMapper(mappings);
+        mapper = FieldMappingUtils.createDefaultFieldMapper(mappings,nsPrefixService);
         if(mapper.getMappings().isEmpty()){
             throw new IllegalStateException("The parsed field mappings MUST contain at least a single valid mapping!");
         }
@@ -80,7 +76,7 @@ public class FiledMapperProcessor implements EntityProcessor{
         if(mappings == null){
             throw new IllegalArgumentException("The parsed field mappings MUST NOT be NULL!");
         }
-        this.mapper = createMapperFormStream(mappings);
+        this.mapper = createMapperFormStream(mappings,nsPrefixService);
     }
     @Override
     public Representation process(Representation source) {
@@ -122,6 +118,7 @@ public class FiledMapperProcessor implements EntityProcessor{
     @Override
     public void setConfiguration(Map<String,Object> config) {
         IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
+        nsPrefixService = indexingConfig.getNamespacePrefixService();
         Object value = config.get(PARAM_MAPPINGS);
         if(value == null || value.toString().isEmpty()){
             //use the mappings configured for the Index
@@ -134,7 +131,7 @@ public class FiledMapperProcessor implements EntityProcessor{
             if(mappings != null){
                 try {
                     InputStream in = new FileInputStream(mappings);
-                    this.mapper = createMapperFormStream(in);
+                    this.mapper = createMapperFormStream(in,nsPrefixService);
                     IOUtils.closeQuietly(in);
                 } catch (IOException e) {
                     throw new IllegalArgumentException("Unable to access FieldMapping file "+
@@ -157,7 +154,7 @@ public class FiledMapperProcessor implements EntityProcessor{
      * @param in the stream to read the mappings from
      * @throws IOException on any error while reading the data from the stream
      */
-    private static FieldMapper createMapperFormStream(final InputStream in) throws IOException {
+    private static FieldMapper createMapperFormStream(final InputStream in, NamespacePrefixService nps) throws IOException {
         return FieldMappingUtils.createDefaultFieldMapper(new Iterator<String>() {
             LineIterator it = IOUtils.lineIterator(in, "UTF-8");
             @Override
@@ -172,7 +169,7 @@ public class FiledMapperProcessor implements EntityProcessor{
             public void remove() {
                 it.remove();
             }
-        });
+        },nps);
     }
 
 }

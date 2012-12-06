@@ -31,7 +31,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
@@ -106,6 +108,9 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
      */
     @Reference // 1..1, static
     private SiteManager siteManager;
+    
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+    private NamespacePrefixService nsPrefixService;
 
     private static final String DEFAULT_MANAGED_ENTITY_PREFIX = "entity";
     private static final String DEFAULT_MAPPING_PREFIX = "mapping";
@@ -171,7 +176,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         log.info(" ... init FieldMappings");
         fieldMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
         for(String mappingString : config.getFieldMappingConfig()){
-            FieldMapping mapping = FieldMappingUtils.parseFieldMapping(mappingString);
+            FieldMapping mapping = FieldMappingUtils.parseFieldMapping(mappingString,nsPrefixService);
             if(mapping != null){
                 log.info("   + mapping: "+mapping);
                 fieldMapper.addMapping(mapping);

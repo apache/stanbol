@@ -136,6 +136,13 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- namespace prefixes mappings are used in the unit tests-->
+    <dependency> <!-- provides the default Stanbol mappings -->
+     <groupId>org.apache.stanbol</groupId>
+     <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>    
 
   </dependencies>
 

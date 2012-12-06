@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
@@ -65,10 +66,15 @@ public final class YardSite implements ManagedSite {
     private SiteConfiguration config;
     private Map<String,Object> siteMetadata;
     private FieldMapper fieldMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
+    /**
+     * used to support '{prefix}:{loacalname}' configurations in the {@link SiteConfiguration}
+     */
+    private NamespacePrefixService nsPrefixService;
     
-    public YardSite(Yard yard, SiteConfiguration config) {
+    public YardSite(Yard yard, SiteConfiguration config, NamespacePrefixService nsPrefixService) {
         this.yard = yard;
         this.config = config;
+        this.nsPrefixService = nsPrefixService;
         this.siteMetadata = extractSiteMetadata(config,InMemoryValueFactory.getInstance());
         //all entities of managed sites are locally cached - so we can add this
         //to the site metadata
@@ -77,7 +83,7 @@ public final class YardSite implements ManagedSite {
         if(config.getFieldMappings() != null){
             log.debug(" > Initialise configured field mappings");
             for(String configuredMapping : config.getFieldMappings()){
-                FieldMapping mapping = FieldMappingUtils.parseFieldMapping(configuredMapping);
+                FieldMapping mapping = FieldMappingUtils.parseFieldMapping(configuredMapping,nsPrefixService);
                 if(mapping != null){
                     log.debug("   - add FieldMapping {}",mapping);
                     fieldMapper.addMapping(mapping);

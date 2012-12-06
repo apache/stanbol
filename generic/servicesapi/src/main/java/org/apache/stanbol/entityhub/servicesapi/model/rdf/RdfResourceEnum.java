@@ -17,11 +17,6 @@
 package org.apache.stanbol.entityhub.servicesapi.model.rdf;
 
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
-import org.apache.stanbol.entityhub.servicesapi.defaults.SpecialFieldEnum;
-import org.apache.stanbol.entityhub.servicesapi.model.Entity;
-import org.apache.stanbol.entityhub.servicesapi.model.Reference;
-import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
-import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
 public enum RdfResourceEnum {
     /**

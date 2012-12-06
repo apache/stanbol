@@ -17,7 +17,8 @@
 package org.apache.stanbol.entityhub.jersey.grefine;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,36 +76,43 @@ public class ReconcileProperty {
      * @return the {@link ReconcileProperty} or <code>null</code> if the parsed
      * String is illegal formatted.
      */
-    public static ReconcileProperty parseProperty(String propertyString){
+    public static ReconcileProperty parseProperty(String propertyString, NamespacePrefixService nxPrefixService){
         propertyString = StringUtils.trimToNull(propertyString);
         if(propertyString != null){
             propertyString = StringUtils.trimToNull(propertyString);
             if(propertyString == null){
                 log.warn("Unable to parse Reconcile Property: The parsed propertyString MUST contain some none trimable chars!");
+                return null;
             }
-            boolean special = propertyString.charAt(0) == SPECIAL_PROPERTY_PREFIX;
+            String propertyUri = nxPrefixService.getFullName(propertyString);
+            if(propertyUri == null){
+                log.warn("The property '{}' uses the unknown prefix '{}' -> ignored",
+                    propertyString,NamespaceMappingUtils.getPrefix(propertyString));
+                return null;
+            }
+            boolean special = propertyUri.charAt(0) == SPECIAL_PROPERTY_PREFIX;
             if(!special){
-                return new ReconcileProperty(special, NamespaceEnum.getFullName(propertyString), null);
+                return new ReconcileProperty(special, propertyUri, null);
             } // else parse special property name and parameter
-            if(propertyString.length() < 1){
+            if(propertyUri.length() < 1){
                 log.warn("Unable to parse Reconcile Property: The parsed propertyString MUST NOT " +
                         "contain only the special property prefix '{}'!",
                         SPECIAL_PROPERTY_PREFIX);
                 return null;
             }
-            int valueSeparatorIndex = propertyString.indexOf(SPECAIL_PROPERTY_VALUE_SEPARATOR);
+            int valueSeparatorIndex = propertyUri.indexOf(SPECAIL_PROPERTY_VALUE_SEPARATOR);
             String name = StringUtils.trimToNull(
-                propertyString.substring(1, valueSeparatorIndex > 0 ? 
-                        valueSeparatorIndex : propertyString.length()));
+                propertyUri.substring(1, valueSeparatorIndex > 0 ? 
+                        valueSeparatorIndex : propertyUri.length()));
             if(name == null) {
                 log.warn("Unable to parse Reconcile Property: The parsed special " +
-                		"property '{}' has an empty property name!",propertyString);
+                		"property '{}' has an empty property name!",propertyUri);
                 return null;
             }
             return new ReconcileProperty(special, name, 
                 //parse the parameter from the parsed value
-                valueSeparatorIndex > 0 && valueSeparatorIndex < propertyString.length() ?
-                        StringUtils.trimToNull(propertyString.substring(valueSeparatorIndex+1)):null);
+                valueSeparatorIndex > 0 && valueSeparatorIndex < propertyUri.length() ?
+                        StringUtils.trimToNull(propertyUri.substring(valueSeparatorIndex+1)):null);
         } else {
             log.warn("Unable to parse Reconcile Property from NULL or an empty String!");
             return null;

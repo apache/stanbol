@@ -57,46 +57,29 @@ public enum NamespaceEnum {
 
     //First the XML Namespaces
     /**
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
-    */
+     * The XSD namespace as used by the datatypes of XML and RDF literals 
+     */
     xsd("http://www.w3.org/2001/XMLSchema#"),
     /**
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
-    */
+     * The XSI namespace
+     */
     xsi("http://www.w3.org/2001/XMLSchema-instance#"),
     /**
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
-    */
+     * The XML namespace as used by the language attribute of XML and the language
+     * for RDF literals
+     */
     xml("http://www.w3.org/XML/1998/namespace#"),
     //Start with the semantic Web Namespaces
     /**
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    * The RDF namespace (rdf:type)
     */
     rdf("http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
     /**
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    * The RDFS namespace (rdfs:label, rdfs:comment, rdfs:seeAlso)
     */
     rdfs("http://www.w3.org/2000/01/rdf-schema#"),
     /**
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    * The OWL namespace (owl:sameAs)
     */
     owl("http://www.w3.org/2002/07/owl#"),
     //CMIS related
@@ -180,17 +163,13 @@ public enum NamespaceEnum {
     */
     dcElements("dc-elements","http://purl.org/dc/elements/1.1/"),
     /**
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    * The DC terms ontology as used by the Entityhub to manage metadata such as
+    * creator, creation/modification dates as well as linking to the license
     */
     dcTerms("dc","http://purl.org/dc/terms/"), // Entityhub prefers DC-Terms, therefore use the "dc" prefix for the terms name space
     /**
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    * FOAF ontology used as type for the resource providing metadata about an
+    * Entity (foaf:Document)
     */
     foaf("http://xmlns.com/foaf/0.1/"),
     /**
@@ -208,10 +187,7 @@ public enum NamespaceEnum {
     */
     vCard("http://www.w3.org/2001/vcard-rdf/3.0#"),
     /**
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    * The SKOS namespace (skos:Concept)
     */
     skos("http://www.w3.org/2004/02/skos/core#"),
     /**
@@ -258,10 +234,7 @@ public enum NamespaceEnum {
     swrc("http://swrc.ontoware.org/ontology#"), //The Semantic Web for Research Communities Ontology
     //Linked Data Ontologies
     /**
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    * THe DBpedia.org ontology (dbp-ont:Person, dbp-ont:Organisation, dbp-ont:Place, ...)
     */
     dbpediaOnt("dbp-ont","http://dbpedia.org/ontology/"),
     /**
@@ -280,10 +253,7 @@ public enum NamespaceEnum {
     geonames("http://www.geonames.org/ontology#"),
     //copyright and license
     /**
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    * Creative Commons as used by the Entityhub for license and attribution information
     */
     cc("http://creativecommons.org/ns#"),
     //Schema.org (see http://schema.org/docs/schemaorg.owl for the Ontology)

@@ -16,7 +16,9 @@
  */
 package org.apache.stanbol.entityhub.jersey.resource.reconcile;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
@@ -31,8 +33,8 @@ public class SiteManagerReconcileResource extends BaseGoogleRefineReconcileResou
 
     SiteManager _siteManager;
     
-    public SiteManagerReconcileResource() {
-        super();
+    public SiteManagerReconcileResource(@Context ServletContext context) {
+        super(context);
     }
 
     private SiteManager getSiteManager(){
