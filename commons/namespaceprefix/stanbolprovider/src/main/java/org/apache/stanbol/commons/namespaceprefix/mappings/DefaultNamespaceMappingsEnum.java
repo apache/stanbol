@@ -108,6 +108,14 @@ public enum DefaultNamespaceMappingsEnum{
     nie("http://www.semanticdesktop.org/ontologies/2007/01/19/nie#"),
     //Linked Data Ontologies
     dbpediaOnt("dbp-ont","http://dbpedia.org/ontology/"),
+    /**
+     * The "dbpedia-owl" prefix was used by a single mapping of the dbpedia
+     * indexing tool. This was actually not intended, but as the new service does
+     * validate prefixes this now causes errors. So this prefix was added to the
+     * list. However it is not recommended to be used - hence deprecated
+     * @deprecated
+     */
+    dbpediaOnt2("dbpedia-owl","http://dbpedia.org/ontology/"),
     dbpediaProp("dbp-prop","http://dbpedia.org/property/"),
     geonames("http://www.geonames.org/ontology#"),
     //copyright and license
