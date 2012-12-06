@@ -61,7 +61,7 @@
     <!-- module>namespaceprefix/bundleprovider</module -->
     <!-- module>namespaceprefix/datafileprovider</module -->
     <module>namespaceprefix/stanbolprovider</module>
-    <!-- module>namespaceprefix/prefixccprovider</module -->
+    <module>namespaceprefix/prefixccprovider</module>
 
     <!-- Apache Solr integration--> 
     <module>solr/core</module>

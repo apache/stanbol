@@ -78,7 +78,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @Component(immediate = true)
-@Services(value = {@Service(value = InstallTaskFactory.class), @Service(value = ResourceTransformer.class)})
+@Service(value = {InstallTaskFactory.class, ResourceTransformer.class})
 @Property(name = Constants.SERVICE_RANKING, intValue = 100)
 // we need to be in front of the Sling Components
 public class SolrIndexInstaller implements InstallTaskFactory, ResourceTransformer {
