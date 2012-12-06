@@ -67,13 +67,23 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
     private SortedMap<String,List<String>> namespaceMap = new TreeMap<String,List<String>>();
     
     /**
-     * OSGI constructor
+     * OSGI constructor <b> DO NOT USE</b> outside of an OSGI environment as this
+     * will not initialise the {@link NamespacePrefixProvider} using the
+     * {@link ServiceLoader} utility!
      */
     public StanbolNamespacePrefixService(){}
     
+    /**
+     * Constructs an Stanbol NamespacePrefixService and initialises other
+     * {@link NamespacePrefixProvider} implementations using the
+     * Java {@link ServiceLoader} utility.
+     * @param mappingFile the mapping file used to manage local mappings. If
+     * <code>null</code> no local mappings are supported.
+     * @throws IOException
+     */
     public StanbolNamespacePrefixService(File mappingFile) throws IOException {
         this.mappingsFile = mappingFile;
-        if(mappingsFile.isFile()){
+        if(mappingsFile != null && mappingsFile.isFile()){
             readPrefixMappings(new FileInputStream(mappingsFile));
         } //else no mappings yet ... nothing todo
         loader = ServiceLoader.load(NamespacePrefixProvider.class);
@@ -185,7 +195,9 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
                         if(!mappingsFile.isFile()){
                             mappingsFile.createNewFile();
                         }
-                        writePrefixMappings(new FileOutputStream(mappingsFile, false));
+                        if(mappingsFile != null){
+                            writePrefixMappings(new FileOutputStream(mappingsFile, false));
+                        } //else do not persist mappings
                     }
                     //(2) update the inverse mappings (ensure read only lists!)
                     List<String> prefixes = namespaceMap.get(namespace);

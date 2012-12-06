@@ -3,6 +3,10 @@ package org.apache.stanbol.commons.namespaceprefix;
 
 import java.util.regex.Pattern;
 
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.osgi.service.cm.ConfigurationException;
+
 public class NamespaceMappingUtils {
     /**
      * This pattern checks for invalid chars within an prefix.
@@ -101,4 +105,78 @@ public class NamespaceMappingUtils {
                     namespace.charAt(namespace.length()-1) == '/') && 
                     namespace.indexOf(":/") > 0;
     }
+    
+    
+    /**
+     * Utility intended to be used during activate of OSGI components that support
+     * the use of '{prefix}:{localname}' in its configurations. The
+     * {@link NamespacePrefixService} is assumed as optional so that users can
+     * use <code>ReferenceCardinality.OPTIONAL_UNARY</code> to inject the service.
+     * <p>
+     * Here is an example
+     * <code><pre>
+     *     @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+     *     protected NamespacePrefixService nps;
+     * </pre></code>
+     * @param nps the {@link NamespacePrefixService} or <code>null</code> if not
+     * available
+     * @param property the configuration property (used for creating {@link ConfigurationException}s)
+     * @param value configured value. Might be both a '{prefix}:{localname}' or the full URI.
+     * @return the full URI
+     * @throws ConfigurationException if the conversion was not possible because
+     * the {@link #nsPrefixService} is <code>null</code> or the prefix is 
+     * unknown to the service
+     */
+    public static String getConfiguredUri(NamespacePrefixService nps, String property, String value) throws ConfigurationException{
+        if(nps != null){
+            String fieldUri = nps.getFullName(value);
+            if(fieldUri == null){
+                throw new ConfigurationException(property, "The prefix '"
+                        + NamespaceMappingUtils.getPrefix(value)+"' is unknown (not mapped to an "
+                        + "namespace) by the Stanbol Namespace Prefix Mapping Service. Please "
+                        + "change the configuration to use the full URI instead of '"+value+"'!");
+            }
+            return fieldUri;
+        } else if(NamespaceMappingUtils.getPrefix(value) != null){
+            throw new ConfigurationException(property, "'{prefix}:{localname}' configurations "
+                + "such as '"+value+"' are only supported if the NamespacePrefixService is "
+                + "available for the Stanbol instance (what is currently not the case). Please "
+                + "change the configuration to use the full URI");
+        } else { //no service but a full uri
+            return value;
+        }
+    }
+    
+    /**
+     * Utility intended to be used to by components that do allow the use of
+     * '{prefix}:{localname}' in its configurations. The {@link NamespacePrefixService}
+     * is considered optional.  
+     * @param nps the {@link NamespacePrefixService} or <code>null</code> if not
+     * available
+     * @param value configured value. Might be both a '{prefix}:{localname}' or the full URI.
+     * @return the full URI
+     * @throws IllegalArgumentException if the conversion was not possible because
+     * the {@link #nsPrefixService} is <code>null</code> or the prefix is 
+     * unknown to the service
+     */
+    public static String getConfiguredUri(NamespacePrefixService nps, String value) throws IllegalArgumentException {
+        if(nps != null){
+            String fieldUri = nps.getFullName(value);
+            if(fieldUri == null){
+                throw new IllegalArgumentException("The prefix '"
+                        + NamespaceMappingUtils.getPrefix(value)+"' is unknown (not mapped to an "
+                        + "namespace) by the Stanbol Namespace Prefix Mapping Service. Please "
+                        + "change the configuration to use the full URI instead of '"+value+"'!");
+            }
+            return fieldUri;
+        } else if(NamespaceMappingUtils.getPrefix(value) != null){
+            throw new IllegalArgumentException("'{prefix}:{localname}' configurations "
+                + "such as '"+value+"' are only supported if the NamespacePrefixService is "
+                + "available for the Stanbol instance (what is currently not the case). Please "
+                + "change the configuration to use the full URI");
+        } else { //no service but a full uri
+            return value;
+        }
+    }
+    
 }
