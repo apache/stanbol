@@ -130,7 +130,7 @@
     	<groupId>org.apache.stanbol</groupId>
   		<artifactId>org.apache.stanbol.commons.viewable</artifactId>
     </dependency>
-<dependency>
+    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>
