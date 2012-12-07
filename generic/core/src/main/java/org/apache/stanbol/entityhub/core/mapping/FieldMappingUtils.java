@@ -157,7 +157,12 @@ public final class FieldMappingUtils {
         List<String> mappedTo = Collections.emptyList();
         String fieldPattern;
         if(!parts[0].isEmpty() && !parts[0].equals("*")){
-            fieldPattern = NamespaceMappingUtils.getConfiguredUri(nps,parts[0]);
+            try {
+                fieldPattern = NamespaceMappingUtils.getConfiguredUri(nps,parts[0]);
+            } catch (IllegalArgumentException e) {
+                log.warn("Unable to parse fieldMapping because of unknown namespace prefix",e);
+                return null;
+            }
         } else {
             fieldPattern = parts[0];
         }
@@ -197,7 +202,7 @@ public final class FieldMappingUtils {
             if(mappingString != null && 
                     !mappingString.isEmpty() && //not an empty line
                     !(mappingString.charAt(0) == FieldMapping.COMMENT_CHAR)){ //not an comment
-                FieldMapping fieldMapping = FieldMappingUtils.parseFieldMapping(mappingString.toString(),nps);
+                FieldMapping fieldMapping = parseFieldMapping(mappingString.toString(),nps);
                 if(fieldMapping != null){
                     fieldMappings.add(fieldMapping);
                 } else {
@@ -245,7 +250,11 @@ public final class FieldMappingUtils {
         ArrayList<String> mappings = new ArrayList<String>(parts.length-start);
         for(int i=start;i<parts.length;i++){
             if(!parts[i].isEmpty()){ //needed to remove two spaces in a row
-                mappings.add(NamespaceMappingUtils.getConfiguredUri(nps, parts[i]));
+                try {
+                    mappings.add(NamespaceMappingUtils.getConfiguredUri(nps, parts[i]));
+                } catch (IllegalArgumentException e) {
+                    log.warn("Unable to parse mapping because of unkown namespace prefix in "+parts[i],e);
+                }
             }
         }
         return mappings;
