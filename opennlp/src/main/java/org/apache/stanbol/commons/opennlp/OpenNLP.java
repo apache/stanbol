@@ -197,10 +197,10 @@ public class OpenNLP {
             }
         }
         if(tokenizer == null){
-            log.debug("Use Simple Tolenizer for language {}",language);
+            log.debug("Use Simple Tokenizer for language {}",language);
             tokenizer = SimpleTokenizer.INSTANCE;
         } else {
-            log.debug("Use ME Tolenizer for language {}",language);
+            log.debug("Use ME Tokenizer for language {}",language);
         }
         return tokenizer;
     }
