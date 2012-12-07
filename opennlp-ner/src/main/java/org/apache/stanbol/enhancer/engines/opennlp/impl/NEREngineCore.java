@@ -458,7 +458,7 @@ public abstract class NEREngineCore
         List<Section> sentences = new ArrayList<Section>();
         //Holds the tokens of the previouse (pos 0) current (pos 1) and next (pos 2) sentence
         AnalysedTextUtils.appandToList(at.getSentences(), sentences);
-        if(!sentences.isEmpty()){ //no sentence annotations
+        if(sentences.isEmpty()){ //no sentence annotations
             sentences.add(at); //process as a single section
         }
         for (int i=0;i<sentences.size();i++) {
