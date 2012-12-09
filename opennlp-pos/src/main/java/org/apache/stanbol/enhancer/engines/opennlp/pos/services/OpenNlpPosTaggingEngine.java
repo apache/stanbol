@@ -61,6 +61,7 @@ import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
+import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
 import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
@@ -134,7 +135,16 @@ public class OpenNlpPosTaggingEngine extends AbstractEnhancementEngine<RuntimeEx
     
     @Reference
     private AnalysedTextFactory analysedTextFactory;
-    
+
+    /**
+     * Holds as key the languages and as values the ad-hoc (unmapped) phrase tags
+     * for that languages.<p>
+     * NOTE: Not synchronised as concurrent execution caused multiple adds will
+     * only create some additional {@link PhraseTag} instances and not actual
+     * problems.
+     */
+    private Map<String,Map<String,PosTag>> languageAdhocTags = new HashMap<String,Map<String,PosTag>>();
+     
     /**
      * Indicate if this engine can enhance supplied ContentItem, and if it
      * suggests enhancing it synchronously or asynchronously. The
@@ -214,7 +224,11 @@ public class OpenNlpPosTaggingEngine extends AbstractEnhancementEngine<RuntimeEx
         }
         //holds PosTags created for POS tags that where not part of the posModel
         //(will hold all PosTags in case tagSet is NULL
-        Map<String,PosTag> adhocTags = new HashMap<String,PosTag>();
+        Map<String,PosTag> adhocTags = languageAdhocTags.get(language);
+        if(adhocTags == null){
+                adhocTags =  new HashMap<String,PosTag>();
+                languageAdhocTags.put(language, adhocTags);
+        }
         //(1) Sentence detection
         
         //Try to read existing Sentence Annotations
@@ -254,8 +268,7 @@ public class OpenNlpPosTaggingEngine extends AbstractEnhancementEngine<RuntimeEx
             }
             
             //(3) POS Tagging
-            
-            posTag(tokenList, posTagger,tagSet,adhocTags);
+            posTag(tokenList, posTagger,tagSet,adhocTags,language);
             
         }
         if(log.isTraceEnabled()){
@@ -286,11 +299,13 @@ public class OpenNlpPosTaggingEngine extends AbstractEnhancementEngine<RuntimeEx
      * @param posTagger
      * @param posModel
      * @param adhocTags
+     * @param language
      */
     private void posTag(List<Token> tokenList,
                         POSTagger posTagger,
                         TagSet<PosTag> posModel,
-                        Map<String,PosTag> adhocTags) {
+                        Map<String,PosTag> adhocTags, 
+                        String language) {
         String[] tokenTexts = new String[tokenList.size()];
         for(int i=0;i<tokenList.size(); i++){
             tokenTexts[i] = tokenList.get(i).getSpan();
@@ -313,7 +328,7 @@ public class OpenNlpPosTaggingEngine extends AbstractEnhancementEngine<RuntimeEx
                 String p = posSequences[j].getOutcomes().get(i);
                 done = j > 0 && p.equals(actPos[0].getTag());
                 if(!done){
-                    actPos[j] = getPosTag(posModel,adhocTags,p);
+                    actPos[j] = getPosTag(posModel,adhocTags,p,language);
                     actProp[j] = posSequences[j].getProbs()[i];
                     j++;
                 }
@@ -324,7 +339,7 @@ public class OpenNlpPosTaggingEngine extends AbstractEnhancementEngine<RuntimeEx
 
     }
 
-    private PosTag getPosTag(TagSet<PosTag> model, Map<String,PosTag> adhocTags, String tag) {
+    private PosTag getPosTag(TagSet<PosTag> model, Map<String,PosTag> adhocTags, String tag, String language) {
         PosTag posTag = model.getTag(tag);
         if(posTag != null){
             return posTag;
@@ -335,7 +350,7 @@ public class OpenNlpPosTaggingEngine extends AbstractEnhancementEngine<RuntimeEx
         }
         posTag = new PosTag(tag);
         adhocTags.put(tag, posTag);
-        log.warn("Encountered unknown POS tag '{}' for langauge '{}'",tag,model.getLanguages());
+        log.info("Encountered umapped POS tag '{}' for langauge '{}'",tag,language);
         return posTag;
     }
 
