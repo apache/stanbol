@@ -29,7 +29,7 @@ import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Chunk;
  * Enumeration with pre-configured sets of POS tags for finding nouns, verbs ...
  * in different languages
  * @author Rupert Westenthaler
- *
+ * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
  */
 public enum PosTagsCollectionEnum {
 
