@@ -19,7 +19,7 @@ package org.apache.stanbol.commons.opennlp;
 /**
  * The type of the POS types represented by a {@link PosTagsCollectionEnum#getTags()}
  * @author Rupert Westenthaler
- *
+ * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
  */
 public enum PosTypeCollectionType {
     
