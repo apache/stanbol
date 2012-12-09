@@ -20,10 +20,12 @@ import static org.apache.stanbol.enhancer.jobmanager.event.Constants.TOPIC_JOB_M
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Semaphore;
+import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -41,6 +43,8 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution;
+import org.apache.stanbol.enhancer.servicesapi.helper.execution.ExecutionMetadata;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -64,7 +68,10 @@ public class EventJobManagerImpl implements EnhancementJobManager {
 
     public static final String MAX_ENHANCEMENT_JOB_WAIT_TIME = "stanbol.maxEnhancementJobWaitTime";
 
-    public static final int DEFAULT_MAX_ENHANCEMENT_JOB_WAIT_TIME = 10 * 1000;
+    /**
+     * default max wait time is 60sec (similar to the http timeout)
+     */
+    public static final int DEFAULT_MAX_ENHANCEMENT_JOB_WAIT_TIME = 60 * 1000;
     
     @Reference
     protected ChainManager chainManager;
@@ -141,14 +148,22 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         //start the execution
         //wait for the results
         EnhancementJobObserver observer = jobHandler.register(job);
-        //TODO: allow configuring a max completion time (e.g. 1min)
-        while(!observer.hasCompleted() & jobHandler != null){
-            observer.waitForCompletion(maxEnhancementJobWaitTime);
+        //now wait for the execution to finish for the configured maximum time
+        boolean completed = observer.waitForCompletion(maxEnhancementJobWaitTime);
+        if(!completed){ //throw timeout exception
+            StringBuilder sb = new StringBuilder("Status:\n");
+            ExecutionMetadata em = ExecutionMetadata.parseFrom(job.getExecutionMetadata(), ci.getUri());
+            for(Entry<String,Execution> ex : em.getEngineExecutions().entrySet()){
+                sb.append("  -").append(ex.getKey()).append(": ").append(ex.getValue().getStatus()).append('\n');
+            }
+            throw new ChainException("Execution timeout after {}sec "+sb.toString()
+                    +" \n To change the timeout change value of property '"+
+                    MAX_ENHANCEMENT_JOB_WAIT_TIME+"' for the service "+getClass());
         }
-        log.info("{} EnhancementJob for ContentItem {} after {}ms",
-            new Object[]{ job.isFailed() ? "Failed" : "Finished",
-                    job.getContentItem().getUri(),
-                    System.currentTimeMillis()-start});
+        log.info("Execution of Chain {} {} after {}ms for ContentItem {}",
+            new Object[]{ chain.getName(), job.isFailed() ? "failed" : "finished",
+                    System.currentTimeMillis()-start,
+                    job.getContentItem().getUri()});
         //NOTE: ExecutionMetadata are not added to the metadata of the ContentItem
         //      by the EnhancementJobManager.
         //      However one could add this as an optional feature to the
@@ -163,6 +178,12 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         	}
         }
         if(!job.isFinished()){
+            log.warn("Execution finished, but Job is not finished!");
+            EnhancementJobHandler.logJobInfo(log, job, null, true);
+            log.warn("ExecutionMetadata: ");
+            for(Iterator<Triple> it = job.getExecutionMetadata().iterator();
+                    it.hasNext();
+                    log.warn(it.next().toString()));
             throw new ChainException("EnhancementJobManager was deactivated while" +
             		" enhancing the passed ContentItem "+job.getContentItem()+
             		" (EnhancementJobManager type: "+getClass()+")");

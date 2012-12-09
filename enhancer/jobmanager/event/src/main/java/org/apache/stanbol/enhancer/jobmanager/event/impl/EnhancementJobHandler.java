@@ -44,8 +44,6 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ibm.icu.lang.UCharacter.SentenceBreak;
-
 public class EnhancementJobHandler implements EventHandler {
 
     private EnhancementEngineManager engineManager;
@@ -144,10 +142,14 @@ public class EnhancementJobHandler implements EventHandler {
             observer = processingJobs.get(enhancementJob);
             if(observer == null){
                 observer = new EnhancementJobObserver(enhancementJob);
-                logJobInfo(log, enhancementJob, "Add EnhancementJob:",false);
+                if(log.isDebugEnabled()){
+                    logJobInfo(log, enhancementJob, "Add EnhancementJob:",log.isTraceEnabled());
+                }
                 processingJobs.put(enhancementJob, observer);
                 init = true;
             } else {
+                log.warn("Request to register an EnhancementJob for an ContentItem {} that is" +
+                		"already registered "+enhancementJob.getContentItem().getUri());
                 init = false;
             }
         } finally {
@@ -156,13 +158,19 @@ public class EnhancementJobHandler implements EventHandler {
         if(init){
             observer.acquire();
             enhancementJob.startProcessing();
-            log.debug("++ w: {}","init execution");
+            log.trace("++ w: {}","init execution");
             enhancementJob.getLock().writeLock().lock();
             try {
-                log.debug(">> w: {}","init execution");
-                executeNextNodes(enhancementJob);
+                log.trace(">> w: {}","init execution");
+                if(!executeNextNodes(enhancementJob)){
+                    String message = "Unable to start Execution of "+enhancementJob.getContentItem().getUri();
+                    log.warn(message);
+                    logJobInfo(log, enhancementJob, null, true);
+                    log.warn("finishing job ...");
+                    finish(enhancementJob);
+                }
             } finally {
-                log.debug("<< w: {}","init execution");
+                log.trace("<< w: {}","init execution");
                 enhancementJob.getLock().writeLock().unlock();
             }
         }
@@ -188,9 +196,9 @@ public class EnhancementJobHandler implements EventHandler {
            log.error(message,t);
         }
         //(2) trigger the next actions
-        log.debug("++ w: {}","check for next Executions");
+        log.trace("++ w: {}","check for next Executions");
         job.getLock().writeLock().lock();
-        log.debug(">> w: {}","check for next Executions");
+        log.trace(">> w: {}","check for next Executions");
         try {
             if(job.isFinished()){
                 finish(job);
@@ -213,7 +221,7 @@ public class EnhancementJobHandler implements EventHandler {
                 }
             }
         } finally {
-            log.debug("<< w: {}","check for next Executions");
+            log.trace("<< w: {}","check for next Executions");
             job.getLock().writeLock().unlock();
         }
     }
@@ -222,8 +230,8 @@ public class EnhancementJobHandler implements EventHandler {
      * @param execution
      */
     private void processEvent(EnhancementJob job, NonLiteral execution) {
-        NonLiteral executionNode = job.getExecutionNode(execution);
-        String engineName = getEngine(job.getExecutionPlan(), executionNode);
+        String engineName = getEngine(job.getExecutionPlan(), 
+            job.getExecutionNode(execution));
         //(1) execute the parsed ExecutionNode
         EnhancementEngine engine = engineManager.getEngine(engineName);
         if(engine != null){
@@ -241,27 +249,33 @@ public class EnhancementJobHandler implements EventHandler {
             }
             if(engineState == EnhancementEngine.ENHANCE_SYNCHRONOUS){
                 //ensure that this engine exclusively access the content item
-                log.debug("++ w: {}: {}","start sync execution", engine.getName());
+                log.trace("++ w: {}: {}","start sync execution", engine.getName());
                 job.getLock().writeLock().lock();
-                log.debug(">> w: {}: {}","start sync execution", engine.getName());
+                log.trace(">> w: {}: {}","start sync execution", engine.getName());
                 try {
                     engine.computeEnhancements(job.getContentItem());
                     job.setCompleted(execution);
                 } catch (EngineException e){
+                    log.warn(e.getMessage(),e);
+                    job.setFailed(execution, engine, e);
+                } catch (RuntimeException e){
+                    log.warn(e.getMessage(),e);
                     job.setFailed(execution, engine, e);
                 } finally{
-                    log.debug("<< w: {}: {}","finished sync execution", engine.getName());
+                    log.trace("<< w: {}: {}","finished sync execution", engine.getName());
                     job.getLock().writeLock().unlock();
                 }
             } else if(engineState == EnhancementEngine.ENHANCE_ASYNC){
                 try {
-                    log.debug("++ n: start async execution of Engine {}",engine.getName());
+                    log.trace("++ n: start async execution of Engine {}",engine.getName());
                     engine.computeEnhancements(job.getContentItem());
-                    log.debug("++ n: finished async execution of Engine {}",engine.getName());
+                    log.trace("++ n: finished async execution of Engine {}",engine.getName());
                     job.setCompleted(execution);
                 } catch (EngineException e) {
+                    log.warn(e.getMessage(),e);
                     job.setFailed(execution, engine, e);
                 } catch (RuntimeException e) {
+                    log.warn(e.getMessage(),e);
                     job.setFailed(execution, engine, e);
                 }
             } else { //CANNOT_ENHANCE
@@ -291,8 +305,10 @@ public class EnhancementJobHandler implements EventHandler {
         }
         if(observer != null) {
             try {
-                logJobInfo(log, job, "Finished EnhancementJob:",false);
-                log.debug("++ n: finished processing ContentItem {} with Chain {}",
+                if(log.isDebugEnabled()){
+                    logJobInfo(log, job, "Finished EnhancementJob:",log.isTraceEnabled());
+                }
+                log.trace("++ n: finished processing ContentItem {} with Chain {}",
                     job.getContentItem().getUri(),job.getChainName());
             } finally {
                 //release the semaphore to send signal to the EventJobManager waiting
@@ -316,16 +332,16 @@ public class EnhancementJobHandler implements EventHandler {
         //getExecutable returns an snapshot so we do not need to lock
         boolean startedExecution = false;
         for(NonLiteral executable : job.getExecutable()){
-            if(log.isDebugEnabled()){
-                log.debug("PREPARE execution of Engine {}",
+            if(log.isTraceEnabled()){
+                log.trace("PREPARE execution of Engine {}",
                     getEngine(job.getExecutionPlan(), job.getExecutionNode(executable)));
             }
             Dictionary<String,Object> properties = new Hashtable<String,Object>();
             properties.put(PROPERTY_JOB_MANAGER, job);
             properties.put(PROPERTY_EXECUTION, executable);
             job.setRunning(executable);
-            if(log.isDebugEnabled()){
-                log.debug("SHEDULE execution of Engine {}",
+            if(log.isTraceEnabled()){
+                log.trace("SHEDULE execution of Engine {}",
                     getEngine(job.getExecutionPlan(), job.getExecutionNode(executable)));
             }
             eventAdmin.postEvent(new Event(TOPIC_JOB_MANAGER,properties));
@@ -356,6 +372,16 @@ public class EnhancementJobHandler implements EventHandler {
                 log.info("    - {} running",getEngine(job.getExecutionMetadata(), 
                     job.getExecutionNode(runningExec)));
             }
+            for(NonLiteral executeable : job.getExecutable()){
+                log.info("    - {} executeable",getEngine(job.getExecutionMetadata(), 
+                    job.getExecutionNode(executeable)));
+            }
+        }
+        if(job.getErrorMessage() != null){
+            log.info("Error Message: {}",job.getErrorMessage());
+        }
+        if(job.getError() != null){
+            log.info("Reported Exception:",job.getError());
         }
     }
     public class EnhancementJobObserver{
@@ -394,14 +420,16 @@ public class EnhancementJobHandler implements EventHandler {
             }
         }
 
-        public void waitForCompletion(int maxEnhancementJobWaitTime) {
+        public boolean waitForCompletion(int maxEnhancementJobWaitTime) {
+            boolean acquire = false;
             if(semaphore.availablePermits() < 1){
                 // The only permit is taken by the EnhancementJobHander
                 try {
-                    semaphore.tryAcquire(1,
+                    acquire = semaphore.tryAcquire(1,
                         Math.max(MIN_WAIT_TIME, maxEnhancementJobWaitTime),TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     //interupted
+                    acquire = false;
                 }
             } else if(!hasCompleted()){
                 int wait = Math.max(100, maxEnhancementJobWaitTime/10);
@@ -417,9 +445,10 @@ public class EnhancementJobHandler implements EventHandler {
                 } catch (InterruptedException e) {
                     //interupted
                 }
+                acquire = true;
             }// else completed
+            return acquire;
         }
-        
     }
     
     
@@ -457,7 +486,7 @@ public class EnhancementJobHandler implements EventHandler {
                     readLock.unlock();
                 }
                 if(!jobs.isEmpty()){
-                    observerLog.info(" -- {} active Enhancement Jobs",jobs.size());
+                    observerLog.debug(" -- {} active Enhancement Jobs",jobs.size());
                     if(observerLog.isDebugEnabled()){
                         for(EnhancementJob job : jobs){
                             Lock jobLock = job.getLock().readLock();
