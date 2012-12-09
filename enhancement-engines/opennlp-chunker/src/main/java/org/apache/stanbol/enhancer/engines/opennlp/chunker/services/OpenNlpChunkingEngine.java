@@ -29,15 +29,12 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import opennlp.tools.chunker.ChunkerME;
 import opennlp.tools.chunker.ChunkerModel;
-import opennlp.tools.util.Sequence;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -49,11 +46,9 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.enhancer.engines.opennlp.chunker.model.PhraseTagSetRegistry;
-import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.NlpProcessingRole;
 import org.apache.stanbol.enhancer.nlp.NlpServiceProperties;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
-import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
 import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Section;
 import org.apache.stanbol.enhancer.nlp.model.Span;
@@ -64,12 +59,10 @@ import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
-import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
-import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
@@ -120,8 +113,6 @@ public class OpenNlpChunkingEngine extends AbstractEnhancementEngine<RuntimeExce
 
     public static final String MIN_CHUNK_SCORE = "org.apache.stanbol.enhancer.chunker.minScore";
     
-    public static final String[] AVAILABLE_LANGUAGES = new String[] {"en","de"};
-
     private static final String MODEL_PARAM_NAME = "model";
 
     private static Logger log = LoggerFactory.getLogger(OpenNlpChunkingEngine.class);
@@ -139,7 +130,15 @@ public class OpenNlpChunkingEngine extends AbstractEnhancementEngine<RuntimeExce
 
     private Double minChunkScore;
 
-
+    /**
+     * Holds as key the languages and as values the ad-hoc (unmapped) phrase tags
+     * for that languages.<p>
+     * NOTE: Not synchronised as concurrent execution caused multiple adds will
+     * only create some additional {@link PhraseTag} instances and not actual
+     * problems.
+     */
+    private Map<String,Map<String,PhraseTag>> languageAdhocTags = new HashMap<String,Map<String,PhraseTag>>();
+    
     /**
      * Indicate if this engine can enhance supplied ContentItem, and if it
      * suggests enhancing it synchronously or asynchronously. The
@@ -206,8 +205,11 @@ public class OpenNlpChunkingEngine extends AbstractEnhancementEngine<RuntimeExce
         }
         //holds PosTags created for POS tags that where not part of the posModel
         //(will hold all PosTags in case tagSet is NULL
-        Map<String,PhraseTag> adhocTags = new HashMap<String,PhraseTag>();
-        
+        Map<String,PhraseTag> adhocTags = languageAdhocTags.get(language);
+        if(adhocTags == null){
+            adhocTags = new HashMap<String,PhraseTag>();
+            languageAdhocTags.put(language, adhocTags);
+        }        
         ci.getLock().writeLock().lock();
         try {
             Iterator<? extends Section> sentences = at.getSentences();
@@ -286,7 +288,7 @@ public class OpenNlpChunkingEngine extends AbstractEnhancementEngine<RuntimeExce
                     }
                     if(start){ //create the new tag
                         tag = getPhraseTag(tagSet,adhocTags,
-                            chunkTags[i].substring(2)); //skip 'B-'
+                            chunkTags[i].substring(2), language); //skip 'B-'
                         
                     }
                     if(tag != null){ //count this token for the current chunk
@@ -335,7 +337,7 @@ public class OpenNlpChunkingEngine extends AbstractEnhancementEngine<RuntimeExce
         }
     }
 
-    private PhraseTag getPhraseTag(TagSet<PhraseTag> model, Map<String,PhraseTag> adhocTags, String tag) {
+    private PhraseTag getPhraseTag(TagSet<PhraseTag> model, Map<String,PhraseTag> adhocTags, String tag, String language) {
         PhraseTag phraseTag = model.getTag(tag);
         if(phraseTag != null){
             return phraseTag;
@@ -346,7 +348,7 @@ public class OpenNlpChunkingEngine extends AbstractEnhancementEngine<RuntimeExce
         }
         phraseTag = new PhraseTag(tag);
         adhocTags.put(tag, phraseTag);
-        log.warn("Encountered unknown POS tag '{}' for langauge '{}'",tag,model.getLanguages());
+        log.info("Encountered unknown POS tag '{}' for langauge '{}'",tag,language);
         return phraseTag;
     }
     
@@ -401,6 +403,7 @@ public class OpenNlpChunkingEngine extends AbstractEnhancementEngine<RuntimeExce
     protected void deactivate(ComponentContext context){
         this.languageConfiguration.setDefault();
         this.minChunkScore = null;
+        this.languageAdhocTags.clear();
         super.deactivate(context);
     }
     

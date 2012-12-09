@@ -229,11 +229,11 @@ public class LanguageDetectionEnhancementEngine
         List<Language> languages = null;
         try {
             languages = languageIdentifier.getLanguages(text);
-            log.info("language identified: {}",languages);
+            log.debug("language identified: {}",languages);
         }
         catch (LangDetectException e) {
-            log.warn("Could not identify language");
-            return;
+            log.warn("Could not identify language", e);
+            throw new EngineException(this, ci, "Could not identify language", e);
         }
         
         // add language to metadata

@@ -27,7 +27,6 @@ public class NEREngineConfig {
     
     static { //the default mappings for the default NER types
         Map<String,UriRef> mappings = new TreeMap<String,UriRef>();
-        mappings.put(OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString(), OntologicalClasses.DBPEDIA_ORGANISATION);
         mappings.put("person", OntologicalClasses.DBPEDIA_PERSON);
         mappings.put("location", OntologicalClasses.DBPEDIA_PLACE);
         mappings.put("organization", OntologicalClasses.DBPEDIA_ORGANISATION);

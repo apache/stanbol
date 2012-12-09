@@ -191,7 +191,7 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
     
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
-        log.info("canEnhancer {}",ci.getUri());
+        log.trace("canEnhancer {}",ci.getUri());
         if(isOfflineMode() && !entitySearcher.supportsOfflineMode()){
             log.warn("{} '{}' is inactive because EntitySearcher does not support Offline mode!",
                 getClass().getSimpleName(),getName());
@@ -212,12 +212,12 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        log.info(" enhance ci {}",ci.getUri());
+        log.trace(" enhance ci {}",ci.getUri());
         if(isOfflineMode() && !entitySearcher.supportsOfflineMode()){
             throw new EngineException(this,ci,"Offline mode is not supported by the used EntitySearcher!",null);
         }
         AnalysedText at = getAnalysedText(this, ci, true);
-        log.info("  > AnalysedText {}",at);
+        log.debug("  > AnalysedText {}",at);
         String language = getLanguage(this, ci, true);
         if(log.isDebugEnabled()){
             log.debug("computeEnhancements for ContentItem {} language {} text={}", 
