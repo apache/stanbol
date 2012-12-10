@@ -96,9 +96,4 @@ public class LdViewableWebFragment implements WebFragment {
 		return links;
 	}
 
-	@Override
-	public BundleContext getBundleContext() {
-		return bundleContext;
-	}
-
 }
