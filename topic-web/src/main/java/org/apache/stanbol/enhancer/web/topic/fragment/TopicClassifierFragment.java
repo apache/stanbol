@@ -87,9 +87,4 @@ public class TopicClassifierFragment implements WebFragment {
         this.bundleContext = ctx.getBundleContext();
     }
 
-    @Override
-    public BundleContext getBundleContext() {
-        return this.bundleContext;
-    }
-
 }
