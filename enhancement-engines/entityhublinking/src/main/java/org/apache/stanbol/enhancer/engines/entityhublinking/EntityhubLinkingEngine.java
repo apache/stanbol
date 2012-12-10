@@ -24,6 +24,7 @@ import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLin
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_MIN_TOKEN_SCORE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_SUGGESTIONS;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES;
+import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES_FIELDS;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.MIN_SEARCH_TOKEN_LENGTH;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.MIN_TOKEN_SCORE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.NAME_FIELD;
@@ -109,6 +110,12 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
     @Property(name=DEFAULT_MATCHING_LANGUAGE,value=""),
     @Property(name=TYPE_MAPPINGS,cardinality=Integer.MAX_VALUE),
     @Property(name=DEREFERENCE_ENTITIES, boolValue=DEFAULT_DEREFERENCE_ENTITIES_STATE),
+    @Property(name=DEREFERENCE_ENTITIES_FIELDS,cardinality=Integer.MAX_VALUE,
+    	value={"http://www.w3.org/2000/01/rdf-schema#comment",
+            "http://www.w3.org/2003/01/geo/wgs84_pos#lat",
+            "http://www.w3.org/2003/01/geo/wgs84_pos#long",
+            "http://xmlns.com/foaf/0.1/depiction",
+            "http://dbpedia.org/ontology/thumbnail"}),
     @Property(name=SERVICE_RANKING,intValue=0)
 })
 public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {
@@ -122,7 +129,7 @@ public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {
      * The id of the Entityhub Site (Referenced or Managed Site) used for matching. <p>
      * To match against the Entityhub use "entityhub" as value.
      */
-    public static final String SITE_ID = "enhancer.engines.linking.entityhub.siteId";
+    public static final String SITE_ID = "enhancer.engines.entityhublinking.siteId";
 
     /**
      * The engine initialised based on the configuration of this component
