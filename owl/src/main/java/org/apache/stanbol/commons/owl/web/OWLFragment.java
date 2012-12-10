@@ -32,8 +32,6 @@ import org.apache.stanbol.commons.web.base.WebFragment;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 /**
  * Implementation of WebFragment for the OWL API.
@@ -48,8 +46,6 @@ public class OWLFragment implements WebFragment {
 
 	private static final String NAME = "owl";
 
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/owl/web/static";
-
     private BundleContext bundleContext;
 	
 	
@@ -63,10 +59,6 @@ public class OWLFragment implements WebFragment {
         this.bundleContext = ctx.getBundleContext();
     }
 
-	@Override
-	public String getStaticResourceClassPath() {
-		return STATIC_RESOURCE_PATH;
-	}
 
 	@Override
 	public Set<Class<?>> getJaxrsResourceClasses() {

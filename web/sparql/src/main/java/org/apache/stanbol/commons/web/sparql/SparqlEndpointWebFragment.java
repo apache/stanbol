@@ -34,8 +34,6 @@ import org.apache.stanbol.commons.web.sparql.resource.SparqlEndpointResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 /**
  * Statically define the list of available resources and providers to be contributed to the the Stanbol JAX-RS
@@ -70,11 +68,6 @@ public class SparqlEndpointWebFragment implements WebFragment {
     @Override
     public Set<Object> getJaxrsResourceSingletons() {
         return Collections.emptySet();
-    }
-
-    @Override
-    public String getStaticResourceClassPath() {
-        return null;
     }
 
     @Override

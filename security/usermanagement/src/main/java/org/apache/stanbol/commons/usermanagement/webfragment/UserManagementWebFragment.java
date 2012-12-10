@@ -34,8 +34,6 @@ import org.apache.stanbol.commons.web.base.WebFragment;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 /**
  * Statsically define the list of available resources and providers to be
@@ -49,8 +47,6 @@ public class UserManagementWebFragment implements WebFragment {
 	private UserResource userManager;
 	
 	private static final String NAME = "user-management";
-
-	private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/commons/usermanagement/webfragment";
 
 	private BundleContext bundleContext;
 
@@ -75,11 +71,6 @@ public class UserManagementWebFragment implements WebFragment {
 		Set<Object> instances = new HashSet<Object>();
 		instances.add(userManager);
 		return instances;
-	}
-
-	@Override
-	public String getStaticResourceClassPath() {
-		return STATIC_RESOURCE_PATH;
 	}
 
 

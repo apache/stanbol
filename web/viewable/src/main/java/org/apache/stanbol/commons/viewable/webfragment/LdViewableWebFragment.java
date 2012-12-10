@@ -35,8 +35,6 @@ import org.apache.stanbol.commons.web.base.WebFragment;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 /**
  * Statically define the list of available resources and providers to be
@@ -78,11 +76,6 @@ public class LdViewableWebFragment implements WebFragment {
 		instances.add(ldViewableWriter);
 		instances.add(viewableWriter);
 		return instances;
-	}
-
-	@Override
-	public String getStaticResourceClassPath() {
-		return "foobar";
 	}
 
 	@Override
