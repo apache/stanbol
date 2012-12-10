@@ -92,9 +92,4 @@ public class UserManagementWebFragment implements WebFragment {
 		return links;
 	}
 
-	@Override
-	public BundleContext getBundleContext() {
-		return bundleContext;
-	}
-
 }
