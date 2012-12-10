@@ -63,10 +63,7 @@ import freemarker.cache.TemplateLoader;
 public class StoreWebFragment implements WebFragment {
     private static final Logger log = LoggerFactory.getLogger(StoreWebFragment.class);
     private static final String NAME = "ontology";
-
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/commons/web/ontologymanager/store/templates";
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/commons/web/ontologymanager/store/static";
-
+    
     private BundleContext bundleContext;
 
     @Override
@@ -119,15 +116,6 @@ public class StoreWebFragment implements WebFragment {
         return singletons;
     }
 
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
-    }
-
-    @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
-    }
 
     @Override
     public List<LinkResource> getLinkResources() {

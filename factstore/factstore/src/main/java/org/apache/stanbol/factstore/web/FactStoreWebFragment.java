@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -48,8 +47,6 @@ import org.osgi.service.component.ComponentContext;
 public class FactStoreWebFragment implements WebFragment {
 
     public static final String NAME = "factstore";
-    
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/factstore/web/static";
 
     private BundleContext bundleContext;
     
@@ -104,10 +101,6 @@ public class FactStoreWebFragment implements WebFragment {
         return scripts;
     }
 
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
-    }
 
 
 }

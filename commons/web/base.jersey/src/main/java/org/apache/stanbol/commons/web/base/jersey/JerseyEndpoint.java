@@ -181,16 +181,6 @@ public class JerseyEndpoint {
             navigationLinks.addAll(fragment.getNavigationLinks());
             app.contributeClasses(fragment.getJaxrsResourceClasses());
             app.contributeSingletons(fragment.getJaxrsResourceSingletons());
-            String staticPath = fragment.getStaticResourceClassPath();
-            if (staticPath != null) {
-                String resourceAlias = (applicationAlias.endsWith("/") ? applicationAlias.substring(0,
-                    applicationAlias.length() - 1) : applicationAlias)
-                                       + staticUrlRoot
-                                       + '/'
-                                       + fragment.getName();
-                httpService.registerResources(resourceAlias, staticPath, new BundleHttpContext(fragment));
-                registeredAliases.add(resourceAlias);
-            }
         }
         Collections.sort(linkResources);
         Collections.sort(scriptResources);

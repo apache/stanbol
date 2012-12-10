@@ -33,9 +33,6 @@ public class CrawlerWebFragment implements WebFragment {
 
 	private static final String NAME = "crawler";
 
-	private static final String TEMPLATE_PATH = "/org/apache/stanbol/demos/crawler/web/templates";
-	private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/demos/crawler/web/static";
-
 	private BundleContext bundleContext;
 
 	@Activate
@@ -48,10 +45,6 @@ public class CrawlerWebFragment implements WebFragment {
 		return NAME;
 	}
 
-	@Override
-	public String getStaticResourceClassPath() {
-		return STATIC_RESOURCE_PATH;
-	}
 
 	@Override
 	public Set<Class<?>> getJaxrsResourceClasses() {
@@ -63,11 +56,6 @@ public class CrawlerWebFragment implements WebFragment {
 	@Override
 	public Set<Object> getJaxrsResourceSingletons() {
 		return Collections.emptySet();
-	}
-
-	@Override
-	public TemplateLoader getTemplateLoader() {
-		return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
 	}
 
 	@Override

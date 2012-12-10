@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -40,8 +39,6 @@ import org.apache.stanbol.rules.web.writers.RuleListWriter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 /**
  * Implementation of WebFragment for the Stanbol Rules end-point.
@@ -55,8 +52,6 @@ import freemarker.cache.TemplateLoader;
 public class RulesFragment implements WebFragment {
 
     private static final String NAME = "rules";
-
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/rules/web/static";
 
     private BundleContext bundleContext;
 
@@ -93,11 +88,6 @@ public class RulesFragment implements WebFragment {
     @Override
     public Set<Object> getJaxrsResourceSingletons() {
         return Collections.emptySet();
-    }
-
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
     }
 
     @Override

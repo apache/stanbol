@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -52,8 +51,6 @@ public class EntityhubWebFragment implements WebFragment {
     
     private static final String NAME = "entityhub";
     
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/entityhub/jersey/static";
-
 //    private static final String TEMPLATE_PATH = "/org/apache/stanbol/entityhub/jersey/templates";
 
     /**
@@ -134,9 +131,6 @@ public class EntityhubWebFragment implements WebFragment {
         return Collections.emptyList();
     }
     
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
-    }
+
     
 }

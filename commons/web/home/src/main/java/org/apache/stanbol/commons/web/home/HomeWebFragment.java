@@ -74,11 +74,6 @@ public class HomeWebFragment implements WebFragment {
     }
 
     @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
-    }
-
-    @Override
     public List<LinkResource> getLinkResources() {
         List<LinkResource> resources = new ArrayList<LinkResource>();
         resources.add(new LinkResource("stylesheet", "style/stanbol.css", this, 0));
