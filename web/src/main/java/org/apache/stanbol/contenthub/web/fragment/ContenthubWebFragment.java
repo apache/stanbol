@@ -114,10 +114,4 @@ public class ContenthubWebFragment implements WebFragment {
 				"/contenthub", "/imports/contenthubDescription.ftl", 20));
 		return links;
 	}
-
-	@Override
-	public BundleContext getBundleContext() {
-		return bundleContext;
-	}
-
 }
