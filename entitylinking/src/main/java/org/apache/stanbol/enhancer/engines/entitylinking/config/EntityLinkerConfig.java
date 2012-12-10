@@ -196,15 +196,6 @@ public class EntityLinkerConfig {
      * Allows to add a list of fields that are included when dereferencing Entities
      */
     public static final String DEREFERENCE_ENTITIES_FIELDS = "enhancer.engines.linking.dereferenceFields";
-    /**
-     * Additional fields added for dereferenced entities
-     */
-    private static final Collection<UriRef> DEFAULT_DEREFERENCED_FIELDS = Arrays.asList(
-        new UriRef("http://www.w3.org/2000/01/rdf-schema#comment"),
-        new UriRef("http://www.w3.org/2003/01/geo/wgs84_pos#lat"),
-        new UriRef("http://www.w3.org/2003/01/geo/wgs84_pos#long"),
-        new UriRef("http://xmlns.com/foaf/0.1/depiction"),
-        new UriRef("http://dbpedia.org/ontology/thumbnail"));
 
     /**
      * The minimum length of Token to be used for searches in case no
@@ -849,8 +840,8 @@ public class EntityLinkerConfig {
                     "Dereference Entities_Fields MUST BE parsed as String[], Collection<String> or "
                     + "String (single value). The actual value '"+value+"'(type: '"+value.getClass() 
                     + "') is NOT supported");
-            } else { //value == null -> add the default fields
-                linkerConfig.getDereferencedFields().addAll(DEFAULT_DEREFERENCED_FIELDS);
+            }else { //value == null 
+            	log.debug("No deference fields for entity configured");
             }
         }
 
