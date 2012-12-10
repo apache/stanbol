@@ -88,11 +88,6 @@ public class HomeWebFragment implements WebFragment {
     }
 
     @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    @Override
     public List<NavigationLink> getNavigationLinks() {
         return Collections.emptyList();
     }

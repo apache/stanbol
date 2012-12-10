@@ -87,9 +87,5 @@ public class SparqlEndpointWebFragment implements WebFragment {
         return links;
     }
 
-    @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
 
 }

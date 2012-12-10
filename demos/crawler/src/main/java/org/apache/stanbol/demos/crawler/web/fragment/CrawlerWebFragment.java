@@ -86,10 +86,4 @@ public class CrawlerWebFragment implements WebFragment {
 	public List<NavigationLink> getNavigationLinks() {
 		return Collections.emptyList();
 	}
-
-	@Override
-	public BundleContext getBundleContext() {
-		return bundleContext;
-	}
-
 }

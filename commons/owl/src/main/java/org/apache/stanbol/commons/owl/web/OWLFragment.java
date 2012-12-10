@@ -90,9 +90,5 @@ public class OWLFragment implements WebFragment {
 		return resources;
 	}
 
-	@Override
-	public BundleContext getBundleContext() {
-		return bundleContext;
-	}
 
 }

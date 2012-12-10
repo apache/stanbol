@@ -77,11 +77,6 @@ public class JobsFragment implements WebFragment{
         return Collections.emptyList();
     }
 
-    @Override
-    public BundleContext getBundleContext() {
-        return this.bundleContext;
-    }
-
     @Activate
     protected void activate(ComponentContext ctx) {
         this.bundleContext = ctx.getBundleContext();

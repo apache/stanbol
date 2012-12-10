@@ -128,9 +128,4 @@ public class EnhancerWebFragment implements WebFragment {
         return links;
     }
 
-    @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
 }

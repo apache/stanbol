@@ -65,11 +65,6 @@ public class ReasonersFragment implements WebFragment {
     private BundleContext bundleContext;
 
     @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         // Reasoner

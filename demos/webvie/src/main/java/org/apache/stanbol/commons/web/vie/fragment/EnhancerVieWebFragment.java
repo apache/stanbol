@@ -110,9 +110,4 @@ public class EnhancerVieWebFragment implements WebFragment {
         return links;
     }
 
-    @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
 }

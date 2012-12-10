@@ -58,11 +58,6 @@ public class ReengineerFragment implements WebFragment{
     
     @Reference
     ReengineerManager reengineeringManager;
-    
-    @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
 
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {

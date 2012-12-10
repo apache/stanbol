@@ -66,11 +66,6 @@ public class EntityhubWebFragment implements WebFragment {
     protected void activate(ComponentContext ctx) {
         this.bundleContext = ctx.getBundleContext();
     }
-
-    @Override
-    public BundleContext getBundleContext() {
-        return this.bundleContext;
-    }
     
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {

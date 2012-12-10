@@ -75,10 +75,4 @@ public interface WebFragment {
      */
     List<NavigationLink> getNavigationLinks();
 
-    /**
-     * @return the bundle context who contributed this fragment (useful for loading the resources from the
-     *         right classloading context)
-     */
-    BundleContext getBundleContext();
-
 }

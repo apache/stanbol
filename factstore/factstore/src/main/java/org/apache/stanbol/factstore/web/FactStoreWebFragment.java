@@ -59,11 +59,6 @@ public class FactStoreWebFragment implements WebFragment {
     }
 
     @Override
-    public BundleContext getBundleContext() {
-        return this.bundleContext;
-    }
-
-    @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(FactStoreRootResource.class);
