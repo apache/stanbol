@@ -428,6 +428,11 @@
   <startLevel level="27">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.resources</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>

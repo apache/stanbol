@@ -49,6 +49,7 @@
     <module>ldtemplaterenderer</module>
     <module>web/sparql</module>
     <module>httpqueryheaders</module> <!-- allows CORS with MS Internet Explorer -->
+    <module>web/resources</module>
 	
     <!-- DataFile Provider -->
     <module>stanboltools/datafileprovider</module>
