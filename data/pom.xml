@@ -59,80 +59,28 @@
   <modules>
     <module>parent</module>
     <module>defaultconfig</module>
+
+    <module>sites/dbpedia</module>
+    <module>sites/dbpediacached</module>
+
+    <module>registries/default</module>
+
+    <module>opennlp/lang/da</module>
+    <module>opennlp/lang/de</module>
+    <module>opennlp/lang/en</module>
+    <module>opennlp/lang/es</module>
+    <module>opennlp/lang/nl</module>
+    <module>opennlp/lang/pt</module>
+    <module>opennlp/lang/sv</module>
+    <module>opennlp/ner/en</module>
+    <module>opennlp/ner/es</module>
+    <module>opennlp/ner/nl</module>
+
+    <module>sentiment/sentiws</module>
+    <module>sentiment/sentiwordnet</module>
   </modules>
 
   <profiles>
-    <profile>
-      <!--
-        Profile that includes all the data modules used as default data
-        within the Stanbol Launchers.
-        
-        This profile is activated by default because this bundles are
-        referenced by other stanbol modules and the launchers.
-      -->
-      <id>defaultdata</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <modules>
-        <module>sites/dbpedia</module>
-        <module>opennlp/lang/en</module>
-        <module>opennlp/ner/en</module>
-        <module>registries/default</module>
-      </modules>
-    </profile>
-    <profile>
-      <!--
-        Profile including data modules that are predefined configurations of 
-        referenced sites that do not use a precomputed local index, but directly 
-        access a remote service for query and retrievel. However they they will
-        use a local cache to store retrieved entities.
-        
-        This profile is activated by default because it does not need to download
-        remote resources
-      -->
-      <id>siteconfigs</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <modules>
-        <module>sites/dbpediacached</module>
-      </modules>
-    </profile>
-    <profile>
-      <!--
-         Profile including all OpenNLP language and NER modules
-       -->
-      <id>opennlp</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <modules>
-        <module>opennlp/lang/da</module>
-        <module>opennlp/lang/de</module>
-        <module>opennlp/lang/en</module>
-        <module>opennlp/lang/es</module>
-        <module>opennlp/lang/nl</module>
-        <module>opennlp/lang/pt</module>
-        <module>opennlp/lang/sv</module>
-        <module>opennlp/ner/en</module>
-        <module>opennlp/ner/es</module>
-        <module>opennlp/ner/nl</module>
-      </modules>
-    </profile>
-    <profile>
-      <!--
-       Profile including all OpenNLP language and NER modules
-       -->
-      <id>sentiment</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <modules>
-        <module>sentiment/sentiws</module>
-        <module>sentiment/sentiwordnet</module>
-      </modules>
-    </profile>
     <profile>
       <id>apache-release</id>
       <activation>
@@ -167,6 +115,9 @@
                 <exclude>DEPENDENCIES</exclude>
                 <exclude>DEPENDENCIES-BY-LICENSE</exclude>
                 <exclude>RAT-REPORT</exclude>
+
+                <!-- exclude downloads -->
+                <exclude>**/downloads/**</exclude>
 
                 <!-- exclude certain file types -->
                 <exclude>**/*.config</exclude>
