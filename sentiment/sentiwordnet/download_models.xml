@@ -15,7 +15,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project name="OpenNLP Model Download Helper" default="download" basedir=".">
+<project name="SentiWordNet Model Download Helper" default="download" basedir=".">
   <description>
     Contains only a singel target that is used by the Maven Ant
     Plugin to download Sentiment Models from the Web
