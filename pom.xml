@@ -75,7 +75,6 @@
     <module>ldpath</module>
     <module>benchmark</module>
     <module>defaults</module>
-    <module>bundlelist</module>
   </modules>
 
   <profiles>
