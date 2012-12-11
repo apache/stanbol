@@ -49,7 +49,6 @@
     <module>search</module>
     <module>web</module>
     <module>ldpath</module>
-    <module>bundlelist</module>
   </modules>
 
   <profiles>
