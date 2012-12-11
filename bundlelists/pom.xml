@@ -69,6 +69,7 @@
     <!-- Components -->
     <module>cmsadapter</module>
     <module>entityhub</module>
+    <module>contenthub</module>
     <module>ontologymanager</module>
     <module>reasoners</module>
     <module>rules</module>
