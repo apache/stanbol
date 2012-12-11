@@ -129,7 +129,7 @@ public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {
      * The id of the Entityhub Site (Referenced or Managed Site) used for matching. <p>
      * To match against the Entityhub use "entityhub" as value.
      */
-    public static final String SITE_ID = "enhancer.engines.entityhublinking.siteId";
+    public static final String SITE_ID = "enhancer.engines.linking.entityhub.siteId";
 
     /**
      * The engine initialised based on the configuration of this component
