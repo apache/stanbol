@@ -53,14 +53,13 @@
   </scm>
   <properties>
     <downloadWarning>
-      *
-      * WARNING - this build downloads the SentimentWortschatz files that are *not*
-      * licensed under the Apache License, and have more restrictive usage
-      * terms than the Apache Stanbol code. See STANBOL-545 for more
-      * information: https://issues.apache.org/jira/browse/STANBOL-545
-      *
+*
+* WARNING - this build downloads the SentimentWortschatz files that are *not*
+* licensed under the Apache License, and have more restrictive usage
+* terms than the Apache Stanbol code. See STANBOL-836 for more
+* information: https://issues.apache.org/jira/browse/STANBOL-836
+*
     </downloadWarning>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- define the path to/home of the OpenNLP modles-->
     <sentiment.model.path>org/apache/stanbol/data/sentiment/sentiws</sentiment.model.path>
     <sentiment.model.home>http://dev.iks-project.eu/downloads/sentiment-data/</sentiment.model.home>
@@ -112,7 +111,7 @@
                 available!
               -->
               <target>
-                <property name="target.directory" value="${project.basedir}/src/main/resources/${sentiment.model.path}"/>
+                <property name="target.directory" value="${project.basedir}/downloads/resources/${sentiment.model.path}"/>
                 <property name="model.url" value="${sentiment.model.home}"/>
                                 
                 <echo message="copy SentiWS (German sentiment) models"/>
@@ -129,16 +128,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <configuration>
-          <excludes><!-- exclude OpenNLP model files -->
-            <exclude>**/LICENSE.*</exclude>
-            <exclude>**/SentiWS*.txt</exclude>
-          </excludes>
-        </configuration>
       </plugin>
     </plugins>
   </build>
