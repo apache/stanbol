@@ -163,6 +163,7 @@ public class LdRenderer {
 		Configuration freemarker= new Configuration();
 		freemarker.setDefaultEncoding("utf-8");
 		freemarker.setOutputEncoding("utf-8");
+		freemarker.setLocalizedLookup(false);
 	    freemarker.setObjectWrapper(new DefaultObjectWrapper());
 		freemarker.setTemplateLoader(templateLoader);
 		try {
