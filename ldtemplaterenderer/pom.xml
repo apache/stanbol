@@ -31,8 +31,8 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Commons LDPath template service</name>
-  <description>A service providing ldpath template redering</description>
+  <name>Apache Stanbol Commons LDPath Template Rendering</name>
+  <description>A service providing ldpath template rendering</description>
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/ldpathtemplate
@@ -68,13 +68,13 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
-		<groupId>org.apache.clerezza</groupId>
-		<artifactId>rdf.ontologies</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.clerezza</groupId>
-		<artifactId>rdf.utils</artifactId>
-	</dependency>
+  		<groupId>org.apache.clerezza</groupId>
+  		<artifactId>rdf.ontologies</artifactId>
+  	</dependency>
+    <dependency>
+    	<groupId>org.apache.clerezza</groupId>
+    	<artifactId>rdf.utils</artifactId>
+    </dependency>
    
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -93,26 +93,14 @@
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
       <artifactId>ldpath-template</artifactId>
-	  <version>0.9.3-SNAPSHOT</version>
-	</dependency>
-	-->
-	<dependency>
+	    <version>0.9.3-SNAPSHOT</version>
+	  </dependency>
+	  -->
+	  <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.ldpath.clerezza</artifactId>
       <version>0.9.0-incubating</version>
     </dependency>
 
   </dependencies>
-
-<!-- 
-  <repositories>
-  	<repository>
-  		<name>ldpath template suff</name>
-  		<id>newmedialab</id>
-  		<snapshots></snapshots>
-  		<url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/snapshots/</url>
-  	</repository>
-  </repositories>
-   -->
-
 </project>
