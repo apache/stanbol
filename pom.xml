@@ -23,6 +23,7 @@
     <version>2-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
+
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.reactor</artifactId>
   <version>0.10.0-SNAPSHOT</version>
@@ -46,7 +47,7 @@
     <module>web/base.jersey</module>
     <module>web/home</module>
     <module>web/viewable</module>
-    <module>ldtemplaterenderer</module>
+    <module>ldpathtemplate</module>
     <module>web/sparql</module>
     <module>httpqueryheaders</module> <!-- allows CORS with MS Internet Explorer -->
     <module>web/resources</module>
