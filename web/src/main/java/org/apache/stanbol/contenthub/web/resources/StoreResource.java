@@ -18,7 +18,9 @@
 package org.apache.stanbol.contenthub.web.resources;
 
 import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.OPTIONS;
+import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -98,7 +100,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Resource to provide a CRU[D] REST API for content items and there related enhancements.
  * <p>
@@ -153,24 +154,28 @@ public class StoreResource extends BaseStanbolResource {
         this.serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
         this.uriInfo = uriInfo;
 
+        if (indexName == null) {
+            log.error("Missing 'index' parameter");
+            throw new IllegalArgumentException("Missing 'index' parameter");
+        }
         if (this.solrStore == null) {
-            log.error("Missing Solr Store Service");
-            throw new WebApplicationException(404);
+            log.error("Missing SolrStore service");
+            throw new IllegalStateException("Missing SolrStore service");
         }
         if (this.solrSearch == null) {
-            log.error("Missing Solr Search Service");
-            throw new WebApplicationException(404);
+            log.error("Missing SolrSearch service");
+            throw new IllegalStateException("Missing SolrSearch service");
         }
         if (this.tcManager == null) {
-            log.error("Missing tcManager");
-            throw new WebApplicationException(404);
+            log.error("Missing TcManager service");
+            throw new IllegalStateException("Missing TcManager service");
         }
     }
 
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        enableCORS(servletContext, res, headers, DELETE, GET, OPTIONS, POST);
         return res.build();
     }
 
@@ -219,7 +224,17 @@ public class StoreResource extends BaseStanbolResource {
      */
 
     /**
-     * Cool URI handler for the uploaded resource.
+     * Cool URI handler for the uploaded resource. Based on the Accept header this service redirects the
+     * incoming request to different endpoints in the following way:
+     * <ul>
+     * <li>If the Accept header contains the "text/html" value it is the request is redirected to the
+     * <b>page</b> endpoint so that an HTML document corresponding to the ContentItem is drawn.</li>
+     * <li>If the Accept header one of the RDF serialization formats defined {@link SupportedFormat}
+     * annotation, the request is redirected to the <b>metadata</b> endpoint and metadata of the specified
+     * {@link ContentItem} is returned.</li>
+     * <li>If the previous two conditions are not satisfied the request is redirected to the <b>raw</b>
+     * endpoint and raw content of the specified {@link ContentItem} is returned.</li>
+     * </ul>
      * 
      * @param uri
      *            The URI of the resource in the Stanbol Contenthub store
@@ -231,9 +246,12 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/content/{uri:.+}")
     public Response getContent(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws StoreException {
         uri = RestUtil.nullify(uri);
+        if (uri == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Missing 'uri' parameter").build();
+        }
         ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
-            throw new WebApplicationException(404);
+            return Response.status(Status.NOT_FOUND).build();
         }
 
         // handle smart redirection to browser view
@@ -272,7 +290,7 @@ public class StoreResource extends BaseStanbolResource {
      *            Type can be {@code "metadata"} or {@code "raw"}. Based on the type, related parts of the
      *            content item will be prepared for download.
      * @param uri
-     *            URI of the resource in the Stanbol Contenthub store
+     *            URI of the {@link ContentItem} in the Contenthub
      * @param format
      *            Rdf serialization format of metadata
      * @return Raw content item or metadata of the content item.
@@ -283,14 +301,20 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/download/{type}/{uri:.+}")
     public Response downloadContentItem(@PathParam(value = "type") String type,
                                         @PathParam(value = "uri") String uri,
-                                        @QueryParam(value = "format") String format,
+                                        @QueryParam(value = "format") @DefaultValue(SupportedFormat.RDF_XML) String format,
                                         @Context HttpHeaders headers) throws IOException, StoreException {
         type = RestUtil.nullify(type);
         uri = RestUtil.nullify(uri);
         format = RestUtil.nullify(format);
+        if (type == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Missing 'type' parameter").build();
+        }
+        if (uri == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Missing 'uri' parameter").build();
+        }
         ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
-            throw new WebApplicationException(404);
+            return Response.status(Status.NOT_FOUND).build();
         }
         if (type.equals("metadata")) {
             String fileName = URLEncoder.encode(uri, "utf-8") + "-metadata";
@@ -331,9 +355,12 @@ public class StoreResource extends BaseStanbolResource {
     public Response getContentItemMetaData(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws IOException,
                                                                                                               StoreException {
         uri = RestUtil.nullify(uri);
+        if (uri == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Missing 'uri' parameter").build();
+        }
         ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
-            throw new WebApplicationException(404);
+            return Response.status(Status.NOT_FOUND).build();
         }
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -357,9 +384,12 @@ public class StoreResource extends BaseStanbolResource {
     public Response getRawContent(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws IOException,
                                                                                                      StoreException {
         uri = RestUtil.nullify(uri);
+        if (uri == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Missing 'uri' parameter").build();
+        }
         ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
-            throw new WebApplicationException(404);
+            return Response.status(Status.NOT_FOUND).build();
         }
         ResponseBuilder rb = Response.ok(ci.getStream(), ci.getMimeType());
         addCORSOrigin(servletContext, rb, headers);
@@ -371,6 +401,7 @@ public class StoreResource extends BaseStanbolResource {
      */
 
     /**
+     * <p>
      * HTTP POST method to create a content item in Contenthub. This method takes a {@link ContentItem} object
      * directly. This means that the values provided for this service will be parsed by the multipart mime
      * serialization of Content Items. (see the following links: <a href=
@@ -379,6 +410,11 @@ public class StoreResource extends BaseStanbolResource {
      * >Content Item Multipart Serialization</a> and <a
      * href="http://incubator.apache.org/stanbol/docs/trunk/components/enhancer/enhancerrest.html">Using the
      * multi-part content item RESTful API extensions</a>)
+     * </p>
+     * <p>
+     * If the passed {@link ContentItem} does already have the <b>metadata</b> part, it is not sent to Stanbol
+     * enhancer to be enhanced.
+     * </p>
      * 
      * @param ci
      *            {@link ContentItem} to be stored.
@@ -417,7 +453,7 @@ public class StoreResource extends BaseStanbolResource {
             // use a redirect to point browsers to newly created content
             rb = Response.seeOther(makeRedirectionURI(ci.getUri().getUnicodeString()));
         } else {
-            rb = Response.created(new URI(ci.getUri().getUnicodeString()));
+            rb = Response.created(makeRedirectionURI(ci.getUri().getUnicodeString()));
         }
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -448,13 +484,13 @@ public class StoreResource extends BaseStanbolResource {
      */
     @POST
     @Consumes(WILDCARD)
-    public Response createContentItemWithURI(byte[] data,
-                                             @QueryParam(value = "uri") String uri,
-                                             @QueryParam(value = "title") String title,
-                                             @QueryParam(value = "chain") String chain,
-                                             @Context HttpHeaders headers) throws URISyntaxException,
-                                                                          EngineException,
-                                                                          StoreException {
+    public Response createContentItemWithRawData(byte[] data,
+                                                 @QueryParam(value = "uri") String uri,
+                                                 @QueryParam(value = "title") String title,
+                                                 @QueryParam(value = "chain") String chain,
+                                                 @Context HttpHeaders headers) throws URISyntaxException,
+                                                                              EngineException,
+                                                                              StoreException {
         uri = RestUtil.nullify(uri);
         title = RestUtil.nullify(title);
         chain = RestUtil.nullify(chain);
@@ -587,6 +623,25 @@ public class StoreResource extends BaseStanbolResource {
     }
 
     /**
+     * This method deletes the {@link ContentItem} specified by the given {@link QueryParam}.
+     * 
+     * @param uri
+     *            URI of the {@link ContentItem} to be deleted.
+     * @param headers
+     * @return {@link Response#ok()} if the removal is successful
+     * @throws StoreException
+     */
+    @DELETE
+    public Response deleteContentItemByForm(@QueryParam(value = "uri") String uri,
+                                            @Context HttpHeaders headers) throws StoreException {
+        uri = RestUtil.nullify(uri);
+        if (uri == null) {
+            throw new IllegalArgumentException("Missing 'uri' parameter");
+        }
+        return deleteContentItem(uri, headers);
+    }
+
+    /**
      * HTTP DELETE method to delete a content item from Contenhub.
      * 
      * @param uri
@@ -598,9 +653,12 @@ public class StoreResource extends BaseStanbolResource {
     @Path("/{uri:.+}")
     public Response deleteContentItem(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws StoreException {
         uri = RestUtil.nullify(uri);
+        if (uri == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Missing 'uri' parameter").build();
+        }
         ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
-            throw new WebApplicationException(404);
+            return Response.status(Status.NOT_FOUND).build();
         }
         solrStore.deleteById(uri, indexName);
         ResponseBuilder rb = Response.ok();
