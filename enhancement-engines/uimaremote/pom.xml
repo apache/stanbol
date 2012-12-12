@@ -29,7 +29,7 @@
   <artifactId>org.apache.stanbol.enhancer.engine.uimaremote</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : UIMA Remote Client</name>
+  <name>Apache Stanbol Enhancement Engine : UIMA Remote Client</name>
 
   <dependencies>
     <dependency>

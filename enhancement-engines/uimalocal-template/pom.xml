@@ -27,7 +27,7 @@
   </parent>
 
   <artifactId>org.apache.stanbol.enhancer.engine.uimalocal-template</artifactId>
-  <name>Apache Stanbol Enhancer Enhancement Engine : UIMA Local Client</name>
+  <name>Apache Stanbol Enhancement Engine : UIMA Local Client</name>
   <packaging>bundle</packaging>
 
   <dependencies>

@@ -29,7 +29,7 @@
 	<artifactId>org.apache.stanbol.enhancer.engines.xmpextractor</artifactId>
 	<version>0.10.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
-	<name>Apache Stanbol Enhancer Enhancement Engine : XMP Extractors</name>
+	<name>Apache Stanbol Enhancement Engine : XMP Extractor</name>
 	<description>Enhancement Engine that extracts XMP data
 	</description>
 
@@ -37,10 +37,10 @@
 
 	<scm>
 		<connection>
-			scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmp/
+			scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmpextractor/
 		</connection>
 		<developerConnection>
-			scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmp/
+			scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmpextractor/
 		</developerConnection>
 		<url>http://stanbol.apache.org/</url>
 	</scm>

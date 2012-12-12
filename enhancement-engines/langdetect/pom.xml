@@ -32,7 +32,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : Language Detection</name>
+  <name>Apache Stanbol Enhancement Engine : Language Detection</name>
   <description>language detection for 53 languages based on http://code.google.com/p/language-detection
   </description>
 

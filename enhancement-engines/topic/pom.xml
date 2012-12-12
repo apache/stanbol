@@ -26,7 +26,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : Topic Classification</name>
+  <name>Apache Stanbol Enhancement Engine : Topic Classification</name>
   <description>
     Implementation of an annotation engine that links the content item
     to a set of possible categories from a dedicated Solr index using

@@ -25,7 +25,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine: POS Tagging</name>
+  <name>Apache Stanbol Enhancement Engine : OpenNLP POS Tagging</name>
   <description>A Stanbol engine adding a POS content part to a content item for further processing</description>
 
   <inceptionYear>2012</inceptionYear>

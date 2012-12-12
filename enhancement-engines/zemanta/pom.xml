@@ -32,7 +32,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : Zemanta Tagging</name>
+  <name>Apache Stanbol Enhancement Engine : Zemanta</name>
   <description></description>
   <inceptionYear>2010</inceptionYear>
 
