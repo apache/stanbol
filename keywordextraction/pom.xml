@@ -32,7 +32,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : Keyword Extraction</name>
+  <name>Apache Stanbol Enhancement Engine : Keyword Extraction</name>
   <description>
       Implementation of utilities and an engine to extract keywords defined in
       a controlloed vocabulary from a parsed text.

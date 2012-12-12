@@ -32,7 +32,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : Semantic NER</name>
+  <name>Apache Stanbol Enhancement Engine : OpenNLP NER</name>
   <description></description>
   <inceptionYear>2010</inceptionYear>
 

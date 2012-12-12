@@ -32,7 +32,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : Entity Tagging</name>
+  <name>Apache Stanbol Enhancement Engine : Entity Tagging</name>
   <description>
     Implementation of an annotation engine that links named entities
     extracted from a text (TextAnnotations) to semantic entities

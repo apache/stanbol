@@ -26,7 +26,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine: NLP data to RDF converter</name>
+  <name>Apache Stanbol Enhancement Engine : NLP to RDF converter</name>
   <description>
     This Enhancement Engine converts NLP data stored in the AnalyzedText
     content part to RDF and adds them to the enhancement metadata of the processed

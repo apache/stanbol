@@ -33,7 +33,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : Refactor Engine</name>
+  <name>Apache Stanbol Enhancement Engine : Refactor Engine</name>
   <description>Implementation of an enhancement engine which refactors the ouptut to a target vocabulary 
   </description>
 

@@ -32,9 +32,9 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : geonames.org GIS service</name>
+  <name>Apache Stanbol Enhancement Engine : Geonames Linking</name>
   <description>
-    Simple of an enhancement engine that consumes TextAnnotations and
+    Enhancement engine that consumes TextAnnotations and
     creates EntityAnnotations using the geonames.org GIS service
   </description>
 

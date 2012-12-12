@@ -32,7 +32,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : Apache Tika </name>
+  <name>Apache Stanbol Enhancement Engine : Tika</name>
   <description>Enhancement Engine that uses Apache Tika to convert parsed
   documents to plain text and xhtml
   </description>

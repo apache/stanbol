@@ -29,7 +29,7 @@
   <artifactId>org.apache.stanbol.enhancer.engine.uimatotriples</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine : UIMA To Triples</name>
+  <name>Apache Stanbol Enhancement Engine : UIMA To Triples</name>
 
   <dependencies>
     <dependency>

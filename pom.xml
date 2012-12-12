@@ -48,7 +48,7 @@
   </scm>
 
   <modules>
-	<!-- Content processing / Metadata extraction -->
+	  <!-- Content processing / Metadata extraction -->
     <module>tika</module>
     <module>htmlextractor</module>
     <module>xmpextractor</module>
@@ -56,7 +56,7 @@
     <module>refactor</module>
 
     <!-- NLP processing engines -->
-	<module>langdetect</module>
+	  <module>langdetect</module>
     <module>langid</module>
     <module>opennlp-sentence</module>
     <module>opennlp-token</module>
@@ -64,17 +64,18 @@
     <module>opennlp-ner</module>
     <module>opennlp-chunker</module>
     <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
-	<!-- EntityLinking -->
+  
+  	<!-- EntityLinking -->
     <module>entitylinking</module>
     <module>entityhublinking</module>
     <module>entitytagging</module>
     <!-- deprecated -->
     <module>keywordextraction</module>
 
-	<!-- Categorization -->
+	  <!-- Categorization -->
     <module>topic</module>
 
-	<!-- Sentiment -->
+	  <!-- Sentiment -->
     <module>sentiment-wordclassifier</module>
     <module>sentiment-summarization</module>
 

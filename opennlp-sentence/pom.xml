@@ -25,7 +25,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer Enhancement Engine: OpenNLP Sentence Detection</name>
+  <name>Apache Stanbol Enhancement Engine : OpenNLP Sentence Detection</name>
   <description>A Stanbol engine adding Sentence annotations to the AnalyzedText
     content part to a content item for further processing</description>
 

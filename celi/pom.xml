@@ -25,7 +25,7 @@
   <artifactId>org.apache.stanbol.enhancer.engines.celi</artifactId>
   <packaging>bundle</packaging>
 
-	<name>Apache Stanbol Enhancer Enhancement Engine : CELI Engine</name>
+	<name>Apache Stanbol Enhancement Engine : CELI Engine</name>
 	<description>Enhancement Engine using the CELI service.</description>
 	<inceptionYear>2012</inceptionYear>
 
