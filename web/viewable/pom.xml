@@ -27,18 +27,18 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.commons.viewable</artifactId>
+  <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Template Viewable</name>
-  <description>A service providing classes and message body writer for response rendering with the viewable pattern</description>
+  <name>Apache Stanbol Commons Web Template Viewable</name>
+  <description>A service providing classes and message body writer for response rendering with the viewable pattern.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/ldviewable
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/viewable
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/web/ldviewable
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/web/viewable
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -64,9 +64,9 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
    	<dependency>
-		<groupId>org.apache.clerezza</groupId>
-		<artifactId>rdf.utils</artifactId>
-	</dependency>
+		  <groupId>org.apache.clerezza</groupId>
+	  	<artifactId>rdf.utils</artifactId>
+  	</dependency>
    
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -78,13 +78,11 @@
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </dependency>
-	<dependency>
-        <groupId>org.apache.stanbol</groupId>
+	  <dependency>
+      <groupId>org.apache.stanbol</groupId>
   		<artifactId>org.apache.stanbol.commons.ldpathtemplate</artifactId>
   		<version>0.10.0-SNAPSHOT</version>
     </dependency>
-
   </dependencies>
-
 
 </project>
