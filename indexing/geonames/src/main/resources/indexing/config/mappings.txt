@@ -65,8 +65,10 @@ geo:lat | d=xsd:decimal
 geo:long | d=xsd:decimal
 
 #mappings
-
+# copy  labels
 geonames:name > rdfs:label
+geonames:alternateName > rdfs:label
+# transitive closure over the hierarchy
 geonames:parentADM1 > geonames:parentFeature
 geonames:parentADM2 > geonames:parentFeature
 geonames:parentADM3 > geonames:parentFeature
