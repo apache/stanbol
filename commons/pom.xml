@@ -17,6 +17,7 @@
 -->
 <project>
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
@@ -25,11 +26,25 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.commons.reactor</artifactId>
+  <artifactId>apache-stanbol-commons</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Commons Reactor</name>
+  <name>Apache Stanbol Commons</name>
+  <description>
+    Pseudo project to build the complete Apache Stanbol Commons bundles
+  </description>  
+
+  <inceptionYear>2010</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>  
+
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons
@@ -41,7 +56,6 @@
   </scm>
 
   <modules>
-
     <!-- Stanbol Web Framework (JAX-RS & Web UI)-->
     <module>web/base</module>
     <module>web/base.jersey</module>
@@ -71,7 +85,7 @@
     <module>solr/web</module>
     <module>solr/install</module>
     <module>solr/defaults</module>
-
+    
     <module>jobs</module> <!-- Stanbol Background Jobs Framework -->
   
     <module>opennlp</module> <!-- Allows to load OpenNLP modles via DataFile provider --> 
@@ -95,4 +109,59 @@
     <module>testing/http</module>
     <module>testing/stanbol</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>apache-release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <configuration>
+              <excludeSubProjects>false</excludeSubProjects>
+              <excludes>
+                <!--
+                  All license headers are also checked per
+                  artifact. These excludes are necessary
+                  to make the reactor build suceed. Consider
+                  the excluded files here as already checked
+                  in the artifacts.
+                -->
+
+                <!-- exclude hidden files -->
+                <exclude>**/.*</exclude>
+                <exclude>**/.*/*</exclude>
+                <exclude>**/.*/**/*</exclude>
+
+                <!-- exclude build files -->
+                <exclude>**/target/**</exclude>
+                <exclude>**/*.log</exclude>             
+
+                <!-- exclude generated files listing the licenses of deps -->
+                <exclude>DEPENDENCIES</exclude>
+                <exclude>DEPENDENCIES-BY-LICENSE</exclude>
+                <exclude>RAT-REPORT</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>aggregate-add-third-party</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>    
+  </profiles>
+
 </project>
