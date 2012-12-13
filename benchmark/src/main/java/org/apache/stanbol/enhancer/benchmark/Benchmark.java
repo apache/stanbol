@@ -43,4 +43,10 @@ public interface Benchmark extends List<TripleMatcherGroup >{
     /** Return the enhanced Graph of our input text */
     Graph getGraph(EnhancementJobManager jobManager, 
                    ContentItemFactory ciFactory) throws EnhancementException;
+
+    /**
+     * Setter for the chain
+     * @param chain the chain
+     */
+    void setChain(Chain chain);
 }

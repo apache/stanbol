@@ -39,13 +39,17 @@
             #end
             </ul>
         </div>         
-        <h2>Benchmark example: $currentBenchmarkPath</h2>   
-		<form method='POST' action="$formAction">
+        <h2>Benchmark example: $currentBenchmarkPath</h2>  
+		<form style="margin-top: 3em" method='POST' action="$formAction">
 			<div style="text-align:right">
 			    <input type='submit'/>
 			</div>
-			<br/>
+			<p>
+            Chain: <input type="text" name="chain"/> (optionally the Enhancement Chain)</p>
+            <p>
+            Benchmark Text:<br/>
 	        <textarea name='content' rows='80' cols='120' style:"width=100%; height=100%;">$benchmarkText</textarea>
+            </p>
 		</form>
 	</div>		
 </body>
