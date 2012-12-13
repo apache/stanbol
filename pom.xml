@@ -139,12 +139,26 @@
 
                 <!-- exclude build files -->
                 <exclude>**/target/**</exclude>
-                <exclude>**/*.log</exclude>             
+                <exclude>**/*.log</exclude>
 
                 <!-- exclude generated files listing the licenses of deps -->
                 <exclude>DEPENDENCIES</exclude>
                 <exclude>DEPENDENCIES-BY-LICENSE</exclude>
                 <exclude>RAT-REPORT</exclude>
+                <exclude>**/src/license/THIRD-PARTY.properties</exclude>
+
+                <exclude>**/META-INF/services/*</exclude>
+                <exclude>**/META-INF/resources/**/*.js</exclude>
+
+                <!-- exclude certain types by extension -->
+                <exclude>**/*.properties</exclude>
+                <exclude>**/*.config</exclude>             
+                <exclude>**/*.nt</exclude>
+                <exclude>**/*.txt</exclude>
+
+                <!-- exclude test files --> 
+                <exclude>**/test/**/*.mappings</exclude>
+
               </excludes>
             </configuration>
           </plugin>
