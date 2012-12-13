@@ -59,7 +59,11 @@ e.g. add email:
                     :newValue <mailto:hugob@example.org> . " \
           http://localhost:8080/user-management/change-user
 
-Plus get user Turtle :
+Get user Turtle :
 
-    curl --user admin:admin -H "Accept:text/turtle"
-    http://localhost:8080/user-management/user/anonymous
+    curl --user admin:admin -H "Accept:text/turtle" http://localhost:8080/user-management/user/anonymous
+
+Get user roles :
+
+   curl --user admin:admin -H "Accept:text/turtle" http://localhost:8080/user-management/roles/anonymous
+
