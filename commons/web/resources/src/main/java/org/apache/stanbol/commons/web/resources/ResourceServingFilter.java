@@ -114,16 +114,17 @@ public class ResourceServingFilter implements Filter, BundleListener {
             }
         }
     }
-    
-    
+       
     private void doFilterHttp(HttpServletRequest request,
             HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         final String requestPath = request.getRequestURI();
-        if (path2Bundle.containsKey(requestPath)) {
+        String contextPath = request.getContextPath();
+        String resourcePatch = requestPath.substring(contextPath.length());
+        Bundle resourceBundle = path2Bundle.get(resourcePatch);
+        if (resourceBundle != null) {
             if (request.getMethod().equals("GET") || request.getMethod().equals("HEAD")) {
-                Bundle resourceBundle = path2Bundle.get(requestPath);
-                URL url = resourceBundle.getEntry(RESOURCE_PREFIX + requestPath);
+                URL url = resourceBundle.getEntry(RESOURCE_PREFIX + resourcePatch);
                 String mediaType = URLConnection.guessContentTypeFromName(url.getFile());
                 response.setContentType(mediaType);
                 //TODO can we get the length of a resource without 
