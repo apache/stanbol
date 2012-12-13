@@ -18,6 +18,7 @@
 package org.apache.stanbol.contenthub.store.solr;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -288,31 +289,31 @@ public class SolrStoreImpl implements SolrStore {
         enhance(ci, chain);
         return put(ci, ldProgramName);
     }
-    
+
     /**
      * Put the ContentItem into the default Solr core
      */
     @Override
     public String put(ContentItem ci) throws StoreException {
-    	return put(ci,null);
+        return put(ci, null);
     }
 
     /**
-     * Put the ContentItem into the Solr core identify by ldProgramName. If ldProgramName is null, put the CI to the default Solr core.
-     * Also save the ContentItem enhancements in the EnhancementGraph
+     * Put the ContentItem into the Solr core identify by ldProgramName. If ldProgramName is null, put the CI
+     * to the default Solr core. Also save the ContentItem enhancements in the EnhancementGraph
      */
     @Override
     public String put(ContentItem ci, String ldProgramName) throws StoreException {
-    	SolrInputDocument doc = new SolrInputDocument();
+        SolrInputDocument doc = new SolrInputDocument();
         addDefaultFields(ci, doc);
         SolrServer solrServer;
         if (ldProgramName == null || ldProgramName.isEmpty()
             || ldProgramName.equals(SolrCoreManager.CONTENTHUB_DEFAULT_INDEX_NAME)) {
-        	
-        	addSolrSpecificFields(ci, doc);
-        	solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer();
-        }else{
-        	addSolrSpecificFields(ci, doc, ldProgramName);
+
+            addSolrSpecificFields(ci, doc);
+            solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer();
+        } else {
+            addSolrSpecificFields(ci, doc, ldProgramName);
             solrServer = SolrCoreManager.getInstance(bundleContext, managedSolrServer).getServer(
                 ldProgramName);
         }
@@ -338,7 +339,8 @@ public class SolrStoreImpl implements SolrStore {
                     "ID of the content item cannot be null while inserting to the SolrStore.");
         }
 
-        String content = null;
+        // get content
+        String content = "";
         Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
         if (contentPart != null) {
             try {
@@ -348,20 +350,26 @@ public class SolrStoreImpl implements SolrStore {
                 log.error(msg, ex);
                 throw new StoreException(msg, ex);
             }
+        }
+        InputStream binaryContent = ci.getStream();
+
+        if (content.equals("") && binaryContent == null) {
+            throw new StoreException("No textual or binary content for the ContentItem");
+        }
+
+        try {
             doc.addField(SolrFieldName.CONTENT.toString(), content);
-        } 
+            doc.addField(SolrFieldName.BINARYCONTENT.toString(), IOUtils.toByteArray(binaryContent));
+        } catch (IOException e) {
+            throw new StoreException("Failed to get bytes of conten item stream", e);
+        }
+
+        doc.addField(SolrFieldName.ID.toString(), ci.getUri().getUnicodeString());
+        doc.addField(SolrFieldName.MIMETYPE.toString(), ci.getMimeType());
 
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         String creationDate = sdf.format(cal.getTime());
-
-        doc.addField(SolrFieldName.ID.toString(), ci.getUri().getUnicodeString());
-        try {
-            doc.addField(SolrFieldName.BINARYCONTENT.toString(), IOUtils.toByteArray(ci.getStream()));
-        } catch (IOException e) {
-            throw new StoreException("Failed to get bytes of conten item stream", e);
-        }
-        doc.addField(SolrFieldName.MIMETYPE.toString(), ci.getMimeType());
         doc.addField(SolrFieldName.CREATIONDATE.toString(), creationDate);
 
         // add the number of enhancemets to the content item
