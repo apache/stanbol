@@ -18,10 +18,13 @@ package org.apache.stanbol.enhancer.it;
 
 import org.apache.stanbol.commons.testing.http.RequestDocumentor;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Test that the default chain is called by requesting the "/enhancer" endpoint. */
 public class DefaultChainTest extends EnhancerTestBase {
     
+    private final Logger log = LoggerFactory.getLogger(DefaultChainTest.class);
     
     private final RequestDocumentor documentor = new RequestDocumentor(getClass().getName());
     /**
@@ -131,6 +134,8 @@ public class DefaultChainTest extends EnhancerTestBase {
     
     @Test
     public void testInvalidFormat() throws Exception {
+        log.info("This test validate that requests with invalid formats do fail.");
+        log.info("The following Exception is expected (see also STANBOL-262).");
         executor.execute(
             builder.buildPostRequest(getEndpoint())
             .withHeader("Accept", "INVALID_FORMAT")
