@@ -122,6 +122,7 @@
               !org.apache.lucene.analysis.stempel.*,
               !org.apache.lucene.search.grouping.*,
               !org.egothor.stemmer.*,
+              javax.servlet.*; version="[2.5.0,4.0.0)",
               org.apache.stanbol.commons.solr,
               org.apache.stanbol.commons.solr.utils,
               org.apache.solr.client.solrj,
