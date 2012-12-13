@@ -17,7 +17,9 @@
 package org.apache.stanbol.contenthub.web.resources;
 
 import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.OPTIONS;
+import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
@@ -89,7 +91,7 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     @Path("/program")
     public Response handleCorsPreflightProgram(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        enableCORS(servletContext, res, headers, GET, DELETE, OPTIONS, POST);
         return res.build();
     }
 
@@ -97,13 +99,21 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     @Path("/program/{name}")
     public Response handleCorsPreflightDeleteProgram(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers, DELETE, OPTIONS);
+        enableCORS(servletContext, res, headers, GET, DELETE, OPTIONS);
         return res.build();
     }
 
     @OPTIONS
     @Path("/exists")
     public Response handleCorsPreflightExists(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
+    @OPTIONS
+    @Path("/exists/{name}")
+    public Response handleCorsPreflightExistsPath(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
         enableCORS(servletContext, res, headers);
         return res.build();
@@ -156,10 +166,12 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
         programName = RestUtil.nullify(programName);
         program = RestUtil.nullify(program);
         if (programName == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'name' parameter").build();
+            return RestUtil.createResponse(servletContext, Status.BAD_REQUEST, "Missing 'name' parameter",
+                headers);
         }
         if (program == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'program' parameter").build();
+            return RestUtil.createResponse(servletContext, Status.BAD_REQUEST, "Missing 'program' parameter",
+                headers);
         }
         programManager.submitProgram(programName, program);
         ResponseBuilder rb = Response.created(new URI(uriInfo.getBaseUri() + "contenthub/" + programName
@@ -182,16 +194,45 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     public Response getProgramByName(@QueryParam("name") String programName, @Context HttpHeaders headers) {
         programName = RestUtil.nullify(programName);
         if (programName == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'name' parameter").build();
+            return RestUtil.createResponse(servletContext, Status.BAD_REQUEST, "Missing 'name' parameter",
+                headers);
         }
         String ldPathProgram = programManager.getProgramByName(programName);
         if (ldPathProgram == null) {
-            return Response.status(Status.NOT_FOUND).build();
+            return RestUtil.createResponse(servletContext, Status.NOT_FOUND, null, headers);
         } else {
-            ResponseBuilder rb = Response.ok(ldPathProgram);
-            addCORSOrigin(servletContext, rb, headers);
-            return rb.build();
+            return RestUtil.createResponse(servletContext, Status.OK, ldPathProgram, headers);
         }
+    }
+
+    /**
+     * HTTP GET method to retrieve an LDPath program, given its name.
+     * 
+     * @param programName
+     *            The name of the LDPath program to be retrieved.
+     * @param headers
+     *            HTTP headers
+     * @return LDPath program in {@link String} format or HTTP BAD_REQUEST(400) or HTTP NOT FOUND(404)
+     */
+    @GET
+    @Path("/program/{name}")
+    public Response getProgramByNamePath(@PathParam("name") String programName, @Context HttpHeaders headers) {
+        return getProgramByName(programName, headers);
+    }
+
+    /**
+     * HTTP DELETE method to delete an LDPath program.
+     * 
+     * @param programName
+     *            The name of the LDPath program.
+     * @param headers
+     *            HTTP headers
+     * @return HTTP OK(200), HTTP BAD_REQUEST(400) or HTTP NOT FOUND(403)
+     */
+    @DELETE
+    @Path("/program")
+    public Response deleteProgram(@QueryParam(value = "name") String programName, @Context HttpHeaders headers) {
+        return deleteProgramPath(programName, headers);
     }
 
     /**
@@ -205,18 +246,18 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
      */
     @DELETE
     @Path("/program/{name}")
-    public Response deleteProgram(@PathParam(value = "name") String programName, @Context HttpHeaders headers) {
+    public Response deleteProgramPath(@PathParam(value = "name") String programName,
+                                      @Context HttpHeaders headers) {
         programName = RestUtil.nullify(programName);
         if (programName == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'name' parameter").build();
+            return RestUtil.createResponse(servletContext, Status.BAD_REQUEST, "Missing 'name' parameter",
+                headers);
         }
         if (!programManager.isManagedProgram(programName)) {
-            return Response.status(Status.NOT_FOUND).build();
+            return RestUtil.createResponse(servletContext, Status.NOT_FOUND, null, headers);
         }
         programManager.deleteProgram(programName);
-        ResponseBuilder rb = Response.ok();
-        addCORSOrigin(servletContext, rb, headers);
-        return rb.build();
+        return RestUtil.createResponse(servletContext, Status.OK, null, headers);
     }
 
     /**
@@ -233,17 +274,29 @@ public class SemanticIndexManagerResource extends BaseStanbolResource {
     public Response isManagedProgram(@QueryParam("name") String programName, @Context HttpHeaders headers) {
         programName = RestUtil.nullify(programName);
         if (programName == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'name' parameter").build();
+            return RestUtil.createResponse(servletContext, Status.BAD_REQUEST, "Missing 'name' parameter",
+                headers);
         }
         if (programManager.isManagedProgram(programName)) {
-            ResponseBuilder rb = Response.ok();
-            addCORSOrigin(servletContext, rb, headers);
-            return rb.build();
+            return RestUtil.createResponse(servletContext, Status.OK, null, headers);
         } else {
-            ResponseBuilder rb = Response.status(Status.NOT_FOUND);
-            addCORSOrigin(servletContext, rb, headers);
-            return rb.build();
+            return RestUtil.createResponse(servletContext, Status.NOT_FOUND, null, headers);
         }
+    }
+
+    /**
+     * HTTP GET method to check whether an LDPath program exists in Contenthub or not.
+     * 
+     * @param programName
+     *            The name of the LDPath program.
+     * @param headers
+     *            HTTP headers
+     * @return HTTP OK(200), HTTP BAD REQUEST(400) or HTTP NOT FOUND(404)
+     */
+    @GET
+    @Path("/exists/{name}")
+    public Response isManagedProgramPath(@PathParam("name") String programName, @Context HttpHeaders headers) {
+        return isManagedProgram(programName, headers);
     }
 
     // Helper methods for HTML view
