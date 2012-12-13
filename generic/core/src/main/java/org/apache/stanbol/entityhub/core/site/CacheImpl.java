@@ -94,7 +94,7 @@ public class CacheImpl implements Cache {
     private ComponentContext context;
     
     @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
-    NamespacePrefixService nsPrefixService;
+    protected NamespacePrefixService nsPrefixService;
 
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, YardException, IllegalStateException, InvalidSyntaxException {
