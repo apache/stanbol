@@ -93,7 +93,7 @@
     <!-- for the Solr Index Installer -->
     <dependency>
       <groupId>org.apache.sling</groupId>
-      <artifactId>org.apache.sling.installer.core</artifactId>
+      <artifactId>org.apache.sling.installer.api</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
