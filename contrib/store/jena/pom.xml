@@ -44,6 +44,15 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-scr-plugin</artifactId>
+		       <configuration>
+		         <instructions>
+		           <Export-Package></Export-Package>
+		           <Import-Package>
+		            javax.servlet.*; version="[2.5.0,4.0.0)",
+		            *
+		           </Import-Package>
+  		         </instructions>
+ 		       </configuration>
 			</plugin>
 		</plugins>
 	</build>

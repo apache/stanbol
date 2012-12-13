@@ -43,7 +43,7 @@
           <instructions>
             <Service-Component>OSGI-INF/serviceComponents.xml</Service-Component>
             <Import-Package>
-              <!-- apache derby -->
+              javax.servlet.*; version="[2.5.0,4.0.0)",
               org.apache.derby.jdbc,
               *
             </Import-Package>

@@ -93,6 +93,7 @@
               !javax.el,
               !org.slf4j.spi,
               !org.zeroturnaround.javarebel,
+              javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs;version="[0,2)",
               javax.ws.rs.ext;version="[0,2)",
               javax.ws.rs.core;version="[0,2)",

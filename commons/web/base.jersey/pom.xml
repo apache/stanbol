@@ -83,6 +83,8 @@
               !javax.el,
               !org.slf4j.spi,
               !org.zeroturnaround.javarebel,
+              javax.servlet; version="[2.5.0,4.0.0)",
+              javax.servlet.http; version="[2.5.0,4.0.0)",
               org.apache.stanbol.commons.web.base,
               org.apache.stanbol.commons.web.base.*,
               *
@@ -101,7 +103,7 @@
     </dependency>
     
     <!-- Jersey -->
-<dependency>
+    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>

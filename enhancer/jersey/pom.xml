@@ -65,6 +65,7 @@
             </Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
+              javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",
               org.apache.stanbol.commons.web.base; provide:=true,
               *

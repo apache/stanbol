@@ -53,6 +53,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              javax.servlet.*; version="[2.5.0,4.0.0)",
+              *
+            </Import-Package>
             <Export-Package>
               org.apache.stanbol.enhancer.benchmark
             </Export-Package>
