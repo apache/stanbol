@@ -352,7 +352,7 @@ public class UserResource {
 	 * @throws UnsupportedEncodingException
 	 */
 	@GET
-	@Path("user/{username}")
+	@Path("users/{username}")
 	@Produces("text/turtle")
 	public Response getUserTurtle(@PathParam("username") String userName)
 			throws UnsupportedEncodingException {
