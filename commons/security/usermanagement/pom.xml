@@ -31,14 +31,25 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Commons usermanagement</name>
+  <name>Apache Stanbol Commons User Management</name>
   <description>A Webconsole plugin for user management</description>
+
+  <inceptionYear>2012</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>  
+
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/usermanagement
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/security/usermanagement
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/usermanagement
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/security/usermanagement
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -55,6 +66,20 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludeSubProjects>false</excludeSubProjects>
+          <excludes>
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+
+            <!-- Apache License 2.0 -->
+            <exclude>src/main/resources/org/apache/stanbol/commons/usermanagement/webfragment/test.txt</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/commons/usermanagement/test.txt</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -62,7 +87,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.10.1-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -73,33 +98,33 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
-		<groupId>org.apache.clerezza</groupId>
-		<artifactId>rdf.ontologies</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.clerezza</groupId>
-		<artifactId>rdf.utils</artifactId>
-	</dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.ontologies</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.utils</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.webconsole</artifactId>
       <version>3.1.8</version>
     </dependency>
     <dependency>
-		<groupId>org.apache.clerezza</groupId>
-		<artifactId>platform.config</artifactId>
-		<version>0.3-incubating</version>
-	</dependency>
-	<dependency>
-	  	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.ldpathtemplate</artifactId>
-  		<version>0.10.0-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-	  	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.viewable</artifactId>
-  		<version>0.10.0-SNAPSHOT</version>
-  	</dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>platform.config</artifactId>
+    <version>0.3-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.ldpathtemplate</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
     
     <!-- Jersey, servlet and freemarker -->
     <dependency>
@@ -119,10 +144,10 @@
     </dependency>
 
     <dependency>
-    	<groupId>org.apache.stanbol</groupId>
-    	<artifactId>org.apache.stanbol.commons.security</artifactId>
-    	<version>0.10.0-SNAPSHOT</version>
-    	<type>bundle</type>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.security</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+      <type>bundle</type>
     </dependency>
   </dependencies>
 
