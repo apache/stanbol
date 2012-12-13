@@ -247,11 +247,12 @@ public class StoreResource extends BaseStanbolResource {
     public Response getContent(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws StoreException {
         uri = RestUtil.nullify(uri);
         if (uri == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'uri' parameter").build();
+            return RestUtil.createResponse(servletContext, Status.BAD_REQUEST, "Missing 'uri' parameter",
+                headers);
         }
         ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
-            return Response.status(Status.NOT_FOUND).build();
+            return RestUtil.createResponse(servletContext, Status.NOT_FOUND, null, headers);
         }
 
         // handle smart redirection to browser view
@@ -269,7 +270,7 @@ public class StoreResource extends BaseStanbolResource {
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (RDF_MEDIA_TYPES.contains(mt.toString())) {
                 URI metadataUri = uriInfo.getBaseUriBuilder().path("/contenthub").path(indexName)
-                        .path("store/metadata").path(uri).build();
+                        .path("store/metadata").path(uri).queryParam("format", mt.toString()).build();
                 ResponseBuilder rb = Response.temporaryRedirect(metadataUri);
                 addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
@@ -307,14 +308,16 @@ public class StoreResource extends BaseStanbolResource {
         uri = RestUtil.nullify(uri);
         format = RestUtil.nullify(format);
         if (type == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'type' parameter").build();
+            return RestUtil.createResponse(servletContext, Status.BAD_REQUEST, "Missing 'type' parameter",
+                headers);
         }
         if (uri == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'uri' parameter").build();
+            return RestUtil.createResponse(servletContext, Status.BAD_REQUEST, "Missing 'uri' parameter",
+                headers);
         }
         ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
-            return Response.status(Status.NOT_FOUND).build();
+            return RestUtil.createResponse(servletContext, Status.NOT_FOUND, null, headers);
         }
         if (type.equals("metadata")) {
             String fileName = URLEncoder.encode(uri, "utf-8") + "-metadata";
@@ -352,19 +355,21 @@ public class StoreResource extends BaseStanbolResource {
      */
     @GET
     @Path("/metadata/{uri:.+}")
-    public Response getContentItemMetaData(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws IOException,
-                                                                                                              StoreException {
+    public Response getContentItemMetaData(@PathParam(value = "uri") String uri,
+                                           @QueryParam(value = "format") @DefaultValue(SupportedFormat.RDF_XML) String format,
+                                           @Context HttpHeaders headers) throws IOException, StoreException {
         uri = RestUtil.nullify(uri);
         if (uri == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'uri' parameter").build();
+            return RestUtil.createResponse(servletContext, Status.BAD_REQUEST, "Missing 'uri' parameter",
+                headers);
         }
         ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
-            return Response.status(Status.NOT_FOUND).build();
+            return RestUtil.createResponse(servletContext, Status.NOT_FOUND, null, headers);
         }
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        serializer.serialize(out, ci.getMetadata(), SupportedFormat.RDF_XML);
+        serializer.serialize(out, ci.getMetadata(), format);
         ResponseBuilder rb = Response.ok(out.toString(), "text/plain");
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -385,11 +390,12 @@ public class StoreResource extends BaseStanbolResource {
                                                                                                      StoreException {
         uri = RestUtil.nullify(uri);
         if (uri == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'uri' parameter").build();
+            return RestUtil.createResponse(servletContext, Status.BAD_REQUEST, "Missing 'uri' parameter",
+                headers);
         }
         ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
-            return Response.status(Status.NOT_FOUND).build();
+            return RestUtil.createResponse(servletContext, Status.NOT_FOUND, null, headers);
         }
         ResponseBuilder rb = Response.ok(ci.getStream(), ci.getMimeType());
         addCORSOrigin(servletContext, rb, headers);
@@ -634,10 +640,6 @@ public class StoreResource extends BaseStanbolResource {
     @DELETE
     public Response deleteContentItemByForm(@QueryParam(value = "uri") String uri,
                                             @Context HttpHeaders headers) throws StoreException {
-        uri = RestUtil.nullify(uri);
-        if (uri == null) {
-            throw new IllegalArgumentException("Missing 'uri' parameter");
-        }
         return deleteContentItem(uri, headers);
     }
 
@@ -654,16 +656,15 @@ public class StoreResource extends BaseStanbolResource {
     public Response deleteContentItem(@PathParam(value = "uri") String uri, @Context HttpHeaders headers) throws StoreException {
         uri = RestUtil.nullify(uri);
         if (uri == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'uri' parameter").build();
+            return RestUtil.createResponse(servletContext, Status.BAD_REQUEST, "Missing 'uri' parameter",
+                headers);
         }
         ContentItem ci = solrStore.get(uri, indexName);
         if (ci == null) {
-            return Response.status(Status.NOT_FOUND).build();
+            return RestUtil.createResponse(servletContext, Status.NOT_FOUND, null, headers);
         }
         solrStore.deleteById(uri, indexName);
-        ResponseBuilder rb = Response.ok();
-        addCORSOrigin(servletContext, rb, headers);
-        return rb.build();
+        return RestUtil.createResponse(servletContext, Status.OK, null, headers);
     }
 
     /*

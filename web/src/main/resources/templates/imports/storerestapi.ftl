@@ -103,8 +103,7 @@ The following one is an example representing the submission of a ContentItem to 
 <div class="preParent">
   <img onClick="javascript:getLine(this.parentNode);" class="copyImg" src="${it.staticRootUrl}/contenthub/images/copy_icon_16.png" title="Get command in a single line" />
 <pre>
-<div id="curl3" class="curlLine">curl -i -F "content=I live in Berlin.;type=text/plain" "http://localhost:8080/contenthub/contenthub/store?uri=urn:my-content-item3&chain=dbpedia-proper-noun"<hr/></div>curl -i \
-        -F "content=I live in Berlin.;type=text/plain" \
+<div id="curl3" class="curlLine">curl -i -F "content=I live in Berlin.;type=text/plain" "http://localhost:8080/contenthub/myindex/store?uri=urn:my-content-item3&chain=dbpedia-proper-noun"<hr/></div>curl -i -F "content=I live in Berlin.;type=text/plain" \
      "http://localhost:8080/contenthub/myindex/store?uri=urn:my-content-item3&chain=dbpedia-proper-noun"
 </pre>
 </div>
