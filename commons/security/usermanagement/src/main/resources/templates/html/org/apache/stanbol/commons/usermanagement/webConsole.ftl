@@ -6,6 +6,7 @@
 $(function() {
     $("#tabs").tabs();
     showUserList();
+    showRoleList();
 });
 
 function showUserList(){  
@@ -14,6 +15,16 @@ function showUserList(){
         success: function(data) {
             $("div#tabs-users").html(data);
             $("#user-table").tablesorter();
+        }
+    });
+}
+
+function showRoleList(){  
+    $.ajax({
+        url: '/user-management/roles',
+        success: function(data) {
+            $("div#tabs-roles").html(data);
+            $("#role-table").tablesorter();
         }
     });
 }
@@ -54,11 +65,11 @@ function removeUser(name){
 <div id="tabs">
     <ul>
         <li><a href="#tabs-users">Users</a></li>
-        <li><a href="#tabs-groups">Groups</a></li>
+        <li><a href="#tabs-roles">Roles</a></li>
         <li><a href="#tabs-permisions">Permissions</a></li>
     </ul>
     <div id="tabs-users">loading User List</div>
-    <div id="tabs-groups">groups</div>
+    <div id="tabs-roles">roles</div>
     <div id="tabs-permisions">permissions</div>
 </div>
 

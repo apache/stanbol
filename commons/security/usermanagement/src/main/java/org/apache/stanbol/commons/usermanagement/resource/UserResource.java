@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.LockableMGraph;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.SimpleGraph;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
@@ -49,6 +51,7 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.FOAF;
 import org.apache.clerezza.rdf.ontologies.PLATFORM;
 import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.clerezza.rdf.ontologies.SIOC;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.clerezza.rdf.utils.MGraphUtils;
 import org.apache.clerezza.rdf.utils.MGraphUtils.NoSuchSubGraphException;
@@ -86,23 +89,27 @@ public class UserResource {
 		return serialized;
 	}
 
-        
-        @GET
-        @Path("users")
-        @Produces("text/html")
-        public RdfViewable listUsers(){
-            return new RdfViewable("listUser.ftl", getUserType(), this.getClass());
-        }
-        
 	@GET
-	@Path("user/{username}")
-	public RdfViewable editUser(@PathParam("username") String userName) {
-            return new RdfViewable("editUser.ftl", getUser(userName), this.getClass());
+	@Path("users")
+	@Produces("text/html")
+	public RdfViewable listUsers() {
+		return new RdfViewable("listUser.ftl", getUserType(), this.getClass());
+	}
+	
+	public GraphNode getUserType() {
+		return new GraphNode(FOAF.Agent, systemGraph);
 	}
 
 	@GET
-	@Path("view-user") 
-    @Produces("text/html")
+	@Path("user/{username}")
+	public RdfViewable editUser(@PathParam("username") String userName) {
+		return new RdfViewable("editUser.ftl", getUser(userName),
+				this.getClass());
+	}
+
+	@GET
+	@Path("view-user")
+	@Produces("text/html")
 	public RdfViewable viewUser(@QueryParam("userName") String userName) {
 		return new RdfViewable("edit.ftl", getUser(userName), this.getClass());
 	}
@@ -124,11 +131,9 @@ public class UserResource {
 
 		GraphNode userNode = getUser(currentUserName);
 
-		System.out
-				.println("BEFORE ========================================================");
-		// serializer.serialize(System.out, userNode.getNodeContext(),
-		// SupportedFormat.TURTLE);
-		serializeTriplesWithSubject(System.out, userNode);
+		// System.out
+		// .println("BEFORE ========================================================");
+		// serializeTriplesWithSubject(System.out, userNode);
 
 		if (!newUserName.equals("")) {
 			changeLiteral(userNode, PLATFORM.userName, newUserName);
@@ -145,14 +150,12 @@ public class UserResource {
 			changeResource(userNode, FOAF.mbox, new UriRef("mailto:" + email));
 		}
 
-		System.out
-				.println("AFTER ========================================================");
-		// serializer.serialize(System.out, userNode.getNodeContext(),
-		// SupportedFormat.TURTLE);
-		serializeTriplesWithSubject(System.out, userNode);
+		// System.out
+		// .println("AFTER ========================================================");
+		// serializeTriplesWithSubject(System.out, userNode);
 
-		System.out
-				.println("^^^^ ========================================================");
+		// System.out
+		// .println("^^^^ ========================================================");
 
 		URI pageUri = uriInfo.getBaseUriBuilder()
 				.path("system/console/usermanagement").build();
@@ -308,7 +311,7 @@ public class UserResource {
 					.filter(changeNode, Ontology.predicate, null).next()
 					.getObject();
 
-			System.out.println("predicateUriRef = " + predicateUriRef);
+			// System.out.println("predicateUriRef = " + predicateUriRef);
 
 			// handle old value (if it exists)
 			Iterator<Triple> iterator = inputGraph.filter(changeNode,
@@ -359,6 +362,64 @@ public class UserResource {
 				SupportedFormat.TURTLE);
 		String serialized = new String(baos.toByteArray(), "utf-8");
 		// System.out.println("User = "+serialized);
+		return Response.ok(serialized).build();
+	}
+
+	@GET
+	@Path("roles")
+	@Produces("text/html")
+	public RdfViewable listRoles() {
+		return new RdfViewable("listRole.ftl", getRoleType(), this.getClass());
+	}
+	
+	public GraphNode getRoleType() {
+		return new GraphNode(PERMISSION.Role,
+				systemGraph);
+	}
+
+	/**
+	 * RESTful access to user roles (and permissions right now - may change)
+	 * 
+	 * @param userName
+	 * @return context graph for user
+	 * @throws UnsupportedEncodingException
+	 */
+	@GET
+	@Path("roles/{username}")
+	@Produces("text/turtle")
+	public Response getUserRoles(@PathParam("username") String userName)
+			throws UnsupportedEncodingException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+		GraphNode userNode = getUser(userName);
+
+		Iterator<Resource> functionIterator = userNode
+				.getObjects(SIOC.has_function);
+
+		SimpleMGraph rolesGraph = new SimpleMGraph();
+
+		while (functionIterator.hasNext()) {
+
+			GraphNode functionNode = new GraphNode(functionIterator.next(),
+					systemGraph);
+
+			Iterator<Triple> roleIterator = systemGraph.filter(
+					(NonLiteral) functionNode.getNode(), RDF.type,
+					PERMISSION.Role);
+
+			while (roleIterator.hasNext()) {
+				Triple roleTriple = roleIterator.next();
+				// rolesGraph.add(roleTriple);
+				NonLiteral roleNode = roleTriple.getSubject();
+				SimpleGraph detailsGraph = new SimpleGraph(systemGraph.filter(
+						roleNode, null, null));
+				rolesGraph.addAll(detailsGraph);
+			}
+		}
+		// case of no roles not handled - what best to return : empty graph or
+		// 404?
+		serializer.serialize(baos, rolesGraph, SupportedFormat.TURTLE);
+		String serialized = new String(baos.toByteArray(), "utf-8");
 		return Response.ok(serialized).build();
 	}
 
@@ -453,7 +514,7 @@ public class UserResource {
 		while (oldTriples.hasNext()) {
 			Triple triple = oldTriples.next();
 
-			System.out.println("*** old triple = " + triple);
+			// System.out.println("*** old triple = " + triple);
 
 			// try {
 			// UriRef oldResource = (UriRef) triple.getObject();
@@ -538,26 +599,15 @@ public class UserResource {
 		Iterator<Triple> iter = systemGraph.filter(null, PLATFORM.userName,
 				new PlainLiteralImpl(userName));
 		if (!iter.hasNext()) {
-			System.out.println("named user not found " + userName);
+			// System.out.println("named user not found " + userName);
 			// System.out.println("\n\n\n");
 
 			return null;
 		}
 		return new GraphNode(iter.next().getSubject(), systemGraph);
 	}
-
-	// private GraphNode getNamedUser(Resource nameResource) {
-	// Iterator<Triple> iter = systemGraph.filter(null, PLATFORM.userName,
-	// nameResource);
-	// if (!iter.hasNext()) {
-	// return null;
-	// }
-	// return new GraphNode(iter.next().getSubject(), systemGraph);
-	// }
-
-	public GraphNode getUserType() {
-		return new GraphNode(FOAF.Agent, systemGraph);
-	}
+	
+	
 
 	public Set<GraphNode> getUsers() {
 		return getResourcesOfType(FOAF.Agent);
