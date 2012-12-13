@@ -3,7 +3,7 @@ Bob Marley was born in Kingston, Jamaica.
 
 = EXPECT =
 Description: Kingston must be found
-http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Kingston%2C_Jamaica
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Kingston,_Jamaica
 
 Description: Bob Marley must be found as a musical artist
 http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist

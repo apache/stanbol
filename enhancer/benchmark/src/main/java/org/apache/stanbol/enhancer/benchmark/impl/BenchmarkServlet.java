@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.benchmark.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
@@ -37,7 +38,10 @@ import org.apache.commons.io.LineIterator;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.stanbol.enhancer.benchmark.Benchmark;
 import org.apache.stanbol.enhancer.benchmark.BenchmarkParser;
+import org.apache.stanbol.enhancer.servicesapi.Chain;
+import org.apache.stanbol.enhancer.servicesapi.ChainManager;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.velocity.Template;
@@ -71,14 +75,22 @@ public class BenchmarkServlet extends HttpServlet {
     
     @Reference
     private Serializer graphSerializer;
-    
+    /**
+     * Needed to lookup active enhancement changes as parsed by {@link ChainState}
+     */
+    @Reference
+    private ChainManager chainManager;
+   
     public static final String PARAM_CONTENT = "content";
+    private static final String PARAM_CHAIN = "chain";
+    
     public static final String DEFAULT_MOUNT_PATH = "/benchmark";
     public static final String DEFAULT_BENCHMARK = "default.txt";
     public static final String EXAMPLE_BENCHMARKS_RESOURCE_ROOT = "/examples";
     
     @Property(value=DEFAULT_MOUNT_PATH)
     public static final String MOUNT_PATH_PROPERTY = "mount.path";
+
     private String mountPath; 
     private final VelocityEngine velocity = new VelocityEngine();
     
@@ -201,12 +213,27 @@ public class BenchmarkServlet extends HttpServlet {
         if(content == null) {
             throw new ServletException("Missing " + PARAM_CONTENT + " parameter");
         }
-        
+        String chainName = request.getParameter(PARAM_CHAIN);
         final Template t = velocity.getTemplate("/velocity/benchmark-results.html");
         final VelocityContext ctx = getVelocityContext(request, "Benchmark Results");
         ctx.put("contentItemFactory", ciFactory);
         ctx.put("jobManager", jobManager);
-        ctx.put("benchmarks", parser.parse(new StringReader(content)));
+        List<? extends Benchmark> benchmarks = parser.parse(new StringReader(content));
+        if(chainName != null && !chainName.isEmpty()){
+            Chain chain = chainManager.getChain(chainName);
+            if(chain == null){
+                response.setStatus(404);
+                PrintWriter w = response.getWriter();
+                w.println("Unable to perform benchmark on EnhancementChain '"
+                    +chainName+"' because no chain with that name is active!");
+                IOUtils.closeQuietly(w);
+                return;
+            }
+            for(Benchmark benchmark : benchmarks){
+                benchmark.setChain(chain);
+            }
+        }
+        ctx.put("benchmarks", benchmarks);
         ctx.put("graphFormatter", new GraphFormatter(graphSerializer));
         
         response.setContentType("text/html");

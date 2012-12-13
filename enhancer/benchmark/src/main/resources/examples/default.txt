@@ -13,7 +13,7 @@ Marley was born in Kingston, Jamaica.
 # one enhancement must match all lines in the group
 
 Description: Kingston must be found
-http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Kingston%2C_Jamaica
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Kingston,_Jamaica
 
 Description: This one should fail
 http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Basel
