@@ -61,6 +61,8 @@ public class AlternateLabelProcessor implements EntityProcessor {
         private final String lang;
         private final boolean preferred;
         private final boolean shortName;
+        private boolean colloquial;
+        private boolean historic;
         private static final String TRUE = "1";
         protected FeatureName(String line){
             LineTokenizer t = new LineTokenizer(line);
@@ -93,6 +95,10 @@ public class AlternateLabelProcessor implements EntityProcessor {
             this.preferred = act != null && act.equals(TRUE);
             act = t.next();
             this.shortName = act != null && act.equals(TRUE);
+            act = t.next();
+            this.colloquial = act != null && act.equals(TRUE);
+            act = t.next();
+            this.historic = act != null && act.equals(TRUE);
         }
         public final Integer getGeonameID() {
             return geonameID;
@@ -108,6 +114,12 @@ public class AlternateLabelProcessor implements EntityProcessor {
         }
         public final boolean isShortName() {
             return shortName;
+        }
+        public final boolean isColloquial() {
+            return colloquial;
+        }
+        public final boolean isHistoric() {
+            return historic;
         }
         public final boolean isNaturalLanguageLabel(){
             return type == NameType.naturalLanguage;
@@ -257,6 +269,7 @@ public class AlternateLabelProcessor implements EntityProcessor {
             List<String> postalCodes = new ArrayList<String>();
             List<URL> wikipediaLinks = new ArrayList<URL>();
             List<Text> shortNames = new ArrayList<Text>();
+            List<Text> colloquialNames = new ArrayList<Text>();
             for(FeatureName name : alternateNames){
                 if(name.isNaturalLanguageLabel()){
                     Text act = vf.createText(name.getName(),name.getLang());
@@ -267,6 +280,9 @@ public class AlternateLabelProcessor implements EntityProcessor {
                     }
                     if(name.isShortName()){
                         shortNames.add(act);
+                    }
+                    if(name.isColloquial()){
+                        colloquialNames.add(act);
                     }
                 } else if(name.getLabelType() == NameType.postal){
                     postalCodes.add(name.getName());
@@ -295,6 +311,9 @@ public class AlternateLabelProcessor implements EntityProcessor {
             }
             if(!shortNames.isEmpty()){
                 source.add(GeonamesPropertyEnum.gn_shortName.toString(), shortNames);
+            }
+            if(!colloquialNames.isEmpty()){
+                source.add(GeonamesPropertyEnum.gn_colloquialName.toString(), colloquialNames);
             }
         }
         return source;

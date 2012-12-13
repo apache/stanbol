@@ -361,8 +361,8 @@ public class GeonamesIndexingSource implements EntityDataIterable, ResourceImpor
                         log.warn(String.format("Unable to parse modificationDate for geonamesID %s from value %s",doc.getId(),modDateString));
                     }
                 }
-                //and add geonames.org as the creator!
-                doc.add(GeonamesPropertyEnum.dc_creator.toString(),"http://www.geonames.org/");
+                //no creator as this is anyway provided by attribution
+                //doc.add(GeonamesPropertyEnum.dc_creator.toString(),"http://www.geonames.org/");
                 return doc;
             }
         };

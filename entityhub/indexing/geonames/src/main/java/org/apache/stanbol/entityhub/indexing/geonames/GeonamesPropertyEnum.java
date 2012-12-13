@@ -48,6 +48,7 @@ public enum GeonamesPropertyEnum {
     gn_name("name"),
     gn_population("population"),
     gn_shortName("shortName"),
+    gn_colloquialName("colloquialName"),
     gn_postalCode("postalCode"),
     geo_lat(GeonamesPropertyEnum.geo,"lat"),
     geo_long(GeonamesPropertyEnum.geo,"long"),
