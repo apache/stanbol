@@ -57,13 +57,11 @@ Tutorials on Stanbol Contenthub can be found in the following links:<br/>
   </tr>
   <tr>
     <th>Produces</th>
-    <td>uri of the newly created contentitem</td>
-  </tr>
-  <tr>
-    <th>Throws</th>
-    <td>
-      URISyntaxException<br>
-      StoreException
+    <td>Varies based on the <b>Accept</b> header:
+      <ul>
+        <li><b>text/html:</b> HTTP 303 (SEE OTHER) including the full URI representing the newly created ContentItem in the Contenthub.</li>
+        <li><b>otherwise:</b> HTTP 201 (CREATED) including the full URI representing the newly created ContentItem in the Contenthub.</li>
+      </ul>
     </td>
   </tr>
 </tbody>
@@ -79,7 +77,7 @@ With following curl command, a ContentItem is created using the data specified i
 </pre>
 </div>
 
-In the example below, metadata of the ContentItem is set with the <b>metadata</b> parameter. Note that the name of the metadata file is set as the URI of the ContentItem. So, it is suggested that the name of the file would start with <b>urn:</b> prefix by convention to provide valid URI for the ContentItem. 
+In the example below, metadata of the ContentItem is set with the <b>metadata</b> parameter. Note that the name of the metadata file is set as the URI of the ContentItem. So, it is suggested that the name of the file would start with <b>urn:</b> prefix by convention to provide valid URI for the ContentItem. In this case, since the ContentItem has already enhancements, it is not re-enhanced through the Enhancer component. 
 
 <div class="preParent">
   <img onClick="javascript:getLine(this.parentNode);" class="copyImg" src="${it.staticRootUrl}/contenthub/images/copy_icon_16.png" title="Get command in a single line" />
@@ -98,6 +96,16 @@ It is also possible to specify a custom URI for the ContentItem as in the exampl
 <div id="curl2_1" class="curlLine">curl -i -F "metadata=@metadata_file;type=application/rdf+xml" -F "content=I live in London.;type=text/plain" "http://localhost:8080/contenthub/contenthub/store?uri=urn:my-content-item3"<hr/></div>curl -i -F "metadata=@metadata_file;type=application/rdf+xml" \
         -F "content=I live in London.;type=text/plain" \
      "http://localhost:8080/contenthub/contenthub/store?uri=urn:my-content-item3"
+</pre>
+</div>
+
+The following one is an example representing the submission of a ContentItem to another index. The submitted the content will be enhanced by the Enhancement Engines included in the speficied chain.
+<div class="preParent">
+  <img onClick="javascript:getLine(this.parentNode);" class="copyImg" src="${it.staticRootUrl}/contenthub/images/copy_icon_16.png" title="Get command in a single line" />
+<pre>
+<div id="curl3" class="curlLine">curl -i -F "content=I live in Berlin.;type=text/plain" "http://localhost:8080/contenthub/contenthub/store?uri=urn:my-content-item3&chain=dbpedia-proper-noun"<hr/></div>curl -i \
+        -F "content=I live in Berlin.;type=text/plain" \
+     "http://localhost:8080/contenthub/myindex/store?uri=urn:my-content-item3&chain=dbpedia-proper-noun"
 </pre>
 </div>
 
@@ -126,15 +134,7 @@ It is also possible to specify a custom URI for the ContentItem as in the exampl
   </tr>
   <tr>
     <th>Produces</th>
-    <td>Redirects to "contenthub/{indexName}/store/content/uri" which shows the content item in the HTML view.</td>
-  </tr>
-  <tr>
-    <th>Throws</th>
-    <td>
-      URISyntaxException<br>
-      EngineException<br>
-      StoreException
-    </td>
+    <td>HTTP 201 (CREATED) including the full URI representing the newly created ContentItem in the Contenthub.</td>
   </tr>
 </tbody>
 </table>
@@ -173,17 +173,7 @@ It is also possible to specify a custom URI for the ContentItem as in the exampl
   </tr>
   <tr>
     <th>Produces</th>
-    <td>Redirects to "contenthub/{indexName}/store/content/{uri}" which shows the content item in the HTML view.</td>
-  </tr>
-  <tr>
-    <th>Throws</th>
-    <td>
-      URISyntaxException<br>
-      EngineException<br>
-      MalformedURLException<br>
-      IOException<br>
-      StoreException
-    </td>
+    <td>HTTP 303 (SEE OTHER) including the full URI representing the newly created ContentItem in the Contenthub.</td>
   </tr>
 </tbody>
 </table>
@@ -216,7 +206,7 @@ It is also possible to specify a custom URI for the ContentItem as in the exampl
   </tr>
   <tr>
     <th>Request</th>
-    <td>DELETE /contenthub/{indexName}/store/{uri}</td>
+    <td>DELETE /contenthub/{indexName}/store, /contenthub/{indexName}/store/{uri}</td>
   </tr>
   <tr>
     <th>Parameter</th>
@@ -224,23 +214,18 @@ It is also possible to specify a custom URI for the ContentItem as in the exampl
   </tr>
   <tr>
     <th>Produces</th>
-    <td>HTTP OK</td>
-  </tr>
-  <tr>
-    <th>Throws</th>
-    <td>StoreException</td>
+    <td>HTTP 200 (OK)</td>
   </tr>
 </tbody>
 </table>
 <h4>Example</h4>
-<pre>curl -i -X DELETE "http://localhost:8080/contenthub/contenthub/store/example-uri-1234"</pre>
-
+<pre>curl -i -X DELETE "http://localhost:8080/contenthub/contenthub/store/urn:my-content-item4"</pre>
+<pre>curl -i -X DELETE "http://localhost:8080/contenthub/contenthub/store?uri=urn:my-content-item4"</pre>
 <hr>
 
 
-<h3>Subresources</h3>
+<h3>Cool URI handler</h3>
 
-<h4>Subresource /content</h4>  
 <table>
 <tbody>
   <tr>
@@ -257,17 +242,29 @@ It is also possible to specify a custom URI for the ContentItem as in the exampl
   </tr>
   <tr>
     <th>Produces</th>
-    <td>Depending on requested media type, it can produce HTML, RDF or raw binary content</td>
+    <td>
+      <ul>
+        <li>
+	      HTTP 307 (TEMPORARY REDIRECT) with a URI varying based on the Accept header<br/>
+	      <ul>
+	        <li><b>text/html:</b> HTTP 307 (TEMPORARY REDIRECT) to the browser view of the specified ContentItem.</li>
+	        <li><b>application/rdf+xml, text/turtle, application/x-turtle, text/rdf+nt, text/rdf+n3 or application/rdf+json:</b> HTTP 307 (TEMPORARY REDIRECT) to the metadata of the specified ContentItem.</li>
+	        <li><b>otherwise: </b> HTTP 307 (TEMPORARY REDIRECT) to the raw content of the specified ContentItem.</li>
+	      </ul>
+	    </li>
+	    <li>HTTP 400 (BAD REQUEST) if there is a missing parameter in the request.</li>
+        <li>HTTP 404 (NOT FOUND) if there is no ContentItem corresponding to the specified URI.</li>
+    </td>
   </tr>
 </tbody>
 </table>
 <h4>Example</h4>
-<pre>curl -i -X GET "http://localhost:8080/contenthub/contenthub/store/content/uri-234231"</pre>
+To get the metadata of the content item the following command can be run: 
+<pre>curl -i -X GET -H "Accept: application/rdf+json" "http://localhost:8080/contenthub/contenthub/store/content/urn:my-content-item3"</pre>
 
 <hr>
 
-
-<h4>Subresource /download</h4>
+<h3>Downlading metadata or raw content of ContentItems</h3>
 <table>
 <tbody>
   <tr>
@@ -288,18 +285,24 @@ It is also possible to specify a custom URI for the ContentItem as in the exampl
   </tr>
   <tr>
     <th>Produces</th>
-    <td>200 with a file containing metadata or raw data of the content item</td>
+    <td>
+      <ul>
+        <li>HTTP 200 (OK) with a file containing metadata or raw data of the content item</li>
+        <li>HTTP 400 (BAD REQUEST) if there is a missing parameter in the request.</li>
+        <li>HTTP 404 (NOT FOUND) if there is no ContentItem corresponding to the specified URI.</li>
+      </ul>
+    </td>
   </tr>
 </tbody>
 </table>
 <h4>Example</h4>
-<pre>curl -i -X GET "http://localhost:8080/contenthub/contenthub/store/download/metadata/5d85e7c63cc48c0985?format=application%2Fjson"</pre>
-<pre>curl -i -X GET "http://localhost:8080/contenthub/contenthub/store/download/raw/5d85e7c63cc48c01b8d4"</pre>
+<pre>curl -i -X GET "http://localhost:8080/contenthub/contenthub/store/download/metadata/urn:my-content-item3?format=application%2Fjson"</pre>
+<pre>curl -i -X GET "http://localhost:8080/contenthub/contenthub/store/download/raw/urn:my-content-item3"</pre>
 
 <hr>
 
 
-<h4>Subresource /metadata</h4>  
+<h3Viewing metadata of the ContentItem</h3>  
 <table>
 <tbody>
   <tr>
@@ -316,16 +319,22 @@ It is also possible to specify a custom URI for the ContentItem as in the exampl
   </tr>
   <tr>
     <th>Produces</th>
-    <td>200 with RDF representation of the metadata of the content item.</td>
+    <td>
+      <ul>
+        <li>HTTP 200 (OK) with RDF representation of the metadata of the content item.</li>
+        <li>HTTP 400 (BAD REQUEST) if there is a missing parameter in the request.</li>
+        <li>HTTP 404 (NOT FOUND) if there is no ContentItem corresponding to the specified URI.</li>
+      </ul>
+   </td>
   </tr>
 </tbody>
 </table>
 <h4>Example</h4>
-<pre>curl -i -X GET "http://localhost:8080/contenthub/contenthub/store/metadata/sha1-5d85e7c63cc48c01"</pre>
+<pre>curl -i -X GET "http://localhost:8080/contenthub/contenthub/store/metadata/urn:my-content-item3"</pre>
 <hr>
 
 
-<h4>Subresource /raw</h4>
+<h3Viewing the raw content of the ContentItem</h3>  
 <table>
 <tbody>
   <tr>
@@ -342,14 +351,18 @@ It is also possible to specify a custom URI for the ContentItem as in the exampl
   </tr>
   <tr>
     <th>Produces</th>
-    <td>200 with the raw data of the content item</td>
+    <td>
+      <ul>
+        <li>HTTP 200 (OK) with the raw data of the content item</li>
+        <li>HTTP 400 (BAD REQUEST) if there is a missing parameter in the request.</li>
+        <li>HTTP 404 (NOT FOUND) if there is no ContentItem corresponding to the specified URI.</li>
+      </ul>
+    </td>
   </tr>
 </tbody>
 </table>
 <h4>Example</h4>
-<pre>curl -i -X GET "http://localhost:8080/contenthub/contenthub/store/raw/testuri2343124"</pre>
-
-<hr>
+<pre>curl -i -X GET "http://localhost:8080/contenthub/contenthub/store/raw/urn:my-content-item3"</pre>
 
 <script>
 function selectText(element) {
