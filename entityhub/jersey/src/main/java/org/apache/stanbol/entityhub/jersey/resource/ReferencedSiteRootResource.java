@@ -17,10 +17,10 @@
 package org.apache.stanbol.entityhub.jersey.resource;
 
 import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.POST;
-import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.OPTIONS;
+import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -43,16 +43,15 @@ import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.transformQu
 
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -80,6 +79,8 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -91,7 +92,6 @@ import org.apache.stanbol.entityhub.ldpath.backend.SiteBackend;
 import org.apache.stanbol.entityhub.ldpath.query.LDPathSelect;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -101,19 +101,17 @@ import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.site.License;
 import org.apache.stanbol.entityhub.servicesapi.site.ManagedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ManagedSiteException;
-import org.apache.stanbol.entityhub.servicesapi.site.Site;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration;
-import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.Site;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.newmedialab.ldpath.exception.LDPathParseException;
 import at.newmedialab.ldpath.model.programs.Program;
-
-import com.hp.hpl.jena.reasoner.rulesys.builtins.GE;
 
 /**
  * Resource to provide a REST API for the {@link SiteManager}
@@ -159,6 +157,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
     
     private Site site;
+
+    private NamespacePrefixService nsPrefixService;
     
     public ReferencedSiteRootResource(@PathParam(value = "site") String siteId,
                                       @Context ServletContext servletContext) {
@@ -179,6 +179,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         if(site instanceof ManagedSite){
             log.debug("   ... init ManagedSite");
         }
+        nsPrefixService = ContextHelper.getServiceFromContext(NamespacePrefixService.class, servletContext);
     }
 
     @OPTIONS
@@ -524,7 +525,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @POST
     @Path("/find")
     public Response findEntity(@FormParam(value = "name") String name,
-                               @FormParam(value = "field") String field,
+                               @FormParam(value = "field") String parsedField,
                                @FormParam(value = "lang") String language,
                                // @FormParam(value="select") String select,
                                @FormParam(value = "limit") Integer limit,
@@ -548,16 +549,27 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
-        if (field == null) {
-            field = DEFAULT_FIND_FIELD;
+        final String property;
+        if (parsedField == null) {
+            property = DEFAULT_FIND_FIELD;
         } else {
-            field = field.trim();
-            if (field.isEmpty()) {
-                field = DEFAULT_FIND_FIELD;
+            parsedField = parsedField.trim();
+            if (parsedField.isEmpty()) {
+                property = DEFAULT_FIND_FIELD;
+            } else {
+                property = nsPrefixService.getFullName(parsedField);
+                if(property == null){
+                    String messsage = String.format("The prefix '%s' of the parsed field '%' is not "
+                        + "mapped to any namespace. Please parse the full URI instead!\n",
+                        NamespaceMappingUtils.getPrefix(parsedField),parsedField);
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity(messsage)
+                            .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+                }
             }
         }
         return executeQuery(createFieldQueryForFindRequest(
-                name, field, language,
+                name, property, language,
                 limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, 
                 offset,ldpath),
             headers);
@@ -738,16 +750,16 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         rep.add(namespace+"localMode", site.supportsLocalMode());
         rep.add(namespace+"supportsSearch", site.supportsSearch());
         SiteConfiguration config = site.getConfiguration();
-        rep.add(NamespaceEnum.rdfs+"label", config.getName());
-        rep.add(NamespaceEnum.rdf+"type", valueFactory.createReference(namespace+"ReferencedSite"));
+        rep.add("http://www.w3.org/2000/01/rdf-schema#label", config.getName());
+        rep.add("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", valueFactory.createReference(namespace+"ReferencedSite"));
         if(config.getDescription() != null){
-            rep.add(NamespaceEnum.rdfs+"description", config.getDescription());
+            rep.add("http://www.w3.org/2000/01/rdf-schema#description", config.getDescription());
         }
         if(config.getAttribution() != null){
-            rep.add(NamespaceEnum.cc.getNamespace()+"attributionName", config.getAttribution());
+            rep.add("http://creativecommons.org/ns#attributionName", config.getAttribution());
         }
         if(config.getAttributionUrl() != null){
-            rep.add(NamespaceEnum.cc.getNamespace()+"attributionURL", config.getAttributionUrl());
+            rep.add("http://creativecommons.org/ns#attributionURL", config.getAttributionUrl());
         }
         //add the licenses
         if(config.getLicenses() != null){
@@ -764,10 +776,10 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                 }
                 //if defined add the name to dc:license
                 if(license.getName() != null){
-                    rep.add(NamespaceEnum.dcTerms.getNamespace()+"license", licenseUrl);
+                    rep.add("http://purl.org/dc/terms/license", licenseUrl);
                 }
                 //link to the license via cc:license
-                rep.add(NamespaceEnum.cc.getNamespace()+"license", licenseUrl);
+                rep.add("http://creativecommons.org/ns#license", licenseUrl);
             }
         }
         if(config.getEntityPrefixes() != null){
@@ -797,15 +809,15 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         RdfRepresentation rep = valueFactory.createRepresentation(id);
         
         if(license.getName() != null){
-            rep.add(NamespaceEnum.dcTerms.getNamespace()+"license", license.getName());
-            rep.add(NamespaceEnum.rdfs+"label", license.getName());
-            rep.add(NamespaceEnum.dcTerms+"title", license.getName());
+            rep.add("http://purl.org/dc/terms/license", license.getName());
+            rep.add("http://www.w3.org/2000/01/rdf-schema#label", license.getName());
+            rep.add("http://purl.org/dc/terms/title", license.getName());
         }
         if(license.getText() != null){
-            rep.add(NamespaceEnum.rdfs+"description", license.getText());
+            rep.add("http://www.w3.org/2000/01/rdf-schema#description", license.getText());
             
         }
-        rep.add(NamespaceEnum.cc.getNamespace()+"licenseUrl", 
+        rep.add("http://creativecommons.org/ns#licenseUrl", 
             license.getUrl() == null ? id:license.getUrl());
         return rep;
     }

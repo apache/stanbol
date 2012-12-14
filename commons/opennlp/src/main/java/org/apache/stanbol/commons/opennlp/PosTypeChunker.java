@@ -38,6 +38,7 @@ import opennlp.tools.util.Span;
  *   <li> Check if it is possible to implement the {@link opennlp.tools.chunker.Chunker} interface
  *   </ul>
  * @author Rupert Westenthaler
+ * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
  *
  */
 public class PosTypeChunker {

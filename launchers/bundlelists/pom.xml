@@ -66,6 +66,16 @@
     <module>opennlp</module>
     <module>sentimentdata</module>
 
+    <!-- Components -->
+    <module>enhancer</module>
+    <module>entityhub</module>
+    <module>cmsadapter</module>
+    <module>contenthub</module>
+    <module>factstore</module>
+    <module>ontologymanager</module>
+    <module>reasoners</module>
+    <module>rules</module>
+
     <!-- Specific features -->
     <module>authentication</module>
     <module>zzshell</module>

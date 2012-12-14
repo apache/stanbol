@@ -46,8 +46,6 @@ public class EnhancerVieWebFragment implements WebFragment {
 
     private static final String NAME = "enhancervie";
 
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/commons/web/vie/static";
-
     private BundleContext bundleContext;
     
 
@@ -73,10 +71,7 @@ public class EnhancerVieWebFragment implements WebFragment {
         return Collections.emptySet();
     }
 
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
-    }
+
 
     @Override
     public List<LinkResource> getLinkResources() {
@@ -113,11 +108,6 @@ public class EnhancerVieWebFragment implements WebFragment {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
         links.add(new NavigationLink("enhancervie", "/enhancer VIE", "/imports/enhancervieDescription.ftl", 20));
         return links;
-    }
-
-    @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
     }
 
 }

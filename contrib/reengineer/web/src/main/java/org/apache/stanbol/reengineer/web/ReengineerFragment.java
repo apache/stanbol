@@ -37,9 +37,6 @@ import org.apache.stanbol.reengineer.web.resources.ReengineerResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
-
 
 /**
  * Implementation of WebFragment for the Stanbol Reengineer end-point.
@@ -54,10 +51,6 @@ public class ReengineerFragment implements WebFragment{
 
     private static final String NAME = "reengineer";
 
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/reengineer/web/static";
-
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/reengineer/web/templates";
-
     private BundleContext bundleContext;
     
     @Reference
@@ -65,11 +58,6 @@ public class ReengineerFragment implements WebFragment{
     
     @Reference
     ReengineerManager reengineeringManager;
-    
-    @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
 
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
@@ -110,16 +98,6 @@ public class ReengineerFragment implements WebFragment{
         List<ScriptResource> resources = new ArrayList<ScriptResource>();
         resources.add(new ScriptResource("text/javascript", "actions/actions.js", this, 10));
         return resources;
-    }
-
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
-    }
-
-    @Override
-    public TemplateLoader getTemplateLoader() {
-        return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
     }
 
     @Activate

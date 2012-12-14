@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.entityhub.core.site;
 
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
@@ -40,6 +41,7 @@ public final class CacheUtils {
     /**
      * Loads the base mappings form the parsed Yard
      * @param yard The yard
+     * @param nsPrefixService if present '{prefix}:{localname}' configurations are
      * @return The baseMappings
      * @throws YardException on any Error while getting the Representation holding
      * the Configuration from the Yard.
@@ -47,13 +49,13 @@ public final class CacheUtils {
      * valid.
      * @throws IllegalArgumentException if <code>null</code> is parsed as {@link Yard}
      */
-    public static FieldMapper loadBaseMappings(Yard yard) throws YardException,CacheInitialisationException{
+    public static FieldMapper loadBaseMappings(Yard yard, NamespacePrefixService nsPrefixService) throws YardException,CacheInitialisationException{
         if(yard == null){
             throw new IllegalArgumentException("The parsed Yard MUST NOT be NULL!");
         }
         Representation baseConfig = yard.getRepresentation(Cache.BASE_CONFIGURATION_URI);
         if(baseConfig != null){
-            FieldMapper mapper = readFieldConfig(yard,baseConfig);
+            FieldMapper mapper = readFieldConfig(yard,baseConfig, nsPrefixService);
             if(mapper == null){
                 String msg = "Invalid Base Configuration: Unable to parse FieldMappings from Field "+Cache.FIELD_MAPPING_CONFIG_FIELD;
                 log.error(msg);
@@ -73,18 +75,19 @@ public final class CacheUtils {
      * Loads the additional field mappings used by this cache from the yard.
      * This method sets the {@link #baseMapper} field during initialisation.
      * @param yard The yard
+     * @param nsPrefixService if present '{prefix}:{localname}' configurations are
      * @return The parsed mappings or <code>null</code> if no found
      * @throws YardException on any Error while reading the {@link Representation}
      * holding the configuration from the {@link Yard}.
      * @throws IllegalArgumentException if <code>null</code> is parsed as {@link Yard}.
      */
-    protected static FieldMapper loadAdditionalMappings(Yard yard) throws YardException {
+    protected static FieldMapper loadAdditionalMappings(Yard yard, NamespacePrefixService nsPrefixService) throws YardException {
         if(yard == null){
             throw new IllegalArgumentException("The parsed Yard MUST NOT be NULL!");
         }
         Representation addConfig = yard.getRepresentation(Cache.ADDITIONAL_CONFIGURATION_URI);
         if(addConfig != null){
-            FieldMapper mapper = readFieldConfig(yard,addConfig);
+            FieldMapper mapper = readFieldConfig(yard,addConfig, nsPrefixService);
             if(mapper == null){
                 log.warn("Invalid Additinal Configuration: Unable to parse FieldMappings from Field "+Cache.FIELD_MAPPING_CONFIG_FIELD+"-> return NULL (no additional Configuration)");
                 if(log.isWarnEnabled()){
@@ -100,15 +103,17 @@ public final class CacheUtils {
      * Reads the field mapping config from an document
      * @param yard the yard of the parsed Representation
      * @param config the configuration MUST NOT be <code>null</code>
+     * @param nsPrefixService if present '{prefix}:{localname}' configurations are
+     * supported for the fieldmappings used by the cache. 
      * @return A field mapper configured based on the configuration in the parsed {@link Representation}
      * @throws if the parsed {@link Representation} does not contain a value for {@value CacheConstants.FIELD_MAPPING_CONFIG_FIELD}.
      */
-    private static FieldMapper readFieldConfig(Yard yard,Representation config) {
+    private static FieldMapper readFieldConfig(Yard yard,Representation config, NamespacePrefixService nsPrefixService) {
         Object mappingValue = config.getFirst(Cache.FIELD_MAPPING_CONFIG_FIELD);
         if(mappingValue != null){
             DefaultFieldMapperImpl fieldMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
             for(String mappingStirng : mappingValue.toString().split("\n")){
-                FieldMapping mapping = FieldMappingUtils.parseFieldMapping(mappingStirng);
+                FieldMapping mapping = FieldMappingUtils.parseFieldMapping(mappingStirng, nsPrefixService);
                 if(mapping != null){
                     log.info("  > add Mapping: "+mappingStirng);
                     fieldMapper.addMapping(mapping);

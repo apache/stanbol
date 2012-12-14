@@ -39,7 +39,9 @@ import opennlp.tools.util.Span;
 import org.apache.felix.scr.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
+ */
 public class TextAnalyzer {
     
     private static final Logger log = LoggerFactory.getLogger(TextAnalyzer.class);
@@ -48,6 +50,9 @@ public class TextAnalyzer {
     
     private final TextAnalyzerConfig config;
     
+    /**
+     * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
+     */
     public static final class TextAnalyzerConfig {
         protected boolean forceSimpleTokenizer = false; //default to false
         protected boolean forceKeywordTokenizer = false; //default to false
@@ -351,6 +356,9 @@ public class TextAnalyzer {
         return new TextAnalysisIterator(text, language);
     }
     
+    /**
+     * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
+     */
     private final class TextAnalysisIterator implements Iterator<AnalysedText> {
         private final String text;
         private final Span[] sentenceSpans;
@@ -390,6 +398,9 @@ public class TextAnalyzer {
         }
     }
 
+    /**
+     * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
+     */
     public class AnalysedText {
         //NOTE: Members are protected to allow the JVM direct access
         /**
@@ -542,6 +553,9 @@ public class TextAnalyzer {
             return offset;
         }
 
+        /**
+         * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
+         */
         public class Token {
             //NOTE: Members are protected to allow the JVM direct access
             protected final Span span;
@@ -632,6 +646,9 @@ public class TextAnalyzer {
                                     Arrays.toString(posTags)):"");
             }
         }
+        /**
+         * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
+         */
         public class Chunk {
             //NOTE: Members are protected to allow the JVM direct access
             /**

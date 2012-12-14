@@ -74,11 +74,6 @@ public class HomeWebFragment implements WebFragment {
     }
 
     @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
-    }
-
-    @Override
     public List<LinkResource> getLinkResources() {
         List<LinkResource> resources = new ArrayList<LinkResource>();
         resources.add(new LinkResource("stylesheet", "style/stanbol.css", this, 0));
@@ -90,11 +85,6 @@ public class HomeWebFragment implements WebFragment {
         List<ScriptResource> resources = new ArrayList<ScriptResource>();
         resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.4.2.js", this, 0));
         return resources;
-    }
-
-    @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
     }
 
     @Override

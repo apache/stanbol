@@ -22,7 +22,7 @@
 <tbody>
   <tr>
     <th>Description</th>
-    <td>HTTP GET method which returns all LDPath programs residing in Contenthub. LDPath programs are uniquely dentified by their names. Returning JSON string presents each LDPath program in string format aligned with its name.</td>
+    <td>HTTP GET method which returns all LDPath programs residing in Contenthub. LDPath programs are uniquely dentified by their names. Returning JSON string presents each LDPath program in string format aligned with its name. However, to get the proper response <b>Accept</b> header should be set as <b>application/json</b></td>
   </tr>
   <tr>
     <th>Request</th>
@@ -30,7 +30,7 @@
   </tr>
   <tr>
     <th>Produces</th>
-    <td>JSON string of <code>name:program</code> pairs.</td>
+    <td>HTTP 200 (OK) together with the JSON representation of <code>name:program</code> pairs of LDPath programs.</td>
   </tr>
 </tbody>
 </table>
@@ -45,7 +45,7 @@
 <tbody>
   <tr>
     <th>Description</th>
-    <td>HTTP POST method which saves an LDPath program into the persistent store of Contenthub.</td>
+    <td>HTTP POST method which saves an LDPath program into the persistent store of Contenthub. Currently this service only consumes requests having <b>application/x-www-form-urlencoded</b> as the value of <b>Content-Type</b> header.</td>
   </tr>
   <tr>
     <th>Request</th>
@@ -60,11 +60,12 @@
   </tr>
   <tr>
     <th>Produces</th>
-    <td>HTTP OK(200) or BAD REQUEST(400)</td>
-  </tr>
-  <tr>
-    <th>Throws</th>
-    <td>LDPathException</td>
+    <td>
+      <ul>
+        <li>HTTP 201 (CREATED) together with the full URI representing the new index in the Contenthub.</li>
+        <li>HTTP 400 (BAD REQUEST) if one of the required parameters is missing in the request.</li>
+       </ul>
+    </td>
   </tr>
 </tbody>
 </table>
@@ -93,7 +94,7 @@
   </tr>
   <tr>
     <th>Request</th>
-    <td>GET /contenthub/ldpath/program</td>
+    <td>GET /contenthub/ldpath/program/{name}, contenthub/ldpath/program</td>
   </tr>
   <tr>
     <th>Parameter</th>
@@ -101,11 +102,17 @@
   </tr>
   <tr>
     <th>Produces</th>
-    <td>LDPath program in String format or HTTP NOT FOUND(404)</td>
+    <td>
+      <ul>
+        <li>HTTP 200 (OK) together with the actual LDPath program.</li>
+	    <li>HTTP 400 (BAD REQUEST) if there is a missing parameter in the request.</li>
+        <li>HTTP 404 (NOT FOUND) if there is no LDPath program corresponding to the specified name.</li>
+    </td>
   </tr>
 </tbody>
 </table>
 <h4>Example</h4>
+<pre>curl -i "http://localhost:8080/contenthub/ldpath/program/universities"</pre>
 <pre>curl -i "http://localhost:8080/contenthub/ldpath/program?name=universities"</pre>
 
 <hr>
@@ -120,7 +127,7 @@
   </tr>
   <tr>
     <th>Request</th>
-    <td>DELETE /contenthub/ldpath/program/{name}</td>
+    <td>DELETE /contenthub/ldpath/program/{name}, /contenthub/ldpath/program</td>
   </tr>
   <tr>
     <th>Parameter</th>
@@ -128,12 +135,19 @@
   </tr>
   <tr>
     <th>Produces</th>
-    <td>HTTP OK(200)</td>
+    <td>
+      <ul>
+        <li>HTTP 200 (OK) if the existing LDPath program is deleted.</li>
+	    <li>HTTP 400 (BAD REQUEST) if there is a missing parameter in the request.</li>
+        <li>HTTP 404 (NOT FOUND) if there is no LDPath program corresponding to the specified name.</li>
+      </ul>
+    </td>
   </tr>
 </tbody>
 </table>
 <h4>Example</h4>
 <pre>curl -i -X DELETE http://localhost:8080/contenthub/ldpath/program/universities</pre>
+<pre>curl -i -X DELETE http://localhost:8080/contenthub/ldpath/program?name=universities</pre>
 
 <hr>
 
@@ -147,7 +161,7 @@
   </tr>
   <tr>
     <th>Request</th>
-    <td>GET /contenthub/ldpath/exists</td>
+    <td>GET /contenthub/ldpath/exists/{name}, /contenthub/ldpath/exists</td>
   </tr>
   <tr>
     <th>Parameter</th>
@@ -155,11 +169,18 @@
   </tr>
   <tr>
     <th>Produces</th>
-    <td>HTTP OK(200) or HTTP NOT FOUND(404)</td>
+    <td>
+      <ul>
+        <li>HTTP 200 (OK) if an LDPath program exists for the given name.</li>
+	    <li>HTTP 400 (BAD REQUEST) if there is a missing parameter in the request.</li>
+        <li>HTTP 404 (NOT FOUND) if there is no LDPath program corresponding to the specified name.</li>
+      </ul>
+    </td>
   </tr>
 </tbody>
 </table>
 <h4>Example</h4>
+<pre>curl -i http://localhost:8080/contenthub/ldpath/exists/universities</pre>
 <pre>curl -i http://localhost:8080/contenthub/ldpath/exists?name=universities</pre>
 
 <hr>

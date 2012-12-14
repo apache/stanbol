@@ -140,19 +140,23 @@ public class SiteManagerImpl implements SiteManager {
             //use a set to iterate to remove possible duplicates
             for(String prefix : new HashSet<String>(Arrays.asList(prefixArray))){
                 synchronized (prefixMap) {
-                    Collection<Site> sites = prefixMap.get(prefix);
-                    if(sites == null){
-                        sites = new CopyOnWriteArrayList<Site>();
-                        prefixMap.put(prefix, sites);
-                        //this also means that the prefix is not part of the prefixList
-                        int pos = Collections.binarySearch(prefixList, prefix);
-                        if(pos<0){
-                            prefixList.add(Math.abs(pos)-1,prefix);
+                    if(prefix == null || prefix.isEmpty()){
+                        noPrefixSites.add(referencedSite);
+                    } else {
+                        Collection<Site> sites = prefixMap.get(prefix);
+                        if(sites == null){
+                            sites = new CopyOnWriteArrayList<Site>();
+                            prefixMap.put(prefix, sites);
+                            //this also means that the prefix is not part of the prefixList
+                            int pos = Collections.binarySearch(prefixList, prefix);
+                            if(pos<0){
+                                prefixList.add(Math.abs(pos)-1,prefix);
+                            }
+                            //prefixList.add(Collections.binarySearch(prefixList, prefix)+1,prefix);
                         }
-                        //prefixList.add(Collections.binarySearch(prefixList, prefix)+1,prefix);
+                        //TODO: Sort the referencedSites based on the ServiceRanking!
+                        sites.add(referencedSite);
                     }
-                    //TODO: Sort the referencedSites based on the ServiceRanking!
-                    sites.add(referencedSite);
                 }
             }
         }

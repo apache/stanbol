@@ -25,7 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FactResultSet {
-	private static Logger logger = LoggerFactory.getLogger(FactResultSet.class);
+    
+	@SuppressWarnings("unused")
+    private static Logger logger = LoggerFactory.getLogger(FactResultSet.class);
 
 	private List<String> header;
 	private List<FactResult> rows;

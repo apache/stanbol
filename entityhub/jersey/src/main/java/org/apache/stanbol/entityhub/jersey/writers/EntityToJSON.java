@@ -36,46 +36,8 @@ final class EntityToJSON {
     private EntityToJSON() { /* do not create instances of utility classes */}
 
     static JSONObject toJSON(Entity entity) throws JSONException {
-        JSONObject jSign;
-//        if (entity instanceof Symbol) {
-//            jSign = writeSymbolAsJSON((Symbol) entity);
-//        } else if (entity instanceof EntityMapping) {
-//            jSign = writeEntityMappingAsJSON((EntityMapping) entity);
-//        } else {
-            jSign = convertEntityToJSON(entity);
-//        }
-        return jSign;
+        return convertEntityToJSON(entity);
     }
-
-//    private static JSONObject writeSymbolAsJSON(Symbol symbol) throws JSONException {
-//        JSONObject jSymbol = convertSignToJSON(symbol);
-//        jSymbol.put("label", symbol.getLabel());
-//        Iterator<Text> descriptions = symbol.getDescriptions();
-//        if (descriptions.hasNext()) {
-//            jSymbol.put("description", convertFieldValuesToJSON(descriptions));
-//        }
-//        Collection<String> value = ModelUtils.asCollection(symbol.getPredecessors());
-//        if (!value.isEmpty()) {
-//            jSymbol.put("predecessors", value);
-//        }
-//        value = ModelUtils.asCollection(symbol.getSuccessors());
-//        if (!value.isEmpty()) {
-//            jSymbol.put("successors", new JSONArray());
-//        }
-//        jSymbol.put("stateUri", symbol.getState().getUri());
-//        jSymbol.put("state", symbol.getState().name());
-//        return jSymbol;
-//    }
-
-//    private static JSONObject writeEntityMappingAsJSON(EntityMapping entityMapping) throws JSONException {
-//        JSONObject jEntityMapping = convertSignToJSON(entityMapping);
-//        jEntityMapping.put("symbol", entityMapping.getTargetId());
-//        jEntityMapping.put("entity", entityMapping.getSourceId());
-//        jEntityMapping.put("stateUri", entityMapping.getState().getUri());
-//        jEntityMapping.put("state", entityMapping.getState().name());
-//        return jEntityMapping;
-//    }
-
 
     /**
      * @param entity

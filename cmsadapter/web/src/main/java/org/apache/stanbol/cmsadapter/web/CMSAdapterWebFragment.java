@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -40,8 +39,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 @Component(immediate = true, metatype = true)
 @Service
@@ -63,11 +60,6 @@ public class CMSAdapterWebFragment implements WebFragment {
     @Override
     public String getName() {
         return NAME;
-    }
-
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
     }
 
     @Override
@@ -109,11 +101,6 @@ public class CMSAdapterWebFragment implements WebFragment {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
         links.add(new NavigationLink("cmsadapter", "/cmsadapter", "/imports/cmsadapterDescription.ftl", 80));
         return links;
-    }
-
-    @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
     }
 
 }

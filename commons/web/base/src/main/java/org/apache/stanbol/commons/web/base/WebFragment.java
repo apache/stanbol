@@ -38,14 +38,6 @@ public interface WebFragment {
     String getName();
 
     /**
-     * Java package name that is the classloading root of the static resources of the fragment to be published
-     * by the OSGi HttpService under {@code /static-url-root/fragment-name/}
-     * <p>
-     * Note: this package should be exported by the bundle.
-     */
-    String getStaticResourceClassPath();
-
-    /**
      * Set of JAX-RS resources provided as classes.
      * <p>
      * Note: those classes should be visible: use the Export-Package bundle declaration to export their
@@ -82,11 +74,5 @@ public interface WebFragment {
      * List of link descriptions to contribute to the main navigation menu.
      */
     List<NavigationLink> getNavigationLinks();
-
-    /**
-     * @return the bundle context who contributed this fragment (useful for loading the resources from the
-     *         right classloading context)
-     */
-    BundleContext getBundleContext();
 
 }

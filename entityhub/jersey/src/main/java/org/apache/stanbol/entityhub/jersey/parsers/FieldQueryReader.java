@@ -27,7 +27,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -37,11 +39,13 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.FieldQueryImpl;
 import org.apache.stanbol.entityhub.ldpath.query.LDPathFieldQueryImpl;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint.ConstraintType;
@@ -66,6 +70,16 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
     private static final ValueFactory valueFactory = InMemoryValueFactory.getInstance();
     private static final ValueConverterFactory converterFactory = ValueConverterFactory.getDefaultInstance();
     
+    private ServletContext context;
+    
+    public FieldQueryReader(@Context ServletContext context) {
+        this.context = context;
+    }
+    
+    private NamespacePrefixService getNsPrefixService(){
+        return ContextHelper.getServiceFromContext(NamespacePrefixService.class, context);
+    }
+    
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         log.debug("isReadable type {}, mediaType {}",type,mediaType);
@@ -86,8 +100,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             acceptedType = MediaType.TEXT_PLAIN_TYPE;
         }
         try {
-            return fromJSON( 
-                queryString,acceptedType);
+            return fromJSON(queryString,acceptedType, getNsPrefixService());
         } catch (JSONException e) {
             log.error("Unable to parse Request ",e);
             StringBuilder message = new StringBuilder();
@@ -117,7 +130,8 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
      * @throws JSONException
      * @throws WebApplicationException
      */
-    public static FieldQuery fromJSON(String jsonQueryString,MediaType acceptedMediaType) throws JSONException,WebApplicationException{
+    public static FieldQuery fromJSON(String jsonQueryString,MediaType acceptedMediaType, 
+                                      NamespacePrefixService nsPrefixService) throws JSONException,WebApplicationException {
         if(jsonQueryString == null){
             throw new IllegalArgumentException("The parsed JSON object MUST NOT be NULL!");
         }
@@ -150,11 +164,8 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             JSONObject jConstraint = constraints.getJSONObject(i);
             if(jConstraint.has("field")){
                 String field = jConstraint.getString("field");
-                field = NamespaceEnum.getFullName(field);
                 //check if there is already a constraint for that field
                 if(field == null || field.isEmpty()){
-//                    log.warn("The value of the key \"field\" MUST NOT be NULL nor emtpy!");
-//                    log.warn("Constraint:\n {}",jConstraint.toString(4));
                     parsingErrorMessages.append('\n');
                     parsingErrorMessages.append(
                         "Each Field Query Constraint MUST define a value for 'field'\n");
@@ -163,12 +174,23 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                     parsingErrorMessages.append('\n');
                     parsingError = true;
                     continue;
-                } else if(query.isConstrained(field)){
- //                   log.warn("Multiple constraints for field {} in parsed FieldQuery!",field);
+                }
+                String fieldUri = nsPrefixService.getFullName(field);
+                if(fieldUri == null){
+                    parsingErrorMessages.append('\n');
+                    parsingErrorMessages.append(
+                        "The 'field' '").append(field).append("uses an unknown namespace prefix '");
+                    parsingErrorMessages.append(NamespaceMappingUtils.getPrefix(field)).append("'\n");
+                    parsingErrorMessages.append("Parsed Constraint:\n");
+                    parsingErrorMessages.append(jConstraint.toString(4));
+                    parsingErrorMessages.append('\n');
+                    parsingError = true;
+                    continue;
+                }else if(query.isConstrained(fieldUri)){
                     parsingErrorMessages.append('\n');
                     parsingErrorMessages.append(
                         "The parsed Query defines multiple constraints fr the field '"
-                        +field+"'!\n");
+                        +fieldUri+"'!\n");
                     parsingErrorMessages.append("FieldQuery allows only a single Constraint for a field\n");
                     parsingErrorMessages.append("Parsed Constraints:\n");
                     parsingErrorMessages.append(constraints.toString(4));
@@ -177,7 +199,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                     continue;
                 } else {
                     try {
-                        query.setConstraint(field, parseConstraint(jConstraint));
+                        query.setConstraint(fieldUri, parseConstraint(jConstraint,nsPrefixService));
                     } catch (IllegalArgumentException e) {
                         parsingErrorMessages.append('\n');
                         parsingErrorMessages.append(e.getMessage());
@@ -209,7 +231,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         if(selected != null){
             for(int i=0;i<selected.length();i++){
                 String selectedField = selected.getString(i);
-                selectedField = NamespaceEnum.getFullName(selectedField);
+                selectedField = nsPrefixService.getFullName(selectedField);
                 if(selectedField != null && !selectedField.isEmpty()){
                     query.addSelectedField(selectedField);
                 }
@@ -243,7 +265,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         return query;
     }
 
-    private static Constraint parseConstraint(JSONObject jConstraint) throws JSONException {
+    private static Constraint parseConstraint(JSONObject jConstraint, NamespacePrefixService nsPrefixService) throws JSONException {
         if(jConstraint.has("type") && !jConstraint.isNull("type")) {
             String type = jConstraint.getString("type");
             //Event that internally "reference" is not part of the
@@ -252,15 +274,15 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             //Value constraints with the dataType Reference and AnyURI are
             //considered to represent reference constraints
             if(type.equals("reference")){
-                return parseReferenceConstraint(jConstraint);
+                return parseReferenceConstraint(jConstraint,nsPrefixService);
             } else if (type.equals(ConstraintType.value.name())){
-                return parseValueConstraint(jConstraint);
+                return parseValueConstraint(jConstraint, nsPrefixService);
             } else if (type.equals(ConstraintType.text.name())){
                 return parseTextConstraint(jConstraint);
             } else if (type.equals(ConstraintType.range.name())){
-                return parseRangeConstraint(jConstraint);
+                return parseRangeConstraint(jConstraint,nsPrefixService);
             } else if(type.equals(ConstraintType.similarity.name())){
-                return parseSimilarityConstraint(jConstraint);
+                return parseSimilarityConstraint(jConstraint, nsPrefixService);
             } else {
                 log.warn(String.format("Unknown Constraint Type %s. Supported values are %s",               
                     Arrays.asList("reference",ConstraintType.values())));
@@ -287,7 +309,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         }
     }
 
-    private static Constraint parseSimilarityConstraint(JSONObject jConstraint) throws JSONException {
+    private static Constraint parseSimilarityConstraint(JSONObject jConstraint, NamespacePrefixService nsPrefixService) throws JSONException {
         String context = jConstraint.optString("context");
         if(context == null){
             throw new IllegalArgumentException("SimilarityConstraints MUST define a \"context\": \n "+jConstraint.toString(4));
@@ -298,8 +320,9 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             fields = new ArrayList<String>(addFields.length());
             for(int i=0;i<addFields.length();i++){
                 String field = addFields.optString(i);
+                field = field != null ? nsPrefixService.getFullName(field) : null;
                 if(field != null && !field.isEmpty()){
-                    fields.add(NamespaceEnum.getFullName(field));
+                    fields.add(field);
                 }
             }
         } else {
@@ -313,7 +336,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
      * @return
      * @throws JSONException
      */
-    private static Constraint parseRangeConstraint(JSONObject jConstraint) throws JSONException {
+    private static Constraint parseRangeConstraint(JSONObject jConstraint, NamespacePrefixService nsPrefixService) throws JSONException {
         Constraint constraint;
         boolean inclusive;
         if(jConstraint.has("inclusive")){
@@ -324,7 +347,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         }
         Object upperBound = jConstraint.opt("upperBound");
         Object lowerBound = jConstraint.opt("lowerBound");
-        Collection<String> datatypes = parseDatatypeProperty(jConstraint);
+        Collection<String> datatypes = parseDatatypeProperty(jConstraint,nsPrefixService);
         if(datatypes != null && !datatypes.isEmpty()){
             Iterator<String> it = datatypes.iterator();
             String datatype = it.next();
@@ -494,9 +517,8 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
      * @return
      * @throws JSONException
      */
-    private static Constraint parseValueConstraint(JSONObject jConstraint) throws JSONException {
-        Constraint constraint;
-        Collection<String> dataTypes = parseDatatypeProperty(jConstraint);
+    private static Constraint parseValueConstraint(JSONObject jConstraint, NamespacePrefixService nsPrefixService) throws JSONException {
+        Collection<String> dataTypes = parseDatatypeProperty(jConstraint, nsPrefixService);
         final List<Object> valueList;
         if(jConstraint.has("value") && !jConstraint.isNull("value")){
             Object value = jConstraint.get("value");
@@ -577,7 +599,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
      * @return
      * @throws JSONException
      */
-    private static Collection<String> parseDatatypeProperty(JSONObject jConstraint) throws JSONException {
+    private static Collection<String> parseDatatypeProperty(JSONObject jConstraint,NamespacePrefixService nsPrefixService) throws JSONException {
         Collection<String> dataTypes;
         String dataTypeKey = null;
         if(jConstraint.has("datatype")){
@@ -592,9 +614,10 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                 dataTypes = new ArrayList<String>(jDataTypes.length());
                 for(int i=0;i<jDataTypes.length();i++){
                     String dataType = jDataTypes.getString(i);
+                    //convert prefix:localName to fill URI
+                    dataType = dataType != null ? nsPrefixService.getFullName(dataType) : null;
                     if(dataType != null && !dataType.isEmpty()){
-                        //convert prefix:localName to fill URI
-                        dataTypes.add(NamespaceEnum.getFullName(dataType));
+                        dataTypes.add(dataType);
                     }
                 }
                 if(dataTypes.isEmpty()){
@@ -602,8 +625,10 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                 }
             } else {
                 String dataType = jConstraint.getString(dataTypeKey);
+                //convert prefix:localName to fill URI
+                dataType = dataType != null ? nsPrefixService.getFullName(dataType) : null;
                 if(dataType != null && !dataType.isEmpty()){
-                    dataTypes = Collections.singleton(NamespaceEnum.getFullName(dataType));
+                    dataTypes = Collections.singleton(dataType);
                 } else {
                     dataTypes = null;
                 }
@@ -619,15 +644,18 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
      * @return
      * @throws JSONException
      */
-    private static Constraint parseReferenceConstraint(JSONObject jConstraint) throws JSONException {
-        Constraint constraint;
+    private static Constraint parseReferenceConstraint(JSONObject jConstraint, NamespacePrefixService nsPrefixService) throws JSONException {
         final List<String> refList;
         if(jConstraint.has("value") && !jConstraint.isNull("value")){
             Object value = jConstraint.get("value");
             if(value instanceof JSONArray){
                 refList = new ArrayList<String>(((JSONArray)value).length());
                 for(int i=0;i<((JSONArray)value).length();i++){
-                    refList.add(NamespaceEnum.getFullName(((JSONArray)value).getString(i)));
+                    String field = ((JSONArray)value).getString(i);
+                    field = field != null ? nsPrefixService.getFullName(field) : null;
+                    if(field != null && !field.isEmpty()){
+                        refList.add(field);
+                    }
                 }
             } else if(value instanceof JSONObject){
                 log.warn("Parsed ValueConstraint does define illegal values (values={})!",value);
@@ -639,7 +667,22 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                 message.append(jConstraint.toString(4));
                 throw new IllegalArgumentException(message.toString());
             } else {
-                refList = Collections.singletonList(NamespaceEnum.getFullName(jConstraint.getString("value")));
+                String field = jConstraint.getString("value");
+                field = field != null ? nsPrefixService.getFullName(field) : null;
+                if(field != null){
+                    refList = Collections.singletonList(field);
+                } else {
+                    refList = Collections.emptyList();
+                }
+            }
+            if(refList.isEmpty()){
+                log.warn("Parsed ReferenceConstraint does not define a single valid \"value\"!");
+                StringBuilder message = new StringBuilder();
+                message.append("Parsed ReferenceConstraint does not define a single valid 'value'!\n");
+                message.append("This means values where only null, empty string or '{prefix}:{localname}' values with unknown {prefix}\n");
+                message.append("Parsed Constraint: \n");
+                message.append(jConstraint.toString(4));
+                throw new IllegalArgumentException(message.toString());                
             }
             MODE mode = parseConstraintValueMode(jConstraint);
             return new ReferenceConstraint(refList,mode);

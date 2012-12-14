@@ -62,7 +62,10 @@
           <excludes>
             <!-- AL20 licensed files. See src/main/resources/README -->
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-language.config</exclude>
-            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.keywordextraction.engine.KeywordLinkingEngine-entityhub.config</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-default.config</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.entityhublinking.EntityhubLinkingEngine-entityhub.config</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-dbpediapropernoun.config</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.entityhublinking.EntityhubLinkingEngine-dbpedia.config</exclude>
           </excludes>
         </configuration>
       </plugin>

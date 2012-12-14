@@ -39,7 +39,6 @@
 		<module>jcr</module>
 		<module>cmis</module>
 		<module>web</module>
-		<module>bundlelist</module>
 	</modules>
 </project>
 

@@ -44,7 +44,6 @@ import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.transformQu
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,6 +53,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -74,12 +74,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
@@ -95,7 +95,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,16 +124,12 @@ public class EntityhubRootResource extends BaseStanbolResource {
      * The default number of maximal results of searched sites.
      */
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
-    /**
-     * The default result fields for /find queries is the entityhub-maodel:label and the
-     * entityhub-maodel:description.
-     */
-    private static final Collection<? extends String> DEFAULT_FIND_SELECTED_FIELDS = Arrays.asList(
-        RdfResourceEnum.label.getUri(), RdfResourceEnum.description.getUri());
+    private NamespacePrefixService nsPrefixService;
 
     // bind the job manager by looking it up from the servlet request context
-    public EntityhubRootResource() {
+    public EntityhubRootResource(@Context ServletContext servletContext) {
         super();
+        nsPrefixService = ContextHelper.getServiceFromContext(NamespacePrefixService.class, servletContext);
     }
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers){
@@ -467,7 +462,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @Path("/find")
     @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE, TEXT_HTML})
     public Response findEntity(@FormParam(value = "name") String name,
-                               @FormParam(value = "field") String field,
+                               @FormParam(value = "field") String parsedField,
                                @FormParam(value = "lang") String language,
                                @FormParam(value = "limit") Integer limit,
                                @FormParam(value = "offset") Integer offset,
@@ -494,12 +489,26 @@ public class EntityhubRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         } else {
-            if (field == null || field.trim().isEmpty()) {
-                field = DEFAULT_FIND_FIELD;
+            final String property;
+            if (parsedField == null) {
+                property = DEFAULT_FIND_FIELD;
             } else {
-                field = field.trim();
+                parsedField = parsedField.trim();
+                if (parsedField.isEmpty()) {
+                    property = DEFAULT_FIND_FIELD;
+                } else {
+                    property = nsPrefixService.getFullName(parsedField);
+                    if(property == null){
+                        String messsage = String.format("The prefix '%s' of the parsed field '%' is not "
+                            + "mapped to any namespace. Please parse the full URI instead!\n",
+                            NamespaceMappingUtils.getPrefix(parsedField),parsedField);
+                        return Response.status(Status.BAD_REQUEST)
+                                .entity(messsage)
+                                .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+                    }
+                }
             }
-            FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language,
+            FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, property, language,
                 limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset,ldpath);
             
             // For the Entityhub we support to select additional fields for results

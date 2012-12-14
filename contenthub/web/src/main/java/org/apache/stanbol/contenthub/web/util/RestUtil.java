@@ -16,12 +16,20 @@
  */
 package org.apache.stanbol.contenthub.web.util;
 
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
+
+import org.apache.stanbol.commons.web.base.CorsHelper;
 
 /**
  * Utility class for REST services
@@ -92,5 +100,28 @@ public class RestUtil {
             }
         }
         return acceptedMediaType;
+    }
+
+    /**
+     * Create a {@link Response} with the given parameters. It also add the necessary headers for CORS by
+     * calling the {@link CorsHelper#addCORSOrigin(ServletContext, ResponseBuilder, HttpHeaders)} method.
+     * 
+     * @param servletContext
+     * @param status
+     * @param entity
+     * @param headers
+     * @return
+     */
+    public static Response createResponse(ServletContext servletContext,
+                                          Status status,
+                                          Object entity,
+                                          HttpHeaders headers) {
+        ResponseBuilder rb = Response.status(status);
+        addCORSOrigin(servletContext, rb, headers);
+        if (entity != null) {
+            return rb.entity(entity).build();
+        } else {
+            return rb.build();
+        }
     }
 }

@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -45,8 +44,6 @@ import org.apache.stanbol.ontologymanager.web.resources.SessionResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 /**
  * Implementation of WebFragment for the Stanbol Ontology Manager endpoint.
@@ -60,8 +57,6 @@ import freemarker.cache.TemplateLoader;
 public class OntologyManagerWebFragment implements WebFragment {
 
     private static final String NAME = "ontonet";
-
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/ontologymanager/web/static";
 
     private BundleContext bundleContext;
 
@@ -86,11 +81,6 @@ public class OntologyManagerWebFragment implements WebFragment {
     @Activate
     protected void activate(ComponentContext ctx) {
         this.bundleContext = ctx.getBundleContext();
-    }
-
-    @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
     }
 
     @Override
@@ -145,9 +135,5 @@ public class OntologyManagerWebFragment implements WebFragment {
         return resources;
     }
 
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
-    }
 
 }

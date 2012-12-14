@@ -42,6 +42,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
@@ -60,13 +61,13 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
@@ -98,6 +99,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    private NamespacePrefixService nsPrefixService;
+
     public static final Set<String> RDF_MEDIA_TYPES = new TreeSet<String>(Arrays.asList(N3, N_TRIPLE,
         RDF_XML, TURTLE, X_TURTLE, RDF_JSON));
 
@@ -113,8 +116,9 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
 
     
-    public SiteManagerRootResource() {
+    public SiteManagerRootResource(@Context ServletContext context) {
         super();
+        nsPrefixService = ContextHelper.getServiceFromContext(NamespacePrefixService.class, context);
     }
 
     @OPTIONS
@@ -270,7 +274,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     @POST
     @Path("/find")
     public Response findEntity(@FormParam(value = "name") String name,
-                               @FormParam(value = "field") String field,
+                               @FormParam(value = "field") String parsedField,
                                @FormParam(value = "lang") String language,
                                // @FormParam(value="select") String select,
                                @FormParam(value = "limit") Integer limit,
@@ -294,16 +298,26 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
-        if (field == null) {
-            field = DEFAULT_FIND_FIELD;
+        final String property;
+        if (parsedField == null) {
+            property = DEFAULT_FIND_FIELD;
         } else {
-            field = field.trim();
-            if (field.isEmpty()) {
-                field = DEFAULT_FIND_FIELD;
+            parsedField = parsedField.trim();
+            if (parsedField.isEmpty()) {
+                property = DEFAULT_FIND_FIELD;
+            } else {
+                property = nsPrefixService.getFullName(parsedField);
+                if(property == null){
+                    String messsage = String.format("The prefix '%s' of the parsed field '%' is not "
+                        + "mapped to any namespace. Please parse the full URI instead!\n",
+                        NamespaceMappingUtils.getPrefix(parsedField),parsedField);
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity(messsage)
+                            .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+                }
             }
-        }
-        
-        FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language,
+        }        
+        FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, property, language,
             limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset,ldpath);
         return executeQuery(ContextHelper.getServiceFromContext(
             SiteManager.class, servletContext), query, acceptedMediaType, headers);

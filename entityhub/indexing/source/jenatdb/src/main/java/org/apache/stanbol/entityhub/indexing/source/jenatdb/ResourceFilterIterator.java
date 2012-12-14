@@ -16,8 +16,6 @@
 */
 package org.apache.stanbol.entityhub.indexing.source.jenatdb;
 
-import static org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum.getFullName;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -25,8 +23,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterable;
 import org.apache.stanbol.entityhub.indexing.core.EntityIterator;
+import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +65,7 @@ public class ResourceFilterIterator implements EntityIterator{
     private Node field;
     private Collection<Node> values;
     
+    
     /**
      * The RDF data
      */
@@ -78,16 +80,26 @@ public class ResourceFilterIterator implements EntityIterator{
      */
     private Iterator<Node> valueIterator;
 
+    /**
+     * The IndexingConfiguration
+     */
+    private IndexingConfig indexingConfig;
+
+    private NamespacePrefixService nsPrefixService;
+
     @Override
     public void setConfiguration(Map<String,Object> config) {
+        indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
         this.indexingDataset = Utils.getTDBDataset(config);
-        
+        nsPrefixService = indexingConfig.getNamespacePrefixService();
         Object value = config.get(PARAM_FIELD);
         if(value == null || value.toString().isEmpty()){
-            this.field = Node.createURI(getFullName(DEFAULT_FIELD));
+            this.field = Node.createURI(NamespaceMappingUtils.getConfiguredUri(
+                nsPrefixService, DEFAULT_FIELD));
             log.info("Using default Field {}",field);
         } else {
-            this.field = Node.createURI(getFullName(DEFAULT_FIELD));
+            this.field = Node.createURI(NamespaceMappingUtils.getConfiguredUri(
+                nsPrefixService, value.toString()));
             log.info("configured Field: {}",field);
         }
         value = config.get(PARAM_VALUES);
@@ -132,7 +144,8 @@ public class ResourceFilterIterator implements EntityIterator{
                             "provide much better performance (change configuration to use" +
                             "the RdfIndexingSource as EntityDataIterable)!");
                 } else {
-                    values.add(Node.createURI(getFullName(fieldValue)));
+                    values.add(Node.createURI(NamespaceMappingUtils.getConfiguredUri(
+                        nsPrefixService, fieldValue)));
                 }
             }
         }

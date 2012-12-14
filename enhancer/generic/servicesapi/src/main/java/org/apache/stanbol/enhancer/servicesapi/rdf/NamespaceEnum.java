@@ -16,6 +16,9 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.rdf;
 
+/**
+ * 
+ */
 public enum NamespaceEnum {
 
     /**
@@ -29,10 +32,40 @@ public enum NamespaceEnum {
     rdfs("http://www.w3.org/2000/01/rdf-schema#"),
     dc("http://purl.org/dc/terms/"),
     skos("http://www.w3.org/2004/02/skos/core#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     foaf("http://xmlns.com/foaf/0.1/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     geonames("http://www.geonames.org/ontology#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     georss("http://www.georss.org/georss/"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     geo("http://www.w3.org/2003/01/geo/wgs84_pos#"),
+    /**
+    * @deprecated All none core namespaces where deprecated. Users should use
+    * the NamespacePrefixService (module:
+    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+    */
     nie("http://www.semanticdesktop.org/ontologies/2007/01/19/nie#"),
     /**
      * Namespace for the Stanbol Enhancer Execution Plan ontology
@@ -50,8 +83,16 @@ public enum NamespaceEnum {
     fise("http://fise.iks-project.eu/ontology/"),
     /**
      * The W3C Ontology for Media Resources http://www.w3.org/TR/mediaont-10/
+     * @deprecated All none core namespaces where deprecated. Users should use
+     * the NamespacePrefixService (module:
+     * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
      */
-    media("http://www.w3.org/ns/ma-ont#")
+    media("http://www.w3.org/ns/ma-ont#"), 
+    /**
+     * The namespace of the Apache Stanbol Entityhub
+     */
+    entityhub("http://stanbol.apache.org/ontology/entityhub/entityhub#"),
     ;
     
     String ns;

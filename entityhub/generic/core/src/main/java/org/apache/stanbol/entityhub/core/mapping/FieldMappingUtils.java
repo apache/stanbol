@@ -25,6 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
@@ -124,10 +126,12 @@ public final class FieldMappingUtils {
      * </ul>
      * TODO: Add Support for {@link Constraint}s on the field values.
      * @param mapping The mapping
+     * @param nps Optionally a namespace prefix service used to convert 
+     * '{prefix}:{localname}' configurations to full URIs
      * @return the parsed {@link FieldMapping} or <code>null</code> if the parsed
      *    String can not be parsed.
      */
-    public static FieldMapping parseFieldMapping(String mapping){
+    public static FieldMapping parseFieldMapping(String mapping, NamespacePrefixService nps){
         if(mapping == null){
             return null;
         }
@@ -153,7 +157,12 @@ public final class FieldMappingUtils {
         List<String> mappedTo = Collections.emptyList();
         String fieldPattern;
         if(!parts[0].isEmpty() && !parts[0].equals("*")){
-            fieldPattern = NamespaceEnum.getFullName(parts[0]);
+            try {
+                fieldPattern = NamespaceMappingUtils.getConfiguredUri(nps,parts[0]);
+            } catch (IllegalArgumentException e) {
+                log.warn("Unable to parse fieldMapping because of unknown namespace prefix",e);
+                return null;
+            }
         } else {
             fieldPattern = parts[0];
         }
@@ -163,7 +172,7 @@ public final class FieldMappingUtils {
                 filter = parseConstraint(parts[i+1]);
             }
             if(">".equals(parts[i]) && parts.length > i+1){
-                mappedTo = parseMappings(parts,i+1);
+                mappedTo = parseMappings(parts,i+1,nps);
             }
         }
         if(ignore && filter != null){
@@ -178,12 +187,13 @@ public final class FieldMappingUtils {
             return null;
         }
     }
+
     /**
      * Parses FieldMappings from the parsed strings
      * @param mappings the mappings to parse
      * @return the parsed mappings
      */
-    public static List<FieldMapping> parseFieldMappings(Iterator<String> mappings) {
+    public static List<FieldMapping> parseFieldMappings(Iterator<String> mappings, NamespacePrefixService nps) {
         List<FieldMapping> fieldMappings = new ArrayList<FieldMapping>();
         log.debug("Parse FieldMappings");
         while(mappings.hasNext()){
@@ -192,7 +202,7 @@ public final class FieldMappingUtils {
             if(mappingString != null && 
                     !mappingString.isEmpty() && //not an empty line
                     !(mappingString.charAt(0) == FieldMapping.COMMENT_CHAR)){ //not an comment
-                FieldMapping fieldMapping = FieldMappingUtils.parseFieldMapping(mappingString.toString());
+                FieldMapping fieldMapping = parseFieldMapping(mappingString.toString(),nps);
                 if(fieldMapping != null){
                     fieldMappings.add(fieldMapping);
                 } else {
@@ -210,10 +220,10 @@ public final class FieldMappingUtils {
      * @param mappings The mappings or <code>null</code> if none
      * @return A new and configured FieldMapper instance.
      */
-    public static FieldMapper createDefaultFieldMapper(Iterator<String> mappings){
+    public static FieldMapper createDefaultFieldMapper(Iterator<String> mappings, NamespacePrefixService nps){
         FieldMapper mapper =  new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
         if(mappings != null){
-            for(FieldMapping mapping : parseFieldMappings(mappings)){
+            for(FieldMapping mapping : parseFieldMappings(mappings,nps)){
                 mapper.addMapping(mapping);
             }
         }
@@ -236,26 +246,15 @@ public final class FieldMappingUtils {
         return mapper;
     }
 
-//moved to NamespaceEnum
-//    private static String getFullUri(String value){
-//        int index = value.indexOf(':');
-//        if(index>0){
-//            NamespaceEnum namespace = NamespaceEnum.forPrefix(value.substring(0, index));
-//            if(namespace!= null){
-//                value = namespace.getNamespace()+value.substring(index+1);
-//            }
-//        }
-//        return value;
-//    }
-
-    private static List<String> parseMappings(String[] parts, int start) {
+    private static List<String> parseMappings(String[] parts, int start, NamespacePrefixService nps) {
         ArrayList<String> mappings = new ArrayList<String>(parts.length-start);
         for(int i=start;i<parts.length;i++){
             if(!parts[i].isEmpty()){ //needed to remove two spaces in a row
-                String act = NamespaceEnum.getFullName(parts[i]);
-//                if(!act.isEmpty()){ 
-                    mappings.add(act);
- //               }
+                try {
+                    mappings.add(NamespaceMappingUtils.getConfiguredUri(nps, parts[i]));
+                } catch (IllegalArgumentException e) {
+                    log.warn("Unable to parse mapping because of unkown namespace prefix in "+parts[i],e);
+                }
             }
         }
         return mappings;

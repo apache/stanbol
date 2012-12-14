@@ -16,7 +16,9 @@
  */
 package org.apache.stanbol.entityhub.jersey.resource.reconcile;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
@@ -30,8 +32,8 @@ public class EntityhubReconcileResource extends BaseGoogleRefineReconcileResourc
 
     private Entityhub _entityhub;
     
-    public EntityhubReconcileResource() {
-        super();
+    public EntityhubReconcileResource(@Context ServletContext context) {
+        super(context);
     }
     private Entityhub getEntityhub(){
         if(_entityhub == null){

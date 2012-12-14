@@ -21,7 +21,6 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.FOAF;
 import org.apache.clerezza.rdf.ontologies.RDF;
@@ -49,7 +48,7 @@ final class EntityToRDF {
     private final static UriRef FOAF_PRIMARY_TOPIC = FOAF.primaryTopic;
     private final static UriRef FOAF_PRIMARY_TOPIC_OF = FOAF.isPrimaryTopicOf;
     private final static UriRef signSite = new UriRef(RdfResourceEnum.site.getUri());
-    private final static UriRef ENTITY_TYPE = new UriRef(RdfResourceEnum.Entity.getUri());
+//    private final static UriRef ENTITY_TYPE = new UriRef(RdfResourceEnum.Entity.getUri());
     private final static RdfValueFactory valueFactory = RdfValueFactory.getInstance();
     /**
      * The literal factory used (currently {@link LiteralFactory#getInstance()},

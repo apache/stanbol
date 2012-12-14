@@ -81,7 +81,7 @@
     	<groupId>org.apache.stanbol</groupId>
   		<artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
     </dependency>
-<dependency>
+    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>

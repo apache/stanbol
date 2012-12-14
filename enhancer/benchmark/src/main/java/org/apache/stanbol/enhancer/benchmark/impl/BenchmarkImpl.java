@@ -70,7 +70,9 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
         return chain;
     }
     
-    void setChain(Chain chain){
+    /** @inheritDoc */
+    @Override
+    public void setChain(Chain chain){
         this.chain = chain;
     }
     

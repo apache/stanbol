@@ -30,10 +30,6 @@ import freemarker.cache.TemplateLoader;
 public class IntegrityCheckFragment implements WebFragment{
     public static final String NAME = "integritycheck";
 
-    public static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/demos/integritycheck/static";
-
-    public static final String TEMPLATE_PATH = "/org/apache/stanbol/demos/integritycheck/templates";
-
     private BundleContext bundleContext;
 
     @Activate
@@ -46,10 +42,6 @@ public class IntegrityCheckFragment implements WebFragment{
 		return NAME;
 	}
 
-	@Override
-	public String getStaticResourceClassPath() {
-		return STATIC_RESOURCE_PATH;
-	}
 
 	@Override
 	public Set<Class<?>> getJaxrsResourceClasses() {
@@ -90,11 +82,6 @@ public class IntegrityCheckFragment implements WebFragment{
         List<NavigationLink> links = new ArrayList<NavigationLink>();
         links.add(new NavigationLink("integritycheck", "/integritycheck", "/imports/integritycheckDescription.ftl", 50));
         return links;
-	}
-
-	@Override
-	public BundleContext getBundleContext() {
-		return bundleContext;
 	}
 
 }

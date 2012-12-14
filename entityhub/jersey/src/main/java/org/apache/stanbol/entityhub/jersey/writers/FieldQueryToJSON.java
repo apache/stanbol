@@ -22,9 +22,9 @@ import java.util.EnumSet;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.ldpath.query.LDPathSelect;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
@@ -51,13 +51,13 @@ final class FieldQueryToJSON {
      * @return the {@link JSONObject}
      * @throws JSONException
      */
-    static JSONObject toJSON(FieldQuery query) throws JSONException {
+    static JSONObject toJSON(FieldQuery query,NamespacePrefixService nsPrefixService) throws JSONException {
         JSONObject jQuery = new JSONObject();
         jQuery.put("selected", new JSONArray(query.getSelectedFields()));
         JSONArray constraints = new JSONArray();
         jQuery.put("constraints", constraints);
         for (Entry<String, Constraint> fieldConstraint : query) {
-            JSONObject jFieldConstraint = convertConstraintToJSON(fieldConstraint.getValue());
+            JSONObject jFieldConstraint = convertConstraintToJSON(fieldConstraint.getValue(),nsPrefixService);
             jFieldConstraint.put("field", fieldConstraint.getKey()); //add the field
             constraints.put(jFieldConstraint); //add fieldConstraint
         }
@@ -79,10 +79,12 @@ final class FieldQueryToJSON {
      * Converts a {@link Constraint} to JSON
      *
      * @param constraint the {@link Constraint}
+     * @param nsPrefixService Optionally the service that is used to convert data type
+     * URIs to '{prefix}:{localname}'
      * @return the JSON representation
      * @throws JSONException
      */
-    private static JSONObject convertConstraintToJSON(Constraint constraint) throws JSONException {
+    private static JSONObject convertConstraintToJSON(Constraint constraint, NamespacePrefixService nsPrefixService) throws JSONException {
         JSONObject jConstraint = new JSONObject();
         jConstraint.put("type", constraint.getType().name());
         switch (constraint.getType()) {
@@ -107,11 +109,14 @@ final class FieldQueryToJSON {
                     Collection<String> dataTypes = valueConstraint.getDataTypes();
                     if (dataTypes != null && !dataTypes.isEmpty()) {
                         if(dataTypes.size() == 1) {
-                            jConstraint.put("datatype", NamespaceEnum.getShortName(dataTypes.iterator().next()));
+                            String dataType = dataTypes.iterator().next();
+                            jConstraint.put("datatype",
+                                nsPrefixService != null ? nsPrefixService.getShortName(dataType) : dataType);
                         } else {
                             ArrayList<String> dataTypeValues = new ArrayList<String>(dataTypes.size());
                             for(String dataType : dataTypes){
-                                dataTypeValues.add(NamespaceEnum.getShortName(dataType));
+                                dataTypeValues.add(nsPrefixService != null ?
+                                        nsPrefixService.getShortName(dataType) : dataType);
                             }
                             jConstraint.put("datatype", dataTypeValues);
                         }

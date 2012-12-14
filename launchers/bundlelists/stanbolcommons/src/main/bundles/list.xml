@@ -40,19 +40,22 @@
   <startLevel level="8">
     <bundle>
       <groupId>org.apache.sling</groupId>
-      <artifactId>org.apache.sling.installer.core</artifactId>
-      <version>3.3.6</version>
+      <artifactId>org.apache.sling.installer.api</artifactId>
+      <version>1.0.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.sling</groupId>
-      <artifactId>org.apache.sling.installer.factory.configuration
-      </artifactId>
+      <artifactId>org.apache.sling.installer.core</artifactId>
+      <version>3.4.2</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.installer.factory.configuration</artifactId>
       <version>1.0.8</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.installer.bundleprovider
-      </artifactId>
+      <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
     <bundle>
@@ -66,13 +69,18 @@
   <startLevel level="9">
     <bundle>
       <groupId>org.apache.sling</groupId>
-      <artifactId>org.apache.sling.launchpad.installer</artifactId>
-      <version>1.1.2</version>
+      <artifactId>org.apache.sling.launchpad.api</artifactId>
+      <version>1.1.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.sling</groupId>
-      <artifactId>org.apache.sling.launchpad.api</artifactId>
-      <version>1.1.0</version>
+      <artifactId>org.apache.sling.settings</artifactId>
+      <version>1.2.2</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.launchpad.installer</artifactId>
+      <version>1.2.0</version>
     </bundle>
   </startLevel>
 
@@ -151,12 +159,6 @@
       <artifactId>org.apache.servicemix.bundles.regexp</artifactId>
       <version>1.3_3</version>
     </bundle>
-<!-- not a bundle (need to be embedded)
-    <bundle>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpmime</artifactId>
-      <version>4.1.2</version>
-    </bundle>  -->
     <bundle> <!-- only used by the Entityhub -->
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
@@ -339,6 +341,22 @@
       </artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
+    <!-- Namespace prefix service -->
+    <bundle>
+	  <groupId>org.apache.stanbol</groupId>
+	  <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
+    <bundle> <!-- Provides the Stanbol specific Prefix Mappings: Backward compatibility -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
+    <bundle> <!-- Provides the namespace prefixes managed by http://prefix.cc -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </bundle>
     <!-- OWL libraries and utilities -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
@@ -418,8 +436,13 @@
   <startLevel level="27">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <artifactId>org.apache.stanbol.commons.web.resources</artifactId>
       <version>0.10.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.11.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>

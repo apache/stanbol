@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -40,8 +39,6 @@ import org.apache.stanbol.rules.base.api.RuleStore;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 /**
  * Implementation of WebFragment for the Stanbol Reasoner end-point.
@@ -56,8 +53,6 @@ public class ReasonersFragment implements WebFragment {
 
     private static final String NAME = "reasoners";
 
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/reasoners/web/static";
-
     @Reference
     ONManager onm;
 
@@ -68,11 +63,6 @@ public class ReasonersFragment implements WebFragment {
     RuleStore kresRuleStore;
 
     private BundleContext bundleContext;
-
-    @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
 
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
@@ -115,11 +105,6 @@ public class ReasonersFragment implements WebFragment {
     @Override
     public List<ScriptResource> getScriptResources() {
         return Collections.emptyList();
-    }
-
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
     }
 
     @Activate

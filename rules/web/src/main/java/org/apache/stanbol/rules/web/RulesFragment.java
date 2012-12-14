@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -40,8 +39,6 @@ import org.apache.stanbol.rules.web.writers.RuleListWriter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 /**
  * Implementation of WebFragment for the Stanbol Rules end-point.
@@ -55,8 +52,6 @@ import freemarker.cache.TemplateLoader;
 public class RulesFragment implements WebFragment {
 
     private static final String NAME = "rules";
-
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/rules/web/static";
 
     private BundleContext bundleContext;
 
@@ -96,11 +91,6 @@ public class RulesFragment implements WebFragment {
     }
 
     @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
-    }
-
-    @Override
     public List<LinkResource> getLinkResources() {
         List<LinkResource> resources = new ArrayList<LinkResource>();
         resources.add(new LinkResource("stylesheet", "css/rules.css", this, 10));
@@ -120,11 +110,6 @@ public class RulesFragment implements WebFragment {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
         links.add(new NavigationLink("rules", "/rules", "/imports/rulesDescription.ftl", 50));
         return links;
-    }
-
-    @Override
-    public BundleContext getBundleContext() {
-        return bundleContext;
     }
 
 }

@@ -23,7 +23,10 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
@@ -89,6 +92,9 @@ public class CacheImpl implements Cache {
     private FieldMapper baseMapper;
     private FieldMapper additionalMapper;
     private ComponentContext context;
+    
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+    protected NamespacePrefixService nsPrefixService;
 
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, YardException, IllegalStateException, InvalidSyntaxException {
@@ -111,7 +117,7 @@ public class CacheImpl implements Cache {
      */
     protected void initWithCacheYard(Yard yard) throws YardException {
         //(1) Read the base mappings from the Yard
-        this.baseMapper = CacheUtils.loadBaseMappings(yard);
+        this.baseMapper = CacheUtils.loadBaseMappings(yard,nsPrefixService);
 
         //(2) Init the additional mappings based on the configuration
         Object mappings = context.getProperties().get(Cache.ADDITIONAL_MAPPINGS);
@@ -119,7 +125,7 @@ public class CacheImpl implements Cache {
         if (mappings instanceof String[] && ((String[]) mappings).length > 0) {
             configuredMappings = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
             for (String mappingString : (String[]) mappings) {
-                FieldMapping fieldMapping = FieldMappingUtils.parseFieldMapping(mappingString);
+                FieldMapping fieldMapping = FieldMappingUtils.parseFieldMapping(mappingString, nsPrefixService);
                 if (fieldMapping != null) {
                     configuredMappings.addMapping(fieldMapping);
                 }
@@ -129,7 +135,7 @@ public class CacheImpl implements Cache {
                 configuredMappings = null; //if no mappings where found set to null
             }
         }
-        FieldMapper yardAdditionalMappings = CacheUtils.loadAdditionalMappings(yard);
+        FieldMapper yardAdditionalMappings = CacheUtils.loadAdditionalMappings(yard,nsPrefixService);
         if (yardAdditionalMappings == null) {
             if (configuredMappings != null) {
                 setAdditionalMappings(yard, configuredMappings);

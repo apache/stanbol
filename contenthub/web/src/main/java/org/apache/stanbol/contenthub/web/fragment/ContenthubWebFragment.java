@@ -40,9 +40,6 @@ import org.apache.stanbol.contenthub.web.writers.SearchResultWriter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
-
 /**
  * Statically define the list of available resources and providers to be
  * contributed to the the Stanbol JAX-RS Endpoint.
@@ -53,8 +50,6 @@ public class ContenthubWebFragment implements WebFragment {
 
 	private static final String NAME = "contenthub";
 
-	private static final String TEMPLATE_PATH = "/org/apache/stanbol/contenthub/web/templates";
-	private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/contenthub/web/static";
 
 	private BundleContext bundleContext;
 
@@ -89,11 +84,6 @@ public class ContenthubWebFragment implements WebFragment {
 	}
 
 	@Override
-	public String getStaticResourceClassPath() {
-		return STATIC_RESOURCE_PATH;
-	}
-
-	@Override
 	public List<LinkResource> getLinkResources() {
 		List<LinkResource> resources = new ArrayList<LinkResource>();
 		resources.add(new LinkResource("stylesheet", "style/contenthub.css",
@@ -124,10 +114,4 @@ public class ContenthubWebFragment implements WebFragment {
 				"/contenthub", "/imports/contenthubDescription.ftl", 20));
 		return links;
 	}
-
-	@Override
-	public BundleContext getBundleContext() {
-		return bundleContext;
-	}
-
 }

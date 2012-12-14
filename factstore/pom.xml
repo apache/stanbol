@@ -50,6 +50,5 @@
 
   <modules>
     <module>factstore</module>
-    <module>bundlelist</module>
   </modules>
 </project>

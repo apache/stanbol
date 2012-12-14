@@ -1,0 +1,4 @@
+test	http://www.example.org/test#
+test-1	http://www.example.org/test-1/
+urn_test	urn:example.text:
+test2	http://www.example.org/test#

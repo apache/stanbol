@@ -44,20 +44,11 @@ public class TopicClassifierFragment implements WebFragment {
 
     public static final String NAME = "topic";
 
-    public static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/enhancer/web/topic/static";
-
-    public static final String TEMPLATE_PATH = "/org/apache/stanbol/enhancer/web/topic/templates";
-
     protected BundleContext bundleContext;
 
     @Override
     public String getName() {
         return NAME;
-    }
-
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
     }
 
     @Override
@@ -94,11 +85,6 @@ public class TopicClassifierFragment implements WebFragment {
     @Activate
     protected void activate(ComponentContext ctx) {
         this.bundleContext = ctx.getBundleContext();
-    }
-
-    @Override
-    public BundleContext getBundleContext() {
-        return this.bundleContext;
     }
 
 }

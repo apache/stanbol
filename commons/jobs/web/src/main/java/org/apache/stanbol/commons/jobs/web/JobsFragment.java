@@ -33,8 +33,6 @@ import org.apache.stanbol.commons.web.base.WebFragment;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 @Component(immediate = true, metatype = true)
 @Service(WebFragment.class)
@@ -48,11 +46,6 @@ public class JobsFragment implements WebFragment{
     @Override
     public String getName() {
         return NAME;
-    }
-
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
     }
 
     @Override
@@ -82,11 +75,6 @@ public class JobsFragment implements WebFragment{
     @Override
     public List<NavigationLink> getNavigationLinks() {
         return Collections.emptyList();
-    }
-
-    @Override
-    public BundleContext getBundleContext() {
-        return this.bundleContext;
     }
 
     @Activate

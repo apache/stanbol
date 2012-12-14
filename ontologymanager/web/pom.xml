@@ -99,7 +99,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.10.1-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -143,9 +143,10 @@
     <!-- specific deps for this project -->
     <dependency>
     	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.viewable</artifactId>
+  		<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+      <version>0.10.0-SNAPSHOT</version>      
     </dependency>
-<dependency>
+    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>

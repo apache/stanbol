@@ -45,7 +45,6 @@
     <module>multiplexer/clerezza</module>
     <module>registry</module>
     <module>web</module>
-    <module>bundlelist</module>
   </modules>
 
 </project>

@@ -84,6 +84,7 @@ public class Query {
     }
 
     private static void handleSelect(JsonLdResource subject, Query query) throws Exception {
+        @SuppressWarnings("unchecked")
         List<String> selects = (List<String>)subject.getPropertyValueIgnoreCase(SELECT).getValues().get(0).getValue();
         for (String role : selects) {
             query.roles.add(role);
@@ -96,7 +97,9 @@ public class Query {
     }
 
     private static void handleWhere(JsonLd jsonLd, JsonLdResource subject, Query query) throws Exception {
+        @SuppressWarnings({"unchecked", "rawtypes"})
         List<Map<String,Map<String,Object>>> wheres = (List)subject.getPropertyValueIgnoreCase(WHERE).getValues().get(0).getValue();;
+        
         for (Map<String,Map<String,Object>> whereObj : wheres) {
             for (String operator : whereObj.keySet()) {
                 if (operator.equalsIgnoreCase(CompareOperator.EQ.getLiteral())) {

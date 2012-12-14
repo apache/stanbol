@@ -1,257 +1,258 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
-	license agreements. See the NOTICE file distributed with this work for additional 
-	information regarding copyright ownership. The ASF licenses this file to 
-	You under the Apache License, Version 2.0 (the "License"); you may not use 
-	this file except in compliance with the License. You may obtain a copy of 
-	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
-	by applicable law or agreed to in writing, software distributed under the 
-	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
-	OF ANY KIND, either express or implied. See the License for the specific 
-	language governing permissions and limitations under the License. -->
+  license agreements. See the NOTICE file distributed with this work for additional 
+  information regarding copyright ownership. The ASF licenses this file to 
+  You under the Apache License, Version 2.0 (the "License"); you may not use 
+  this file except in compliance with the License. You may obtain a copy of 
+  the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+  by applicable law or agreed to in writing, software distributed under the 
+  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+  OF ANY KIND, either express or implied. See the License for the specific 
+  language governing permissions and limitations under the License. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>stanbol-parent</artifactId>
-		<version>2-SNAPSHOT</version>
-		<relativePath>../../parent</relativePath>
-	</parent>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>2-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
 
-	<groupId>org.apache.stanbol</groupId>
-	<artifactId>org.apache.stanbol.reasoners.web</artifactId>
-	<version>0.10.0-SNAPSHOT</version>
-	<packaging>bundle</packaging>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.reasoners.web</artifactId>
+  <version>0.10.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
 
-	<name>Apache Stanbol Reasoners Web</name>
-	<description>Set of rest services to deal with reasoners</description>
+  <name>Apache Stanbol Reasoners Web</name>
+  <description>Set of rest services to deal with reasoners</description>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-scr-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<!-- use defaults for now <configuration>
-					<instructions>
-						<Import-Package>
-							javax.servlet.*,
-							javax.ws.rs.*; version="[0,2)",
-							org.slf4j.*,
-							org.osgi.framework.*,
-							org.osgi.service.*,
-							freemarker.cache.*,
-							com.sun.jersey.api.*,
-							com.sun.jersey.multipart.*,
-							org.apache.clerezza.rdf.core.*,
-							com.hp.hpl.jena.*,
-							org.semanticweb.owlapi.*,
-							org.coode.owlapi.*,
-							uk.ac.manchester.cs.owl.owlapi.*,
-							org.apache.commons.io.*,
-							org.apache.stanbol.commons.web.base.*; provide:=true,
-							org.apache.stanbol.commons.jobs.api.*,
-							org.apache.stanbol.commons.jobs.impl.*,
-							org.apache.stanbol.commons.owl.*,
-							org.apache.stanbol.rules.base.api.*,
-							org.apache.stanbol.ontologymanager.ontonet.api.*,
-							org.apache.stanbol.ontologymanager.servicesapi.*,
-							org.apache.stanbol.reasoners.servicesapi.*,
-							org.apache.stanbol.reasoners.jena.*,
-							org.apache.stanbol.reasoners.owlapi.*
-						</Import-Package>
-					</instructions>
-				</configuration> -->
-			</plugin>
-			<plugin>
-				<groupId>org.apache.rat</groupId>
-				<artifactId>apache-rat-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<!-- AL20 License -->
-						<exclude>src/license/THIRD-PARTY.properties</exclude>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <!-- use defaults for now <configuration>
+          <instructions>
+            <Import-Package>
+              javax.servlet.*,
+              javax.ws.rs.*; version="[0,2)",
+              org.slf4j.*,
+              org.osgi.framework.*,
+              org.osgi.service.*,
+              freemarker.cache.*,
+              com.sun.jersey.api.*,
+              com.sun.jersey.multipart.*,
+              org.apache.clerezza.rdf.core.*,
+              com.hp.hpl.jena.*,
+              org.semanticweb.owlapi.*,
+              org.coode.owlapi.*,
+              uk.ac.manchester.cs.owl.owlapi.*,
+              org.apache.commons.io.*,
+              org.apache.stanbol.commons.web.base.*; provide:=true,
+              org.apache.stanbol.commons.jobs.api.*,
+              org.apache.stanbol.commons.jobs.impl.*,
+              org.apache.stanbol.commons.owl.*,
+              org.apache.stanbol.rules.base.api.*,
+              org.apache.stanbol.ontologymanager.ontonet.api.*,
+              org.apache.stanbol.ontologymanager.servicesapi.*,
+              org.apache.stanbol.reasoners.servicesapi.*,
+              org.apache.stanbol.reasoners.jena.*,
+              org.apache.stanbol.reasoners.owlapi.*
+            </Import-Package>
+          </instructions>
+        </configuration> -->
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 License -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
 
-						<!-- MIT License -->
-						<exclude>src/main/resources/org/apache/stanbol/reasoners/web/static/jquery/jquery-1.6.1</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+            <!-- MIT License -->
+            <exclude>src/main/resources/org/apache/stanbol/reasoners/web/static/jquery/jquery-1.6.1</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
-	<dependencies>
-		<!-- Stanbol deps -->
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
-			<version>0.10.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.servicesapi</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.rules.base</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.rules.manager</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.rules.refactor</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.owl</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
-			<version>0.9.0-incubating</version>
-		</dependency>
+  <dependencies>
+    <!-- Stanbol deps -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.11.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.servicesapi</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.rules.base</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.rules.manager</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.rules.refactor</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.owl</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
-			<version>0.9.0-incubating</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reasoners.jena</artifactId>
-			<version>0.9.0-incubating</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reasoners.owlapi</artifactId>
-			<version>0.9.0-incubating</version>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.reasoners.jena</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.reasoners.owlapi</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>rdf.core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>rdf.rdfjson</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>jaxrs.rdf.providers</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>rdf.jena.serializer</artifactId>
-		</dependency>
-        <dependency>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.commons.viewable</artifactId>
-        </dependency>
-		<!-- specific deps for this project -->
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-server</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-json</artifactId>
-			<exclusions>
-				<!-- jaxb is now part of java 6 -->
-				<exclusion>
-					<groupId>com.sun.xml.bind</groupId>
-					<artifactId>jaxb-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.xml.bind</groupId>
-					<artifactId>jaxb-impl</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey.contribs</groupId>
-			<artifactId>jersey-multipart</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.freemarker</groupId>
-			<artifactId>freemarker</artifactId>
-		</dependency>
-		<!-- indirect dependency for freemarker -->
-		<dependency>
-			<groupId>org.codehaus.jettison</groupId>
-			<artifactId>jettison</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.rdfjson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>jaxrs.rdf.providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.jena.serializer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <!-- specific deps for this project -->
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-json</artifactId>
+      <exclusions>
+        <!-- jaxb is now part of java 6 -->
+        <exclusion>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-impl</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-multipart</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+    <!-- indirect dependency for freemarker -->
+    <dependency>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+    </dependency>
 
-		<!-- servlet container, most useful for the tests -->
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty</artifactId>
-		</dependency>
+    <!-- servlet container, most useful for the tests -->
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+    </dependency>
 
-		<!-- generic tax -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-		</dependency>
+    <!-- generic tax -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
 
-		<!-- OSGi tax -->
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.scr.annotations</artifactId>
-		</dependency>
+    <!-- OSGi tax -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>jena</artifactId>
-			<scope>provided</scope>
-		</dependency>
+    <dependency>
+      <groupId>com.hp.hpl.jena</groupId>
+      <artifactId>jena</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-		<!-- Testing deps -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+    <!-- Testing deps -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
 </project>

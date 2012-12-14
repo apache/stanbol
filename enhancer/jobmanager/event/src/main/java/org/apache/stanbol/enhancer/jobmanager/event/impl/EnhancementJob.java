@@ -330,13 +330,13 @@ public class EnhancementJob {
      * @return the currently running executions.
      */
     public Set<NonLiteral> getRunning() {
-        log.debug("++ r: {}","getRunning");
+        log.trace("++ r: {}","getRunning");
         readLock.lock();
         try {
-            log.debug(">> r: {}","getRunning");
+            log.trace(">> r: {}","getRunning");
             return runningExec;
         } finally {
-            log.debug("<< r: {}","getRunning");
+            log.trace("<< r: {}","getRunning");
             readLock.unlock();
         }
     }
@@ -347,13 +347,13 @@ public class EnhancementJob {
      * @return the completed execution nodes
      */
     public Set<NonLiteral> getCompleted() {
-        log.debug("++ r: {}","getCompleted");
+        log.trace("++ r: {}","getCompleted");
         readLock.lock();
         try {
-            log.debug(">> r: {}","getCompleted");
+            log.trace(">> r: {}","getCompleted");
             return completedExec;
         } finally {
-            log.debug("<< r: {}","getCompleted");
+            log.trace("<< r: {}","getCompleted");
             readLock.unlock();
         }
     }
@@ -377,13 +377,13 @@ public class EnhancementJob {
         }
         writeLock.lock();
         NonLiteral executionNode = getExecutionNode(execution);
-        log.debug("++ w: {}: {}","setCompleted",getEngine(executionPlan, executionNode));
+        log.trace("++ w: {}: {}","setCompleted",getEngine(executionPlan, executionNode));
         try {
-            log.debug(">> w: {}: {}","setCompleted",getEngine(executionPlan, executionNode));
+            log.trace(">> w: {}: {}","setCompleted",getEngine(executionPlan, executionNode));
             setNodeCompleted(executionNode);
             setExecutionCompleted(executionMetadata, execution, null);
         } finally {
-            log.debug("<< w: {}: {}","setCompleted",getEngine(executionPlan, executionNode));
+            log.trace("<< w: {}: {}","setCompleted",getEngine(executionPlan, executionNode));
             writeLock.unlock();
         }
     }
@@ -420,7 +420,7 @@ public class EnhancementJob {
                     + " | chain.running " + running + ")!");
         }
         if (running.remove(executionNode)) {
-            log.debug(
+            log.trace(
                 "Execution of '{}' for ContentItem {} completed "
                 + "(chain: {}, node: {}, optional {})",
                 new Object[] {engine, contentItem.getUri().getUnicodeString(), 
@@ -455,10 +455,10 @@ public class EnhancementJob {
         String engine = getEngine(executionPlan, executionNode);
         boolean optional = isOptional(executionPlan, executionNode);
         Set<NonLiteral> dependsOn = getDependend(executionPlan, executionNode);
-        log.debug("++ w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
+        log.trace("++ w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
         writeLock.lock();
         try {
-            log.debug(">> w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
+            log.trace(">> w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
             if (completed.contains(executionNode)) {
                 String message = "Unable to set state of ExectionNode '" + executionNode + "'(chain '"
                                  + chain + "' | contentItem '" + contentItem.getUri()
@@ -490,7 +490,7 @@ public class EnhancementJob {
                                        chain, executionNode, optional});
                 return;
             } else { //added an engine to running
-                log.debug("Started Execution of '{}' for ContentItem {} "
+                log.trace("Started Execution of '{}' for ContentItem {} "
                          + "(chain: {}, node: {}, optional {})",
                     new Object[] {engine, contentItem.getUri().getUnicodeString(), chain,
                                   executionNode, optional});
@@ -502,7 +502,7 @@ public class EnhancementJob {
                 checkExecutable();
             }
         } finally {
-            log.debug("<< w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
+            log.trace("<< w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
             writeLock.unlock();
         }
     }
@@ -542,7 +542,7 @@ public class EnhancementJob {
                 for(NonLiteral node : executeableNodes){
                     engines.add(getEngine(executionPlan, node));
                 }
-                log.debug("MARK {} as executeable",engines);
+                log.trace("MARK {} as executeable",engines);
             }
             //we need to get the em:Executables for the ep:ExecutionNodes ...
             if(executeableNodes.isEmpty()){
@@ -571,13 +571,13 @@ public class EnhancementJob {
      * currently running engines.
      */
     public Set<NonLiteral> getExecutable(){
-        log.debug("++ r: {}","getExecutable");
+        log.trace("++ r: {}","getExecutable");
         readLock.lock();
-        log.debug(">> r: {}","getExecutable");
+        log.trace(">> r: {}","getExecutable");
         try {
             return executable;
         } finally {
-            log.debug("<< r: {}:{}","getExecutable",executable);
+            log.trace("<< r: {}:{}","getExecutable",executable);
             readLock.unlock();  
         }
     }
@@ -586,14 +586,14 @@ public class EnhancementJob {
      * @return if this enhancement job is finished.
      */
     public boolean isFinished(){
-        log.debug("++ r: {}","isFinished");
+        log.trace("++ r: {}","isFinished");
         readLock.lock();
         try {
-            log.debug(">> r: {}","isFinished");
+            log.trace(">> r: {}","isFinished");
             return running.isEmpty() && // wait for running engine (regard if failed or not)
                     (executable.isEmpty() || isFailed()); //no more engines or already failed
         } finally {
-            log.debug("<< r: {}","isFinished");
+            log.trace("<< r: {}","isFinished");
             readLock.unlock();
         }
     }
@@ -605,10 +605,10 @@ public class EnhancementJob {
         NonLiteral executionNode = getExecutionNode(execution);
         final boolean optional = isOptional(executionPlan, executionNode);
         final String engineName = getEngine(executionPlan, executionNode);
-        log.debug("++ w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
+        log.trace("++ w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
         writeLock.lock();
         try {
-            log.debug(">> w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
+            log.trace(">> w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
             StringBuilder message = new StringBuilder();
             message.append(String.format("Unable to process ContentItem '%s' with " +
             		"Enhancement Engine '%s' because the engine ", 
@@ -637,7 +637,7 @@ public class EnhancementJob {
                 //re-throwing by the EnhancementJobManager.
             }
         } finally {
-            log.debug("<< w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
+            log.trace("<< w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
             writeLock.unlock();
         }
 
@@ -648,26 +648,29 @@ public class EnhancementJob {
      * @return if the EnhancementJob has failed or not.
      */
     public boolean isFailed() {
-        log.debug("++ r: {}","isFailed");
+        log.trace("++ r: {}","isFailed");
         readLock.lock();
         try {
-            log.debug(">> r: {}","isFailed");
+            log.trace(">> r: {}","isFailed");
             return isExecutionFailed(executionMetadata, chainExecutionNode);
         } finally {
-            log.debug("<< r: {}","isFailed");
+            log.trace("<< r: {}","isFailed");
             readLock.unlock();
         }
     }
-    
-    @Override
-    public int hashCode() {
-        return contentItem.getUri().hashCode();
-    }
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof EnhancementJob && 
-                contentItem.getUri().equals(((EnhancementJob)o).contentItem.getUri());
-    }
+// NOTE: use default implementations of hashCode and equals for now as we need
+//       to support the concurrent enhancement of ContentItems with the same
+//       URI. Also two ContentItems with the same URI might still have other
+//       content (as users can manually parse the URI in the request). 
+//    @Override
+//    public int hashCode() {
+//        return contentItem.getUri().hashCode();
+//    }
+//    @Override
+//    public boolean equals(Object o) {
+//        return o instanceof EnhancementJob && 
+//                contentItem.getUri().equals(((EnhancementJob)o).contentItem.getUri());
+//    }
     @Override
     public String toString() {
         return "EnhancementJob for ContentItem "+contentItem.getUri();

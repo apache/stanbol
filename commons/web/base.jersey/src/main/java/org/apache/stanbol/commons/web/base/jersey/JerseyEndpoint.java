@@ -47,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
-import org.apache.stanbol.commons.web.base.BundleHttpContext;
 import org.apache.stanbol.commons.web.base.DefaultApplication;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
@@ -181,16 +180,6 @@ public class JerseyEndpoint {
             navigationLinks.addAll(fragment.getNavigationLinks());
             app.contributeClasses(fragment.getJaxrsResourceClasses());
             app.contributeSingletons(fragment.getJaxrsResourceSingletons());
-            String staticPath = fragment.getStaticResourceClassPath();
-            if (staticPath != null) {
-                String resourceAlias = (applicationAlias.endsWith("/") ? applicationAlias.substring(0,
-                    applicationAlias.length() - 1) : applicationAlias)
-                                       + staticUrlRoot
-                                       + '/'
-                                       + fragment.getName();
-                httpService.registerResources(resourceAlias, staticPath, new BundleHttpContext(fragment));
-                registeredAliases.add(resourceAlias);
-            }
         }
         Collections.sort(linkResources);
         Collections.sort(scriptResources);
@@ -199,8 +188,7 @@ public class JerseyEndpoint {
         // bind the aggregate JAX-RS application to a dedicated servlet
         ServletContainer container = new ServletContainer(app);
         Bundle appBundle = componentContext.getBundleContext().getBundle();
-        httpService.registerServlet(applicationAlias, container, getInitParams(), new BundleHttpContext(
-                appBundle));
+        httpService.registerServlet(applicationAlias, container, getInitParams(), null);
         registeredAliases.add(applicationAlias);
 
         // forward the main Stanbol OSGi runtime context so that JAX-RS resources can lookup arbitrary

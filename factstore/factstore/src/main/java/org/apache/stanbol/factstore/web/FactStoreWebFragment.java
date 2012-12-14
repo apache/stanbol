@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -37,9 +36,6 @@ import org.apache.stanbol.factstore.web.resource.QueryResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
-
 /**
  * The FactStore web fragment registers the FactStore documentation and REST
  * resources at the global Stanbol Jersey module.
@@ -51,8 +47,6 @@ import freemarker.cache.TemplateLoader;
 public class FactStoreWebFragment implements WebFragment {
 
     public static final String NAME = "factstore";
-    
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/factstore/web/static";
 
     private BundleContext bundleContext;
     
@@ -62,11 +56,6 @@ public class FactStoreWebFragment implements WebFragment {
     @Activate
     protected void activate(ComponentContext ctx) {
         this.bundleContext = ctx.getBundleContext();
-    }
-
-    @Override
-    public BundleContext getBundleContext() {
-        return this.bundleContext;
     }
 
     @Override
@@ -107,10 +96,6 @@ public class FactStoreWebFragment implements WebFragment {
         return scripts;
     }
 
-    @Override
-    public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
-    }
 
 
 }
