@@ -77,7 +77,7 @@
     <module>rules</module>
 
     <!-- Specific features -->
-    <module>authentication</module>
+    <module>security</module>
     <module>zzshell</module>
   </modules>
 
