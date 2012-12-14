@@ -1,0 +1,7 @@
+rdfs:label = dbp-ont:wikiPageInterLanguageLink/rdfs:label;
+skos:altLabel = ^dbp-ont:wikiPageRedirects/rdfs:label | dbp-ont:wikiPageInterLanguageLink/^dbp-ont:wikiPageRedirects/rdfs:label;
+rdf:type = dbp-ont:wikiPageInterLanguageLink/rdf:type;
+rdfs:comment = dbp-ont:wikiPageInterLanguageLink/rdfs:comment;
+geo:lat = dbp-ont:wikiPageInterLanguageLink/geo:lat;
+geo:long = dbp-ont:wikiPageInterLanguageLink/geo:long;
+geo:alt = dbp-ont:wikiPageInterLanguageLink/geo:alt;
