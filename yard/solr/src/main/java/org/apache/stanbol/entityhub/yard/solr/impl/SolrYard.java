@@ -53,6 +53,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.SolrCore;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
@@ -302,6 +303,9 @@ public class SolrYard extends AbstractYard implements Yard {
         strategy=ReferenceStrategy.EVENT,
         policy=ReferencePolicy.DYNAMIC)
     private ManagedSolrServer managedSolrServer;
+    
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+    private NamespacePrefixService nsPrefixService;
     /**
      * If update(..) and store(..) calls should be immediately committed.
      */
@@ -520,6 +524,7 @@ public class SolrYard extends AbstractYard implements Yard {
             if(server != null && !server.equals(this._server)){
                 //reset the fieldMapper so that it is reinitialised for the new one
                 //STANBOL-519
+                _server = server;
                 Lock writeLock = fieldMapperLock.writeLock();
                 writeLock.lock();
                 try {
@@ -536,6 +541,7 @@ public class SolrYard extends AbstractYard implements Yard {
         if(server != null){
             return server;
         } else {
+            _server = null;
             Lock writeLock = fieldMapperLock.writeLock();
             writeLock.lock();
             try {
@@ -729,8 +735,9 @@ public class SolrYard extends AbstractYard implements Yard {
         Lock writeLock = fieldMapperLock.writeLock();
         writeLock.lock();
         try {
-            // the fieldMapper need the Server to store it's namespace prefix configuration
-            _fieldMapper = new SolrFieldMapper(getServer());
+            if(_fieldMapper == null){ //might be init by an other thread
+                _fieldMapper = new SolrFieldMapper(getServer(), nsPrefixService);
+            }
             return _fieldMapper;
         } finally {
             writeLock.unlock();
