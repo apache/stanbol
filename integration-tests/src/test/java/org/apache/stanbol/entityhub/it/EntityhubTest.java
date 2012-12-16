@@ -17,12 +17,36 @@
 package org.apache.stanbol.entityhub.it;
 
 import static junit.framework.Assert.assertNotSame;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+import static org.apache.stanbol.entityhub.it.DbpediaDefaultdataConstants.DBPEDIA_DEFAULTDATA_OPTIONAL_FIELDS;
+import static org.apache.stanbol.entityhub.it.DbpediaDefaultdataConstants.DBPEDIA_DEFAULTDATA_REQUIRED_FIELDS;
+import static org.apache.stanbol.entityhub.it.DbpediaDefaultdataConstants.DBPEDIA_SITE_ID;
+import static org.apache.stanbol.entityhub.it.DbpediaDefaultdataConstants.DBPEDIA_SITE_PATH;
+import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.assertEntity;
+import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.assertRepresentation;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
+import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -37,6 +61,7 @@ import org.apache.stanbol.entityhub.test.query.QueryTestBase;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,134 +75,268 @@ import org.slf4j.LoggerFactory;
  */
 public final class EntityhubTest extends QueryTestBase {
     
+    
     public EntityhubTest() {
         super("/entityhub", null);
     }
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    /**
-     * TODO: define
-     */
-    public static final String SINGLE_IMPORT_ENTITY_ID = "";
-    
+
+    private static final Collection<String> EXPECTED_DOAP_FIELDS;
+    static {
+        Collection<String> fields = new ArrayList<String>();
+        fields.add("http://usefulinc.com/ns/doap#created");
+        fields.add("http://usefulinc.com/ns/doap#license");
+        fields.add("http://usefulinc.com/ns/doap#name");
+        fields.add("http://usefulinc.com/ns/doap#homepage");
+        fields.add("http://usefulinc.com/ns/doap#shortdesc");
+        fields.add("http://usefulinc.com/ns/doap#description");
+        fields.add("http://usefulinc.com/ns/doap#bug-database");
+        fields.add("http://usefulinc.com/ns/doap#mailing-list");
+        fields.add("http://usefulinc.com/ns/doap#download-page");
+        fields.add("http://usefulinc.com/ns/doap#programming-language");
+        fields.add("http://usefulinc.com/ns/doap#category");
+        fields.add("http://projects.apache.org/ns/asfext#pmc");
+        EXPECTED_DOAP_FIELDS = Collections.unmodifiableCollection(fields);
+    }
     @Override
     protected String getDefaultFindQueryField() {
         return NamespaceEnum.entityhub+"label";
     }
     /*
-     * First the CRUD interface
+     * Tests the CRUD interface
+     * 
      */
-//    @Test
-    public void testEntityCreation() throws IOException {
-        String singleImportResource = "";
+    @Test
+    public void testEntityCrud() throws IOException, JSONException {
+        //execution order is important
+        testEntityCreation(); 
+        testEntityCreated();
+        testEntityUpdate();
+        testEntityUpdated();
+        testEntityDelete();
+        testEntityDeleted();
+    }
+    private void testEntityCreation() throws IOException {
+        InputStream in = EntityhubTest.class.getClassLoader().getResourceAsStream("doap_Stanbol.rdf");
+        Assert.assertNotNull("Unable to load test resource 'doap_Stanbol.rdf'", in);
+        String stanbolProjectUri = "http://stanbol.apache.org";
         //create a POST request with a test RDF file
         RequestExecutor test = executor.execute(
-            buildImportRdfData(singleImportResource, true, SINGLE_IMPORT_ENTITY_ID));
+            buildImportRdfData(in ,RDF_XML, true, stanbolProjectUri));
         //assert that the entity was created
         test.assertStatus(201);
-        
-        //NOTE: the check for the imported ID(s) is part of the 
-        // testEntityRetrieval test Method
-        
-    }
-//    @Test
-    public void testMultipleEntityCreation() throws IOException {
-        String multipleImportResource = "";
-        //create a POST request with a test RDF file
-        RequestExecutor test = executor.execute(
-            buildImportRdfData(multipleImportResource, true, null));
-        //assert that the entity was created
-        test.assertStatus(201);
-        
-        //NOTE: the check for the imported ID(s) is part of the 
-        // testEntityRetrieval test Method
-        
-    }
-//    @Test
-    public void testEntityRetrieval(){
-        //make a lookup for ID(s) of entities imported by the 
-        //testEntityCreation and testMultipleEntityCreation test method
-        
-    }
-//    @Test
-    public void testEntityUpdates() throws IOException {
-        String singleUpdateResource = "";
-        //create a POST request with a test RDF file that contains updated data
-        //of the one used for testEntityCreation
-        //create a POST request with a test RDF file
-        RequestExecutor test = executor.execute(
-            buildImportRdfData(singleUpdateResource, false, SINGLE_IMPORT_ENTITY_ID));
-        test.assertStatus(200);
-        //TODO: validate that the entity was updated
-        
-    }
-    
-//    @Test
-    public void testMultipleEntityUpdates() throws IOException {
-        String nultipleUpdateResource = "";
-        //create a POST request with a test RDF file that contains updated data
-        //of the one used for testMultipleEntityCreation 
-        RequestExecutor test = executor.execute(
-            buildImportRdfData(nultipleUpdateResource, false, null));
-        test.assertStatus(200);
-        //TODO: validate that the entity was updated
-        
-        //check for the updates to be applied
-        //check the metadata to be updated (creation date != modification date)
     }
 
-//    @Test
-    public void testEntityDeletion(){
-        // delete an entity previously imported
-        // by making a retrieval for this ID check that the removal was successfull 
+    private void testEntityCreated() throws IOException, JSONException {
+        String id = "http://stanbol.apache.org";
+        RequestExecutor re = executor.execute(
+            builder.buildGetRequest("/entityhub/entity","id",id)
+            .withHeader("Accept", "application/json"));
+        re.assertStatus(200);
+
+        JSONObject jEntity = assertEntity(re.getContent(), id, "entityhub");
+        Map<String,Set<List<String>>> data = assertRepresentation(jEntity.getJSONObject("representation"), 
+            EXPECTED_DOAP_FIELDS, null);
+        //test values of two properties we will update in a following test
+        Set<List<String>> pmcValues = data.get("http://projects.apache.org/ns/asfext#pmc");
+        Assert.assertNotNull(pmcValues);
+        Assert.assertEquals(1, pmcValues.size());
+        Assert.assertEquals("http://incubator.apache.org", pmcValues.iterator().next().get(0));
+        Set<List<String>> downloadValues = data.get("http://usefulinc.com/ns/doap#download-page");
+        Assert.assertNotNull(downloadValues);
+        Assert.assertEquals(1, downloadValues.size());
+        Assert.assertEquals("http://stanbol.apache.org", downloadValues.iterator().next().get(0));
     }
-//    @Test
-    public void testEntityLookup(){
-        //lookup is importing entities from referenced sites
-        //lookup entities from the dbpedia site also used by the other integration
-        //tests
+
+    private void testEntityUpdate() throws IOException, JSONException {
+        InputStream in = EntityhubTest.class.getClassLoader().getResourceAsStream("mod_doap_Stanbol.rdf");
+        Assert.assertNotNull("Unable to load test resource 'mod_doap_Stanbol.rdf'", in);
+        String stanbolProjectUri = "http://stanbol.apache.org";
+        //create a POST request with a test RDF file
+        RequestExecutor test = executor.execute(
+            buildImportRdfData(in ,RDF_XML, false, stanbolProjectUri));
+        //assert that the entity was created
+        test.assertStatus(200);
+        //check that the updated entity was returned
+        assertEntity(test.getContent(), stanbolProjectUri, "entityhub");
     }
-//    @Test
-    public void testEntityImport(){
-        //import some entities from referenced sites
-        //here we shall also use some entities from the dbpedia referenced site
+
+    private void testEntityUpdated() throws IOException, JSONException {
+        String id = "http://stanbol.apache.org";
+        RequestExecutor re = executor.execute(
+            builder.buildGetRequest("/entityhub/entity","id",id)
+            .withHeader("Accept", "application/json"));
+        re.assertStatus(200);
+
+        JSONObject jEntity = assertEntity(re.getContent(), id, "entityhub");
+        Map<String,Set<List<String>>> data = assertRepresentation(jEntity.getJSONObject("representation"), 
+            EXPECTED_DOAP_FIELDS, null);
+        Set<List<String>> pmcValues = data.get("http://projects.apache.org/ns/asfext#pmc");
+        Assert.assertNotNull(pmcValues);
+        Assert.assertEquals(1, pmcValues.size());
+        Assert.assertEquals("http://stanbol.apache.org", pmcValues.iterator().next().get(0));
+        Set<List<String>> downloadValues = data.get("http://usefulinc.com/ns/doap#download-page");
+        Assert.assertNotNull(downloadValues);
+        Assert.assertEquals(1, downloadValues.size());
+        Assert.assertEquals("http://stanbol.apache.org/downloads/", downloadValues.iterator().next().get(0));
     }
     
-//    @Test
-    public void testFindNameQuery() throws IOException, JSONException {
-        //typical find by name query tests bases on created and imported entities 
+    private void testEntityDelete() throws IOException {
+        String stanbolProjectUri = "http://stanbol.apache.org";
+        Request request = builder.buildOtherRequest(new HttpDelete(
+            builder.buildUrl("/entityhub/entity", "id", stanbolProjectUri)));
+        RequestExecutor re = executor.execute(request);
+        re.assertStatus(200);
     }
-//    @Test
-    public void testFindLimitAndOffsetQuery() throws IOException, JSONException {
-        //typical tests based on created and imported entities
+
+    private void testEntityDeleted() throws IOException {
+        String id = "http://stanbol.apache.org";
+        RequestExecutor re = executor.execute(
+            builder.buildGetRequest("/entityhub/entity","id",id)
+            .withHeader("Accept", "application/json"));
+        re.assertStatus(404);
     }
-//    @Test
-    public void testFindLanguageQuery() throws IOException, JSONException {
-        //typical tests based on created and imported entities
-    }
-//    @Test
-    public void testFindWildcards() throws IOException, JSONException {
-        //typical tests based on created and imported entities
-    }
-//    @Test
-    public void testFindSpecificFieldQuery() throws IOException, JSONException {
-        //typical tests based on created and imported entities
+    @Test
+    public void testEntityLookup() throws IOException, JSONException {
+        String uri = "http://dbpedia.org/resource/Paris";
+        //first check that lookup without create returns 404
+        RequestExecutor re = executor.execute(builder.buildGetRequest(
+            "/entityhub/lookup", "id",uri));
+        re.assertStatus(404);
+        //Now check that lookup with create does work
+        re = executor.execute(builder.buildGetRequest(
+            "/entityhub/lookup", "id",uri,"create","true"));
+        re.assertStatus(200);
+        JSONObject entity = assertEntity(re.getContent(), null, "entityhub");
+        String ehUri = entity.optString("id", null);
+        
+        //try to retrieve the entity with the generated id
+        re = executor.execute(builder.buildGetRequest(
+            "/entityhub/entity", "id",ehUri));
+        re.assertStatus(200);
+        assertEntity(re.getContent(), ehUri, "entityhub");
+        
+        //no try again to lookup the entity without create
+        re = executor.execute(builder.buildGetRequest(
+            "/entityhub/lookup", "id",uri));
+        re.assertStatus(200);
+        assertEntity(re.getContent(), ehUri, "entityhub");
+        
+        //finally delete the entity
+        re = executor.execute(builder.buildOtherRequest(new HttpDelete(
+            builder.buildUrl("/entityhub/entity", "id", ehUri))));
+        re.assertStatus(200);
     }
     
-//    @Test
-    public void testFieldQueryRangeConstraints() throws IOException, JSONException {
-        //typical tests based on created and imported entities
+    @Test
+    public void testQueries() throws IOException, JSONException {
+        //first load the data for the rquery test
+        URL url = EntityhubTest.class.getClassLoader().getResource("apache-project-doap-files.zip");
+        Assert.assertNotNull(url);
+        File f;
+        try {
+          f = new File(url.toURI());
+        } catch(URISyntaxException e) {
+          f = new File(url.getPath());
+        }
+        Assert.assertNotNull(f.isFile());
+        ZipFile archive = new ZipFile(f);
+        for(Enumeration<? extends ZipEntry> e = archive.entries();e.hasMoreElements();){
+            ZipEntry entry = e.nextElement();
+            RequestExecutor re = executor.execute(
+                buildImportRdfData(archive.getInputStream(entry) ,RDF_XML, false, null));
+            //assert that the entity was created (or already existed)
+            //some projects seams to have more than a single doap file
+            int status = re.getResponse().getStatusLine().getStatusCode();
+            Assert.assertTrue(status == 200 || status == 304);
+        }
+        testFindNameQuery();
+        testFindWildcards();
+        testFindLimitAndOffsetQuery();
+        testFieldQueryTextConstraints();
+        //finally delete all added entity
+        RequestExecutor re = executor.execute(builder.buildOtherRequest(new HttpDelete(
+            builder.buildUrl("/entityhub/entity", "id", "*"))));
+        re.assertStatus(200);
+        
     }
     
-//    @Test
-    public void testFieldQueryTextConstraints() throws IOException, JSONException {
-        //typical tests based on created and imported entities
+    private void testFindNameQuery() throws IOException, JSONException {
+        FindQueryTestCase test = new FindQueryTestCase("Apache Stanbol",
+            Arrays.asList(
+                "http://stanbol.apache.org"));//,
+                //"http://dbpedia.org/resource/Paris_Hilton"));
+        test.setField("http://usefulinc.com/ns/doap#name");
+        test.setLanguage(null);
+        executeQuery(test);
     }
-//    @Test
-    public void testFieldQueryValueConstraints() throws IOException, JSONException {
-        //typical tests based on created and imported entities
-    }    
+    private void testFindWildcards() throws IOException, JSONException {
+        FindQueryTestCase test = new FindQueryTestCase("Hiv*",
+            Arrays.asList(
+                "http://hive.apache.org",
+                "http://jakarta.apache.org/hivemind/"),
+            Arrays.asList(
+                "http://beehive.apache.org"));
+        test.setField("http://usefulinc.com/ns/doap#name");
+        test.setLanguage(null);
+        executeQuery(test);
+    }
+
+    private void testFindLimitAndOffsetQuery() throws IOException, JSONException {
+        FindQueryTestCase test = new FindQueryTestCase("XML*",
+            Arrays.asList(
+                "http://xerces.apache.org/xml-commons/components/external/",
+                "http://xml.apache.org/xerces-c/",
+                "http://xerces.apache.org/xerces2-j/",
+                "http://xerces.apache.org/xerces-p",
+                "http://xerces.apache.org/xml-commons/components/resolver/"),
+            null);
+        test.setField("http://usefulinc.com/ns/doap#name");
+        test.setLanguage(null);
+        executeQuery(test);
+        //repeat the test with offset 2 and limit 2 to only retrieve the 3-4 result
+        test = new FindQueryTestCase("XML*",
+            Arrays.asList(
+                "http://xerces.apache.org/xml-commons/components/external/",
+                "http://xerces.apache.org/xerces-p"),
+            Arrays.asList(
+                "http://xml.apache.org/xerces-c/",
+                "http://xerces.apache.org/xerces2-j/",
+                "http://xerces.apache.org/xml-commons/components/resolver/"));
+        test.setField("http://usefulinc.com/ns/doap#name");
+        test.setOffset(2);
+        test.setLimit(2);
+        test.setLanguage(null);
+        
+    }
+
+    private void testFieldQueryTextConstraints() throws IOException, JSONException {
+        FieldQueryTestCase test = new FieldQueryTestCase(
+            "{ "+
+                "'selected': ["+
+                    "'http:\\/\\/usefulinc.com\\/ns\\/doap#name'],"+
+                "'offset': '0',"+
+                "'limit': '3',"+
+                "'constraints': [{ "+
+                    "'type': 'text', "+
+                    "'patternType': 'wildcard', "+
+                    "'text': 'Stanbol', "+
+                    "'field': 'http:\\/\\/usefulinc.com\\/ns\\/doap#name' "+
+                "},{ "+
+                    "'type': 'text', "+
+                    "'patternType': 'wildcard', "+
+                    "'text': 'Java', "+
+                    "'field': 'http:\\/\\/usefulinc.com\\/ns\\/doap#programming-language' "+
+                "}]"+
+             "}",
+             Arrays.asList( //list of expected results
+                 "http://stanbol.apache.org"),
+             null);
+        //now execute the test
+        executeQuery(test);
+    }
     
 
     /**
@@ -189,28 +348,27 @@ public final class EntityhubTest extends QueryTestBase {
      * @param uri if not <code>null</code> only data of this URI are imported by
      * specifying the id parameter
      */
-    protected Request buildImportRdfData(String file, boolean create, String uri){
+    protected Request buildImportRdfData(InputStream in, String contentType, boolean create, String uri){
+        Assert.assertNotNull(in);
+        Assert.assertNotNull(contentType);
         Request request;
         String path;
         if(uri != null){
-            path = builder.buildUrl("/entity", "id",uri);
+            path = builder.buildUrl("/entityhub/entity", "id",uri);
         } else {
-            path = builder.buildUrl("/entity");
+            path = builder.buildUrl("/entityhub/entity");
         }
         if(create){
-            request = builder.buildPostRequest(path);
+            request = builder.buildOtherRequest(new HttpPost(path));
         } else {
             request = builder.buildOtherRequest(new HttpPut(path));
         }
         //set the HttpEntity (both PUT and POST are HttpEntityEnclosingRequests)
         ((HttpEntityEnclosingRequest)request.getRequest()).setEntity(
-            new InputStreamEntity(
-                EntityhubTest.class.getClassLoader().getResourceAsStream(file),
-                -1));
+            new InputStreamEntity(in, -1));
         //finally set the correct content-type of the provided data
         //currently fixed to "application/rdf+xml"
-        request.getRequest().setHeader("Content-Type", "application/rdf+xml");
-        
+        request.getRequest().setHeader("Content-Type", contentType);
         return request;
     }
     
