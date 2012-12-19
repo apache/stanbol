@@ -170,7 +170,6 @@ public class LdRenderer {
 			//should root be a map instead?
 			freemarker.getTemplate(templatePath).process(pojo, out);
 			out.flush();
-			out.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} catch (TemplateException e) {
