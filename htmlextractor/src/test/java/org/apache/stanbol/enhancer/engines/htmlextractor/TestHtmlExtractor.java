@@ -35,7 +35,6 @@ import org.apache.stanbol.enhancer.engines.htmlextractor.impl.HtmlExtractionRegi
 import org.apache.stanbol.enhancer.engines.htmlextractor.impl.HtmlExtractor;
 import org.apache.stanbol.enhancer.engines.htmlextractor.impl.HtmlParser;
 import org.apache.stanbol.enhancer.engines.htmlextractor.impl.InitializationException;
-import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -53,6 +52,9 @@ public class TestHtmlExtractor {
     private static HtmlParser parser;
     
     private static HtmlExtractionRegistry registry;
+    
+    // define the Nepomuks NIE namespace locally here
+    private static final String NIE_NS = "http://www.semanticdesktop.org/ontologies/2007/01/19/nie#";
     
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
@@ -89,7 +91,7 @@ public class TestHtmlExtractor {
         LOG.debug("RDFa triples: {}",tripleCounter);
         printTriples(model);
         assertEquals(8, tripleCounter);
-        ClerezzaRDFUtils.makeConnected(model, new UriRef("file://" + testFile), new UriRef(NamespaceEnum.nie+"contains"));
+        ClerezzaRDFUtils.makeConnected(model, new UriRef("file://" + testFile), new UriRef(NIE_NS+"contains"));
     }
     
     /** This tests some Microformat extraction
@@ -114,9 +116,33 @@ public class TestHtmlExtractor {
         LOG.debug("Microformat triples: {}",tripleCounter);
         printTriples(model);
         assertEquals(127, tripleCounter);
-        ClerezzaRDFUtils.makeConnected(model, new UriRef("file://" + testFile), new UriRef(NamespaceEnum.nie+"contains"));
+        ClerezzaRDFUtils.makeConnected(model, new UriRef("file://" + testFile), new UriRef(NIE_NS+"contains"));
     }
 
+    /** This test some extraction of microdata from an HTML-5 document
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testMicrodataExtraction() throws Exception {
+      HtmlExtractor extractor = new HtmlExtractor(registry, parser);
+      MGraph model = new SimpleMGraph();
+      String testFile = "test-microdata.html";
+
+      // extract text from RDFa annotated html
+      InputStream in = getResourceAsStream(testFile);
+      assertNotNull("failed to load resource " + testFile, in);
+
+      extractor.extract("file://" + testFile,in,null, "text/html", model);
+
+      // show triples
+      int tripleCounter = model.size();
+      LOG.debug("Microdata triples: {}",tripleCounter);
+      printTriples(model);
+      assertEquals(91, tripleCounter);
+      ClerezzaRDFUtils.makeConnected(model, new UriRef("file://" + testFile), new UriRef(NIE_NS+"contains"));
+    }
+    
     /** This tests the merging of disconnected graphs under a single root
      * 
      * @throws Exception
@@ -139,7 +165,7 @@ public class TestHtmlExtractor {
         printTriples(model);
         Set<NonLiteral> roots = ClerezzaRDFUtils.findRoots(model);
         assertTrue(roots.size() > 1);
-        ClerezzaRDFUtils.makeConnected(model, new UriRef("file://" + testFile), new UriRef(NamespaceEnum.nie+"contains"));
+        ClerezzaRDFUtils.makeConnected(model, new UriRef("file://" + testFile), new UriRef(NIE_NS+"contains"));
         roots = ClerezzaRDFUtils.findRoots(model);
         assertEquals(1,roots.size());
     }
