@@ -16,8 +16,6 @@
 */
 package org.apache.stanbol.launchpad;
 
-import static org.apache.sling.launchpad.base.shared.SharedConstants.SLING_HOME;
-
 import java.io.File;
 import java.security.AllPermission;
 import java.security.PermissionCollection;
@@ -26,13 +24,16 @@ import java.security.Policy;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import static org.apache.sling.launchpad.base.shared.SharedConstants.SLING_HOME;
 
 public class Main {
 
     public static final String DEFAULT_STANBOL_HOME = "stanbol";
+    /**
+     * If this argument is set Stanbol is started without a securitymanager
+     */
+    public static final String NOSECURITYARG = "-no-security";
     /**
      * @param args
      */
@@ -44,8 +45,9 @@ public class Main {
             System.setProperty(SLING_HOME, home);
         } //else do not override user configured values
         List<String> argsList = new ArrayList<String>(Arrays.asList(args));
-        if (argsList.contains("-s")) {
-        	argsList.remove("-s");
+        if (argsList.contains(NOSECURITYARG)) {
+        	argsList.remove(NOSECURITYARG);
+        } else {
         	args = argsList.toArray(new String[argsList.size()]);
 	        Policy.setPolicy(new Policy() {
 				@Override
