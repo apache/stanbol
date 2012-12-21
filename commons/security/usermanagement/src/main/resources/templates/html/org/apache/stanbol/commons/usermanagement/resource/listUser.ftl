@@ -18,7 +18,7 @@
 <@namespace permission="http://clerezza.org/2008/10/permission#" />
 <@namespace sioc="http://rdfs.org/sioc/ns#" />
 <table id="user-table" class="nicetable noauto">
-    <thead><tr><th>Name</th><th>login</th><th>email</th><th>groups</th><th>&nbsp;</th></tr></thead>
+    <thead><tr><th>Name</th><th>Login</th><th>Email</th><th>Roles</th></tr></thead>
     <tbody>
         <@ldpath path="fn:sort(^rdf:type)">
         <#assign fullName>

@@ -76,8 +76,10 @@ function removeUser(name){
 
 </script>
 
-
+<!--
 <p class="statline ui-state-highlight">There are X amount of users blah blah blah</p>
+-->
+<p><a href="">Add User</a></p>
 <div id="tabs">
     <ul>
         <li><a href="#tabs-users">Users</a></li>
