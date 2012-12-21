@@ -4,6 +4,8 @@ package org.apache.stanbol.enhancer.engines.entityhublinking.labeltokenizer.luce
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,10 +16,11 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
-import org.apache.lucene.util.Attribute;
 import org.apache.lucene.util.Version;
+import org.apache.solr.analysis.TokenFilterFactory;
 import org.apache.solr.analysis.TokenizerFactory;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
@@ -34,6 +37,7 @@ import org.slf4j.LoggerFactory;
     metatype=true)
 @Properties(value={
         @Property(name=LuceneLabelTokenizer.PROPERTY_TOKENIZER_FACTORY,value="{full-qualified-class-name}"),
+        @Property(name=LuceneLabelTokenizer.PROPERTY_TOKEN_FILTER_FACTORY,cardinality=Integer.MAX_VALUE,value=""),
         @Property(name=LabelTokenizer.SUPPORTED_LANUAGES,value="{lang1},{lang2},!{lang3},{*}"),
         @Property(name=Constants.SERVICE_RANKING,intValue=0)
 })
@@ -44,7 +48,9 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
     private static final String[] EMPTY = new String[]{};
     
     public static final String PROPERTY_TOKENIZER_FACTORY = "enhancer.engine.linking.labeltokenizer.lucene.tokenizerFactory";
+    public static final String PROPERTY_TOKEN_FILTER_FACTORY = "enhancer.engine.linking.labeltokenizer.lucene.tokenFilterFactory";
     private TokenizerFactory tokenizerFactory;
+    private List<TokenFilterFactory> filterFactories = new ArrayList<TokenFilterFactory>();
     private LanguageConfiguration langConf = new LanguageConfiguration(SUPPORTED_LANUAGES, new String[]{});
     
     @Activate
@@ -57,6 +63,7 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
         Class<?> tokenizerFactoryClass;
         try {
             tokenizerFactoryClass = getClass().getClassLoader().loadClass(value.toString());
+            log.info(" ... adding {}",tokenizerFactoryClass.getSimpleName());
         } catch (ClassNotFoundException e) {
             throw new ConfigurationException(PROPERTY_TOKENIZER_FACTORY, "Unable to load the "
                 + "class for the parsed name '"+value+"'!");
@@ -78,6 +85,56 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
         } else {
             throw new ConfigurationException(PROPERTY_TOKENIZER_FACTORY, "The parsed class '"
                     + tokenizerFactoryClass +"' is not assignable to "+TokenizerFactory.class);
+        }
+        Collection<String> values;
+        value = ctx.getProperties().get(PROPERTY_TOKEN_FILTER_FACTORY);
+        if(value == null){
+            values = Collections.emptyList();
+        } else if(value instanceof Collection<?>){
+            values = new ArrayList<String>(((Collection<?>)value).size());
+            for(Object v : (Collection<Object>)value){
+                if(v != null && !v.toString().isEmpty()){
+                    values.add(v.toString());
+                }
+            }
+        } else if(value instanceof String[]){
+            values = Arrays.asList((String[])value);
+        } else if(value instanceof String){
+            values = Collections.singleton((String)value);
+        } else {
+            throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "The type '"
+                + value.getClass()+"' of the parsed value is not supported (supported are "
+                + "Collections, String[] and String values)!");
+        }
+        for(String filterClassName : values){
+            Class<?> tokenFilterFactoryClass;
+            try {
+                tokenFilterFactoryClass = getClass().getClassLoader().loadClass(filterClassName);
+                log.info(" ... adding {}",tokenFilterFactoryClass.getSimpleName());
+            } catch (ClassNotFoundException e) {
+                throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "Unable to load the "
+                    + "class for the parsed name '"+filterClassName+"'!");
+            }
+            Object filterFactoryObject;
+            try {
+                filterFactoryObject = tokenFilterFactoryClass.newInstance();
+            } catch (InstantiationException e) {
+                throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "Unable to instantiate the "
+                        + "class '"+tokenFilterFactoryClass+"'!", e);
+            } catch (IllegalAccessException e) {
+                throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "Unable to instantiate the "
+                        + "class '"+tokenFilterFactoryClass+"'!", e);
+            }
+            
+            if(filterFactoryObject instanceof TokenFilterFactory){
+                TokenFilterFactory tff = (TokenFilterFactory)filterFactoryObject;
+                tff.init(Collections.singletonMap("luceneMatchVersion", Version.LUCENE_36.toString()));
+                filterFactories.add(tff);
+            } else {
+                throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "The parsed class '"
+                        + tokenFilterFactoryClass +"' is not assignable to "+TokenFilterFactory.class);
+            }
+            
         }
         //init the language configuration
         value = ctx.getProperties().get(LabelTokenizer.SUPPORTED_LANUAGES);
@@ -104,7 +161,11 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
             if(label.isEmpty()){
                 return EMPTY;
             }
-            Tokenizer tokenizer = tokenizerFactory.create(new StringReader(label));
+            //build the analysing chain
+            TokenStream tokenizer = tokenizerFactory.create(new StringReader(label));
+            for(TokenFilterFactory filterFactory : filterFactories){
+                tokenizer = filterFactory.create(tokenizer); 
+            }
             List<String> tokens = new ArrayList<String>(8);
             try {
                 while(tokenizer.incrementToken()){

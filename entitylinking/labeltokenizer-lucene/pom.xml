@@ -105,6 +105,20 @@
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>      
     </dependency>
+    
+    <dependency> <!-- To test ch text tokenizing conf -->
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-smartcn</artifactId>
+      <version>3.6.1</version>
+      <scope>test</scope>      
+    </dependency>
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-analysis-extras</artifactId>
+      <scope>test</scope>      
+    </dependency>
+    
+    
   </dependencies>
 
 </project>
