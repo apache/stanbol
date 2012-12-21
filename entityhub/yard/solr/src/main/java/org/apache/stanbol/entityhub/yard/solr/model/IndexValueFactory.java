@@ -276,6 +276,9 @@ public class IndexValueFactory {
 
         @Override
         public IndexValue createIndexValue(Date value) {
+            if(value == null){
+                return null;
+            }
             return new IndexValue(XML_DATE_TIME_FORMAT.print(value.getTime()), INDEX_TYPE);
         }
 
@@ -408,7 +411,7 @@ public class IndexValueFactory {
 
         @Override
         public IndexValue createIndexValue(String value) {
-            if (value == null) {
+            if (value == null || value.isEmpty()) {
                 return null;
             }
             return new IndexValue(value, INDEX_TYPE);
@@ -922,7 +925,7 @@ public class IndexValueFactory {
 
         @Override
         public IndexValue createIndexValue(Reference value) {
-            if (value == null) {
+            if (value == null || value.getReference() == null || value.getReference().isEmpty()) {
                 return null;
             }
             return new IndexValue(value.getReference(), INDEX_TYPE);
