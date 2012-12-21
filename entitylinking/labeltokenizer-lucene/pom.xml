@@ -24,29 +24,27 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
     <version>0.10.0-SNAPSHOT</version>
-    <relativePath>../../enhancer/parent</relativePath>
+    <relativePath>../../../enhancer/parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.enhancer.engines.entityhublinking</artifactId>
+  <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancement Engine : Entityhub Linking</name>
+  <name>Apache Stanbol Enhancer EntityLinking LabelTokenizer Lucene </name>
   <description>
-    Named Entity Linking for the Stanbol Entityhub. This Engine provides an
-    Entityhub based implementation/configuration of the EntityLinkingEngine. It
-    supports linking against the Entityhub, ReferencedSites and ManagedSites.
+    LabelTokenizer implementation based on the Apache Lucene Tokenizer interface.
   </description>
 
   <inceptionYear>2012</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityhublinking/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityhublinking/lucene-labeltokenizer
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityhublinking/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityhublinking/lucene-labeltokenizer
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -60,12 +58,11 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.enhancer.servicesapi; provide:=true,
               org.apache.stanbol.enhancer.engines.entitylinking;version=${project.version}; provide:=true,
               *
             </Import-Package>
             <Private-Package>
-              org.apache.stanbol.enhancer.engines.entityhublinking;version=${project.version}
+              org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene;version=${project.version}
             </Private-Package>
           </instructions>
         </configuration>
@@ -78,11 +75,6 @@
   </build>
 
   <dependencies>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
-    </dependency>
 
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -90,9 +82,8 @@
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-core</artifactId>
     </dependency>
 
     <dependency>
@@ -104,6 +95,16 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>      
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>      
+    </dependency>
   </dependencies>
 
 </project>
