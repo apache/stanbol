@@ -181,6 +181,9 @@ public class SolrServerAdapter {
         this.context = context;
         //create a clone so that only we control who changes to the properties
         serverProperties = parsedServerProperties.clone();
+//        SolrResourceLoader loader = new OsgiResourceLoader(solrDir.getAbsolutePath(),
+//            SolrServerAdapter.class.getClassLoader());
+//        CoreContainer container = new CoreContainer(loader);
         CoreContainer container = new CoreContainer(solrDir.getAbsolutePath());
         File solrCof = new File(solrDir,parsedServerProperties.getSolrXml());
         ClassLoader classLoader = updateContextClassLoader();
@@ -352,8 +355,14 @@ public class SolrServerAdapter {
         ClassLoader classLoader = updateContextClassLoader();
         SolrCore core;
         try {
+//            SolrResourceLoader loader = new OsgiResourceLoader(coreDir.getAbsolutePath(), 
+//                SolrServerAdapter.class.getClassLoader());
+//            SolrConfig config = new OsgiEnabledSolrConfig(loader, "solrconfig.xml", null);
+//            IndexSchema schema = new IndexSchema(config,"schema.xml",null);
             CoreDescriptor coreDescriptor = new CoreDescriptor(server, 
                 coreName, coreDir.getAbsolutePath());
+//            core = new SolrCore(coreName, coreDir.getAbsolutePath(), config, schema,coreDescriptor);
+//            server.register(coreName, core, false);
             core = server.create(coreDescriptor);
             //add the CloseHook
             core.addCloseHook(closeHook);

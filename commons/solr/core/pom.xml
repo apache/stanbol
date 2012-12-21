@@ -68,7 +68,8 @@
               org.apache.stanbol.commons.solr;version=${project.version},
               org.apache.stanbol.commons.solr.utils;version=${project.version}
             </Export-Package>
-            <_exportcontents> <!-- used instead of Export-Package to preserve the owlapi jar -->
+            <!-- used instead of Export-Package to preserve the jars -->
+            <_exportcontents> 
               org.apache.solr.client.solrj;version=${solr-version},
               org.apache.solr.client.solrj.beans;version=${solr-version},
               org.apache.solr.client.solrj.impl;version=${solr-version},
@@ -116,12 +117,12 @@
               !antlr.*, 
               !com.werken.*,
               !org.apache.oro.*,
-              !org.apache.lucene.analysis.cn.smart.*,
-              !org.apache.lucene.analysis.pl.*,
-              !org.apache.lucene.analysis.ja.*,
-              !org.apache.lucene.analysis.stempel.*,
-              !org.apache.lucene.search.grouping.*,
-              !org.egothor.stemmer.*,
+              org.apache.lucene.analysis.cn.smart.*;resolution:=optional,
+              org.apache.lucene.analysis.pl.*;resolution:=optional,
+              org.apache.lucene.analysis.ja.*;resolution:=optional,
+              org.apache.lucene.analysis.stempel.*;resolution:=optional,
+              org.apache.lucene.search.grouping.*;resolution:=optional,
+              org.egothor.stemmer.*;resolution:=optional,
               javax.servlet.*; version="[2.5.0,4.0.0)",
               org.apache.stanbol.commons.solr,
               org.apache.stanbol.commons.solr.utils,
@@ -149,6 +150,7 @@
               org.apache.lucene.*,
               *
             </Import-Package>
+            <DynamicImport-Package>*</DynamicImport-Package>
             <Embed-Dependency>
               solr-solrj, solr-core, solr-dataimporthandler,
               solr-analysis-extras, commons-httpclient,
