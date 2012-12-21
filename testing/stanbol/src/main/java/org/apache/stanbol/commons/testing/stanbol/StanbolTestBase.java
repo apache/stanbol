@@ -129,6 +129,8 @@ public class StanbolTestBase {
                 final String substring = (s.length > 0 ? s[1] : null);
                 final String url = serverBaseUrl + path;
                 final HttpGet get = new HttpGet(url);
+                //authenticate as admin with password admin
+                get.setHeader("Authorization", "Basic YWRtaW46YWRtaW4=");
                 for(int i = 2; i+1<s.length;i=i+2){
                     if(s[i] != null && !s[i].isEmpty() &&
                             s[i+1] != null && !s[i+1].isEmpty()){
