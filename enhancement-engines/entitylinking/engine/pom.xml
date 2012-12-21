@@ -24,29 +24,30 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
     <version>0.10.0-SNAPSHOT</version>
-    <relativePath>../../enhancer/parent</relativePath>
+    <relativePath>../../../enhancer/parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.enhancer.engines.entityhublinking</artifactId>
+  <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.engine</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancement Engine : Entityhub Linking</name>
+  <name>Apache Stanbol Enhancement Engine : Entity Linking</name>
   <description>
-    Named Entity Linking for the Stanbol Entityhub. This Engine provides an
-    Entityhub based implementation/configuration of the EntityLinkingEngine. It
-    supports linking against the Entityhub, ReferencedSites and ManagedSites.
+    Implementation of an entity-linking engine that consumes NLP processing
+    resutls from the AnalyzedText content part and uses those information for
+    token based linking (searching and matching) of Entities of the configured
+    controlled vocabulary.
   </description>
 
   <inceptionYear>2012</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityhublinking/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entitylinking/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityhublinking/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entitylinking/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -61,11 +62,16 @@
           <instructions>
             <Import-Package>
               org.apache.stanbol.enhancer.servicesapi; provide:=true,
-              org.apache.stanbol.enhancer.engines.entitylinking;version=${project.version}; provide:=true,
               *
             </Import-Package>
+            <Export-Package>
+              org.apache.stanbol.enhancer.engines.entitylinking;version=${project.version}; provide:=true,
+              org.apache.stanbol.enhancer.engines.entitylinking.config;version=${project.version},
+              org.apache.stanbol.enhancer.engines.entitylinking.engine;version=${project.version},
+              org.apache.stanbol.enhancer.engines.entitylinking.impl;version=${project.version}
+            </Export-Package>
             <Private-Package>
-              org.apache.stanbol.enhancer.engines.entityhublinking;version=${project.version}
+              org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer;version=${project.version}
             </Private-Package>
           </instructions>
         </configuration>
@@ -83,16 +89,30 @@
       <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
-
+    
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.engine</artifactId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <artifactId>org.apache.stanbol.enhancer.nlp</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
     </dependency>
 
     <dependency>
@@ -100,8 +120,42 @@
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <!-- Testing -->
+     <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.core</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+      <scope>test</scope>      
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>      
+    </dependency>
+    <dependency>  <!-- used for debug level logging during tests -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>
