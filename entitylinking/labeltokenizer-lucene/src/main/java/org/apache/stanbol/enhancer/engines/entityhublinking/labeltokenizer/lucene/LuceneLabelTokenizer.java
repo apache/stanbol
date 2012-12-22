@@ -172,6 +172,8 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
                     OffsetAttribute offset = tokenizer.addAttribute(OffsetAttribute.class);
                     tokens.add(label.substring(offset.startOffset(), offset.endOffset()));
                 }
+                tokenizer.end();
+                tokenizer.close();
             } catch (IOException e) {
                 log.error("IOException while reading from a StringReader :(",e);
                 return null;

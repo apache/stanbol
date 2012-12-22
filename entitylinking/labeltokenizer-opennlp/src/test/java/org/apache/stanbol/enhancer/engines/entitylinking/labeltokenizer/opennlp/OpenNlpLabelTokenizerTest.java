@@ -32,7 +32,7 @@ public class OpenNlpLabelTokenizerTest {
         tokenizer.tokenize(null, "en");
     }
     @Test
-    public void testNullLanguate(){
+    public void testNullLanguage(){
         String[] tokens = tokenizer.tokenize(label, null);
         Assert.assertNotNull(tokens);
         Assert.assertArrayEquals(expected, tokens);
