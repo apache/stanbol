@@ -63,6 +63,7 @@
     <module>opennlp-pos</module>
     <module>opennlp-ner</module>
     <module>opennlp-chunker</module>
+    <module>smartcn-token</module> <!-- Chinese sentence detection & tokenizer -->
     <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
   
   	<!-- EntityLinking -->
