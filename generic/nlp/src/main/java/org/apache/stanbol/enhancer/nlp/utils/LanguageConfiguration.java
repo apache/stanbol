@@ -169,7 +169,7 @@ public class LanguageConfiguration {
             String line = value.toString().trim();
             int sepIndex = line.indexOf(';');
             String lang = sepIndex < 0 ? line : line.substring(0, sepIndex).trim();
-            lang = lang.toLowerCase();
+            //lang = lang.toLowerCase(); //country codes are upper case
             if(lang.length() > 0 && lang.charAt(0) == '!'){ //exclude
                 lang = lang.substring(1);
                 if(configuredLanguages.containsKey(lang)){
@@ -252,15 +252,37 @@ public class LanguageConfiguration {
         return params.isEmpty() ? EMPTY_PARAMS : Collections.unmodifiableMap(params);
     }
 
+    private class LangState{
+        
+        protected final boolean state;
+        protected final String lang;
+        protected LangState(boolean state, String lang){
+            this.state = state;
+            this.lang = lang;
+        }
+    }
+    
+    private LangState getLanguageState(String language){
+        int countrySepPos = language == null ? -1 : language.indexOf('-');
+        boolean excluded = excludedLanguages.contains(language);
+        boolean included = configuredLanguages.containsKey(language);
+        if(countrySepPos >= 2 && !excluded && ! included){
+            //search without language specific part
+            String baseLang = language.substring(0, countrySepPos);
+            return new LangState(allowAll ? !excludedLanguages.contains(baseLang) :
+                configuredLanguages.containsKey(baseLang), baseLang);
+        } else {
+            return new LangState(allowAll ? !excluded : included,language);
+        }
+    }
+    
     /**
      * Checks if the parsed language is included in the configuration
      * @param language the language
      * @return the state
      */
     public boolean isLanguage(String language){
-        return allowAll ? 
-            (!excludedLanguages.contains(language)) : 
-                configuredLanguages.containsKey(language);
+        return getLanguageState(language).state;
     }
     /**
      * The explicitly configured languages
@@ -293,9 +315,10 @@ public class LanguageConfiguration {
      * @return the parameters or <code>null</code> if none or the parsed language
      * is not active.
      */
-    public Map<String,String> getParameters(String language){
-        if(isLanguage(language)){
-            Map<String,String> params = configuredLanguages.get(language);
+    public Map<String,String> getParameters(String parsedLang){
+        LangState ls = getLanguageState(parsedLang);
+        if(ls.state){
+            Map<String,String> params = configuredLanguages.get(ls.lang);
             if(params != null){
                 params = new CompositeMap(params,defaultParameters,CONFIGURATION_MERGER);
             } else {
@@ -313,8 +336,9 @@ public class LanguageConfiguration {
      * @return the language specific parameters or <code>null</code> if no
      * parameters are configured.
      */
-    public Map<String,String> getLanguageParams(String language){
-        return configuredLanguages.get(language);
+    public Map<String,String> getLanguageParams(String parsedLang){
+        LangState ls = getLanguageState(parsedLang);
+        return ls.state ? configuredLanguages.get(ls.lang) : null;
     }
     /**
      * Getter for the default parameters
@@ -346,6 +370,14 @@ public class LanguageConfiguration {
      */
     public String getParameter(String language, String paramName) {
         Map<String,String> params = getParameters(language);
+        int countrySepPos = language == null ? -1 : language.indexOf('-');
+        //we need to fallback to the language specific config if
+        // * there is a country code
+        // * no country specific params OR
+        // * param not present in country specific config
+        if(countrySepPos >= 2 && (params == null || !params.containsKey(paramName))) {
+            params = getParameters(language.substring(0,countrySepPos));
+        }
         return params == null ? null : params.get(paramName);
     }
     
