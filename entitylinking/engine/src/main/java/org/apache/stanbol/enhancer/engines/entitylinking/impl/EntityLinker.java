@@ -345,11 +345,18 @@ public class EntityLinker {
      * @throws EntitySearcherException 
      */
     private List<Suggestion> lookupEntities(List<String> searchStrings) throws EntitySearcherException {
+        Set<String> languages = new HashSet<String>();
+        languages.add(linkerConfig.getDefaultLanguage());
+        languages.add(state.getLanguage());
+        int countryCodeIndex = state.getLanguage() == null ? -1 : state.getLanguage().indexOf('-');
+        if(countryCodeIndex >= 2){
+            languages.add(state.getLanguage().substring(0,countryCodeIndex));
+        }
         Collection<? extends Entity> results;
         results = entitySearcher.lookup(linkerConfig.getNameField(),
             linkerConfig.getSelectedFields(),
             searchStrings, 
-            new String[]{state.getLanguage(),linkerConfig.getDefaultLanguage()},
+            languages.toArray(new String[languages.size()]),
             lookupLimit);
         log.debug("   - found {} entities ...",results.size());
         List<Suggestion> suggestions = new ArrayList<Suggestion>();
@@ -403,29 +410,46 @@ public class EntityLinker {
     private Suggestion matchLabels(Entity entity) {
         String curLang = state.getLanguage(); //language of the current sentence
         String defLang = linkerConfig.getDefaultLanguage(); //configured default language 
-//        Iterator<Text> labels = rep.get(config.getNameField(), //get all labels
-//            state.getLanguage(), //in the current language
-//            config.getDefaultLanguage()); //and the default language
+        String mainLang;
+        int countryCodeIndex = state.getLanguage() == null ? -1 : state.getLanguage().indexOf('-');
+        Collection<PlainLiteral> mainLangLabels;
+        if(countryCodeIndex >= 2){
+            mainLang = state.getLanguage().substring(0,countryCodeIndex);
+            mainLangLabels = new ArrayList<PlainLiteral>();
+        } else {
+            mainLang = curLang;
+            mainLangLabels = Collections.emptyList();
+        }
         Iterator<PlainLiteral> labels = entity.getText(linkerConfig.getNameField());
         Suggestion match = new Suggestion(entity);
         Collection<PlainLiteral> defaultLabels = new ArrayList<PlainLiteral>();
-        boolean matchedCurLangLabel = false;
+        boolean matchedLangLabel = false;
         while(labels.hasNext()){
             PlainLiteral label = labels.next();
             String lang = label.getLanguage() != null ? label.getLanguage().toString() : null;
             if((lang == null && curLang == null) ||
-                    (lang != null && curLang != null && lang.startsWith(curLang))){
+                    (lang != null && curLang != null && lang.equalsIgnoreCase(curLang))){
                 matchLabel(match, label);
-                matchedCurLangLabel = true;
-            } else if((lang ==null && defLang == null) ||
+                matchedLangLabel = true;
+            } else if((lang == null && mainLang == null) ||
+                    (lang != null && mainLang != null && lang.equalsIgnoreCase(mainLang))){
+                mainLangLabels.add(label);
+            } else if((lang == null && defLang == null) ||
                     (lang != null && defLang != null && lang.startsWith(defLang))){
                 defaultLabels.add(label);
+            }
+        }
+        //try to match main language labels
+        if(!matchedLangLabel || match.getMatch() == MATCH.NONE){
+            for(PlainLiteral mainLangLabel : mainLangLabels){
+                matchLabel(match, mainLangLabel);
+                matchedLangLabel = true;
             }
         }
         //use only labels in the default language if there is
         // * no label in the current language or
         // * no MATCH was found in the current language
-        if(!matchedCurLangLabel || match.getMatch() == MATCH.NONE){
+        if(!matchedLangLabel || match.getMatch() == MATCH.NONE){
             for(PlainLiteral defaultLangLabel : defaultLabels){
                 matchLabel(match, defaultLangLabel);
             }
@@ -439,12 +463,12 @@ public class EntityLinker {
      */
     private void matchLabel(Suggestion suggestion, PlainLiteral label) {
         String text = label.getLexicalForm();
+        String lang = label.getLanguage() == null ? null : label.getLanguage().toString();
         if(!linkerConfig.isCaseSensitiveMatching()){
             text = text.toLowerCase(); //TODO use language of label for Locale
         }
         //Tokenize the label and remove remove tokens without alpha numerical chars
-        String[] unprocessedLabelTokens = labelTokenizer.tokenize(text,
-            state.getLanguage()); //TODO: maybe check of Pos.Foreign
+        String[] unprocessedLabelTokens = labelTokenizer.tokenize(text, lang); 
         if(unprocessedLabelTokens == null){ //no tokenizer available
             log.info("Unable to tokenize {} language texts. Will process untokenized label {}",
                 state.getLanguage(),text);
