@@ -53,6 +53,7 @@
     <!-- LabelTokenizer implementations -->
     <module>labeltokenizer-lucene</module>
     <module>labeltokenizer-opennlp</module>
+    <module>labeltokenizer-smartcn</module>
   </modules>
 
 </project>
