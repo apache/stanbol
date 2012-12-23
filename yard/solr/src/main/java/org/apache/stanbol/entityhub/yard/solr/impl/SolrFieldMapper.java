@@ -25,6 +25,9 @@ import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.REFERRED
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.SPECIAL_CONFIG_FIELD;
 
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -762,15 +765,9 @@ public class SolrFieldMapper implements FieldMapper {
                 log.debug("add namespace prefix '{}' for '{}'",prefix,namespace);
                 prefixMap.put(prefix, namespace);
                 namespaceMap.put(namespace, prefix);
-                saveNamespaceConfig(); // save the configuration
-                //make sure the namespaces are committed to the Solr Server
-                try {
-                    server.commit();
-                } catch (SolrServerException e) {
-                    log.error("Unable to commit NamespaceConfig to SolrServer",e);
-                } catch (IOException e) {
-                    log.error("Unable to commit NamespaceConfig to SolrServer",e);
-                }
+                // save the configuration and parse true to make  sure the 
+                //namespaces are committed to the Solr Server
+                saveNamespaceConfig(true); 
             } finally {
                 prefixNamespaceMappingsLock.writeLock().unlock();
             }
@@ -864,26 +861,30 @@ public class SolrFieldMapper implements FieldMapper {
      * Saves the current configuration to the index! This does NOT commit the
      * changes!
      */
-    public void saveNamespaceConfig() {
+    public void saveNamespaceConfig(final boolean commit) {
         if(server != null){
             prefixNamespaceMappingsLock.writeLock().lock();
             try {
                 log.debug("saveNamespaceConfig on {}",server);
                 Map<String,String> prefixMap = getPrefixMap();
-                SolrInputDocument inputDoc = new SolrInputDocument();
+                final SolrInputDocument inputDoc = new SolrInputDocument();
                 inputDoc.addField(getDocumentIdField(), FieldMapper.URI);
                 for (Entry<String,String> entry : prefixMap.entrySet()) {
                     log.debug("  > {}: {}",entry.getKey(),entry.getValue());
                     inputDoc.addField(getConfigFieldName(entry.getKey()), entry.getValue());
                 }
                 try {
-                    server.add(inputDoc);
-                } catch (IOException e) {
-                    log.error("Unable save Configuration to SolrProvider", e);
-                } catch (SolrServerException e) {
-                    log.error("Unable save Configuration to SolrProvider", e);
-                } catch (SolrException e) {
-                    log.error("Unable save Configuration to SolrProvider", e);
+                    AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                        public Object run() throws IOException, SolrServerException {
+                                server.add(inputDoc);
+                                if(commit){
+                                    server.commit();
+                                }
+                                return null;
+                        }
+                    });
+                } catch (PrivilegedActionException pae) {
+                    log.error("Unable save Configuration to SolrProvider", pae.getException());
                 }
             } finally {
                 prefixNamespaceMappingsLock.writeLock().unlock();
@@ -903,13 +904,29 @@ public class SolrFieldMapper implements FieldMapper {
         if(server == null){
             return null;
         }
-        SolrQuery solrQuery = new SolrQuery();
+        final SolrQuery solrQuery = new SolrQuery();
         solrQuery.addField("*"); // select all fields
         solrQuery.setRows(1); // we query for the id, there is only one result
         String queryString = String.format("%s:%s", this.getDocumentIdField(),
             SolrUtil.escapeSolrSpecialChars(uri));
         solrQuery.setQuery(queryString);
-        QueryResponse queryResponse = server.query(solrQuery);
+        QueryResponse queryResponse;
+        try {
+            queryResponse = AccessController.doPrivileged(new PrivilegedExceptionAction<QueryResponse>() {
+                public QueryResponse run() throws IOException, SolrServerException {
+                    return server.query(solrQuery);
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof SolrServerException){
+                throw (SolrServerException)e;
+            } else if(e instanceof IOException){
+                throw (IOException)e;
+            } else {
+                throw RuntimeException.class.cast(e);
+            }
+        }
         if (queryResponse.getResults().isEmpty()) {
             return null;
         } else {
