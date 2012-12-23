@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -214,7 +216,12 @@ public class BenchmarkServlet extends HttpServlet {
             throw new ServletException("Missing " + PARAM_CONTENT + " parameter");
         }
         String chainName = request.getParameter(PARAM_CHAIN);
-        final Template t = velocity.getTemplate("/velocity/benchmark-results.html");
+        final Template t = AccessController.doPrivileged(new PrivilegedAction<Template>() {
+            @Override
+            public Template run() {
+                return velocity.getTemplate("/velocity/benchmark-results.html");
+            }
+        });
         final VelocityContext ctx = getVelocityContext(request, "Benchmark Results");
         ctx.put("contentItemFactory", ciFactory);
         ctx.put("jobManager", jobManager);
