@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,6 +77,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.clerezza.rdf.ontologies.PERMISSION;
+import org.apache.stanbol.commons.ldpathtemplate.LdRenderer;
 import org.apache.stanbol.commons.security.PasswordUtil;
 import org.apache.stanbol.commons.usermanagement.Ontology;
 import org.apache.stanbol.commons.viewable.RdfViewable;
@@ -94,6 +96,11 @@ public class UserResource {
     private Parser parser;
     @Reference
     private Serializer serializer;
+    
+    	@Reference
+	private LdRenderer ldRenderer;
+    
+   // private GraphNode dummyNode = new GraphNode(new UriRef("http://example.org"), systemGraph); 
 
     @GET
     public String index() throws UnsupportedEncodingException {
@@ -121,6 +128,8 @@ public class UserResource {
                 this.getClass());
     }
 
+
+    
     @GET
     @Path("view-user")
     @Produces("text/html")
@@ -128,9 +137,19 @@ public class UserResource {
         return new RdfViewable("edit.ftl", getUser(userName), this.getClass());
     }
 
-    /**
-     * takes edit form data and pushes into store "" values are ignored
-     */
+//        @POST
+//    @Path("new-user")
+//    @Consumes("application/x-www-form-urlencoded")
+//    public Response newUser(@Context UriInfo uriInfo,
+//            @FormParam("newUserName") String newUserName,
+//            @FormParam("fullName") String fullName,
+//            @FormParam("email") String email,
+//            @FormParam("password") String password,
+//            @FormParam("permission[]") List<String> permission) {
+//            
+//            createUser(newUserName);
+//        return store(uriInfo, newUserName, newUserName, fullName, email, password, permission);
+//        }
     @POST
     @Path("store-user")
     // @Consumes("multipart/form-data")
@@ -143,12 +162,21 @@ public class UserResource {
             @FormParam("password") String password,
             @FormParam("permission[]") List<String> permission) {
 
-        GraphNode userNode;
-        if (currentUserName == null || currentUserName.equals("")) {
-            userNode = createUser(newUserName);
-        } else {
-            userNode = getUser(currentUserName);
-        }
+        return store(uriInfo, currentUserName, newUserName, fullName, email, password, permission);
+    }
+
+    /**
+     * takes edit form data and pushes into store "" values are ignored
+     */
+    private Response store(UriInfo uriInfo,
+            String currentUserName,
+            String newUserName,
+            String fullName,
+            String email,
+            String password,
+            List<String> permission) {
+
+        GraphNode userNode = getUser(currentUserName);
 
         // System.out
         // .println("BEFORE ========================================================");
@@ -388,6 +416,13 @@ public class UserResource {
     public RdfViewable listRoles() {
         return new RdfViewable("listRole.ftl", getRoleType(), this.getClass());
     }
+    
+//        @GET
+//    @Path("createForm")
+//    @Produces("text/html")
+//    public RdfViewable showCreateForm() {
+//        return new RdfViewable("createUser.ftl", dummyNode, this.getClass());
+//    }
 
     public GraphNode getRoleType() {
         return new GraphNode(PERMISSION.Role,
@@ -442,12 +477,12 @@ public class UserResource {
 
     // ///////////////////////////////////////////////////////////////////////
     // helper methods
-    private GraphNode createUser(String newUserName) {
+    private GraphNode createBlankUser() {
         //    throw new UnsupportedOperationException("Not yet implemented");
         BNode subject = new BNode();
         GraphNode userNode = new GraphNode(subject, systemGraph);
         userNode.addProperty(RDF.type, FOAF.Agent);
-        userNode.addPropertyValue(PLATFORM.userName, newUserName);
+        //   userNode.addPropertyValue(PLATFORM.userName, newUserName);
         return userNode;
         // TripleImpl(NonLiteral subject, UriRef predicate, Resource object) 
     }
