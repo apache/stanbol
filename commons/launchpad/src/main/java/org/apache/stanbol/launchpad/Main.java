@@ -60,7 +60,7 @@ public class Main {
 	        System.setSecurityManager(new SecurityManager());
         }
         //now use the standard Apache Sling launcher to do the job
-        org.apache.sling.launchpad.app.Main.main(args);
+        org.apache.sling.launchpad.app.Main.main(argsList.toArray(new String[argsList.size()]));
     }
 
 }
