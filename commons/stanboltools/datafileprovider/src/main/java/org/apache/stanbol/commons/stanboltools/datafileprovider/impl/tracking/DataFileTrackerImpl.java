@@ -60,8 +60,7 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler.
  *
  */
-@Component(//specVersion="1.1-felix", //to use the update property for @Reference
-    immediate=true, metatype=true)
+@Component(immediate=true, metatype=true)
 @Service
 @Property(name=Constants.SERVICE_RANKING, intValue=Integer.MAX_VALUE)
 public final class DataFileTrackerImpl implements DataFileTracker {
@@ -95,9 +94,7 @@ public final class DataFileTrackerImpl implements DataFileTracker {
         policy=ReferencePolicy.DYNAMIC,
         strategy=ReferenceStrategy.EVENT,
         bind="bindDataFileProvider",
-        unbind="unbindDataFileProvider"//,
-        //updated="bindDataFileProvider"
-        )
+        unbind="unbindDataFileProvider")
     protected DataFileProvider _dataFileProvider;
     
     /**
