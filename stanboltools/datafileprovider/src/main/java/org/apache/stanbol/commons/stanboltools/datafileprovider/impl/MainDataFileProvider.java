@@ -20,6 +20,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -153,7 +157,7 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
             String filename, Map<String, String> comments) throws IOException {
         InputStream result = null;
         String fileUrl = null;
-        File dataFile = getDataFile(bundleSymbolicName, filename);
+        final File dataFile = getDataFile(bundleSymbolicName, filename);
         // Then, if not found, query other DataFileProviders,
         // ordered by service ranking
         if(dataFile == null) {
@@ -182,7 +186,21 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
                 }
             }
         } else {
-            result =  new FileInputStream(dataFile);
+            try {
+                result =  AccessController.doPrivileged(new PrivilegedExceptionAction<InputStream>() {
+                    @Override
+                    public InputStream run() throws IOException {
+                        return new FileInputStream(dataFile);
+                    }
+                });
+            } catch (PrivilegedActionException pae) {
+                Exception e = pae.getException();
+                if(e instanceof IOException){
+                    throw (IOException)e;
+                } else {
+                    throw RuntimeException.class.cast(e);
+                }
+            }
             fileUrl = dataFile.toURI().toASCIIString();
         }
         
@@ -258,8 +276,7 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
      * @param filename
      * @return
      */
-    private File getDataFile(String bundleSymbolicName, String filename) {
-        File dataFile = null;
+    private File getDataFile(String bundleSymbolicName, final String filename) {
         // First look for the file in our data folder,
         // with and without bundle symbolic name prefix
         final String [] candidateNames = bundleSymbolicName == null ? 
@@ -268,17 +285,23 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
                         bundleSymbolicName + "-" + filename,
                         filename
                     };
-        for(String name : candidateNames) {
-            dataFile = new File(dataFilesFolder, name);
-            log.debug("Looking for file {}", dataFile.getAbsolutePath());
-            if(dataFile.exists() && dataFile.canRead()) {
-                log.debug("File found in data files folder: {}", filename);
-                break;
-            } else {
-                dataFile = null;
+        return AccessController.doPrivileged(new PrivilegedAction<File>() {
+            @Override
+            public File run() {
+                File dataFile = null;
+                for(String name : candidateNames) {
+                    dataFile = new File(dataFilesFolder, name);
+                    log.debug("Looking for file {}", dataFile.getAbsolutePath());
+                    if(dataFile.exists() && dataFile.canRead()) {
+                        log.debug("File found in data files folder: {}", filename);
+                        break;
+                    } else {
+                        dataFile = null;
+                    }
+                }
+                return dataFile;
             }
-        }
-        return dataFile;
+        });
     }
     
     File getDataFilesFolder() {
