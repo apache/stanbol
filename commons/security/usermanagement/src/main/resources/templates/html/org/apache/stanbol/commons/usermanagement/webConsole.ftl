@@ -119,10 +119,10 @@ limitations under the License.
                             type: 'POST',
                             url: '/user-management/create-user',
                             data: { 
-                                "login": login, 
-                                "fullName": fullName.toString(),
-                                "email": email.toString(),
-                                "password": password.toString()
+                                "login": login.val(), 
+                                "fullName": fullName.val(),
+                                "email": email.val(),
+                                "password": password.val()
                             },
                             success: function(data) {
                                 $("div#tabs-users").html(back);

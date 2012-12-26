@@ -141,10 +141,10 @@ public class UserResource {
             @FormParam("fullName") String fullName,
             @FormParam("email") String email,
             @FormParam("password") String password,
-            @FormParam("permission[]") List<String> permission) {
+            @FormParam("permission[]") List<String> permissions) {
 
         createUser(login);
-        return store(uriInfo, login, login, fullName, email, password, permission);
+        return store(uriInfo, login, login, fullName, email, password, permissions);
     }
 
     @POST
@@ -157,9 +157,9 @@ public class UserResource {
             @FormParam("fullName") String fullName,
             @FormParam("email") String email,
             @FormParam("password") String password,
-            @FormParam("permission[]") List<String> permission) {
+            @FormParam("permission[]") List<String> permissions) {
 
-        return store(uriInfo, currentUserName, newUserName, fullName, email, password, permission);
+        return store(uriInfo, currentUserName, newUserName, fullName, email, password, permissions);
     }
 
     /**
@@ -175,22 +175,23 @@ public class UserResource {
 
         GraphNode userNode = getUser(currentUserName);
 
-        // System.out
-        // .println("BEFORE ========================================================");
+         System.out
+         .println("BEFORE ========================================================");
         // serializeTriplesWithSubject(System.out, userNode);
+          serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
 
-        if (!newUserName.equals("")) {
+        if (newUserName != null && !newUserName.equals("")) {
             changeLiteral(userNode, PLATFORM.userName, newUserName);
         }
-        if (!fullName.equals("")) {
+        if (fullName != null && !fullName.equals("")) {
             changeLiteral(userNode, FOAF.name, fullName);
         }
-        if (!password.equals("")) {
+        if (password != null && !password.equals("")) {
             String passwordSha1 = PasswordUtil.convertPassword(password);
             changeLiteral(userNode, PERMISSION.passwordSha1, passwordSha1);
         }
 
-        if (!email.equals("")) {
+        if (email != null && !email.equals("")) {
             changeResource(userNode, FOAF.mbox, new UriRef("mailto:" + email));
         }
 
@@ -579,7 +580,6 @@ public class UserResource {
             if (newValue.equals(oldValue)) {
                 return;
             }
-
             oldBuffer.add(triple);
         }
 
@@ -671,11 +671,15 @@ public class UserResource {
         }
     }
 
-    private void createUser(String newUserName) {
+    private GraphNode createUser(String newUserName) {
+        System.out.println("newUserName = "+newUserName);
         BNode subject = new BNode();
         GraphNode userNode = new GraphNode(subject, systemGraph);
         userNode.addProperty(RDF.type, FOAF.Agent);
         userNode.addPropertyValue(PLATFORM.userName, newUserName);
+        
+        serializeTriplesWithSubject(System.out, userNode);
         // TripleImpl(NonLiteral subject, UriRef predicate, Resource object) 
+        return userNode;
     }
 }
