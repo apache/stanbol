@@ -96,12 +96,10 @@ public class UserResource {
     private Parser parser;
     @Reference
     private Serializer serializer;
-    
-    	@Reference
-	private LdRenderer ldRenderer;
-    
-   // private GraphNode dummyNode = new GraphNode(new UriRef("http://example.org"), systemGraph); 
+    @Reference
+    private LdRenderer ldRenderer;
 
+    // private GraphNode dummyNode = new GraphNode(new UriRef("http://example.org"), systemGraph); 
     @GET
     public String index() throws UnsupportedEncodingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -128,8 +126,6 @@ public class UserResource {
                 this.getClass());
     }
 
-
-    
     @GET
     @Path("view-user")
     @Produces("text/html")
@@ -137,19 +133,20 @@ public class UserResource {
         return new RdfViewable("edit.ftl", getUser(userName), this.getClass());
     }
 
-//        @POST
-//    @Path("new-user")
-//    @Consumes("application/x-www-form-urlencoded")
-//    public Response newUser(@Context UriInfo uriInfo,
-//            @FormParam("newUserName") String newUserName,
-//            @FormParam("fullName") String fullName,
-//            @FormParam("email") String email,
-//            @FormParam("password") String password,
-//            @FormParam("permission[]") List<String> permission) {
-//            
-//            createUser(newUserName);
-//        return store(uriInfo, newUserName, newUserName, fullName, email, password, permission);
-//        }
+    @POST
+    @Path("create-user")
+    @Consumes("application/x-www-form-urlencoded")
+    public Response newUser(@Context UriInfo uriInfo,
+            @FormParam("login") String login,
+            @FormParam("fullName") String fullName,
+            @FormParam("email") String email,
+            @FormParam("password") String password,
+            @FormParam("permission[]") List<String> permission) {
+
+        createUser(login);
+        return store(uriInfo, login, login, fullName, email, password, permission);
+    }
+
     @POST
     @Path("store-user")
     // @Consumes("multipart/form-data")
@@ -416,14 +413,13 @@ public class UserResource {
     public RdfViewable listRoles() {
         return new RdfViewable("listRole.ftl", getRoleType(), this.getClass());
     }
-    
+
 //        @GET
 //    @Path("createForm")
 //    @Produces("text/html")
 //    public RdfViewable showCreateForm() {
 //        return new RdfViewable("createUser.ftl", dummyNode, this.getClass());
 //    }
-
     public GraphNode getRoleType() {
         return new GraphNode(PERMISSION.Role,
                 systemGraph);
@@ -475,18 +471,11 @@ public class UserResource {
         return Response.ok(serialized).build();
     }
 
-    // ///////////////////////////////////////////////////////////////////////
-    // helper methods
-    private GraphNode createBlankUser() {
-        //    throw new UnsupportedOperationException("Not yet implemented");
-        BNode subject = new BNode();
-        GraphNode userNode = new GraphNode(subject, systemGraph);
-        userNode.addProperty(RDF.type, FOAF.Agent);
-        //   userNode.addPropertyValue(PLATFORM.userName, newUserName);
-        return userNode;
-        // TripleImpl(NonLiteral subject, UriRef predicate, Resource object) 
-    }
-
+    /**
+     * ********************
+     * helper methods
+    *********************
+     */
     /**
      * Replaces/inserts literal value for predicate assumes there is only one
      * triple for the given predicate new value is added before deleting old one
@@ -680,5 +669,13 @@ public class UserResource {
         } finally {
             readLock.unlock();
         }
+    }
+
+    private void createUser(String newUserName) {
+        BNode subject = new BNode();
+        GraphNode userNode = new GraphNode(subject, systemGraph);
+        userNode.addProperty(RDF.type, FOAF.Agent);
+        userNode.addPropertyValue(PLATFORM.userName, newUserName);
+        // TripleImpl(NonLiteral subject, UriRef predicate, Resource object) 
     }
 }
