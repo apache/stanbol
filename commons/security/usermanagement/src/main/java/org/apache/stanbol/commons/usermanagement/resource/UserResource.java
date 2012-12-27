@@ -45,14 +45,12 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.platform.config.SystemConfig;
 import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.Resource;
@@ -99,7 +97,6 @@ public class UserResource {
     @Reference
     private LdRenderer ldRenderer;
 
-    // private GraphNode dummyNode = new GraphNode(new UriRef("http://example.org"), systemGraph); 
     @GET
     public String index() throws UnsupportedEncodingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -143,8 +140,8 @@ public class UserResource {
             @FormParam("password") String password,
             @FormParam("permission[]") List<String> permissions) {
 
-        createUser(login);
-        return store(uriInfo, login, login, fullName, email, password, permissions);
+        GraphNode userNode = createUser(login);
+        return store(userNode, uriInfo, login, login, fullName, email, password, permissions);
     }
 
     @POST
@@ -159,13 +156,14 @@ public class UserResource {
             @FormParam("password") String password,
             @FormParam("permission[]") List<String> permissions) {
 
-        return store(uriInfo, currentUserName, newUserName, fullName, email, password, permissions);
+        GraphNode userNode = getUser(currentUserName);
+        return store(userNode, uriInfo, currentUserName, newUserName, fullName, email, password, permissions);
     }
 
     /**
      * takes edit form data and pushes into store "" values are ignored
      */
-    private Response store(UriInfo uriInfo,
+    private Response store(GraphNode userNode, UriInfo uriInfo,
             String currentUserName,
             String newUserName,
             String fullName,
@@ -173,12 +171,13 @@ public class UserResource {
             String password,
             List<String> permission) {
 
-        GraphNode userNode = getUser(currentUserName);
+        //   GraphNode userNode = getUser(currentUserName);
 
-         System.out
-         .println("BEFORE ========================================================");
+        System.out.println("currentUserName = " + currentUserName);
+        System.out
+                .println("BEFORE ========================================================");
         // serializeTriplesWithSubject(System.out, userNode);
-          serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
+        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
 
         if (newUserName != null && !newUserName.equals("")) {
             changeLiteral(userNode, PLATFORM.userName, newUserName);
@@ -190,7 +189,6 @@ public class UserResource {
             String passwordSha1 = PasswordUtil.convertPassword(password);
             changeLiteral(userNode, PERMISSION.passwordSha1, passwordSha1);
         }
-
         if (email != null && !email.equals("")) {
             changeResource(userNode, FOAF.mbox, new UriRef("mailto:" + email));
         }
@@ -415,12 +413,6 @@ public class UserResource {
         return new RdfViewable("listRole.ftl", getRoleType(), this.getClass());
     }
 
-//        @GET
-//    @Path("createForm")
-//    @Produces("text/html")
-//    public RdfViewable showCreateForm() {
-//        return new RdfViewable("createUser.ftl", dummyNode, this.getClass());
-//    }
     public GraphNode getRoleType() {
         return new GraphNode(PERMISSION.Role,
                 systemGraph);
@@ -474,8 +466,7 @@ public class UserResource {
 
     /**
      * ********************
-     * helper methods
-    *********************
+     * helper methods ********************
      */
     /**
      * Replaces/inserts literal value for predicate assumes there is only one
@@ -497,41 +488,24 @@ public class UserResource {
 
         // System.out.println("\n\n");
 
+        // hacky
+        Resource oldValue = null;
         while (oldTriples.hasNext()) {
             Triple triple = oldTriples.next();
-
-            // System.out.println("*** old triple = "+triple);
-
-            // shouldn't be necessary, but just to catch the edge case where the
-            // triple has the wrong type of subject
-            // try {
-            // // check for newValue == oldValue
-            // Literal oldLiteral = (Literal) triple.getObject();
-            // if (newValue.equals(oldLiteral.getLexicalForm())) {
-            // return;
-            // }
-            // } catch (Exception e) {
-            //
-            // UriRef oldResource = (UriRef) triple.getObject();
-            //
-            // // check for newValue == oldValue
-            // if (newValue.equals(oldResource)) {
-            // return;
-            // }
-            // }
-
-            Resource oldValue = triple.getObject();
-            if (newValue.equals(oldValue)) {
-                return;
-            }
-
+            oldValue = triple.getObject();
             oldBuffer.add(triple);
         }
-
+        System.out.println("OLDVALUE = " + oldValue);
+        System.out.println("ADDING " + predicate + "   " + newValue);
         // filter appears to see plain literals and xsd:strings as differerent
         // so not
         // userNode.addPropertyValue(predicate, newValue);
         userNode.addProperty(predicate, new PlainLiteralImpl(newValue));
+
+        // hacky
+        if (newValue.equals(oldValue)) {
+            return;
+        }
 
         // System.out.println("*** systemGraph size before removal = "+systemGraph.size());
         systemGraph.removeAll(oldBuffer);
@@ -558,23 +532,6 @@ public class UserResource {
 
         while (oldTriples.hasNext()) {
             Triple triple = oldTriples.next();
-
-            // System.out.println("*** old triple = " + triple);
-
-            // try {
-            // UriRef oldResource = (UriRef) triple.getObject();
-            //
-            // // check for newValue == oldValue
-            // if (newValue.equals(oldResource)) {
-            // return;
-            // }
-            // } catch (Exception e) {
-            //
-            // Literal oldLiteral = (Literal) triple.getObject();
-            // if (newValue.equals(oldLiteral.getLexicalForm())) {
-            // return;
-            // }
-            // }
 
             Resource oldValue = triple.getObject();
             if (newValue.equals(oldValue)) {
@@ -622,12 +579,6 @@ public class UserResource {
             log.error("parsing error with userData", ex);
             throw new WebApplicationException(ex, 500);
         }
-        // System.out.println("inputGraph.size() = "+inputGraph.size());
-        //
-        // Object[] stuff = inputGraph.toArray();
-        // for(int i=0;i<stuff.length;i++){
-        // System.out.println("as array - "+stuff[i]);
-        // }
         return inputGraph;
     }
 
@@ -672,13 +623,15 @@ public class UserResource {
     }
 
     private GraphNode createUser(String newUserName) {
-        System.out.println("newUserName = "+newUserName);
+        System.out.println("newUserName = " + newUserName);
         BNode subject = new BNode();
         GraphNode userNode = new GraphNode(subject, systemGraph);
         userNode.addProperty(RDF.type, FOAF.Agent);
-        userNode.addPropertyValue(PLATFORM.userName, newUserName);
-        
+        userNode.addProperty(PLATFORM.userName, new PlainLiteralImpl(newUserName));
+
+        System.out.println("CREATED USER ====================vvvvvvvvvv");
         serializeTriplesWithSubject(System.out, userNode);
+        System.out.println("CREATED USER ====================^^^^^^^^^^^^^^^");
         // TripleImpl(NonLiteral subject, UriRef predicate, Resource object) 
         return userNode;
     }

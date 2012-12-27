@@ -79,12 +79,12 @@ limitations under the License.
 <script>
         
     $(function() {
-//        var login = $("#login");
-//        var fullName = $("#fullName");
-//        var email = $("#email");
-//        var password = $("#password");
-//        var tips = $("#validateTips");
-//        var allFields = $([]).add(login).add(fullName).add(email).add(password);
+        //        var login = $("#login");
+        //        var fullName = $("#fullName");
+        //        var email = $("#email");
+        //        var password = $("#password");
+        //        var tips = $("#validateTips");
+        //        var allFields = $([]).add(login).add(fullName).add(email).add(password);
     
         $("#dialog-form").dialog({
             autoOpen: false,
@@ -93,12 +93,12 @@ limitations under the License.
             modal: true,
             buttons: {
                 "Create account": function() {                            
-                var login = $("#login");
-        var fullName = $("#fullName");
-        var email = $("#email");
-        var password = $("#password");
-        var tips = $("#validateTips");
-        var allFields = $([]).add(login).add(fullName).add(email).add(password);
+                    var login = $("#login");
+                    var fullName = $("#fullName");
+                    var email = $("#email");
+                    var password = $("#password");
+                    var tips = $("#validateTips");
+                    var allFields = $([]).add(login).add(fullName).add(email).add(password);
         
                     var valid = true;
                     allFields.removeClass("ui-state-error");
@@ -113,7 +113,6 @@ limitations under the License.
                     valid = valid && checkRegexp(password, /^([0-9a-zA-Z])+$/,"Password field only allow : a-z 0-9");
         
                     if(valid) {
-                        alert('login = '+login);
                         var back = ("<div style='float:right;'><href='#' onClick='showUserList()'>&lt;&lt; back to user list</a></div>");    
                         $.ajax({
                             type: 'POST',
@@ -131,27 +130,65 @@ limitations under the License.
                         });
                         /////////////////////////////////////////
         
-                        $(this).dialog("close");
+                       // $(this).dialog("close");
+                       $("#dialog-form").dialog("close");
+                      // close();
                     }
                 },
                 Cancel: function() {
-                    $(this).dialog("close");
+               //   $(this).dialog("close");
+                 $("#dialog-form").dialog("close");
                 }
-            },
-            close: function() {
-                allFields.val("").removeClass("ui-state-error");
-            }
+            } 
+//            ,
+//            close: function() {
+//                //////
+//                var login = $("#login");
+//                var fullName = $("#fullName");
+//                var email = $("#email");
+//                var password = $("#password");
+//                var tips = $("#validateTips");
+//                var allFields = $([]).add(login).add(fullName).add(email).add(password);
+//                ////
+//                allFields.val("").removeClass("ui-state-error");
+//            }
         });
-    
-
-    
+     
         function updateTips(t) {
+        var tips = $("#validateTips");
             tips
             .text(t)
             .addClass("ui-state-highlight");
             setTimeout(function() {
                 tips.removeClass("ui-state-highlight", 1500);
             }, 500);
+        }
+        
+        /*
+         * for popup fields 
+         */
+        function checkLength(o, n, min, max) {
+            if(o.val().length > max || o.val().length < min) {
+                o.addClass("ui-state-error");
+                updateTips("Length of" + n +" must be between" +
+                    min +" and" + max +".");
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        /*
+         * for popup fields 
+         */
+        function checkRegexp(o, regexp, n) {
+            if(!(regexp.test(o.val()))) {
+                o.addClass("ui-state-error");
+                updateTips(n);
+                return false;
+            } else {
+                return true;
+            }
         }
     
         $("#tabs").tabs();
@@ -182,31 +219,7 @@ limitations under the License.
                 $("#role-table").tablesorter();
             }
         });
-    }
-
-    function checkLength(o, n, min, max) {
-        if(o.val().length > max || o.val().length < min) {
-            o.addClass("ui-state-error");
-            updateTips("Length of" + n +" must be between" +
-                min +" and" + max +".");
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    function checkRegexp(o, regexp, n) {
-        if(!(regexp.test(o.val()))) {
-            o.addClass("ui-state-error");
-            updateTips(n);
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    
-            
+    }  
 
     function editUser(name){
         var back = ("<div style='float:right;'><href='#' onClick='showUserList()'>&lt;&lt; back to user list</a></div>");    
