@@ -36,7 +36,7 @@ limitations under the License.
 <!-- couldn't get all the jQueryUI magic to work, so using onClick() instead -->
 <p><button id="create-user" onClick="addUser()">Create new user</button></p>
 <br />
-<div id="dialog-form" title="Create new user">
+<div id="createUserForm" title="Create new user">
     <p id="validateTips" class="important">* required fields</p>
     <form>
         <fieldset>
@@ -79,14 +79,8 @@ limitations under the License.
 <script>
         
     $(function() {
-        //        var login = $("#login");
-        //        var fullName = $("#fullName");
-        //        var email = $("#email");
-        //        var password = $("#password");
-        //        var tips = $("#validateTips");
-        //        var allFields = $([]).add(login).add(fullName).add(email).add(password);
     
-        $("#dialog-form").dialog({
+        $("#createUserForm").dialog({
             autoOpen: false,
             height: 300,
             width: 350,
@@ -113,7 +107,7 @@ limitations under the License.
                     valid = valid && checkRegexp(password, /^([0-9a-zA-Z])+$/,"Password field only allow : a-z 0-9");
         
                     if(valid) {
-                        var back = ("<div style='float:right;'><href='#' onClick='showUserList()'>&lt;&lt; back to user list</a></div>");    
+                      //  var back = ("<div style='float:right;'><href='#' onClick='showUserList()'>&lt;&lt; back to user list</a></div>");    
                         $.ajax({
                             type: 'POST',
                             url: '/user-management/create-user',
@@ -124,33 +118,38 @@ limitations under the License.
                                 "password": password.val()
                             },
                             success: function(data) {
-                                $("div#tabs-users").html(back);
-                                $("div#tabs-users").append(data);
+                           //     $("div#tabs-users").html(back);
+                            //    $("div#tabs-users").append(data);
+                                 close();
+                                 location.reload();
                             }
                         });
                         /////////////////////////////////////////
         
-                       // $(this).dialog("close");
-                       $("#dialog-form").dialog("close");
-                      // close();
+                        $(this).dialog("close");
+                   //    $("#createUserForm").dialog("close");
+                  //   close();
                     }
                 },
                 Cancel: function() {
                //   $(this).dialog("close");
-                 $("#dialog-form").dialog("close");
+             //    $("#createUserForm").dialog("close");
+             close();
                 }
             } 
 //            ,
 //            close: function() {
-//                //////
-//                var login = $("#login");
-//                var fullName = $("#fullName");
-//                var email = $("#email");
-//                var password = $("#password");
-//                var tips = $("#validateTips");
-//                var allFields = $([]).add(login).add(fullName).add(email).add(password);
-//                ////
-//                allFields.val("").removeClass("ui-state-error");
+//                console.log("close: called");
+////                var login = $("#login");
+////                var fullName = $("#fullName");
+////                var email = $("#email");
+////                var password = $("#password");
+////                var tips = $("#validateTips");
+////                var allFields = $([]).add(login).add(fullName).add(email).add(password);
+////                ////
+////                allFields.val("").removeClass("ui-state-error");
+//                // $(this).dialog("close");
+//               //  $("#createUserForm").dialog("close");
 //            }
         });
      
@@ -197,7 +196,7 @@ limitations under the License.
     });
     
     function addUser(){
-        $("#dialog-form").dialog("open");
+        $("#createUserForm").dialog("open");
     }
 
 

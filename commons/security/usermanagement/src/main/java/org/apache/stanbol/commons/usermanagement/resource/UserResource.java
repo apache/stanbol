@@ -474,16 +474,11 @@ public class UserResource {
      * helper methods 
      */
     private GraphNode createUser(String newUserName) {
-        System.out.println("newUserName = " + newUserName);
         BNode subject = new BNode();
         GraphNode userNode = new GraphNode(subject, systemGraph);
         userNode.addProperty(RDF.type, FOAF.Agent);
         userNode.addProperty(PLATFORM.userName, new PlainLiteralImpl(newUserName));
 
-        System.out.println("CREATED USER ====================vvvvvvvvvv");
-        serializeTriplesWithSubject(System.out, userNode);
-        System.out.println("CREATED USER ====================^^^^^^^^^^^^^^^");
-        // TripleImpl(NonLiteral subject, UriRef predicate, Resource object) 
         return userNode;
     }
 
@@ -499,54 +494,29 @@ public class UserResource {
      */
     private void changeLiteral(GraphNode userNode, UriRef predicate,
             String newValue) {
-
-        System.out.println("PRE CHANGE LITERAL");
-        System.out.println("new predicate = "+predicate);
-        System.out.println("new value = "+newValue);
-        serializeTriplesWithSubject(System.out, userNode);
         
         Iterator<Triple> oldTriples = systemGraph.filter(
                 (NonLiteral) userNode.getNode(), predicate, null);
 
         ArrayList<Triple> oldBuffer = new ArrayList<Triple>();
 
-        // System.out.println("\n\n");
-
-        // hacky
         Resource oldObject = null;
         while (oldTriples.hasNext()) {
             Triple triple = oldTriples.next();
             oldObject = triple.getObject();
             oldBuffer.add(triple);
         }
-        System.out.println("old buffer size ="+oldBuffer.size());
-        System.out.println("OLDVALUE = " + oldObject);
-        System.out.println("ADDING " + predicate + "   " + newValue);
+
         // filter appears to see plain literals and xsd:strings as differerent
         // so not
         // userNode.addPropertyValue(predicate, newValue);
         PlainLiteral newObject = new PlainLiteralImpl(newValue);
         userNode.addProperty(predicate, newObject);
-
-                System.out.println("POST CHANGE LITERAL");
-        serializeTriplesWithSubject(System.out, userNode);
-      
-        if(oldObject != null){
-          System.out.println("oldValue.getClass() "+oldObject+" "+oldObject.getClass());
-        System.out.println("newValue.getClass() "+newValue+" "+newValue.getClass());
-        }
         
         if (newObject.equals(oldObject)) {
-            System.out.println("newValue=oldValue = "+newValue);
             return;
         }
-
-        // System.out.println("*** systemGraph size before removal = "+systemGraph.size());
         systemGraph.removeAll(oldBuffer);
-        
-                        System.out.println("POST removeAll");
-        serializeTriplesWithSubject(System.out, userNode);
-        // System.out.println("*** systemGraph size after removal = "+systemGraph.size());
     }
 
     /**
@@ -584,9 +554,7 @@ public class UserResource {
         // userNode.addPropertyValue(predicate, newValue);
         userNode.addProperty(predicate, newValue);
 
-        // System.out.println("*** systemGraph size before removal = "+systemGraph.size());
         systemGraph.removeAll(oldBuffer);
-        // System.out.println("*** systemGraph size after removal = "+systemGraph.size());
     }
 
     private void serializeTriplesWithSubject(OutputStream stream, GraphNode node) {
