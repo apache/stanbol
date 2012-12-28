@@ -52,6 +52,7 @@ import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.TripleCollection;
@@ -253,6 +254,10 @@ public class UserResource {
         systemGraph.addAll(assertedGraph);
     }
 
+    /**
+     * ********************
+     * Endpoint API ********************
+     */
     /**
      * Endpoint-style user creation takes a little bunch of Turtle e.g. [] a
      * foaf:Agent ; cz:userName "Hugo Ball" .
@@ -465,9 +470,23 @@ public class UserResource {
     }
 
     /**
-     * ********************
-     * helper methods ********************
+     **********************
+     * helper methods 
      */
+    private GraphNode createUser(String newUserName) {
+        System.out.println("newUserName = " + newUserName);
+        BNode subject = new BNode();
+        GraphNode userNode = new GraphNode(subject, systemGraph);
+        userNode.addProperty(RDF.type, FOAF.Agent);
+        userNode.addProperty(PLATFORM.userName, new PlainLiteralImpl(newUserName));
+
+        System.out.println("CREATED USER ====================vvvvvvvvvv");
+        serializeTriplesWithSubject(System.out, userNode);
+        System.out.println("CREATED USER ====================^^^^^^^^^^^^^^^");
+        // TripleImpl(NonLiteral subject, UriRef predicate, Resource object) 
+        return userNode;
+    }
+
     /**
      * Replaces/inserts literal value for predicate assumes there is only one
      * triple for the given predicate new value is added before deleting old one
@@ -481,6 +500,11 @@ public class UserResource {
     private void changeLiteral(GraphNode userNode, UriRef predicate,
             String newValue) {
 
+        System.out.println("PRE CHANGE LITERAL");
+        System.out.println("new predicate = "+predicate);
+        System.out.println("new value = "+newValue);
+        serializeTriplesWithSubject(System.out, userNode);
+        
         Iterator<Triple> oldTriples = systemGraph.filter(
                 (NonLiteral) userNode.getNode(), predicate, null);
 
@@ -489,26 +513,39 @@ public class UserResource {
         // System.out.println("\n\n");
 
         // hacky
-        Resource oldValue = null;
+        Resource oldObject = null;
         while (oldTriples.hasNext()) {
             Triple triple = oldTriples.next();
-            oldValue = triple.getObject();
+            oldObject = triple.getObject();
             oldBuffer.add(triple);
         }
-        System.out.println("OLDVALUE = " + oldValue);
+        System.out.println("old buffer size ="+oldBuffer.size());
+        System.out.println("OLDVALUE = " + oldObject);
         System.out.println("ADDING " + predicate + "   " + newValue);
         // filter appears to see plain literals and xsd:strings as differerent
         // so not
         // userNode.addPropertyValue(predicate, newValue);
-        userNode.addProperty(predicate, new PlainLiteralImpl(newValue));
+        PlainLiteral newObject = new PlainLiteralImpl(newValue);
+        userNode.addProperty(predicate, newObject);
 
-        // hacky
-        if (newValue.equals(oldValue)) {
+                System.out.println("POST CHANGE LITERAL");
+        serializeTriplesWithSubject(System.out, userNode);
+      
+        if(oldObject != null){
+          System.out.println("oldValue.getClass() "+oldObject+" "+oldObject.getClass());
+        System.out.println("newValue.getClass() "+newValue+" "+newValue.getClass());
+        }
+        
+        if (newObject.equals(oldObject)) {
+            System.out.println("newValue=oldValue = "+newValue);
             return;
         }
 
         // System.out.println("*** systemGraph size before removal = "+systemGraph.size());
         systemGraph.removeAll(oldBuffer);
+        
+                        System.out.println("POST removeAll");
+        serializeTriplesWithSubject(System.out, userNode);
         // System.out.println("*** systemGraph size after removal = "+systemGraph.size());
     }
 
@@ -523,6 +560,8 @@ public class UserResource {
     private void changeResource(GraphNode userNode, UriRef predicate,
             UriRef newValue) {
 
+        
+        
         Iterator<Triple> oldTriples = systemGraph.filter(
                 (NonLiteral) userNode.getNode(), predicate, null);
 
@@ -620,19 +659,5 @@ public class UserResource {
         } finally {
             readLock.unlock();
         }
-    }
-
-    private GraphNode createUser(String newUserName) {
-        System.out.println("newUserName = " + newUserName);
-        BNode subject = new BNode();
-        GraphNode userNode = new GraphNode(subject, systemGraph);
-        userNode.addProperty(RDF.type, FOAF.Agent);
-        userNode.addProperty(PLATFORM.userName, new PlainLiteralImpl(newUserName));
-
-        System.out.println("CREATED USER ====================vvvvvvvvvv");
-        serializeTriplesWithSubject(System.out, userNode);
-        System.out.println("CREATED USER ====================^^^^^^^^^^^^^^^");
-        // TripleImpl(NonLiteral subject, UriRef predicate, Resource object) 
-        return userNode;
     }
 }
