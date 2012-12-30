@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ public class ResourceLoader {
     private static final Logger log = LoggerFactory.getLogger(ResourceLoader.class);
     private final ResourceImporter resourceImporter;
     private final Map<String,ResourceState> files;
+    private File importedDir;
     /**
      * for future uses to activate/deactivate parsing of entries within ZIP
      * archives. If <code>false</code> the ZIP archive will be parsed as a 
@@ -65,6 +67,19 @@ public class ResourceLoader {
         this.failOnError = failOnError;
     }
 
+    public void setImportedDir(File importedDir) {
+        this.importedDir = importedDir;
+        if(importedDir != null){
+            if(importedDir.isFile()){
+                throw new IllegalArgumentException("The parsed imported directory MUST NOT be a File");
+            }
+            if(!importedDir.isDirectory()){
+                if(!importedDir.mkdirs()){
+                    throw new IllegalStateException("Unable to create imported directory "+importedDir);
+                }
+            }
+        }
+    }
     /**
      * Adds a new {@link File} resource to this resource loader. In case a
      * directory is parsed, all files directly within this directory will be 
@@ -73,7 +88,7 @@ public class ResourceLoader {
      */
     public void addResource(File fileOrDirectory){
         if(fileOrDirectory != null){
-            for(String file:getFiles(fileOrDirectory)){
+            for(String file : getFiles(fileOrDirectory)){
                 ResourceState state = files.get(file);
                 if(state == null){
                     log.debug("File {} registered to this RdfLoader",file);
@@ -86,6 +101,7 @@ public class ResourceLoader {
             }
         }
     }
+    
     /**
      * Getter for the read only status of the resource loader.
      * @return the read only view of the status
@@ -264,7 +280,19 @@ public class ResourceLoader {
         synchronized (files) {
             if(files.containsKey(file)){
                 log.debug("File {} now in state {}",file,state);
-                files.put(file, state);
+                if(importedDir != null && ResourceState.LOADED == state){
+                    files.remove(file);
+                    try {
+                        files.put(moveToImportedFolder(new File(file)).toString(), state);
+                    } catch (IOException ioe) {
+                       log.warn("Unable to move loaded Resource {} to imported Directory! "
+                           + "Please move the file manually to {}!",file,importedDir);
+                       log.warn("Reason: "+ioe.getMessage(),ioe);
+                       files.put(file, state);
+                    }
+                } else { //this does not use an imported folder or the state is not LOADED
+                    files.put(file, state);
+                }
                 //if failOnError is activated we stop the loading on the first
                 //error!
                 if(failOnError && ResourceState.ERROR == state){
@@ -280,5 +308,20 @@ public class ResourceLoader {
                     file);
             }
         }
+    }
+    private File moveToImportedFolder(File file) throws IOException {
+        if(importedDir == null){
+            return file;
+        }
+        File moved = new File(importedDir,file.getName());
+        int i=0;
+        while(moved.isFile()){
+            i++;
+            moved = new File(importedDir,i+"_"+file.getName());
+        }
+        log.info("   ... moving imported file {} to {}/{}",new Object[] {
+                file.getName(),importedDir.getName(),moved.getName()});
+        FileUtils.moveFile(file, moved);
+        return moved;
     }
 }

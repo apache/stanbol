@@ -121,7 +121,7 @@ public class RdfIndexingSourceTest {
     @Test
     public void testEntityDataIterable(){
         IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"iterable",CONFIG_ROOT+"iterable"){};
-        EntityDataIterable iterable = config.getDataInterable();
+        EntityDataIterable iterable = config.getDataIterable();
         assertNotNull(iterable);
         assertEquals(iterable.getClass(), RdfIndexingSource.class);
         assertTrue(iterable.needsInitialisation());
@@ -203,7 +203,7 @@ public class RdfIndexingSourceTest {
     @Test
     public void testBNodeSupport(){
         IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"bnode",CONFIG_ROOT+"bnode"){};
-        EntityDataIterable iterable = config.getDataInterable();
+        EntityDataIterable iterable = config.getDataIterable();
         assertNotNull(iterable);
         assertEquals(iterable.getClass(), RdfIndexingSource.class);
         assertTrue(iterable.needsInitialisation());
