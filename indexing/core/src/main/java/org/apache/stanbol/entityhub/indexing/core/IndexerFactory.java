@@ -101,7 +101,7 @@ public class IndexerFactory {
             config= new IndexingConfig(dir);
         }
         //get the mode based on the configured IndexingComponents
-        EntityDataIterable dataIterable = config.getDataInterable();
+        EntityDataIterable dataIterable = config.getDataIterable();
         EntityIterator idIterator = config.getEntityIdIterator();
         EntityDataProvider dataProvider = config.getEntityDataProvider();
         EntityScoreProvider scoreProvider = config.getEntityScoreProvider();

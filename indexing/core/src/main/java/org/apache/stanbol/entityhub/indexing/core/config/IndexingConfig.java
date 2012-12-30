@@ -149,7 +149,7 @@ public class IndexingConfig {
      * of the {@link IndexingConstants#KEY_ENTITY_DATA_ITERABLE} key or
      * <code>null</code> if not configured.
      * This variable uses lazy initialisation
-     * @see #getDataInterable()
+     * @see #getDataIterable()
      */
     private EntityDataIterable entityDataIterable = null;
     /**
@@ -797,7 +797,7 @@ public class IndexingConfig {
      * @return the configured {@link EntityDataIterable} or a <code>null</code> if
      * this configuration is not present.
      */
-    public EntityDataIterable getDataInterable(){
+    public EntityDataIterable getDataIterable(){
         if(entityDataIterable  != null){
             return entityDataIterable;
         } else if(configuration.containsKey(KEY_ENTITY_DATA_ITERABLE)){

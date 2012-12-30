@@ -110,7 +110,7 @@ public class LdpathSourceProcessor implements EntityProcessor {
         //we need to check for both EntityDataProvider and EntityDataIterator
         indexingSource = indexingConfig.getEntityDataProvider();
         if(indexingSource == null){
-            indexingSource = indexingConfig.getDataInterable();
+            indexingSource = indexingConfig.getDataIterable();
         }
         if(indexingSource == null){
             throw new IllegalStateException("Indexing Configuration does not contain" +

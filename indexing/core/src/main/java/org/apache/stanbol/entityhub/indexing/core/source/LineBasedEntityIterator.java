@@ -24,13 +24,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.stanbol.entityhub.indexing.core.EntityIterator;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.slf4j.Logger;
@@ -114,8 +113,8 @@ public class LineBasedEntityIterator implements EntityIterator {
      */
     public static final boolean DEFAULT_TRIM_ENTITY = true;
     
-    private File scoreFile;
-    private BufferedReader reader;
+    protected File scoreFile;
+    protected BufferedReader reader;
     private String separator;
     private String charset;
     /**
@@ -131,7 +130,7 @@ public class LineBasedEntityIterator implements EntityIterator {
     private EntityScore nextEntity;
     private int scorePos;
     private int idPos;
-    private String namespace;
+    protected String namespace;
     private boolean trimLine;
     private boolean trimEntityId;
     
@@ -264,7 +263,7 @@ public class LineBasedEntityIterator implements EntityIterator {
         }
         value = config.get(PARAM_ID_NAMESPACE);
         if(value != null){
-            this.namespace = value.toString();
+            this.namespace = StringEscapeUtils.unescapeJava(value.toString());
             log.info("Set Namespace to ''",namespace);
         }
         value = config.get(PARAM_SEPARATOR);
@@ -338,7 +337,7 @@ public class LineBasedEntityIterator implements EntityIterator {
         }
         return entity;
     }
-    private EntityScore getNext(){
+    protected EntityScore getNext(){
         String line;
         try {
             while((line = reader.readLine()) != null){
@@ -358,7 +357,7 @@ public class LineBasedEntityIterator implements EntityIterator {
      * @param line
      * @return
      */
-    private EntityScore parseEntityFormLine(String line) {
+    protected EntityScore parseEntityFormLine(String line) {
         if(line == null){
             return null;
         }
@@ -384,6 +383,7 @@ public class LineBasedEntityIterator implements EntityIterator {
                 } else {
                     id = value;
                 }
+                id = StringEscapeUtils.unescapeJava(id);
                 log.debug(" - id = {}",id);
                 entity = namespace != null ? namespace+id : id;
                 log.debug(" - entity = {}",entity);
@@ -437,4 +437,5 @@ public class LineBasedEntityIterator implements EntityIterator {
             }
         }
     }
+    
 }
