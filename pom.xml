@@ -85,13 +85,21 @@
 
     <module>launchers/bundlelists</module>
     <module>launchers/full</module>
-    <module>integration-tests</module>
 
     <module>launchers/stable</module>
     <module>launchers/full-war</module>
   </modules>
 
   <profiles>
+    <profile>
+      <id>it</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>integration-tests</module>      
+      </modules>
+    </profile>
     <profile>
       <id>rat</id>
       <activation>
