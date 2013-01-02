@@ -82,8 +82,9 @@
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-core</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
