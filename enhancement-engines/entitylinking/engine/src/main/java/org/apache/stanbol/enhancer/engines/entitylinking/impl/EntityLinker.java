@@ -468,7 +468,8 @@ public class EntityLinker {
             text = text.toLowerCase(); //TODO use language of label for Locale
         }
         //Tokenize the label and remove remove tokens without alpha numerical chars
-        String[] unprocessedLabelTokens = labelTokenizer.tokenize(text, lang); 
+        String[] unprocessedLabelTokens = labelTokenizer != null ? 
+                labelTokenizer.tokenize(text, lang) : null; 
         if(unprocessedLabelTokens == null){ //no tokenizer available
             log.info("Unable to tokenize {} language texts. Will process untokenized label {}",
                 state.getLanguage(),text);

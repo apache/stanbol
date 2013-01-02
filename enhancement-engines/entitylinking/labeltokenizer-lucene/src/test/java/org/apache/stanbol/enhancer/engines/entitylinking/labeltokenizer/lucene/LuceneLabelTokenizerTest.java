@@ -1,9 +1,10 @@
-package org.apache.stanbol.enhancer.engines.entityhublinking.labeltokenizer.lucene;
+package org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
+import org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene.LuceneLabelTokenizer;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;

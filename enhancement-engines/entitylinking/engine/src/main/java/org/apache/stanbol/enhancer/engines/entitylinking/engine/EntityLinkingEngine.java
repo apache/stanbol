@@ -105,7 +105,8 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
     /**
      * The label tokenizer
      */
-    protected final LabelTokenizer labelTokenizer;
+    protected LabelTokenizer labelTokenizer;
+
     /**
      * The text processing configuration
      */
@@ -176,7 +177,21 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
         this.entitySearcher = entitySearcher;
         this.labelTokenizer = labelTokenizer;
     }
+    /**
+     * Getter for the {@link LabelTokenizer} used by this Engine
+     * @return the labelTokenizer
+     */
+    public final LabelTokenizer getLabelTokenizer() {
+        return labelTokenizer;
+    }
 
+    /**
+     * Setter for the {@link LabelTokenizer} used by this Engine
+     * @param labelTokenizer the labelTokenizer to set
+     */
+    public final void setLabelTokenizer(LabelTokenizer labelTokenizer) {
+        this.labelTokenizer = labelTokenizer;
+    }
     @Override
     public Map<String,Object> getServiceProperties() {
         return Collections.unmodifiableMap(Collections.singletonMap(
