@@ -82,19 +82,19 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
         //init the Solr CharFilterFactory (optional)
         Object value = ctx.getProperties().get(PROPERTY_CHAR_FILTER_FACTORY);
         if(value != null && !value.toString().isEmpty() && !DEFAULT_CLASS_NAME_CONFIG.equals(value)){
-            Entry<String,Map<String,String>> componentConfig = parseConfigLine(
+            Entry<String,Map<String,String>> charFilterConfig = parseConfigLine(
                 PROPERTY_CHAR_FILTER_FACTORY, value.toString());
             Object factoryObject;
             try {
-                factoryObject = resourceLoader.newInstance(componentConfig.getKey(), (String[])null);
+                factoryObject = resourceLoader.newInstance(charFilterConfig.getKey(), (String[])null);
             } catch (SolrException e) {
                 throw new ConfigurationException(PROPERTY_CHAR_FILTER_FACTORY, "Unable to instantiate the "
-                        + "class '"+componentConfig.getKey()+"'!", e);
+                        + "class '"+charFilterConfig.getKey()+"'!", e);
             }
             
             if(factoryObject instanceof CharFilterFactory){
                 charFilterFactory = (CharFilterFactory)factoryObject;
-                Map<String,String> config = componentConfig.getValue();
+                Map<String,String> config = charFilterConfig.getValue();
                 if(!config.containsKey("luceneMatchVersion")){
                     config.put("luceneMatchVersion", Version.LUCENE_36.toString());
                 }
@@ -104,7 +104,7 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
                 }
             } else {
                 throw new ConfigurationException(PROPERTY_CHAR_FILTER_FACTORY, "The parsed class '"
-                        + componentConfig.getKey() +"' is not assignable to "+CharFilterFactory.class);
+                        + charFilterConfig.getKey() +"' is not assignable to "+CharFilterFactory.class);
             }     
         } else {
             charFilterFactory = null;
@@ -115,27 +115,27 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
         if(value == null || value.toString().isEmpty() || DEFAULT_CLASS_NAME_CONFIG.equals(value)){
             throw new ConfigurationException(PROPERTY_TOKENIZER_FACTORY,"The class name of the Lucene Tokemizer MUST BE configured");
         }
-        Entry<String,Map<String,String>> componentConfig = parseConfigLine(
+        Entry<String,Map<String,String>> tokenizerConfig = parseConfigLine(
             PROPERTY_CHAR_FILTER_FACTORY, value.toString());
 
         Object factoryObject;
         try {
-            factoryObject = resourceLoader.newInstance(componentConfig.getKey(), (String[])null);
+            factoryObject = resourceLoader.newInstance(tokenizerConfig.getKey(), (String[])null);
         } catch (SolrException e) {
             throw new ConfigurationException(PROPERTY_TOKENIZER_FACTORY, "Unable to instantiate the "
-                    + "class '"+componentConfig.getKey()+"'!", e);
+                    + "class '"+tokenizerConfig.getKey()+"'!", e);
         }
         
         if(factoryObject instanceof TokenizerFactory){
             tokenizerFactory = (TokenizerFactory)factoryObject;
-            Map<String,String> config = componentConfig.getValue();
+            Map<String,String> config = tokenizerConfig.getValue();
             if(!config.containsKey("luceneMatchVersion")){
                 config.put("luceneMatchVersion", Version.LUCENE_36.toString());
             }
             tokenizerFactory.init(config);
         } else {
             throw new ConfigurationException(PROPERTY_TOKENIZER_FACTORY, "The instance "
-                    + factoryObject + "of the parsed parsed class '" + componentConfig.getKey() 
+                    + factoryObject + "of the parsed parsed class '" + tokenizerConfig.getKey() 
                     + "' is not assignable to "+TokenizerFactory.class);
         }
         if(factoryObject instanceof ResourceLoaderAware){
@@ -169,10 +169,10 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
                 PROPERTY_CHAR_FILTER_FACTORY, filterConfigLine);
             Object filterFactoryObject;
             try {
-                filterFactoryObject = resourceLoader.newInstance(componentConfig.getKey(), (String[])null);
+                filterFactoryObject = resourceLoader.newInstance(filterConfig.getKey(), (String[])null);
             } catch (SolrException e) {
                 throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "Unable to instantiate the "
-                        + "class '"+componentConfig.getKey()+"'!", e);
+                        + "class '"+filterConfig.getKey()+"'!", e);
             }
             
             if(filterFactoryObject instanceof TokenFilterFactory){
@@ -185,7 +185,7 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
                 filterFactories.add(tff);
             } else {
                 throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "The parsed class '"
-                        + componentConfig.getKey() +"' is not assignable to "+TokenFilterFactory.class);
+                        + filterConfig.getKey() +"' is not assignable to "+TokenFilterFactory.class);
             }
             if(filterFactoryObject instanceof ResourceLoaderAware){
                 ((ResourceLoaderAware)filterFactoryObject).inform(resourceLoader);
