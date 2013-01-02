@@ -1,0 +1,84 @@
+package org.apache.stanbol.commons.solr.utils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.collections.Predicate;
+import org.apache.commons.collections.iterators.FilterIterator;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.solr.common.ResourceLoader;
+import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
+
+/**
+ * SolrResourceLoader that supports loading resources via the Apache Stanbol
+ * {@link DataFileProvider}<p>
+ * This does NOT implement the {@link #newInstance(String, String...)} method.
+ * Calls will throw an {@link UnsupportedOperationException}.
+ * Users that need to also load classes should combine this implementation with
+ * the {@link StanbolResourceLoader} that supports instantiation of classes via
+ * the parsed ClassLoader.
+ * @author Rupert Westenthaler
+ *
+ */
+@Component(immediate=true,policy=ConfigurationPolicy.OPTIONAL,metatype=true)
+@Service(value={ResourceLoader.class, DataFileResourceLoader.class})
+public class DataFileResourceLoader implements ResourceLoader {
+
+    @Reference
+    private DataFileProvider dfp;
+    
+    /**
+     * Default constructure used by OSGI
+     */
+    public DataFileResourceLoader(){}
+    
+    /**
+     * Constructs a {@link DataFileResourceLoader} using the parsed 
+     * {@link DataFileProvider}.
+     * @param dfp the {@link DataFileProvider}
+     * @throws IllegalArgumentException if the parsed {@link DataFileProvider} is
+     * <code>null</code>
+     */
+    public DataFileResourceLoader(DataFileProvider dfp){
+        if(dfp == null){
+            throw new IllegalArgumentException("The parsed DataFileProvider MUST NOT be NULL!");
+        }
+        this.dfp = dfp;
+    }
+    
+    @Override
+    public InputStream openResource(String resource) throws IOException {
+        return dfp.getInputStream(null, resource, null);
+    }
+
+    @Override
+    public List<String> getLines(String resource) throws IOException {
+        List<String> lines = new ArrayList<String>();
+        LineIterator it = IOUtils.lineIterator(openResource(resource), "UTF-8");
+        while(it.hasNext()){
+            String line = it.nextLine();
+            if(line != null && !line.isEmpty() && line.charAt(0) != '#'){
+                lines.add(line);
+            }
+        }
+        return lines;
+    }
+    /**
+     * Not implemented!
+     * @throws UnsupportedOperationException on every call to this mehtod
+     * @see StanbolResourceLoader#newInstance(String, String...)
+     */
+    @Override
+    public Object newInstance(String cname, String... subpackages) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("Loading of ClassFiles is not supported");
+    }
+
+}

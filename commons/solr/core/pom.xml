@@ -90,7 +90,7 @@
               org.apache.solr.search.*;version=${solr-version},
               org.apache.solr.update.*;version=${solr-version},
               org.apache.solr.util.*;version=${solr-version},
-              org.apache.solr.analysis;version=${solr-version},
+              org.apache.solr.analysis;-split-package:=merge-last;version=${solr-version},
               org.apache.lucene.*;version=${solr-version}
             </_exportcontents>
             <!-- NOTE: 
