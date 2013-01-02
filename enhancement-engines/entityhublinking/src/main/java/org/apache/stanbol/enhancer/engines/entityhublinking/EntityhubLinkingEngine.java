@@ -41,6 +41,9 @@ import static org.osgi.framework.Constants.SERVICE_RANKING;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.NavigableSet;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -63,7 +66,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * The EntityhubLinkingEngine in NOT an {@link EnhancementEngine} but only an
  * OSGI {@link Component} that allows to configure instances of the
@@ -120,7 +126,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 })
 public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {
 
-    //private final Logger log = LoggerFactory.getLogger(EntityhubLinkingEngine.class);
+    private final Logger log = LoggerFactory.getLogger(EntityhubLinkingEngine.class);
 
     @Reference
     NamespacePrefixService prefixService;
@@ -147,11 +153,10 @@ public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {
     int trackedServiceCount = 0;
     
     /**
-     * the MainLabelTokenizer
+     * the ServiceTracker for the {@link LabelTokenizer}
      */
-    @Reference
-    protected LabelTokenizer labelTokenizer;
-    
+    private ServiceTracker labelTokenizerTracker;
+    private NavigableSet<ServiceReference> labelTokenizersRefs = new TreeSet<ServiceReference>();
     
     /**
      * The name of the reference site ('local' or 'entityhub') if the
@@ -206,12 +211,82 @@ public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {
         } else {
             entitySearcher = new ReferencedSiteSearcher(bundleContext,siteName,10,this);
         }
+        labelTokenizerTracker = new ServiceTracker(bundleContext, LabelTokenizer.class.getName(), 
+            new ServiceTrackerCustomizer() {
+                
+            @Override
+            public Object addingService(ServiceReference reference) {
+                Object service = bundleContext.getService(reference);
+                synchronized (labelTokenizersRefs) {
+                    labelTokenizersRefs.add(reference);
+                    ServiceReference higest = labelTokenizersRefs.last();
+                    EntityLinkingEngine engine = entityLinkingEngine;
+                    if(engine != null){
+                        LabelTokenizer lt = (LabelTokenizer)
+                                (higest.equals(reference) ? service : 
+                                    labelTokenizerTracker.getService(higest));
+                        if(!lt.equals(engine.getLabelTokenizer())){
+                            log.info(" ... setting LabelTokenizer of Engine '{}' to {}",
+                                engine.getName(),lt);
+                            engine.setLabelTokenizer(lt);
+                        }
+                    }
+                }
+                return service;
+            }
+
+            @Override
+            public void removedService(ServiceReference reference, Object service) {
+                synchronized (labelTokenizersRefs) {
+                    labelTokenizersRefs.remove(reference); //override
+                    EntityLinkingEngine engine = entityLinkingEngine;
+                    if(engine != null){
+                        if(labelTokenizersRefs.isEmpty()){
+                            log.info(" ... setting LabelTokenizer of Engine '{}' to null",
+                                engine.getName());
+                            engine.setLabelTokenizer(null);
+                        } else {
+                            LabelTokenizer lt = (LabelTokenizer)labelTokenizerTracker.getService(
+                                labelTokenizersRefs.last());
+                            if(!lt.equals(engine.getLabelTokenizer())){
+                                log.info(" ... setting LabelTokenizer of Engine '{}' to {}",
+                                    engine.getName(),lt);
+                                engine.setLabelTokenizer(lt);
+                            }
+                        }
+                    }
+                }
+                bundleContext.ungetService(reference);
+            }
+                
+            @Override
+            public void modifiedService(ServiceReference reference, Object service) {
+                synchronized (labelTokenizersRefs) {
+                    labelTokenizersRefs.remove(reference); //override
+                    labelTokenizersRefs.add(reference);
+                    ServiceReference higest = labelTokenizersRefs.last();
+                    EntityLinkingEngine engine = entityLinkingEngine;
+                    if(engine != null){
+                        LabelTokenizer lt = (LabelTokenizer)
+                            (higest.equals(reference) ? service : 
+                                labelTokenizerTracker.getService(higest));
+                        if(!lt.equals(engine.getLabelTokenizer())){
+                            log.info(" ... setting LabelTokenizer of Engine '{}' to {}",
+                                engine.getName(),lt);
+                            engine.setLabelTokenizer(lt);
+                        }
+                    }
+                }
+            }
+                
+            });
         //create the engine
         entityLinkingEngine = new EntityLinkingEngine(engineName,
             entitySearcher, //the searcher might not be available
             textProcessingConfig, linkerConfig, 
-            labelTokenizer);
+            null);
         //start tracking
+        labelTokenizerTracker.open();
         entitySearcher.open();
     }
     /**
@@ -229,6 +304,8 @@ public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {
         //* reset engine
         entityLinkingEngine = null;
         engineMetadata = null;
+        labelTokenizerTracker.close();
+        labelTokenizerTracker = null;
         //close the tracking EntitySearcher
         entitySearcher.close();
         entitySearcher = null;
