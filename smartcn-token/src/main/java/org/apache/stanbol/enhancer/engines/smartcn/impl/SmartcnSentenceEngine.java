@@ -72,23 +72,23 @@ import org.slf4j.LoggerFactory;
     policy = ConfigurationPolicy.OPTIONAL) //create a default instance with the default configuration
 @Service
 @Properties(value={
-        @Property(name= EnhancementEngine.PROPERTY_NAME,value="smartcn-token"),
+        @Property(name= EnhancementEngine.PROPERTY_NAME,value="smartcn-sentence"),
         @Property(name=Constants.SERVICE_RANKING,intValue=0) //give the default instance a ranking < 0
 })
-public class SmartcnTokenizerEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties {
+public class SmartcnSentenceEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties {
 
     private static final Map<String,Object> SERVICE_PROPERTIES;
     static {
         Map<String,Object> props = new HashMap<String,Object>();
         props.put(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING, 
-            ServiceProperties.ORDERING_NLP_TOKENIZING);
+            ServiceProperties.ORDERING_NLP_SENTENCE_DETECTION);
         props.put(NlpServiceProperties.ENHANCEMENT_ENGINE_NLP_ROLE, 
-            NlpProcessingRole.Tokenizing);
+            NlpProcessingRole.SentenceDetection);
         SERVICE_PROPERTIES = Collections.unmodifiableMap(props);
     }
 
 
-    private static Logger log = LoggerFactory.getLogger(SmartcnTokenizerEngine.class);
+    private static Logger log = LoggerFactory.getLogger(SmartcnSentenceEngine.class);
     
     @Reference
     private AnalysedTextFactory analysedTextFactory;
@@ -149,31 +149,15 @@ public class SmartcnTokenizerEngine extends AbstractEnhancementEngine<RuntimeExc
                 + "Please report this on the dev@apache.stanbol.org or create an "
                 + "JIRA issue about this.");
         }
-        if(!at.getSentences().hasNext()) { //no sentences  ... use this engine to detect
-            //first the sentences
-            TokenStream sentences = new SentenceTokenizer(new CharSequenceReader(at.getText()));
-            try {
-                while(sentences.incrementToken()){
-                    OffsetAttribute offset = sentences.addAttribute(OffsetAttribute.class);
-                    Sentence s = at.addSentence(offset.startOffset(), offset.endOffset());
-                    if(log.isTraceEnabled()) {
-                        log.trace("detected {}:{}",s,s.getSpan());
-                    }
-                }
-            } catch (IOException e) {
-                String message = String.format("IOException while reading from "
-                    +"CharSequenceReader of AnalyzedText for ContentItem %s",ci.getUri());
-                log.error(message,e);
-                throw new EngineException(this, ci, message, e);
-            }
-        }
-        //now the tokens
-        TokenStream tokens = new WordTokenFilter(new AnalyzedTextSentenceTokenizer(at));
+        //first the sentences
+        TokenStream sentences = new SentenceTokenizer(new CharSequenceReader(at.getText()));
         try {
-            while(tokens.incrementToken()){
-                OffsetAttribute offset = tokens.addAttribute(OffsetAttribute.class);
-                Token t = at.addToken(offset.startOffset(), offset.endOffset());
-                log.trace("detected {}",t);
+            while(sentences.incrementToken()){
+                OffsetAttribute offset = sentences.addAttribute(OffsetAttribute.class);
+                Sentence s = at.addSentence(offset.startOffset(), offset.endOffset());
+                if(log.isTraceEnabled()) {
+                    log.trace("detected {}:{}",s,s.getSpan());
+                }
             }
         } catch (IOException e) {
             String message = String.format("IOException while reading from "
