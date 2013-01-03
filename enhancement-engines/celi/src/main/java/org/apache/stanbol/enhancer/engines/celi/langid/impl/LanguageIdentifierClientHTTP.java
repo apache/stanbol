@@ -37,6 +37,7 @@ import javax.xml.soap.SOAPPart;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.clerezza.rdf.core.impl.util.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.stanbol.enhancer.engines.celi.utils.Utils;
 import org.slf4j.Logger;
@@ -111,7 +112,6 @@ public class LanguageIdentifierClientHTTP {
         MessageFactory msgFactory = MessageFactory.newInstance();
         SOAPMessage message = msgFactory.createMessage();
         SOAPPart soapPart = message.getSOAPPart();
-
         // Load the SOAP text into a stream source
         StreamSource source = new StreamSource(stream);
 

@@ -39,10 +39,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityinging
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityinging
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -53,7 +53,9 @@
     <!-- LabelTokenizer implementations -->
     <module>labeltokenizer-lucene</module>
     <module>labeltokenizer-opennlp</module>
-    <module>labeltokenizer-smartcn</module>
+    <!-- Chinese Label Tokenizer -->
+    <module>labeltokenizer-smartcn</module> <!-- config for the lucene label tokenizer -->
+    <module>labeltokenizer-paoding</module> <!-- implementation based on paoding -->
   </modules>
 
 </project>
