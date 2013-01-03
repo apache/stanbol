@@ -29,6 +29,39 @@
 	<description>Enhancement Engine using the CELI service.</description>
 	<inceptionYear>2012</inceptionYear>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              *
+            </Import-Package>
+            <Export-Package>
+              org.apache.stanbol.enhancer.engines.celi
+            </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engines.celi.ner.impl, 
+              org.apache.stanbol.enhancer.engines.celi.langid.impl, 
+              org.apache.stanbol.enhancer.engines.celi.classification.impl, 
+              org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl,
+              org.apache.stanbol.enhancer.engines.celi.utils
+            </Private-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -112,43 +145,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <build>
-  	<plugins>
-  		<plugin>
-  			<groupId>org.apache.maven.plugins</groupId>
-  			<artifactId>maven-surefire-plugin</artifactId>
-  			<configuration>
-  				<skipTests>false</skipTests>
-  			</configuration>
-  		</plugin>
-  		<plugin>
-  			<groupId>org.apache.felix</groupId>
-  			<artifactId>maven-bundle-plugin</artifactId>
-  			<extensions>true</extensions>
-  			<configuration>
-  				<instructions>
-                        <Import-Package>
-                            org.apache.stanbol.enhancer.servicesapi; provide:=true,
-                            org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
-                            *
-                        </Import-Package>
-  				    <Export-Package>
-  				        org.apache.stanbol.enhancer.engines.celi
-  				    </Export-Package>
-  					<Private-Package>
-  						org.apache.stanbol.enhancer.engines.celi.ner.impl, 
-  						org.apache.stanbol.enhancer.engines.celi.langid.impl, 
-  						org.apache.stanbol.enhancer.engines.celi.classification.impl, 
-  						org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl,
-                            org.apache.stanbol.enhancer.engines.celi.utils
-  					</Private-Package>
-  				</instructions>
-  			</configuration>
-  		</plugin>
-  		<plugin>
-  			<groupId>org.apache.felix</groupId>
-  			<artifactId>maven-scr-plugin</artifactId>
-  		</plugin>
-  	</plugins>
-  </build>
+
 </project>
