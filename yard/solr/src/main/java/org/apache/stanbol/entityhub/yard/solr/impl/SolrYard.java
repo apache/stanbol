@@ -82,6 +82,7 @@ import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
+import org.apache.stanbol.entityhub.yard.solr.model.NoConverterException;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationException;
@@ -1351,7 +1352,16 @@ public class SolrYard extends AbstractYard implements Yard {
                             inputDocument.addField(fieldName, value.getValue());
                         }
                     }
-                } catch (Exception e) {
+                } catch (NoConverterException e) {
+                    log.warn(
+                        String.format("Unable to convert value %s (type:%s) for field %s!", next,
+                            next.getClass(), field), e);
+                } catch (IllegalArgumentException e) { //usually because the Object is NULL or empty
+                    if(log.isDebugEnabled()){
+                        log.debug(String.format("Illegal Value %s (type:%s) for field %s!", next,
+                                next.getClass(), field), e);
+                    }
+                } catch (RuntimeException e) {
                     log.warn(
                         String.format("Unable to process value %s (type:%s) for field %s!", next,
                             next.getClass(), field), e);
