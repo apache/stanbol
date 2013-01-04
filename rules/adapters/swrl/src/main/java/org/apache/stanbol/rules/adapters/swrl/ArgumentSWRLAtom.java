@@ -20,6 +20,7 @@ package org.apache.stanbol.rules.adapters.swrl;
 import java.util.Collection;
 import java.util.Set;
 
+import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -169,5 +170,11 @@ public class ArgumentSWRLAtom implements SWRLAtom {
 
     public String getId() {
         return id;
+    }
+
+    @Override
+    public Set<OWLAnonymousIndividual> getAnonymousIndividuals() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
