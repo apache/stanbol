@@ -38,19 +38,6 @@
     constructs of the OWL and OWL 2 languages.
   </description>
 
-  <repositories>
-    <repository>
-      <releases>
-        <updatePolicy>always</updatePolicy>
-      </releases>
-      <snapshots>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-      <id>reasoners-owlapi-embedded</id>
-      <url>file://localhost/${project.basedir}/src/main/resources/maven/repo</url>
-    </repository>
-  </repositories>
-
   <inceptionYear>2010</inceptionYear>
 
   <build>
@@ -61,21 +48,29 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Embed-Dependency>owlapi</Embed-Dependency>
+            <Embed-Dependency>
+              owlapi-api, owlapi-apibinding, owlapi-debugging, 
+              owlapi-dlsyntax, owlapi-examples, owlapi-functional, 
+              owlapi-impl, owlapi-krss, owlapi-latex, owlapi-mansyntax,
+              owlapi-modularity, owlapi-normalform, owlapi-obo,
+              owlapi-owlxml, owlapi-rdfapi, owlapi-rdfxml,
+              owlapi-reasoner, owlapi-util, owlapi-turtle,
+              owlapi-metrics, owlapi-change, owlapi-owlexpression
+            </Embed-Dependency>
             <Embed-Transitive>false</Embed-Transitive>
             <Export-Package>
               org.apache.stanbol.commons.owl.*
             </Export-Package>
             <_exportcontents> <!-- used instead of Export-Package to preserve the owlapi jar -->
-              org.semanticweb.owlapi.*,
-              com.clarkparsia.owlapi.*,
-              de.uulm.ecs.ai.owlapi.*,
-              org.coode.owl.*,
-              org.coode.owlapi.*,
-              org.coode.string,
-              org.coode.xml,
-              uk.ac.manchester.cs.bhig.util,
-              uk.ac.manchester.cs.owl.*
+              org.semanticweb.owlapi.*;version=${owlapi-version},
+              com.clarkparsia.owlapi.*;version=${owlapi-version},
+              de.uulm.ecs.ai.owlapi.*;version=${owlapi-version},
+              org.coode.owl.*;version=${owlapi-version},
+              org.coode.owlapi.*;version=${owlapi-version},
+              org.coode.string;version=${owlapi-version},
+              org.coode.xml;version=${owlapi-version},
+              uk.ac.manchester.cs.bhig.util;version=${owlapi-version},
+              uk.ac.manchester.cs.owl.*;version=${owlapi-version}
             </_exportcontents>
             <Import-Package>
               org.semanticweb.owlapi.*,
@@ -85,37 +80,30 @@
             <_nouses>true</_nouses>
         </instructions>
       </configuration>
-    </plugin>
-    <plugin>
-      <groupId>org.apache.rat</groupId>
-      <artifactId>apache-rat-plugin</artifactId>
-      <configuration>
-        <excludes>
-          <!-- AL20 License -->
-          <exclude>src/license/THIRD-PARTY.properties</exclude>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 License -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+    </plugins>
 
-          <!-- See src/main/resources/maven/repo/README file -->
-          <exclude>src/main/resources/maven/repo/net/sourceforge/owlapi/owlapi/maven-metadata-local.xml</exclude>
-          <exclude>src/main/resources/maven/repo/net/sourceforge/owlapi/owlapi/3.2.3/owlapi-3.2.3.pom</exclude>
-          <exclude>src/main/resources/maven/repo/net/sourceforge/owlapi/owlapi/3.2.3/owlapi-3.2.3.jar</exclude>
-          <exclude>src/main/resources/maven/repo/net/sourceforge/owlapi/owlapi/3.2.3/owlapi-3.2.3-sources.jar</exclude>
-        </excludes>
-      </configuration>
-    </plugin>
-    <plugin>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>maven-scr-plugin</artifactId>
-    </plugin>
-  </plugins>
     <resources> <!-- Do not include the embedded repository in the build -->
       <resource>
         <directory>src/main/resources</directory>
-        <excludes>
-          <exclude>maven/**</exclude>
-        </excludes>
       </resource>
     </resources> 
-</build>
+
+  </build>
 
 
 <dependencies>
@@ -153,11 +141,126 @@
     <groupId>com.hp.hpl.jena</groupId>
     <artifactId>arq</artifactId>
   </dependency>
+
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-api</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-apibinding</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-debugging</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-dlsyntax</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-examples</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-functional</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-impl</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-krss</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-latex</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-modularity</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-mansyntax</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-normalform</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-obo</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-owlxml</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-rdfapi</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-rdfxml</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-reasoner</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-util</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-turtle</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-metrics</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-change</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-owlexpression</artifactId>
+      <version>${owlapi-version}</version>
+    </dependency>
+
+<!--
   <dependency>
     <groupId>net.sourceforge.owlapi</groupId>
     <artifactId>owlapi</artifactId>
     <version>3.2.3</version>
   </dependency>
+-->
 
   <!-- Persistence deps -->
   <dependency>
