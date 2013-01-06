@@ -67,15 +67,15 @@
               net.paoding.analysis.analyzer;version=2.0.4,
               net.paoding.analysis.knife;version=2.0.4,
               net.paoding.analysis.analyzer.*;version=2.0.4,
-              net.paoding.analysis.dictionar.*version=2.0.4
+              net.paoding.analysis.dictionary.*;version=2.0.4
             </Export-Package>
           </instructions>
         </configuration>
       </plugin>
-      <plugin>
+      <!-- plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
+      </plugin  -->
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
