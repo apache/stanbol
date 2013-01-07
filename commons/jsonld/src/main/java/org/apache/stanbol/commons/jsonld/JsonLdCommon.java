@@ -22,30 +22,24 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * 
- * 
- * @author Fabian Christ
- * 
- */
 public abstract class JsonLdCommon {
 
     private static final Logger logger = LoggerFactory.getLogger(JsonLdCommon.class);
 
     public static final String CONTEXT = "@context";
-    public static final String COERCE = "@coerce";
 
-    public static final String LITERAL = "@literal";
-    public static final String DATATYPE = "@datatype";
-    public static final String LANGUAGE = "@language";
-
-    public static final String IRI = "@iri";
-
-    public static final String SUBJECT = "@subject";
+    public static final String ID = "@id";
+    public static final String GRAPH = "@graph";
+    
     public static final String TYPE = "@type";
+    public static final String VALUE = "@value";
+    public static final String LANGUAGE = "@language";
 
     public static final String PROFILE = "@profile";
     public static final String TYPES = "@types";
+
+    @Deprecated
+    public static final String COERCE = "@coerce";
 
     /**
      * Maps URIs to namespace prefixes.

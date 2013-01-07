@@ -191,13 +191,14 @@
       <type>partialbundlelist</type>
     </dependency>
     
-    <!-- Stanbol FactStore Bundle List -->
+    <!-- Stanbol FactStore Bundle List (out of date) 
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.factstore</artifactId>
       <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
+    -->
 
     <!-- Stanbol Ontology Manager Bundle List -->
     <dependency>

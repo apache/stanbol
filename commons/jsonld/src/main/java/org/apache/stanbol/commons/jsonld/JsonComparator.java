@@ -35,30 +35,18 @@ public class JsonComparator implements Comparator<Object> {
             value = -1;
         } else if (arg1.equals(JsonLdCommon.CONTEXT)) {
             value = 1;
-        } else if (arg0.equals(JsonLdCommon.COERCE)) {
-            value = 1;
-        } else if (arg1.equals(JsonLdCommon.COERCE)) {
-            value = -1;
         } else if (arg0.equals(JsonLdCommon.TYPES)) {
             value = 1;
         } else if (arg1.equals(JsonLdCommon.TYPES)) {
             value = -1;
-        } else if (arg0.equals(JsonLdCommon.SUBJECT)) {
+        } else if (arg0.equals(JsonLdCommon.ID)) {
             value = -1;
-        } else if (arg1.equals(JsonLdCommon.SUBJECT)) {
+        } else if (arg1.equals(JsonLdCommon.ID)) {
             value = 1;
         } else if (arg0.equals(JsonLdCommon.TYPE)) {
             value = -1;
         } else if (arg1.equals(JsonLdCommon.TYPE)) {
             value = 1;
-        } else if (arg0.equals(JsonLdCommon.DATATYPE)) {
-            value = 1;
-        } else if (arg1.equals(JsonLdCommon.DATATYPE)) {
-            value = -1;
-        } else if (arg0.equals(JsonLdCommon.LITERAL)) {
-            value = 1;
-        } else if (arg1.equals(JsonLdCommon.LITERAL)) {
-            value = -1;
         } else {
             value = String.valueOf(arg0).toLowerCase().compareTo(String.valueOf(arg1).toLowerCase());
         }

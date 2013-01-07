@@ -19,8 +19,6 @@ package org.apache.stanbol.commons.jsonld;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,10 +31,8 @@ import org.slf4j.LoggerFactory;
  * The JsonLd class provides an API to create a JSON-LD object structure and to serialize this structure.
  * 
  * <p>
- * This implementation is based on the JSON-LD 1.0 specification version 20110911. Available online at <a
- * href="http://json-ld.org/spec/ED/20110911/">http://json-ld.org/spec/ED/20110911/</a>.
- * 
- * @author Fabian Christ
+ * This implementation is based on the JSON-LD 1.0 specification editor's draft from
+ * January 5, 2013. Available online at <a href="http://json-ld.org/spec">http://json-ld.org/spec</a>.
  */
 public class JsonLd extends JsonLdCommon {
     
@@ -174,7 +170,7 @@ public class JsonLd extends JsonLdCommon {
 
                 // put subject
                 if (resource.getSubject() != null && !resource.getSubject().isEmpty()) {
-                    subjectObject.put(SUBJECT, shortenURI(resource.getSubject()));
+                    subjectObject.put(ID, shortenURI(resource.getSubject()));
                 }
 
                 // put profile
@@ -194,10 +190,6 @@ public class JsonLd extends JsonLdCommon {
                 // put the used namespaces
                 if (!this.usedNamespaces.isEmpty() || this.useTypeCoercion) {
                     Map<String,Object> nsObject = new TreeMap<String,Object>(new JsonComparator());
-
-                    if (this.useTypeCoercion) {
-                        putCoercedTypes(nsObject, resource.getCoerceMap());
-                    }
                     
                     for (String ns : this.usedNamespaces.keySet()) {
                         nsObject.put(this.usedNamespaces.get(ns), ns);
@@ -214,6 +206,8 @@ public class JsonLd extends JsonLdCommon {
 
     @SuppressWarnings("unchecked")
     private Map<String,Object> createJointGraph() throws ShorteningException {
+        Map<String,Object> context = new TreeMap<String,Object>(new JsonComparator());
+        
         Map<String,Object> json = new TreeMap<String,Object>(new JsonComparator());
         Map<String,String> coercionMap = new TreeMap<String,String>(new JsonComparator());
 
@@ -228,7 +222,7 @@ public class JsonLd extends JsonLdCommon {
 
                 // put subject
                 if (resource.getSubject() != null && !resource.getSubject().isEmpty()) {
-                    subjectObject.put(SUBJECT, shortenURI(resource.getSubject()));
+                    subjectObject.put(ID, shortenURI(resource.getSubject()));
                 }
                 
                 // put profile
@@ -239,12 +233,43 @@ public class JsonLd extends JsonLdCommon {
                 // put types
                 putTypes(subjectObject, resource);
 
-                if (this.useTypeCoercion) {
-                    coercionMap.putAll(resource.getCoerceMap());
-                }
-
                 // put properties = objects
                 putProperties(subjectObject, resource);
+
+                if (this.useTypeCoercion) {
+                    coercionMap.putAll(resource.getCoerceMap());
+                    
+                    for (String propertyName : resource.getPropertyMap().keySet()) {
+                        JsonLdProperty property = resource.getProperty(propertyName);
+                        if (property.isTyped()) {
+                            Map<String,Object> propObject = new TreeMap<String,Object>(new JsonComparator());
+                            String finalPropName = propertyName;
+                            if (this.useCuries) {
+                                propObject.put(TYPE, this.shortenURI(property.getType()));
+                                finalPropName = this.shortenURI(propertyName);
+                            }
+                            else {
+                                propObject.put(TYPE, this.unCURIE(property.getType()));
+                                finalPropName = this.unCURIE(propertyName);
+                            }
+                            
+                            // Check if there is a namespace defined for this property
+                            String removeNs = null;
+                            for (String nsKey : this.usedNamespaces.keySet()) {
+                                if (finalPropName.equals(nsKey)) {
+                                    finalPropName = this.usedNamespaces.get(nsKey);
+                                    propObject.put(ID, nsKey);
+                                    removeNs = nsKey;
+                                    break;
+                                }
+                            }
+                            if (removeNs != null) {
+                                this.usedNamespaces.remove(removeNs);
+                            }
+                            context.put(finalPropName, propObject);
+                        }
+                    }
+                }
 
                 // add to list of subjects
                 subjects.add(subjectObject);
@@ -255,24 +280,18 @@ public class JsonLd extends JsonLdCommon {
                 if (subjects.size() == 1) {
                     json = (Map<String,Object>) subjects.get(0);
                 } else {
-                    json.put(SUBJECT, subjects);
+                    json.put(GRAPH, subjects);
                 }
             }
         }
 
         // put the namespaces
-        if (!this.usedNamespaces.isEmpty() || (!coercionMap.isEmpty() && this.useTypeCoercion)) {
-            Map<String,Object> nsObject = new TreeMap<String,Object>(new JsonComparator());
-
-            if (!coercionMap.isEmpty() && this.useTypeCoercion) {
-                putCoercedTypes(nsObject, coercionMap);
-            }
-
+        if (!this.usedNamespaces.isEmpty() || (!coercionMap.isEmpty() && this.useTypeCoercion)) {            
             for (String ns : usedNamespaces.keySet()) {
-                nsObject.put(usedNamespaces.get(ns), ns);
+                context.put(usedNamespaces.get(ns), ns);
             }
 
-            json.put(CONTEXT, nsObject);
+            json.put(CONTEXT, context);
         }
 
         return json;
@@ -300,23 +319,6 @@ public class JsonLd extends JsonLdCommon {
         }
     }
 
-    private void putCoercedTypes(Map<String,Object> jsonObject, Map<String,String> coercionMap) throws ShorteningException {
-        if (!coercionMap.isEmpty()) {
-            Map<String,List<String>> nsCoercionMap = new TreeMap<String,List<String>>(new JsonComparator());
-            for (String property : coercionMap.keySet()) {
-                String prop = shortenURIIgnoreDuplicates(property);
-                String type = shortenURIWithCuries(coercionMap.get(property));
-                
-                if (nsCoercionMap.get(type) == null) {
-                    nsCoercionMap.put(type, new LinkedList<String>());
-                }
-                List<String> propList = nsCoercionMap.get(type);
-                propList.add(prop);
-            }
-            jsonObject.put(COERCE, nsCoercionMap);
-        }
-    }
-
     private void putProperties(Map<String,Object> jsonObject, JsonLdResource resource) throws ShorteningException {
         for (String property : resource.getPropertyMap().keySet()) {
             JsonLdProperty jldProperty = resource.getPropertyMap().get(property);
@@ -340,12 +342,12 @@ public class JsonLd extends JsonLdCommon {
         Map<String,Object> valueObject = new TreeMap<String,Object>();
         putProperty(valueObject, resource.getCoerceMap(), property, value);
         
-        if (valueObject.containsKey(DATATYPE)) {
+        if (valueObject.containsKey(TYPE)) {
             putTypedValue(jsonObject, resource, property, valueObject);
         }
-        else if (valueObject.size() == 1 && valueObject.containsKey(LITERAL)) {
-            // If the returned value object contains only one @literal value,
-            // we can simplify the value by admitting the @literal.
+        else if (valueObject.size() == 1 && valueObject.containsKey(VALUE)) {
+            // If the returned value object contains only one @value value,
+            // we can simplify the value by admitting the @value.
             putSimplifiedValue(jsonObject, property, valueObject, resource.getCoerceMap());
         }
         else {
@@ -358,7 +360,7 @@ public class JsonLd extends JsonLdCommon {
                                     String property,
                                     Map<String,Object> valueObject,
                                     Map<String,String> coercionMap) throws ShorteningException {
-        Object convertedValue = convertValueType(valueObject.get(LITERAL));
+        Object convertedValue = convertValueType(valueObject.get(VALUE));
         if (convertedValue instanceof String) {
             String strValue = (String) convertedValue;
             String type = coercionMap.get(property);
@@ -413,7 +415,7 @@ public class JsonLd extends JsonLdCommon {
             Map<String,Object> valueObject = new TreeMap<String,Object>();
             putProperty(valueObject, resource.getCoerceMap(), property, value);
             
-            if (valueObject.containsKey(DATATYPE)) {
+            if (valueObject.containsKey(TYPE)) {
                 if (this.useTypeCoercion) {
                     if (resource.getCoerceMap().get(property) != null) {
                         // Type already defined by coercion. We add the simplified value.
@@ -430,9 +432,9 @@ public class JsonLd extends JsonLdCommon {
                     valueList.add(valueObject);
                 }
             }
-            else if (valueObject.size() == 1 && valueObject.containsKey(LITERAL)) {
-                // If the returned value object contains only one @literal value,
-                // we can simplify the value by admitting the @literal.
+            else if (valueObject.size() == 1 && valueObject.containsKey(VALUE)) {
+                // If the returned value object contains only one @value value,
+                // we can simplify the value by admitting the @value.
                 addSimplifiedValue(valueList, valueObject);
             }
             else {
@@ -446,15 +448,15 @@ public class JsonLd extends JsonLdCommon {
 
     private void simplifyIRI(Map<String,Object> valueObject) throws ShorteningException {
         // No type coercion but value has type - maybe it's an IRI
-        if (valueObject.get(DATATYPE).equals(IRI)) {
-            String iri = (String)valueObject.get(LITERAL);
+        if (valueObject.get(TYPE).equals(ID)) {
+            String iri = (String)valueObject.get(VALUE);
             valueObject.clear();
-            valueObject.put(IRI, shortenURI(iri));
+            valueObject.put(ID, shortenURI(iri));
         }
     }
 
     private void addSimplifiedValue(List<Object> valueList, Map<String,Object> valueObject) throws ShorteningException {
-        Object convertedValue = convertValueType(valueObject.get(LITERAL));
+        Object convertedValue = convertValueType(valueObject.get(VALUE));
         if (convertedValue instanceof String) {
             String strValue = (String) convertedValue;
             valueList.add(shortenURI(strValue));
@@ -471,17 +473,17 @@ public class JsonLd extends JsonLdCommon {
         if (value instanceof JsonLdIRI) {
             JsonLdIRI iriValue = (JsonLdIRI) value;
             Map<String,Object> iriObject = new TreeMap<String,Object>();
-            iriObject.put(IRI, shortenURI(iriValue.getIRI()));
+            iriObject.put(ID, shortenURI(iriValue.getIRI()));
             jsonObject.put(shortenURI(property), iriObject);
         } else if (value instanceof JsonLdPropertyValue) {
             JsonLdPropertyValue jldPropertyValue = (JsonLdPropertyValue)value;
-            jsonObject.put(LITERAL, jldPropertyValue.getLiteralValue());
+            jsonObject.put(VALUE, jldPropertyValue.getLiteralValue());
             String type = coercionMap.get(property);
             if (type != null) {
                 jldPropertyValue.setType(type);
             }
             if (jldPropertyValue.getType() != null) {
-                jsonObject.put(DATATYPE, shortenURIWithCuries(jldPropertyValue.getType()));
+                jsonObject.put(TYPE, shortenURIWithCuries(jldPropertyValue.getType()));
             }
             if (jldPropertyValue.getLanguage() != null) {
                 jsonObject.put(LANGUAGE, jldPropertyValue.getLanguage());
@@ -500,13 +502,13 @@ public class JsonLd extends JsonLdCommon {
     private Map<String, Object> unCoerce(Object value, String type) throws ShorteningException {
         Map<String, Object> typeDef = new TreeMap<String,Object>(new JsonComparator());
         
-        if (type.equals(IRI)) {
-            typeDef.put(LITERAL, String.valueOf(value));
+        if (type.equals(ID)) {
+            typeDef.put(VALUE, String.valueOf(value));
         }
         else {
-            typeDef.put(LITERAL, String.valueOf(value));
+            typeDef.put(VALUE, String.valueOf(value));
         }
-        typeDef.put(DATATYPE, shortenURI(type));
+        typeDef.put(TYPE, shortenURI(type));
         
         return typeDef;
     }

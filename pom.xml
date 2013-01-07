@@ -78,10 +78,12 @@
 
     <module>cmsadapter</module>
 
-    <module>factstore</module>
     <module>reasoners</module>
 
     <module>demos/webvie</module>
+
+    <!-- Out of date -->
+    <!-- module>factstore</module -->
 
     <module>launchers/bundlelists</module>
     <module>launchers/full</module>

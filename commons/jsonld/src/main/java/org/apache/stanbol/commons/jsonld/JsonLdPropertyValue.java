@@ -30,7 +30,7 @@ public class JsonLdPropertyValue {
         if (value instanceof JsonLdIRI) {
             JsonLdIRI iriValue = (JsonLdIRI) value;
             this.value = iriValue.getIRI();
-            this.type = JsonLdCommon.IRI;
+            this.type = JsonLdCommon.ID;
         }
         else {
             this.value = value;
