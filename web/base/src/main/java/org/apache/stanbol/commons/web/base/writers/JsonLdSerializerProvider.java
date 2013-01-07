@@ -142,7 +142,7 @@ public class JsonLdSerializerProvider implements SerializingProvider {
                     }
                     else if (currentTriple.getObject() instanceof UriRef) {
                         UriRef uriRef = (UriRef) currentTriple.getObject();
-                        jldValue.setType(JsonLdCommon.IRI);
+                        jldValue.setType(JsonLdCommon.ID);
                         strValue = uriRef.getUnicodeString();
                     }
                     

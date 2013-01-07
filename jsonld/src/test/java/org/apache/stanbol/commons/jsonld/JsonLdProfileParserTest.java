@@ -45,7 +45,6 @@ public class JsonLdProfileParserTest {
         
         String expected = "{\"@context\":{\"@types\":{\"organization\":\"http://iks-project.eu/ont/organization\",\"person\":[\"http://iks-project.eu/ont/person\",\"http://www.schema.org/Person\"]}}}";
         String actual = profile.toString();
-        toConsole(actual);
         assertEquals(expected, actual);
         assertNotNull(profile);
     }
