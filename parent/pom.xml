@@ -29,7 +29,7 @@
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
   <packaging>pom</packaging>
-  <version>2</version>
+  <version>2-SNAPSHOT</version>
 
   <name>Apache Stanbol Parent</name>
   <description>Parent POM for the Apache Stanbol project</description>
@@ -45,9 +45,9 @@
   </licenses>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/stanbol-parent-2</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/stanbol-parent-2</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/stanbol-parent-2</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/parent</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/parent</developerConnection>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <issueManagement>
