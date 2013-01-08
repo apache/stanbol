@@ -17,23 +17,14 @@
 package org.apache.stanbol.entityhub.it.ldpath;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.Collections;
 
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.stanbol.entityhub.it.ReferencedSiteTest;
 import org.apache.stanbol.entityhub.it.SitesManagerTest;
 import org.apache.stanbol.entityhub.test.it.EntityhubTestBase;
-import org.apache.stanbol.entityhub.test.query.FieldQueryTestCase;
-import org.apache.stanbol.entityhub.test.query.FindQueryTestCase;
-import org.apache.stanbol.entityhub.test.query.QueryTestBase;
-import org.codehaus.jettison.json.JSONException;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 /**
  * Tests for the "/query" (Field Query) and "/find" (label search) 
  * implementation of the Entityhub.<p>

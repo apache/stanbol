@@ -114,8 +114,8 @@ public class MultipartRequestTest extends EnhancerTestBase {
         //This is basically testing backward compatibility 
         
         String[] jsonLDMetadataTests = new String[]{
-            "\"@subject\": \"http://dbpedia.org/resource/Paris\",",
-            "\"@subject\": \"http://dbpedia.org/resource/Bob_Marley\",",
+            "\"@id\": \"http://dbpedia.org/resource/Paris\",",
+            "\"@id\": \"http://dbpedia.org/resource/Bob_Marley\",",
             "\"dc:creator\": \"org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine\","
         };
         String[] params = new String []{
