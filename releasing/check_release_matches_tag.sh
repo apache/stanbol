@@ -6,7 +6,7 @@
 #
 PROJECT=stanbol
 BASE=$2/$1/org/apache/${PROJECT}
-TAGBASE=http://svn.apache.org/repos/asf/incubator/${PROJECT}/tags
+TAGBASE=http://svn.apache.org/repos/asf/${PROJECT}/tags
 
 # set this to the command that computes an md5 sum on your system
 MD5=md5
