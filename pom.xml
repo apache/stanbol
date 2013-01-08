@@ -64,7 +64,6 @@
           <execution>
             <configuration>
               <resourceBundles>
-                <resourceBundle>org.apache:apache-incubator-disclaimer-resource-bundle:1.1</resourceBundle>
                 <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
               </resourceBundles>
             </configuration>
@@ -78,6 +77,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
+          <version>2.3.2</version>
           <configuration>
             <tagBase>
               https://svn.apache.org/repos/asf/stanbol/tags/
