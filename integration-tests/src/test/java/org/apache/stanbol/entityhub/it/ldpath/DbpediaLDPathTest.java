@@ -144,8 +144,10 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         )
         .assertStatus(200)
         .assertContentContains(
-            "\"@literal\": \"Paris\"",
-            "\"@literal\": \"London\"");
+            "\"@id\": \"http://dbpedia.org/resource/London\"",
+            "\"@value\": \"London\"",
+            "\"@id\": \"http://dbpedia.org/resource/Paris\"",
+            "\"@value\": \"Paris\"");
     }
     @Test
     public void testUnknownContext() throws IOException {
@@ -176,17 +178,17 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         .assertStatus(200)
         .assertContentType("application/json")
         .assertContentContains(
-            "\"@subject\": \"http://dbpedia.org/resource/Paris\"",
+            "\"@id\": \"http://dbpedia.org/resource/Paris\"",
             "\"comment\": {",
             "Paris is the capital and largest city in France",
             "\"homepage\": [",
             "http://www.paris.fr",
             "\"labels\": [",
-            "\"@literal\": \"Pariisi\"",
-            "\"@literal\": \"巴黎\"",
+            "\"@value\": \"Pariisi\"",
+            "\"@value\": \"巴黎\"",
             "\"location\": \"[48.856667,2.350833]\"",
             "\"name\": {",
-            "\"@literal\": \"Paris\""
+            "\"@value\": \"Paris\""
             );
     }
     /*
