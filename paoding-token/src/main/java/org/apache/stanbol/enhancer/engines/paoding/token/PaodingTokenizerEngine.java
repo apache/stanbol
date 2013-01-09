@@ -4,6 +4,9 @@ import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.initAnalysedText;
 
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -122,8 +125,13 @@ public class PaodingTokenizerEngine extends AbstractEnhancementEngine<RuntimeExc
         }
         PaodingAnalyzer pa;
         try {
-            pa = new PaodingAnalyzer();
-        } catch (Exception e) {
+            pa = AccessController.doPrivileged(new PrivilegedExceptionAction<PaodingAnalyzer>() {
+                public PaodingAnalyzer run() throws Exception {
+                    return new PaodingAnalyzer();
+                }
+            });
+        } catch (PrivilegedActionException pae){
+            Exception e = pae.getException();
             log.error("Unable to initialise PoadingAnalyzer",e);
             throw new EngineException("Unable to initialise PoadingAnalyzer",e);
         }
