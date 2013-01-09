@@ -33,6 +33,9 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -59,6 +62,7 @@ import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
+import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AutoDetectParser;
@@ -71,6 +75,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
 
 /**
  * EnhancementEngine based on Apache Tika that converts the content of parsed 
@@ -171,7 +176,7 @@ public class TikaEngine
         if(plainMediaType.equals(MediaType.TEXT_PLAIN)){
             return; //we need not to process plain text!
         }
-        ParseContext context = new ParseContext();
+        final ParseContext context = new ParseContext();
         context.set(Parser.class,parser);
         Set<MediaType> supproted = parser.getSupportedTypes(context);
         if(supproted.contains(plainMediaType)) {
@@ -181,7 +186,7 @@ public class TikaEngine
             } else {
                 in = mtas.in;
             }
-            Metadata metadata = new Metadata();
+            final Metadata metadata = new Metadata();
             //set the already parsed contentType
             metadata.set(Metadata.CONTENT_TYPE, mtas.mediaType.toString());
             ContentSink plainTextSink;
@@ -218,11 +223,21 @@ public class TikaEngine
                     xhtmlSink = null;
                 }
                 try {
-                    parser.parse(in, mainHandler, metadata, context);
-                } catch (Exception e) {
-                    throw new EngineException("Unable to convert ContentItem "+
-                            ci.getUri()+" with mimeType '"+ci.getMimeType()+"' to "+
-                            "plain text!",e);
+                    AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                        public Object run() throws IOException, SAXException, TikaException {
+                            parser.parse(in, mainHandler, metadata, context);
+                            return null;
+                        }
+                    });
+                } catch (PrivilegedActionException pae) {
+                    Exception e = pae.getException();
+                    if(e instanceof IOException || e instanceof SAXException || e instanceof TikaException){
+                        throw new EngineException("Unable to convert ContentItem "+
+                                ci.getUri()+" with mimeType '"+ci.getMimeType()+"' to "+
+                                "plain text!",e);
+                    } else { //runtime exception
+                        throw RuntimeException.class.cast(e);
+                    }
                 }
             } finally { //ensure that the writers are closed correctly
                 IOUtils.closeQuietly(in);
