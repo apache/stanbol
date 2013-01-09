@@ -1,6 +1,7 @@
 package org.apache.stanbol.enhancer.nlp.pos;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
@@ -33,18 +34,18 @@ public class PosTag extends Tag<PosTag>{
      * NOTE: NULL if {@link #pos} is empty!
      */
     private final Set<Pos> posHierarchy;
-//    /**
-//     * Creates a new POS tag for the parsed tag. The created Tag is not
-//     * assigned to any {@link LexicalCategory}.<p> This constructor can be used
-//     * by {@link EnhancementEngine}s that encounter an Tag they do not know 
-//     * (e.g. that is not defined by the configured {@link TagSet}).<p>
-//     * @param tag the Tag
-//     * @throws IllegalArgumentException if the parsed tag is <code>null</code>
-//     * or empty.
-//     */
-//    public PosTag(String tag){
-//        this(tag,(LexicalCategory)null);
-//    }
+    /**
+     * Creates a new POS tag for the parsed tag. The created Tag is not
+     * assigned to any {@link LexicalCategory}.<p> This constructor can be used
+     * by {@link EnhancementEngine}s that encounter an Tag they do not know 
+     * (e.g. that is not defined by the configured {@link TagSet}).<p>
+     * @param tag the Tag
+     * @throws IllegalArgumentException if the parsed tag is <code>null</code>
+     * or empty.
+     */
+    public PosTag(String tag){
+        this(tag,(LexicalCategory[])null);
+    }
     /**
      * Creates a PosTag that is assigned to a {@link LexicalCategory}
      * @param tag the tag
@@ -70,43 +71,39 @@ public class PosTag extends Tag<PosTag>{
      * or empty.
      */
     public PosTag(String tag,Pos pos,Pos...furtherPos){
-        this(tag, null,pos,furtherPos);
+        this(tag, EnumSet.noneOf(LexicalCategory.class), EnumSet.of(pos,furtherPos), false);
     }
     
     public PosTag(String tag,LexicalCategory category, Pos pos,Pos...furtherPos){
+        this(tag,category == null ? EnumSet.noneOf(LexicalCategory.class) : EnumSet.of(category),
+                EnumSet.of(pos,furtherPos),false);
+    }
+    public PosTag(String tag,Collection<LexicalCategory> categories, Collection<Pos> pos){
+        this(tag,categories,pos,true);
+    }
+    public PosTag(String tag,Collection<LexicalCategory> categories, Collection<Pos> pos, boolean copy){
         super(tag);
-        if(pos != null){
-            if(furtherPos == null || furtherPos.length < 1){
-                this.pos = Collections.singleton(pos);
-                this.posHierarchy = pos.hierarchy();
-                if(category == null){
-                    this.category = pos.categories();
-                } else {
-                    this.category = EnumSet.of(category);
-                    this.category.addAll(pos.categories());
-                }
-            } else { // in case of multiple Pos Tags
-                this.pos = EnumSet.of(pos,furtherPos);
-                //we need to collect categories
-                this.category = category == null ? 
-                        EnumSet.noneOf(LexicalCategory.class) :
-                            EnumSet.of(category);
-                //and the union over the pos parents
-                this.posHierarchy = EnumSet.noneOf(Pos.class);
-                for(Pos p : this.pos){
-                    this.posHierarchy.addAll(p.hierarchy());
-                    this.category.addAll(p.categories());
-                }
+        if(copy){
+            this.pos = EnumSet.noneOf(Pos.class);
+            if(pos != null){
+                this.pos.addAll(pos);
             }
         } else {
-            if(furtherPos != null && furtherPos.length > 0){
-                throw new IllegalArgumentException("furtherPos parameter MUST BE NULL "
-                    + "or empty if the pos parameter is NULL!");
+            this.pos = (EnumSet<Pos>)pos;
+        }
+        if(copy){
+            this.category = EnumSet.noneOf(LexicalCategory.class);
+            if(categories != null){
+                this.category.addAll(categories);
             }
-            this.category = category == null ? 
-                    Collections.EMPTY_SET : Collections.singleton(category);
-            this.pos = Collections.emptySet();
-            this.posHierarchy = Collections.emptySet();
+        } else {
+            this.category = (EnumSet<LexicalCategory>)categories;
+        }
+        //and the union over the pos parents
+        this.posHierarchy = EnumSet.noneOf(Pos.class);
+        for(Pos p : this.pos){
+            this.posHierarchy.addAll(p.hierarchy());
+            this.category.addAll(p.categories());
         }
     }
     /**

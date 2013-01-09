@@ -1,8 +1,5 @@
 package org.apache.stanbol.enhancer.nlp.model;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,8 +13,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import junit.framework.Assert;
-
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
@@ -28,6 +23,7 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,8 +44,8 @@ public class AnalysedTextTest {
             "disambiguation it would even be able to detect the Comedian " +
             "Bob Marley trafeling to Paris in Texas.";
     
-    public static final Annotation<String,Number> testAnnotation = 
-            new Annotation<String,Number>("test", Number.class);
+    public static final Annotation<Number> testAnnotation = 
+            new Annotation<Number>("test", Number.class);
     
     /* -----
      * Test data creates within the BeforeClass
@@ -244,8 +240,8 @@ public class AnalysedTextTest {
             end = endPos[s]*sentenceLength;
             Sentence sent = at.addSentence(start, end);
             log.info("add {}",sent);
-            assertEquals(start, sent.getStart());
-            assertEquals(end, sent.getEnd());
+            Assert.assertEquals(start, sent.getStart());
+            Assert.assertEquals(end, sent.getEnd());
             sentences.add(sent);
         }
         //1.b iterate over the sentences while adding Chunks and Tokens to
@@ -261,8 +257,8 @@ public class AnalysedTextTest {
                 log.info("  add {}",chunk);
                 start = sent.getStart() + start;
                 end = sent.getStart() + end;
-                assertEquals(start, chunk.getStart());
-                assertEquals(end, chunk.getEnd());
+                Assert.assertEquals(start, chunk.getStart());
+                Assert.assertEquals(end, chunk.getEnd());
                 chunks.add(chunk);
                 for(int t=0;t<startPos.length;t++){
                     start = startPos[t]*tokenLength;
@@ -271,8 +267,8 @@ public class AnalysedTextTest {
                     log.info("    add {}",token);
                     start = chunk.getStart() + start;
                     end = chunk.getStart() + end;
-                    assertEquals(start, token.getStart());
-                    assertEquals(end, token.getEnd());
+                    Assert.assertEquals(start, token.getStart());
+                    Assert.assertEquals(end, token.getEnd());
                     tokens.add(token);
                 }
             }
@@ -288,30 +284,30 @@ public class AnalysedTextTest {
         log.info("--- iterating over Spans ---");
         log.info("{}",at);
         for(;sentIt.hasNext();s++){
-            assertTrue(sentences.size()+" Sentences Expected (found: "+(s+1)+")",s < sentences.size());
+            Assert.assertTrue(sentences.size()+" Sentences Expected (found: "+(s+1)+")",s < sentences.size());
             Sentence sent = sentIt.next();
             log.info("  {}",sent);
-            assertEquals(sentences.get(s), sent);
+            Assert.assertEquals(sentences.get(s), sent);
             Iterator<Chunk> chunkIt = sent.getChunks();
             int foundChunks = 0;
             for(;chunkIt.hasNext();c++){
-                assertTrue(chunks.size()+" Chunks Expected (found: "+(c+1)+")",c < chunks.size());
+                Assert.assertTrue(chunks.size()+" Chunks Expected (found: "+(c+1)+")",c < chunks.size());
                 Chunk chunk = chunkIt.next();
                 log.info("    {}",chunk);
-                assertEquals(chunks.get(c), chunk);
+                Assert.assertEquals(chunks.get(c), chunk);
                 Iterator<Token> tokenIt = chunk.getTokens();
                 int foundTokens = 0;
                 for(;tokenIt.hasNext();t++){
-                    assertTrue(tokens.size()+" Tokens Expected (found: "+(t+1)+")",t < tokens.size());
+                    Assert.assertTrue(tokens.size()+" Tokens Expected (found: "+(t+1)+")",t < tokens.size());
                     Token token = tokenIt.next();
                     log.info("      {}",token);
-                    assertEquals(tokens.get(t), token);
+                    Assert.assertEquals(tokens.get(t), token);
                     foundTokens++;
                 }
-                assertEquals(tokensInChunk+" Tokens expected in Chunk", tokensInChunk,foundTokens);
+                Assert.assertEquals(tokensInChunk+" Tokens expected in Chunk", tokensInChunk,foundTokens);
                 foundChunks++;
             }
-            assertEquals(chunksInSentence+" Chunks expected in Sentence", chunksInSentence,foundChunks);
+            Assert.assertEquals(chunksInSentence+" Chunks expected in Sentence", chunksInSentence,foundChunks);
             //also iterate over tokens within a sentence
             log.info("  {}",sent);
             Iterator<Token> tokenIt = sent.getTokens();
@@ -319,13 +315,13 @@ public class AnalysedTextTest {
             for(;tokenIt.hasNext();foundTokens++){
                 Token token = tokenIt.next();
                 log.info("    {}",token);
-                assertEquals(tokens.get(s*tokensInSentence+foundTokens), token);
+                Assert.assertEquals(tokens.get(s*tokensInSentence+foundTokens), token);
             }
-            assertEquals(tokensInSentence+" Tokens expected in Sentence", tokensInSentence,foundTokens);
+            Assert.assertEquals(tokensInSentence+" Tokens expected in Sentence", tokensInSentence,foundTokens);
         }
-        assertEquals(sentences.size()+" Sentences Expected (found: "+s+")", sentences.size(),s);
-        assertEquals(chunks.size()+" Chunks Expected (found: "+c+")", chunks.size(),c);
-        assertEquals(tokens.size()+" Sentences Expected (found: "+t+")", tokens.size(),t);
+        Assert.assertEquals(sentences.size()+" Sentences Expected (found: "+s+")", sentences.size(),s);
+        Assert.assertEquals(chunks.size()+" Chunks Expected (found: "+c+")", chunks.size(),c);
+        Assert.assertEquals(tokens.size()+" Sentences Expected (found: "+t+")", tokens.size(),t);
         //also iterate over Chunks in AnalysedText
         Iterator<Chunk> chunkIt = at.getChunks();
         int foundChunks = 0;
@@ -333,9 +329,9 @@ public class AnalysedTextTest {
         for(;chunkIt.hasNext();foundChunks++){
             Chunk chunk = chunkIt.next();
             log.info("  {}",chunk);
-            assertEquals(chunks.get(foundChunks), chunk);
+            Assert.assertEquals(chunks.get(foundChunks), chunk);
         }
-        assertEquals(chunks.size()+" Chunks expected in AnalysedText", chunks.size(),foundChunks);
+        Assert.assertEquals(chunks.size()+" Chunks expected in AnalysedText", chunks.size(),foundChunks);
         //also iterate over Tokens in AnalysedText
         Iterator<Token> tokenIt = at.getTokens();
         int foundTokens = 0;
@@ -343,9 +339,9 @@ public class AnalysedTextTest {
         for(;tokenIt.hasNext();foundTokens++){
             Token token = tokenIt.next();
             log.info("  {}",token);
-            assertEquals(tokens.get(foundTokens), token);
+            Assert.assertEquals(tokens.get(foundTokens), token);
         }
-        assertEquals(tokens.size()+" Tokens expected in AnalysedText", tokens.size(),foundTokens);
+        Assert.assertEquals(tokens.size()+" Tokens expected in AnalysedText", tokens.size(),foundTokens);
 
       //Finally iterate over multiple token types
       Iterator<Span> sentencesAndChunks = at.getEnclosed(
@@ -357,17 +353,17 @@ public class AnalysedTextTest {
           Span span = sentencesAndChunks.next();
           log.info("  {}",span);
           if(span.getType() == SpanTypeEnum.Chunk){
-              assertEquals(chunks.get(c), span);
+              Assert.assertEquals(chunks.get(c), span);
               c++;
           } else if(span.getType() == SpanTypeEnum.Sentence){
-              assertEquals(sentences.get(s), span);
+              Assert.assertEquals(sentences.get(s), span);
               s++;
           } else {
               Assert.fail("Unexpected SpanType '"+span.getType()+" (Span: "+span.getClass()+")");
           }
       }
-      assertEquals(sentences.size()+" Sentences expected in AnalysedText", sentences.size(),s);
-      assertEquals((sentences.size()*chunksInSentence)+" Chunks expected in AnalysedText", 
+      Assert.assertEquals(sentences.size()+" Sentences expected in AnalysedText", sentences.size(),s);
+      Assert.assertEquals((sentences.size()*chunksInSentence)+" Chunks expected in AnalysedText", 
           (sentences.size()*chunksInSentence),c);
     }
     
@@ -380,21 +376,21 @@ public class AnalysedTextTest {
         values.add(new Value<Number>(25.0,0.8));
         at.addAnnotations(testAnnotation, values);
         Value<Number> value = at.getAnnotation(testAnnotation);
-        assertNotNull(value);
-        assertEquals(Double.valueOf(25.0), value.value());
-        assertEquals(0.8d, value.probability());
+        Assert.assertNotNull(value);
+        Assert.assertEquals(Double.valueOf(25.0), value.value());
+        Assert.assertEquals(0.8d, value.probability(), 0.0d);
         Number prev = Float.valueOf(24f);
         for(Value<Number> v : at.getAnnotations(testAnnotation)){
-            assertNotNull(v);
-            assertTrue(v.value().doubleValue() > prev.doubleValue());
+            Assert.assertNotNull(v);
+            Assert.assertTrue(v.value().doubleValue() > prev.doubleValue());
             prev = v.value();
         }
         //check that the order of Annotations without probability is kept
         at.addAnnotation(testAnnotation, new Value<Number>(29));
         prev = Integer.valueOf(24);
         for(Value<Number> v : at.getAnnotations(testAnnotation)){
-            assertNotNull(v);
-            assertTrue(v.value().intValue() > prev.intValue());
+            Assert.assertNotNull(v);
+            Assert.assertTrue(v.value().intValue() > prev.intValue());
             prev = v.value();
         }
         
