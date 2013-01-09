@@ -354,22 +354,22 @@ public final class CeliTagSetRegistry {
                     t = clazz.getConstructor(String.class).newInstance(tag);
                 } catch (IllegalArgumentException e) {
                     throw new IllegalStateException("Unable to instantiate " + clazz.getSimpleName()
-                                                    + "with String tag '" + tag + "'!", e);
+                                                    + " with String tag '" + tag + "'!", e);
                 } catch (SecurityException e) {
                     throw new IllegalStateException("Unable to instantiate " + clazz.getSimpleName()
-                                                    + "with String tag '" + tag + "'!", e);
+                                                    + " with String tag '" + tag + "'!", e);
                 } catch (InstantiationException e) {
                     throw new IllegalStateException("Unable to instantiate " + clazz.getSimpleName()
-                                                    + "with String tag '" + tag + "'!", e);
+                                                    + " with String tag '" + tag + "'!", e);
                 } catch (IllegalAccessException e) {
                     throw new IllegalStateException("Unable to instantiate " + clazz.getSimpleName()
-                                                    + "with String tag '" + tag + "'!", e);
+                                                    + " with String tag '" + tag + "'!", e);
                 } catch (InvocationTargetException e) {
                     throw new IllegalStateException("Unable to instantiate " + clazz.getSimpleName()
-                                                    + "with String tag '" + tag + "'!", e);
+                                                    + " with String tag '" + tag + "'!", e);
                 } catch (NoSuchMethodException e) {
                     throw new IllegalStateException("Unable to instantiate " + clazz.getSimpleName()
-                                                    + "with String tag '" + tag + "'!", e);
+                                                    + " with String tag '" + tag + "'!", e);
                 }
                 log.warn("added unrecognized {} '{}' for Language {}", new Object[] {clazz.getSimpleName(), tag,
                                                                                 language});
@@ -383,104 +383,25 @@ public final class CeliTagSetRegistry {
      * POS TAGSETS MAPPINGS TO OLIA ONTOLOGY *
      ****************************************************************/
 
-    public static final TagSet<PosTag> ITALIAN = new TagSet<PosTag>("CELI Italian POS tags", "it");
+    public static final TagSet<PosTag> TAGSET = new TagSet<PosTag>("CELI POS tags","da", "de",
+            "it", "ro", "ru","sv");
     static {
-        ITALIAN.addTag(new PosTag("N", LexicalCategory.Noun));
-        ITALIAN.addTag(new PosTag("NF", LexicalCategory.Noun));
-        ITALIAN.addTag(new PosTag("NM", LexicalCategory.Noun));
-        ITALIAN.addTag(new PosTag("ADJ", LexicalCategory.Adjective));
-        ITALIAN.addTag(new PosTag("ADV", LexicalCategory.Adverb));
-        ITALIAN.addTag(new PosTag("ART", LexicalCategory.PronounOrDeterminer));
-        ITALIAN.addTag(new PosTag("PRON", LexicalCategory.PronounOrDeterminer));
-        ITALIAN.addTag(new PosTag("PRONWH", LexicalCategory.PronounOrDeterminer));
-        ITALIAN.addTag(new PosTag("DETDEMO", LexicalCategory.PronounOrDeterminer));
-        ITALIAN.addTag(new PosTag("DETINDEF", LexicalCategory.PronounOrDeterminer));
-        ITALIAN.addTag(new PosTag("DETPOSS", LexicalCategory.PronounOrDeterminer));
-        ITALIAN.addTag(new PosTag("DETWH", LexicalCategory.PronounOrDeterminer));
-        ITALIAN.addTag(new PosTag("CHEWH", LexicalCategory.PronounOrDeterminer));
-        ITALIAN.addTag(new PosTag("CLI")); //not mapped
-        ITALIAN.addTag(new PosTag("CONJ", LexicalCategory.Conjuction));
-        ITALIAN.addTag(new PosTag("CONGWH", LexicalCategory.Conjuction));
-        ITALIAN.addTag(new PosTag("PREP", LexicalCategory.Adposition));
-        ITALIAN.addTag(new PosTag("V", LexicalCategory.Verb));
-        ITALIAN.addTag(new PosTag("INT", LexicalCategory.Interjection));
-        ITALIAN.addTag(new PosTag("NEG", LexicalCategory.Adverb));
-        ITALIAN.addTag(new PosTag("NUM", Pos.Numeral));
-        getInstance().addPosTagset(ITALIAN);
-    }
-
-    public static final TagSet<PosTag> GERMAN = new TagSet<PosTag>("CELI German POS tags", "de");
-    static {
-        GERMAN.addTag(new PosTag("N", LexicalCategory.Noun));
-        GERMAN.addTag(new PosTag("ADJ", LexicalCategory.Adjective));
-        GERMAN.addTag(new PosTag("ADV", LexicalCategory.Adverb));
-        GERMAN.addTag(new PosTag("ART", LexicalCategory.PronounOrDeterminer));
-        GERMAN.addTag(new PosTag("PRON", LexicalCategory.PronounOrDeterminer));
-        GERMAN.addTag(new PosTag("CONJ", LexicalCategory.Conjuction));
-        GERMAN.addTag(new PosTag("PREP", LexicalCategory.Adposition));
-        GERMAN.addTag(new PosTag("PREPART", LexicalCategory.Adposition));
-        GERMAN.addTag(new PosTag("V", LexicalCategory.Verb));
-        GERMAN.addTag(new PosTag("INT", LexicalCategory.Interjection));
-        GERMAN.addTag(new PosTag("NUM", Pos.Numeral));
-        getInstance().addPosTagset(GERMAN);
-    }
-
-    public static final TagSet<PosTag> DANISH = new TagSet<PosTag>("CELI Danish POS tags", "da");
-    static {
-        DANISH.addTag(new PosTag("N", LexicalCategory.Noun));
-        DANISH.addTag(new PosTag("NF", LexicalCategory.Noun));
-        DANISH.addTag(new PosTag("NN", LexicalCategory.Noun));
-        DANISH.addTag(new PosTag("NP", LexicalCategory.Noun));//ProperNoun));
-        DANISH.addTag(new PosTag("ADJ", LexicalCategory.Adjective));
-        DANISH.addTag(new PosTag("ADV", LexicalCategory.Adverb));
-        DANISH.addTag(new PosTag("ART", LexicalCategory.PronounOrDeterminer));
-        DANISH.addTag(new PosTag("PRON", LexicalCategory.PronounOrDeterminer));
-        DANISH.addTag(new PosTag("CONJ", LexicalCategory.Conjuction));
-        DANISH.addTag(new PosTag("PREP", LexicalCategory.Adposition));
-        DANISH.addTag(new PosTag("V", LexicalCategory.Verb));
-        DANISH.addTag(new PosTag("INT", LexicalCategory.Interjection));
-        DANISH.addTag(new PosTag("INVAR", LexicalCategory.Residual));
-        DANISH.addTag(new PosTag("NUM", Pos.Numeral));
-        getInstance().addPosTagset(DANISH);
-    }
-
-    public static final TagSet<PosTag> RUSSIAN = new TagSet<PosTag>("CELI Russian POS tags", "ru");
-    static {
-        RUSSIAN.addTag(new PosTag("N", LexicalCategory.Noun));
-        RUSSIAN.addTag(new PosTag("NF", LexicalCategory.Noun));
-        RUSSIAN.addTag(new PosTag("NM", LexicalCategory.Noun));
-        RUSSIAN.addTag(new PosTag("NN", LexicalCategory.Noun));
-        RUSSIAN.addTag(new PosTag("NP", LexicalCategory.Noun));//ProperNoun));
-        RUSSIAN.addTag(new PosTag("NPLUR", LexicalCategory.Noun));
-        RUSSIAN.addTag(new PosTag("ADJ", LexicalCategory.Adjective));
-        RUSSIAN.addTag(new PosTag("ADV", LexicalCategory.Adverb));
-        RUSSIAN.addTag(new PosTag("PRON", LexicalCategory.PronounOrDeterminer));
-        RUSSIAN.addTag(new PosTag("CONJ", LexicalCategory.Conjuction));
-        RUSSIAN.addTag(new PosTag("PREP", LexicalCategory.Adposition));
-        RUSSIAN.addTag(new PosTag("V", LexicalCategory.Verb));
-        RUSSIAN.addTag(new PosTag("INT", LexicalCategory.Interjection));
-        RUSSIAN.addTag(new PosTag("NUM", Pos.Numeral));
-        RUSSIAN.addTag(new PosTag("NUMNON", LexicalCategory.PronounOrDeterminer));
-        RUSSIAN.addTag(new PosTag("PART", LexicalCategory.Unique));
-        getInstance().addPosTagset(RUSSIAN);
-    }
-
-    public static final TagSet<PosTag> ROMANIAN = new TagSet<PosTag>("CELI Romanian POS tags", "ro");
-    static {
-        ROMANIAN.addTag(new PosTag("N", LexicalCategory.Noun));
-        ROMANIAN.addTag(new PosTag("AJ", LexicalCategory.Adjective));
-        ROMANIAN.addTag(new PosTag("AV", LexicalCategory.Adverb));
-        ROMANIAN.addTag(new PosTag("AT", LexicalCategory.PronounOrDeterminer));
-        ROMANIAN.addTag(new PosTag("PD", LexicalCategory.PronounOrDeterminer));
-        ROMANIAN.addTag(new PosTag("C", LexicalCategory.Conjuction));
-        ROMANIAN.addTag(new PosTag("AP", LexicalCategory.Adposition));
-        ROMANIAN.addTag(new PosTag("V", LexicalCategory.Verb));
-        ROMANIAN.addTag(new PosTag("I", LexicalCategory.Interjection));
-        ROMANIAN.addTag(new PosTag("INVAR", LexicalCategory.Residual));
-        ROMANIAN.addTag(new PosTag("NU", Pos.Numeral));
-        ROMANIAN.addTag(new PosTag("R", LexicalCategory.Residual));
-        ROMANIAN.addTag(new PosTag("U", LexicalCategory.Unique));
-        getInstance().addPosTagset(ROMANIAN);
+        TAGSET.addTag(new PosTag("NOUN", LexicalCategory.Noun));
+        TAGSET.addTag(new PosTag("ADJ", LexicalCategory.Adjective));
+        TAGSET.addTag(new PosTag("ADV", LexicalCategory.Adverb));
+        TAGSET.addTag(new PosTag("PD", LexicalCategory.PronounOrDeterminer));
+        TAGSET.addTag(new PosTag("CONJ", LexicalCategory.Conjuction));
+        TAGSET.addTag(new PosTag("PREP", LexicalCategory.Adposition));
+        TAGSET.addTag(new PosTag("VERB", LexicalCategory.Verb));
+        TAGSET.addTag(new PosTag("INTERJ", LexicalCategory.Interjection));
+        TAGSET.addTag(new PosTag("NUM", Pos.Numeral));
+        
+        TAGSET.addTag(new PosTag("SYMBOL", LexicalCategory.Residual));
+        TAGSET.addTag(new PosTag("PART", LexicalCategory.Unique));
+        TAGSET.addTag(new PosTag("PN", LexicalCategory.Noun));//ProperNoun));
+        TAGSET.addTag(new PosTag("CLI",  LexicalCategory.Unique));
+        
+        getInstance().addPosTagset(TAGSET);
     }
 
     /*****************************************************************
@@ -489,7 +410,7 @@ public final class CeliTagSetRegistry {
      ****************************************************************/
 
     public static final TagSet<GenderTag> GENDER = new TagSet<GenderTag>("CELI GENDER tags", "da", "de",
-            "it", "ro", "ru");
+            "it", "ro", "ru","sv");
     static {
         GENDER.addTag(new GenderTag("F", Gender.Feminine));
         GENDER.addTag(new GenderTag("FEM", Gender.Feminine));
@@ -503,7 +424,7 @@ public final class CeliTagSetRegistry {
     }
 
     public static final TagSet<NumberTag> NUMBER = new TagSet<NumberTag>("CELI NUMBER tags", "da", "de",
-            "it", "ro", "ru");
+            "it", "ro", "ru","sv");
     static {
         NUMBER.addTag(new NumberTag("SGL", NumberFeature.Singular));
         NUMBER.addTag(new NumberTag("SIN", NumberFeature.Singular));
@@ -523,8 +444,8 @@ public final class CeliTagSetRegistry {
             "da", "de","it", "ro", "ru");
     }
 
-    public static final TagSet<CaseTag> CASE = new TagSet<CaseTag>("CELI CASE tags", "da", "de", "it", "ro",
-            "ru");
+    public static final TagSet<CaseTag> CASE = new TagSet<CaseTag>("CELI CASE tags", "da", "de",
+            "it", "ro", "ru","sv");
     static {
         CASE.addTag(new CaseTag("NOMORPH", Case.Uninflected));
         CASE.addTag(new CaseTag("NOM", Case.Nominative));
@@ -547,13 +468,14 @@ public final class CeliTagSetRegistry {
         Map<String,Definitness> model = new HashMap<String,Definitness>();
         model.put("DEF", Definitness.Definite);
         model.put("INDEF", Definitness.Indefinite);
+        model.put("IND", Definitness.Indefinite);
         getInstance().addDefinitnessTagset(
             Collections.unmodifiableMap(model), 
-            "da", "de", "it", "ro", "ru");
+            "da", "de", "it", "ro", "ru","sv");
     }
 
-    public static final TagSet<VerbMoodTag> VERB_FORM = new TagSet<VerbMoodTag>("CELI VERB FORM tags", "da",
-            "de", "it", "ro", "ru");
+    public static final TagSet<VerbMoodTag> VERB_FORM = new TagSet<VerbMoodTag>("CELI VERB FORM tags", "da", "de",
+            "it", "ro", "ru","sv");
     static {
         VERB_FORM.addTag(new VerbMoodTag("GERUND", VerbMood.Gerund));
         VERB_FORM.addTag(new VerbMoodTag("GEROUNDPRS", VerbMood.Gerund));//
@@ -579,8 +501,8 @@ public final class CeliTagSetRegistry {
         getInstance().addVerbFormTagset(VERB_FORM);
     }
 
-    public static final TagSet<TenseTag> TENSE = new TagSet<TenseTag>("CELI TENSE tags", "da", "de", "it",
-            "ro", "ru");
+    public static final TagSet<TenseTag> TENSE = new TagSet<TenseTag>("CELI TENSE tags", "da", "de",
+            "it", "ro", "ru","sv");
     static {
         TENSE.addTag(new TenseTag("PRS", Tense.Present));
         TENSE.addTag(new TenseTag("PRES", Tense.Present));

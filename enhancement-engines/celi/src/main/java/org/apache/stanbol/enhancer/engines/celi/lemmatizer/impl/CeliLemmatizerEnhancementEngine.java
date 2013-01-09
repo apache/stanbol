@@ -78,15 +78,20 @@ import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, metatype = true)
 @Service
-@Properties(value = { @Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiLemmatizer"), @Property(name = CeliConstants.CELI_LICENSE), @Property(name = CeliConstants.CELI_TEST_ACCOUNT, boolValue = false) })
+@Properties(value = { 
+		@Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiLemmatizer"), 
+		@Property(name = CeliConstants.CELI_LICENSE), 
+		@Property(name = CeliConstants.CELI_TEST_ACCOUNT, boolValue = false) 
+})
 public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 	// TODO: check if it is OK to define new properties in the FISE namespace
 	public static final UriRef hasLemmaForm = new UriRef("http://fise.iks-project.eu/ontology/hasLemmaForm");
 
-	/**
-	 * This ensures that no connections to external services are made if Stanbol is started in offline mode as the OnlineMode service will only be available if OfflineMode is deactivated.
-	 */
-	@Reference
+    /**
+     * This ensures that no connections to external services are made if Stanbol is started in offline mode as the OnlineMode service will only be available if OfflineMode is deactivated.
+     */
+    @SuppressWarnings("unused")
+    @Reference
 	private OnlineMode onlineMode;
 
 	private static List<String> supportedLangs = new Vector<String>();

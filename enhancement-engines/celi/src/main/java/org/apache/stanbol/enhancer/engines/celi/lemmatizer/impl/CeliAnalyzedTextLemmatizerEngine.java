@@ -51,7 +51,8 @@ import org.osgi.service.component.ComponentContext;
 @Properties(value = { 
     @Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiLemmatizer"), 
     @Property(name = CeliConstants.CELI_LICENSE), 
-    @Property(name = CeliConstants.CELI_TEST_ACCOUNT, boolValue = false) })
+    @Property(name = CeliConstants.CELI_TEST_ACCOUNT, boolValue = false) 
+})
 public class CeliAnalyzedTextLemmatizerEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 
     private static final Map<String,Object> SERVICE_PROPERTIES;
@@ -74,11 +75,11 @@ public class CeliAnalyzedTextLemmatizerEngine extends AbstractEnhancementEngine<
     @Property(value = "http://linguagrid.org/LSGrid/ws/morpho-analyser")
     public static final String SERVICE_URL = "org.apache.stanbol.enhancer.engines.celi.lemmatizer.url";
 
-    @Property(value={"it", "da", "de", "ru","ro"})
+    @Property(value={"it", "da", "de", "ru", "ro", "sv"})
     public static final String PROPERTY_SUPPORTED_LANGUAGES = "org.apache.stanbol.enhancer.engines.celi.lemmatizer.languages";
     
     private LanguageConfiguration languageConfig = new LanguageConfiguration(
-        PROPERTY_SUPPORTED_LANGUAGES, new String[]{"it", "da", "de", "ru","ro"});
+        PROPERTY_SUPPORTED_LANGUAGES, new String[]{"it", "da", "de", "ru","ro","sv"});
     
     private String licenseKey;
     private URL serviceURL;
