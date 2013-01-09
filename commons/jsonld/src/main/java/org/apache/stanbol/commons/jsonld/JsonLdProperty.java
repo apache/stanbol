@@ -93,4 +93,7 @@ public class JsonLdProperty {
         return this.values.size() == 1;
     }
     
+    public boolean isTyped() {
+        return this.type != null;
+    }
 }

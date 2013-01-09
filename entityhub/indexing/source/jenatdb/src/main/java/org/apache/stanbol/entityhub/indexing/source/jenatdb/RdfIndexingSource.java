@@ -90,6 +90,10 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
      */
     public static final String PARAM_SOURCE_FILE_OR_FOLDER = "source";
     /**
+     * The directory where successfully imported files are copied to
+     */
+    public static final String PARAM_IMPORTED_FOLDER = "imported";
+    /**
      * Allows to enable/disable the indexing of Bnodes (see 
      * <a href="https://issues.apache.org/jira/browse/STANBOL-765">STANBOL-765</a>
      * for details).
@@ -113,6 +117,8 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
      * The default directory name used to search for RDF files to be imported
      */
     public static final String DEFAULT_SOURCE_FOLDER_NAME = "rdfdata";
+    
+    public static final String DEFAULT_IMPORTED_FOLDER_NAME = "imported";
     //protected to allow internal classes direct access (without hidden getter/
     //setter added by the compiler that decrease performance)
     protected final static Logger log = LoggerFactory.getLogger(RdfIndexingSource.class);
@@ -182,10 +188,21 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
         this.indexingDataset = Utils.getTDBDataset(config);
         //second we need to check if we need to import RDF files to the RDF model
         //create the ResourceLoader
-        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset), true); 
+        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset), true);
+        
+        Object value = config.get(PARAM_IMPORTED_FOLDER);
+        String importedFolderName;
+        if(value != null && !value.toString().isEmpty()){
+            importedFolderName = value.toString();
+        } else {
+            importedFolderName = DEFAULT_IMPORTED_FOLDER_NAME;
+        }
+        File importedFolder = new File(indexingConfig.getSourceFolder(),importedFolderName);
+        log.info("Imported RDF File Folder: {}",importedFolder);
+        this.loader.setImportedDir(importedFolder);
         //check if importing is deactivated
         boolean importSource = true; //default is true
-        Object value = config.get(PARAM_IMPORT_SOURCE);
+        value = config.get(PARAM_IMPORT_SOURCE);
         if(value != null){
             importSource = Boolean.parseBoolean(value.toString());
         }

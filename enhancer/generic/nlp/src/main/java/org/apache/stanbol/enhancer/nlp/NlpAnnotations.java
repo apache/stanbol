@@ -18,12 +18,12 @@ public interface NlpAnnotations {
      * The POS {@link Annotation} added by POS taggers to {@link Token}s of
      * an {@link AnalysedText}.
      */
-    Annotation<String,PosTag> POS_ANNOTATION = new Annotation<String,PosTag>(
+    Annotation<PosTag> POS_ANNOTATION = new Annotation<PosTag>(
             "stanbol.enhancer.nlp.pos", PosTag.class);
     /**
      * 
      */
-    Annotation<String,NerTag> NER_ANNOTATION = new Annotation<String,NerTag>(
+    Annotation<NerTag> NER_ANNOTATION = new Annotation<NerTag>(
             "stanbol.enhancer.nlp.ner", NerTag.class);
     
     /**
@@ -31,14 +31,14 @@ public interface NlpAnnotations {
      * [1..*] {@link Token}s.<p>
      * This annotation is typically found on {@link Chunk}s.
      */
-    Annotation<String,PhraseTag> PHRASE_ANNOTATION = new Annotation<String,PhraseTag>(
+    Annotation<PhraseTag> PHRASE_ANNOTATION = new Annotation<PhraseTag>(
             "stanbol.enhancer.nlp.phrase", PhraseTag.class);
     
     /**
      * The Sentiment {@link Annotation} added by a sentiment tagger typically
      * to single {@link Token}s that do carry a positive or negative sentiment.
      */
-    Annotation<String,Double> SENTIMENT_ANNOTATION = new Annotation<String,Double>(
+    Annotation<Double> SENTIMENT_ANNOTATION = new Annotation<Double>(
             "stanbol.enhancer.nlp.sentiment", Double.class);
     /**
      * {@link Annotation} representing the Morphological analysis of a word. 
@@ -49,28 +49,28 @@ public interface NlpAnnotations {
      * to be of one of the Tags the definitions of this {@link MorphoFeatures} can
      * be applied.
      */
-    Annotation<String,MorphoFeatures> MORPHO_ANNOTATION = new Annotation<String,MorphoFeatures>(
+    Annotation<MorphoFeatures> MORPHO_ANNOTATION = new Annotation<MorphoFeatures>(
             "stanbol.enhancer.nlp.morpho",MorphoFeatures.class);
 
     /* 
      * Currently only used as part of MorphoFeatures
      */
-//    Annotation<String,CaseTag> CASE_ANNOTATION = new Annotation<String,CaseTag>(
+//    Annotation<CaseTag> CASE_ANNOTATION = new Annotation<CaseTag>(
 //            "stanbol.enhancer.nlp.morpho.case",CaseTag.class);
 //
-//    Annotation<String,GenderTag> GENDER_ANNOTATION = new Annotation<String,GenderTag>(
+//    Annotation<GenderTag> GENDER_ANNOTATION = new Annotation<GenderTag>(
 //            "stanbol.enhancer.nlp.morpho.gender",GenderTag.class);
 //
-//    Annotation<String,NumberTag> NUMBER_ANNOTATION = new Annotation<String,NumberTag>(
+//    Annotation<NumberTag> NUMBER_ANNOTATION = new Annotation<NumberTag>(
 //            "stanbol.enhancer.nlp.morpho.number",NumberTag.class);
 //    
-//    Annotation<String,PersonTag> PERSON_ANNOTATION = new Annotation<String,PersonTag>(
+//    Annotation<PersonTag> PERSON_ANNOTATION = new Annotation<PersonTag>(
 //            "stanbol.enhancer.nlp.morpho.person",PersonTag.class);
 //
-//    Annotation<String,TenseTag> TENSE_ANNOTATION = new Annotation<String,TenseTag>(
+//    Annotation<TenseTag> TENSE_ANNOTATION = new Annotation<TenseTag>(
 //            "stanbol.enhancer.nlp.morpho.tense",TenseTag.class);
 //
-//    Annotation<String,VerbMoodTag> VERB_MOOD_ANNOTATION = new Annotation<String,VerbMoodTag>(
+//    Annotation<VerbMoodTag> VERB_MOOD_ANNOTATION = new Annotation<VerbMoodTag>(
 //            "stanbol.enhancer.nlp.morpho.verb-mood",VerbMoodTag.class);
 
 }

@@ -17,23 +17,14 @@
 package org.apache.stanbol.entityhub.it.ldpath;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.Collections;
 
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.stanbol.entityhub.it.ReferencedSiteTest;
 import org.apache.stanbol.entityhub.it.SitesManagerTest;
 import org.apache.stanbol.entityhub.test.it.EntityhubTestBase;
-import org.apache.stanbol.entityhub.test.query.FieldQueryTestCase;
-import org.apache.stanbol.entityhub.test.query.FindQueryTestCase;
-import org.apache.stanbol.entityhub.test.query.QueryTestBase;
-import org.codehaus.jettison.json.JSONException;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 /**
  * Tests for the "/query" (Field Query) and "/find" (label search) 
  * implementation of the Entityhub.<p>
@@ -144,8 +135,10 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         )
         .assertStatus(200)
         .assertContentContains(
-            "\"@literal\": \"Paris\"",
-            "\"@literal\": \"London\"");
+            "\"@id\": \"http://dbpedia.org/resource/London\"",
+            "\"@value\": \"London\"",
+            "\"@id\": \"http://dbpedia.org/resource/Paris\"",
+            "\"@value\": \"Paris\"");
     }
     @Test
     public void testUnknownContext() throws IOException {
@@ -176,17 +169,17 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         .assertStatus(200)
         .assertContentType("application/json")
         .assertContentContains(
-            "\"@subject\": \"http://dbpedia.org/resource/Paris\"",
+            "\"@id\": \"http://dbpedia.org/resource/Paris\"",
             "\"comment\": {",
             "Paris is the capital and largest city in France",
             "\"homepage\": [",
             "http://www.paris.fr",
             "\"labels\": [",
-            "\"@literal\": \"Pariisi\"",
-            "\"@literal\": \"巴黎\"",
+            "\"@value\": \"Pariisi\"",
+            "\"@value\": \"巴黎\"",
             "\"location\": \"[48.856667,2.350833]\"",
             "\"name\": {",
-            "\"@literal\": \"Paris\""
+            "\"@value\": \"Paris\""
             );
     }
     /*

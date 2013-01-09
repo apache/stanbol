@@ -156,8 +156,10 @@ public class EventJobManagerImpl implements EnhancementJobManager {
             for(Entry<String,Execution> ex : em.getEngineExecutions().entrySet()){
                 sb.append("  -").append(ex.getKey()).append(": ").append(ex.getValue().getStatus()).append('\n');
             }
-            throw new ChainException("Execution timeout after {}sec "+sb.toString()
-                    +" \n To change the timeout change value of property '"+
+            throw new ChainException("Execution timeout after "
+                    +((System.currentTimeMillis()-start)/1000f)+"sec (timeout:"+(maxEnhancementJobWaitTime/1000)
+                + "sec) for ContentItem "+ci.getUri()+"\n"+sb.toString()
+                + " \n To change the timeout change value of property '"+
                     MAX_ENHANCEMENT_JOB_WAIT_TIME+"' for the service "+getClass());
         }
         log.info("Execution of Chain {} {} after {}ms for ContentItem {}",

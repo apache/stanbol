@@ -27,7 +27,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>apache-stanbol-commons</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>0.11.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Commons</name>
@@ -85,6 +85,9 @@
     <module>solr/web</module>
     <module>solr/install</module>
     <module>solr/defaults</module>
+    <module>solr/extras/smartcn</module> <!-- support for the smartcn (Chinese) analyzer -->
+    <module>solr/extras/paoding</module> <!-- alternative support for Chinese -->
+    <module>solr/extras/stempel</module> <!-- support for the Polish stemmer -->
     
     <module>jobs</module> <!-- Stanbol Background Jobs Framework -->
   

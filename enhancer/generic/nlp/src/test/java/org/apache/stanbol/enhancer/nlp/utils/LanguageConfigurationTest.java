@@ -41,6 +41,7 @@ public class LanguageConfigurationTest {
         config.put("test", "*,!de");
         LanguageConfiguration lc = new LanguageConfiguration("test", null);
         lc.setConfiguration(config);
+        Assert.assertTrue(lc.isLanguage(null));
         Assert.assertFalse(lc.isLanguage("de"));
         Assert.assertTrue(lc.isLanguage("en"));
         Assert.assertTrue(lc.isLanguage("jp"));
@@ -148,4 +149,31 @@ public class LanguageConfigurationTest {
         Assert.assertEquals("overridden", lc.getParameter("es", "param"));
         
     }
+    @Test
+    public void testCountrySpecificConfigurations() throws ConfigurationException {
+        LanguageConfiguration lc = new LanguageConfiguration("test", null);
+        Dictionary<String,Object> config = new Hashtable<String,Object>();
+        config.put("test", ";param=default,de-AT;param1=test1,de;param2=test2");
+        lc.setConfiguration(config);
+        //test no wildcard
+        Assert.assertFalse(lc.isLanguage("en"));
+        Assert.assertTrue(lc.isLanguage("de"));
+        Assert.assertTrue(lc.isLanguage("de-AT"));
+        Assert.assertTrue(lc.isLanguage("de-CH"));
+        //test defaults
+        Assert.assertEquals("default", lc.getParameter("de", "param"));
+        Assert.assertEquals("default", lc.getParameter("de-AT", "param"));
+        Assert.assertEquals("default", lc.getParameter("de-CH", "param"));
+        //test specific
+        Assert.assertEquals("test2", lc.getParameter("de", "param2"));
+        Assert.assertEquals("test2", lc.getParameter("de-CH", "param2"));
+        Assert.assertEquals("test2",lc.getParameter("de-AT", "param2")); //fallback from de-AT to de
+
+        //test Country specificspecific
+        Assert.assertEquals("test1", lc.getParameter("de-AT", "param1"));
+        Assert.assertNull(lc.getParameter("de", "param1"));
+        Assert.assertNull(lc.getParameter("de-CH", "param1"));
+        
+    }
+    
 }

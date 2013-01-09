@@ -57,7 +57,6 @@
 
   <properties>
     <downloadWarning>No downloads for this artifact.</downloadWarning>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>    
   </properties>  
 
   <build>
@@ -87,10 +86,21 @@
           <!-- 
             Ant is used to download the datafiles over the
             web
-            -->
+          -->
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
           <version>1.6</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <configuration>
+          <!--
+            Data bundles should never be deployed, e.g. as SNAPSHOTS, by default
+            unless explicitly specified in a POM because of known license issues.
+          -->
+            <skip>true</skip>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>

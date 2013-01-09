@@ -59,6 +59,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jersey-version>1.15</jersey-version>
     <freemarker-version>2.3.19</freemarker-version>
+    <owlapi-version>3.3</owlapi-version>
     <solr-version>3.6.1</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
     <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
@@ -1028,12 +1029,12 @@
   	  <artifactId>icu4j</artifactId>
 	    <version>4.8.1.1</version>
     </dependency>    
-    <!-- other unused Lucene bundes
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-grouping</artifactId>
         <version>${solr-version}</version>
     </dependency>
+    <!-- other unused Lucene bundes
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-queryparser</artifactId>
@@ -1097,6 +1098,16 @@
     <dependency> <!--  required by Solr 3.2 -->
       <groupId>javax.portlet</groupId>
       <artifactId>portlet-api</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.velocity</groupId>
+      <artifactId>velocity</artifactId>
+      <version>1.6.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.velocity</groupId>
+      <artifactId>velocity-tools</artifactId>
       <version>2.0</version>
     </dependency>
     <!-- END Solr/Lucene dependencies -->
@@ -1516,7 +1527,7 @@
               <dependency>
                 <groupId>org.apache.stanbol</groupId>
                 <artifactId>source-assembly</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>1.0.0</version>
               </dependency>
             </dependencies>
           </plugin>

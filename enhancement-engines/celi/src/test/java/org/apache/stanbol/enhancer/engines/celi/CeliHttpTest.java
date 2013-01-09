@@ -19,18 +19,13 @@ package org.apache.stanbol.enhancer.engines.celi;
 import static org.apache.stanbol.enhancer.engines.celi.langid.impl.CeliLanguageIdentifierEnhancementEngineTest.CELI_LANGID_SERVICE_URL;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.net.UnknownHostException;
 
-import javax.print.attribute.standard.MediaSize.Engineering;
 import javax.xml.soap.SOAPException;
 
 import junit.framework.Assert;
 
 import org.apache.stanbol.enhancer.engines.celi.langid.impl.LanguageIdentifierClientHTTP;
-import org.apache.stanbol.enhancer.engines.celi.testutils.TestUtils;
-import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.Test;
 import org.slf4j.Logger;

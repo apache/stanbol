@@ -77,8 +77,12 @@
     <module>rules</module>
 
     <!-- Specific features -->
-    <module>authentication</module>
+    <module>security</module>
     <module>zzshell</module>
+    
+    <!-- language specific extensions -->
+    <module>language-extras/smartcn</module>
+    <module>language-extras/paoding</module>
   </modules>
 
   <profiles>

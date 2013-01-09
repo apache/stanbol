@@ -17,6 +17,9 @@
 package org.apache.stanbol.entityhub.yard.solr.impl;
 
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,12 +50,13 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.core.SolrCore;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
@@ -75,10 +79,10 @@ import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrQueryFactory.SELECT;
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
-import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
+import org.apache.stanbol.entityhub.yard.solr.model.NoConverterException;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationException;
@@ -302,6 +306,9 @@ public class SolrYard extends AbstractYard implements Yard {
         strategy=ReferenceStrategy.EVENT,
         policy=ReferencePolicy.DYNAMIC)
     private ManagedSolrServer managedSolrServer;
+    
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+    private NamespacePrefixService nsPrefixService;
     /**
      * If update(..) and store(..) calls should be immediately committed.
      */
@@ -520,6 +527,7 @@ public class SolrYard extends AbstractYard implements Yard {
             if(server != null && !server.equals(this._server)){
                 //reset the fieldMapper so that it is reinitialised for the new one
                 //STANBOL-519
+                _server = server;
                 Lock writeLock = fieldMapperLock.writeLock();
                 writeLock.lock();
                 try {
@@ -536,6 +544,7 @@ public class SolrYard extends AbstractYard implements Yard {
         if(server != null){
             return server;
         } else {
+            _server = null;
             Lock writeLock = fieldMapperLock.writeLock();
             writeLock.lock();
             try {
@@ -578,7 +587,7 @@ public class SolrYard extends AbstractYard implements Yard {
         if(indexLocation.startsWith("http") && indexLocation.indexOf("://") > 0){
             //init remote server
             try {
-                _server = new CommonsHttpSolrServer(indexLocation);
+                _server = new HttpSolrServer(indexLocation);
                 _server.ping(); //test if remove service is available
             } catch (RuntimeException e) {
                 throw new YardException("Unable to connect to remote SolrServer '"+
@@ -729,8 +738,9 @@ public class SolrYard extends AbstractYard implements Yard {
         Lock writeLock = fieldMapperLock.writeLock();
         writeLock.lock();
         try {
-            // the fieldMapper need the Server to store it's namespace prefix configuration
-            _fieldMapper = new SolrFieldMapper(getServer());
+            if(_fieldMapper == null){ //might be init by an other thread
+                _fieldMapper = new SolrFieldMapper(getServer(), nsPrefixService);
+            }
             return _fieldMapper;
         } finally {
             writeLock.unlock();
@@ -819,20 +829,31 @@ public class SolrYard extends AbstractYard implements Yard {
             selected = null;
         }
 
-        SolrQuery query = getSolrQueryFactory().parseFieldQuery(fieldQuery, select);
+        final SolrQuery query = getSolrQueryFactory().parseFieldQuery(fieldQuery, select);
         long queryGeneration = System.currentTimeMillis();
-
+        final SolrServer server = getServer();
         QueryResponse response;
         try {
-            StreamQueryRequest request = new StreamQueryRequest(query);
-            response = request.process(getServer());
-        } catch (SolrServerException e) {
-            if ("unknown handler: /mlt".equals(e.getCause().getMessage())) {
-                throw new YardException("Solr is missing '<requestHandler name=\"/mlt\""
-                                        + " class=\"solr.MoreLikeThisHandler\" startup=\"lazy\" />'"
-                                        + " in 'solrconfig.xml'", e);
+            response = AccessController.doPrivileged(new PrivilegedExceptionAction<QueryResponse>() {
+                public QueryResponse run() throws IOException, SolrServerException {
+                    StreamQueryRequest request = new StreamQueryRequest(query);
+                     return request.process(server);
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof SolrServerException){
+                if ("unknown handler: /mlt".equals(e.getCause().getMessage())) {
+                    throw new YardException("Solr is missing '<requestHandler name=\"/mlt\""
+                        + " class=\"solr.MoreLikeThisHandler\" startup=\"lazy\" />'"
+                        + " in 'solrconfig.xml'", e);
+                }
+                throw new YardException("Error while performing Query on SolrServer: " + query.getQuery(), e);
+            } else if(e instanceof IOException){
+                throw new YardException("Unable to access SolrServer",e);
+            } else {
+                throw RuntimeException.class.cast(e);
             }
-            throw new YardException("Error while performing Query on SolrServer: " + query.getQuery(), e);
         }
         if(query.getQueryType() == SolrQueryFactory.MLT_QUERY_TYPE){
             log.info("{}",response);
@@ -863,18 +884,31 @@ public class SolrYard extends AbstractYard implements Yard {
         //create a clone of the query, because we need to refine it because the
         //query (as executed) needs to be included in the result set
         FieldQuery fieldQuery = parsedQuery.clone();
-        SolrQuery query = getSolrQueryFactory().parseFieldQuery(fieldQuery, SELECT.ID);
-        QueryResponse respone;
+        final SolrQuery query = getSolrQueryFactory().parseFieldQuery(fieldQuery, SELECT.ID);
+        QueryResponse response;
+        final SolrServer server = getServer();
         try {
-            respone = getServer().query(query, METHOD.POST);
-        } catch (SolrServerException e) {
-            throw new YardException("Error while performing query on the SolrServer", e);
+            response = AccessController.doPrivileged(new PrivilegedExceptionAction<QueryResponse>() {
+                public QueryResponse run() throws IOException, SolrServerException {
+                        return server.query(query, METHOD.POST);
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof SolrServerException){
+                throw new YardException("Error while performing query on the SolrServer (query: "
+                        + query.getQuery()+")!", e);
+            } else if(e instanceof IOException){
+                throw new YardException("Unable to access SolrServer",e);
+            } else {
+                throw RuntimeException.class.cast(e);
+            }
         }
         final FieldMapper fieldMapper = getFieldMapper();
         // return a queryResultList
         return new QueryResultListImpl<String>(fieldQuery,
         // by adapting SolrDocuments to Representations
-                new AdaptingIterator<SolrDocument,String>(respone.getResults().iterator(),
+                new AdaptingIterator<SolrDocument,String>(response.getResults().iterator(),
                 // inline Adapter Implementation
                         new AdaptingIterator.Adapter<SolrDocument,String>() {
                             @Override
@@ -1030,33 +1064,43 @@ public class SolrYard extends AbstractYard implements Yard {
     }
 
     @Override
-    public final void remove(String id) throws YardException, IllegalArgumentException {
+    public final void remove(final String id) throws YardException, IllegalArgumentException {
         if (id == null) {
             throw new IllegalArgumentException("The parsed Representation id MUST NOT be NULL!");
         }
         if (id.isEmpty()) {
             throw new IllegalArgumentException("The parsed Representation id MUST NOT be empty!");
         }
-        SolrServer server = getServer();
-        SolrYardConfig config = (SolrYardConfig)getConfig();
-        SolrFieldMapper fieldMapper = getFieldMapper();
+        final SolrServer server = getServer();
+        final SolrYardConfig config = (SolrYardConfig)getConfig();
+        final SolrFieldMapper fieldMapper = getFieldMapper();
         try {
-            if(config.isMultiYardIndexLayout()){
-                //make sure we only delete the Entity only if it is  managed by 
-                //this Yard. Entities of other Yards MUST NOT be deleted!
-                server.deleteByQuery(String.format("%s:%s AND %s:%s",
-                    fieldMapper.getDocumentDomainField(),
-                    SolrUtil.escapeSolrSpecialChars(getId()),
-                    fieldMapper.getDocumentIdField(),
-                    SolrUtil.escapeSolrSpecialChars(id)));
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                public Object run() throws IOException, SolrServerException {
+                    if(config.isMultiYardIndexLayout()){
+                        //make sure we only delete the Entity only if it is  managed by 
+                        //this Yard. Entities of other Yards MUST NOT be deleted!
+                        server.deleteByQuery(String.format("%s:%s AND %s:%s",
+                            fieldMapper.getDocumentDomainField(),
+                            SolrUtil.escapeSolrSpecialChars(getId()),
+                            fieldMapper.getDocumentIdField(),
+                            SolrUtil.escapeSolrSpecialChars(id)));
+                    } else {
+                        server.deleteById(id);
+                    }
+                    server.commit();
+                    return null;
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof SolrServerException){
+                throw new YardException("Error while deleting document " + id + " from the Solr server", e);
+            } else if(e instanceof IOException){
+                throw new YardException("Unable to access SolrServer",e);
             } else {
-                server.deleteById(id);
+                throw RuntimeException.class.cast(e);
             }
-            server.commit();
-        } catch (SolrServerException e) {
-            throw new YardException("Error while deleting document " + id + " from the Solr server", e);
-        } catch (IOException e) {
-            throw new YardException("Unable to access SolrServer", e);
         }
         // NOTE: We do not need to update all Documents that refer this ID, because
         // only the representation of the Entity is deleted and not the
@@ -1069,35 +1113,45 @@ public class SolrYard extends AbstractYard implements Yard {
         if (ids == null) {
             throw new IllegalArgumentException("The parsed IDs MUST NOT be NULL");
         }
-        List<String> toRemove = new ArrayList<String>();
+        final List<String> toRemove = new ArrayList<String>();
         for (String id : ids) {
             if (id != null && !id.isEmpty()) {
                 toRemove.add(id);
             }
         }
-        SolrServer server = getServer();
-        SolrYardConfig config = (SolrYardConfig)getConfig();
-        SolrFieldMapper fieldMapper = getFieldMapper();
+        final SolrServer server = getServer();
+        final SolrYardConfig config = (SolrYardConfig)getConfig();
+        final SolrFieldMapper fieldMapper = getFieldMapper();
         try {
-            if(config.isMultiYardIndexLayout()){
-                //make sure we only delete Entities managed by this Yard
-                //if someone parses an ID managed by an other yard we MUST NOT
-                //delete it!
-                for(String id : toRemove){
-                    server.deleteByQuery(String.format("%s:%s AND %s:%s",
-                        fieldMapper.getDocumentDomainField(),
-                        SolrUtil.escapeSolrSpecialChars(getId()),
-                        fieldMapper.getDocumentIdField(),
-                        SolrUtil.escapeSolrSpecialChars(id)));
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                public Object run() throws IOException, SolrServerException {
+                    if(config.isMultiYardIndexLayout()){
+                        //make sure we only delete Entities managed by this Yard
+                        //if someone parses an ID managed by an other yard we MUST NOT
+                        //delete it!
+                        for(String id : toRemove){
+                            server.deleteByQuery(String.format("%s:%s AND %s:%s",
+                                fieldMapper.getDocumentDomainField(),
+                                SolrUtil.escapeSolrSpecialChars(getId()),
+                                fieldMapper.getDocumentIdField(),
+                                SolrUtil.escapeSolrSpecialChars(id)));
+                        }
+                    } else {
+                        server.deleteById(toRemove);
+                    }
+                    server.commit();
+                    return null;
                 }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof SolrServerException){
+                throw new YardException("Error while deleting documents from the Solr server", e);
+            } else if(e instanceof IOException){
+                throw new YardException("Unable to access SolrServer",e);
             } else {
-                server.deleteById(toRemove);
+                throw RuntimeException.class.cast(e);
             }
-            server.commit();
-        } catch (SolrServerException e) {
-            throw new YardException("Error while deleting documents from the Solr server", e);
-        } catch (IOException e) {
-            throw new YardException("Unable to access SolrServer", e);
         }
         // NOTE: We do not need to update all Documents that refer this ID, because
         // only the representation of the Entity is deleted and not the
@@ -1106,31 +1160,42 @@ public class SolrYard extends AbstractYard implements Yard {
     }
     @Override
     public void removeAll() throws YardException {
-        SolrServer server = getServer();
-        SolrYardConfig config = (SolrYardConfig)getConfig();
+        final SolrServer server = getServer();
+        final SolrYardConfig config = (SolrYardConfig)getConfig();
         try {
-            //ensures that the fildMapper is initialised and reads the
-            //namespace config before deleting all documents
-            getFieldMapper();
             //delete all documents
-            if(config.isMultiYardIndexLayout()){
-                //only delete entities of this referenced site
-                server.deleteByQuery(String.format("%s:%s", 
-                    getFieldMapper().getDocumentDomainField(),
-                    SolrUtil.escapeSolrSpecialChars(getId())));
-            } else { //we can delete all
-                server.deleteByQuery("*:*");
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                public Object run() throws IOException, SolrServerException, YardException {
+                    //ensures that the fildMapper is initialised and reads the
+                    //namespace config before deleting all documents
+                    FieldMapper fieldMapper = getFieldMapper();
+                    if(config.isMultiYardIndexLayout()){
+                        //only delete entities of this referenced site
+                        server.deleteByQuery(String.format("%s:%s", 
+                            fieldMapper.getDocumentDomainField(),
+                            SolrUtil.escapeSolrSpecialChars(getId())));
+                    } else { //we can delete all
+                        server.deleteByQuery("*:*");
+                    }
+                    //ensure that the namespace config is stored again after deleting
+                    //all documents
+                    getFieldMapper().saveNamespaceConfig(false);
+                    server.commit();
+                    return null;
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof SolrServerException){
+                throw new YardException("Error while deleting documents from the Solr server", e);
+            } else if(e instanceof IOException){
+                throw new YardException("Unable to access SolrServer",e);
+            } else if(e instanceof YardException){
+                throw (YardException)e;
+            } else {
+                throw RuntimeException.class.cast(e);
             }
-            //ensure that the namespace config is stored again after deleting
-            //all documents
-            getFieldMapper().saveNamespaceConfig();
-            server.commit();
-        } catch (SolrServerException e) {
-            throw new YardException("Error while deleting documents from the Solr server", e);
-        } catch (IOException e) {
-            throw new YardException("Unable to access SolrServer", e);
-        }
-        
+        }        
     }
 
     @Override
@@ -1140,30 +1205,38 @@ public class SolrYard extends AbstractYard implements Yard {
         if (representation == null) {
             throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
         }
-        SolrServer server = getServer();
+        final SolrServer server = getServer();
         FieldMapper fieldMapper = getFieldMapper();
         long start = System.currentTimeMillis();
-        SolrInputDocument inputDocument = createSolrInputDocument(fieldMapper,representation);
+        final SolrInputDocument inputDocument = createSolrInputDocument(fieldMapper,representation);
         long create = System.currentTimeMillis();
         try {
-            UpdateRequest update = new UpdateRequest();
+            final UpdateRequest update = new UpdateRequest();
             if (!immediateCommit) {
                 update.setCommitWithin(commitWithin);
             }
             update.add(inputDocument);
-            update.process(server);
-            if (immediateCommit) {
-                server.commit();
-            }
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                public Object run() throws IOException, SolrServerException {
+                    update.process(server);
+                    if (immediateCommit) {
+                        server.commit();
+                    }
+                    return null; // nothing to return
+                }
+            });
             long stored = System.currentTimeMillis();
-            log.debug("  ... done [create={}ms|store={}ms|sum={}ms]", new Object[] {(create - start),
-                                                                                    (stored - create),
-                                                                                    (stored - start)});
-        } catch (SolrServerException e) {
-            throw new YardException(String.format("Exception while adding Document to Solr",
-                representation.getId()), e);
-        } catch (IOException e) {
-            throw new YardException("Unable to access SolrServer", e);
+            log.debug("  ... done [create={}ms|store={}ms|sum={}ms]", 
+                new Object[] {(create - start),(stored - create),(stored - start)});
+        } catch (PrivilegedActionException pae){
+            if(pae.getException() instanceof SolrServerException){
+                throw new YardException(String.format("Exception while adding Document to Solr",
+                    representation.getId()), pae.getException());
+            } else if( pae.getException() instanceof IOException){
+                throw new YardException("Unable to access SolrServer", pae.getException());
+            } else {
+                throw RuntimeException.class.cast(pae.getException());
+            }
         }
         return representation;
     }
@@ -1279,7 +1352,16 @@ public class SolrYard extends AbstractYard implements Yard {
                             inputDocument.addField(fieldName, value.getValue());
                         }
                     }
-                } catch (Exception e) {
+                } catch (NoConverterException e) {
+                    log.warn(
+                        String.format("Unable to convert value %s (type:%s) for field %s!", next,
+                            next.getClass(), field), e);
+                } catch (IllegalArgumentException e) { //usually because the Object is NULL or empty
+                    if(log.isDebugEnabled()){
+                        log.debug(String.format("Illegal Value %s (type:%s) for field %s!", next,
+                                next.getClass(), field), e);
+                    }
+                } catch (RuntimeException e) {
                     log.warn(
                         String.format("Unable to process value %s (type:%s) for field %s!", next,
                             next.getClass(), field), e);
@@ -1352,7 +1434,7 @@ public class SolrYard extends AbstractYard implements Yard {
                 ids.add(representation.getId());
             }
         }
-        SolrServer server = getServer();
+        final SolrServer server = getServer();
         FieldMapper fieldMapper = getFieldMapper();
         int numDocs = ids.size(); // for debuging
         try {
@@ -1377,19 +1459,29 @@ public class SolrYard extends AbstractYard implements Yard {
         long created = System.currentTimeMillis();
         if (!inputDocs.isEmpty()) {
             try {
-                UpdateRequest update = new UpdateRequest();
+                final UpdateRequest update = new UpdateRequest();
                 if (!immediateCommit) {
                     update.setCommitWithin(commitWithin);
                 }
                 update.add(inputDocs);
-                update.process(server);
-                if (immediateCommit) {
-                    server.commit();
+                AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                    public UpdateResponse run() throws IOException, SolrServerException {
+                        update.process(server);
+                        if (immediateCommit) {
+                            server.commit();
+                        }
+                        return null;
+                    }
+                });
+            } catch (PrivilegedActionException pae){
+                if(pae.getException() instanceof SolrServerException){
+                    throw new YardException("Error while adding updated Documents to the SolrServer", 
+                        pae.getException());
+                } else if( pae.getException() instanceof IOException){
+                    throw new YardException("Unable to access SolrServer", pae.getException());
+                } else {
+                    throw RuntimeException.class.cast(pae.getException());
                 }
-            } catch (SolrServerException e) {
-                throw new YardException("Error while adding updated Documents to the SolrServer", e);
-            } catch (IOException e) {
-                throw new YardException("Unable to access Solr server", e);
             }
         }
         long ready = System.currentTimeMillis();
@@ -1408,9 +1500,23 @@ public class SolrYard extends AbstractYard implements Yard {
      * @param inputDoc
      *            the document to store
      */
-    protected final void storeSolrDocument(SolrServer server, SolrInputDocument inputDoc) 
+    protected final void storeSolrDocument(final SolrServer server, final SolrInputDocument inputDoc) 
                                            throws SolrServerException,IOException {
-        server.add(inputDoc);
+        try {
+            AccessController.doPrivileged(new PrivilegedExceptionAction<UpdateResponse>() {
+                public UpdateResponse run() throws IOException, SolrServerException {
+                    return server.add(inputDoc);
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            if(pae.getException() instanceof SolrServerException){
+                throw (SolrServerException)pae.getException();
+            } else if( pae.getException() instanceof IOException){
+                throw (IOException)pae.getException();
+            } else {
+                throw RuntimeException.class.cast(pae.getException());
+            }
+        }
     }
 
     /**
@@ -1424,13 +1530,13 @@ public class SolrYard extends AbstractYard implements Yard {
         return getSolrDocument(server, fieldMapper, uri, null);
     }
 
-    protected final Collection<SolrDocument> getSolrDocuments(SolrServer server,
+    protected final Collection<SolrDocument> getSolrDocuments(final SolrServer server,
                                                               FieldMapper fieldMapper,
                                                               Collection<String> uris, 
                                                               Collection<String> fields) 
                                                               throws SolrServerException, IOException {
         SolrYardConfig config = (SolrYardConfig) getConfig();
-        SolrQuery solrQuery = new SolrQuery();
+        final SolrQuery solrQuery = new SolrQuery();
         if (fields == null || fields.isEmpty()) {
             solrQuery.addField("*"); // select all fields
         } else {
@@ -1476,7 +1582,23 @@ public class SolrYard extends AbstractYard implements Yard {
             // set the number of results to the number of parsed IDs.
             solrQuery.setRows(num);
             num = 0; // reset to 0
-            QueryResponse queryResponse = server.query(solrQuery, METHOD.POST);
+            QueryResponse queryResponse;
+            try {
+                queryResponse = AccessController.doPrivileged(new PrivilegedExceptionAction<QueryResponse>() {
+                    public QueryResponse run() throws IOException, SolrServerException {
+                        return server.query(solrQuery, METHOD.POST);
+                    }
+                });
+            } catch (PrivilegedActionException pae) {
+                Exception e = pae.getException();
+                if(e instanceof SolrServerException){
+                    throw (SolrServerException)e;
+                } else if(e instanceof IOException){
+                    throw (IOException)e;
+                } else {
+                    throw RuntimeException.class.cast(e);
+                }
+            }
             if (resultDocs == null) {
                 resultDocs = queryResponse.getResults();
             } else {
@@ -1492,12 +1614,12 @@ public class SolrYard extends AbstractYard implements Yard {
         return resultDocs;
     }
 
-    protected final SolrDocument getSolrDocument(SolrServer server,
+    protected final SolrDocument getSolrDocument(final SolrServer server,
                                                  FieldMapper fieldMapper,
                                                  String uri, 
                                                  Collection<String> fields) 
                                                  throws SolrServerException, IOException {
-        SolrQuery solrQuery = new SolrQuery();
+        final SolrQuery solrQuery = new SolrQuery();
         if (fields == null || fields.isEmpty()) {
             solrQuery.addField("*"); // select all fields
         } else {
@@ -1511,7 +1633,23 @@ public class SolrYard extends AbstractYard implements Yard {
         String queryString = String.format("%s:%s", fieldMapper.getDocumentIdField(),
             SolrUtil.escapeSolrSpecialChars(uri));
         solrQuery.setQuery(queryString);
-        QueryResponse queryResponse = server.query(solrQuery, METHOD.POST);
+        QueryResponse queryResponse;
+        try {
+            queryResponse = AccessController.doPrivileged(new PrivilegedExceptionAction<QueryResponse>() {
+                public QueryResponse run() throws IOException, SolrServerException {
+                    return server.query(solrQuery, METHOD.POST);
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof SolrServerException){
+                throw (SolrServerException)e;
+            } else if(e instanceof IOException){
+                throw (IOException)e;
+            } else {
+                throw RuntimeException.class.cast(e);
+            }
+        }
         if (queryResponse.getResults().isEmpty()) {
             return null;
         } else {

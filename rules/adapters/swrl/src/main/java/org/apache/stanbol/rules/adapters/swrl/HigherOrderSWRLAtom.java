@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -158,6 +159,12 @@ public class HigherOrderSWRLAtom implements SWRLAtom {
 
     @Override
     public SWRLPredicate getPredicate() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Set<OWLAnonymousIndividual> getAnonymousIndividuals() {
         // TODO Auto-generated method stub
         return null;
     }

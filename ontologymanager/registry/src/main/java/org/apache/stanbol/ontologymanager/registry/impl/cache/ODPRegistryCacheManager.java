@@ -184,7 +184,7 @@ public class ODPRegistryCacheManager {
         manager.addMissingImportListener(new MissingImportListener() {
             public void importMissing(MissingImportEvent arg0) {
                 if (!getUnresolvedURIs().contains(arg0.getImportedOntologyURI())) getUnresolvedURIs().add(
-                    arg0.getImportedOntologyURI());
+                    arg0.getImportedOntologyURI().toURI());
             }
         });
         IRI oi = oiri.get(uri);
@@ -216,7 +216,7 @@ public class ODPRegistryCacheManager {
         manager.addMissingImportListener(new MissingImportListener() {
             public void importMissing(MissingImportEvent arg0) {
                 if (!getUnresolvedURIs().contains(arg0.getImportedOntologyURI())) getUnresolvedURIs().add(
-                    arg0.getImportedOntologyURI());
+                    arg0.getImportedOntologyURI().toURI());
             }
         });
         manager.addOntologyLoaderListener(new OWLOntologyLoaderListener() {

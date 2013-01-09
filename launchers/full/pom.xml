@@ -114,7 +114,7 @@
               <artifactSet>
               <!-- Use this to in/exclude only specific dependencies -->
                 <includes>
-                  <include>org.apache.stanbol:org.apache.stanbol.launchpad</include>
+                  <include>org.apache.stanbol:org.apache.stanbol.commons.launchpad</include>
                 </includes>
               </artifactSet>
               <transformers>
@@ -138,7 +138,7 @@
     <dependency>
       <!-- The Apache Stanbol lauchpad -->
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchpad</artifactId>
+      <artifactId>org.apache.stanbol.commons.launchpad</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -166,10 +166,10 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Authentication Support-->
+    <!-- Security Support-->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.bundlelists.authentication</artifactId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.security</artifactId>
       <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
@@ -236,7 +236,7 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Stanbol FactStore Bundle List -->
+    <!-- Stanbol FactStore Bundle List (out of date)
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.factstore</artifactId>
@@ -244,6 +244,7 @@
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
+    -->
 
     <!-- Stanbol Ontology Manager Bundle List -->
     <dependency>

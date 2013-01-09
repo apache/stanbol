@@ -28,7 +28,7 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.launchpad</artifactId>
+  <artifactId>org.apache.stanbol.commons.launchpad</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 

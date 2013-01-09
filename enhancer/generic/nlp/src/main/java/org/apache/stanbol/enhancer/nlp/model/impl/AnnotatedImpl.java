@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.stanbol.enhancer.nlp.model.annotation.Annotated;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Annotation;
@@ -12,11 +13,15 @@ import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 
 public class AnnotatedImpl implements Annotated{
 
-    private Map<Object,Object> annotations;
+    private Map<String,Object> annotations;
     
+    @SuppressWarnings("unchecked")
+    public Set<String> getKeys(){
+        return annotations == null ? Collections.EMPTY_SET : annotations.keySet();
+    }
     
     @Override
-    public final Value<?> getValue(Object key) {
+    public final Value<?> getValue(String key) {
         if(annotations == null){
             return null;
         }
@@ -31,7 +36,7 @@ public class AnnotatedImpl implements Annotated{
     }
     @SuppressWarnings("unchecked")
     @Override
-    public final List<Value<?>> getValues(Object key) {
+    public final List<Value<?>> getValues(String key) {
         if(annotations == null){
             return Collections.emptyList();
         }
@@ -47,7 +52,7 @@ public class AnnotatedImpl implements Annotated{
     }
     @SuppressWarnings("unchecked")
     @Override
-    public final <V> Value<V> getAnnotation(Annotation<?,V> annotation) {
+    public final <V> Value<V> getAnnotation(Annotation<V> annotation) {
         if(annotations == null){
             return null;
         }
@@ -63,7 +68,7 @@ public class AnnotatedImpl implements Annotated{
     
     @SuppressWarnings("unchecked")
     @Override
-    public final <V> List<Value<V>> getAnnotations(Annotation<?,V> annotation) {
+    public final <V> List<Value<V>> getAnnotations(Annotation<V> annotation) {
         if(annotations == null){
             return Collections.emptyList();
         }
@@ -79,12 +84,24 @@ public class AnnotatedImpl implements Annotated{
     }
     
     @Override
-    public <K,V> void addAnnotations(Annotation<K,V> annotation, List<Value<V>> values) {
+    public <V> void addAnnotations(Annotation<V> annotation, List<Value<V>> values) {
+        addValuesInternal(annotation.getKey(), values);
+    }
+    @Override
+    public void addValues(String key, List<Value<?>> values) {
+        addValuesInternal(key, values);
+    }
+    /**
+     * Just here because of Java generics combined with Collections ...
+     * @param key
+     * @param values
+     */
+    private void addValuesInternal(String key, List<?> values) {
         if(values == null || values.isEmpty()){
             return;
         }
-        Map<Object, Object> map = initAnnotations();
-        Object currentValue = annotations.get(annotation.getKey());
+        Map<String, Object> map = initAnnotations();
+        Object currentValue = annotations.get(key);
         Object newValues;
         if(currentValue == null){
             if(values.size() == 1){
@@ -97,8 +114,8 @@ public class AnnotatedImpl implements Annotated{
             newValues = new Value<?>[values.size()+1];
             ((Value<?>[])newValues)[0] = (Value<?>)currentValue;
             int index = 1;
-            for(Value<V> value : values){
-                ((Value<?>[])newValues)[index] = value;
+            for(Object value : values){
+                ((Value<?>[])newValues)[index] = (Value<?>)value;
                 index++;
             }
             Arrays.sort((Value<?>[])newValues,Value.PROBABILITY_COMPARATOR);
@@ -106,68 +123,87 @@ public class AnnotatedImpl implements Annotated{
             int length = ((Value<?>[])currentValue).length;
             newValues = new Value<?>[values.size()+length];
             System.arraycopy(currentValue, 0, newValues, 0, length);
-            for(Value<V> value : values){
-                ((Value<?>[])newValues)[length] = value;
+            for(Object value : values){
+                ((Value<?>[])newValues)[length] = (Value<?>)value;
                 length++;
             }
             Arrays.sort((Value<?>[])newValues,Value.PROBABILITY_COMPARATOR);
         }
-        map.put(annotation.getKey(), newValues);
+        map.put(key, newValues);
     }
     @Override
-    public <K,V> void setAnnotations(Annotation<K,V> annotation, List<Value<V>> value) {
-        Map<Object, Object> map = initAnnotations();
-        if(value == null || value.isEmpty()){
-            map.remove(annotation.getKey());
-        } else if(value.size() == 1){
-            map.put(annotation.getKey(), value.get(0));
+    public <V> void setAnnotations(Annotation<V> annotation, List<Value<V>> values) {
+        setValuesInternal(annotation.getKey(),values);
+    }
+    @Override
+    public void setValues(String key, List<Value<?>> values){
+        setValuesInternal(key, values);
+    }
+    /**
+     * Just here because of Java generics combined with Collections ...
+     * @param key
+     * @param values
+     */
+    private void setValuesInternal(String key, List<?> values){
+        Map<String, Object> map = initAnnotations();
+        if(values == null || values.isEmpty()){
+            map.remove(key);
+        } else if(values.size() == 1){
+            map.put(key, values.get(0));
         } else {
             //we need to copy, because users might change the parsed Array!
-            Value<?>[] copy = value.toArray(new Value<?>[value.size()]);
+            Value<?>[] copy = values.toArray(new Value<?>[values.size()]);
             Arrays.sort(copy,Value.PROBABILITY_COMPARATOR);
-            map.put(annotation.getKey(),copy);
+            map.put(key,copy);
         }
         
     }
     
-    private Map<Object,Object> initAnnotations(){
+    private Map<String,Object> initAnnotations(){
         if(annotations == null){ //avoid sync for the typical case
-            annotations = new HashMap<Object,Object>();
+            annotations = new HashMap<String,Object>();
         }
         return annotations;
     }
     @Override
-    public <K,V> void addAnnotation(Annotation<K,V> annotation, Value<V> value) {
+    public <V> void addAnnotation(Annotation<V> annotation, Value<V> value) {
+        addValue(annotation.getKey(), value);
+    }
+    @Override
+    public void addValue(String key, Value<?> value) {
         if(value != null){
-          Map<Object,Object> map = initAnnotations();  
-          Object currentValue = map.get(annotation);
+          Map<String,Object> map = initAnnotations();  
+          Object currentValue = map.get(key);
           if(currentValue == null){
-              map.put(annotation.getKey(), value);
-          } else if (value instanceof Value<?>){
+              map.put(key, value);
+          } else if (currentValue instanceof Value<?>){
               Value<?>[] newValues =  new Value<?>[]{(Value<?>)currentValue,value};
               Arrays.sort(newValues,Value.PROBABILITY_COMPARATOR);
-              map.put(annotation.getKey(), newValues);
+              map.put(key, newValues);
           } else { //array
               int length = ((Value<?>[])currentValue).length;
               Value<?>[] newValues = new Value<?>[length+1];
               System.arraycopy(currentValue, 0, newValues, 0, length);
               newValues[length] = value;
               Arrays.sort(newValues,Value.PROBABILITY_COMPARATOR);
-              map.put(annotation.getKey(), newValues);
+              map.put(key, newValues);
           }
         } 
     }
     @Override
-    public <K,V> void setAnnotation(Annotation<K,V> annotation, Value<V> value) {
+    public <V> void setAnnotation(Annotation<V> annotation, Value<V> value) {
+        setValue(annotation.getKey(), value);
+    }
+    @Override
+    public void setValue(String key, Value<?> value) {
         if(annotations == null && value == null){
             return;
         }
-        Map<Object,Object> map = initAnnotations();
+        Map<String,Object> map = initAnnotations();
         if(value == null){
-            map.remove(annotation.getKey());
+            map.remove(key);
         } else {
-            map.put(annotation.getKey(),value);
+            map.put(key,value);
         }
-        
     }
 }

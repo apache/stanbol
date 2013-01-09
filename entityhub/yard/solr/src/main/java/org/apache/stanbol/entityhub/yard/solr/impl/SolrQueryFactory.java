@@ -931,20 +931,20 @@ public class SolrQueryFactory {
         // this.fieldConstraints.remove(constraintType);
         // }
     }
-    public static void main(String[] args) {
-        SolrQueryFactory factory = new SolrQueryFactory(
-            InMemoryValueFactory.getInstance(), 
-            IndexValueFactory.getInstance(), 
-            new SolrFieldMapper(null));
-        FieldQuery query = DefaultQueryFactory.getInstance().createFieldQuery();
-//        query.setConstraint("urn:field2", new TextConstraint("test","en","de"));
-        query.setConstraint("urn:field3", new TextConstraint(Arrays.asList(
-            "text value","anothertest","some more values"),"en","de",null));
-        query.addSelectedField("urn:field2a");
-        query.addSelectedField("urn:field3");
-        query.setLimit(5);
-        query.setOffset(5);
-        SolrQuery solrQuery = factory.parseFieldQuery(query, SELECT.QUERY);
-        System.out.println(solrQuery.getQuery());
-    }
+//    public static void main(String[] args) {
+//        SolrQueryFactory factory = new SolrQueryFactory(
+//            InMemoryValueFactory.getInstance(), 
+//            IndexValueFactory.getInstance(), 
+//            new SolrFieldMapper(null));
+//        FieldQuery query = DefaultQueryFactory.getInstance().createFieldQuery();
+////        query.setConstraint("urn:field2", new TextConstraint("test","en","de"));
+//        query.setConstraint("urn:field3", new TextConstraint(Arrays.asList(
+//            "text value","anothertest","some more values"),"en","de",null));
+//        query.addSelectedField("urn:field2a");
+//        query.addSelectedField("urn:field3");
+//        query.setLimit(5);
+//        query.setOffset(5);
+//        SolrQuery solrQuery = factory.parseFieldQuery(query, SELECT.QUERY);
+//        System.out.println(solrQuery.getQuery());
+//    }
 }

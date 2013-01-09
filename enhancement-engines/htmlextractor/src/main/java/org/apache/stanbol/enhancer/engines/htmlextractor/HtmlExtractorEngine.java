@@ -46,7 +46,6 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
-import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -101,7 +100,10 @@ public class HtmlExtractorEngine extends AbstractEnhancementEngine<IOException,R
     private HtmlParser htmlParser;
     
     private boolean singleRootRdf = true;
-    
+   
+    // define the Nepomuk NIE namespace locally here
+    private static final String NIE_NS = "http://www.semanticdesktop.org/ontologies/2007/01/19/nie#";
+
     protected void activate(ComponentContext ce) throws ConfigurationException, IOException  {
         super.activate(ce);
         this.bundleContext = ce.getBundleContext();
@@ -164,7 +166,7 @@ public class HtmlExtractorEngine extends AbstractEnhancementEngine<IOException,R
         ClerezzaRDFUtils.urifyBlankNodes(model);
         // make the model single rooted
         if (singleRootRdf) {
-            ClerezzaRDFUtils.makeConnected(model,ci.getUri(),new UriRef(NamespaceEnum.nie+"contains"));
+            ClerezzaRDFUtils.makeConnected(model,ci.getUri(),new UriRef(NIE_NS+"contains"));
         }
         //add the extracted triples to the metadata of the ContentItem
         ci.getLock().writeLock().lock();

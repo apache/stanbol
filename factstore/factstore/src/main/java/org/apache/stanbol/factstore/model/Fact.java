@@ -100,7 +100,7 @@ public class Fact {
                     JsonLdProperty jldProperty = propMap.get(role);
                     if (jldProperty.isSingleValued()) {
                         JsonLdPropertyValue jldValue = jldProperty.getValues().get(0);
-                        if (jldValue.getType() != null && jldValue.getType().equals(JsonLdCommon.IRI)) {
+                        if (jldValue.getType() != null && jldValue.getType().equals(JsonLdCommon.ID)) {
                             fact.addRole(role, jsonLd.unCURIE(jldValue.getLiteralValue()));
                         } else {
                             fact.addRole(role, jldValue.getValue().toString());

@@ -68,7 +68,8 @@
               org.apache.stanbol.commons.solr;version=${project.version},
               org.apache.stanbol.commons.solr.utils;version=${project.version}
             </Export-Package>
-            <_exportcontents> <!-- used instead of Export-Package to preserve the owlapi jar -->
+            <!-- used instead of Export-Package to preserve the jars -->
+            <_exportcontents> 
               org.apache.solr.client.solrj;version=${solr-version},
               org.apache.solr.client.solrj.beans;version=${solr-version},
               org.apache.solr.client.solrj.impl;version=${solr-version},
@@ -89,7 +90,7 @@
               org.apache.solr.search.*;version=${solr-version},
               org.apache.solr.update.*;version=${solr-version},
               org.apache.solr.util.*;version=${solr-version},
-              org.apache.solr.analysis;version=${solr-version},
+              org.apache.solr.analysis;-split-package:=merge-last;version=${solr-version},
               org.apache.lucene.*;version=${solr-version}
             </_exportcontents>
             <!-- NOTE: 
@@ -116,12 +117,12 @@
               !antlr.*, 
               !com.werken.*,
               !org.apache.oro.*,
-              !org.apache.lucene.analysis.cn.smart.*,
-              !org.apache.lucene.analysis.pl.*,
-              !org.apache.lucene.analysis.ja.*,
-              !org.apache.lucene.analysis.stempel.*,
-              !org.apache.lucene.search.grouping.*,
-              !org.egothor.stemmer.*,
+              org.apache.lucene.analysis.cn.smart.*;resolution:=optional,
+              org.apache.lucene.analysis.pl.*;resolution:=optional,
+              org.apache.lucene.analysis.ja.*;resolution:=optional,
+              org.apache.lucene.analysis.stempel.*;resolution:=optional,
+              org.apache.lucene.search.grouping.*;resolution:=optional,
+              org.egothor.stemmer.*;resolution:=optional,
               javax.servlet.*; version="[2.5.0,4.0.0)",
               org.apache.stanbol.commons.solr,
               org.apache.stanbol.commons.solr.utils,
@@ -149,12 +150,13 @@
               org.apache.lucene.*,
               *
             </Import-Package>
+            <DynamicImport-Package>*</DynamicImport-Package>
             <Embed-Dependency>
               solr-solrj, solr-core, solr-dataimporthandler,
               solr-analysis-extras, commons-httpclient,
               lucene-core, lucene-analyzers, lucene-highlighter, lucene-memory,
               lucene-spatial, lucene-spellchecker, lucene-misc, lucene-queries,
-              lucene-icu, lucene-phonetic,
+              lucene-icu, lucene-phonetic, lucene-grouping, 
               velocity, velocity-tools
             </Embed-Dependency>
           </instructions>
@@ -240,6 +242,10 @@
       <artifactId>lucene-phonetic</artifactId>
     </dependency>
     <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-grouping</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.regexp</artifactId>
     </dependency>
@@ -300,12 +306,10 @@
     <dependency>
         <groupId>org.apache.velocity</groupId>
         <artifactId>velocity</artifactId>
-        <version>1.6.2</version>
     </dependency>
     <dependency>
         <groupId>org.apache.velocity</groupId>
         <artifactId>velocity-tools</artifactId>
-        <version>2.0</version>
     </dependency>
 
     <dependency>

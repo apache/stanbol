@@ -25,6 +25,9 @@ import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.REFERRED
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.SPECIAL_CONFIG_FIELD;
 
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -45,6 +49,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.defaults.SpecialFieldEnum;
@@ -135,12 +140,15 @@ public class SolrFieldMapper implements FieldMapper {
     private final Map<String,IndexField> fieldMappings = 
             //STANBOL-669: LRU chaches MUST BE synchronized!
             Collections.synchronizedMap(new LRU<String,IndexField>());
+    
+    private NamespacePrefixService nsPrefixService;
 
-    public SolrFieldMapper(SolrServer server) {
+    public SolrFieldMapper(SolrServer server, NamespacePrefixService nps) {
         if (server == null) {
             log.warn("NULL parsed as SolrServer: Loading and Saving of the Namespace Prefix Settings will be deactivated!");
             log.warn("  This is OK for Unit Test but should not happen in productive use!");
         }
+        this.nsPrefixService = nps;
         this.server = server;
     }
 
@@ -602,12 +610,23 @@ public class SolrFieldMapper implements FieldMapper {
      * @return the map holding the namespace to prefix mappings
      */
     private Map<String,String> getNamespaceMap() {
-        if (__namespaceMap == null) {
-            synchronized (prefixNamespaceMappingsLock) {
-                loadNamespaceConfig();
+        prefixNamespaceMappingsLock.readLock().lock();
+        Map<String,String> m = __namespaceMap;
+        prefixNamespaceMappingsLock.readLock().unlock();
+        if (m == null) {
+            prefixNamespaceMappingsLock.writeLock().lock();
+            try {
+                m = __namespaceMap; //might be concurrently be initialised
+                if(m == null){
+                    loadNamespaceConfig();
+                    m = __namespaceMap;
+                }
+            } finally {
+                prefixNamespaceMappingsLock.writeLock().unlock();
             }
+            
         }
-        return __namespaceMap;
+        return m;
     }
 
     /**
@@ -618,7 +637,7 @@ public class SolrFieldMapper implements FieldMapper {
      * used as lock during loading of the namespace <-> prefix mappings
      * (fixes STANBOL-668)
      */
-    private Object prefixNamespaceMappingsLock = new Object();
+    private ReentrantReadWriteLock prefixNamespaceMappingsLock = new ReentrantReadWriteLock();
 
     /**
      * Getter for the prefix to namespace mappings
@@ -626,12 +645,22 @@ public class SolrFieldMapper implements FieldMapper {
      * @return the map holding the prefix to namespace mappings
      */
     private Map<String,String> getPrefixMap() {
-        if (__prefixMap == null) {
-            synchronized (prefixNamespaceMappingsLock) {
-                loadNamespaceConfig();
+        prefixNamespaceMappingsLock.readLock().lock();
+        Map<String,String> m = __prefixMap;
+        prefixNamespaceMappingsLock.readLock().unlock();
+        if (m == null) {
+            prefixNamespaceMappingsLock.writeLock().lock();
+            try {
+                m = __prefixMap; //might be concurrently be initialised
+                if(m == null){
+                    loadNamespaceConfig();
+                    m = __prefixMap;
+                }
+            } finally {
+                prefixNamespaceMappingsLock.writeLock().unlock();
             }
         }
-        return __prefixMap;
+        return m;
     }
 
     /**
@@ -667,6 +696,8 @@ public class SolrFieldMapper implements FieldMapper {
             if (namespace != null) {
                 return namespace + shortFieldName.substring(seperatorIndex + 1);
             } else {
+                log.error("Unknown prefix {} used by Field {}",prefix,shortFieldName);
+                log.error("known prefixes: {}",getPrefixMap());
                 throw new IllegalStateException("Unknown prefix " + prefix + " (parsed from field "
                                                 + shortFieldName + ")!");
             }
@@ -698,13 +729,26 @@ public class SolrFieldMapper implements FieldMapper {
         if (namespace == null) {
             return null;
         }
-        Map<String,String> prefixMap = getPrefixMap();
-        String prefix = getNamespaceMap().get(namespace);
+        Map<String,String> namespaceMap = getNamespaceMap();
+        String prefix = namespaceMap.get(namespace);
         if (prefix != null) {
             return prefix;
         } else if (create) { // only if not present and prefix is true
-            NamespaceEnum defaultMapping = NamespaceEnum.forNamespace(namespace);
-            if (defaultMapping != null && !prefixMap.containsKey(defaultMapping.getPrefix())) {
+            prefixNamespaceMappingsLock.writeLock().lock();
+            try {
+                //try again to get the prefix ... there might be a concurrent change
+                prefix = getNamespaceMap().get(namespace);
+                if(prefix != null){ //added by an other thread
+                    return prefix; //nothing else to do
+                }
+                Map<String,String> prefixMap = getPrefixMap();
+                String defaultprefix;
+                if(nsPrefixService != null){
+                    defaultprefix = nsPrefixService.getPrefix(namespace);
+                } else {
+                    NamespaceEnum defaultMapping = NamespaceEnum.forNamespace(namespace);
+                    defaultprefix = defaultMapping != null ? defaultMapping.getPrefix() : null;
+                }
                 /*
                  * NOTE: we need to check here also if the default prefix is not yet taken, because the Solr
                  * Index used to store the prefixes might be older than the latest change within the
@@ -712,20 +756,20 @@ public class SolrFieldMapper implements FieldMapper {
                  * Enum is already assigned to a different namespace within the Solr index! In such cases, we
                  * need to create a new prefix for this namespace
                  */
-                prefix = defaultMapping.getPrefix();
-            } else {
-                // need to generate a default mapping
-                prefix = createPrefix(prefixMap);
-            }
-            addNamespaceMapping(prefix, namespace); // we need to add the new mapping
-            saveNamespaceConfig(); // save the configuration
-            //make sure the namespaces are committed to the Solr Server
-            try {
-                server.commit();
-            } catch (SolrServerException e) {
-                log.error("Unable to commit NamespaceConfig to SolrServer",e);
-            } catch (IOException e) {
-                log.error("Unable to commit NamespaceConfig to SolrServer",e);
+                if (defaultprefix != null && !prefixMap.containsKey(defaultprefix)) {
+                    prefix = defaultprefix;
+                } else { // need to generate a default mapping
+                    prefix = createPrefix(prefixMap);
+                }
+                //add an namespace
+                log.debug("add namespace prefix '{}' for '{}'",prefix,namespace);
+                prefixMap.put(prefix, namespace);
+                namespaceMap.put(namespace, prefix);
+                // save the configuration and parse true to make  sure the 
+                //namespaces are committed to the Solr Server
+                saveNamespaceConfig(true); 
+            } finally {
+                prefixNamespaceMappingsLock.writeLock().unlock();
             }
         }
         return prefix; // may return null if !create
@@ -737,24 +781,24 @@ public class SolrFieldMapper implements FieldMapper {
              // NamespaceEnum
             defaultNsPrefixNumber++;
             defaultPrefix = DEFAULT_NS_PREFIX_STRING + defaultNsPrefixNumber;
-        } while (prefixMap.containsKey(defaultPrefix) || NamespaceEnum.forPrefix(defaultPrefix) != null);
+        } while (prefixMap.containsKey(defaultPrefix) || 
+                NamespaceEnum.forPrefix(defaultPrefix) != null ||
+                (nsPrefixService != null && nsPrefixService.getNamespace(defaultPrefix) != null));
         return defaultPrefix;
-    }
-
-    private void addNamespaceMapping(String prefix, String namespace) {
-        synchronized (prefixNamespaceMappingsLock) { 
-            getPrefixMap().put(prefix, namespace);
-            getNamespaceMap().put(namespace, prefix);
-        }
     }
 
     /**
      * Leads the prefix to namespace mappings from the configured Solr server and inits the two mapps holding
-     * the prefix &lt;-&gt; namespace mappings
+     * the prefix &lt;-&gt; namespace mappings.<p>
+     * Needs to be called under a write lock on {@link #prefixNamespaceMappingsLock}
      */
     private void loadNamespaceConfig() {
-        HashMap<String,String> prefixMap = new HashMap<String,String>();
-        HashMap<String,String> namespaceMap = new HashMap<String,String>();
+        log.debug("loadNamespaceConfig for {}",server);
+        if(__prefixMap != null || __namespaceMap != null){
+            log.warn("LoadNamespaceConfig called while mapping maps are NOT NULL!");
+        }
+        __prefixMap = new HashMap<String,String>();
+        __namespaceMap = new HashMap<String,String>();
         SolrDocument config = null;
         try {
             config = getSolrDocument(FieldMapper.URI);
@@ -773,14 +817,14 @@ public class SolrFieldMapper implements FieldMapper {
                         String prefix = configFieldElements[1];
                         Object value = config.getFirstValue(fieldName);
                         if (value != null) {
-                            if (namespaceMap.containsKey(value.toString())) {
-                                log.error("found two prefixes (" + namespaceMap.get(value.toString())
+                            if (__namespaceMap.containsKey(value.toString())) {
+                                log.error("found two prefixes (" + __namespaceMap.get(value.toString())
                                           + " and " + prefix + ") for Namespace " + value.toString()
                                           + " keep the first one");
                             } else {
                                 log.debug(" > prefix: " + prefix + " value: " + value);
-                                prefixMap.put(prefix, value.toString());
-                                namespaceMap.put(value.toString(), prefix);
+                                __prefixMap.put(prefix, value.toString());
+                                __namespaceMap.put(value.toString(), prefix);
                                 // check for default NS
                                 if (prefix.startsWith(DEFAULT_NS_PREFIX_STRING)) {
                                     String prefixNumber = prefix.substring(DEFAULT_NS_PREFIX_STRING.length());
@@ -807,11 +851,6 @@ public class SolrFieldMapper implements FieldMapper {
                 }
             }
         }
-        //only store complete mappings to the member variables (STANBOL-668)
-        synchronized (prefixNamespaceMappingsLock) {
-            __prefixMap = prefixMap;
-            __namespaceMap = namespaceMap;
-        }
     }
 
     private String getConfigFieldName(String configName) {
@@ -822,23 +861,36 @@ public class SolrFieldMapper implements FieldMapper {
      * Saves the current configuration to the index! This does NOT commit the
      * changes!
      */
-    public void saveNamespaceConfig() {
-        Map<String,String> prefixMap = getPrefixMap();
-        SolrInputDocument inputDoc = new SolrInputDocument();
-        inputDoc.addField(getDocumentIdField(), FieldMapper.URI);
-        for (Entry<String,String> entry : prefixMap.entrySet()) {
-            inputDoc.addField(getConfigFieldName(entry.getKey()), entry.getValue());
-        }
+    public void saveNamespaceConfig(final boolean commit) {
         if(server != null){
+            prefixNamespaceMappingsLock.writeLock().lock();
             try {
-                server.add(inputDoc);
-            } catch (IOException e) {
-                log.error("Unable save Configuration to SolrProvider", e);
-            } catch (SolrServerException e) {
-                log.error("Unable save Configuration to SolrProvider", e);
-            } catch (SolrException e) {
-                log.error("Unable save Configuration to SolrProvider", e);
+                log.debug("saveNamespaceConfig on {}",server);
+                Map<String,String> prefixMap = getPrefixMap();
+                final SolrInputDocument inputDoc = new SolrInputDocument();
+                inputDoc.addField(getDocumentIdField(), FieldMapper.URI);
+                for (Entry<String,String> entry : prefixMap.entrySet()) {
+                    log.debug("  > {}: {}",entry.getKey(),entry.getValue());
+                    inputDoc.addField(getConfigFieldName(entry.getKey()), entry.getValue());
+                }
+                try {
+                    AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                        public Object run() throws IOException, SolrServerException {
+                                server.add(inputDoc);
+                                if(commit){
+                                    server.commit();
+                                }
+                                return null;
+                        }
+                    });
+                } catch (PrivilegedActionException pae) {
+                    log.error("Unable save Configuration to SolrProvider", pae.getException());
+                }
+            } finally {
+                prefixNamespaceMappingsLock.writeLock().unlock();
             }
+        } else {
+            log.warn("Unable to save NamespaceCondig because no SolrServer is set");
         }
     }
 
@@ -852,13 +904,29 @@ public class SolrFieldMapper implements FieldMapper {
         if(server == null){
             return null;
         }
-        SolrQuery solrQuery = new SolrQuery();
+        final SolrQuery solrQuery = new SolrQuery();
         solrQuery.addField("*"); // select all fields
         solrQuery.setRows(1); // we query for the id, there is only one result
         String queryString = String.format("%s:%s", this.getDocumentIdField(),
             SolrUtil.escapeSolrSpecialChars(uri));
         solrQuery.setQuery(queryString);
-        QueryResponse queryResponse = server.query(solrQuery);
+        QueryResponse queryResponse;
+        try {
+            queryResponse = AccessController.doPrivileged(new PrivilegedExceptionAction<QueryResponse>() {
+                public QueryResponse run() throws IOException, SolrServerException {
+                    return server.query(solrQuery);
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof SolrServerException){
+                throw (SolrServerException)e;
+            } else if(e instanceof IOException){
+                throw (IOException)e;
+            } else {
+                throw RuntimeException.class.cast(e);
+            }
+        }
         if (queryResponse.getResults().isEmpty()) {
             return null;
         } else {

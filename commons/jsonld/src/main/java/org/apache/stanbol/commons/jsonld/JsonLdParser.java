@@ -106,9 +106,9 @@ public class JsonLdParser extends JsonLdParserCommon {
 			}
 			subject.setProfile(profile);
 
-			if (jo.has(JsonLdCommon.SUBJECT)) {
+			if (jo.has(JsonLdCommon.ID)) {
 				// Check for N subjects
-				Object subjectObject = jo.get(JsonLdCommon.SUBJECT);
+				Object subjectObject = jo.get(JsonLdCommon.ID);
 				if (subjectObject instanceof JSONArray) {
 					// There is an array of subjects. We create all subjects
 					// in sequence.
@@ -119,11 +119,11 @@ public class JsonLdParser extends JsonLdParserCommon {
 					}
 				} else {
 					String subjectName = unCURIE(jo
-							.getString(JsonLdCommon.SUBJECT), jld
+							.getString(JsonLdCommon.ID), jld
 							.getNamespacePrefixMap());
 					subject.setSubject(subjectName);
 				}
-				jo.remove(JsonLdCommon.SUBJECT);
+				jo.remove(JsonLdCommon.ID);
 			} else {
 				// No subject specified. We create a dummy bnode
 				// and add this subject.
@@ -188,10 +188,10 @@ public class JsonLdParser extends JsonLdParserCommon {
 			JSONObject jo = (JSONObject) input;
 
 			// Handle IRIs
-			if (jo.has(JsonLdCommon.IRI)) {
+			if (jo.has(JsonLdCommon.ID)) {
 				try {
 					return new JsonLdIRI(unCURIE(
-							jo.getString(JsonLdCommon.IRI), namespacePrefixMap));
+							jo.getString(JsonLdCommon.ID), namespacePrefixMap));
 				} catch (JSONException e) {
 					return null;
 				}

@@ -38,6 +38,8 @@ import org.apache.stanbol.entityhub.test.query.QueryTestCase;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities for asserting JSON responses encoded in the Entityhub JSON format.
@@ -46,6 +48,8 @@ import org.codehaus.jettison.json.JSONObject;
  *
  */
 public class AssertEntityhubJson {
+    
+    private final static Logger log = LoggerFactory.getLogger(AssertEntityhubJson.class);
     
     private AssertEntityhubJson(){/*noinstances*/}
 
@@ -89,6 +93,7 @@ public class AssertEntityhubJson {
         for(int i=0;i<results.length();i++){
             JSONObject result = results.getJSONObject(i);
             String id = result.optString("id", null);
+            log.info("({}) {}",i,id);
             assertNotNull("ID missing for an Result", id);
             if(expectedIds != null){
                 expectedIds.remove(id); //not all results must be in the list
@@ -185,10 +190,19 @@ public class AssertEntityhubJson {
         assertTrue("Metadata are missing",jEntity.has("metadata"));
         JSONObject jMetadata = jEntity.getJSONObject("metadata");
         assertNotNull("Metadata is not an JSON Object",jMetadata);
-        Map<String,Set<List<String>>> metadata = assertRepresentation(jMetadata, Arrays.asList(
-            NamespaceEnum.entityhub+"isChached",
-            NamespaceEnum.entityhub+"about",
-            NamespaceEnum.rdf+"type"),null);
+        Collection<String> requiredMetadata;
+        if("entityhub".equals(site)){
+            requiredMetadata = Arrays.asList(
+                //NamespaceEnum.entityhub+"isChached", not used by the entityhub
+                NamespaceEnum.entityhub+"about",
+                NamespaceEnum.rdf+"type");
+        } else {
+            requiredMetadata = Arrays.asList(
+                NamespaceEnum.entityhub+"isChached",
+                NamespaceEnum.entityhub+"about",
+                NamespaceEnum.rdf+"type");
+        }
+        Map<String,Set<List<String>>> metadata = assertRepresentation(jMetadata, requiredMetadata ,null);
         assertTrue("The Metadata of an Entity MUST BE about the Entity",
             metadata.get(NamespaceEnum.entityhub+"about")
                 .contains(Arrays.asList(id,"xsd:anyURI")));
@@ -262,7 +276,7 @@ public class AssertEntityhubJson {
             }
         }
         if(checkRequiredFields != null){
-            assertTrue("Missing required Fields "+checkRequiredFields,
+            assertTrue("Missing required Fields "+checkRequiredFields+" present: "+valueMap,
                 checkRequiredFields.isEmpty());
         }
         return valueMap;

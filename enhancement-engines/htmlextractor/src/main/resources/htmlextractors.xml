@@ -22,4 +22,7 @@
   <extractor id="RDFa">
     <source type="xslt">xslt/rdfa.xslt</source>
   </extractor>
+  <extractor id="MD">
+  	<source type="xslt">xslt/microdata.xsl</source>
+  </extractor>
 </htmlextractors>

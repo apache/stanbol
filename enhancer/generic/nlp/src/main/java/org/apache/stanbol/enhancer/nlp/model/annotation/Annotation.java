@@ -9,18 +9,18 @@ package org.apache.stanbol.enhancer.nlp.model.annotation;
  * @param <K>
  * @param <V>
  */
-public final class Annotation<K,V> {
+public final class Annotation<V> {
 
     /**
      * The type of the used Key
      */
-    final K key;
+    final String key;
     /**
      * The type of the used Value
      */
     final Class<V> valueType;
     
-    public Annotation(K key,Class<V> valueType){
+    public Annotation(String key,Class<V> valueType){
         if(key == null || key == null){
             throw new IllegalArgumentException("Key and Value MUST NOT be NULL!");
         }
@@ -28,7 +28,7 @@ public final class Annotation<K,V> {
         this.valueType = valueType;
     }
  
-    public K getKey(){
+    public String getKey(){
         return key;
     }
     
