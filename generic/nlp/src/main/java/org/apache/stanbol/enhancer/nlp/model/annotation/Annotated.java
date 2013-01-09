@@ -1,10 +1,15 @@
 package org.apache.stanbol.enhancer.nlp.model.annotation;
 
 import java.util.List;
+import java.util.Set;
 
 public interface Annotated {
     
-    
+    /**
+     * Getter for all keys used by Annotations
+     * @return the Set with all keys. An empty Set if none
+     */
+    Set<String> getKeys();
 
     /**
      * Method for requesting Values of a given Key. This allows to request
@@ -12,7 +17,7 @@ public interface Annotated {
      * @param key the Key
      * @return the Value with the highest probability
      */
-    Value<?> getValue(Object key);
+    Value<?> getValue(String key);
     
     /**
      * Method for requesting the Value of an Annotation.
@@ -21,7 +26,7 @@ public interface Annotated {
      * @throws ClassCastException if values of {@link Annotation#getKey()} are
      * not of type V
      */
-    <V> Value<V> getAnnotation(Annotation<?,V> annotation);
+    <V> Value<V> getAnnotation(Annotation<V> annotation);
 
     /**
      * Method for requesting Values of a given Key. This allows to request
@@ -29,7 +34,7 @@ public interface Annotated {
      * @param key the Key
      * @return all Value sorted by probability
      */
-    List<Value<?>> getValues(Object key);
+    List<Value<?>> getValues(String key);
     
     /**
      * Method for requesting the Value of an Annotation.
@@ -38,33 +43,71 @@ public interface Annotated {
      * @throws ClassCastException if the returned value of 
      * {@link Annotation#getKey()} is not of type V
      */
-    <V> List<Value<V>> getAnnotations(Annotation<?,V> annotation);
+    <V> List<Value<V>> getAnnotations(Annotation<V> annotation);
     
     /**
      * Appends an Annotation to eventually already existing values 
      * @param annotation the annotation
      * @param value the value to append
      */
-    <K,V> void addAnnotation(Annotation<K,V> annotation, Value<V> value);
+    <V> void addAnnotation(Annotation<V> annotation, Value<V> value);
 
     /**
      * Replaces existing Annotations with the parsed one
      * @param annotation the annotation
      * @param value the value for the annotation
      */
-    <K,V> void setAnnotation(Annotation<K,V> annotation, Value<V> value);
+    <V> void setAnnotation(Annotation<V> annotation, Value<V> value);
     
+    /**
+     * Appends an Value to the key. This method is intended for internal use (
+     * e.g. parsers). Users are encouraged to define type save
+     * {@link Annotation} objects and use {@link #addAnnotation(Annotation, Value)}
+     * instead. 
+     * @param key the key
+     * @param value the value
+     */
+    void addValue(String key, Value<?> value);
+    /**
+     * Replaces existing Values for a key with the parsed one. This method is 
+     * intended for internal use (e.g. parsers). Users are encouraged to define 
+     * type save {@link Annotation} objects and use 
+     * {@link #setAnnotation(Annotation, Value)} instead. 
+     * @param key the key
+     * @param value the value
+     */
+    void setValue(String key, Value<?> value);
     /**
      * Appends an Annotation to eventually already existing values 
      * @param annotation the annotation
      * @param value the value to append
      */
-    <K,V> void addAnnotations(Annotation<K,V> annotation, List<Value<V>> values);
+    <V> void addAnnotations(Annotation<V> annotation, List<Value<V>> values);
 
     /**
      * Replaces existing Annotations with the parsed one
      * @param annotation the annotation
      * @param value the value for the annotation
      */
-    <K,V> void setAnnotations(Annotation<K,V> annotation, List<Value<V>> values);
+    <V> void setAnnotations(Annotation<V> annotation, List<Value<V>> values);
+    
+    /**
+     * Appends the parsed values to the key. This method is intended for internal use (
+     * e.g. parsers). Users are encouraged to define type save
+     * {@link Annotation} objects and use {@link #addAnnotations(Annotation, List)
+     * instead. 
+     * @param key the key
+     * @param value the value
+     */
+    void addValues(String key, List<Value<?>> values);
+    
+    /**
+     * Replaces existing Values for a key with the parsed one. This method is 
+     * intended for internal use (e.g. parsers). Users are encouraged to define 
+     * type save {@link Annotation} objects and use 
+     * {@link #setAnnotations(Annotation, List) instead. 
+     * @param key the key
+     * @param value the value
+     */
+    void setValues(String key, List<Value<?>> values);
 }
