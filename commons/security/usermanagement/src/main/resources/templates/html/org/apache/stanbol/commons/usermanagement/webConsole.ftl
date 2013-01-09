@@ -23,6 +23,22 @@ limitations under the License.
     .ui-dialog .ui-state-error { padding: .3em; }
     .validateTips { border: 1px solid transparent; padding: 0.3em; }
     .important {color:rgb(128,0,0);}
+
+
+    .labelCheckbox {
+        padding: 0px;
+        margin: 0px;
+    }
+    .labelCheckbox input {
+        width: 15px;
+        height: 15px;
+        float: left;
+    }
+    .labelCheckbox label {
+        float: left;
+        padding-left: 3px;
+    }
+
 </style>
 
 <@namespace platform="http://clerezza.org/2009/08/platform#" />
@@ -34,9 +50,9 @@ limitations under the License.
 -->
 <br />
 <!-- couldn't get all the jQueryUI magic to work, so using onClick() instead -->
-<p><button id="create-user" onClick="addUser()">Create new user</button></p>
+<p><button id="create-user" onClick="addUser()"> Create New User </button></p>
 <br />
-<div id="createUserForm" title="Create new user">
+<div id="createUserForm" title="Create New User">
     <p id="validateTips" class="important">* required fields</p>
     <form>
         <fieldset>
@@ -49,6 +65,10 @@ limitations under the License.
             <label for="password">Password <span class="important">*</span></label>
             <input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
         </fieldset>
+        <fieldset id="roles-checkboxes" class="labelCheckbox">
+
+        </fieldset> 
+
     </form>
 </div>
 <!-- -->
@@ -79,10 +99,16 @@ limitations under the License.
 <script>
         
     $(function() {
-    
+        $.get("/user-management/rolesCheckboxes",
+        function(data){
+            $("#roles-checkboxes").html(data);
+        }, "text/html");
+
+   
         $("#createUserForm").dialog({
             autoOpen: false,
-            height: 300,
+            minHeight: 400,
+            autoResize:true,
             width: 350,
             modal: true,
             buttons: {
@@ -102,59 +128,51 @@ limitations under the License.
                     valid = valid && checkLength(password,"password", 5, 16);
         
                     // From jqueryUI examples, attributed to joern & Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
-                    valid = valid && checkRegexp(login, /^[a-z]([0-9a-z_])+$/i,"Login name may consist of a-z, 0-9, underscores, begin with a letter.");
-                    valid = valid && checkRegexp(email, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i,"eg. ui@jquery.com");
-                    valid = valid && checkRegexp(password, /^([0-9a-zA-Z])+$/,"Password field only allow : a-z 0-9");
+                    valid = valid && checkRegexp(login, /^[a-z]([0-9a-z_])+$/i,"Login name may only contain a-z, 0-9, underscores, begin with a letter.");
+                    valid = valid && checkRegexp(email, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i,"eg. person@jexample.com");
+                    valid = valid && checkRegexp(password, /^([0-9a-zA-Z])+$/,"Password may only contain : a-z 0-9");
         
                     if(valid) {
-                      //  var back = ("<div style='float:right;'><href='#' onClick='showUserList()'>&lt;&lt; back to user list</a></div>");    
+                         var formData = {
+                            "login": login.val(), 
+                            "fullName": fullName.val(),
+                            "email": email.val(),
+                            "password": password.val()
+                        };
+                        
+                        // gather role checkbox values into array, to provide format
+                        // roles=BasePermissionsRole&roles=CommunityUser etc.
+                        var roleList = new Array();
+                        var index = 0;
+                        var roles = $(".labelCheckbox input");
+                        for (var attrname in roles) { 
+                            if(roles[attrname].checked) {
+                               roleList[index++] = roles[attrname].name;
+                            };
+                        };
+                        formData["roles"] = roleList;
+                        
                         $.ajax({
                             type: 'POST',
                             url: '/user-management/create-user',
-                            data: { 
-                                "login": login.val(), 
-                                "fullName": fullName.val(),
-                                "email": email.val(),
-                                "password": password.val()
-                            },
+                            data: formData,
                             success: function(data) {
-                           //     $("div#tabs-users").html(back);
-                            //    $("div#tabs-users").append(data);
-                                 close();
-                                 location.reload();
+                                close();
+                                location.reload();
                             }
                         });
-                        /////////////////////////////////////////
         
                         $(this).dialog("close");
-                   //    $("#createUserForm").dialog("close");
-                  //   close();
                     }
                 },
                 Cancel: function() {
-               //   $(this).dialog("close");
-             //    $("#createUserForm").dialog("close");
-             close();
+                    close();
                 }
             } 
-//            ,
-//            close: function() {
-//                console.log("close: called");
-////                var login = $("#login");
-////                var fullName = $("#fullName");
-////                var email = $("#email");
-////                var password = $("#password");
-////                var tips = $("#validateTips");
-////                var allFields = $([]).add(login).add(fullName).add(email).add(password);
-////                ////
-////                allFields.val("").removeClass("ui-state-error");
-//                // $(this).dialog("close");
-//               //  $("#createUserForm").dialog("close");
-//            }
         });
      
         function updateTips(t) {
-        var tips = $("#validateTips");
+            var tips = $("#validateTips");
             tips
             .text(t)
             .addClass("ui-state-highlight");
@@ -169,8 +187,8 @@ limitations under the License.
         function checkLength(o, n, min, max) {
             if(o.val().length > max || o.val().length < min) {
                 o.addClass("ui-state-error");
-                updateTips("Length of" + n +" must be between" +
-                    min +" and" + max +".");
+                updateTips(n +" must be between " +
+                    min +" and " + max +" characters");
                 return false;
             } else {
                 return true;

@@ -139,10 +139,11 @@ public class UserResource {
             @FormParam("fullName") String fullName,
             @FormParam("email") String email,
             @FormParam("password") String password,
-            @FormParam("permission[]") List<String> permissions) {
+            @FormParam("roles") List<String> roles) {
 
+        // System.out.println("ROLES COUNT = "+roles.size());
         GraphNode userNode = createUser(login);
-        return store(userNode, uriInfo, login, login, fullName, email, password, permissions);
+        return store(userNode, uriInfo, login, login, fullName, email, password, roles);
     }
 
     @POST
@@ -155,10 +156,10 @@ public class UserResource {
             @FormParam("fullName") String fullName,
             @FormParam("email") String email,
             @FormParam("password") String password,
-            @FormParam("permission[]") List<String> permissions) {
+            @FormParam("roles") List<String> roles) {
 
         GraphNode userNode = getUser(currentUserName);
-        return store(userNode, uriInfo, currentUserName, newUserName, fullName, email, password, permissions);
+        return store(userNode, uriInfo, currentUserName, newUserName, fullName, email, password, roles);
     }
 
     /**
@@ -170,7 +171,7 @@ public class UserResource {
             String fullName,
             String email,
             String password,
-            List<String> permission) {
+            List<String> roles) {
 
         //   GraphNode userNode = getUser(currentUserName);
 
@@ -192,6 +193,11 @@ public class UserResource {
         }
         if (email != null && !email.equals("")) {
             changeResource(userNode, FOAF.mbox, new UriRef("mailto:" + email));
+        }
+                if (roles != null) {
+            for(int i=0;i<roles.size();i++) {
+                addRole(userNode, roles.get(i));
+            }
         }
 
         // System.out
@@ -252,6 +258,25 @@ public class UserResource {
             throw new RuntimeException(ex);
         }
         systemGraph.addAll(assertedGraph);
+    }
+
+    @GET
+    @Path("roles")
+    @Produces("text/html")
+    public RdfViewable listRoles() {
+        return new RdfViewable("listRole.ftl", getRoleType(), this.getClass());
+    }
+
+    @GET
+    @Path("rolesCheckboxes")
+    @Produces("text/html")
+    public RdfViewable rolesCheckboxes() {
+        return new RdfViewable("rolesCheckboxes.ftl", getRoleType(), this.getClass());
+    }
+
+    public GraphNode getRoleType() {
+        return new GraphNode(PERMISSION.Role,
+                systemGraph);
     }
 
     /**
@@ -411,18 +436,6 @@ public class UserResource {
         return Response.ok(serialized).build();
     }
 
-    @GET
-    @Path("roles")
-    @Produces("text/html")
-    public RdfViewable listRoles() {
-        return new RdfViewable("listRole.ftl", getRoleType(), this.getClass());
-    }
-
-    public GraphNode getRoleType() {
-        return new GraphNode(PERMISSION.Role,
-                systemGraph);
-    }
-
     /**
      * RESTful access to user roles (and permissions right now - may change)
      *
@@ -471,7 +484,7 @@ public class UserResource {
 
     /**
      **********************
-     * helper methods 
+     * helper methods
      */
     private GraphNode createUser(String newUserName) {
         BNode subject = new BNode();
@@ -479,6 +492,11 @@ public class UserResource {
         userNode.addProperty(RDF.type, FOAF.Agent);
         userNode.addProperty(PLATFORM.userName, new PlainLiteralImpl(newUserName));
 
+        return userNode;
+    }
+    
+    private GraphNode addRole(GraphNode userNode, String roleName){
+        // System.out.println("ROLE = "+roleName);
         return userNode;
     }
 
@@ -494,7 +512,7 @@ public class UserResource {
      */
     private void changeLiteral(GraphNode userNode, UriRef predicate,
             String newValue) {
-        
+
         Iterator<Triple> oldTriples = systemGraph.filter(
                 (NonLiteral) userNode.getNode(), predicate, null);
 
@@ -512,7 +530,7 @@ public class UserResource {
         // userNode.addPropertyValue(predicate, newValue);
         PlainLiteral newObject = new PlainLiteralImpl(newValue);
         userNode.addProperty(predicate, newObject);
-        
+
         if (newObject.equals(oldObject)) {
             return;
         }
@@ -530,8 +548,8 @@ public class UserResource {
     private void changeResource(GraphNode userNode, UriRef predicate,
             UriRef newValue) {
 
-        
-        
+
+
         Iterator<Triple> oldTriples = systemGraph.filter(
                 (NonLiteral) userNode.getNode(), predicate, null);
 
