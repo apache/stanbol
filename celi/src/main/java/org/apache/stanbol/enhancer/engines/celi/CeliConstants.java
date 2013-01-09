@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.celi;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -52,5 +53,16 @@ public interface CeliConstants {
      * </ul>
      */
     String CELI_TEST_ACCOUNT = "celi.testaccount";
-
+    
+ 
+    /**
+     * Concept used to annotate sentiment expressions within text
+     *  TODO: Find standard ontology for reference or check if it is OK to define new properties in the FISE namespace
+     */
+ 	UriRef SENTIMENT_EXPRESSION = new UriRef("http://fise.iks-project.eu/ontology/Sentiment Expression");
+ 	/**
+     * Datatype property (targets double literals) used to represent the polarity of a sentiment expression
+     *  TODO: Find standard ontology for reference or check if it is OK to define new properties in the FISE namespace
+     */
+ 	UriRef HAS_SENTIMENT_EXPRESSION_POLARITY=new UriRef("http://fise.iks-project.eu/ontology/hasSentimentPolarityValue");
 }

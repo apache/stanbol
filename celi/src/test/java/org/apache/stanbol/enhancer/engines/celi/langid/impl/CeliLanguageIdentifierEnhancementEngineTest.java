@@ -16,12 +16,11 @@
  */
 package org.apache.stanbol.enhancer.engines.celi.langid.impl;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateAllEntityAnnotations;
 import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateAllTextAnnotations;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -45,9 +44,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 public class CeliLanguageIdentifierEnhancementEngineTest {
 	
@@ -56,8 +52,6 @@ public class CeliLanguageIdentifierEnhancementEngineTest {
     static CeliLanguageIdentifierEnhancementEngine langIdentifier = new CeliLanguageIdentifierEnhancementEngine();
 
     private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
-
-    private static final Logger log = LoggerFactory.getLogger(CeliLanguageIdentifierEnhancementEngine.class);
 	
 	private static final String TEXT = "Brigitte Bardot, née  le 28 septembre 1934 à Paris, est une actrice de cinéma et chanteuse française.";
 
@@ -98,8 +92,7 @@ public class CeliLanguageIdentifierEnhancementEngineTest {
 	        //even through this tests do not validate service quality but rather
 	        //the correct integration of the CELI service as EnhancementEngine
 	        //we expect the "fr" is detected for the parsed text
-	        assertEquals("The detected language for text '"+TEXT+"' MUST BE 'fr'",
-	            "fr",EnhancementEngineHelper.getLanguage(ci));
+	        assertEquals("The detected language for text '"+TEXT+"' MUST BE 'fr'","fr",EnhancementEngineHelper.getLanguage(ci));
 
 	        int entityAnnoNum = validateAllEntityAnnotations(ci.getMetadata(), expectedValues);
 	        assertEquals("No EntityAnnotations are expected",0, entityAnnoNum);
@@ -108,15 +101,4 @@ public class CeliLanguageIdentifierEnhancementEngineTest {
 		}
 	}
 
-// removed: other tests now add a simple triple with <{ciUri},dc:langauge,{lang}>
-/**	public static void addEnanchements(ContentItem ci) throws IOException, ConfigurationException, EngineException {
-		//Add guessed language
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
-		properties.put(EnhancementEngine.PROPERTY_NAME, "celiLangIdentifier");
-	    properties.put(CeliLanguageIdentifierEnhancementEngine.SERVICE_URL, "http://linguagrid.org/LSGrid/ws/language-identifier");
-	    MockComponentContext context = new MockComponentContext(properties);
-		CeliLanguageIdentifierEnhancementEngine langIdentifier=new CeliLanguageIdentifierEnhancementEngine();
-		langIdentifier.activate(context);
-		langIdentifier.computeEnhancements(ci);
-	} **/
 }

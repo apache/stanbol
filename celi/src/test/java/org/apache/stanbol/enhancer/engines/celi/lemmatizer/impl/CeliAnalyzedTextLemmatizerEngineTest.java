@@ -1,6 +1,5 @@
 package org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl;
 
-import static org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.CeliLemmatizerEnhancementEngine.MORPHOLOGICAL_ANALYSIS;
 import static org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.CeliLemmatizerEnhancementEngine.SERVICE_URL;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
@@ -15,14 +14,12 @@ import junit.framework.Assert;
 
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.commons.logging.Log;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
 import org.apache.stanbol.enhancer.engines.celi.testutils.MockComponentContext;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextFactory;
-import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures;
