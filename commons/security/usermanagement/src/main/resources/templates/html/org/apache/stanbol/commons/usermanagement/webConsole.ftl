@@ -15,32 +15,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<!-- needs moving to the nearby CSS resource, but that currently isn't getting loaded -->
-<style>
-    label, input { display:block; }
-    input.text { margin-bottom:12px; width:95%; padding: .4em; }
-    fieldset { padding:0; border:0; margin-top:25px; }
-    .ui-dialog .ui-state-error { padding: .3em; }
-    .validateTips { border: 1px solid transparent; padding: 0.3em; }
-    .important {color:rgb(128,0,0);}
-
-
-    .labelCheckbox {
-        padding: 0px;
-        margin: 0px;
-    }
-    .labelCheckbox input {
-        width: 15px;
-        height: 15px;
-        float: left;
-    }
-    .labelCheckbox label {
-        float: left;
-        padding-left: 3px;
-    }
-
-</style>
-
 <@namespace platform="http://clerezza.org/2009/08/platform#" />
 <@namespace permission="http://clerezza.org/2008/10/permission#" />
 <@namespace sioc="http://rdfs.org/sioc/ns#" />

@@ -75,12 +75,10 @@ public class WebConsolePlugin extends
 
 	}
 	
+    @Override
 	protected String[] getCssReferences() {
         String[] result = new String[1];
-        //this is to use the stanbol way for static resources
-        //http://felix.apache.org/site/providing-resources.html describes the webconsole way
-        //TODO make sure things work when stanbol is not in root
-        result[0] = "../../static/user-management/styles/webconsole.css";
+        result[0] = "res/static/user-management/styles/webconsole.css";
 		return result;
     }
 
@@ -93,12 +91,21 @@ public class WebConsolePlugin extends
 
 	}
 	
+    /**
+     * The felix webconsole way for returning static resources
+     */
 	public URL getResource(String path){
 		if(path.startsWith(STATIC_PREFIX)){
-			return this.getClass().getResource(path.substring(STATIC_PREFIX.length()));
-			
+            //we just get the resources from the same place as stanbol expectes them to be
+            //i.e. the resources will be available below
+            //http://<host>/<path/to/webconsole>/usermangement/res/
+            //by virtuel of this felix webconsole method
+            //as well as below
+            //http://<host>/<path/to/stanbol>/, 
+            //e.g. with the default config below http://localhost:8080/
+			return this.getClass().getResource("/META-INF/resources/"+path.substring(STATIC_PREFIX.length()));		
 		}else {
 			return null;
 		}
-	}
+	} 
 }
