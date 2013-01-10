@@ -2,6 +2,9 @@ package org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.paoding
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,8 +61,13 @@ public class PaodingLabelTokenizer implements LabelTokenizer {
             }
             PaodingAnalyzer pa;
             try {
-                pa = new PaodingAnalyzer();
-            } catch (Exception e) {
+                pa = AccessController.doPrivileged(new PrivilegedExceptionAction<PaodingAnalyzer>() {
+                    public PaodingAnalyzer run() throws Exception {
+                        return new PaodingAnalyzer();
+                    }
+                });
+            } catch (PrivilegedActionException pae){
+                Exception e = pae.getException();
                 log.error("Unable to initialise PoadingAnalyzer",e);
                 return null;
             }
