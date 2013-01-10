@@ -24,12 +24,10 @@
     <@ldpath path="platform:userName :: xsd:string"/>
 </#assign>	
 	
-<#if userName?? && userName != "">
-Current login: ${userName} <br/>
-<input type="hidden" name="currentUserName" value="${userName}" />
-</#if>
 
-login: <input type="text" name="newUserName" value="" /><br/>
+<input type="hidden" name="currentUserName" value="${userName}" />
+
+Login: <input type="text" name="newUserName" value="${userName}" /><br/>
 Full Name: <input type="text" name="fullName" value="<@ldpath path="foaf:name :: xsd:string"/>" /><br/>
 
 <#assign mbox>
@@ -37,11 +35,8 @@ Full Name: <input type="text" name="fullName" value="<@ldpath path="foaf:name ::
 </#assign>
 
 <#attempt>
-   <#assign email>
-      <#if mbox != "">${mbox?substring(7)}</#if>
-   </#assign>
-<#recover>
-</#attempt>
+   <#assign email><#if mbox != "">${mbox?substring(7)}</#if></#assign>
+<#recover></#attempt>
 
 Email : <input type="text" name="email" value="${email}" /><br/>
 Password : <input type="password" name="password" value="" /><br/>

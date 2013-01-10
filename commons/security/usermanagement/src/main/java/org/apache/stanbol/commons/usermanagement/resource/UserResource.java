@@ -65,6 +65,7 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.clerezza.rdf.ontologies.DC;
 import org.apache.clerezza.rdf.ontologies.FOAF;
 import org.apache.clerezza.rdf.ontologies.PLATFORM;
 import org.apache.clerezza.rdf.ontologies.RDF;
@@ -175,11 +176,11 @@ public class UserResource {
 
         //   GraphNode userNode = getUser(currentUserName);
 
-        System.out.println("currentUserName = " + currentUserName);
-        System.out
-                .println("BEFORE ========================================================");
+        // System.out.println("currentUserName = " + currentUserName);
+        //   System.out
+        //      .println("BEFORE ========================================================");
         // serializeTriplesWithSubject(System.out, userNode);
-        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
+        // serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
 
         if (newUserName != null && !newUserName.equals("")) {
             changeLiteral(userNode, PLATFORM.userName, newUserName);
@@ -194,8 +195,8 @@ public class UserResource {
         if (email != null && !email.equals("")) {
             changeResource(userNode, FOAF.mbox, new UriRef("mailto:" + email));
         }
-                if (roles != null) {
-            for(int i=0;i<roles.size();i++) {
+        if (roles != null) {
+            for (int i = 0; i < roles.size(); i++) {
                 addRole(userNode, roles.get(i));
             }
         }
@@ -494,10 +495,39 @@ public class UserResource {
 
         return userNode;
     }
-    
-    private GraphNode addRole(GraphNode userNode, String roleName){
-        // System.out.println("ROLE = "+roleName);
+    // move later?
+    public final static String rolesBase = "urn:x-localhost/local/";
+
+    private GraphNode addRole(GraphNode userNode, String roleName) {
+        System.out.println("ROLENAME = " + roleName);
+
+        // is this thing already around? (will be a bnode)
+        GraphNode roleNode = getTitleNode(roleName);
+
+        // otherwise make a new one as a named node
+        if (roleNode == null) {
+            UriRef roleUriRef = new UriRef(rolesBase + roleName);
+
+            roleNode = new GraphNode(roleUriRef, systemGraph);
+            roleNode.addProperty(RDF.type, PERMISSION.Role);
+            roleNode.addProperty(DC.title, new PlainLiteralImpl(roleName));
+            userNode.addProperty(SIOC.has_function, roleUriRef);
+        } else {
+            userNode.addProperty(SIOC.has_function, roleNode.getNode());
+        }
         return userNode;
+    }
+
+    /* 
+     * must be a neater way of doing this...
+     */
+    private GraphNode getTitleNode(String title) {
+        Iterator<Triple> triples = systemGraph.filter(null, DC.title, new PlainLiteralImpl(title));
+        if (triples.hasNext()) {
+            Resource resource = triples.next().getSubject();
+            return new GraphNode(resource, systemGraph);
+        }
+        return null;
     }
 
     /**
