@@ -64,6 +64,7 @@
     <module>generic/test</module>
     <module>generic/rdfentities</module>
     <module>generic/nlp</module>
+    <module>generic/nlp-json</module>
     <module>jobmanager</module>
 
     <module>chain/allactive</module>
