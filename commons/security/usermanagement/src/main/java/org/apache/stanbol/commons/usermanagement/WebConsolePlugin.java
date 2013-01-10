@@ -78,7 +78,7 @@ public class WebConsolePlugin extends
     @Override
 	protected String[] getCssReferences() {
         String[] result = new String[1];
-        result[0] = "res/static/user-management/styles/webconsole.css";
+        result[0] = "usermanagement/res/static/user-management/styles/webconsole.css";
 		return result;
     }
 
@@ -95,6 +95,7 @@ public class WebConsolePlugin extends
      * The felix webconsole way for returning static resources
      */
 	public URL getResource(String path){
+        System.out.println("******evaluating: "+path);
 		if(path.startsWith(STATIC_PREFIX)){
             //we just get the resources from the same place as stanbol expectes them to be
             //i.e. the resources will be available below
