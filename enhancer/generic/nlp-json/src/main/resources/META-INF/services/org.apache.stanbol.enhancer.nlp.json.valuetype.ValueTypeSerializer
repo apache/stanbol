@@ -1,0 +1,3 @@
+org.apache.stanbol.enhancer.nlp.json.valuetype.impl.PosTagSupport
+org.apache.stanbol.enhancer.nlp.json.valuetype.impl.NerTagSupport
+org.apache.stanbol.enhancer.nlp.json.valuetype.impl.MorphoFeaturesSupport
