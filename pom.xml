@@ -65,7 +65,6 @@
     <module>parent</module>
     <module>data</module>
     <module>commons</module>
-    <module>frameworkfragment</module>
 
     <module>entityhub</module>
     <module>ontologymanager</module>

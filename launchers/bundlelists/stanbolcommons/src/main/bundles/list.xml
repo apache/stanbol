@@ -20,7 +20,7 @@
     <!-- JDK Package Exporter -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.frameworkfragment</artifactId>
+      <artifactId>org.apache.stanbol.commons.frameworkfragment</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
@@ -30,8 +30,7 @@
     <!-- Allows to parse Http Headers as QueryParameter -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.httpqueryheaders
-      </artifactId>
+      <artifactId>org.apache.stanbol.commons.httpqueryheaders</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
   </startLevel>

@@ -26,7 +26,7 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.frameworkfragment</artifactId>
+  <artifactId>org.apache.stanbol.commons.frameworkfragment</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 

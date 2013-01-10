@@ -56,15 +56,18 @@
   </scm>
 
   <modules>
+    <!-- Basic OSGi bundles -->
+    <module>frameworkfragment</module>
+
     <!-- Stanbol Web Framework (JAX-RS & Web UI)-->
     <module>web/base</module>
     <module>web/base.jersey</module>
     <module>web/home</module>
     <module>web/viewable</module>
-    <module>ldpathtemplate</module>
-    <module>web/sparql</module>
-    <module>httpqueryheaders</module> <!-- allows CORS with MS Internet Explorer -->
     <module>web/resources</module>
+    <module>web/sparql</module>
+    <module>ldpathtemplate</module>
+    <module>httpqueryheaders</module> <!-- allows CORS with MS Internet Explorer -->
 	
     <!-- DataFile Provider -->
     <module>stanboltools/datafileprovider</module>
