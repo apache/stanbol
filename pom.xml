@@ -62,7 +62,7 @@
   <modules>
     <module>releasing/source-assembly</module>    
     
-    <!-- module>parent</module -->
+    <module>parent</module>
     <module>data</module>
     <module>commons</module>
 
