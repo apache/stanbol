@@ -280,6 +280,26 @@ public class UserResource {
                 systemGraph);
     }
 
+    @POST
+    @Path("delete")
+    public void removeUser(@FormParam("user") String userName) {
+       // System.out.println("DELETE " + userName);
+        Resource userResource = getNamedUser(userName).getNode();
+        Iterator<Triple> userTriples = systemGraph.filter((NonLiteral)userResource, null, null);
+
+        ArrayList<Triple> buffer = new ArrayList<Triple>();
+
+        Resource oldObject = null;
+        while (userTriples.hasNext()) {
+            Triple triple = userTriples.next();
+            oldObject = triple.getObject();
+            buffer.add(triple);
+        }
+ 
+        // Graph context = getNamedUser(userName).getNodeContext();
+        systemGraph.removeAll(buffer);
+    }
+
     /**
      * ********************
      * Endpoint API ********************
@@ -499,7 +519,7 @@ public class UserResource {
     public final static String rolesBase = "urn:x-localhost/local/";
 
     private GraphNode addRole(GraphNode userNode, String roleName) {
-        System.out.println("ROLENAME = " + roleName);
+        // System.out.println("ROLENAME = " + roleName);
 
         // is this thing already around? (will be a bnode)
         GraphNode roleNode = getTitleNode(roleName);

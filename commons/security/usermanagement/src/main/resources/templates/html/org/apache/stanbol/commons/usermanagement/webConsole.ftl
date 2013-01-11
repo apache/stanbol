@@ -40,11 +40,11 @@ limitations under the License.
             <input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
         </fieldset>
         <fieldset id="roles-checkboxes" class="labelCheckbox">
-
+            <input type="hidden" id="BasePermissionsRole" name="BasePermissionsRole" value="BasePermissionsRole" />
         </fieldset> 
-
     </form>
 </div>
+
 <!-- -->
 
 <div id="tabs">
@@ -229,19 +229,35 @@ limitations under the License.
     }
 
     function removeUser(name){
-        $.dialog({
+        // console.log("Remove user ="+name);
+
+        $("#remove"+name).dialog({
             resizable: false,
             height:140,
             modal: true,
+            title: "Delete",
             buttons: {
                 "Delete User": function() {
-                    $(this).dialog("close");
+                    console.log("deleting user ="+name); 
+                    
+                    $.ajax({
+                        type: 'POST',
+                        url: '/user-management/delete',
+                        data: {"user" : name},
+                        success: function(data) {
+                            close();
+                            location.reload();
+                        }
+                    });
                 },
                 Cancel: function() {
                     $(this).dialog("close");
+                    location.reload();
                 }
             }
         });
     }
+    
+
 </script>
 

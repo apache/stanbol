@@ -9,8 +9,10 @@
 <@ldpath path="dc:title :: xsd:string"/>
 </#assign>
 
+<#if name != "BasePermissionsRole">
 <input type="checkbox" id="${name}" name="${name}" value="${name}" />
 <label for="${name}">${name}</label>
-
+<br/>
+</#if>
 </@ldpath>
 
