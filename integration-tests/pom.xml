@@ -171,13 +171,13 @@
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency> <!-- provides the default Stanbol mappings -->
-     <groupId>org.apache.stanbol</groupId>
-     <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency> <!-- provides the prefix.cc mappings -->
-     <groupId>org.apache.stanbol</groupId>
-     <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
 
@@ -202,8 +202,8 @@
       <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-    	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
       <version>0.10.0-SNAPSHOT</version>      
     </dependency>
     <dependency>
@@ -231,10 +231,10 @@
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.parser</artifactId>
     </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.rdfjson</artifactId>
-      </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.rdfjson</artifactId>
+    </dependency>
   </dependencies>
 
 </project>
