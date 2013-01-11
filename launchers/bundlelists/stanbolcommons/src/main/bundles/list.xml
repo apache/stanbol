@@ -482,14 +482,14 @@
       <artifactId>org.apache.stanbol.commons.ldpath.clerezza</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
-	<bundle>
+	  <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.ldpathtemplate</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
-	<bundle>
+	  <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.viewable</artifactId>
+      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
