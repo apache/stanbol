@@ -25,16 +25,15 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Stanbol Commons Solr Extension for Paoding Analysis</name>
-  <description>This provides an Solr Analyzer for Chinese including dictionary as
-    OSGI bundle. This includes a forced version of the Paoding code base.</description>
+  <name>Apache Stanbol Commons Solr Extension for Paoding Analysis</name>
+  <description>Provides a Solr analyzer for Chinese.</description>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/ext/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/extras/paoding
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/ext/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/extras/paoding
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>
@@ -72,14 +71,6 @@
           </instructions>
         </configuration>
       </plugin>
-      <!-- plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin  -->
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
     </plugins>
   </build>
 
@@ -99,11 +90,11 @@
       <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
-      <dependency>
-        <groupId>org.osgi</groupId>
-        <artifactId>org.osgi.compendium</artifactId>
-        <scope>provided</scope>
-      </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -114,9 +105,9 @@
     </dependency>
 
     <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <scope>provided</scope>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
