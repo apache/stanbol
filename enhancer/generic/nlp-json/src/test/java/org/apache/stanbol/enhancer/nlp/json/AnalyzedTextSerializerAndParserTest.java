@@ -40,6 +40,7 @@ import org.apache.stanbol.enhancer.nlp.morpho.TenseTag;
 import org.apache.stanbol.enhancer.nlp.morpho.VerbMood;
 import org.apache.stanbol.enhancer.nlp.morpho.VerbMoodTag;
 import org.apache.stanbol.enhancer.nlp.ner.NerTag;
+import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
@@ -140,6 +141,8 @@ public class AnalyzedTextSerializerAndParserTest {
         expectedChunks.put(stanbolEnhancer, "Stanbol enhancer");
         stanbolEnhancer.addAnnotation(NlpAnnotations.NER_ANNOTATION, Value.value(
             new NerTag("organization", DBPEDIA_ORGANISATION)));
+        stanbolEnhancer.addAnnotation(NlpAnnotations.PHRASE_ANNOTATION, Value.value(
+            new PhraseTag("NP", LexicalCategory.Noun),0.98));
 
     }
     @Before
