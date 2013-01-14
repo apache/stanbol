@@ -10,7 +10,7 @@ echo "##########################################################################
 echo "                          CHECK SIGNATURES AND DIGESTS                          "
 echo "################################################################################"
 
-for i in `find "$1" -type f | grep -v '\.\(asc\|sha1\|md5\)$'`
+for i in `find "$1" -maxdepth 1 -type f | grep -v '\.\(asc\|sha1\|md5\)$'`
 do
  f=`echo $i | sed 's/\.asc$//'`
  echo "$f"
