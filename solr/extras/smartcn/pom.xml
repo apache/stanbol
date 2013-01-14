@@ -10,19 +10,19 @@
     CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing
     permissions and limitations under the License.
   -->
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>3-SNAPSHOT</version>
+    <version>3</version>
     <relativePath>../../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.solr.extras.smartcn</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>0.11.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Solr Extras: Lucene Smartcn Bundle</name>
@@ -33,12 +33,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/extras/smartcn
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/solr/extras/smartcn
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/extras/smartcn
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/solr/extras/smartcn
     </developerConnection>
-    <url>http://stanbol.apache.org</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0</url>
   </scm>
 
   <build>
