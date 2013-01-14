@@ -25,19 +25,19 @@
   </parent>
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.jobs.reactor</artifactId>
-  <version>0.11.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Commons Jobs Reactor</name>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/jobs
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/jobs
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/jobs
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/jobs
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <modules>

@@ -26,7 +26,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.frameworkfragment</artifactId>
-  <version>0.11.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Commons Framework Fragment</name>
@@ -286,11 +286,5 @@
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/org.apache.stanbol.commons.frameworkfragment</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/org.apache.stanbol.commons.frameworkfragment</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/org.apache.stanbol.commons.frameworkfragment</url>
-  </scm>
 </project>
 

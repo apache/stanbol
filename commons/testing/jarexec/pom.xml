@@ -27,7 +27,7 @@
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.testing.jarexec</artifactId>
-  <version>0.11.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Commons Testing Jar Executor</name>
@@ -37,12 +37,12 @@
   </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/testing/jarexec
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/testing/jarexec
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/testing/jarexec
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/testing/jarexec
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <dependencies>

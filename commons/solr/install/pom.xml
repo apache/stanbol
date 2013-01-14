@@ -28,7 +28,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.solr.install</artifactId>
-  <version>0.11.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Solr Installer</name>
@@ -48,12 +48,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/solr/install
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/install
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/solr/install
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/install
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0//stanbol.apache.org</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>
@@ -87,7 +87,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-      <version>0.11.0</version>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <!-- for the Solr Index Installer -->
     <dependency>

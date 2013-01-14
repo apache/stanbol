@@ -27,19 +27,19 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.ldpathtemplate</artifactId>
-  <version>0.11.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons LDPath Template Rendering</name>
   <description>A service providing ldpath template rendering</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/ldpathtemplate
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/ldpathtemplate
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/ldpathtemplate
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/ldpathtemplate
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

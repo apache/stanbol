@@ -22,7 +22,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.solr.extras.paoding</artifactId>
-  <version>0.11.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Solr Extension for Paoding Analysis</name>
@@ -30,12 +30,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/solr/extras/paoding
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/extras/paoding
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/solr/extras/paoding
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/extras/paoding
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>
