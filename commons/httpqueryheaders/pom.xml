@@ -15,32 +15,31 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>3-SNAPSHOT</version>
+    <version>3</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.httpqueryheaders</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>0.11.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons HTTP Query Headers</name>
   <description>Allows to parse HTTP headers as QueryParameters by prefixing it with "header_{http-header}". This feature allows to bypass the inability of Internet Explorer to set headers for multi domain (CORS) requests. This is a general utility and has no dependencies to Apache Stanbol.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/httpqueryheaders
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/httpqueryheaders
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/httpqueryheaders
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/httpqueryheaders
     </developerConnection>
-    <url>http://stanbol.apache.org/</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/stanbol.apache.org</url>
   </scm>
 
   <build>
@@ -56,7 +55,7 @@
         <extensions>true</extensions>
        <configuration>
          <instructions>
-           <Export-Package></Export-Package>
+           <Export-Package />
            <Import-Package>
             javax.servlet.*; version="[2.5.0,4.0.0)",
             *

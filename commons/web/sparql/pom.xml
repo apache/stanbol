@@ -15,32 +15,31 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>3-SNAPSHOT</version>
+    <version>3</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>0.11.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Web SPARQL</name>
   <description>SPARQL HTTP endpoint for Stanbol</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/sparql
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/web/sparql
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/web/sparql
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/web/sparql
     </developerConnection>
-    <url>http://stanbol.apache.org/</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-commons-0.11.0/stanbol.apache.org</url>
   </scm>
 
   <build>
@@ -75,14 +74,14 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>0.11.0</version>
     </dependency>
 
     <!-- Jersey and servlet -->
     <dependency>
     	<groupId>org.apache.stanbol</groupId>
   		<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.11.0</version>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
