@@ -15,20 +15,19 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.parent</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.0</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.sentiment.sentiws</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.1.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: SentimentWortschatz Models for German</name>
@@ -44,12 +43,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/data/sentiment/sentiws
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-data-1.1.0/sentiment/sentiws
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/data/sentiment/sentiws
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-data-1.1.0/sentiment/sentiws
     </developerConnection>
-    <url>http://incubator.apache.org/stanbol/</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-data-1.1.0/incubator.apache.org/stanbol</url>
   </scm>
   <properties>
     <downloadWarning>
@@ -111,15 +110,15 @@
                 available!
               -->
               <target>
-                <property name="target.directory" value="${project.basedir}/downloads/resources/${sentiment.model.path}"/>
-                <property name="model.url" value="${sentiment.model.home}"/>
+                <property name="target.directory" value="${project.basedir}/downloads/resources/${sentiment.model.path}" />
+                <property name="model.url" value="${sentiment.model.home}" />
                                 
-                <echo message="copy SentiWS (German sentiment) models"/>
-                <echo message="  FROM ${model.url} "/>
-                <echo message="  TO ${target.directory}"/>
+                <echo message="copy SentiWS (German sentiment) models" />
+                <echo message=" FROM ${model.url} " />
+                <echo message=" TO ${target.directory}" />
 
                 <ant antfile="${basedir}/download_models.xml">
-                  <target name="download"/>
+                  <target name="download" />
                 </ant>
               </target>
             </configuration>
