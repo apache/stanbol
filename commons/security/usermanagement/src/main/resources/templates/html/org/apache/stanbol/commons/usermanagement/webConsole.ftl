@@ -51,11 +51,11 @@ limitations under the License.
     <ul>
         <li><a href="#tabs-users">Users</a></li>
         <li><a href="#tabs-roles">Roles</a></li>
-        <li><a href="#tabs-permisions">Permissions</a></li>
+        <li><a href="#tabs-permissions">Permissions</a></li>
     </ul>
     <div id="tabs-users">loading User List</div>
-    <div id="tabs-roles">roles</div>
-    <div id="tabs-permissions">permissions</div>
+    <div id="tabs-roles">loading Roles</div>
+    <div id="tabs-permissions">loading Permissions</div>
 </div>
 
 <!--
@@ -190,6 +190,7 @@ limitations under the License.
         $("#tabs").tabs();
         showUserList();
         showRoleList();
+        showPermissionList();
     });
     
     function addUser(){
@@ -213,6 +214,16 @@ limitations under the License.
             success: function(data) {
                 $("div#tabs-roles").html(data);
                 $("#role-table").tablesorter();
+            }
+        });
+    }  
+    
+        function showPermissionList(){  
+        $.ajax({
+            url: '/user-management/permissions',
+            success: function(data) {
+                $("div#tabs-permissions").html(data);
+                $("#permission-table").tablesorter();
             }
         });
     }  

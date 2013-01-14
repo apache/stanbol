@@ -216,13 +216,17 @@ public class UserResource {
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);
 
+        //////////////////////////////////
+        // serializer.serialize(System.out, userNode.getNodeContext(),SupportedFormat.TURTLE);
+        /////////////////////////////////////////
+
         // see other my not be the best response, but does seem the best given
         // the jax-rs things available
         return Response.seeOther(pageUri).cacheControl(cc).build();
     }
 
     /**
-     * replaces the subgraph serialized with RDF/XML in
+     * NOT CURRENTLY IN USE replaces the subgraph
      * <code>revokedString
      * </code> with the one from
      * <code>assertedString</code>.
@@ -269,6 +273,51 @@ public class UserResource {
     }
 
     @GET
+    @Path("permissions")
+    @Produces("text/html")
+    public RdfViewable listPermissions() {
+        addClassToPermissions();
+        return new RdfViewable("listPermission.ftl", getPermissionType(), this.getClass());
+    }
+
+    /**
+     * a kludge - initially the permissions aren't expressed as instances of
+     * Permission class, this adds the relevant triples
+     */
+    private void addClassToPermissions() {
+        Iterator<Triple> permissionTriples = systemGraph.filter(null, PERMISSION.hasPermission, null);
+
+        ArrayList<GraphNode> buffer = new ArrayList<GraphNode>();
+
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try {
+            while (permissionTriples.hasNext()) {
+                Triple triple = permissionTriples.next();
+                Resource permissionResource = triple.getObject();
+                buffer.add(new GraphNode(permissionResource, systemGraph));
+            }
+        } finally {
+            readLock.unlock();
+        }
+
+        Lock writeLock = systemGraph.getLock().writeLock();
+        writeLock.lock();
+        try {
+            for (int i = 0; i < buffer.size(); i++) {
+                buffer.get(i).addProperty(RDF.type, PERMISSION.Permission);
+            }
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    public GraphNode getPermissionType() {
+        return new GraphNode(PERMISSION.Permission,
+                systemGraph);
+    }
+
+    @GET
     @Path("rolesCheckboxes")
     @Produces("text/html")
     public RdfViewable rolesCheckboxes() {
@@ -283,21 +332,31 @@ public class UserResource {
     @POST
     @Path("delete")
     public void removeUser(@FormParam("user") String userName) {
-       // System.out.println("DELETE " + userName);
+        // System.out.println("DELETE " + userName);
         Resource userResource = getNamedUser(userName).getNode();
-        Iterator<Triple> userTriples = systemGraph.filter((NonLiteral)userResource, null, null);
+        Iterator<Triple> userTriples = systemGraph.filter((NonLiteral) userResource, null, null);
 
         ArrayList<Triple> buffer = new ArrayList<Triple>();
 
-        Resource oldObject = null;
-        while (userTriples.hasNext()) {
-            Triple triple = userTriples.next();
-            oldObject = triple.getObject();
-            buffer.add(triple);
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try {
+            while (userTriples.hasNext()) {
+                Triple triple = userTriples.next();
+                buffer.add(triple);
+            }
+        } finally {
+            readLock.unlock();
         }
- 
+
         // Graph context = getNamedUser(userName).getNodeContext();
-        systemGraph.removeAll(buffer);
+        Lock writeLock = systemGraph.getLock().writeLock();
+        writeLock.lock();
+        try {
+            systemGraph.removeAll(buffer);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -323,10 +382,19 @@ public class UserResource {
         Iterator<Triple> agents = inputGraph.filter(null, null, FOAF.Agent);
 
         NonLiteral userNode = agents.next().getSubject();
+
         Iterator<Triple> userTriples = inputGraph.filter(userNode, null, null);
-        while (userTriples.hasNext()) {
-            Triple userTriple = userTriples.next();
-            systemGraph.add(userTriple);
+
+
+        Lock writeLock = systemGraph.getLock().writeLock();
+        writeLock.lock();
+        try {
+            while (userTriples.hasNext()) {
+                Triple userTriple = userTriples.next();
+                systemGraph.add(userTriple);
+            }
+        } finally {
+            writeLock.unlock();
         }
 
         // it's not actually creating a resource at this URI so this
@@ -355,18 +423,26 @@ public class UserResource {
 
         Literal userNameNode = (Literal) userNameTriples.next().getObject();
 
-        Iterator<Triple> userTriples = systemGraph.filter(null, null,
-                userNameNode);
-
-        Triple userTriple = userTriples.next();
-        Iterator<Triple> systemUserTriples = systemGraph.filter(
-                userTriple.getSubject(), null, null);
-
         // gives concurrent mod exception otherwise
         ArrayList<Triple> tripleBuffer = new ArrayList<Triple>();
-        while (systemUserTriples.hasNext()) {
-            tripleBuffer.add(systemUserTriples.next());
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try {
+            Iterator<Triple> userTriples = systemGraph.filter(null, null,
+                    userNameNode);
+
+            Triple userTriple = userTriples.next();
+            Iterator<Triple> systemUserTriples = systemGraph.filter(
+                    userTriple.getSubject(), null, null);
+
+
+            while (systemUserTriples.hasNext()) {
+                tripleBuffer.add(systemUserTriples.next());
+            }
+        } finally {
+            readLock.unlock();
         }
+
         systemGraph.removeAll(tripleBuffer);
 
         // it's not actually creating a resource at this URI so this
@@ -374,6 +450,7 @@ public class UserResource {
         return Response.noContent().build();
     }
 
+    // needs refactoring and locks adding
     @POST
     @Consumes("text/turtle")
     @Path("change-user")
@@ -383,6 +460,8 @@ public class UserResource {
 
         Graph inputGraph = readData(userData);
 
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
         Iterator<Triple> changes = inputGraph.filter(null, null,
                 Ontology.Change);
 
@@ -457,6 +536,7 @@ public class UserResource {
         return Response.ok(serialized).build();
     }
 
+    /// LOCKS MAYBE OK TO HERE
     /**
      * RESTful access to user roles (and permissions right now - may change)
      *
@@ -487,6 +567,7 @@ public class UserResource {
                     (NonLiteral) functionNode.getNode(), RDF.type,
                     PERMISSION.Role);
 
+            // needs lock?
             while (roleIterator.hasNext()) {
                 Triple roleTriple = roleIterator.next();
                 // rolesGraph.add(roleTriple);
@@ -569,10 +650,17 @@ public class UserResource {
         ArrayList<Triple> oldBuffer = new ArrayList<Triple>();
 
         Resource oldObject = null;
-        while (oldTriples.hasNext()) {
-            Triple triple = oldTriples.next();
-            oldObject = triple.getObject();
-            oldBuffer.add(triple);
+
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try {
+            while (oldTriples.hasNext()) {
+                Triple triple = oldTriples.next();
+                oldObject = triple.getObject();
+                oldBuffer.add(triple);
+            }
+        } finally {
+            readLock.unlock();
         }
 
         // filter appears to see plain literals and xsd:strings as differerent
@@ -607,14 +695,20 @@ public class UserResource {
 
         // System.out.println("\n\n");
 
-        while (oldTriples.hasNext()) {
-            Triple triple = oldTriples.next();
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try {
+            while (oldTriples.hasNext()) {
+                Triple triple = oldTriples.next();
 
-            Resource oldValue = triple.getObject();
-            if (newValue.equals(oldValue)) {
-                return;
+                Resource oldValue = triple.getObject();
+                if (newValue.equals(oldValue)) {
+                    return;
+                }
+                oldBuffer.add(triple);
             }
-            oldBuffer.add(triple);
+        } finally {
+            readLock.unlock();
         }
 
         // filter appears to see plain literals and xsd:strings as differerent
@@ -661,6 +755,7 @@ public class UserResource {
         return getNamedUser(userName);
     }
 
+    // needs lock?
     private GraphNode getNamedUser(String userName) {
 
         // System.out.println("getting named user = "+userName);
