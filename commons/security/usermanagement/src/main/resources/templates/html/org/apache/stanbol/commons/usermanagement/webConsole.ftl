@@ -55,6 +55,8 @@ limitations under the License.
 
 <!-- #include "*/editUserForm.html" -->
 
+<#include "/html/included.ftl">
+
 <div id="tabs">
     <ul>
         <li><a href="#tabs-users">Users</a></li>
