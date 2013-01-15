@@ -39,13 +39,21 @@ limitations under the License.
             <label for="password">Password <span class="important">*</span></label>
             <input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
         </fieldset>
+
+
         <fieldset id="roles-checkboxes" class="labelCheckbox">
+            <legend>Roles</legend>
             <input type="hidden" id="BasePermissionsRole" name="BasePermissionsRole" value="BasePermissionsRole" />
+        </fieldset> 
+<br/>
+        <fieldset id="permissions-checkboxes" class="labelCheckbox">
+            <legend>Direct Permissions</legend>
         </fieldset> 
     </form>
 </div>
 
-<!-- -->
+
+<!-- #include "*/editUserForm.html" -->
 
 <div id="tabs">
     <ul>
@@ -58,17 +66,6 @@ limitations under the License.
     <div id="tabs-permissions">loading Permissions</div>
 </div>
 
-<!--
-                Permssions: 
-                <ul>
-                    <@ldpath path="fn:sort(permission:hasPermission)">
-                        <li class="permission" style="list-style-type: disc;">
-                            <@ldpath path="permission:javaPermissionEntry :: xsd:string"/>
-                        </li>
-                    </@ldpath>
-                </ul>
--->
-
 
 <script>
         
@@ -76,6 +73,11 @@ limitations under the License.
         $.get("/user-management/rolesCheckboxes",
         function(data){
             $("#roles-checkboxes").html(data);
+        }, "text/html");
+        
+        $.get("/user-management/permissionsCheckboxes",
+        function(data){
+            $("#permissions-checkboxes").html(data);
         }, "text/html");
 
    
@@ -218,7 +220,7 @@ limitations under the License.
         });
     }  
     
-        function showPermissionList(){  
+    function showPermissionList(){  
         $.ajax({
             url: '/user-management/permissions',
             success: function(data) {

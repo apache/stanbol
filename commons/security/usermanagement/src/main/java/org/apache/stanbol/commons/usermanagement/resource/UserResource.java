@@ -177,10 +177,10 @@ public class UserResource {
         //   GraphNode userNode = getUser(currentUserName);
 
         // System.out.println("currentUserName = " + currentUserName);
-        //   System.out
-        //      .println("BEFORE ========================================================");
+        System.out
+                .println("BEFORE ========================================================");
         // serializeTriplesWithSubject(System.out, userNode);
-        // serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
+        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
 
         if (newUserName != null && !newUserName.equals("")) {
             changeLiteral(userNode, PLATFORM.userName, newUserName);
@@ -201,10 +201,9 @@ public class UserResource {
             }
         }
 
-        // System.out
-        // .println("AFTER ========================================================");
+        System.out.println("AFTER ========================================================");
         // serializeTriplesWithSubject(System.out, userNode);
-
+        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
         // System.out
         // .println("^^^^ ========================================================");
 
@@ -312,11 +311,6 @@ public class UserResource {
         }
     }
 
-    public GraphNode getPermissionType() {
-        return new GraphNode(PERMISSION.Permission,
-                systemGraph);
-    }
-
     @GET
     @Path("rolesCheckboxes")
     @Produces("text/html")
@@ -326,6 +320,25 @@ public class UserResource {
 
     public GraphNode getRoleType() {
         return new GraphNode(PERMISSION.Role,
+                systemGraph);
+    }
+
+    @GET
+    @Path("permissionsCheckboxes")
+    @Produces("text/html")
+    public RdfViewable permissionsCheckboxes() {
+        return new RdfViewable("permissionsCheckboxes.ftl", getPermissionType(), this.getClass());
+    }
+
+    @GET
+    @Path("permissionsOptions")
+    @Produces("text/html")
+    public RdfViewable permissionsOptions() {
+        return new RdfViewable("permissionsOptions.ftl", getPermissionType(), this.getClass());
+    }
+
+    public GraphNode getPermissionType() {
+        return new GraphNode(PERMISSION.Permission,
                 systemGraph);
     }
 

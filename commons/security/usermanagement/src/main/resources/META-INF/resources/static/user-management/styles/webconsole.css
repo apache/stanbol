@@ -20,9 +20,19 @@ ul {
     list-style-position: inside;
 }
 
-label, input { display:block; }
+label, input { display:block; float:left }
 input.text { margin-bottom:12px; width:95%; padding: .4em; }
-fieldset { padding:0; border:0; margin-top:25px; }
+
+fieldset { padding:10px; margin-top:25px; border: 2px }
+
+legend {
+  padding: 0.2em 0.5em;
+  border:1px solid green;
+  color:green;
+  font-size:90%;
+  text-align:right;
+  }
+  
 .ui-dialog .ui-state-error { padding: .3em; }
 .validateTips { border: 1px solid transparent; padding: 0.3em; }
 .important {color:rgb(128,0,0);}
@@ -34,19 +44,25 @@ fieldset { padding:0; border:0; margin-top:25px; }
     font-weight:bold;
 }
 
-
 .labelCheckbox {
+    display: block;
+   /*  float: left; */
     padding: 0px;
     margin: 0px;
 }
 .labelCheckbox input {
-    width: 15px;
-    height: 15px;
-    float: left;
+    width: 13px;
+    height: 13px;
+    padding: 0;
+    margin:0;
+    vertical-align: bottom;
+    position: relative;
+    top: -1px;
 }
 .labelCheckbox label {
-    float: left;
-    padding-left: 3px;
+        display: block;
+    padding-left: 15px;
+    text-indent: -15px;
 }
 
 /* to include - popup stuff */
