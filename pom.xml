@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>2-SNAPSHOT</version>
+    <version>3-SNAPSHOT</version>
     <relativePath>parent</relativePath>
   </parent>
 
@@ -65,7 +65,6 @@
     <module>parent</module>
     <module>data</module>
     <module>commons</module>
-    <module>frameworkfragment</module>
 
     <module>entityhub</module>
     <module>ontologymanager</module>
@@ -81,9 +80,6 @@
     <module>reasoners</module>
 
     <module>demos/webvie</module>
-
-    <!-- Out of date -->
-    <!-- module>factstore</module -->
 
     <module>launchers/bundlelists</module>
     <module>launchers/full</module>

@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>2-SNAPSHOT</version>
+    <version>3-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
@@ -71,7 +71,6 @@
     <module>entityhub</module>
     <module>cmsadapter</module>
     <module>contenthub</module>
-    <module>factstore</module>
     <module>ontologymanager</module>
     <module>reasoners</module>
     <module>rules</module>

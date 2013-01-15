@@ -15,13 +15,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>2-SNAPSHOT</version>
+    <version>3-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
 
@@ -56,15 +56,18 @@
   </scm>
 
   <modules>
+    <!-- Basic OSGi bundles -->
+    <module>frameworkfragment</module>
+
     <!-- Stanbol Web Framework (JAX-RS & Web UI)-->
     <module>web/base</module>
     <module>web/base.jersey</module>
     <module>web/home</module>
     <module>web/viewable</module>
-    <module>ldpathtemplate</module>
-    <module>web/sparql</module>
-    <module>httpqueryheaders</module> <!-- allows CORS with MS Internet Explorer -->
     <module>web/resources</module>
+    <module>web/sparql</module>
+    <module>ldpathtemplate</module>
+    <module>httpqueryheaders</module> <!-- allows CORS with MS Internet Explorer -->
 	
     <!-- DataFile Provider -->
     <module>stanboltools/datafileprovider</module>

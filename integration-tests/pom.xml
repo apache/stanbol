@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>2-SNAPSHOT</version>
+    <version>3-SNAPSHOT</version>
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
@@ -120,13 +120,10 @@
             <server.ready.path.4>/entityhub:The RESTful API of the Entityhub</server.ready.path.4>
             <server.ready.path.5>/ontonet:Apache Stanbol OntoNet:Accept:text/html</server.ready.path.5>
             <server.ready.path.6>/reasoners:The Stanbol Reasoners provides</server.ready.path.6>
-            <!-- server.ready.path.7>/factstore:What is the FactStore</server.ready.path.7 -->
           </systemPropertyVariables>
           <excludes>
             <!-- Config is to big and Regex check on result causes OutOfMemoryExceptions -->
             <exclude>**/DefaultConfigTest.java</exclude>
-            <!-- Facstore is not adapted to the new JSON-LD (will go to contrib soon) -->
-            <exclude>**/FactStoreTest.java</exclude>
           </excludes>
         </configuration>
       </plugin>
@@ -174,13 +171,13 @@
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency> <!-- provides the default Stanbol mappings -->
-     <groupId>org.apache.stanbol</groupId>
-     <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
     <dependency> <!-- provides the prefix.cc mappings -->
-     <groupId>org.apache.stanbol</groupId>
-     <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
 
@@ -205,8 +202,8 @@
       <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-    	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
       <version>0.10.0-SNAPSHOT</version>      
     </dependency>
     <dependency>
@@ -234,10 +231,10 @@
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.parser</artifactId>
     </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.rdfjson</artifactId>
-      </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.rdfjson</artifactId>
+    </dependency>
   </dependencies>
 
 </project>
