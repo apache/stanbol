@@ -9,10 +9,8 @@
 <@ldpath path="permission:javaPermissionEntry :: xsd:string"/>
 </#assign>
 
-<!-- #if name != "BasePermissionsRole" -->
 <input type="checkbox" id="${name}" name="${name}" value="${name}" />
 <label for="${name}">${name}</label>
-<!-- /#if -->
 </@ldpath>
 
 

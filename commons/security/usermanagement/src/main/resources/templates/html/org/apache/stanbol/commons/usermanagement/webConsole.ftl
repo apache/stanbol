@@ -18,56 +18,7 @@ limitations under the License.
 <@namespace platform="http://clerezza.org/2009/08/platform#" />
 <@namespace permission="http://clerezza.org/2008/10/permission#" />
 <@namespace sioc="http://rdfs.org/sioc/ns#" />
-
-<!--
-<p class="statline ui-state-highlight">There are X amount of users blah blah blah</p>
--->
-<br />
-<!-- couldn't get all the jQueryUI magic to work, so using onClick() instead -->
-<p><button id="create-user" onClick="addUser()"> Create New User </button></p>
-<br />
-<div id="createUserForm" title="Create New User">
-    <p id="validateTips" class="important">* required fields</p>
-    <form>
-        <fieldset>
-            <label for="login">Login <span class="important">*</span></label>
-            <input type="text" name="login" id="login" class="text ui-widget-content ui-corner-all" />
-            <label for="fullName">Full Name</label>
-            <input type="text" name="fullName" id="fullName" class="text ui-widget-content ui-corner-all" />
-            <label for="email">Email</label>
-            <input type="text" name="email" id="email" value="" class="text ui-widget-content ui-corner-all" />
-            <label for="password">Password <span class="important">*</span></label>
-            <input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
-        </fieldset>
-
-
-        <fieldset id="roles-checkboxes" class="labelCheckbox">
-            <legend>Roles</legend>
-            <input type="hidden" id="BasePermissionsRole" name="BasePermissionsRole" value="BasePermissionsRole" />
-        </fieldset> 
-<br/>
-        <fieldset id="permissions-checkboxes" class="labelCheckbox">
-            <legend>Direct Permissions</legend>
-        </fieldset> 
-    </form>
-</div>
-
-
-<!-- #include "*/editUserForm.html" -->
-
-<#include "/html/included.ftl">
-
-<div id="tabs">
-    <ul>
-        <li><a href="#tabs-users">Users</a></li>
-        <li><a href="#tabs-roles">Roles</a></li>
-        <li><a href="#tabs-permissions">Permissions</a></li>
-    </ul>
-    <div id="tabs-users">loading User List</div>
-    <div id="tabs-roles">loading Roles</div>
-    <div id="tabs-permissions">loading Permissions</div>
-</div>
-
+<@namespace dc="http://purl.org/dc/elements/1.1/" />
 
 <script>
         
@@ -232,6 +183,20 @@ limitations under the License.
         });
     }  
 
+    function edit(name){
+//        var back = ("<div style='float:right;'><href='#' onClick='showUserList()'>&lt;&lt; back to user list</a></div>");    
+        $.ajax({
+            url: '/user-management/user/'+name,
+            success: function(data) {
+             //   $("div#tabs-users").html(back);
+              //  $("div#tabs-users").append(data);
+                $("#editUserForm").html(data);
+            }
+        });
+
+        $("#editUserForm").dialog("open");
+    }
+    
     function editUser(name){
         var back = ("<div style='float:right;'><href='#' onClick='showUserList()'>&lt;&lt; back to user list</a></div>");    
         $.ajax({
@@ -275,4 +240,55 @@ limitations under the License.
     
 
 </script>
+
+<!--
+<p class="statline ui-state-highlight">There are X amount of users blah blah blah</p>
+-->
+<br />
+<!-- couldn't get all the jQueryUI magic to work, so using onClick() instead -->
+<p><button id="create-user" onClick="addUser()"> Create New User </button></p>
+<br />
+<div id="createUserForm" title="Create New User">
+    <p id="validateTips" class="important">* required fields</p>
+    <form>
+        <fieldset>
+            <label for="login">Login <span class="important">*</span></label>
+            <input type="text" name="login" id="login" class="text ui-widget-content ui-corner-all" />
+            <label for="fullName">Full Name</label>
+            <input type="text" name="fullName" id="fullName" class="text ui-widget-content ui-corner-all" />
+            <label for="email">Email</label>
+            <input type="text" name="email" id="email" value="" class="text ui-widget-content ui-corner-all" />
+            <label for="password">Password <span class="important">*</span></label>
+            <input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
+        </fieldset>
+
+
+        <fieldset id="roles-checkboxes" class="labelCheckbox">
+            <legend>Roles</legend>
+            <input type="hidden" id="BasePermissionsRole" name="BasePermissionsRole" value="BasePermissionsRole" />
+        </fieldset> 
+<!--
+        <fieldset id="permissions-checkboxes" class="labelCheckbox">
+            <legend>Direct Permissions</legend>
+        </fieldset> 
+-->
+    </form>
+</div>
+
+
+<#include "/html/editUserForm.ftl">
+
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-users">Users</a></li>
+        <li><a href="#tabs-roles">Roles</a></li>
+        <li><a href="#tabs-permissions">Permissions</a></li>
+    </ul>
+    <div id="tabs-users">loading User List</div>
+    <div id="tabs-roles">loading Roles</div>
+    <div id="tabs-permissions">loading Permissions</div>
+</div>
+
+
+
 
