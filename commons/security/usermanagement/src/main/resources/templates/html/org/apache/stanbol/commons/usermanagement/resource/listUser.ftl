@@ -48,9 +48,8 @@
             </td>
             <td>
                 <ul class="icons ui-widget">
-                    <li class="dynhover ui-state-default ui-corner-all" title="Edit" onClick="javascript:edit('${userName}')"><span class="ui-icon ui-icon-star">&nbsp;</span></li>
                     <li class="dynhover ui-state-default ui-corner-all" title="Edit Permissions" onClick="javascript:editUserPermissions('${userName}')"><span class="ui-icon ui-icon-plus">&nbsp;</span></li>
-                    <li class="dynhover ui-state-default ui-corner-all" title="Edit" onClick="javascript:editUser('${userName}')"><span class="ui-icon ui-icon-edit">&nbsp;</span></li>
+                    <li class="dynhover ui-state-default ui-corner-all" title="Edit" onClick="javascript:edit('${userName}')"><span class="ui-icon ui-icon-edit">&nbsp;</span></li>
                     <li class="dynhover ui-state-default ui-corner-all delete" title="Delete" onClick="javascript:removeUser('${userName}')"><span class="ui-icon ui-icon-trash">&nbsp;</span><div id="remove${userName}" class="hidden delete-dialog" title="Remove User"><p><br/>Delete user : ${userName}?</p></div></li>
                 </ul>
             </td>

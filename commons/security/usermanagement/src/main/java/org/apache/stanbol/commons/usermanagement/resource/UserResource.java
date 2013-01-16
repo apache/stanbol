@@ -124,6 +124,25 @@ public class UserResource {
         return new RdfViewable("editUser.ftl", getUser(userName),
                 this.getClass());
     }
+    private static GraphNode dummyNode;
+
+    static {
+        dummyNode = new GraphNode(new BNode(), new SimpleMGraph());
+        dummyNode.addProperty(RDF.type, FOAF.Agent);
+    }
+
+    @GET
+    @Path("create-form")
+    public RdfViewable getCreateUserForm(@Context UriInfo uriInfo) {
+//            stanbol/commons/security/usermanagement/src/main/resources/templates/html/org/apache/stanbol/commons/usermanagement/resource/editUser.ftl
+
+        return new RdfViewable("editUser.ftl", dummyNode,
+                this.getClass());
+        //                URI pageUri = uriInfo.getBaseUriBuilder()
+//                .path("html/editUserTemp.ftl").build();
+//
+//        return Response.ok().build();
+    }
 
     @GET
     @Path("view-user")
@@ -132,35 +151,42 @@ public class UserResource {
         return new RdfViewable("edit.ftl", getUser(userName), this.getClass());
     }
 
-    @POST
-    @Path("create-user")
-    @Consumes("application/x-www-form-urlencoded")
-    public Response newUser(@Context UriInfo uriInfo,
-            @FormParam("login") String login,
-            @FormParam("fullName") String fullName,
-            @FormParam("email") String email,
-            @FormParam("password") String password,
-            @FormParam("roles") List<String> roles) {
-
-        // System.out.println("ROLES COUNT = "+roles.size());
-        GraphNode userNode = createUser(login);
-        return store(userNode, uriInfo, login, login, fullName, email, password, roles);
-    }
-
+//    @POST
+//    @Path("create-user")
+//    @Consumes("application/x-www-form-urlencoded")
+//    public Response newUser(@Context UriInfo uriInfo,
+//            @FormParam("login") String login,
+//            @FormParam("fullName") String fullName,
+//            @FormParam("email") String email,
+//            @FormParam("password") String password,
+//            @FormParam("roles") List<String> roles) {
+//
+//        // System.out.println("ROLES COUNT = "+roles.size());
+//        GraphNode userNode = createUser(login);
+//        return store(userNode, uriInfo, login, login, fullName, email, password, roles);
+//    }
     @POST
     @Path("store-user")
     // @Consumes("multipart/form-data")
     @Consumes("application/x-www-form-urlencoded")
     public Response storeUser(@Context UriInfo uriInfo,
-            @FormParam("currentUserName") String currentUserName,
-            @FormParam("newUserName") String newUserName,
+            @FormParam("currentLogin") String currentLogin,
+            @FormParam("newLogin") String newLogin,
             @FormParam("fullName") String fullName,
             @FormParam("email") String email,
             @FormParam("password") String password,
             @FormParam("roles") List<String> roles) {
 
-        GraphNode userNode = getUser(currentUserName);
-        return store(userNode, uriInfo, currentUserName, newUserName, fullName, email, password, roles);
+        GraphNode userNode;
+
+        // System.out.println("CURRENTUSERNAME = ["+currentUserName+"]");
+        if (currentLogin != null && !currentLogin.equals("")) {
+            userNode = getUser(currentLogin);
+            return store(userNode, uriInfo, currentLogin, newLogin, fullName, email, password, roles);
+        }
+        System.out.println("NEWLOGIN = [" + newLogin + "]");
+        userNode = createUser(newLogin);
+        return store(userNode, uriInfo, newLogin, newLogin, fullName, email, password, roles);
     }
 
     /**
@@ -177,10 +203,10 @@ public class UserResource {
         //   GraphNode userNode = getUser(currentUserName);
 
         // System.out.println("currentUserName = " + currentUserName);
-        System.out
-                .println("BEFORE ========================================================");
-        // serializeTriplesWithSubject(System.out, userNode);
-        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
+//        System.out
+//                .println("BEFORE ========================================================");
+//        // serializeTriplesWithSubject(System.out, userNode);
+//        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
 
         if (newUserName != null && !newUserName.equals("")) {
             changeLiteral(userNode, PLATFORM.userName, newUserName);
@@ -201,9 +227,9 @@ public class UserResource {
             }
         }
 
-        System.out.println("AFTER ========================================================");
-        // serializeTriplesWithSubject(System.out, userNode);
-        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
+//        System.out.println("AFTER ========================================================");
+//        // serializeTriplesWithSubject(System.out, userNode);
+//        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
         // System.out
         // .println("^^^^ ========================================================");
 
