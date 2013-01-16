@@ -153,7 +153,14 @@ public class MorphoFeatures {
 
     @Override
     public int hashCode() {
-        return lemma.hashCode() + posTags.hashCode() + genderTags.hashCode() + personValue.hashCode() + caseFeatureTags.hashCode() + definitnessValue.hashCode() + verbFormTags.hashCode() + tenseTags.hashCode();
+        return lemma.hashCode() + 
+                (posTags != null ? posTags.hashCode() : 0) + 
+                (genderTags != null ? genderTags.hashCode() : 0) + 
+                (personValue != null ? personValue.hashCode() : 0) + 
+                (caseFeatureTags != null ? caseFeatureTags.hashCode() : 0) + 
+                (definitnessValue != null ? definitnessValue.hashCode() : 0) + 
+                (verbFormTags != null ? verbFormTags.hashCode() : 0) + 
+                (tenseTags != null ? tenseTags.hashCode() : 0);
     }
     @Override
     public boolean equals(Object o) {
