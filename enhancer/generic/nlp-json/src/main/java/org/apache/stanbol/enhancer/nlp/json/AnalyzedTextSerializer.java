@@ -24,6 +24,8 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Serializes an AnalysedText instance as JSON
@@ -33,6 +35,8 @@ import org.codehaus.jackson.node.ObjectNode;
 @Component(immediate=true,policy=ConfigurationPolicy.IGNORE)
 @Service(value=AnalyzedTextSerializer.class)
 public class AnalyzedTextSerializer {
+    
+    Logger log = LoggerFactory.getLogger(AnalyzedTextSerializer.class);
 
     private final static Charset UTF8 = Charset.forName("UTF-8");
     
@@ -106,6 +110,7 @@ public class AnalyzedTextSerializer {
     }
 
     private ObjectNode writeSpan(Span span) throws IOException {
+        log.trace("wirte {}",span);
         ObjectNode jSpan = mapper.createObjectNode();
         jSpan.put("type", span.getType().name());
         jSpan.put("start", span.getStart());
@@ -122,6 +127,7 @@ public class AnalyzedTextSerializer {
                 jSpan.put(key, jValues);
             }
         }
+        log.trace(" ... {}",jSpan);
         return jSpan;
     }
 
