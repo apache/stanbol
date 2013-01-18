@@ -99,17 +99,17 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.11.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>0.11.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.11.0</version>
     </dependency>
 
     <!-- Clerezza dependencies -->
@@ -130,7 +130,7 @@
     <dependency>
     	<groupId>org.apache.stanbol</groupId>
   		<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-      <version>0.10.0-SNAPSHOT</version>      
+      <version>0.11.0</version>      
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
