@@ -93,7 +93,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.11.0</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -112,14 +112,14 @@
 
     <!-- namespace prefixes mappings -->
     <dependency> <!-- provides the default Stanbol mappings -->
-     <groupId>org.apache.stanbol</groupId>
-     <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
+      <version>0.11.0</version>
     </dependency>
     <dependency> <!-- provides the prefix.cc mappings -->
-     <groupId>org.apache.stanbol</groupId>
-     <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
+      <version>0.11.0</version>
     </dependency>
 
 
@@ -141,19 +141,19 @@
 
     <!-- for logging -->
     <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <scope>runtime</scope>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <dependency> <!-- we use log4j 1.2 -->
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-        <scope>runtime</scope>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <dependency> <!-- see also the log4j.properties in src/main/resources -->
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
-        <scope>runtime</scope>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 

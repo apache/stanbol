@@ -22,7 +22,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.solr.extras.paoding</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>0.12.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Solr Extension for Paoding Analysis</name>

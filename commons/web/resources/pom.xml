@@ -27,7 +27,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.web.resources</artifactId>
-  <version>0.10.1-SNAPSHOT</version>
+  <version>0.12.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Web Resources</name>

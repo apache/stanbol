@@ -1,143 +1,143 @@
 <?xml version="1.0" encoding="UTF-8"?>
-	<!--
-		Licensed to the Apache Software Foundation (ASF) under one or more
-		contributor license agreements. See the NOTICE file distributed with
-		this work for additional information regarding copyright ownership.
-		The ASF licenses this file to You under the Apache License, Version
-		2.0 (the "License"); you may not use this file except in compliance
-		with the License. You may obtain a copy of the License at
+  <!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements. See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version
+    2.0 (the "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
 
-		http://www.apache.org/licenses/LICENSE-2.0 Unless required by
-		applicable law or agreed to in writing, software distributed under the
-		License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-		CONDITIONS OF ANY KIND, either express or implied. See the License for
-		the specific language governing permissions and limitations under the
-		License.
-	-->
+    http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+    applicable law or agreed to in writing, software distributed under the
+    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+    CONDITIONS OF ANY KIND, either express or implied. See the License for
+    the specific language governing permissions and limitations under the
+    License.
+  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>stanbol-parent</artifactId>
-		<version>3</version>
-		<relativePath>../../../parent</relativePath>
-	</parent>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>3</version>
+    <relativePath>../../../parent</relativePath>
+  </parent>
 
-	<groupId>org.apache.stanbol</groupId>
-	<artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-	<version>0.10.0-SNAPSHOT</version>
-	<packaging>bundle</packaging>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+  <version>0.12.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
 
-	<name>Apache Stanbol Commons Solr Managed</name>
-	<description>This bundle provides support for manageing
+  <name>Apache Stanbol Commons Solr Managed</name>
+  <description>This bundle provides support for manageing
   Solr Servers (CoreContainer and SolrCores) within the Stanbol JVM.
   Managed CoreContainer and SolrCores are registered as OSGI services
   and may be published via the OSGI http service.
   </description>
 
-	<inceptionYear>2010</inceptionYear>
+  <inceptionYear>2010</inceptionYear>
 
-	<scm>
-		<connection>
+  <scm>
+    <connection>
       scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/managed
     </connection>
-		<developerConnection>
+    <developerConnection>
       scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/managed
     </developerConnection>
-		<url>http://stanbol.apache.org</url>
-	</scm>
+    <url>http://stanbol.apache.org</url>
+  </scm>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Export-Package>
-							org.apache.stanbol.commons.solr.managed;version=${project.version}; provide:=true,
-                            org.apache.stanbol.commons.solr.managed.util;version=${project.version},
-                            org.apache.stanbol.commons.solr.managed.standalone;version=${project.version}
-                        </Export-Package>
-						<Private-Package>
-							org.apache.stanbol.commons.solr.managed.impl;version=${project.version}
-                        </Private-Package>
-						<Embed-Dependency />
-					</instructions>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-scr-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.apache.stanbol.commons.solr.managed;version=${project.version}; provide:=true,
+              org.apache.stanbol.commons.solr.managed.util;version=${project.version},
+              org.apache.stanbol.commons.solr.managed.standalone;version=${project.version}
+            </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.commons.solr.managed.impl;version=${project.version}
+            </Private-Package>
+            <Embed-Dependency />
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
-	<dependencies>
-		<!-- Stanbol Commomns dependencies -->
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-			<version>0.9.0-incubating</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-			<version>0.10.1-SNAPSHOT</version>
-		</dependency>
-		<!-- dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.solr.web</artifactId>
-			<version>0.9.0-incubating</version>
-		</dependency -->
+  <dependencies>
+    <!-- Stanbol Commomns dependencies -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+      <version>0.11.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <version>0.11.0</version>
+    </dependency>
+    <!-- dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.web</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency -->
 
-		<!-- OSGI dependencies -->
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.scr.annotations</artifactId>
-		</dependency>
-		<!-- generic stuff -->
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-compress</artifactId>
-		</dependency>
+    <!-- OSGI dependencies -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <!-- generic stuff -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+    </dependency>
         
-		<!-- Logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<!--
-			for tests NOTE: We also need all the Solr dependencies for the Unit
-			Tests!
-		-->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+    <!-- Logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <!--
+      for tests NOTE: We also need all the Solr dependencies for the Unit
+      Tests!
+    -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
 </project>

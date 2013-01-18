@@ -28,7 +28,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>0.12.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons OpenNLP Utilities and Models</name>
@@ -79,10 +79,10 @@
   </build>
   
   <dependencies>
-   <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-        <version>0.9.0-incubating</version>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+      <version>0.11.0</version>
     </dependency>
 
     <!-- obviously we need opennlp -->
@@ -123,7 +123,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.2.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>

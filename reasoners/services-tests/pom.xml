@@ -17,10 +17,12 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <artifactId>stanbol-parent</artifactId>
     <groupId>org.apache.stanbol</groupId>
-    <version>0.10.0-SNAPSHOT</version>
+    <version>3</version>
+    <relativePath>../../parent</relativePath>    
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
@@ -28,7 +30,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <name>Tests for the Stanbol Reasoners REST services</name>
   
-    <properties>
+  <properties>
     <!-- Set this to run the server on a specific port -->
     <http.port></http.port>
 
@@ -41,83 +43,6 @@
     <!-- Set this to true to keep the runnable jar running - useful to debug tests -->
     <keepJarRunning>false</keepJarRunning>
   </properties>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.kres</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
-    </dependency>
-	<dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.9.0-incubating</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
-      <version>0.9.0-incubating</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
-      <version>0.9.0-incubating</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.reasoners.test</artifactId>
-      <version>0.9.0-incubating</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-  	<dependency>
-    	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-server</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.jettison</groupId>
-      <artifactId>jettison</artifactId>
-    </dependency>
-    <dependency>
-		<groupId>org.apache.james</groupId>
-		<artifactId>apache-mime4j</artifactId>
-		<version>0.6</version>
-		<scope>test</scope>
-	</dependency>
-    <dependency>
-		<groupId>org.apache.httpcomponents</groupId>
-		<artifactId>httpclient</artifactId>
-		<version>4.0.1</version>
-		<scope>test</scope>
-	</dependency>
-    <dependency>
-		<groupId>org.apache.httpcomponents</groupId>
-		<artifactId>httpcore</artifactId>
-		<version>4.1</version>
-		<scope>test</scope>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.httpcomponents</groupId>
-		<artifactId>httpmime</artifactId>
-		<version>4.0.1</version>
-		<scope>test</scope>
-	</dependency>
-  </dependencies>
 
   <build>
     <plugins>
@@ -187,5 +112,82 @@
       </plugin>
     </plugins>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.kres</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.11.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
+      <version>0.11.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
+      <version>0.11.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.reasoners.test</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-mime4j</artifactId>
+      <version>0.6</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.0.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+      <version>4.0.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
   
 </project>

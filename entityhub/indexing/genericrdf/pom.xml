@@ -95,16 +95,15 @@
 
     <!-- namespace prefixes mappings -->
     <dependency> <!-- provides the default Stanbol mappings -->
-     <groupId>org.apache.stanbol</groupId>
-     <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
+      <version>0.11.0</version>
     </dependency>
     <dependency> <!-- provides the prefix.cc mappings -->
-     <groupId>org.apache.stanbol</groupId>
-     <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
+      <version>0.11.0</version>
     </dependency>
-
 
     <dependency> <!-- for the Main (command line utility) -->
       <groupId>commons-cli</groupId>
@@ -154,7 +153,6 @@
       <version>0.11.0-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
-
         
     <!-- dependencies of the solr yard destination -->
     <dependency>
