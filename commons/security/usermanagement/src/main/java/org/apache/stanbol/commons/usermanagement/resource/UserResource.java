@@ -709,9 +709,9 @@ public class UserResource {
             permissionNode = new GraphNode(permissionUriRef, systemGraph);
             permissionNode.addProperty(RDF.type, PERMISSION.Permission);
             permissionNode.addProperty(DC.title, new PlainLiteralImpl(permissionName));
-            userNode.addProperty(SIOC.has_function, permissionUriRef);
+            userNode.addProperty(PERMISSION.javaPermissionEntry, permissionUriRef);
         } else {
-            userNode.addProperty(SIOC.has_function, permissionNode.getNode());
+            userNode.addProperty(PERMISSION.javaPermissionEntry, permissionNode.getNode());
         }
         return userNode;
     }
