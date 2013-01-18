@@ -16,7 +16,23 @@
 */
 package org.apache.stanbol.commons.solr;
 
-import static org.apache.stanbol.commons.solr.SolrConstants.*;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_CORE_DATA_DIR;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_CORE_DIR;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_CORE_INDEX_DIR;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_CORE_NAME;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_CORE_RANKING;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_CORE_SCHEMA;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_CORE_SERVER_ID;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_CORE_SOLR_CONF;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_SERVER_CORES;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_SERVER_DIR;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_SERVER_NAME;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_SERVER_PUBLISH_REST;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_SERVER_RANKING;
+import static org.apache.stanbol.commons.solr.SolrConstants.PROPERTY_SOLR_XML_NAME;
+import static org.apache.stanbol.commons.solr.SolrConstants.SOLR_CONFIG_NAME;
+import static org.apache.stanbol.commons.solr.SolrConstants.SOLR_SCHEMA_NAME;
+import static org.apache.stanbol.commons.solr.SolrConstants.SOLR_XML_NAME;
 import static org.osgi.framework.Constants.SERVICE_ID;
 
 import java.io.File;
@@ -33,7 +49,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.solr.core.CloseHook;
@@ -188,10 +203,6 @@ public class SolrServerAdapter {
         File solrCof = new File(solrDir,parsedServerProperties.getSolrXml());
         ClassLoader classLoader = updateContextClassLoader();
         try {
-            log.info(">> +++++++++++++++++++++++");
-            XPathFactory.newInstance();
-            log.info(">>  {}",org.xml.sax.InputSource.class.getClassLoader());
-            log.info(">> +++++++++++++++++++++++");
             container.load(solrDir.getAbsolutePath(), solrCof);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
@@ -240,6 +251,7 @@ public class SolrServerAdapter {
      * @param name the name of the core to remove
      */
     public void removeCore(String name){
+        log.info("Remove Core {} on CoreContainer {}",name,serverProperties.getServerName());
         SolrCore core = server.remove(name);
         if(core != null){
             CoreRegistration reg = registrations.remove(name);
@@ -263,6 +275,7 @@ public class SolrServerAdapter {
      */
     public void reloadCore(String name) throws ParserConfigurationException, IOException, SAXException {
         //try to reload
+        log.info("Reload Core {} on CoreContainer {}",name,serverProperties.getServerName());
         ClassLoader classLoader = updateContextClassLoader();
         try {
             //TODO: what happens if the core with 'name' is no longer present?
@@ -316,6 +329,8 @@ public class SolrServerAdapter {
      * @param core2 the second core to swap
      */
     public void swap(String core1,String core2){
+        log.info("Swap Core {} with Core {}on CoreContainer {}",
+            new Object[]{core1,core2, serverProperties.getServerName()});
         //swap the cores
         //TODO: what happens if one/both cores are no longer present?
         server.swap(core1, core2);
@@ -340,6 +355,7 @@ public class SolrServerAdapter {
     public ServiceReference registerCore(SolrCoreProperties parsedCoreConfig) throws ParserConfigurationException, IOException, SAXException{
         SolrCoreProperties coreConfig = parsedCoreConfig.clone();
         String coreName = coreConfig.getCoreName();
+        log.info("Register Core {} to CoreContainer {}",coreName,serverProperties.getServerName());
         if(coreName == null){
             coreName = server.getDefaultCoreName();
         }

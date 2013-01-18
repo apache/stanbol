@@ -978,6 +978,7 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
         
         @Override
         public boolean unavailable(String resource) {
+            log.info("IndexArchive {} unavailable ...",resource);
             for(String indexName : managedCores.getIndexNames(resource)){
                 IndexMetadata metadata = managedCores.getIndexMetadata(indexName);
                 if(metadata != null){ //may be removed in the meantime
@@ -1037,6 +1038,7 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
     
         @Override
         public boolean available(String resourceName, InputStream is) {
+            log.info("IndexArchive {} available ...",resourceName);
             ArchiveInputStream ais;
             try {
                 ais = ManagementUtils.getArchiveInputStream(resourceName, is);
@@ -1116,6 +1118,9 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
             if(desiredState == null){
                 throw new IllegalArgumentException("The parsed desired ManagedIndexState MUST NOT be NULL");
             }
+            log.info("Update Request for {} (server: {}, desired state: {}, from Archive: {})", 
+                new Object[]{metadata.getIndexName(), metadata.getServerName(),
+                    desiredState.name(), metadata.getArchive()});
             switch (desiredState) {
                 case ACTIVE:
                     if(ais == null){
