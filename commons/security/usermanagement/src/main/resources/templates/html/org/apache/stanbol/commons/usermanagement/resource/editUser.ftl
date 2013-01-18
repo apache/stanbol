@@ -59,6 +59,8 @@ limitations under the License.
             <label for="newPermission">Add Permission</label>
             <input type="text" id="newPermission" name="newPermission">
         </div>
+        <br/>
+        <p>e.g. (org.osgi.framework.ServicePermission "*" "get")</p>
     </fieldset>
     <!-- <button name="addPermission">Add permission</button> -->
 </form>

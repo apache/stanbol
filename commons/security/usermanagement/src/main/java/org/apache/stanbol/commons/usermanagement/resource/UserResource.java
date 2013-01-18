@@ -174,13 +174,23 @@ public class UserResource {
 
         GraphNode userNode;
 
+        if(currentLogin != null){ // 
+            currentLogin = currentLogin.trim();
+        }
+        
         // System.out.println("CURRENTUSERNAME = ["+currentUserName+"]");
         if (currentLogin != null && !currentLogin.equals("")) {
             userNode = getUser(currentLogin);
             return store(userNode, uriInfo, currentLogin, newLogin, fullName, email, password, roles, permissions);
         }
+        
+//        try {
+//             userNode = getUser(newLogin);
+//        } catch(Exception e) {
+            userNode = createUser(newLogin);
+      //  }
         // System.out.println("NEWLOGIN = [" + newLogin + "]");
-        userNode = createUser(newLogin);
+       
         return store(userNode, uriInfo, newLogin, newLogin, fullName, email, password, roles, permissions);
     }
 
@@ -226,7 +236,10 @@ public class UserResource {
             writeLock.lock();
             try {
                 for (int i = 0; i < roles.size(); i++) {
-                    addRole(userNode, roles.get(i));
+                    roles.set(i, roles.get(i).trim());
+                    if (!roles.get(i).equals("")) {
+                        addRole(userNode, roles.get(i));
+                    }
                 }
             } finally {
                 writeLock.unlock();
@@ -238,7 +251,10 @@ public class UserResource {
             writeLock.lock();
             try {
                 for (int i = 0; i < permissions.size(); i++) {
-                    addPermission(userNode, permissions.get(i));
+                    permissions.set(i, permissions.get(i).trim());
+                    if (!permissions.get(i).equals("")) {
+                        addPermission(userNode, permissions.get(i));
+                    }
                 }
             } finally {
                 writeLock.unlock();
@@ -246,10 +262,10 @@ public class UserResource {
         }
 
         //  System.out.println("AFTER ========================================================");
-        // serializeTriplesWithSubject(System.out, userNode);
-      //  serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
-        //      System.out
-        //      .println("^^^^ ========================================================");
+        serializeTriplesWithSubject(System.out, userNode);
+        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
+        System.out
+                .println("^^^^ ========================================================");
 
         URI pageUri = uriInfo.getBaseUriBuilder()
                 .path("system/console/usermanagement").build();
@@ -700,27 +716,26 @@ public class UserResource {
         // System.out.println("ROLENAME = " + roleName);
 
         // is this thing already around? (will be a bnode)
-     //   GraphNode permissionNode = getTitleNode(permissionName);
+        //   GraphNode permissionNode = getTitleNode(permissionName);
 
         // otherwise make a new one as a named node
-      //  if (permissionNode == null) {
+        //  if (permissionNode == null) {
 //            UriRef permissionUriRef = new UriRef(permissionsBase + permissionName);
 // BNode permissionBNode = new BNode();
-            GraphNode permissionNode = new GraphNode(new BNode(), systemGraph);
-            permissionNode.addProperty(RDF.type, PERMISSION.Permission);
-           // permissionNode.addProperty(DC.title, new PlainLiteralImpl(permissionName));
-            userNode.addProperty(PERMISSION.hasPermission, permissionNode.getNode());
-      permissionNode.addProperty(PERMISSION.javaPermissionEntry,new PlainLiteralImpl(permissionName));
+        GraphNode permissionNode = new GraphNode(new BNode(), systemGraph);
+        permissionNode.addProperty(RDF.type, PERMISSION.Permission);
+        // permissionNode.addProperty(DC.title, new PlainLiteralImpl(permissionName));
+        userNode.addProperty(PERMISSION.hasPermission, permissionNode.getNode());
+        permissionNode.addProperty(PERMISSION.javaPermissionEntry, new PlainLiteralImpl(permissionName));
         return userNode;
     }
-    
+
 //    []    a       <http://xmlns.com/foaf/0.1/Agent> ;
 //      <http://clerezza.org/2008/10/permission#hasPermission>
 //              [ a       <http://clerezza.org/2008/10/permission#Permission> ;
 //                <http://clerezza.org/2008/10/permission#javaPermissionEntry>
 //                        "(java.security.AllPermission \"\" \"\")"
 //              ] ;
-
     private void clearPermissions(NonLiteral userResource) {
         systemGraph.removeAll(filterToArray(userResource, PERMISSION.javaPermissionEntry, null));
     }
@@ -859,20 +874,19 @@ public class UserResource {
         return getNamedUser(userName);
     }
 
+    /*
+     * This *should* pull out an existing user node from the graph, except (I think) because
+     * the node in question is a bnode, it always creates another bnode in the graph. Maybe.
+     */
     // needs lock?
     private GraphNode getNamedUser(String userName) {
-
-        // System.out.println("getting named user = "+userName);
-
         Iterator<Triple> iter = systemGraph.filter(null, PLATFORM.userName,
                 new PlainLiteralImpl(userName));
         if (!iter.hasNext()) {
-            // System.out.println("named user not found " + userName);
-            // System.out.println("\n\n\n");
-
             return null;
         }
-        return new GraphNode(iter.next().getSubject(), systemGraph);
+      
+       return new GraphNode(iter.next().getSubject(), systemGraph);
     }
 
     public Set<GraphNode> getUsers() {
