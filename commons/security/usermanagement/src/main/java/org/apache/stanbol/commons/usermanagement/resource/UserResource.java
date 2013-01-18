@@ -700,21 +700,26 @@ public class UserResource {
         // System.out.println("ROLENAME = " + roleName);
 
         // is this thing already around? (will be a bnode)
-        GraphNode permissionNode = getTitleNode(permissionName);
+     //   GraphNode permissionNode = getTitleNode(permissionName);
 
         // otherwise make a new one as a named node
-        if (permissionNode == null) {
-            UriRef permissionUriRef = new UriRef(permissionsBase + permissionName);
-
-            permissionNode = new GraphNode(permissionUriRef, systemGraph);
+      //  if (permissionNode == null) {
+//            UriRef permissionUriRef = new UriRef(permissionsBase + permissionName);
+// BNode permissionBNode = new BNode();
+            GraphNode permissionNode = new GraphNode(new BNode(), systemGraph);
             permissionNode.addProperty(RDF.type, PERMISSION.Permission);
-            permissionNode.addProperty(DC.title, new PlainLiteralImpl(permissionName));
-            userNode.addProperty(PERMISSION.javaPermissionEntry, permissionUriRef);
-        } else {
-            userNode.addProperty(PERMISSION.javaPermissionEntry, permissionNode.getNode());
-        }
+           // permissionNode.addProperty(DC.title, new PlainLiteralImpl(permissionName));
+            userNode.addProperty(PERMISSION.hasPermission, permissionNode.getNode());
+      permissionNode.addProperty(PERMISSION.javaPermissionEntry,new PlainLiteralImpl(permissionName));
         return userNode;
     }
+    
+//    []    a       <http://xmlns.com/foaf/0.1/Agent> ;
+//      <http://clerezza.org/2008/10/permission#hasPermission>
+//              [ a       <http://clerezza.org/2008/10/permission#Permission> ;
+//                <http://clerezza.org/2008/10/permission#javaPermissionEntry>
+//                        "(java.security.AllPermission \"\" \"\")"
+//              ] ;
 
     private void clearPermissions(NonLiteral userResource) {
         systemGraph.removeAll(filterToArray(userResource, PERMISSION.javaPermissionEntry, null));
