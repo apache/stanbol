@@ -95,7 +95,6 @@ public class WebConsolePlugin extends
      * The felix webconsole way for returning static resources
      */
 	public URL getResource(String path){
-        System.out.println("******evaluating: "+path);
 		if(path.startsWith(STATIC_PREFIX)){
             //we just get the resources from the same place as stanbol expectes them to be
             //i.e. the resources will be available below
