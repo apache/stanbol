@@ -1,21 +1,75 @@
-<!--
-   Licensed to the Apache Software Foundation (ASF) under one or more
-   contributor license agreements.  See the NOTICE file distributed with
-   this work for additional information regarding copyright ownership.
-   The ASF licenses this file to You under the Apache License, Version 2.0
-   (the "License"); you may not use this file except in compliance with
-   the License.  You may obtain a copy of the License at
+usermanager
+===========
 
-        http://www.apache.org/licenses/LICENSE-2.0
+A usermanager for stanbol. It provides a felix webconsole plugin as well as the 
+following HTTP resources to manage users and roles, the HTTP services are 
+described in terms of curl-commands and assume Stanbol to be running on localhost.
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
--->
+Note that users are uniquely identified by their clerezza:userName (= login) but may also have a foaf:name (= full name).
 
-User Manager
-============
+The following assumes your stanbol instance is running on localhost port 8080.
 
-A user manager for Stanbol.
+Add user:
+
+    curl -i -X POST -H "Content-Type: text/turtle" \
+         --user admin:admin \
+         --data \
+         ' @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . 
+         @prefix foaf: <http://xmlns.com/foaf/0.1/> . 
+         @prefix cz: <http://clerezza.org/2009/08/platform#> . 
+
+          [] a foaf:Agent ; 
+             cz:userName "hugob" . ' \
+         http://localhost:8080/user-management/add-user
+
+Delete user:
+
+    curl -i -X POST -H "Content-Type: text/turtle" \
+         --user admin:admin \
+         --data \
+         ' @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . 
+         @prefix foaf: <http://xmlns.com/foaf/0.1/> . 
+         @prefix cz: <http://clerezza.org/2009/08/platform#> . 
+
+          [] a foaf:Agent ; 
+             cz:userName "tristant" . ' \
+[TODO: also add password, maybe showing 2 options one setting encryed passord (as its stored) and other transmitting clear text password]
+         http://localhost:8080/user-management/delete-user
+
+Change user details. Multiple change blocks may appear in a message. If old 
+value isn't specified, the corresponding triple won't be removed from the system.
+
+e.g. change user name:
+
+    curl -i -X POST -H "Content-Type: text/turtle" --user admin:admin \
+        --data " @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \
+                 @prefix cz: <http://clerezza.org/2009/08/platform#> . \
+                 @prefix : <http://stanbol.apache.org/ontologies/usermanagement#>. \
+                 [] a :Change;  \
+                    cz:userName 'hugob'; \
+                    :predicate cz:userName; \
+                    :oldValue 'hugob'; \
+                    :newValue 'tristant' . " \
+          http://localhost:8080/user-management/change-user
+
+e.g. add email (replacing a previous address if any):
+
+    curl -i -X POST -H "Content-Type: text/turtle" --user admin:admin \
+        --data " @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \
+                 @prefix foaf: <http://xmlns.com/foaf/0.1/> . \
+                 @prefix cz: <http://clerezza.org/2009/08/platform#> . \
+                 @prefix : <http://stanbol.apache.org/ontologies/usermanagement#>. \
+                 [] a :Change;  \
+                    cz:userName 'hugob'; \
+                    :predicate foaf:mbox; \
+                    :newValue <mailto:hugob@example.org> . " \
+          http://localhost:8080/user-management/change-user
+
+Get user Turtle :
+
+    curl --user admin:admin -H "Accept:text/turtle" http://localhost:8080/user-management/user/anonymous
+
+Get user roles :
+
+   curl --user admin:admin -H "Accept:text/turtle" http://localhost:8080/user-management/roles/anonymous
+

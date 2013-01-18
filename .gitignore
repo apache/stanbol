@@ -2,4 +2,6 @@
 .project
 .settings
 target
+downloads
+data-files
 *~

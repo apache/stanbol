@@ -91,5 +91,4 @@ public class UserManagementWebFragment implements WebFragment {
 		List<NavigationLink> links = new ArrayList<NavigationLink>();
 		return links;
 	}
-
 }
