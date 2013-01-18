@@ -1,51 +1,74 @@
 <#--
-  Licensed to the Apache Software Foundation (ASF) under one or more
-  contributor license agreements.  See the NOTICE file distributed with
-  this work for additional information regarding copyright ownership.
-  The ASF licenses this file to You under the Apache License, Version 2.0
-  (the "License"); you may not use this file except in compliance with
-  the License.  You may obtain a copy of the License at
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
 
-      http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 -->
 <@namespace platform="http://clerezza.org/2009/08/platform#" />
 <@namespace permission="http://clerezza.org/2008/10/permission#" />
 <@namespace sioc="http://rdfs.org/sioc/ns#" />
 
-<form method="post" action="/user-management/store-user">
-User-Name: <input type="text" name="userName" value="<@ldpath path="platform:userName :: xsd:string"/>" /><br/>
-<#assign mbox>
-<@ldpath path="foaf:mbox" />
-</#assign>
-<#assign email>
-<#if mbox != "">${mbox?substring(7)}</#if>
-</#assign>
-Email : <input type="text" name="email" value="${email}" /><br/>
-Password : <input type="password" name="password" value="" /><br/>
-	Permissions: <ul>
-	<@ldpath path="fn:sort(permission:hasPermission)">
-		<#assign permission>
-		<@ldpath path="permission:javaPermissionEntry :: xsd:string"/>
-		</#assign>
-		<li class="permission">
-		<input type="text" name="permission[]" value="${permission?html}" />
-		</li>
-	</@ldpath>
-	</ul>
-	<button name="addPermission">Add permission</button>
-	Groups:
-	<ol>
-	<@ldpath path="fn:sort(sioc:has_function)">
-		<li class="permission">
-		<@ldpath path="dc:title :: xsd:string"/>
-		</li>
-	</@ldpath>
-	</ol>
- <input type="submit" value="Submit">
+<p id="validateTips" class="important">* required fields</p>
+<form>
+
+    <#assign userName>
+    <@ldpath path="platform:userName :: xsd:string"/>
+    </#assign>	
+
+    <#assign mbox>
+    <@ldpath path="foaf:mbox" />
+    </#assign>
+
+    <#attempt>
+    <#assign email><#if mbox != "">${mbox?substring(7)}</#if></#assign>
+    <#recover></#attempt>	
+
+
+    <input id="currentLogin" type="hidden" name="currentLogin" value="${userName}" />
+    <input id="create-or-edit" type="hidden" name="create-or-edit" value="edit" />
+
+    <fieldset>
+        <label for="newLogin">Login <span class="important">*</span></label>
+        <input id="newLogin" type="text" name="newLogin" value="${userName}" class="text ui-widget-content ui-corner-all" />
+        <label for="fullName">Full Name</label>
+        <input id="fullName" type="text" name="fullName" value="<@ldpath path="foaf:name :: xsd:string"/>" class="text ui-widget-content ui-corner-all" />
+               <label for="email">Email</label>
+        <input id="email" type="text" name="email" value="${email}" class="text ui-widget-content ui-corner-all" />
+        <label for="password" id="password-label">Password <span class="important">*</span></label>
+        <input id="password" type="password" name="password" value="" class="text ui-widget-content ui-corner-all" />
+    </fieldset>
+
+    <fieldset id="roles-checkboxes">
+         </fieldset> 
+
+    <br/>
+    
+    <fieldset id="permission-checkboxes" class="labelCheckbox">
+ 
+        <div class="labelTextbox">
+            <label for="newPermission">Add Permission</label>
+            <input type="text" id="newPermission" name="newPermission">
+        </div>
+        <br/>
+        <p>e.g. (org.osgi.framework.ServicePermission "*" "get")</p>
+    </fieldset>
+    <!-- <button name="addPermission">Add permission</button> -->
 </form>
+<!--
+        <@ldpath path="fn:sort(sioc:has_function)">
+                <li class="permission">
+                <@ldpath path="dc:title :: xsd:string"/>
+                </li>
+        </@ldpath>
+        </ol>
+-->
