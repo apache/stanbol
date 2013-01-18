@@ -851,8 +851,7 @@ public class UserResource {
     }
 
     /*
-     * This *should* pull out an existing user node from the graph, except (I think) because
-     * the node in question is a bnode, it always creates another bnode in the graph. Maybe.
+     * returns an existing user node from the graph.
      */
     // needs lock?
     private GraphNode getNamedUser(String userName) {
