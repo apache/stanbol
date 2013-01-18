@@ -18,7 +18,12 @@ package org.apache.stanbol.enhancer.engines.entitylinking.engine;
 
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getAnalysedText;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_CONTRIBUTOR;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,12 +31,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
@@ -61,6 +69,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -277,32 +286,52 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
             languageObject = new Language(language);
         }
         Set<UriRef> dereferencedEntitis = new HashSet<UriRef>();
+        
         MGraph metadata = ci.getMetadata();
         for(LinkedEntity linkedEntity : linkedEntities){
             Collection<UriRef> textAnnotations = new ArrayList<UriRef>(linkedEntity.getOccurrences().size());
             //first create the TextAnnotations for the Occurrences
             for(Occurrence occurrence : linkedEntity.getOccurrences()){
-                UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
-                textAnnotations.add(textAnnotation);
-                metadata.add(new TripleImpl(textAnnotation, 
-                    Properties.ENHANCER_START, 
-                    literalFactory.createTypedLiteral(occurrence.getStart())));
-                metadata.add(new TripleImpl(textAnnotation, 
-                    Properties.ENHANCER_END, 
-                    literalFactory.createTypedLiteral(occurrence.getEnd())));
-                metadata.add(new TripleImpl(textAnnotation, 
-                    Properties.ENHANCER_SELECTION_CONTEXT, 
-                    new PlainLiteralImpl(occurrence.getContext(),languageObject)));
-                metadata.add(new TripleImpl(textAnnotation, 
-                    Properties.ENHANCER_SELECTED_TEXT, 
-                    new PlainLiteralImpl(occurrence.getSelectedText(),languageObject)));
-                metadata.add(new TripleImpl(textAnnotation, 
-                    Properties.ENHANCER_CONFIDENCE, 
-                    literalFactory.createTypedLiteral(linkedEntity.getScore())));
+                Literal startLiteral = literalFactory.createTypedLiteral(occurrence.getStart());
+                Literal endLiteral = literalFactory.createTypedLiteral(occurrence.getEnd());
+                //search for existing text annotation
+                Iterator<Triple> it = metadata.filter(null, ENHANCER_START, startLiteral);
+                UriRef textAnnotation = null;
+                while(it.hasNext()){
+                    Triple t = it.next();
+                    if(metadata.filter(t.getSubject(), ENHANCER_END, endLiteral).hasNext() &&
+                            metadata.filter(t.getSubject(), RDF_TYPE, ENHANCER_TEXTANNOTATION).hasNext()){
+                        textAnnotation = (UriRef)t.getSubject();
+                        break;
+                    }
+                }
+                if(textAnnotation == null){ //not found ... create a new one
+                    textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                    metadata.add(new TripleImpl(textAnnotation, 
+                        Properties.ENHANCER_START, 
+                        startLiteral));
+                    metadata.add(new TripleImpl(textAnnotation, 
+                        Properties.ENHANCER_END, 
+                        endLiteral));
+                    metadata.add(new TripleImpl(textAnnotation, 
+                        Properties.ENHANCER_SELECTION_CONTEXT, 
+                        new PlainLiteralImpl(occurrence.getContext(),languageObject)));
+                    metadata.add(new TripleImpl(textAnnotation, 
+                        Properties.ENHANCER_SELECTED_TEXT, 
+                        new PlainLiteralImpl(occurrence.getSelectedText(),languageObject)));
+                    metadata.add(new TripleImpl(textAnnotation, 
+                        Properties.ENHANCER_CONFIDENCE, 
+                        literalFactory.createTypedLiteral(linkedEntity.getScore())));
+                } else { //if existing add this engine as contributor
+                    metadata.add(new TripleImpl(textAnnotation, DC_CONTRIBUTOR, 
+                        new PlainLiteralImpl(this.getClass().getName())));
+                }
+                //add dc:types (even to existing)
                 for(UriRef dcType : linkedEntity.getTypes()){
                     metadata.add(new TripleImpl(
                         textAnnotation, Properties.DC_TYPE, dcType));
                 }
+                textAnnotations.add(textAnnotation);
             }
             //now the EntityAnnotations for the Suggestions
             for(Suggestion suggestion : linkedEntity.getSuggestions()){
