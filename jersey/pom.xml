@@ -83,12 +83,23 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>0.11.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.11.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
+      <version>0.11.0</version>
+    </dependency>
+    <!-- Jersey and Freemarker -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+      <version>0.11.0</version>      
     </dependency>
 
     <!-- dependencies on other Entityhub modules -->
@@ -112,11 +123,6 @@
       <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
       <version>0.11.0-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
-      <version>0.9.0-incubating</version>
-    </dependency>
 
     <!-- LD Path -->
     <!--  imported via entityhub.ldpath
@@ -134,65 +140,20 @@
       <artifactId>commons-io</artifactId>
     </dependency>
 
-    <!-- Clerezza dependenciess -->
-    <!--  imported via entityhub.model.clerezza
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.jena.serializer</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.jena.parser</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.rdfjson</artifactId>
-    </dependency> -->
-
     <!-- jersey-multipart now uses an other lib to read multipart/mime 
          however the MessagebodyReaderUtils still use this lib -->    
-     <dependency>
-          <groupId>javax.mail</groupId>
-          <artifactId>mail</artifactId>
-          <version>1.4</version>
-      </dependency>
+   <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4</version>
+    </dependency>
 
     <!-- Servlet API for handling ServletContext -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
-        
-    <!-- Jersey and Freemarker -->
-    <dependency>
-    	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-      <version>0.10.0-SNAPSHOT</version>      
-    </dependency>
-    <!--  imported via commons.web.base
     
-<dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-server</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-core</artifactId>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.jettison</groupId>
-      <artifactId>jettison</artifactId>
-    </dependency>    -->
-
     <!-- OSGi tax -->
     <dependency>
       <groupId>org.osgi</groupId>

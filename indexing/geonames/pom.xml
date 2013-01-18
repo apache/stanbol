@@ -101,22 +101,22 @@
     </dependency>
     <!-- Entityhub dependencies -->
     <dependency>
-	  <groupId>org.apache.stanbol</groupId>
-	  <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
-	  <version>0.11.0-SNAPSHOT</version>
+  	  <groupId>org.apache.stanbol</groupId>
+	    <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
+	    <version>0.11.0-SNAPSHOT</version>
     </dependency>
 
     <!-- runtime dependencies for the standalone tool -->
     <dependency> <!-- provides the default Stanbol mappings -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.11.0</version>
       <scope>runtime</scope>
     </dependency>
     <dependency> <!-- provides the prefix.cc mappings -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.11.0</version>
       <scope>runtime</scope>
     </dependency>
     <dependency> <!-- we use log4j 1.2 -->
@@ -136,8 +136,7 @@
       <version>0.11.0-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
-    
-    
+        
     <!-- for testing -->
     <dependency>
       <groupId>junit</groupId>
