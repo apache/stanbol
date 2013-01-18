@@ -63,7 +63,7 @@
               !org.apache.felix.http.jetty, 
               !org.mortbay.jetty.*,
               javax.ws.rs.*; version="[0,2)",
-              org.apache.stanbol.commons.web.base; provide:=true,
+              org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
               *
             </Import-Package>
           </instructions>

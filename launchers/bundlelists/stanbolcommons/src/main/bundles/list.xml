@@ -179,6 +179,11 @@
       <artifactId>jackson-mapper-asl</artifactId>
       <version>1.9.11</version>
     </bundle>
+    <bundle> <!-- for JAX-RS integration -->
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-jaxrs</artifactId>
+      <version>1.9.11</version>
+    </bundle>
   </startLevel>
   <!-- Jersey -->
   <startLevel level="24">
@@ -189,21 +194,6 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
       <version>1.15</version>
-    </bundle>
-    <bundle>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-core-asl</artifactId>
-      <version>1.9.7</version>
-    </bundle>
-    <bundle>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.9.7</version>
-    </bundle>
-    <bundle>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-jaxrs</artifactId>
-      <version>1.9.7</version>
     </bundle>
   </startLevel>
   <startLevel level="25">
@@ -415,7 +405,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.10.1-SNAPSHOT</version>
+      <version>0.12.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>

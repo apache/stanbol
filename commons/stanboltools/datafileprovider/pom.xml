@@ -58,6 +58,7 @@
           <instructions>
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
+              org.apache.stanbol.commons.stanboltools.datafileprovider; provide:=true; version="[0.9,0.13)",
               *
             </Import-Package>
             <Export-Package>

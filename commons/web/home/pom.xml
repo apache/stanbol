@@ -56,7 +56,7 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.commons.web.base; provide:=true,
+              org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
               *;
             </Import-Package>
             <Export-Package>
