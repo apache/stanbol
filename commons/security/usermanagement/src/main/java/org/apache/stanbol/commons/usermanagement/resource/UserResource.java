@@ -145,20 +145,6 @@ public class UserResource {
         return new RdfViewable("edit.ftl", getUser(userName), this.getClass());
     }
 
-//    @POST
-//    @Path("create-user")
-//    @Consumes("application/x-www-form-urlencoded")
-//    public Response newUser(@Context UriInfo uriInfo,
-//            @FormParam("login") String login,
-//            @FormParam("fullName") String fullName,
-//            @FormParam("email") String email,
-//            @FormParam("password") String password,
-//            @FormParam("roles") List<String> roles) {
-//
-//        // System.out.println("ROLES COUNT = "+roles.size());
-//        GraphNode userNode = createUser(login);
-//        return store(userNode, uriInfo, login, login, fullName, email, password, roles);
-//    }
     @POST
     @Path("store-user")
     // @Consumes("multipart/form-data")
@@ -262,10 +248,10 @@ public class UserResource {
         }
 
         //  System.out.println("AFTER ========================================================");
-        serializeTriplesWithSubject(System.out, userNode);
-        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
-        System.out
-                .println("^^^^ ========================================================");
+//        serializeTriplesWithSubject(System.out, userNode);
+//        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
+//        System.out
+//                .println("^^^^ ========================================================");
 
         URI pageUri = uriInfo.getBaseUriBuilder()
                 .path("system/console/usermanagement").build();
@@ -274,10 +260,6 @@ public class UserResource {
         // holding onto old stuff
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);
-
-        //////////////////////////////////
-        // serializer.serialize(System.out, userNode.getNodeContext(),SupportedFormat.TURTLE);
-        /////////////////////////////////////////
 
         // see other my not be the best response, but does seem the best given
         // the jax-rs things available
@@ -346,12 +328,6 @@ public class UserResource {
         return new RdfViewable("permissionsCheckboxes.ftl", getUser(userName), this.getClass());
     }
 
-//    @GET
-//    @Path("permissionsOptions")
-//    @Produces("text/html")
-//    public RdfViewable permissionsOptions() {
-//        return new RdfViewable("permissionsOptions.ftl", getPermissionType(), this.getClass());
-//    }
     public GraphNode getPermissionType() {
         return new GraphNode(PERMISSION.Permission,
                 systemGraph);
