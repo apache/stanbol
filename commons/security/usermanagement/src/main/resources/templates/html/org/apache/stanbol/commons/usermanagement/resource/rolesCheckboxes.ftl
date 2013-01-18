@@ -9,9 +9,12 @@
 <@ldpath path="dc:title :: xsd:string"/>
 </#assign>
 
-<#if name != "BasePermissionsRole">
-<input type="checkbox" id="${name}" name="${name}" value="${name}" />
-<label for="${name}">${name}</label>
+<#if name != "BasePermissionsRole"><!-- all users have it, so hide -->
+<!-- div class="labelCheckbox role" -->
+    <input class="role" type="checkbox" id="${name}" name="${name}" value="${name}" />
+    <label for="${name}">${name}</label>
+
+<br />
 </#if>
 </@ldpath>
 

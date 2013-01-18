@@ -26,11 +26,11 @@ input.text { margin-bottom:12px; width:95%; padding: .4em; }
 fieldset { padding:10px; margin-top:25px; border: 1px }
 
 legend {
-  padding: 0.2em 0.5em;
-  font-size:90%;
-  text-align:right;
-  }
-  
+    padding: 0.2em 0.5em;
+    font-size:90%;
+    text-align:right;
+}
+
 .ui-dialog .ui-state-error { padding: .3em; }
 .validateTips { border: 1px solid transparent; padding: 0.3em; }
 .important {color:rgb(128,0,0);}
@@ -42,12 +42,29 @@ legend {
     font-weight:bold;
 }
 
+/*
 .labelCheckbox {
     display: block;
-   /*  float: left; */
+   
     padding: 0px;
     margin: 0px;
 }
+
+.labelCheckbox input
+{
+    width: 15px;
+    height: 15px;
+    float: left;
+}
+
+.labelCheckbox label
+{
+    float: left;
+    padding-left: 3px;
+}
+*/
+
+/*
 .labelCheckbox input {
     width: 13px;
     height: 13px;
@@ -62,5 +79,26 @@ legend {
     padding-left: 15px;
     text-indent: -15px;
 }
+*/
 
+/*
+.labelTextbox {
+    display: block;
+   
+    padding: 0px;
+    margin: 0px;
+}
+
+
+.labelTextbox input
+{
+    width: 20em;
+
+}
+
+.labelTextbox label
+{
+
+}
+*/
 /* to include - popup stuff */

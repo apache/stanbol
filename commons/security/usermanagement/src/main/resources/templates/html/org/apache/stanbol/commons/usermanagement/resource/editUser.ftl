@@ -35,6 +35,7 @@ limitations under the License.
 
 
     <input id="currentLogin" type="hidden" name="currentLogin" value="${userName}" />
+    <input id="create-or-edit" type="hidden" name="create-or-edit" value="edit" />
 
     <fieldset>
         <label for="newLogin">Login <span class="important">*</span></label>
@@ -43,42 +44,25 @@ limitations under the License.
         <input id="fullName" type="text" name="fullName" value="<@ldpath path="foaf:name :: xsd:string"/>" class="text ui-widget-content ui-corner-all" />
                <label for="email">Email</label>
         <input id="email" type="text" name="email" value="${email}" class="text ui-widget-content ui-corner-all" />
-        <label for="password">Password <span class="important">*</span></label>
+        <label for="password" id="password-label">Password <span class="important">*</span></label>
         <input id="password" type="password" name="password" value="" class="text ui-widget-content ui-corner-all" />
     </fieldset>
 
-    <fieldset id="roles-checkboxes" class="labelCheckbox">
-        <legend>Roles</legend>
-        <input type="hidden" id="BasePermissionsRole" name="BasePermissionsRole" value="BasePermissionsRole" />
+    <fieldset id="roles-checkboxes">
+         </fieldset> 
 
-        <@ldpath path="fn:sort(sioc:has_function)">
-        <#assign roleName>
-        <@ldpath path="dc:title :: xsd:string"/>
-        </#assign>
-
-        <input type="checkbox" id="${roleName?html}" name="${roleName?html}" value="${roleName?html}" checked="checked" />
-        <label for="${roleName?html}">${roleName?html}</label>
-
-        </@ldpath>
-    </fieldset> 
-
+    <br/>
+    
+    <fieldset id="permission-checkboxes" class="labelCheckbox">
+ 
+        <div class="labelTextbox">
+            <label for="newPermission">Add Permission</label>
+            <input type="text" id="newPermission" name="newPermission">
+        </div>
+    </fieldset>
     <!-- <button name="addPermission">Add permission</button> -->
 </form>
-
 <!--
-
-        Permissions: <ul>
-        <@ldpath path="fn:sort(permission:hasPermission)">
-                <#assign permission>
-                <@ldpath path="permission:javaPermissionEntry :: xsd:string"/>
-                </#assign>
-                <li class="permission">
-                <input type="text" name="permission[]" value="${permission?html}" />
-                </li>
-        </@ldpath>
-        </ul>
-
-        <ol>
         <@ldpath path="fn:sort(sioc:has_function)">
                 <li class="permission">
                 <@ldpath path="dc:title :: xsd:string"/>

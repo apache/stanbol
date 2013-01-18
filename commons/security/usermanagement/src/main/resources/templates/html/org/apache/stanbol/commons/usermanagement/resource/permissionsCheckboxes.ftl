@@ -5,12 +5,12 @@
 
 <@ldpath path="fn:sort(^rdf:type)">
 
-<#assign name>
+<#assign permission>
 <@ldpath path="permission:javaPermissionEntry :: xsd:string"/>
 </#assign>
+<!-- div class="permission" --> <!-- labelCheckbox  -->
+    <input class="permission" type="checkbox" id="${permission}" name="${permission}" value="${permission}" checked="checked"  />
+    <label for="${permission}">${permission}</label>
+    <br/>
 
-<input type="checkbox" id="${name}" name="${name}" value="${name}" />
-<label for="${name}">${name}</label>
 </@ldpath>
-
-

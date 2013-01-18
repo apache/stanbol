@@ -134,14 +134,8 @@ public class UserResource {
     @GET
     @Path("create-form")
     public RdfViewable getCreateUserForm(@Context UriInfo uriInfo) {
-//            stanbol/commons/security/usermanagement/src/main/resources/templates/html/org/apache/stanbol/commons/usermanagement/resource/editUser.ftl
-
         return new RdfViewable("editUser.ftl", dummyNode,
                 this.getClass());
-        //                URI pageUri = uriInfo.getBaseUriBuilder()
-//                .path("html/editUserTemp.ftl").build();
-//
-//        return Response.ok().build();
     }
 
     @GET
@@ -175,18 +169,19 @@ public class UserResource {
             @FormParam("fullName") String fullName,
             @FormParam("email") String email,
             @FormParam("password") String password,
-            @FormParam("roles") List<String> roles) {
+            @FormParam("roles") List<String> roles,
+            @FormParam("permissions") List<String> permissions) {
 
         GraphNode userNode;
 
         // System.out.println("CURRENTUSERNAME = ["+currentUserName+"]");
         if (currentLogin != null && !currentLogin.equals("")) {
             userNode = getUser(currentLogin);
-            return store(userNode, uriInfo, currentLogin, newLogin, fullName, email, password, roles);
+            return store(userNode, uriInfo, currentLogin, newLogin, fullName, email, password, roles, permissions);
         }
-        System.out.println("NEWLOGIN = [" + newLogin + "]");
+        // System.out.println("NEWLOGIN = [" + newLogin + "]");
         userNode = createUser(newLogin);
-        return store(userNode, uriInfo, newLogin, newLogin, fullName, email, password, roles);
+        return store(userNode, uriInfo, newLogin, newLogin, fullName, email, password, roles, permissions);
     }
 
     /**
@@ -198,7 +193,8 @@ public class UserResource {
             String fullName,
             String email,
             String password,
-            List<String> roles) {
+            List<String> roles,
+            List<String> permissions) {
 
         //   GraphNode userNode = getUser(currentUserName);
 
@@ -221,17 +217,39 @@ public class UserResource {
         if (email != null && !email.equals("")) {
             changeResource(userNode, FOAF.mbox, new UriRef("mailto:" + email));
         }
+
+        NonLiteral userResource = (NonLiteral) userNode.getNode();
+
         if (roles != null) {
-            for (int i = 0; i < roles.size(); i++) {
-                addRole(userNode, roles.get(i));
+            clearRoles(userResource);
+            Lock writeLock = systemGraph.getLock().writeLock();
+            writeLock.lock();
+            try {
+                for (int i = 0; i < roles.size(); i++) {
+                    addRole(userNode, roles.get(i));
+                }
+            } finally {
+                writeLock.unlock();
+            }
+        }
+        if (permissions != null) {
+            clearPermissions(userResource);
+            Lock writeLock = systemGraph.getLock().writeLock();
+            writeLock.lock();
+            try {
+                for (int i = 0; i < permissions.size(); i++) {
+                    addPermission(userNode, permissions.get(i));
+                }
+            } finally {
+                writeLock.unlock();
             }
         }
 
-//        System.out.println("AFTER ========================================================");
-//        // serializeTriplesWithSubject(System.out, userNode);
-//        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
-        // System.out
-        // .println("^^^^ ========================================================");
+        //  System.out.println("AFTER ========================================================");
+        // serializeTriplesWithSubject(System.out, userNode);
+      //  serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
+        //      System.out
+        //      .println("^^^^ ========================================================");
 
         URI pageUri = uriInfo.getBaseUriBuilder()
                 .path("system/console/usermanagement").build();
@@ -305,6 +323,24 @@ public class UserResource {
         return new RdfViewable("listPermission.ftl", getPermissionType(), this.getClass());
     }
 
+    @GET
+    @Path("user/{username}/permissionsCheckboxes")
+    @Produces("text/html")
+    public RdfViewable permissionsCheckboxes(@PathParam("username") String userName) { //getUser(userName)
+        return new RdfViewable("permissionsCheckboxes.ftl", getUser(userName), this.getClass());
+    }
+
+//    @GET
+//    @Path("permissionsOptions")
+//    @Produces("text/html")
+//    public RdfViewable permissionsOptions() {
+//        return new RdfViewable("permissionsOptions.ftl", getPermissionType(), this.getClass());
+//    }
+    public GraphNode getPermissionType() {
+        return new GraphNode(PERMISSION.Permission,
+                systemGraph);
+    }
+
     /**
      * a kludge - initially the permissions aren't expressed as instances of
      * Permission class, this adds the relevant triples
@@ -346,25 +382,6 @@ public class UserResource {
 
     public GraphNode getRoleType() {
         return new GraphNode(PERMISSION.Role,
-                systemGraph);
-    }
-
-    @GET
-    @Path("permissionsCheckboxes")
-    @Produces("text/html")
-    public RdfViewable permissionsCheckboxes() {
-        return new RdfViewable("permissionsCheckboxes.ftl", getPermissionType(), this.getClass());
-    }
-
-    @GET
-    @Path("permissionsOptions")
-    @Produces("text/html")
-    public RdfViewable permissionsOptions() {
-        return new RdfViewable("permissionsOptions.ftl", getPermissionType(), this.getClass());
-    }
-
-    public GraphNode getPermissionType() {
-        return new GraphNode(PERMISSION.Permission,
                 systemGraph);
     }
 
@@ -629,6 +646,7 @@ public class UserResource {
      */
     private GraphNode createUser(String newUserName) {
         BNode subject = new BNode();
+
         GraphNode userNode = new GraphNode(subject, systemGraph);
         userNode.addProperty(RDF.type, FOAF.Agent);
         userNode.addProperty(PLATFORM.userName, new PlainLiteralImpl(newUserName));
@@ -636,7 +654,26 @@ public class UserResource {
         return userNode;
     }
     // move later?
-    public final static String rolesBase = "urn:x-localhost/local/";
+    public final static String rolesBase = "urn:x-localhost/role/";
+
+    private void clearRoles(NonLiteral userResource) {
+        systemGraph.removeAll(filterToArray(userResource, SIOC.has_function, null));
+    }
+
+    private ArrayList<Triple> filterToArray(NonLiteral subject, UriRef predicate, Resource object) {
+        Iterator<Triple> triples = systemGraph.filter(subject, predicate, object);
+        ArrayList<Triple> buffer = new ArrayList<Triple>();
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try {
+            while (triples.hasNext()) {
+                buffer.add(triples.next());
+            }
+        } finally {
+            readLock.unlock();
+        }
+        return buffer;
+    }
 
     private GraphNode addRole(GraphNode userNode, String roleName) {
         // System.out.println("ROLENAME = " + roleName);
@@ -656,6 +693,31 @@ public class UserResource {
             userNode.addProperty(SIOC.has_function, roleNode.getNode());
         }
         return userNode;
+    }
+    public final static String permissionsBase = "urn:x-localhost/role/";
+
+    private GraphNode addPermission(GraphNode userNode, String permissionName) {
+        // System.out.println("ROLENAME = " + roleName);
+
+        // is this thing already around? (will be a bnode)
+        GraphNode permissionNode = getTitleNode(permissionName);
+
+        // otherwise make a new one as a named node
+        if (permissionNode == null) {
+            UriRef permissionUriRef = new UriRef(permissionsBase + permissionName);
+
+            permissionNode = new GraphNode(permissionUriRef, systemGraph);
+            permissionNode.addProperty(RDF.type, PERMISSION.Permission);
+            permissionNode.addProperty(DC.title, new PlainLiteralImpl(permissionName));
+            userNode.addProperty(SIOC.has_function, permissionUriRef);
+        } else {
+            userNode.addProperty(SIOC.has_function, permissionNode.getNode());
+        }
+        return userNode;
+    }
+
+    private void clearPermissions(NonLiteral userResource) {
+        systemGraph.removeAll(filterToArray(userResource, PERMISSION.javaPermissionEntry, null));
     }
 
     /* 
@@ -724,8 +786,6 @@ public class UserResource {
      */
     private void changeResource(GraphNode userNode, UriRef predicate,
             UriRef newValue) {
-
-
 
         Iterator<Triple> oldTriples = systemGraph.filter(
                 (NonLiteral) userNode.getNode(), predicate, null);

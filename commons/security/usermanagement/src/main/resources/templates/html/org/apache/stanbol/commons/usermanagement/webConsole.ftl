@@ -55,20 +55,9 @@ limitations under the License.
 <script>
         
     $(function() {
-        $.get("/user-management/rolesCheckboxes",
-        function(data){
-            $("#roles-checkboxes").html(data);
-        }, "text/html");
-        
-        $.get("/user-management/permissionsCheckboxes",
-        function(data){
-            $("#permissions-checkboxes").html(data);
-        }, "text/html");
-        
-  
+
         
         
-    
         $("#tabs").tabs();
         showUserList();
         showRoleList();
@@ -82,7 +71,7 @@ limitations under the License.
         width: 350,
         modal: true,
         buttons: {
-            "Submit": function() {                            
+            "Submit": function() {  
                 var newLogin = $("#newLogin");
                 var currentLogin = $("#currentLogin");
                 var fullName = $("#fullName");
@@ -92,6 +81,8 @@ limitations under the License.
                 var allFields = $([]).add(newLogin).add(fullName).add(email).add(password);
                 allFields.removeClass("ui-state-error");
         
+                console.log("calling validate");
+        
                 if(validate(newLogin, email, password)) {
                     var formData = {
                         "currentLogin": currentLogin.val(), 
@@ -99,20 +90,43 @@ limitations under the License.
                         "fullName": fullName.val(),
                         "email": email.val(),
                         "password": password.val()
+                        
                     };
                         
                     // gather role checkbox values into array, to provide format
                     // roles=BasePermissionsRole&roles=CommunityUser etc.
                     var roleList = new Array();
                     var index = 0;
-                    var roles = $(".labelCheckbox input");
+                    var roles = $(".role"); // .role,input:checkbox
+                   //  console.log("roles = "+roles);
+                  
                     for (var attrname in roles) { 
+                        console.log("roles[attrname] = "+roles[attrname]);
                         if(roles[attrname].checked) {
                             roleList[index++] = roles[attrname].name;
                         };
                     };
+                    roleList[index++] = "BasePermissionsRole";
                     formData["roles"] = roleList;
                     console.log("ROLES = "+roleList);
+                    
+                    /////////////
+                    var permissionList = new Array();
+                    var index = 0;
+                    var permissions = $(".permission"); // .labelCheckbox 
+                    console.log("permissions = "+permissions);
+                    for (var attrname in permissions) { 
+                        console.log("attrname = "+attrname);
+                        if(permissions[attrname].checked) {
+                            permissionList[index++] = permissions[attrname].name;
+                        };
+                    };
+                   // var newPermission = $("#newPermission").val();
+                    permissionList[index++] = $("#newPermission").val();
+                    
+                    formData["permissions"] = permissionList;
+                    console.log("PERMISSIONS = "+permissionList);
+                    
                     $.ajax({
                         type: 'POST',
                         url: '/user-management/store-user',
@@ -143,7 +157,12 @@ limitations under the License.
 
         valid = valid && checkLength(login,"login", 3, 16);
         valid = valid && checkLength(email,"email", 6, 80);
-        valid = valid && checkLength(password,"password", 5, 16);
+        console.log('$("create-or-edit") = '+$("#create-or-edit"));
+        console.log('$("create-or-edit").val() = '+$("#create-or-edit").val());
+        console.log('$("create-or-edit").valueOf() = '+$("#create-or-edit").valueOf());
+        if($("#create-or-edit").val() != "edit") {
+            valid = valid && checkLength(password,"password", 5, 16);
+        }
         
         // From jqueryUI examples, attributed to joern & Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
         valid = valid && checkRegexp(login, /^[a-z]([0-9a-z_])+$/i,"Login name may only contain a-z, 0-9, underscores, begin with a letter.");
@@ -190,16 +209,21 @@ limitations under the License.
     }
     
     function addUser(){
-                $.ajax({
+        $.ajax({
             url: '/user-management/create-form',
             success: function(data) {
-                //   $("div#tabs-users").html(back);
-                //  $("div#tabs-users").append(data);
                 $("#editUserForm").html(data);
+                $("#editUserForm").title = "Create User"; 
+                
+                $.get("/user-management/rolesCheckboxes",
+                function(data){
+                    $("#roles-checkboxes").html(data);
+                }, "text/html");
+        
+                $("#editUserForm").dialog("open");
             }
         });
-
-        $("#editUserForm").dialog("open");
+      
     }
 
 
@@ -217,6 +241,7 @@ limitations under the License.
         $.ajax({
             url: '/user-management/roles',
             success: function(data) {
+                console.log(data);
                 $("div#tabs-roles").html(data);
                 $("#role-table").tablesorter();
             }
@@ -233,28 +258,29 @@ limitations under the License.
         });
     }  
 
-    function edit(name){
+    function editUser(userName){
         $.ajax({
-            url: '/user-management/user/'+name,
+            url: '/user-management/user/'+userName,
             success: function(data) {
-                //   $("div#tabs-users").html(back);
-                //  $("div#tabs-users").append(data);
                 $("#editUserForm").html(data);
+                $("#password-label").html("<label for='password' id='password-label'>Password (leave blank to retain existing password)</label>");
+                
+                $.get("/user-management/rolesCheckboxes",
+                function(data){
+                    $("#roles-checkboxes").html(data);
+                }, "text/html");
+        
+                $.get("/user-management/user/"+userName+"/permissionsCheckboxes",
+                function(data){
+                    console.log("permissionsCheckboxes = "+data);
+                    $("#permissions-checkboxes").html(data);
+                }, "text/html");
+                
+                $("#editUserForm").dialog("open");
             }
         });
 
-        $("#editUserForm").dialog("open");
-    }
-    
-    function editUser(name){
-        var back = ("<div style='float:right;'><href='#' onClick='showUserList()'>&lt;&lt; back to user list</a></div>");    
-        $.ajax({
-            url: '/user-management/user/'+name,
-            success: function(data) {
-                $("div#tabs-users").html(back);
-                $("div#tabs-users").append(data);
-            }
-        });
+        
     }
 
     function removeUser(name){
