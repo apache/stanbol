@@ -111,7 +111,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
        <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-       <version>0.9.0-incubating</version>
+       <version>0.10.0-incubating</version>
     </dependency>
 
     <!-- KReS dependencies -->
@@ -143,7 +143,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.11.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

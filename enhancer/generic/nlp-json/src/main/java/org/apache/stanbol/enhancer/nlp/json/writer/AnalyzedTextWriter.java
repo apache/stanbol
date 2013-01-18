@@ -112,7 +112,7 @@ public class AnalyzedTextWriter implements MessageBodyWriter<AnalysedText> {
     @Override
     public long getSize(AnalysedText t, Class<?> type, Type genericType, Annotation[] annotations,
             MediaType mediaType) {
-        return 0;
+        return -1;
     }
 
     @Override
