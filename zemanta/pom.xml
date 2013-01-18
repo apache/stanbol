@@ -93,7 +93,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.11.0</version>
       <scope>provided</scope>
     </dependency>
 

@@ -87,7 +87,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.11.0</version>
     </dependency>
 
     <dependency>
@@ -98,7 +98,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.11.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -109,14 +109,14 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.10.0-incubating</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
 	  <groupId>org.apache.stanbol</groupId>
 	  <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
-    <version>0.9.0-incubating</version>
+    <version>0.11.0</version>
     </dependency>
 
     <dependency>
@@ -151,7 +151,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>0.11.0</version>
       <scope>test</scope>      
     </dependency>
     <dependency>
@@ -163,7 +163,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.2.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
 
