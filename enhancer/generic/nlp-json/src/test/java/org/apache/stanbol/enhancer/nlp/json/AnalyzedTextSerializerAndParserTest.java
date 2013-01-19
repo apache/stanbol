@@ -176,7 +176,8 @@ public class AnalyzedTextSerializerAndParserTest {
         Assert.assertTrue(serialized.contains("\"class\" : \"org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures\""));
         //deserialize
         AnalyzedTextParser parser = AnalyzedTextParser.getDefaultInstance();
-        AnalysedText parsedAt = parser.parse(new ByteArrayInputStream(data), null, textBlob.getValue());
+        AnalysedText parsedAt = parser.parse(new ByteArrayInputStream(data), null, 
+            atFactory.createAnalysedText(textBlob.getValue()));
         Assert.assertEquals(analysedTextWithData, parsedAt);
         Iterator<Span> origSpanIt = analysedTextWithData.getEnclosed(EnumSet.allOf(SpanTypeEnum.class));
         Iterator<Span> parsedSpanIt = parsedAt.getEnclosed(EnumSet.allOf(SpanTypeEnum.class));

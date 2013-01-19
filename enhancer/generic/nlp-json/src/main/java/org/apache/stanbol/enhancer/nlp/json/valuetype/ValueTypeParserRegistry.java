@@ -173,7 +173,8 @@ public class ValueTypeParserRegistry {
             parserLock.writeLock().lock();
             try {
                 List<ServiceReference> refs = valueTypeParserRefs.get(vts.getType());
-                if(refs != null && refs.remove(reference) && refs.isEmpty()){
+                if(refs != null && refs.remove(reference) && refs.isEmpty() &&
+                        valueTypeParsers != null){ //not yet deactivated
                     valueTypeParsers.remove(vts.getType());
                 }
             } finally {
