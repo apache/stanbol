@@ -175,7 +175,8 @@ public class ValueTypeSerializerRegistry {
             serializerLock.writeLock().lock();
             try {
                 List<ServiceReference> refs = valueTypeSerializerRefs.get(vts.getType());
-                if(refs != null && refs.remove(reference) && refs.isEmpty()){
+                if(refs != null && refs.remove(reference) && refs.isEmpty()
+                        && valueTypeSerializers != null){ //not yet deactivated
                     valueTypeSerializers.remove(vts.getType());
                 }
             } finally {

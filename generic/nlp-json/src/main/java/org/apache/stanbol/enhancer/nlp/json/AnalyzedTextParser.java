@@ -58,8 +58,7 @@ public class AnalyzedTextParser {
     public static final AnalyzedTextParser getDefaultInstance(){
         if(defaultInstance == null){
             defaultInstance = new AnalyzedTextParser(
-                ValueTypeParserRegistry.getInstance(),
-                AnalysedTextFactory.getDefaultInstance());
+                ValueTypeParserRegistry.getInstance());
         }
         return defaultInstance;
     }
@@ -76,36 +75,32 @@ public class AnalyzedTextParser {
      * Usages outside an OSGI environment should prefer to use the
      * {@link #getDefaultInstance()} instance to obtain the singleton instance.
      * @param vtsr
-     * @param atf
      */
-    public AnalyzedTextParser(ValueTypeParserRegistry vtpr, AnalysedTextFactory atf){
+    public AnalyzedTextParser(ValueTypeParserRegistry vtpr){
         if(vtpr == null){
             throw new IllegalArgumentException("The parsed ValueTypeParserRegistry MUST NOT be NULL!");
         }
-        if(atf == null){
-            throw new IllegalArgumentException("The parsed AnalyzedTextFactory MUST NOT be NULL!");
-        }
         this.valueTypeParserRegistry = vtpr;
-        this.analysedTextFactory = atf;
     }
     
     @Reference
     protected ValueTypeParserRegistry valueTypeParserRegistry;
     
-    @Reference
-    protected AnalysedTextFactory analysedTextFactory;
     /**
-     * Parses an {@link AnalysedText} instance from the {@link InputStream}. The
-     * analyzed text needs also to be parsed as the serialized data to usually
-     * not include those information
-     * @param in
-     * @param charset
-     * @param blob The blob to create the AnalyzedText for. As the Blob is not
-     * part of the parsed data it must be provided
-     * @return
-     * @throws IOException
+     * Parses {@link AnalysedText} {@link Span}s including annotations from the 
+     * {@link InputStream}. The {@link AnalysedText} instance that is going to
+     * be enrichted with the parsed data needs to be parsed. In the simplest case
+     * the caller can create an empty instance by using a 
+     * {@link AnalysedTextFactory}.
+     * @param in The stream to read the data from
+     * @param charset the {@link Charset} used by the stream
+     * @param at The {@link AnalysedText} instance used to add the data to
+     * @return the parsed {@link AnalysedText} instance enrichted with the
+     * information parsed from the Stream
+     * @throws IOException on any Error while reading or parsing the data
+     * from the Stream
      */
-    public AnalysedText parse(InputStream in, Charset charset, final Blob blob) throws IOException {
+    public AnalysedText parse(InputStream in, Charset charset, final AnalysedText at) throws IOException {
         if(in == null){
             throw new IllegalArgumentException("The parsed InputStream MUST NOT be NULL!");
         }
@@ -124,10 +119,9 @@ public class AnalyzedTextParser {
             throw new IOException("The value of the 'span' field MUST BE an Json Array!");
         }
         boolean first = true;
-        AnalysedText at = null;
         while(parser.nextValue() == JsonToken.START_OBJECT){
             if(first){
-                at = parseAnalyzedTextSpan(parser.readValueAsTree(), blob);
+                parseAnalyzedTextSpan(parser.readValueAsTree(), at);
                 first = false;
             } else {
                 parseSpan(at, parser.readValueAsTree());
@@ -136,7 +130,7 @@ public class AnalyzedTextParser {
         return at;
     }
 
-    private AnalysedText parseAnalyzedTextSpan(JsonNode node, Blob blob) throws IOException {
+    private void parseAnalyzedTextSpan(JsonNode node, AnalysedText at) throws IOException {
         if(node.isObject()){
             ObjectNode jSpan = (ObjectNode)node;
             int[] spanPos = new int[]{-1,-1}; 
@@ -146,13 +140,11 @@ public class AnalyzedTextParser {
                 throw new IOException("The AnalyzedText span MUST have the SpanType 'text', a "
                         + "start position of '0' and an end position (ignored, json: "+jSpan);
             }
-            AnalysedText at = analysedTextFactory.createAnalysedText(blob);
             if(at.getEnd() != spanPos[1]){
                 throw new IOException("The size of the local text '"+at.getEnd()+"' does not "
                     + "match the span of the parsed AnalyzedText ["+spanPos[0]+","+spanPos[1]+"]!");
             }
             parseAnnotations(at, jAnnotations);
-            return at;
         } else {
             throw new IOException("Unable to parse AnalyzedText span form JsonNode "+node+" (expected JSON object)!");
         }
