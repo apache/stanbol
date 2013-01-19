@@ -67,6 +67,8 @@
     <module>smartcn-token</module> <!-- sentence detection and tokenizing -->
     <module>paoding-token</module> <!-- tokenizing -->
     <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
+    <!-- RESTful NLP analyser service engine-->
+    <module>restful-nlp</module> <!-- see -->
   
   	<!-- EntityLinking -->
     <module>entitylinking</module>
