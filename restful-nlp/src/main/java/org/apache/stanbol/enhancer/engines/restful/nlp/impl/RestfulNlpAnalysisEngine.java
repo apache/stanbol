@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.print.attribute.TextSyntax;
 
@@ -153,7 +154,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
      * The User for the remote analyses service
      */
     public static final String ANALYSIS_SERVICE_PWD = "enhancer.engine.restful.nlp.analysis.service.pwd";
-    
+        
     /**
      * Language configuration. Takes a list of ISO language codes to be processed
      * by this engine. This list will be joined with the list of languages supported
@@ -452,8 +453,9 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         //get the supported languages
         String supported = httpClient.execute(new HttpGet(analysisServiceUrl), 
             new BasicResponseHandler());
-        for(String lang : supported.split("\\{\\[\",\\]\\}")){
-            supportedLanguages.add(lang);
+        StringTokenizer st = new StringTokenizer(supported, "{[\",]}");
+        while(st.hasMoreElements()){
+            supportedLanguages.add(st.nextToken());
         }
         
     }
