@@ -241,6 +241,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         if(!supportedLanguages.contains(language)){
             log.trace(" > the RESTful Analysis service does not support '{}' (supported: {})",
                 language, supportedLanguages);
+            return CANNOT_ENHANCE;
         }
         log.trace(" > can enhance ContentItem {} with language {}",ci,language);
         return ENHANCE_ASYNC;
