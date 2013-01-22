@@ -1,5 +1,6 @@
 package org.apache.stanbol.enhancer.nlp.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -10,11 +11,16 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.impl.SectionImpl;
 import org.apache.stanbol.enhancer.nlp.model.impl.SpanImpl;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +53,7 @@ public class AnalysedTextUtils {
             ci.getLock().readLock().unlock();
         }
     }
-    
+
     /**
      * Copies the elements of the parsed iterator to a list.
      * @param iterator the iterator
