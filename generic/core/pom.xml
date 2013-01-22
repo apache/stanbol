@@ -75,6 +75,19 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- Generated License infos -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+
+            <!-- AL20 Licensed -->
+            <exclude>src/main/resources/META-INF/services/org.apache.stanbol.enhancer.servicesapi.ContentItemFactory</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
     </plugins>
   </build>
 
