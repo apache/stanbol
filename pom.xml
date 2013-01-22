@@ -68,7 +68,8 @@
     <module>paoding-token</module> <!-- tokenizing -->
     <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
     <!-- RESTful NLP analyser service engine-->
-    <module>restful-nlp</module> <!-- see -->
+    <module>restful-nlp</module> <!-- see STANBOL-893 -->
+    <module>restful-langident</module> <!-- see STANBOL-895 -->
   
   	<!-- EntityLinking -->
     <module>entitylinking</module>
