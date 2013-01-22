@@ -15,21 +15,20 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
+    <version>0.10.0</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.test</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>0.10.0</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Enhancer Test framework</name>
@@ -40,12 +39,12 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/test/
+            scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancer-0.10.0/generic/test
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/test/
+            scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancer-0.10.0/generic/test
         </developerConnection>
-        <url>http://stanbol.apache.org/</url>
+        <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancer-0.10.0/stanbol.apache.org</url>
     </scm>
 
   <build>
@@ -74,7 +73,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.10.0</version>
     </dependency>
 
     <dependency>
