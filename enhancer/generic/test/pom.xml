@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-    <version>0.10.0</version>
+    <version>0.10.0-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.test</artifactId>
-  <version>0.10.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Enhancer Test framework</name>
@@ -39,12 +39,12 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancer-0.10.0/generic/test
+            scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/test/
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancer-0.10.0/generic/test
+            scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/test/
         </developerConnection>
-        <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancer-0.10.0/stanbol.apache.org</url>
+        <url>http://stanbol.apache.org/</url>
     </scm>
 
   <build>

@@ -21,25 +21,25 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-    <version>0.10.0</version>
+    <version>0.10.0-SNAPSHOT</version>
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.defaults</artifactId>
-  <version>0.10.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancer Defaults Configuration</name>
   <description>This provides the default configuration for the Enhancer. This bundle can be removed by users that want/need to provide their own configuration conflicting with the defaults.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancer-0.10.0/defaults
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/defaults
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancer-0.10.0/defaults
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/defaults
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancer-0.10.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>
