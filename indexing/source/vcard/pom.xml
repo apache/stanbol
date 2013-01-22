@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.indexing.parent</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>0.11.0</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.indexing.source.vcard</artifactId>
-  <version>0.11.0-SNAPSHOT</version>
+  <version>0.11.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Entityhub Indexing Source for vCard</name>
@@ -48,12 +48,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/source/vcard
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/indexing/source/vcard
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/source/vcard
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/indexing/source/vcard
     </developerConnection>
-    <url>http://stanbol.apache.org</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0</url>
   </scm>
 
   <build>
@@ -77,7 +77,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>0.11.0</version>
     </dependency>
     
     <dependency>
