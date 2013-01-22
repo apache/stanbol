@@ -134,6 +134,9 @@
                 <exclude>**/test/**/*.rtf</exclude>
                 <exclude>**/test/**/*.rules</exclude>
                 <exclude>**/test/**/*.odt</exclude>
+
+                <!-- example data under AL -->
+                <exclude>data/text-examples/*.txt</exclude>                
               </excludes>
             </configuration>
           </plugin>
