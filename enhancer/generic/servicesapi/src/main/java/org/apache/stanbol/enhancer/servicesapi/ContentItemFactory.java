@@ -36,7 +36,14 @@ public interface ContentItemFactory {
      * generates as unique ID from the passed content.
      * Implementors might want to use
      * {@link ContentItemHelper#streamDigest(InputStream, java.io.OutputStream, String)
-     * for generating an ID while reading the data from the ContentSource.
+     * for generating an ID while reading the data from the ContentSource.<p>
+     * The content provided by the {@link ContentSource} is consumed by the
+     * this method and stored as {@link Blob} with the returned {@link ContentItem}.
+     * In addition implementors need to ensure that this {@link Blob} is also
+     * used by the {@link ContentItem#getBlob()}, {@link ContentItem#getStream()},
+     * and {@link ContentItem#getMimeType()} methods.<p>
+     * Callers can safely close any resource related to the parsed {@link ContentSource}
+     * method after this method returns.
      * @param source The content source
      * @return the {@link ContentItem} with a generated id and the passed
      * content as content-part of type {@link Blob} at index <code>0</code>
@@ -54,7 +61,14 @@ public interface ContentItemFactory {
      * values should typically end with an separator char (e.g. '/', '#', ':').
      * Implementors might want to use
      * {@link org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper#streamDigest(InputStream, java.io.OutputStream, String)
-     * for generating an ID while reading the data from the ContentSource.
+     * for generating an ID while reading the data from the ContentSource.<p>
+     * The content provided by the {@link ContentSource} is consumed by the
+     * this method and stored as {@link Blob} with the returned {@link ContentItem}.
+     * In addition implementors need to ensure that this {@link Blob} is also
+     * used by the {@link ContentItem#getBlob()}, {@link ContentItem#getStream()},
+     * and {@link ContentItem#getMimeType()} methods.<p>
+     * Callers can safely close any resource related to the parsed {@link ContentSource}
+     * method after this method returns.
      * @param source The content source
      * @return the {@link ContentItem} with a generated id and the passed
      * content as content-part of type {@link Blob} at index <code>0</code>
@@ -70,7 +84,14 @@ public interface ContentItemFactory {
      * @param id the id for the ContentItem or <code>null</code> to generate an id.
      * If <code>null</code> is passed as ID, implementors might want to use
      * {@link ContentItemHelper#streamDigest(InputStream, java.io.OutputStream, String)
-     * for generating an ID while reading the data from the ContentSource.
+     * for generating an ID while reading the data from the ContentSource.<p>
+     * The content provided by the {@link ContentSource} is consumed by the
+     * this method and stored as {@link Blob} with the returned {@link ContentItem}.
+     * In addition implementors need to ensure that this {@link Blob} is also
+     * used by the {@link ContentItem#getBlob()}, {@link ContentItem#getStream()},
+     * and {@link ContentItem#getMimeType()} methods.<p>
+     * Callers can safely close any resource related to the parsed {@link ContentSource}
+     * method after this method returns.
      * @param source The content source
      * @return the {@link ContentItem} with a passed/generated id and the passed
      * content as content-part of type {@link Blob} at index <code>0</code>
@@ -88,7 +109,14 @@ public interface ContentItemFactory {
      * values should typically end with an separator char (e.g. '/', '#', ':').
      * Implementors might want to use
      * {@link ContentItemHelper#streamDigest(InputStream, java.io.OutputStream, String)
-     * for generating an ID while reading the data from the ContentSource
+     * for generating an ID while reading the data from the ContentSource.<p>
+     * The content provided by the {@link ContentSource} is consumed by the
+     * this method and stored as {@link Blob} with the returned {@link ContentItem}.
+     * In addition implementors need to ensure that this {@link Blob} is also
+     * used by the {@link ContentItem#getBlob()}, {@link ContentItem#getStream()},
+     * and {@link ContentItem#getMimeType()} methods.<p>
+     * Callers can safely close any resource related to the parsed {@link ContentSource}
+     * method after this method returns.
      * @param source The content source
      * @param metadata an {@link MGraph} with the metadata or <code>null</code>
      * if none. Implementation are free to use the passed instance or to generate 
@@ -109,7 +137,14 @@ public interface ContentItemFactory {
      * @param id the id for the ContentItem or <code>null</code> to generate an id.
      * If <code>null</code> is passed as ID, implementors might want to use
      * {@link ContentItemHelper#streamDigest(InputStream, java.io.OutputStream, String)
-     * for generating an ID while reading the data from the ContentSource.
+     * for generating an ID while reading the data from the ContentSource.<p>
+     * The content provided by the {@link ContentSource} is consumed by the
+     * this method and stored as {@link Blob} with the returned {@link ContentItem}.
+     * In addition implementors need to ensure that this {@link Blob} is also
+     * used by the {@link ContentItem#getBlob()}, {@link ContentItem#getStream()},
+     * and {@link ContentItem#getMimeType()} methods.<p>
+     * Callers can safely close any resource related to the parsed {@link ContentSource}
+     * method after this method returns.
      * @param source The content source
      * @param metadata an {@link MGraph} with the metadata or <code>null</code>
      * if none. Implementation are free to use the passed instance or to generate 
@@ -163,7 +198,11 @@ public interface ContentItemFactory {
      */
     ContentItem createContentItem(ContentReference reference, MGraph metadata) throws IOException;
     /**
-     * Creates a new Blob based on the passed {@link ContentSource}
+     * Creates a new Blob based on the passed {@link ContentSource}<p>
+     * The content provided by the {@link ContentSource} is consumed by the
+     * this method and stored in the returned {@link Blob}. Callers can safely 
+     * close any resource related to the parsed {@link ContentSource}
+     * method after this method returns.
      * @param source The source 
      * @return the Blob
      * @throws IllegalArgumentException of the passed source is <code>null</code>
