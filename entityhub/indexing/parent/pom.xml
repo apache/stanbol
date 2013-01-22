@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.11.0</version>
+    <version>0.11.0-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.indexing.parent</artifactId>
-  <version>0.11.0</version>
+  <version>0.11.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Entityhub Indexing Parent</name>
@@ -47,12 +47,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/indexing/parent
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/parent
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/indexing/parent
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/parent
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0//stanbol.apache.org</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>

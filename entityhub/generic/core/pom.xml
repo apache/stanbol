@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.11.0</version>
+    <version>0.11.0-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-  <version>0.11.0</version>
+  <version>0.11.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Entityhub Generic Core</name>
@@ -49,12 +49,12 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/generic/core
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/generic/core
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/generic/core
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/generic/core
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0//stanbol.apache.org</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>
