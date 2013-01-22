@@ -17,6 +17,7 @@
 package org.apache.stanbol.enhancer.servicesapi.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -126,17 +127,12 @@ public class StreamSource implements ContentSource {
             throw new IllegalStateException("This InputStream of this ContentSource is already consumed!");
         }
         consumed = true;
-        return in;
+        return new NonCloseableInputStream(in);
     }
     @Override
-    public byte[] getData() throws IOException {
+    public synchronized byte[] getData() throws IOException {
         if(data == null){
-            InputStream in = getStream();
-            try {
-                data = IOUtils.toByteArray(in);
-            } finally {
-                IOUtils.closeQuietly(in);
-            }
+            data = IOUtils.toByteArray(in);
         }
         return data;
     }
@@ -154,9 +150,26 @@ public class StreamSource implements ContentSource {
     public Map<String,List<String>> getHeaders() {
         return headers;
     }
-    @Override
-    protected void finalize() throws Throwable {
-        IOUtils.closeQuietly(in);
-    }
+// The parsed Stream MUST NOT be closed (STANBOL-898)
+//    @Override
+//    protected void finalize() throws Throwable {
+//        IOUtils.closeQuietly(in);
+//    }
     
+    /**
+     * Internally used to ensure that InputStreams returned by
+     * {@link StreamSource#getStream()} can not be closed by callers (as 
+     * requested by STANBOL-898)
+     */
+    private static class NonCloseableInputStream extends FilterInputStream {
+
+        protected NonCloseableInputStream(InputStream in) {
+            super(in);
+        }
+    
+        @Override
+        public void close() throws IOException {
+            //ignore call to close
+        }
+    }
 }
