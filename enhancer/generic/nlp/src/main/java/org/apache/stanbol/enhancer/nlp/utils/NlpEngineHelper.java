@@ -164,12 +164,21 @@ public final class NlpEngineHelper {
                     + "ContentPart because the parsed AnalysedTextFactory is NULL");
             }
             Entry<UriRef,Blob> textBlob = getPlainText(engine, ci, true);
-            log.debug(" ... create new AnalysedText instance for Engine {}", engine.getName());
+            //we need to create
+            ci.getLock().writeLock().lock();
             try {
-                at = analysedTextFactory.createAnalysedText(ci, textBlob.getValue());
+                //try again to retrieve (maybe an concurrent thread has created
+                //the content part in the meantime
+                at = AnalysedTextUtils.getAnalysedText(ci);
+                if(at == null){
+                    log.debug(" ... create new AnalysedText instance for Engine {}", engine.getName());
+                    at = analysedTextFactory.createAnalysedText(ci, textBlob.getValue());
+                }
             } catch (IOException e) {
                 throw new EngineException("Unable to create AnalysetText instance for Blob "
                     + textBlob.getKey()+ " of ContentItem "+ci.getUri()+"!",e);
+            } finally {
+                ci.getLock().writeLock().unlock();
             }
         } else {
             log.debug(" ... use existing AnalysedText instance for Engine {}", engine.getName());
