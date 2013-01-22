@@ -30,21 +30,18 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
-
-import javax.print.attribute.TextSyntax;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -61,7 +58,6 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHeaders;
@@ -88,18 +84,15 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.json.AnalyzedTextParser;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextFactory;
-import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Span;
 import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
@@ -193,13 +186,6 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
     protected DefaultHttpClient httpClient;
     private BasicHttpParams httpParams;
     private PoolingClientConnectionManager connectionManager;
-    /**
-     * List of HttpHeaders reused for each request. This avoids to re-create them
-     * for every request
-     */
-    private static List<? extends Header> DEFAULT_HEADERS = Arrays.asList(
-        new BasicHeader(HttpHeaders.ACCEPT_ENCODING, UTF8.name()),
-        new BasicHeader(HttpHeaders.CONTENT_TYPE, "text/plain; charset="+UTF8.name()));
     
     @Reference
     private AnalysedTextFactory analysedTextFactory;
@@ -265,28 +251,36 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
      *          expected
      */
     @Override
-    public void computeEnhancements(ContentItem ci) throws EngineException {
-        //get the plain text Blob
-        Map.Entry<UriRef,Blob> textBlob = NlpEngineHelper.getPlainText(this, ci, false);
-        Blob blob = textBlob.getValue();
+    public void computeEnhancements(final ContentItem ci) throws EngineException {
+        //get/create the AnalysedText
+        final AnalysedText at = NlpEngineHelper.initAnalysedText(this, analysedTextFactory, ci);
+        final Blob blob = at.getBlob();
         //send the text to the server
-        String language = getLanguage(this, ci, true);
-        HttpPost request = new HttpPost(analysisServiceUrl);
+        final String language = getLanguage(this, ci, true);
+        final HttpPost request = new HttpPost(analysisServiceUrl);
         request.addHeader(HttpHeaders.CONTENT_LANGUAGE, language);
         request.setEntity(new InputStreamEntity(
             blob.getStream(), blob.getContentLength(),
             ContentType.create(blob.getMimeType(), 
                 blob.getParameter().get("charset"))));
         //execute the request
-        AnalysedText at;
         try {
-            at = httpClient.execute(request, new AnalysisResponseHandler(ci, textBlob));
-        } catch (ClientProtocolException e) {
-            throw new EngineException(this, ci, "Exception while executing Request "
-                + "on RESTful NLP Analysis Service at "+analysisServiceUrl, e);
-        } catch (IOException e) {
-            throw new EngineException(this, ci, "Exception while executing Request "
+            AccessController.doPrivileged(new PrivilegedExceptionAction<AnalysedText>() {
+                public AnalysedText run() throws ClientProtocolException, IOException {
+                    return httpClient.execute(request, new AnalysisResponseHandler(at));
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof ClientProtocolException) {
+                throw new EngineException(this, ci, "Exception while executing Request "
                     + "on RESTful NLP Analysis Service at "+analysisServiceUrl, e);
+            } else if(e instanceof IOException) {
+                throw new EngineException(this, ci, "Exception while executing Request "
+                        + "on RESTful NLP Analysis Service at "+analysisServiceUrl, e);
+            } else {
+                throw RuntimeException.class.cast(e);
+            }
         }
         Iterator<Span> spans = at.getEnclosed(EnumSet.of(SpanTypeEnum.Sentence,SpanTypeEnum.Chunk));
         Sentence context = null;
@@ -335,13 +329,11 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
 
     protected class AnalysisResponseHandler implements ResponseHandler<AnalysedText>{
         
-        protected final ContentItem ci;
-        protected final Entry<UriRef,Blob> textBlob;
+        protected final AnalysedText at;
 
 
-        protected AnalysisResponseHandler(ContentItem ci, Map.Entry<UriRef,Blob> textBlob){
-            this.ci = ci;
-            this.textBlob = textBlob;
+        protected AnalysisResponseHandler(AnalysedText at){
+            this.at = at;
         }
 
         @Override
@@ -359,9 +351,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                 in = entity.getContent();
                 Charset charset = entity.getContentEncoding() != null ? 
                         Charset.forName(entity.getContentEncoding().getValue()) : UTF8;
-                //parse the received data and add it to the AnalysedText of the 
-                //contentItem
-                return parseAnalysedText(ci, textBlob, in, charset);
+                return analyzedTextParser.parse(in, charset, at);
             } finally {
                 //ensure that the stream is closed
                 IOUtils.closeQuietly(in);
@@ -369,26 +359,6 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         }
     }
     
-    /**
-     * @param ci
-     * @param entry
-     * @param in
-     * @param charset
-     * @throws EngineException
-     */
-    private AnalysedText parseAnalysedText(ContentItem ci, Map.Entry<UriRef,Blob> entry,
-            InputStream in,Charset charset) throws IOException {
-        AnalysedText at;
-        ci.getLock().writeLock().lock();
-        try {
-            at = analysedTextFactory.createAnalysedText(ci, entry.getValue());
-        } finally {
-            ci.getLock().writeLock().unlock();
-        }
-        analyzedTextParser.parse(in, charset, at);
-        return at;
-    }
-
     @Override
     public Map<String,Object> getServiceProperties() {
         return SERVICE_PROPERTIES;
@@ -453,8 +423,23 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
             httpClient.addRequestInterceptor(new PreemptiveAuthInterceptor(), 0);
         }
         //get the supported languages
-        String supported = httpClient.execute(new HttpGet(analysisServiceUrl), 
-            new BasicResponseHandler());
+        String supported;
+        try {
+            supported = AccessController.doPrivileged(new PrivilegedExceptionAction<String>() {
+                public String run() throws IOException {
+                    return httpClient.execute(new HttpGet(analysisServiceUrl), 
+                        new BasicResponseHandler());
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof IOException){
+                throw (IOException)e;
+            } else {
+                throw RuntimeException.class.cast(e);
+            }
+        }
+
         StringTokenizer st = new StringTokenizer(supported, "{[\",]}");
         while(st.hasMoreElements()){
             supportedLanguages.add(st.nextToken());
