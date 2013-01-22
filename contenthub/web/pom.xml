@@ -79,13 +79,13 @@
             <exclude>src/license/THIRD-PARTY.properties</exclude>
 
             <!-- MIT License -->
-            <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/style/jquery-ui-1.8.11.custom.css</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jquery-ui-1.8.11.custom.min.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jquery-1.5.1.min.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jquery-1.4.2.js</exclude>            
+            <exclude>src/main/resources/META-INF/resources/static/contenthub/style/jquery-ui-1.8.11.custom.css</exclude>
+            <exclude>src/main/resources/META-INF/resources/static/contenthub/scripts/jquery-ui-1.8.11.custom.min.js</exclude>
+            <exclude>src/main/resources/META-INF/resources/static/contenthub/scripts/jquery-1.5.1.min.js</exclude>
+            <exclude>src/main/resources/META-INF/resources/static/contenthub/scripts/jquery-1.4.2.js</exclude>            
 
             <!-- BSD License -->
-            <exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jit.js</exclude>
+            <exclude>src/main/resources/META-INF/resources/static/contenthub/scripts/jit.js</exclude>
           </excludes>
         </configuration>
       </plugin>
