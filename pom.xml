@@ -136,7 +136,11 @@
                 <exclude>**/test/**/*.odt</exclude>
 
                 <!-- example data under AL -->
-                <exclude>data/text-examples/*.txt</exclude>                
+                <exclude>data/text-examples/*.txt</exclude>
+
+                <!-- Service configs -->
+                <exclude>**/src/main/resources/META-INF/services/**</exclude>
+
               </excludes>
             </configuration>
           </plugin>
