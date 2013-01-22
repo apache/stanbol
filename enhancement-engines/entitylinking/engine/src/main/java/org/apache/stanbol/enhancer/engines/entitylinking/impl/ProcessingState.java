@@ -88,6 +88,8 @@ public class ProcessingState {
     protected final LanguageProcessingConfig tpc;
     protected final EntityLinkerConfig elc;
 
+    private AnalysedText at;
+
     private static final Predicate PROCESSABLE_TOKEN_OREDICATE = new Predicate() {
         @Override
         public boolean evaluate(Object object) {
@@ -115,7 +117,7 @@ public class ProcessingState {
         if(!tpc.isIgnoreChunks()){
             enclosedSpanTypes.add(SpanTypeEnum.Chunk);
         }
-        
+        this.at = at; //store as field (just used for logging)
         this.language = language;
         //prefer to iterate over sentences
         Iterator<Sentence> sentences = at.getSentences();
@@ -227,6 +229,10 @@ public class ProcessingState {
             ChunkData activeChunk = null;
             while(enclosed.hasNext()){
                 Span span = enclosed.next();
+                if(span.getStart() >= span.getEnd()){ //save guard against empty spans
+                    log.warn("Detected Empty Span {} in section {} of Blob {}",
+                        new Object[]{span,section, at.getBlob()});
+                }
                 if(span.getType() == SpanTypeEnum.Chunk){
                     ChunkData chunkData = new ChunkData((Chunk)span);
                     if(chunkData.isProcessable){
@@ -482,7 +488,9 @@ public class ProcessingState {
             boolean matchedPosTag = false; //matched any of the POS annotations
             
             //(1) check if this Token should be linked against the Vocabulary (isProcessable)
-            boolean upperCase = index > 0 && Character.isUpperCase(token.getSpan().codePointAt(0));
+            boolean upperCase = index > 0 && //not a sentence start
+                    token.getEnd() > token.getStart() && //not an empty token
+                    Character.isUpperCase(token.getSpan().codePointAt(0)); //and upper case
             if(tpc.isLinkUpperCaseTokens() && upperCase){
                 isProcessable = true;
             } else { //else use POS tag & token length
