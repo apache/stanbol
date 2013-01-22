@@ -90,6 +90,8 @@
 
             <!-- AL20 licensed files. See src/test/resources/README -->
             <exclude>src/test/resources/indexing/resources/incoming_links.txt</exclude>
+
+            <exclude>dbpedia-3.8/copy_en_values.ldpath</exclude>
           </excludes>
         </configuration>
       </plugin>

@@ -82,12 +82,9 @@
           	<exclude>src/license/THIRD-PARTY.properties</exclude>
           
             <!-- AL20 licensed files. See src/test/resources/README -->
-            <exclude>src/test/resources/testConfigs/provider/indexing/config/indexFieldConfig.txt</exclude>
-            <exclude>src/test/resources/testConfigs/provider/indexing/resources/testEntityIds.txt</exclude>
-            <exclude>src/test/resources/testConfigs/existing/indexing/config/indexFieldConfig.txt</exclude>
-            <exclude>src/test/resources/testConfigs/existing/indexing/resources/testEntityIds.txt</exclude>
-            <exclude>src/test/resources/testConfigs/iterable/indexing/config/indexFieldConfig.txt</exclude>
-            <exclude>src/test/resources/testConfigs/iterable/indexing/resources/testEntityScore.txt</exclude>
+            <exclude>src/test/**/*.txt</exclude>
+            <exclude>src/test/**/*.nq</exclude>
+            <exclude>src/test/**/*.nt</exclude>
           </excludes>
         </configuration>
       </plugin>      

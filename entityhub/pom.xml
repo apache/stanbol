@@ -120,10 +120,12 @@
                 <exclude>**/*.txt</exclude>
                 <exclude>**/*.tsv</exclude>
                 <exclude>**/*.sem</exclude>
+                <exclude>**/*.ldpath</exclude>
 
                 <!-- exclude test files --> 
                 <exclude>**/test/**/*.eml</exclude>
                 <exclude>**/test/**/*.nt</exclude>
+                <exclude>**/test/**/*.nq</exclude>
                 <exclude>**/test/**/*.html</exclude>
                 <exclude>**/test/**/*.xhtml</exclude>
                 <exclude>**/test/**/*.rdf</exclude>
