@@ -105,7 +105,8 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  */
 
-@Component(immediate = true, metatype = true,  policy = ConfigurationPolicy.REQUIRE)
+@Component(immediate = true, metatype = true,
+    policy = ConfigurationPolicy.REQUIRE, configurationFactory=true)
 @Service
 @Properties(value={
         @Property(name= EnhancementEngine.PROPERTY_NAME,value="changeme"),
