@@ -79,7 +79,8 @@
     <module>keywordextraction</module>
 
 	  <!-- Categorization -->
-    <module>topic</module>
+    <module>topic/engine</module>
+    <module>topic/web</module>
 
 	  <!-- Sentiment -->
     <module>sentiment-wordclassifier</module>

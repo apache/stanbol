@@ -73,7 +73,6 @@
     <module>contenthub</module>
 
     <module>enhancement-engines</module>
-    <module>enhancer/topic-web</module>
 
     <module>cmsadapter</module>
 
