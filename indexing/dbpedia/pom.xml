@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.indexing.parent</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>0.11.0</version>
     <relativePath>../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.indexing.dbpedia</artifactId>
-  <version>0.11.0-SNAPSHOT</version>
+  <version>0.11.0</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Entityhub Indexing for DBpedia.org</name>
@@ -44,12 +44,12 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/dbpedia
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/indexing/dbpedia
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/dbpedia
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/indexing/dbpedia
     </developerConnection>
-    <url>http://stanbol.apache.org</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0//stanbol.apache.org</url>
   </scm>
 
   <build>
@@ -103,20 +103,20 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>0.11.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.source.jenatdb</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>0.11.0</version>
       <scope>runtime</scope>
     </dependency>
     <!-- dependencies of the solr yard destination -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.destination.solryard</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>0.11.0</version>
       <scope>runtime</scope>
     </dependency>
 
