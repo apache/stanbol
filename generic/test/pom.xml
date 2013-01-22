@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.11.0</version>
+    <version>0.11.0-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.test</artifactId>
-  <version>0.11.0</version>
+  <version>0.11.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Entityhub Generic Test Framework</name>
@@ -48,12 +48,12 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/generic/test
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/generic/test
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/generic/test
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/generic/test
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0//stanbol.apache.org</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <dependencies>
