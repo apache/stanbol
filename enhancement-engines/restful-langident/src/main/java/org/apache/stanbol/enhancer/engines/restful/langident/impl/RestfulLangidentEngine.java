@@ -28,6 +28,9 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -197,12 +200,12 @@ public class RestfulLangidentEngine extends AbstractEnhancementEngine<IOExceptio
      *          expected
      */
     @Override
-    public void computeEnhancements(ContentItem ci) throws EngineException {
+    public void computeEnhancements(final ContentItem ci) throws EngineException {
         //get the plain text Blob
         Map.Entry<UriRef,Blob> textBlob = getPlainText(this, ci, false);
         Blob blob = textBlob.getValue();
         //send the text to the server
-        HttpPost request = new HttpPost(serviceUrl);
+        final HttpPost request = new HttpPost(serviceUrl);
         request.setEntity(new InputStreamEntity(
             blob.getStream(), blob.getContentLength(),
             ContentType.create(blob.getMimeType(), 
@@ -210,13 +213,22 @@ public class RestfulLangidentEngine extends AbstractEnhancementEngine<IOExceptio
         //execute the request
         List<LangSuggestion> detected;
         try {
-            detected = httpClient.execute(request, new LangIdentResponseHandler(ci,objectMapper));
-        } catch (ClientProtocolException e) {
-            throw new EngineException(this, ci, "Exception while executing Request "
-                + "on RESTful Language Identification Service at "+serviceUrl, e);
-        } catch (IOException e) {
-            throw new EngineException(this, ci, "Exception while executing Request "
-                    + "on RESTful Language Identification Service at "+serviceUrl, e);
+            detected = AccessController.doPrivileged(new PrivilegedExceptionAction<List<LangSuggestion>>() {
+                public List<LangSuggestion> run() throws ClientProtocolException, IOException {
+                    return httpClient.execute(request, new LangIdentResponseHandler(ci,objectMapper));
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof ClientProtocolException) {
+                throw new EngineException(this, ci, "Exception while executing Request "
+                        + "on RESTful Language Identification Service at "+serviceUrl, e);
+            } else if(e instanceof IOException) {
+                throw new EngineException(this, ci, "Exception while executing Request "
+                        + "on RESTful Language Identification Service at "+serviceUrl, e);
+            } else {
+                throw RuntimeException.class.cast(e);
+            }
         }
         MGraph metadata = ci.getMetadata();
         log.debug("Detected Languages for ContentItem {} and Blob {}");
