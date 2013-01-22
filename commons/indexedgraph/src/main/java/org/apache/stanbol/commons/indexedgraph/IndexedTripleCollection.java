@@ -16,13 +16,18 @@
 */
 package org.apache.stanbol.commons.indexedgraph;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
@@ -30,6 +35,8 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.AbstractTripleCollection;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link TripleCollection} implementation that uses indexes for <ul>
@@ -38,8 +45,8 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
  * <li> object, subject, predicate [OSP]
  * </ul>
  * Indexes are maintained in {@link TreeSet}s with according {@link Comparator}
- * instances ({@link #SPO_COMPARATOR}, {@link #POS_COMPARATOR} ,
- * {@link #OSP_COMPARATOR}). {@link Resource}s are compared first using the
+ * instances ({@link #spoComparator}, {@link #posComparator} ,
+ * {@link #ospComparator}). {@link Resource}s are compared first using the
  * {@link Resource#hashCode()} and only if this matches by using
  * {@link Resource}{@link #toString()}.<p>
  * The {@link #filter(NonLiteral, UriRef, Resource)} implementation is based
@@ -53,9 +60,77 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
  */
 class IndexedTripleCollection extends AbstractTripleCollection implements TripleCollection {
 
-    private final NavigableSet<Triple> spo = new TreeSet<Triple>(SPO_COMPARATOR);
-    private final NavigableSet<Triple> pos = new TreeSet<Triple>(POS_COMPARATOR);
-    private final NavigableSet<Triple> osp = new TreeSet<Triple>(OSP_COMPARATOR);
+    private static final Logger log = LoggerFactory.getLogger(IndexedTripleCollection.class);
+    
+    /**
+     * This map is used to ensure constant ordering for {@link BNode} that do
+     * have the same hashcode (and therefore result to have the same
+     * {@link BNode#toString()} value.
+     */
+    private final Map<Integer,List<Resource>> hashCodeConflictMap = new HashMap<Integer,List<Resource>>();
+    /**
+     * Compares Triples based on Subject, Predicate, Object
+     */
+    private final Comparator<Triple> spoComparator = new Comparator<Triple>() {
+
+        @Override
+        public int compare(Triple a, Triple b) {
+            int c = IndexedTripleCollection.compare(a.getSubject(), b.getSubject(), hashCodeConflictMap);
+            if(c == 0){
+                c = IndexedTripleCollection.compare(a.getPredicate(), b.getPredicate(), hashCodeConflictMap);
+                if(c == 0){
+                    c =  IndexedTripleCollection.compare(a.getObject(), b.getObject(), hashCodeConflictMap);
+                }
+            }
+            return c;
+        }
+    };
+    /**
+     * The SPO index
+     */
+    private final NavigableSet<Triple> spo = new TreeSet<Triple>(spoComparator);
+    /**
+     * Compares Triples based on Predicate, Object, Subject
+     */
+    private final Comparator<Triple> posComparator = new Comparator<Triple>() {
+
+        @Override
+        public int compare(Triple a, Triple b) {
+            int c = IndexedTripleCollection.compare(a.getPredicate(), b.getPredicate(), hashCodeConflictMap);
+            if(c == 0){
+                c = IndexedTripleCollection.compare(a.getObject(), b.getObject(), hashCodeConflictMap);
+                if(c == 0){
+                    c =  IndexedTripleCollection.compare(a.getSubject(), b.getSubject(), hashCodeConflictMap);
+                }
+            }
+            return c;
+        }
+    };
+    /**
+     * The POS index
+     */
+    private final NavigableSet<Triple> pos = new TreeSet<Triple>(posComparator);
+    /**
+     * Compares Triples based on Object, Subject, Predicate
+     */
+    private final Comparator<Triple> ospComparator = new Comparator<Triple>() {
+
+        @Override
+        public int compare(Triple a, Triple b) {
+            int c = IndexedTripleCollection.compare(a.getObject(), b.getObject(), hashCodeConflictMap);
+            if(c == 0){
+                c = IndexedTripleCollection.compare(a.getSubject(), b.getSubject(), hashCodeConflictMap);
+                if(c == 0){
+                    c =  IndexedTripleCollection.compare(a.getPredicate(), b.getPredicate(), hashCodeConflictMap);
+                }
+            }
+            return c;
+        }
+    };
+    /**
+     * The OSP index
+     */
+    private final NavigableSet<Triple> osp = new TreeSet<Triple>(ospComparator);
     
     /**
      * Creates an empty {@link IndexedTripleCollection}
@@ -184,40 +259,6 @@ class IndexedTripleCollection extends AbstractTripleCollection implements Triple
     }
 
     
-    /**
-     * Compares Triples based on Subject, Predicate, Object
-     */
-    public static final Comparator<Triple> SPO_COMPARATOR = new Comparator<Triple>() {
-
-        @Override
-        public int compare(Triple a, Triple b) {
-            int c = IndexedTripleCollection.compare(a.getSubject(), b.getSubject());
-            if(c == 0){
-                c = IndexedTripleCollection.compare(a.getPredicate(), b.getPredicate());
-                if(c == 0){
-                    c =  IndexedTripleCollection.compare(a.getObject(), b.getObject());
-                }
-            }
-            return c;
-        }
-    };
-    /**
-     * Compares Triples based on Predicate, Object, Subject
-     */
-    public static final Comparator<Triple> POS_COMPARATOR = new Comparator<Triple>() {
-
-        @Override
-        public int compare(Triple a, Triple b) {
-            int c = IndexedTripleCollection.compare(a.getPredicate(), b.getPredicate());
-            if(c == 0){
-                c = IndexedTripleCollection.compare(a.getObject(), b.getObject());
-                if(c == 0){
-                    c =  IndexedTripleCollection.compare(a.getSubject(), b.getSubject());
-                }
-            }
-            return c;
-        }
-    };
     protected static UriRef MIN = new UriRef("") {
         @Override
         public int hashCode() {
@@ -233,23 +274,6 @@ class IndexedTripleCollection extends AbstractTripleCollection implements Triple
     
 
     /**
-     * Compares Triples based on Object, Subject, Predicate
-     */
-    public static final Comparator<Triple> OSP_COMPARATOR = new Comparator<Triple>() {
-
-        @Override
-        public int compare(Triple a, Triple b) {
-            int c = IndexedTripleCollection.compare(a.getObject(), b.getObject());
-            if(c == 0){
-                c = IndexedTripleCollection.compare(a.getSubject(), b.getSubject());
-                if(c == 0){
-                    c =  IndexedTripleCollection.compare(a.getPredicate(), b.getPredicate());
-                }
-            }
-            return c;
-        }
-    };
-    /**
      * Compares two resources with special support for {@link #MIN} and
      * {@link #MAX} to allow building {@link SortedSet#subSet(Object, Object)}
      * for <code>null</code> values parsed to 
@@ -258,14 +282,53 @@ class IndexedTripleCollection extends AbstractTripleCollection implements Triple
      * @param b
      * @return
      */
-    protected static int compare(Resource a, Resource b) {
+    protected static int compare(Resource a, Resource b, Map<Integer,List<Resource>> confictsMap) {
         int hashA = a.hashCode();
         int hashB = b.hashCode();
         if (hashA != hashB) {
             return hashA > hashB ? 1 : -1;
         }
-        return a == MIN || b == MAX ? -1 :
+        int state = a == MIN || b == MAX ? -1 :
             a == MAX || b == MIN ? 1 : a.toString().compareTo(b.toString());
+        if(state == 0 && //same string representation -> should be equals
+                a instanceof BNode && //but for BNodes it might be a hashcode conflict
+                !a.equals(b)){ //so check if they are not equals
+            log.info("HashCode conflict for {} and {}",a,b); //we have a conflict
+            //This is not a bad thing. We need just to ensure constant ordering
+            //and as there is nothing we can use to distinguish we need to keep
+            //this information in a list.
+            Integer hash = Integer.valueOf(a.hashCode());
+            List<Resource> resources = confictsMap.get(hash);
+            if(resources == null){ //new conflict ... just add and return
+                resources = new ArrayList<Resource>(2);
+                confictsMap.put(hash, resources);
+                resources.add(a);
+                resources.add(b);
+                return -1;
+            }
+            //already conflicting resource for this hash present
+            int aIndex=-1;
+            int bIndex=-1;
+            for(int i = 0; i<resources.size() && (aIndex < 0 || bIndex < 0);i++){
+                Resource r = resources.get(i);
+                if(aIndex < 0 && r.equals(a)){
+                    aIndex = i;
+                }
+                if(bIndex < 0 && r.equals(b)){
+                    bIndex = i;
+                }
+            }
+            if(aIndex < 0){ //a not found
+                aIndex = resources.size();
+                resources.add(a);
+            }
+            if(bIndex < 0){ //b not found
+                bIndex = resources.size();
+                resources.add(b);
+            }
+            return aIndex < bIndex ? -1 : 1;
+       } //no conflict or no conflict possible
+       return state;
     }
 
     

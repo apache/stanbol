@@ -176,7 +176,7 @@ public class IndexedGraphTest  extends MGraphTest {
         MGraph sg = new SimpleMGraph();
         int iterations = 100; //reduced from 1000
         int graphsize = 100000;
-        Long seed = new Long("1332943407752");//System.currentTimeMillis();
+        Long seed = System.currentTimeMillis();
         log.info("Test Seed: {}",seed);
         createGraph(sg, graphsize, seed);
         MGraph ig = new IndexedMGraph(sg);
