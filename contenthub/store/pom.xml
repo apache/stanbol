@@ -15,8 +15,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -27,7 +26,7 @@
   </parent>
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.contenthub.store.reactor</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>0.10.0</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Contenthub Store Reactor</name>
@@ -39,10 +38,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/contenthub/contenthub/store
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-contenthub-0.10.0/store
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/contenthub/contenthub/store
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-contenthub-0.10.0/store
     </developerConnection>
   </scm>
 
