@@ -27,7 +27,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-  <version>0.11.0-SNAPSHOT</version>
+  <version>0.11.0</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Entityhub Parent</name>
@@ -47,12 +47,12 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/parent
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/parent
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/parent
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/parent
     </developerConnection>
-    <url>http://stanbol.apache.org</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-entityhub-0.11.0/stanbol.apache.org</url>
   </scm>
 
   <build>
