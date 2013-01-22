@@ -21,7 +21,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.contenthub.parent</artifactId>
-  <version>0.10.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Contenthub Parent</name>
@@ -33,12 +33,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-contenthub-0.10.0/parent
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/contenthub/parent
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-contenthub-0.10.0/parent
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/contenthub/parent
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-contenthub-0.10.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>

@@ -20,7 +20,7 @@
   </parent>
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.contenthub.search.reactor</artifactId>
-  <version>0.10.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Contenthub Search Reactor</name>
@@ -32,10 +32,10 @@
 
   <scm>
     <connection>
-			scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-contenthub-0.10.0/search
+			scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/contenthub/search
     </connection>
     <developerConnection>
-			scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-contenthub-0.10.0/search
+			scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/contenthub/search
     </developerConnection>
   </scm>
 

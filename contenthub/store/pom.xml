@@ -26,7 +26,7 @@
   </parent>
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.contenthub.store.reactor</artifactId>
-  <version>0.10.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Contenthub Store Reactor</name>
@@ -38,10 +38,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-contenthub-0.10.0/store
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/contenthub/contenthub/store
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-contenthub-0.10.0/store
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/contenthub/contenthub/store
     </developerConnection>
   </scm>
 
