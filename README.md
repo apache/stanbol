@@ -141,3 +141,4 @@ release plugin [3] is used. For doing official release you start with
   - Please report bugs on the [Apache issue tracker](
     https://issues.apache.org/jira/browse/STANBOL)
 
+  - Javadocs http://www.go5th.com/jdocs/stanbol/
