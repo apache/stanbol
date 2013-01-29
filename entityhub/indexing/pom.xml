@@ -20,24 +20,21 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.apache</groupId>
-    <artifactId>apache</artifactId>
-    <version>12</version>
-    <relativePath />
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>3</version>
+    <relativePath>../../parent</relativePath>
   </parent>
   
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.entityhub.indexing.reactor</artifactId>
-  <version>0.10.1-SNAPSHOT</version>
+  <artifactId>apache-stanbol-entityhub-indexing</artifactId>
+  <version>0.12.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Entityhub Indexing Reactor</name>
-  <description>
-    Pseudo project to build the complete Apache Stanbol Entityhub Indexing component
-  </description>
+  <name>Apache Stanbol Entityhub Indexing</name>
+  <description>Pseudo project to build the complete Apache Stanbol Entityhub Indexing component.</description>
 
   <inceptionYear>2010</inceptionYear>
-
   <licenses>
     <license>
       <name>Apache Software License, Version 2.0</name>
@@ -58,8 +55,6 @@
   </scm>
 
   <modules>
-    <module>parent</module>
-
     <module>core</module>
     <module>source/jenatdb</module>
     <module>source/vcard</module>
@@ -70,4 +65,22 @@
     <module>dbpedia</module>
     <module>dblp</module>
   </modules>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <inherited>true</inherited>
+          <configuration>
+            <instructions>
+              <Bundle-Category>Stanbol Entityhub Indexing</Bundle-Category>
+            </instructions>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
 </project>

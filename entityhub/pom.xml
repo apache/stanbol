@@ -28,7 +28,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>apache-stanbol-entityhub</artifactId>
-  <version>0.11.0-SNAPSHOT</version>
+  <version>0.12.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Entityhub</name>
@@ -57,8 +57,6 @@
   </scm>  
 
   <modules>
-    <module>parent</module>
-
     <module>generic/servicesapi</module>
     <module>generic/test</module>
     <module>generic/core</module>
@@ -71,10 +69,27 @@
     <module>jersey</module>
     <module>ldpath</module>
 
-    <!-- Utils for createing local caches (indexing utils) -->
+    <!-- Utils for creating local caches (indexing utils) -->
     <module>indexing</module>
     <module>defaults</module>
   </modules>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <inherited>true</inherited>
+          <configuration>
+            <instructions>
+              <Bundle-Category>Stanbol Entityhub</Bundle-Category>
+            </instructions>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
   <profiles>
     <profile>
