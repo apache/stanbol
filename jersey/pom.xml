@@ -26,9 +26,7 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancer Web (Jersey)</name>
