@@ -91,7 +91,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.10.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -101,7 +101,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.nlp</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.10.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>

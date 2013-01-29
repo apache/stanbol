@@ -4,4 +4,4 @@
 # available Stanbol release artifacts.
 # Uses the Maven versions plugin.
 
-mvn versions:use-latest-releases -DexcludeReactor=false -DgenerateBackupPoms=false -Dincludes=org.apache.stanbol:*
+mvn versions:use-releases -DexcludeReactor=false -DgenerateBackupPoms=false -Dincludes=org.apache.stanbol:*
