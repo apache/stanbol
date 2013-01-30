@@ -57,7 +57,7 @@
       	<configuration>
       	  <instructions>
             <Import-Package>
-              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.9.0,0.11)",
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
               *
             </Import-Package>
       	    <Private-Package>

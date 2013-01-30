@@ -32,22 +32,21 @@
 
   <name>Apache Stanbol Enhancer Event Jobmanager</name>
   <description>
-        Implementation of the EnhancementJobManager that supports
-        an asynchronous enhancement process by using the
-        "org.osgi.services.event" framework.
-    </description>
+    Implementation of the EnhancementJobManager that supports
+    an asynchronous enhancement process by using the
+    "org.osgi.services.event" framework.
+  </description>
 
   <inceptionYear>2012</inceptionYear>
 
-    <scm>
-        <connection>
-            scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jobmanager/event/
-        </connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jobmanager/event/
-        </developerConnection>
-        <url>http://stanbol.apache.org/</url>
-    </scm>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jobmanager/event/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jobmanager/event/
+    </developerConnection>
+  </scm>
 
   <build>
     <plugins>
@@ -58,7 +57,7 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.9.0,0.11)",
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10.0,0.12)",
               *
             </Import-Package>
             <Export-Package>
