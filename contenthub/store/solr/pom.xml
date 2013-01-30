@@ -16,14 +16,12 @@
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>org.apache.stanbol.contenthub.parent</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
+    <artifactId>apache-stanbol-contenthub</artifactId>
+    <version>0.11.0-SNAPSHOT</version>
+    <relativePath>../..</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.contenthub.store.solr</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Contenthub Solr Store</name>
@@ -40,7 +38,7 @@
             <Import-Package>
               org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
               org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
-              org.apache.stanbol.contenthub.servicesapi.store.solr; provide:=true,
+              org.apache.stanbol.contenthub.servicesapi.store.solr; provide:=true; version="[0.10,0.12)",
               *
             </Import-Package>
             <Export-Package>

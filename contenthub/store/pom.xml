@@ -19,15 +19,15 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+  
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>stanbol-parent</artifactId>
-    <version>3</version>
-    <relativePath>../../parent</relativePath>
+    <artifactId>apache-stanbol-contenthub</artifactId>
+    <version>0.11.0-SNAPSHOT</version>
+    <relativePath>..</relativePath>
   </parent>
-  <groupId>org.apache.stanbol</groupId>
+
   <artifactId>org.apache.stanbol.contenthub.store.reactor</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Contenthub Store Reactor</name>

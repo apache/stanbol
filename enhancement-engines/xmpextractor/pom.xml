@@ -16,107 +16,107 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-		<groupId>org.apache.stanbol</groupId>
-		<version>0.10.0-SNAPSHOT</version>
-		<relativePath>../../enhancer/parent</relativePath>
-	</parent>
+     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>apache-stanbol-enhancement-engines</artifactId>
+    <version>0.10.0-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
 
-	<groupId>org.apache.stanbol</groupId>
-	<artifactId>org.apache.stanbol.enhancer.engines.xmpextractor</artifactId>
-	<version>0.10.0-SNAPSHOT</version>
-	<packaging>bundle</packaging>
-	<name>Apache Stanbol Enhancement Engine : XMP Extractor</name>
-	<description>Enhancement Engine that extracts XMP data
-	</description>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.enhancer.engines.xmpextractor</artifactId>
+  <version>0.10.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
 
-	<inceptionYear>2012</inceptionYear>
+  <name>Apache Stanbol Enhancement Engine : XMP Extractor</name>
+  <description>Enhancement Engine that extracts XMP data</description>
 
-	<scm>
-		<connection>
-			scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmpextractor/
-		</connection>
-		<developerConnection>
-			scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmpextractor/
-		</developerConnection>
-		<url>http://stanbol.apache.org/</url>
-	</scm>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-scr-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+  <inceptionYear>2012</inceptionYear>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmpextractor/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmpextractor/
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-			<version>0.10.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.scr.annotations</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>rdf.ontologies</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>rdf.utils</artifactId>
-		</dependency>
-	<!-- <dependency>
-		<groupId>org.apache.pdfbox</groupId>
-		<artifactId>jempbox</artifactId>
-		<version>1.7.1</version>
-	</dependency> -->
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.10.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.ontologies</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.utils</artifactId>
+    </dependency>
+  <!-- <dependency>
+    <groupId>org.apache.pdfbox</groupId>
+    <artifactId>jempbox</artifactId>
+    <version>1.7.1</version>
+  </dependency> -->
     <!-- Test dependencies -->
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.test</artifactId>
-			<version>0.10.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.core</artifactId>
-			<version>0.10.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<scope>test</scope>
-		</dependency>   
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-parsers</artifactId>
-			<type>jar</type>
-		</dependency>
-	</dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.test</artifactId>
+      <version>0.10.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.core</artifactId>
+      <version>0.10.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>   
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-parsers</artifactId>
+      <type>jar</type>
+    </dependency>
+  </dependencies>
 </project>

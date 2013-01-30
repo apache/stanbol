@@ -33,7 +33,7 @@
 
   <name>Apache Stanbol Enhancement Engines</name>
   <description>
-    Pseudo project to build Enhancement Engines
+    Pseudo project to build all Enhancement Engines
   </description>
   <inceptionYear>2010</inceptionYear>
 
@@ -99,4 +99,20 @@
     <module>zemanta</module> <!-- htt://zemanta.com -->
   </modules>
 
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <inherited>true</inherited>
+          <configuration>
+            <instructions>
+              <Bundle-Category>Stanbol Enhancement Engines</Bundle-Category>
+            </instructions>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
