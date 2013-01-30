@@ -63,7 +63,7 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.entityhub.servicesapi.yard; provide:=true,
+              org.apache.stanbol.entityhub.servicesapi.yard; provide:=true; version="[0.11,0.13)",
               *
             </Import-Package>
             <Private-Package>

@@ -60,8 +60,8 @@
             </Private-Package>
             <Import-Package>
               !net.didion.*,
-              org.apache.stanbol.enhancer.servicesapi; provide:=true,
-              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
               *
             </Import-Package>
           </instructions>

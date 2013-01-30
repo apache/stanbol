@@ -67,9 +67,9 @@
 							!com.google.inject.*,
 							!org.seasar.framework.*,
 							!org.springframework.*,
-			                org.apache.stanbol.enhancer.servicesapi; provide:=true,
-			                org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
-			                *
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              *
 						</Import-Package>
 					</instructions>
 				</configuration>
@@ -110,7 +110,7 @@
       <artifactId>jsonic</artifactId>
       <version>1.2.7</version>
       <type>jar</type>
-   </dependency>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -141,7 +141,7 @@
       <version>0.10.0</version>
       <scope>test</scope>
     </dependency>    
-	<dependency>
+  	<dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>

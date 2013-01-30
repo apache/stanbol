@@ -62,7 +62,7 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.entityhub.servicesapi.query; provide:=true,
+              org.apache.stanbol.entityhub.servicesapi.query; provide:=true; version="[0.11,0.13)",
               *
             </Import-Package>
             <Export-Package>

@@ -25,17 +25,17 @@
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancer Services API</name>
-  <description>The Enhancer (formally FISE) Services API</description>
+  <description>The Enhancer Services API</description>
 
   <inceptionYear>2010</inceptionYear>
 
   <scm>
     <connection>
-            scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/servicesapi/
-        </connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/servicesapi/
+    </connection>
     <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/servicesapi/
-        </developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/servicesapi/
+    </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
 

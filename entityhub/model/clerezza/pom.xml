@@ -63,8 +63,8 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.entityhub.servicesapi.model; provide:=true,
-              org.apache.stanbol.entityhub.servicesapi.util; provide:=true,
+              org.apache.stanbol.entityhub.servicesapi.model; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.entityhub.servicesapi.util; provide:=true; version="[0.11,0.13)",
               *
             </Import-Package>
             <Export-Package>

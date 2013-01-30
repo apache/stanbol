@@ -64,12 +64,12 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.entityhub.servicesapi; provide:=true,
-              org.apache.stanbol.entityhub.servicesapi.site; provide:=true,
-              org.apache.stanbol.entityhub.servicesapi.yard; provide:=true,
-              org.apache.stanbol.entityhub.servicesapi.mapping; provide:=true,
-              org.apache.stanbol.entityhub.servicesapi.model; provide:=true,
-              org.apache.stanbol.entityhub.servicesapi.query; provide:=true,
+              org.apache.stanbol.entityhub.servicesapi; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.entityhub.servicesapi.site; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.entityhub.servicesapi.yard; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.entityhub.servicesapi.mapping; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.entityhub.servicesapi.model; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.entityhub.servicesapi.query; provide:=true; version="[0.11,0.13)",
               *
             </Import-Package>
             <Export-Package>
