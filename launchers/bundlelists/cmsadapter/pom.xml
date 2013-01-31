@@ -17,7 +17,7 @@
   <parent>
     <artifactId>stanbol-parent</artifactId>
     <groupId>org.apache.stanbol</groupId>
-    <version>3</version>
+    <version>4-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
