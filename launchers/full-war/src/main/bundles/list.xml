@@ -31,11 +31,11 @@
 			<artifactId>mime-util</artifactId>
 			<version>2.1.3</version>
 		</bundle>
-		<bundle> <!-- only used by the Factstore -->
+<!--		<bundle>  only used by the Factstore 
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 			<version>10.7.1.1</version>
-		</bundle>
+		</bundle -->
   </startLevel>
 
   <!-- Jersey -->
@@ -73,11 +73,11 @@
   
   <startLevel level="36">
     <!-- The Content-Editable based UI for Enhancing Text written on a Webpage -->
-    <bundle>
+    <!-- bundle>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.demos.enhancer.vie</artifactId>
         <version>0.10.0-SNAPSHOT</version>
-    </bundle>
+    </bundle -->
   </startLevel>
 
   <!-- *********************************************************************
