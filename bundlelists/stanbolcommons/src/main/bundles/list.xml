@@ -45,7 +45,7 @@
     <bundle>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.installer.core</artifactId>
-      <version>3.4.2</version>
+      <version>3.4.4</version>
     </bundle>
     <bundle>
       <groupId>org.apache.sling</groupId>
@@ -111,7 +111,12 @@
     <bundle>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.3</version>
+      <version>1.4.1</version>
+    </bundle>
+    <bundle> 
+      <groupId>org.tukaani</groupId>
+      <artifactId>xz</artifactId>
+      <version>1.2</version>
     </bundle>
     <bundle>
       <groupId>commons-codec</groupId>
@@ -131,12 +136,12 @@
     <bundle>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore-osgi</artifactId>
-      <version>4.2.1</version>
+      <version>4.2.3</version>
     </bundle>
     <bundle>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient-osgi</artifactId>
-      <version>4.2.1</version>
+      <version>4.2.3</version>
     </bundle>
     <!-- bundle> Stax is included in JDK 1.6+ 
       <groupId>org.apache.servicemix.specs</groupId>
@@ -167,22 +172,22 @@
     <bundle> <!-- used for simple JSON parsing/writing in Stanbol -->
       <groupId>org.codehaus.jettison</groupId>
       <artifactId>jettison</artifactId>
-      <version>1.3.1</version>
+      <version>1.3.3</version>
     </bundle>
     <bundle> <!-- used for stream parsing/serialization -->
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-core-asl</artifactId>
-      <version>1.9.11</version>
+      <version>1.9.12</version>
     </bundle>
     <bundle> <!--  JSON Tree model and JSON - Object mappings -->
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.9.11</version>
+      <version>1.9.12</version>
     </bundle>
     <bundle> <!-- for JAX-RS integration -->
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-jaxrs</artifactId>
-      <version>1.9.11</version>
+      <version>1.9.12</version>
     </bundle>
   </startLevel>
   <!-- Jersey -->
@@ -342,8 +347,8 @@
     </bundle>
     <!-- Namespace prefix service -->
     <bundle>
-	  <groupId>org.apache.stanbol</groupId>
-	  <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
       <version>0.12.0-SNAPSHOT</version>
     </bundle>
     <bundle> <!-- Provides the Stanbol specific Prefix Mappings: Backward compatibility -->
