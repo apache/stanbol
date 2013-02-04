@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDProgramCollection;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
+import org.apache.stanbol.contenthub.servicesapi.search.featured.FacetResult;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeyword;
 import org.codehaus.jettison.json.JSONArray;
@@ -134,12 +135,23 @@ public class JSONUtils {
                     jArr.put(toJSON((FacetField.Count) element));
                 } else if (RelatedKeyword.class.isAssignableFrom(element.getClass())) {
                     jArr.put(toJSON((RelatedKeyword) element));
+                } else if (FacetResult.class.isAssignableFrom(element.getClass())) {
+                	jArr.put(toJSON((FacetResult) element));
                 }
             }
         }
         return jArr;
     }
 
+    private static JSONObject toJSON(FacetResult facetResult) throws JSONException {
+        JSONObject jObj = new JSONObject();
+        if (facetResult != null) {
+            jObj.put("facet", toJSON(facetResult.getFacetField()));
+            jObj.put("type", facetResult.getType());
+        }
+        return jObj;
+    }
+    
     private static JSONObject toJSON(RelatedKeyword relatedKeyword) throws JSONException {
         JSONObject jObj = new JSONObject();
         if (relatedKeyword != null) {
