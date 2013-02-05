@@ -21,11 +21,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +41,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -77,12 +75,13 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.clerezza.rdf.ontologies.PERMISSION;
-import org.apache.stanbol.commons.ldpathtemplate.LdRenderer;
 import org.apache.stanbol.commons.security.PasswordUtil;
 import org.apache.stanbol.commons.usermanagement.Ontology;
-import org.apache.stanbol.commons.viewable.RdfViewable;
+import org.apache.stanbol.commons.web.viewable.RdfViewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.multipart.FormDataParam;
 
 @Component
 @Service(UserResource.class)
@@ -96,8 +95,6 @@ public class UserResource {
     private Parser parser;
     @Reference
     private Serializer serializer;
-    @Reference
-    private LdRenderer ldRenderer;
 
     @GET
     public String index() throws UnsupportedEncodingException {
@@ -109,7 +106,7 @@ public class UserResource {
 
     @GET
     @Path("users")
-    @Produces("text/html")
+    @Produces(MediaType.TEXT_HTML)
     public RdfViewable listUsers() {
         return new RdfViewable("listUser.ftl", getUserType(), this.getClass());
     }
@@ -140,7 +137,7 @@ public class UserResource {
 
     @GET
     @Path("view-user")
-    @Produces("text/html")
+    @Produces(MediaType.TEXT_HTML)
     public RdfViewable viewUser(@QueryParam("userName") String userName) {
         return new RdfViewable("edit.ftl", getUser(userName), this.getClass());
     }
@@ -148,7 +145,7 @@ public class UserResource {
     @POST
     @Path("store-user")
     // @Consumes("multipart/form-data")
-    @Consumes("application/x-www-form-urlencoded")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response storeUser(@Context UriInfo uriInfo,
             @FormParam("currentLogin") String currentLogin,
             @FormParam("newLogin") String newLogin,
@@ -281,11 +278,11 @@ public class UserResource {
      */
     @POST
     @Path("replace-subgraph")
-    @Consumes("multipart/form-data")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     public void replaceSubGraph(@QueryParam("graph") UriRef graphUri,
-            @FormParam("assert") String assertedString,
-            @FormParam("revoke") String revokedString,
-            @FormParam("format") @DefaultValue("text/turtle") String format) {
+            @FormDataParam("assert") String assertedString,
+            @FormDataParam("revoke") String revokedString,
+            @FormDataParam("format") @DefaultValue("text/turtle") String format) {
         final Graph assertedGraph;
         final Graph revokedGraph;
         try {
@@ -308,14 +305,14 @@ public class UserResource {
 
     @GET
     @Path("roles")
-    @Produces("text/html")
+    @Produces(MediaType.TEXT_HTML)
     public RdfViewable listRoles() {
         return new RdfViewable("listRole.ftl", getRoleType(), this.getClass());
     }
 
     @GET
     @Path("permissions")
-    @Produces("text/html")
+    @Produces(MediaType.TEXT_HTML)
     public RdfViewable listPermissions() {
         addClassToPermissions();
         return new RdfViewable("listPermission.ftl", getPermissionType(), this.getClass());
@@ -323,7 +320,7 @@ public class UserResource {
 
     @GET
     @Path("user/{username}/permissionsCheckboxes")
-    @Produces("text/html")
+    @Produces(MediaType.TEXT_HTML)
     public RdfViewable permissionsCheckboxes(@PathParam("username") String userName) { //getUser(userName)
         return new RdfViewable("permissionsCheckboxes.ftl", getUser(userName), this.getClass());
     }
@@ -367,7 +364,7 @@ public class UserResource {
 
     @GET
     @Path("rolesCheckboxes")
-    @Produces("text/html")
+    @Produces(MediaType.TEXT_HTML)
     public RdfViewable rolesCheckboxes() {
         return new RdfViewable("rolesCheckboxes.ftl", getRoleType(), this.getClass());
     }
@@ -419,7 +416,7 @@ public class UserResource {
      * @return HTTP/1.1 204 No Content
      */
     @POST
-    @Consumes("text/turtle")
+    @Consumes(SupportedFormat.TURTLE)
     @Path("add-user")
     public Response addUser(String userData) {
 
@@ -458,7 +455,7 @@ public class UserResource {
      * @return HTTP/1.1 204 No Content
      */
     @POST
-    @Consumes("text/turtle")
+    @Consumes(SupportedFormat.TURTLE)
     @Path("delete-user")
     public Response deleteUser(String userData) {
 
@@ -500,7 +497,7 @@ public class UserResource {
 
     // needs refactoring and locks adding
     @POST
-    @Consumes("text/turtle")
+    @Consumes(SupportedFormat.TURTLE)
     @Path("change-user")
     public Response changeUser(String userData) {
 
@@ -572,7 +569,7 @@ public class UserResource {
      */
     @GET
     @Path("users/{username}")
-    @Produces("text/turtle")
+    @Produces(SupportedFormat.TURTLE)
     public Response getUserTurtle(@PathParam("username") String userName)
             throws UnsupportedEncodingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -594,7 +591,7 @@ public class UserResource {
      */
     @GET
     @Path("roles/{username}")
-    @Produces("text/turtle")
+    @Produces(SupportedFormat.TURTLE)
     public Response getUserRoles(@PathParam("username") String userName)
             throws UnsupportedEncodingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
