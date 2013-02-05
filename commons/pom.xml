@@ -64,6 +64,7 @@
     <module>web/base.jersey</module>
     <module>web/home</module>
     <module>web/viewable</module>
+    <module>web/viewable-ldpath</module>
     <module>web/resources</module>
     <module>web/sparql</module>
     <module>ldpathtemplate</module>
