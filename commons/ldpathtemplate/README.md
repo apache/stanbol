@@ -15,7 +15,9 @@
    limitations under the License.
 -->
 
-LDPath template rendering service
+LDpath Template
 ===========
 
-Provides a service to render GraphNodes using an LDPath template
+This module exports a LDpath template version compatible with the LDpath version used by Apache Stanbol.
+
+__TODO:__ Remove this module after upgrading LDpath to a version where also ldpath-templage is present in maven central. This is the case for LDpath version >= 0.9.12 
