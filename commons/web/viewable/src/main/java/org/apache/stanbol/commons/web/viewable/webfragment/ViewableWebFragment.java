@@ -15,25 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.stanbol.commons.viewable.webfragment;
+package org.apache.stanbol.commons.web.viewable.webfragment;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.viewable.mbw.LdViewableWriter;
-import org.apache.stanbol.commons.viewable.mbw.ViewableWriter;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.osgi.framework.BundleContext;
+import org.apache.stanbol.commons.web.viewable.writer.ViewableWriter;
 import org.osgi.service.component.ComponentContext;
+
+import freemarker.cache.TemplateLoader;
 
 
 /**
@@ -42,17 +43,17 @@ import org.osgi.service.component.ComponentContext;
  */
 @Component(immediate = true, metatype = true)
 @Service
-public class LdViewableWebFragment implements WebFragment {
+public class ViewableWebFragment implements WebFragment {
 
-	@Reference
-	private LdViewableWriter ldViewableWriter;
+	//@Reference
+	//private LdViewableWriter ldViewableWriter;
 	
 	@Reference
+	private TemplateLoader templateLoader;
+	
 	private ViewableWriter viewableWriter;
 	
 	private static final String NAME = "ld-viewable";
-
-	private BundleContext bundleContext;
 
 	@Override
 	public String getName() {
@@ -61,39 +62,40 @@ public class LdViewableWebFragment implements WebFragment {
 
 	@Activate
 	protected void activate(ComponentContext ctx) {
-		this.bundleContext = ctx.getBundleContext();
+	    viewableWriter = new ViewableWriter(templateLoader);
+	}
+	
+	@Deactivate
+	protected void deactivate(ComponentContext ctx){
+	    viewableWriter = null;
 	}
 
 	@Override
 	public Set<Class<?>> getJaxrsResourceClasses() {
-		Set<Class<?>> classes = new HashSet<Class<?>>();
-		return classes;
+		return Collections.emptySet();
 	}
 
 	@Override
 	public Set<Object> getJaxrsResourceSingletons() {
 		Set<Object> instances = new HashSet<Object>();
-		instances.add(ldViewableWriter);
+		//instances.add(ldViewableWriter);
 		instances.add(viewableWriter);
 		return instances;
 	}
 
 	@Override
 	public List<LinkResource> getLinkResources() {
-		List<LinkResource> resources = new ArrayList<LinkResource>();
-		return resources;
+		return Collections.emptyList();
 	}
 
 	@Override
 	public List<ScriptResource> getScriptResources() {
-		List<ScriptResource> resources = new ArrayList<ScriptResource>();
-		return resources;
+        return Collections.emptyList();
 	}
 
 	@Override
 	public List<NavigationLink> getNavigationLinks() {
-		List<NavigationLink> links = new ArrayList<NavigationLink>();
-		return links;
+        return Collections.emptyList();
 	}
 
 }

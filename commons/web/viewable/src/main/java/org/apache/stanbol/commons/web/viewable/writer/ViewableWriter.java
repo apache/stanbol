@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.commons.viewable.mbw;
+package org.apache.stanbol.commons.web.viewable.writer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,20 +29,27 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.ldpathtemplate.LdRenderer;
-import org.apache.stanbol.commons.viewable.Viewable;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 
-@Component
-@Service(ViewableWriter.class)
+import freemarker.cache.TemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.TemplateException;
+
 @Produces("text/html")
 @Provider
 public class ViewableWriter implements MessageBodyWriter<Viewable> {
 
-	@Reference
-	private LdRenderer ldRenderer;
+    
+    
+	private TemplateLoader templateLoader;
+
+	public ViewableWriter(TemplateLoader templateLoader) {
+	    if(templateLoader == null){
+	        throw new IllegalArgumentException("The parsed templateLoader MUST NOT be NULL");
+	    }
+        this.templateLoader = templateLoader;
+    }
 	
 	@Override
 	public boolean isWriteable(Class<?> type, Type genericType,
@@ -63,9 +70,31 @@ public class ViewableWriter implements MessageBodyWriter<Viewable> {
 			OutputStream entityStream) throws IOException,
 			WebApplicationException {
 		Writer out = new OutputStreamWriter(entityStream, "utf-8"); 
-		ldRenderer.renderPojo(new Wrapper(t.getPojo()), "html/"+t.getTemplatePath(), out);
+		renderPojo(new Wrapper(t.getPojo()), "html/"+t.getTemplatePath(), out);
 		out.flush();
 	}
+	
+	   /**
+     * Old school classical freemarker rendering, no LD here
+     */
+    public void renderPojo(Object pojo, final String templatePath, Writer out) {    
+        Configuration freemarker= new Configuration();
+        freemarker.setDefaultEncoding("utf-8");
+        freemarker.setOutputEncoding("utf-8");
+        freemarker.setLocalizedLookup(false);
+        freemarker.setObjectWrapper(new DefaultObjectWrapper());
+        freemarker.setTemplateLoader(templateLoader);
+        try {
+            //should root be a map instead?
+            freemarker.getTemplate(templatePath).process(pojo, out);
+            out.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (TemplateException e) {
+            throw new RuntimeException(e);
+        }
+    }
+	
 	static public class Wrapper {
 
 		private Object wrapped;
