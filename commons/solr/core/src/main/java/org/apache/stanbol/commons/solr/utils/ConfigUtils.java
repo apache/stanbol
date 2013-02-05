@@ -386,18 +386,19 @@ public final class ConfigUtils {
      *         found in the parsed resource this method returns <code>null</code>
      */
     private static File prepairCopy(String resource, File targetDir, String context) {
-        if (!(context.charAt(context.length() - 1) == '/')) {
-            context = context + '/';
+        if (!(context.charAt(context.length() - 1) == File.separatorChar)) {
+            context = context + File.separatorChar;
         }
+        resource = FilenameUtils.separatorsToSystem(resource);
         int contextPos = resource.lastIndexOf(context);
         if (contextPos >= 0) {
             contextPos = contextPos + context.length();
         } else {
-            log.warn(String.format("Context %s not found in resource %s -> ignored!", context, resource));
+            log.warn("Context {} not found in resource {} -> ignored!", context, resource);
             return null;
         }
         String relativePath = resource.substring(contextPos);
-        String[] relativePathElements = relativePath.split("/");
+        String[] relativePathElements = relativePath.split(File.separator);
         File parentElement = targetDir;
         for (int i = 0; i < relativePathElements.length - 1; i++) {
             File pathElement = new File(parentElement, relativePathElements[i]);
