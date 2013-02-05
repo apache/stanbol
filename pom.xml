@@ -66,9 +66,10 @@
       <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package><!-- export packages of implemented Interfaces -->
-              org.apache.stanbol.commons.security.auth; provide:=true
-            </Export-Package>
+            <Import-Package><!-- increase default version range to support current SNAPSHOT -->
+              org.apache.stanbol.commons.security.auth; provide:=true; version="[0.11,0.13)",
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>
