@@ -47,6 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
+import java.util.Collection;
+import org.apache.felix.scr.annotations.References;
 import org.apache.stanbol.commons.web.base.DefaultApplication;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
@@ -60,7 +62,15 @@ import org.apache.stanbol.commons.web.base.WebFragment;
  * resources.
  */
 @Component(immediate = true, metatype = true)
-@Reference(name = "webFragment", referenceInterface = WebFragment.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+@References({
+    @Reference(name = "webFragment", 
+        referenceInterface = WebFragment.class, 
+        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, 
+        policy = ReferencePolicy.DYNAMIC),
+    @Reference(name="component", referenceInterface=Object.class, 
+        target="(javax.ws.rs=true)", 
+		cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE, 
+        policy=ReferencePolicy.DYNAMIC)})
 public class JerseyEndpoint {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -94,6 +104,7 @@ public class JerseyEndpoint {
     protected Set<String> corsOrigins;
 
     protected Set<String> exposedHeaders;
+    private Set<Object> components = new HashSet<Object>();
 
     public Dictionary<String,String> getInitParams() {
         Dictionary<String,String> initParams = new Hashtable<String,String>();
@@ -181,6 +192,7 @@ public class JerseyEndpoint {
             app.contributeClasses(fragment.getJaxrsResourceClasses());
             app.contributeSingletons(fragment.getJaxrsResourceSingletons());
         }
+        app.contributeSingletons(components);
         Collections.sort(linkResources);
         Collections.sort(scriptResources);
         Collections.sort(navigationLinks);
@@ -236,7 +248,21 @@ public class JerseyEndpoint {
         webFragments.remove(webFragment);
         initJersey();
     }
+    
+    protected void bindComponent(Object component) throws IOException,
+                                                          ServletException,
+                                                          NamespaceException  {
+        components.add(component);
+        initJersey();
+    }
 
+    protected void unbindComponent(Object component) throws IOException,
+                                                          ServletException,
+                                                          NamespaceException  {
+        components.remove(component);
+        initJersey();
+    }    
+    
     public List<WebFragment> getWebFragments() {
         return webFragments;
     }
