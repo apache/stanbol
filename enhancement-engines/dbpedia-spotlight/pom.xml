@@ -89,6 +89,8 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-dbpspotlight.config</exclude>
             <!-- AL20 licensed files: See src/test/resources/README -->
             <exclude>src/test/resources/en.txt</exclude>
           </excludes>

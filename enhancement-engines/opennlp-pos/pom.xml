@@ -66,6 +66,7 @@
           <excludes>
             <!-- AL20 License -->
             <exclude>src/license/THIRD-PARTY.properties</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.pos.services.POSTaggingEngine-snml.config</exclude>
           </excludes>
         </configuration>
       </plugin>
