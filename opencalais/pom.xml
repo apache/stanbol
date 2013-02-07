@@ -86,6 +86,7 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes>de>
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
             <!-- AL20 licensed files. See src/main/resources/README -->
             <exclude>src/main/resources/calaisTypeMap.txt</exclude>
           </excludes>

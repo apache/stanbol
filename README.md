@@ -24,4 +24,4 @@ lifting of unstructured content.
 
 For documentation see 
   
-  http://incubator.apache.org/stanbol/docs/trunk/enhancer/engines/list.html
+  http://stanbol.apache.org/docs/trunk/components/enhancer/engines/list.html
