@@ -19,12 +19,7 @@ package org.apache.stanbol.contenthub.web.resources;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import javax.servlet.ServletContext;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
@@ -37,7 +32,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchException;
@@ -45,15 +39,6 @@ import org.apache.stanbol.contenthub.servicesapi.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.search.related.RelatedKeywordSearchManager;
 import org.apache.stanbol.contenthub.web.util.RestUtil;
 import org.apache.stanbol.contenthub.web.writers.SearchResultWriter;
-import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
-import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
-import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
-import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
-import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,20 +54,13 @@ public class RelatedKeywordResource extends BaseStanbolResource {
 
     private static Logger log = LoggerFactory.getLogger(RelatedKeywordResource.class);
 
-    private static int AUTOCOMPLETED_KEYWORD_NUMBER = 10;
-
-    private static String DEFAULT_AUTOCOMPLETE_SEARCH_FIELD = RDFS.label.getUnicodeString();
-
-    private SiteManager referencedSiteManager;
-
     private RelatedKeywordSearchManager relatedKeywordSearchManager;
 
     public RelatedKeywordResource(@Context ServletContext context) {
-        referencedSiteManager = ContextHelper.getServiceFromContext(SiteManager.class, context);
         relatedKeywordSearchManager = ContextHelper.getServiceFromContext(RelatedKeywordSearchManager.class,
             context);
     }
-    
+
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
@@ -102,8 +80,9 @@ public class RelatedKeywordResource extends BaseStanbolResource {
      * @param headers
      *            HTTP headers
      * @return JSON string which is constructed by {@link SearchResultWriter}. {@link SearchResult} returned
-     *         by {@link RelatedKeywordSearchManager#getRelatedKeywordsFromAllSources(String, String)} only contains related keywords (no resultant documents
-     *         or facet fields are returned within the {@link SearchResult}).
+     *         by {@link RelatedKeywordSearchManager#getRelatedKeywordsFromAllSources(String, String)} only
+     *         contains related keywords (no resultant documents or facet fields are returned within the
+     *         {@link SearchResult}).
      * @throws SearchException
      */
     @GET
@@ -116,7 +95,7 @@ public class RelatedKeywordResource extends BaseStanbolResource {
             return Response.status(Status.BAD_REQUEST).build();
         }
 
-		keyword = RestUtil.nullify(keyword);
+        keyword = RestUtil.nullify(keyword);
         if (keyword == null) {
             String msg = "RelatedKeywordResource.findAllRelatedKeywords requires \"keyword\" parameter. \"graphURI\" is optional";
             log.error(msg);
@@ -142,8 +121,9 @@ public class RelatedKeywordResource extends BaseStanbolResource {
      * @param headers
      *            HTTP headers
      * @return JSON string which is constructed by {@link SearchResultWriter}. {@link SearchResult} returned
-     *         by {@link RelatedKeywordSearchManager#getRelatedKeywordsFromOntology(String, String)} contains only related keywords from ontology resources.
-     *         (No resultant documents or facet fields are returned within the {@link SearchResult}).
+     *         by {@link RelatedKeywordSearchManager#getRelatedKeywordsFromOntology(String, String)} contains
+     *         only related keywords from ontology resources. (No resultant documents or facet fields are
+     *         returned within the {@link SearchResult}).
      * @throws SearchException
      */
     @GET
@@ -216,45 +196,4 @@ public class RelatedKeywordResource extends BaseStanbolResource {
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
-
-    /**
-     * TODO: Not completed yet.
-     * This method is used to provide data to autocomplete component. It queries entityhub with the provided
-     * query term.
-     */
-    @GET
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/autocomplete")
-    public final Response bringSuggestion(@QueryParam("pattern") String pattern) {
-        if (pattern == null || pattern.isEmpty()) {
-            return Response.noContent().build();
-        }
-        pattern = pattern.trim();
-        pattern += "*";
-
-        FieldQueryFactory qf = DefaultQueryFactory.getInstance();
-        FieldQuery fieldQuery = qf.createFieldQuery();
-        Collection<String> selectedFields = new ArrayList<String>();
-        selectedFields.add(DEFAULT_AUTOCOMPLETE_SEARCH_FIELD);
-        fieldQuery.addSelectedFields(selectedFields);
-        fieldQuery.setConstraint(DEFAULT_AUTOCOMPLETE_SEARCH_FIELD, new TextConstraint(pattern,
-                PatternType.wildcard, false, "en"));
-        fieldQuery.setLimit(AUTOCOMPLETED_KEYWORD_NUMBER);
-        fieldQuery.setOffset(0);
-
-        List<String> result = new ArrayList<String>();
-        QueryResultList<Representation> entityhubResult = referencedSiteManager.find(fieldQuery);
-        for (Representation rep : entityhubResult) {
-            result.add(rep.getFirst(DEFAULT_AUTOCOMPLETE_SEARCH_FIELD).toString());
-        }
-
-        JSONObject jResult = new JSONObject();
-        try {
-            jResult.put("completedKeywords", result);
-        } catch (Exception e) {
-
-        }
-        return Response.ok(jResult.toString()).build();
-    }
-
 }

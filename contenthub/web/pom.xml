@@ -117,22 +117,6 @@
       <version>0.9.0-incubating</version>
     </dependency>
 
-    <!-- dependencies on other Stanbol modules -->
-    <!-- 0.11.0-SNAPSHOT needed since the change in ReferencedSiteManager->SiteManager
-     -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.11.0</version>
-    </dependency>
-    <!-- TODO : added to get DefaultQueryFactory at SearchResource, find 
-    a solution not to get this dependency -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.10.0-incubating</version>
-    </dependency>
-
     <!-- needed for the ContentItem resource -->
     <dependency>
       <groupId>org.apache.clerezza</groupId>
