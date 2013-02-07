@@ -122,79 +122,22 @@
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
 
-    <!-- dependencies on Clerezza modules -->
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.rdfjson</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>jaxrs.rdf.providers</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.jena.serializer</artifactId>
-    </dependency>
 
     <!-- specific deps for this project -->
     <dependency>
-    	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+  	  <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
       <version>0.11.0</version>      
     </dependency>
-    <dependency>
+
+    <!-- Jersey specific JAX-RS annotations -->
+    <dependency> <!-- because of ImplicitProduces -->
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-core</artifactId>
-    </dependency>
-   <!-- <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-json</artifactId>
-      <exclusions>
-        <!- jaxb is now part of java 6 ->
-        <exclusion>
-          <groupId>com.sun.xml.bind</groupId>
-          <artifactId>jaxb-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.xml.bind</groupId>
-          <artifactId>jaxb-impl</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency> -->
-    <dependency>
+    <dependency> <!-- because of multipart -->
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-    </dependency>    
-    <!-- <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.jettison</groupId>
-      <artifactId>jettison</artifactId>
-    </dependency> -->
-
-    <!-- servlet container, most useful for the tests -->
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
     </dependency>
 
     <!-- generic tax -->
@@ -202,32 +145,11 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-    </dependency>
 
     <!-- OSGi tax -->
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
     </dependency>
 
     <!-- Testing deps -->

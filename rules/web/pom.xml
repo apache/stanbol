@@ -94,6 +94,11 @@
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+    <version>0.11.0</version>      
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.manager</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
@@ -133,11 +138,6 @@
     
     <!-- Jersey, servlet and freemarker -->
     <dependency>
-    	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-      <version>0.11.0</version>      
-    </dependency>
-    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>
@@ -145,22 +145,10 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
     </dependency>
-    <!-- <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-json</artifactId>
-    </dependency> -->
     <dependency>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
     </dependency>
-    <!-- <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-    </dependency> -->
    
 
     <!-- OSGi tax -->
@@ -178,20 +166,16 @@
     </dependency>
 
 		<!-- Clerezza -->
-		<dependency>
+    <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
     </dependency>
     	
     	<!-- Tests -->
     <dependency>
-		  <groupId>junit</groupId>
+        <groupId>junit</groupId>
   		<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-client</artifactId>
-    </dependency>
+	</dependency>
     
   </dependencies>
 
