@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<bundles>
+  <!-- 
+   *************************************************************************
+   HTTP service and Http related Utilities 
+   ************************************************************************* 
+   -->
+  <startLevel level="5">
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.http.whiteboard</artifactId>
+      <version>2.2.0</version>
+    </bundle>
+  </startLevel>
+  <startLevel level="6">
+    <!-- Allows to parse Http Headers as QueryParameter -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.httpqueryheaders</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+
+  <!--
+   *************************************************************************
+   Jersey as JAX-RS framework
+   *************************************************************************
+   -->
+  <startLevel level="24">
+    <!-- NOTE: jersey-core bug, must start before jersey-server to avoid
+     jersey spi class not found errors. Restart jersey-server manually if getting
+     those. -->
+    <bundle>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-core</artifactId>
+      <version>1.15</version>
+    </bundle>
+  </startLevel>
+  <startLevel level="25">
+    <bundle>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>1.15</version>
+    </bundle>
+    <bundle>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-servlet</artifactId>
+      <version>1.15</version>
+    </bundle>
+    <!-- needed to read data from mime multipart requests -->
+    <bundle>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-multipart</artifactId>
+      <version>1.15</version>
+    </bundle>
+    <!-- dependency of jersey-multipart -->
+    <bundle>
+      <groupId>org.jvnet</groupId>
+      <artifactId>mimepull</artifactId>
+      <version>1.4</version>
+    </bundle>
+  </startLevel>
+  
+  <!--
+   *************************************************************************
+   Stanbol JAX-RS and Web interface modules
+   *************************************************************************
+   -->
+  <startLevel level="27">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.resources</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base.jersey</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.home</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+    </bundle>
+</startLevel>
+
+
+</bundles>

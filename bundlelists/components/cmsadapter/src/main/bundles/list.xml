@@ -1,0 +1,103 @@
+<?xml version="1.0" ?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<bundles>
+  <startLevel level="25">
+    <bundle> <!-- the CMIS impl. uses the jersey-client -->
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>1.15</version>
+    </bundle>
+	</startLevel>
+	<startLevel level="33">
+		<!-- JCR Bundles -->
+		<bundle>
+			<groupId>javax.jcr</groupId>
+			<artifactId>jcr</artifactId>
+			<version>2.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-jcr-commons</artifactId>
+			<version>2.3.4</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-jcr-rmi</artifactId>
+			<version>2.2.9</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-api</artifactId>
+			<version>2.2.9</version>
+		</bundle>
+
+		<!-- CMIS Bundles -->
+		<bundle>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-client-api</artifactId>
+			<version>0.4.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-commons-api</artifactId>
+			<version>0.4.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-client-impl</artifactId>
+			<version>0.4.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-client-bindings</artifactId>
+			<version>0.4.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-commons-impl</artifactId>
+			<version>0.4.0</version>
+		</bundle>
+
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.cmsadapter.core</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.cmsadapter.web</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.cmsadapter.jcr</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.cmsadapter.cmis</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
+</bundles>

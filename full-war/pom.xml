@@ -48,6 +48,7 @@
       <plugin>
         <groupId>org.apache.sling</groupId>
         <artifactId>maven-launchpad-plugin</artifactId>
+        <version>2.2.1-SNAPSHOT</version>
         <executions>
           <execution>
             <id>prepare-package</id>
@@ -120,100 +121,85 @@
       <scope>runtime</scope>
     </dependency>
 
-    <!-- OSGi Framemework Bundle List -->
-    <dependency>
+    <!-- The dependencies of this launcher -->
+    <dependency> <!-- The default Stanbol runtime-->
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.runtime.default</artifactId>
       <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
-
-    <!-- Stanbol Commons Bundle List -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
-      <type>partialbundlelist</type>
-    </dependency>
-    <!-- Security Support-->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.bundlelists.security</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
-      <type>partialbundlelist</type>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- Stanbol CMS Adapter Bundle List -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.bundlelists.cmsadapter</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
-      <type>partialbundlelist</type>
-    </dependency>
-
-    <!-- Stanbol Contenthub Bundle List -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.bundlelists.contenthub</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
-      <type>partialbundlelist</type>
-    </dependency>
-
-    <!-- Stanbol Data Bundle List -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.bundlelists.defaultdata</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
-      <type>partialbundlelist</type>
-    </dependency>
-    <dependency> <!-- include all OpenNLP models in the full launcher -->
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.bundlelists.opennlp</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
-      <type>partialbundlelist</type>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- Stanbol Enhancer Bundle List -->
-    <dependency>
+    <dependency> <!-- the Stanbol Enhancer -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.enhancer</artifactId>
       <version>0.11.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
-
-    <!-- Stanbol Entityhub Bundle List -->
-    <dependency>
+    <dependency> <!-- the Stanbol Entityhub -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.entityhub</artifactId>
       <version>0.12.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
-    
-    <!-- Stanbol Ontology Manager Bundle List -->
-    <dependency>
+    <dependency> <!-- the Stanbol Contenthub -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.contenthub</artifactId>
+      <version>0.11.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+    </dependency>
+    <dependency> <!-- the Stanbol CMS Adapter (for CMIS and JCR repositories) -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.cmsadapter</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+    </dependency>
+    <dependency> <!-- the Stanbol Ontology Manager Component -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.ontologymanager</artifactId>
       <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
-
-    <!-- Stanbol Rules Bundle List -->
-    <dependency>
+    <dependency> <!-- the Stanbol Reasoning Component -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.reasoners</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+    </dependency>
+    <dependency> <!-- the Stanbol Rules Component -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.rules</artifactId>
       <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
     </dependency>
-    
-    <!-- Stanbol Reasoners Bundle List -->
+    <!-- Also add the Refactor Engine for the Enahncer-->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.bundlelists.reasoners</artifactId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.engines.refactor</artifactId>
       <version>0.10.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
-      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Stanbol Default Data and OpenNLP Models -->
+    <!--
+     NOTE: Not all data files are compatible with the Apache License. See the
+     referenced modules for details!
+     -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.data.default</artifactId>
+      <version>1.1.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+    </dependency>
+    <dependency> <!-- include all OpenNLP models in the full launcher -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.data.opennlp</artifactId>
+      <version>1.1.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+    </dependency>
+    <dependency> <!-- include sentiment analysis dictionaries -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.data.sentiment</artifactId>
+      <version>1.1.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
     </dependency>
     
   </dependencies>

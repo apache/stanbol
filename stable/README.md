@@ -1,8 +1,9 @@
-This module builds a runnable Stanbol jar using the Sling Launchpad Maven plugin,
-including the bundles defined at src/main/bundles/list.xml.
+Stanbol Stable Launcher
+=======================
 
-This launcher includes only Stanbol components that were agreed on being stable
-components.
+This launcher is similar to the [Sateless](../stateless) but includes the DBpedia default data index as well as OpenNLP language models. It also comes with a default configuration providing some Enhancement Chains.
+
+Users that want to get started with Apache Stanbol should prefer this launcher over the stateless.
 
 To start this after building use:
 

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<bundles>
+
+  <!-- ********************************************************************* 
+    start level 10 TO 19 reserved for required libraries (internal and external) 
+    ********************************************************************* -->
+  <!-- General-purpose libraries -->
+  <startLevel level="20">
+    <bundle> <!-- commons-beanutils as bundle provided by servicemix.apache.org -->
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.commons-beanutils</artifactId>
+      <version>1.8.3_1</version>
+    </bundle>
+    <bundle> <!-- woodstox Stax impl as bundle provided by servicemix.apache.org -->
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.woodstox</artifactId>
+      <version>3.2.9_3</version>
+    </bundle>
+    <bundle> <!-- jarkata regexp as bundle provided by servicemix.apache.org -->
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.regexp</artifactId>
+      <version>1.3_3</version>
+    </bundle>
+  </startLevel>
+  
+  <!-- Apache Solr as bundle + utilities -->
+  <startLevel level="27">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <version>0.11.0</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+      <version>0.11.0</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.install</artifactId>
+      <version>0.11.0</version>
+    </bundle>
+  </startLevel>
+  <startLevel level="28">
+    <bundle> <!-- defualt config for Solr -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.defaults</artifactId>
+      <version>0.11.0</version>
+    </bundle>
+  </startLevel>
+  
+</bundles>
