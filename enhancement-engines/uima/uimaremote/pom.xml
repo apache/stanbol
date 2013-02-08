@@ -21,51 +21,24 @@
   
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>apache-stanbol-enhancement-engines</artifactId>
+    <artifactId>apache-stanbol-enhancement-engines-uima</artifactId>
     <version>0.10.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
   <artifactId>org.apache.stanbol.enhancer.engine.uimaremote</artifactId>
+  <name>Apache Stanbol Enhancement Engine : UIMA Remote Client</name>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancement Engine : UIMA Remote Client</name>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <version>1.4.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.4</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.10.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.core</artifactId>
-      <version>0.12-incubating</version>
-      <type>bundle</type>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
-      <version>1.6.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.caslight</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/uima/uimaremote
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/uima/uimaremote
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
 
   <build>
     <plugins>
@@ -108,6 +81,42 @@
       </plugin>
     </plugins>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>1.4.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.4</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.10.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+      <version>0.12-incubating</version>
+      <type>bundle</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+      <version>1.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.caslight</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
 
   <profiles>
     <profile>
@@ -212,8 +221,7 @@
         <!-- org.apache.felix:org.apache.felix.gogo.shell:0.6.1 useless from Maven since stdin is swallowed -->
       </dependencies>
       <build>
-        <plugins>
-          
+        <plugins>          
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-antrun-plugin</artifactId>

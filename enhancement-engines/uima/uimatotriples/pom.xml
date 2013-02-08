@@ -21,15 +21,55 @@
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>apache-stanbol-enhancement-engines</artifactId>
+    <artifactId>apache-stanbol-enhancement-engines-uima</artifactId>
     <version>0.10.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
   <artifactId>org.apache.stanbol.enhancer.engine.uimatotriples</artifactId>
+  <name>Apache Stanbol Enhancement Engine : UIMA To Triples</name>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancement Engine : UIMA To Triples</name>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/uima/uimatotriple
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/uima/uimatotriple
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <version>1.7.4</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-scr-scrdescriptor</id>
+            <goals>
+              <goal>scr</goal>
+            </goals>
+          </execution>
+        </executions> 
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.2.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.apache.stanbol.enhancer.engines.uimatotriples;version=${project.version}
+            </Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
   <dependencies>
     <dependency>
@@ -74,37 +114,6 @@
       <version>0.10.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <version>1.7.4</version>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-scr-scrdescriptor</id>
-            <goals>
-              <goal>scr</goal>
-            </goals>
-          </execution>
-        </executions> 
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.2.0</version>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Export-Package>
-              org.apache.stanbol.enhancer.engines.uimatotriples;version=${project.version}
-            </Export-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
   <profiles>
     <profile>

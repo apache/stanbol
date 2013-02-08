@@ -59,10 +59,12 @@
 	  <module>langdetect</module>
     <module>langid</module>
     <module>opennlp</module>
+
     <!-- Chinese language support -->
     <module>smartcn-token</module> <!-- sentence detection and tokenizing -->
     <module>paoding-token</module> <!-- tokenizing -->
     <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
+
     <!-- RESTful NLP analyser service engine-->
     <module>restful-nlp</module> <!-- see STANBOL-893 -->
     <module>restful-langident</module> <!-- see STANBOL-895 -->
@@ -83,9 +85,7 @@
     <module>sentiment-summarization</module>
 
     <!-- UIMA based engines -->
-    <module>uimaremote</module>
-    <module>uimatotriples</module>
-    <module>uimalocal-template</module>
+    <module>uima</module>
     
     <!-- Enhancement Engines using external services -->
     <module>celi</module> <!-- http://linguagrid.org -->
