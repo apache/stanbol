@@ -37,10 +37,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmpextractor/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/xmpextractor/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/xmpextractor/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/xmpextractor/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

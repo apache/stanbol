@@ -33,10 +33,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp/opennlp-token/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/opennlp/opennlp-token/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp/opennlp-token/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/opennlp/opennlp-token/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

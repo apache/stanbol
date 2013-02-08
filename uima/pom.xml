@@ -41,10 +41,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/uima
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/uima
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/uima
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/uima
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

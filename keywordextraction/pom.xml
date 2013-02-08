@@ -44,10 +44,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/keywordextraction/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/keywordextraction/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/keywordextraction/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/keywordextraction/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

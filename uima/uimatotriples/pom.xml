@@ -32,10 +32,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/uima/uimatotriple
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/uima/uimatotriple
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/uima/uimatotriple
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/uima/uimatotriple
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

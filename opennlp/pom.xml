@@ -40,10 +40,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/opennlp
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/opennlp
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
