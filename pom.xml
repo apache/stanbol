@@ -53,7 +53,6 @@
     <module>htmlextractor</module>
     <module>xmpextractor</module>
     <module>metaxa</module>
-    <module>refactor</module>
 
     <!-- NLP processing engines -->
 	  <module>langdetect</module>
