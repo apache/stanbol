@@ -32,7 +32,7 @@
   <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancement Engine for Chinese tokenizing using Paoding</name>
+  <name>Apache Stanbol Enhancement Engine : Paoding Chinese Tokenizer</name>
   <description>
     Stanbol Tokenizing and Sentence detection Enhancement Engine for chinese using the
     the Paoding analyzer

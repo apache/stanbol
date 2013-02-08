@@ -15,19 +15,16 @@
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>apache-stanbol-enhancement-engines</artifactId>
+    <artifactId>apache-stanbol-enhancement-engines-entitylinking</artifactId>
     <version>0.10.0-SNAPSHOT</version>
-    <relativePath>../..</relativePath>
+    <relativePath>..</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.paoding</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Stanbol Enhancer Engines EntityLinking LabelTokenizer Paoding</name>
-  <description>LabelTokenizer implementation based on the paoding analyser for
-  Chinese</description>
+  <name>Apache Stanbol Enhancement Engine : Entity Linking LabelTokenizer : Paoding</name>
+  <description>LabelTokenizer implementation based on the paoding analyser for Chinese</description>
 
   <scm>
     <connection>
