@@ -180,6 +180,7 @@ public class AnalyzedTextSerializerAndParserTest {
         //get the serialized String and check for some expected elements
         byte[] data = bout.toByteArray();
         String serialized = new String(data,Charset.forName("UTF-8"));
+        log.info(serialized);
         Assert.assertTrue(serialized.contains("\"spans\" : [ {"));
         Assert.assertTrue(serialized.contains("\"type\" : \"Text\""));
         Assert.assertTrue(serialized.contains("\"type\" : \"Sentence\""));
