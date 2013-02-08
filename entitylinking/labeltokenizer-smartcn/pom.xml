@@ -22,17 +22,15 @@
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>apache-stanbol-enhancement-engines</artifactId>
+    <artifactId>apache-stanbol-enhancement-engines-entitylinking</artifactId>
     <version>0.10.0-SNAPSHOT</version>
-    <relativePath>../..</relativePath>
+    <relativePath>..</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.smartcn</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancer EntityLinking LabelTokenizer Smart Chinese </name>
+  <name>Apache Stanbol Enhancement Engine : Entity Linking LabelTokenizer : Smart Chinese</name>
   <description>
     Configuration for the Lucene LabelTokenizer based on the Smart Chinese Analyzer
     for the language 'zh'
