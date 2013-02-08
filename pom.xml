@@ -52,7 +52,6 @@
     <module>tika</module>
     <module>htmlextractor</module>
     <module>xmpextractor</module>
-    <module>metaxa</module>
 
     <!-- NLP processing engines -->
 	  <module>langdetect</module>
