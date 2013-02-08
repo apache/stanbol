@@ -58,7 +58,6 @@
             <Private-Package>
               org.apache.stanbol.enhancer.nlp.json.valuetype.impl;version=${project.version}
             </Private-Package>
-            <Embed-Dependency></Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>

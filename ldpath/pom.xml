@@ -63,11 +63,6 @@
             <Export-Package>
               org.apache.stanbol.enhancer.ldpath.*
             </Export-Package>
-            <!-- 
-            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=
-            </Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
-            -->
           </instructions>
         </configuration>
       </plugin>

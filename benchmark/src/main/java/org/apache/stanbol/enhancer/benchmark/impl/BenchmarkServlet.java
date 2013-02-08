@@ -24,6 +24,8 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -49,6 +51,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.velocity.tools.generic.EscapeTool;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -120,7 +123,6 @@ public class BenchmarkServlet extends HttpServlet {
         if(mountPath.endsWith("/")) {
             mountPath = mountPath.substring(mountPath.length() - 1);
         }
-        
         httpService.registerServlet(mountPath, this, null, null);
         log.info("Servlet mounted at {}", mountPath);
         
@@ -156,7 +158,7 @@ public class BenchmarkServlet extends HttpServlet {
         final String path = request.getPathInfo() == null ? "" : request.getPathInfo(); 
         if(path.endsWith(".css")) {
             // Serve our css
-            final Template t = velocity.getTemplate("/velocity/benchmark.css");
+            final Template t = getTemplate("/velocity/benchmark.css");
             response.setContentType("text/css");
             response.setCharacterEncoding("UTF-8");
             t.merge(getVelocityContext(request, null), response.getWriter());
@@ -167,7 +169,7 @@ public class BenchmarkServlet extends HttpServlet {
             
         } else {
             // Benchmark input form pre-filled with selected example
-            final Template t = velocity.getTemplate("/velocity/benchmark-input.html");
+            final Template t = getTemplate("/velocity/benchmark-input.html");
             final VelocityContext ctx = getVelocityContext(request, "Benchmark Input");
             ctx.put("formAction", request.getContextPath() + mountPath);
             ctx.put("benchmarkText", getBenchmarkText(path)); 
@@ -177,6 +179,21 @@ public class BenchmarkServlet extends HttpServlet {
             response.setCharacterEncoding("UTF-8");
             t.merge(ctx, response.getWriter());
         }
+    }
+
+    /**
+     * @return
+     */
+    private Template getTemplate(String templatePath) {
+        final Template t;
+        ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(BenchmarkServlet.class.getClassLoader()); 
+        try {
+            t = velocity.getTemplate(templatePath);
+        } finally {
+            Thread.currentThread().setContextClassLoader(tcl);
+        }
+        return t;
     }
     
     private String getExampleBenchmarkPath(HttpServletRequest request, String name) {
@@ -209,7 +226,7 @@ public class BenchmarkServlet extends HttpServlet {
     }
     
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(final HttpServletRequest request, final HttpServletResponse response) 
     throws ServletException, IOException {
         final String content = request.getParameter(PARAM_CONTENT);
         if(content == null) {
@@ -219,7 +236,7 @@ public class BenchmarkServlet extends HttpServlet {
         final Template t = AccessController.doPrivileged(new PrivilegedAction<Template>() {
             @Override
             public Template run() {
-                return velocity.getTemplate("/velocity/benchmark-results.html");
+                return getTemplate("/velocity/benchmark-results.html");
             }
         });
         final VelocityContext ctx = getVelocityContext(request, "Benchmark Results");
@@ -245,6 +262,22 @@ public class BenchmarkServlet extends HttpServlet {
         
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
-        t.merge(ctx, response.getWriter());
+        try {
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                @Override
+                public Object run()  throws IOException{
+                    t.merge(ctx, response.getWriter());
+                    return null;
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof IOException){
+                throw (IOException)e;
+            } else {
+                throw RuntimeException.class.cast(e);
+            }
+            
+        }
     }
 }
