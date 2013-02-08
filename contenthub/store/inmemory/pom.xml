@@ -44,8 +44,6 @@
             <Private-Package>
               org.apache.stanbol.contenthub.store.inmemory
             </Private-Package>
-            <Embed-Dependency>
-            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>

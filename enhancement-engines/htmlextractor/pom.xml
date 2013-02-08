@@ -62,9 +62,6 @@
             <Private-Package>
               org.apache.stanbol.enhancer.engines.htmlextractor.*
             </Private-Package>
-            <Embed-Dependency>
-            	jsoup;scope=compile
-            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>
@@ -143,10 +140,9 @@
     	<artifactId>icu4j</artifactId>
     </dependency>		
     <dependency>
-		  <groupId>org.jsoup</groupId>
-		  <artifactId>jsoup</artifactId>
-		  <version>1.7.1</version>
-		</dependency>
-	</dependencies>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+    </dependency>
+  </dependencies>
     
 </project>

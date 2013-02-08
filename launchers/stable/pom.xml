@@ -118,9 +118,6 @@
                   <include>org.apache.sling:org.apache.sling.launchpad.base</include>
                 </includes>
               </artifactSet>
-              <!-- transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer" />
-              </transformers -->
             </configuration>
           </execution>
         </executions>
@@ -147,7 +144,6 @@
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.base</artifactId>
       <classifier>app</classifier>
-      <scope>provided</scope>
     </dependency>
 
     <!-- OSGi Framemework Bundle List -->

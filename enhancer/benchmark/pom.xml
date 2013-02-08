@@ -63,8 +63,8 @@
             </Private-Package>
             
             <!-- TODO velocity should be in its own bundle -->
-            <Embed-Dependency>velocity,velocity-tools</Embed-Dependency>
-            <Embed-Transitive>false</Embed-Transitive>
+            <!-- Embed-Dependency>velocity,velocity-tools</Embed-Dependency>
+            <Embed-Transitive>false</Embed-Transitive  -->
             
             <!-- Ignore Velocity stuff that we don't need -->
             <Import-Package>
@@ -146,18 +146,16 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.velocity</groupId>
-      <artifactId>velocity</artifactId>
-      <version>1.7</version>
-    </dependency>
-    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.velocity</groupId>
+      <artifactId>velocity</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.velocity</groupId>
       <artifactId>velocity-tools</artifactId>
-      <version>2.0</version>
     </dependency>
   </dependencies>
 </project>

@@ -21,6 +21,15 @@
     start level 10 TO 19 reserved for required libraries (internal and external) 
     ********************************************************************* -->
 
+  <!-- JSoup is used by the HTML extractor -->
+  <startLevel level="20">
+    <bundle>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.7.2</version>
+    </bundle>
+  </startLevel>
+
   <!-- Apache Tika -->
   <!-- Note: that Tika only inits the Parser correctly if the start level of
        tika-core is lower than tika-bundle

@@ -98,9 +98,14 @@
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
       <version>0.11.0</version>
     </dependency>
+    <!-- dependency> - anyway provided by commons.solr.managed
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <version>0.11.0</version>
+    </dependency -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
@@ -118,18 +123,13 @@
     </dependency>
 
     <!-- needed for the ContentItem resource -->
-    <dependency>
+    <!-- dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>jaxrs.rdf.providers</artifactId>
-    </dependency>
+    </dependency -->
 
     <!-- Jersey -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-      <version>0.11.0</version>
-    </dependency>
-    <dependency>
+    <!-- dependency> - anyway defined via commons.web.base
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>
@@ -149,14 +149,14 @@
     <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
-    </dependency>
+    </dependency -->
 
     <!-- generic tax -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency>
+    <!-- dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
@@ -164,6 +164,10 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+    </dependency -->
 
     <!-- OSGi tax -->
     <dependency>
@@ -179,15 +183,11 @@
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
 
-    <dependency>
+    <!-- dependency> - anyway provided by the commons.solr dependencies
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-core</artifactId>
-    </dependency>
+    </dependency -->
 
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-compress</artifactId>
-    </dependency>
     <!-- for tests -->
     <dependency>
       <groupId>junit</groupId>

@@ -73,8 +73,8 @@
               freemarker.template.*;version=${freemarker-version},
               freemarker.core;version=${freemarker-version}
             </_exportcontents>
-            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jettison|jackson-core-asl
-            </Embed-Dependency>
+            <!-- Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jettison|jackson-core-asl
+            </Embed-Dependency -->
             <Embed-Dependency>freemarker</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>

@@ -38,8 +38,6 @@
               org.apache.stanbol.contenthub.servicesapi;version=${project.version},
               org.apache.stanbol.contenthub.servicesapi.*;version=${project.version}
             </Export-Package>
-            <Embed-Dependency>
-            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>

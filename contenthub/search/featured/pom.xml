@@ -43,8 +43,6 @@
               org.apache.stanbol.contenthub.search.featured,
               org.apache.stanbol.contenthub.search.featured.util
             </Export-Package>
-            <Embed-Dependency>
-            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>

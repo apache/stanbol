@@ -189,6 +189,22 @@
       <artifactId>jackson-jaxrs</artifactId>
       <version>1.9.12</version>
     </bundle>
+    <!-- Velocity -->
+    <bundle>
+      <groupId>org.apache.velocity</groupId>
+      <artifactId>velocity</artifactId>
+      <version>1.7</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.velocity-tools</artifactId>
+      <version>2.0_1</version>
+    </bundle>
+    <bundle>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4.5</version>
+    </bundle>
   </startLevel>
   <!-- Jersey -->
   <startLevel level="24">

@@ -156,8 +156,7 @@
               solr-analysis-extras, commons-httpclient,
               lucene-core, lucene-analyzers, lucene-highlighter, lucene-memory,
               lucene-spatial, lucene-spellchecker, lucene-misc, lucene-queries,
-              lucene-icu, lucene-phonetic, lucene-grouping, 
-              velocity, velocity-tools
+              lucene-icu, lucene-phonetic, lucene-grouping
             </Embed-Dependency>
           </instructions>
         </configuration>

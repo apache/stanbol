@@ -70,8 +70,6 @@
             <Private-Package>
               org.apache.stanbol.commons.solr.install.impl;version=${project.version}
             </Private-Package>
-            <Embed-Dependency>
-            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>

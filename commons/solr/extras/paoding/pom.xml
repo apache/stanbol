@@ -55,8 +55,8 @@
             <Bundle-Activator>
               org.apache.stanbol.commons.solr.extras.paoding.Activator
             </Bundle-Activator>
-            <Embed-Dependency>paoding-analysis</Embed-Dependency>
-            <Import-Package>*</Import-Package>
+            <!-- Embed-Dependency>paoding-analysis</Embed-Dependency>
+            <Import-Package>*</Import-Package -->
             <!--
              For now export all paoding packages.This might however change
              -->

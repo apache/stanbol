@@ -278,7 +278,8 @@
                  org.xml.sax,
                  org.xml.sax.ext,
                  org.xml.sax.helpers,
-                 sun.misc
+                 sun.misc,
+                 sun.security.util
                </Export-Package>
             </manifestEntries>
           </archive>

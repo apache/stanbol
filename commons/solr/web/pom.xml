@@ -67,8 +67,6 @@
               org.apache.stanbol.commons.solr.web.impl;version=${project.version},
               org.apache.stanbol.commons.solr.web.utils;version=${project.version}
             </Private-Package>
-            <Embed-Dependency>
-            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>

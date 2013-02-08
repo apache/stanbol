@@ -58,10 +58,10 @@
             <Export-Package>
               org.apache.stanbol.enhancer.jersey.*
             </Export-Package>
-            <Embed-Dependency>
+            <!-- Embed-Dependency>
               *;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl|httpmime
             </Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
+            <Embed-Transitive>true</Embed-Transitive -->
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",

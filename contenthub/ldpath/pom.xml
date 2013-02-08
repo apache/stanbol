@@ -49,8 +49,6 @@
             <Private-Package>
               org.apache.stanbol.contenthub.ldpath.solr,
             </Private-Package>
-            <Embed-Dependency>
-            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>

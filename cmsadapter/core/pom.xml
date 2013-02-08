@@ -35,8 +35,8 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Embed-Dependency>commons-collections</Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
+            <!-- Embed-Dependency>commons-collections</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive --> 
           </instructions>
         </configuration>
         <extensions>true</extensions>

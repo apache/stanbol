@@ -50,8 +50,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-						<Embed-Dependency>lucene-stempel</Embed-Dependency>
-						<Import-Package>*</Import-Package>
+            <Embed-Dependency>lucene-stempel</Embed-Dependency>
+            <Import-Package>*</Import-Package>
             <!-- used instead of Export-Package to preserve the jars -->
             <_exportcontents>
               org.apache.lucene.analysis.pl;version=3.6.1,
