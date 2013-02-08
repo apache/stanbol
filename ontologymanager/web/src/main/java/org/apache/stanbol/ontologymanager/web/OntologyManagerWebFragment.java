@@ -58,6 +58,10 @@ public class OntologyManagerWebFragment implements WebFragment {
 
     private static final String NAME = "ontonet";
 
+	private static final String htmlDescription = 
+			"A <strong>controlled environment</strong> for managing Web ontologies, "+
+			"<strong>ontology networks</strong> and user sessions that put them to use.";
+
     private BundleContext bundleContext;
 
     @Reference
@@ -124,7 +128,7 @@ public class OntologyManagerWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink(NAME, "/" + NAME, "/imports/ontonetDescription.ftl", 50));
+        links.add(new NavigationLink(NAME, "/" + NAME, htmlDescription, 50));
         return links;
     }
 

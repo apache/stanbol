@@ -45,18 +45,13 @@ import freemarker.cache.TemplateLoader;
 public class EnhancerVieWebFragment implements WebFragment {
 
     private static final String NAME = "enhancervie";
+	private static final String htmlDescription = 
+			"This is a frontend to the enhancer featuring VIE.js";
 
-    private BundleContext bundleContext;
-    
 
     @Override
     public String getName() {
         return NAME;
-    }
-
-    @Activate
-    protected void activate(ComponentContext ctx) {
-        this.bundleContext = ctx.getBundleContext();
     }
 
     @Override
@@ -106,7 +101,7 @@ public class EnhancerVieWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("enhancervie", "/enhancer VIE", "/imports/enhancervieDescription.ftl", 20));
+        links.add(new NavigationLink("enhancervie", "/enhancer VIE", htmlDescription, 20));
         return links;
     }
 

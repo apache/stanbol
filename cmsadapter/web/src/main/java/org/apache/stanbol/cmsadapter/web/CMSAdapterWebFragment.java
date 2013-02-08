@@ -48,14 +48,8 @@ public class CMSAdapterWebFragment implements WebFragment {
 
     private static final String NAME = "cmsadapter";
 
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/cmsadapter/web/static";
+	private String htmlDescription = "This is the <strong>CMS Adapter</strong> component of Apache Stanbol.";
 
-    private BundleContext bundleContext;
-
-    @Activate
-    protected void activate(ComponentContext ctx) {
-        this.bundleContext = ctx.getBundleContext();
-    }
 
     @Override
     public String getName() {
@@ -99,7 +93,7 @@ public class CMSAdapterWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("cmsadapter", "/cmsadapter", "/imports/cmsadapterDescription.ftl", 80));
+        links.add(new NavigationLink("cmsadapter", "/cmsadapter", htmlDescription, 80));
         return links;
     }
 

@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -36,8 +35,6 @@ import org.apache.stanbol.rules.web.resources.RulesResource;
 import org.apache.stanbol.rules.web.writers.RecipeListWriter;
 import org.apache.stanbol.rules.web.writers.RecipeWriter;
 import org.apache.stanbol.rules.web.writers.RuleListWriter;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
 
 /**
@@ -53,7 +50,10 @@ public class RulesFragment implements WebFragment {
 
     private static final String NAME = "rules";
 
-    private BundleContext bundleContext;
+	private static final String htmlDescription = 
+			"This is the implementation of Stanbol Rules which can be used both "+
+			"for <strong>reasoning</strong> and <strong>refactoring</strong>";
+
 
     @Reference
     Refactorer refactorer;
@@ -64,11 +64,6 @@ public class RulesFragment implements WebFragment {
     @Override
     public String getName() {
         return NAME;
-    }
-
-    @Activate
-    protected void activate(ComponentContext ctx) {
-        this.bundleContext = ctx.getBundleContext();
     }
 
     @Override
@@ -108,7 +103,7 @@ public class RulesFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("rules", "/rules", "/imports/rulesDescription.ftl", 50));
+        links.add(new NavigationLink("rules", "/rules", htmlDescription, 50));
         return links;
     }
 

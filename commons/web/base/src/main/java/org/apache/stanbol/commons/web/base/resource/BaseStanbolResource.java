@@ -26,7 +26,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
@@ -103,7 +102,7 @@ public class BaseStanbolResource {
     public List<MenuItem> getMainMenuItems() {
         List<MenuItem> items = new ArrayList<MenuItem>();
         for (NavigationLink link : getNavigationLinks()) {
-            items.add(new MenuItem(link.label, link.path, uriInfo));
+            items.add(new MenuItem(link.getLabel(), link.getPath(), uriInfo));
         }
         return items;
     }

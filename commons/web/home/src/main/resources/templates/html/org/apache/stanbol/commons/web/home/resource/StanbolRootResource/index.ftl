@@ -32,9 +32,9 @@ view that documents the matching RESTful API for applications:</p>
 <dl>
 
   <#list it.navigationLinks as link>
-  <#if link.hasDescriptionTemplate>
+  <#if link.htmlDescription??>
     <dt><a href="${it.publicBaseUri}${link.path}">${link.label}</a><dt>
-    <dd><#include "${link.descriptionTemplate}"></dd>
+    <dd>${link.htmlDescription }</dd>
   </#if>
   </#list>
 

@@ -51,17 +51,18 @@ public class ContenthubWebFragment implements WebFragment {
 	private static final String NAME = "contenthub";
 
 
-	private BundleContext bundleContext;
+	private static final String htmlDescription = 
+			"This is a <strong>stateful interface</strong> to submit content to <strong>"+
+			"analyze and store the results</strong> on the server. It is then possible"+
+			"to browse the resulting enhanced content items. The longer-term goal of this"+
+			"endpoint is to implement faceted semantic search of the enhanced content items";
+
 
 	@Override
 	public String getName() {
 		return NAME;
 	}
 
-	@Activate
-	protected void activate(ComponentContext ctx) {
-		this.bundleContext = ctx.getBundleContext();
-	}
 
 	@Override
 	public Set<Class<?>> getJaxrsResourceClasses() {
@@ -111,7 +112,7 @@ public class ContenthubWebFragment implements WebFragment {
 	public List<NavigationLink> getNavigationLinks() {
 		List<NavigationLink> links = new ArrayList<NavigationLink>();
 		links.add(new NavigationLink("contenthub/contenthub/store",
-				"/contenthub", "/imports/contenthubDescription.ftl", 20));
+				"/contenthub", htmlDescription, 20));
 		return links;
 	}
 }

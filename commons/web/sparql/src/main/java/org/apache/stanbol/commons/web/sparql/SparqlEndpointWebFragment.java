@@ -48,6 +48,11 @@ public class SparqlEndpointWebFragment implements WebFragment {
 
     private BundleContext bundleContext;
 
+	private String htmlDescription = "This is the <strong>SPARQL endpoint</strong> for the Stanbol store."+
+			"<a href=\"http://en.wikipedia.org/wiki/Sparql\">SPARQL</a> is the"+
+			"standard query language the most commonly used to provide interactive"+
+			"access to semantic knowledge bases.";
+
     @Override
     public String getName() {
         return NAME;
@@ -83,7 +88,7 @@ public class SparqlEndpointWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("sparql", "/sparql", "/imports/sparqlDescription.ftl", 50));
+		links.add(new NavigationLink("sparql", "/sparql", htmlDescription , 50));
         return links;
     }
 

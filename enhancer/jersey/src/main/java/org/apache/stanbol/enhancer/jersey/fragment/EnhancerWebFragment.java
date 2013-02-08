@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
-import org.apache.felix.scr.annotations.Activate;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -42,11 +42,6 @@ import org.apache.stanbol.enhancer.jersey.resource.EnhancementEnginesRootResourc
 import org.apache.stanbol.enhancer.jersey.resource.EnhancerRootResource;
 import org.apache.stanbol.enhancer.jersey.writers.ContentItemWriter;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
-
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 /**
  * Statically define the list of available resources and providers to be contributed to the the Stanbol JAX-RS
@@ -59,7 +54,12 @@ public class EnhancerWebFragment implements WebFragment {
     private static final String NAME = "enhancer";
 
 
-    private BundleContext bundleContext;
+	private static final String htmlDescription = 
+			"This is a <strong>stateless interface</strong> to allow clients to submit"+
+			"content to <strong>analyze</strong> by the <code>EnhancementEngine</code>s"+
+			"and get the resulting <strong>RDF enhancements</strong> at once without"+
+			"storing anything on the server-side.";
+
 
     @Reference
     EnhancementJobManager jobManager;
@@ -77,10 +77,6 @@ public class EnhancerWebFragment implements WebFragment {
         return NAME;
     }
 
-    @Activate
-    protected void activate(ComponentContext ctx) {
-        this.bundleContext = ctx.getBundleContext();
-    }
 
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
@@ -124,7 +120,7 @@ public class EnhancerWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("enhancer", "/enhancer", "/imports/enginesDescription.ftl", 10));
+        links.add(new NavigationLink("enhancer", "/enhancer", htmlDescription, 10));
         return links;
     }
 

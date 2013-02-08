@@ -53,6 +53,11 @@ public class ReasonersFragment implements WebFragment {
 
     private static final String NAME = "reasoners";
 
+	private static final String htmlDescription = 
+			"The entry point to multiple <strong>reasoning services</strong> that are used for"+
+			"obtaining unexpressed additional knowledge from the explicit axioms in an ontology."+
+			"Multiple reasoning profiles are available, each with its expressive power and computational cost.";
+
     @Reference
     ONManager onm;
 
@@ -98,7 +103,7 @@ public class ReasonersFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("reasoners", "/reasoners", "/imports/reasonersDescription.ftl", 50));
+        links.add(new NavigationLink("reasoners", "/reasoners", htmlDescription, 50));
         return links;
     }
 

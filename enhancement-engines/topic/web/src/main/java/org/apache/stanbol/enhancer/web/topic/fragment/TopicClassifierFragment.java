@@ -35,8 +35,6 @@ import org.apache.stanbol.enhancer.web.topic.resource.TopicModelResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 @Component(immediate = true, metatype = true)
 @Service
