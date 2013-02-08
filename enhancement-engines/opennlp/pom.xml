@@ -19,98 +19,42 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>stanbol-parent</artifactId>
-    <version>4-SNAPSHOT</version>
-    <relativePath>../parent</relativePath>
+    <artifactId>apache-stanbol-enhancement-engines</artifactId>
+    <version>0.10.0-SNAPSHOT</version>
+    <relativePath>..</relativePath>
   </parent>
   
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>apache-stanbol-enhancement-engines</artifactId>
+  <artifactId>apache-stanbol-enhancement-engines-opennlp</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Enhancement Engines</name>
+  <name>Apache Stanbol Enhancement Engine : OpenNLP</name>
   <description>
-    Pseudo project to build all Enhancement Engines
+    Pseudo project to build the Stanbol Enhancer OpenNLP Engines
   </description>
-  <inceptionYear>2010</inceptionYear>
+  <inceptionYear>2012</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
 
   <modules>
-	  <!-- Content processing / Metadata extraction -->
-    <module>tika</module>
-    <module>htmlextractor</module>
-    <module>xmpextractor</module>
-    <module>metaxa</module>
-    <module>refactor</module>
-
-    <!-- NLP processing engines -->
-	  <module>langdetect</module>
-    <module>langid</module>
-    <module>opennlp</module>
-    <!-- Chinese language support -->
-    <module>smartcn-token</module> <!-- sentence detection and tokenizing -->
-    <module>paoding-token</module> <!-- tokenizing -->
-    <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
-    <!-- RESTful NLP analyser service engine-->
-    <module>restful-nlp</module> <!-- see STANBOL-893 -->
-    <module>restful-langident</module> <!-- see STANBOL-895 -->
-  
-  	<!-- EntityLinking -->
-    <module>entitylinking</module>
-    <module>entityhublinking</module>
-    <module>entitytagging</module>
-    <!-- deprecated -->
-    <module>keywordextraction</module>
-
-	  <!-- Categorization -->
-    <module>topic/engine</module>
-    <module>topic/web</module>
-
-	  <!-- Sentiment -->
-    <module>sentiment-wordclassifier</module>
-    <module>sentiment-summarization</module>
-
-    <!-- UIMA based engines -->
-    <module>uimaremote</module>
-    <module>uimatotriples</module>
-    <module>uimalocal-template</module>
-    
-    <!-- Enhancement Engines using external services -->
-    <module>celi</module> <!-- http://linguagrid.org -->
-    <module>dbpedia-spotlight</module> <!-- dbpedia Spotlight -->
-    <module>geonames</module> <!-- http://geonames.org -->
-    <module>opencalais</module> <!-- http://opencalais.com/ -->
-    <module>zemanta</module> <!-- htt://zemanta.com -->
+    <module>opennlp-sentence</module>
+    <module>opennlp-token</module>
+    <module>opennlp-pos</module>
+    <module>opennlp-ner</module>
+    <module>opennlp-chunker</module>
   </modules>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>maven-bundle-plugin</artifactId>
-          <inherited>true</inherited>
-          <configuration>
-            <instructions>
-              <Bundle-Category>Stanbol Enhancement Engines</Bundle-Category>
-            </instructions>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>    
-  </build>
 
   <profiles>
     <profile>
