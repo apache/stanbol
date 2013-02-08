@@ -80,9 +80,6 @@
             <Export-Package>
               org.apache.stanbol.enhancer.web.topic.*;version=${project.version}
             </Export-Package>
-            <Embed-Dependency>
-                mail
-            </Embed-Dependency>
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",
