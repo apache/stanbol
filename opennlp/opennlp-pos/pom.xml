@@ -15,14 +15,12 @@
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>apache-stanbol-enhancement-engines</artifactId>
+    <artifactId>apache-stanbol-enhancement-engines-opennlp</artifactId>
     <version>0.10.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.opennlp.pos</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancement Engine : OpenNLP POS Tagging</name>
@@ -32,10 +30,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp-pos/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp/opennlp-pos/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp-pos/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/opennlp/opennlp-pos/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
