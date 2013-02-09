@@ -384,7 +384,11 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         int i=1;
         for(Entry<HttpResponse,String> failed :tracker.getFailed().entrySet()){
             log.warn("Failed ({}):",i);
-            log.warn("  > Status: {}",failed.getKey().getStatusLine());
+            if(failed.getKey() != null){
+                log.warn("  > Status: {}",failed.getKey().getStatusLine());
+            } else {
+                log.warn(" > HttpResponse is NULL");
+            }
             log.warn("  > Content: {}",failed.getValue());
             i++;
         }
