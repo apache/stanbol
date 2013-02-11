@@ -392,7 +392,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
             log.warn("  > Content: {}",failed.getValue());
             i++;
         }
-        Assert.assertTrue(tracker.getFailed()+"/"+settings.getNumThreads()+" failed", tracker.getFailed().isEmpty());
+        Assert.assertTrue(tracker.getFailed().size()+"/"+settings.getMaxRequests()+" failed", tracker.getFailed().isEmpty());
         tracker = null;
     }
     
