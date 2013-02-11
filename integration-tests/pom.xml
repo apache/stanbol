@@ -51,7 +51,7 @@
     <test.server.url></test.server.url>
 
     <!-- Options for the VM that executes our runnable jar -->
-    <jar.executor.vm.options>-Xmx512m -XX:MaxPermSize=256m -Dorg.apache.stanbol.offline.mode=true -Dorg.apache.sling.commons.log.level=DEBUG</jar.executor.vm.options>
+    <jar.executor.vm.options>-Xmx1g -XX:MaxPermSize=256m -Dorg.apache.stanbol.offline.mode=true -Dorg.apache.sling.commons.log.level=DEBUG</jar.executor.vm.options>
 
     <!-- Set this to true to keep the runnable jar running - useful to debug tests -->
     <keepJarRunning>false</keepJarRunning>
