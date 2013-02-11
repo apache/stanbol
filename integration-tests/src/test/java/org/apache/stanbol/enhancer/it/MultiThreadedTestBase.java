@@ -382,12 +382,12 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         tracker.printStatistics();
         log.warn("Content(s) of Faild tests:");
         int i=1;
-        for(Entry<HttpResponse,String> failed :tracker.getFailed().entrySet()){
+        for(Entry<RequestExecutor,String> failed :tracker.getFailed().entrySet()) {
             log.warn("Failed ({}):",i);
-            if(failed.getKey() != null){
-                log.warn("  > Status: {}",failed.getKey().getStatusLine());
-            } else {
-                log.warn(" > HttpResponse is NULL");
+            log.warn("  > Request: {}"+failed.getKey().getRequest());
+            log.warn("  > Response: {}"+failed.getKey().getResponse());
+            if(failed.getKey().getResponse() != null){
+                log.warn("    - Status: {}",failed.getKey().getResponse().getStatusLine());
             }
             log.warn("  > Content: {}",failed.getValue());
             i++;
@@ -577,7 +577,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         
         private int completed = 0;
         private final Set<Request> registered = new HashSet<Request>();
-        private final Map<HttpResponse,String> failed = Collections.synchronizedMap(new LinkedHashMap<HttpResponse,String>());
+        private final Map<RequestExecutor,String> failed = Collections.synchronizedMap(new LinkedHashMap<RequestExecutor,String>());
         
         private ExecutionStatistics statistics = new ExecutionStatistics();
         
@@ -623,7 +623,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
 
         void failed(Request request, String content,RequestExecutor executor) {
             synchronized (registered) {
-                failed.put(executor.getResponse(),content);
+                failed.put(executor,content);
                 if(registered.remove(request)){
                     completed++;
                     registered.notifyAll();
@@ -642,7 +642,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
          * failed requests will modify this list
          * @return
          */
-        public Map<HttpResponse,String> getFailed(){
+        public Map<RequestExecutor,String> getFailed(){
             return failed;
         }
         public int getNumCompleted(){
@@ -720,21 +720,16 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
                 log.warn("Error while sending Request ",e);
                 tracker.failed(request,content,executor);
                 rtt = null;
+                return;
             }
             IndexedMGraph graph = new IndexedMGraph();
             try {
                 rdfParser.parse(graph,executor.getStream(), executor.getContentType().getMimeType());
             } catch (Exception e) {
-                Assert.fail("Unable to parse RDF data from Response with Content-Type "
-                    + executor.getContentType().getMimeType()+" ( "+e.getClass().getSimpleName()
-                    + ": "+e.getMessage()+")");
+                log.warn("Exception while parsing Enhancement Response",e);
+                tracker.failed(request, content, executor);
+                return;
             }
-//            log.info("Content:\n{}",executor.getContent());
-//            
-//            log.info("Triples");
-//            for(Triple t : graph){
-//                log.info(t.toString());
-//            }
             Iterator<Triple> ciIt = graph.filter(null, Properties.ENHANCER_EXTRACTED_FROM, null);
             Assert.assertTrue("Enhancement Results do not caontain a single Enhancement",ciIt.hasNext());
             Resource contentItemUri = ciIt.next().getObject();
