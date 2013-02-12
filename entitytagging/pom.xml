@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
+    <version>0.10.0</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -158,7 +158,7 @@
      <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-      <version>1.2.0-SNAPSHOT</version>
+      <version>1.1.0</version>
       <scope>test</scope>
     </dependency>
      <dependency>

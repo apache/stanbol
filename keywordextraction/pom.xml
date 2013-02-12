@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
+    <version>0.10.0</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -160,12 +160,6 @@
       <version>0.11.0</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-      <version>1.2.0-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -177,7 +171,39 @@
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>      
     </dependency>
-
   </dependencies>
+
+  <profiles>
+    <!--
+      The profiles here are used to prevent a build failure
+      if tests are skipped using -DskipTests but the required
+      OpenNLP data bundles are not available in the local repo.
+      With these profiles Maven does not try to download
+      the runtime test dependencies of the data bundles.
+    -->
+    <profile>
+      <id>with-tests</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.stanbol</groupId>
+          <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
+          <version>1.1.0</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>no-tests</id>
+      <activation>
+        <property>
+          <name>skipTests</name>
+          <value>true</value>
+        </property>
+      </activation>
+    </profile>    
+  </profiles>
 
 </project>

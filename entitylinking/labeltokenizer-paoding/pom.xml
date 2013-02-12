@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines-entitylinking</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
+    <version>0.10.0</version>
     <relativePath>..</relativePath>
   </parent>
 
