@@ -670,7 +670,7 @@
         <version>1.4</version>
       </dependency>
       <!-- As commons-beanutils:commons-beanutils is not bundle we use the
-           org.apache.stanbol.servicemix version instead -->
+           org.apache.stanbol.servuemix version instead -->
       <dependency>
         <groupId>org.apache.servicemix.bundles</groupId>
         <artifactId>org.apache.servicemix.bundles.commons-beanutils</artifactId>
@@ -1177,6 +1177,13 @@
         </exclusion>
       </exclusions>
     </dependency>
+
+    <!-- jsoup HTML parser -->
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.7.2</version>
+    </dependency>    
 
     <!-- OpenNLP -->
     <dependency>
