@@ -54,17 +54,23 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
+            <!-- Export-Package>
               org.apache.stanbol.entityhub.jersey.*
-            </Export-Package>
-            <Embed-Dependency>
-                mail
-            </Embed-Dependency>
+            </Export-Package -->
             <Import-Package>
               javax.ws.rs.*; version="[0,2)",
-              org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.commons.web.base; provide:=true,
               *
             </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.entityhub.jersey.fragment; version=${project.version},
+              org.apache.stanbol.entityhub.jersey.grefine; version=${project.version},
+              org.apache.stanbol.entityhub.jersey.parsers; version=${project.version},
+              org.apache.stanbol.entityhub.jersey.resource; version=${project.version},
+              org.apache.stanbol.entityhub.jersey.resource.reconcile; version=${project.version},
+              org.apache.stanbol.entityhub.jersey.utils; version=${project.version},
+              org.apache.stanbol.entityhub.jersey.writers; version=${project.version}
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -140,10 +146,9 @@
 
     <!-- jersey-multipart now uses an other lib to read multipart/mime 
          however the MessagebodyReaderUtils still use this lib -->    
-   <dependency>
+    <dependency>
       <groupId>javax.mail</groupId>
       <artifactId>mail</artifactId>
-      <version>1.4</version>
     </dependency>
 
     <!-- Servlet API for handling ServletContext -->

@@ -58,13 +58,20 @@
         <configuration>
           <instructions>
             <Import-Package>
+              javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",
-              org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.commons.web.base; provide:=true,
               *
             </Import-Package>
-            <Export-Package>
+            <!-- Export-Package>
               org.apache.stanbol.contenthub.web.*;version=${project.version},
-            </Export-Package>
+            </Export-Package -->
+            <Private-Package>
+              org.apache.stanbol.contenthub.web.fragment; version=${project.version},
+              org.apache.stanbol.contenthub.web.resources; version=${project.version},
+              org.apache.stanbol.contenthub.web.util; version=${project.version},
+              org.apache.stanbol.contenthub.web.writers; version=${project.version}
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>

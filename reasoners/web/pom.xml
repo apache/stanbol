@@ -39,36 +39,24 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-        <!-- use defaults for now <configuration>
+        <configuration>
           <instructions>
             <Import-Package>
-              javax.servlet.*,
+              javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",
-              org.slf4j.*,
-              org.osgi.framework.*,
-              org.osgi.service.*,
-              freemarker.cache.*,
-              com.sun.jersey.api.*,
-              com.sun.jersey.multipart.*,
-              org.apache.clerezza.rdf.core.*,
-              com.hp.hpl.jena.*,
-              org.semanticweb.owlapi.*,
-              org.coode.owlapi.*,
-              uk.ac.manchester.cs.owl.owlapi.*,
-              org.apache.commons.io.*,
-              org.apache.stanbol.commons.web.base.*; provide:=true,
-              org.apache.stanbol.commons.jobs.api.*,
-              org.apache.stanbol.commons.jobs.impl.*,
-              org.apache.stanbol.commons.owl.*,
-              org.apache.stanbol.rules.base.api.*,
-              org.apache.stanbol.ontologymanager.ontonet.api.*,
-              org.apache.stanbol.ontologymanager.servicesapi.*,
-              org.apache.stanbol.reasoners.servicesapi.*,
-              org.apache.stanbol.reasoners.jena.*,
-              org.apache.stanbol.reasoners.owlapi.*
+              org.apache.stanbol.commons.web.base; provide:=true,
+              *
             </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.reasoners.web; version=${project.version},
+              org.apache.stanbol.reasoners.web.input.impl; version=${project.version},
+              org.apache.stanbol.reasoners.web.input.provider.impl; version=${project.version},
+              org.apache.stanbol.reasoners.web.resources; version=${project.version},
+              org.apache.stanbol.reasoners.web.utils; version=${project.version},
+              org.apache.stanbol.reasoners.web.writers; version=${project.version}
+            </Private-Package>
           </instructions>
-        </configuration> -->
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.rat</groupId>

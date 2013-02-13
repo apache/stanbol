@@ -64,9 +64,12 @@
         <extensions>true</extensions>
         <configuration>
          <instructions>
+           <Private-Package>
+             org.apache.stanbol.commons.web.resources
+           </Private-Package>
            <Import-Package>
-            javax.servlet.*; version="[2.5.0,4.0.0)",
-            *
+             javax.servlet.*; version="[2.5.0,4.0.0)",
+             *
            </Import-Package>
          </instructions>
        </configuration>

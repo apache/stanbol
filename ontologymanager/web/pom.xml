@@ -61,9 +61,14 @@
               org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
               *
             </Import-Package>            
-            <Export-Package>
+            <!-- Export-Package>
               org.apache.stanbol.ontologymanager.web.*
-            </Export-Package>
+            </Export-Package -->
+            <Private-Package>
+              org.apache.stanbol.ontologymanager.web; version=${project.version},
+              org.apache.stanbol.ontologymanager.web.resources; version=${project.version},
+              org.apache.stanbol.ontologymanager.web.util; version=${project.version}
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>

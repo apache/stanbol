@@ -68,7 +68,7 @@
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",
-              org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.commons.web.base; provide:=true,
               *
             </Import-Package>
           </instructions>

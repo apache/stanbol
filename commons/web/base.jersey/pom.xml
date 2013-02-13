@@ -64,9 +64,9 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
+            <Private-Package>
               org.apache.stanbol.commons.web.base.jersey;version=${project.version}
-            </Export-Package>
+            </Private-Package>
             <Import-Package>
               !javax.servlet.jsp.*,
               !org.apache.tools.*,

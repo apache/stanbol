@@ -58,18 +58,15 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
-              org.apache.stanbol.commons.web.viewable.ldpath;version=${project.version},
-              org.apache.stanbol.commons.web.viewable.ldpath.writer;version=${project.version}
-            </Export-Package>
             <Private-Package>
               org.apache.stanbol.commons.web.viewable.ldpath.webfragment;version=${project.version},
+              org.apache.stanbol.commons.web.viewable.ldpath.writer;version=${project.version}
             </Private-Package>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",
-              org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.commons.web.base; provide:=true,
               *
             </Import-Package>
           </instructions>
