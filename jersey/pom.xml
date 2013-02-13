@@ -55,9 +55,9 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
+            <!-- Export-Package>
               org.apache.stanbol.enhancer.jersey.*
-            </Export-Package>
+            </Export-Package -->
             <!-- Embed-Dependency>
               *;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl|httpmime
             </Embed-Dependency>
@@ -65,9 +65,16 @@
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",
-              org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.commons.web.base; provide:=true,
               *
             </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.jersey.fragment; version=${project.version},
+              org.apache.stanbol.enhancer.jersey.reader; version=${project.version},
+              org.apache.stanbol.enhancer.jersey.resource; version=${project.version},
+              org.apache.stanbol.enhancer.jersey.util; version=${project.version},
+              org.apache.stanbol.enhancer.jersey.writers; version=${project.version}
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
