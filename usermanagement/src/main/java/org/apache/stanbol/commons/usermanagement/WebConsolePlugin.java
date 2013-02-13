@@ -23,21 +23,21 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
 
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.clerezza.rdf.core.Resource;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.ldpath.clerezza.ClerezzaBackend;
 import org.apache.stanbol.commons.usermanagement.resource.UserResource;
-import org.apache.stanbol.commons.web.viewable.RdfViewable;
-import org.apache.stanbol.commons.web.viewable.ldpath.writer.LdViewableWriter;
 import org.osgi.framework.BundleContext;
 
+import at.newmedialab.ldpath.template.engine.TemplateEngine;
+
 import freemarker.cache.TemplateLoader;
+import freemarker.template.TemplateException;
 
 @Component
 @Service(Servlet.class)
@@ -47,17 +47,22 @@ import freemarker.cache.TemplateLoader;
 public class WebConsolePlugin extends
 		org.apache.felix.webconsole.AbstractWebConsolePlugin {
 
-	private static final String STATIC_PREFIX = "/usermanagement/res/";
+
+    private static final long serialVersionUID = -7624898299851954671L;
+
+    private static final String STATIC_PREFIX = "/usermanagement/res/";
 
 	@Reference
 	private UserResource userManager;
-		
+
 	
 	@Reference
 	private TemplateLoader templateLoader;
-	
-	private LdViewableWriter rdfViewableWriter;
-	
+	/**
+	 * The TemplateEngine used to render user information
+	 */
+	private TemplateEngine<Resource> templateEngine;
+		
 	public static final String NAME = "User Management";
 	public static final String LABEL = "usermanagement";
 
@@ -71,14 +76,15 @@ public class WebConsolePlugin extends
 
 	protected void renderContent(HttpServletRequest req,
 			HttpServletResponse response) throws ServletException, IOException {
-	    //create an RdfViewable
-        RdfViewable rdfViewable = new RdfViewable(
-            "org/apache/stanbol/commons/usermanagement/webConsole.ftl", 
-            userManager.getUserType());
-        //now use the LdViewableWriter to serialize
-        rdfViewableWriter.writeTo(rdfViewable, RdfViewable.class, RdfViewable.class, 
-            RdfViewable.class.getAnnotations(), MediaType.TEXT_HTML_TYPE, 
-            null, response.getOutputStream());
+        try {
+            templateEngine.processFileTemplate(userManager.getUserType().getNode(),
+                "html/org/apache/stanbol/commons/usermanagement/webConsole.ftl", response.getWriter());
+            response.getWriter().flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (TemplateException e) {
+            throw new RuntimeException(e);
+        }
 		// serializer.serialize(System.out, userManager.getUserType().getGraph(), SupportedFormat.TURTLE);
         // log me for debug!
 	}
@@ -94,11 +100,15 @@ public class WebConsolePlugin extends
     @Override
 	public void activate(BundleContext bundleContext) {
 		super.activate(bundleContext);
-		rdfViewableWriter = new LdViewableWriter(templateLoader);
+		//use some getter to get the Graph that backups the UserManager
+		//TODO: a direct getter for the graph would be nice to have
+		templateEngine = new TemplateEngine<Resource>(
+		        new ClerezzaBackend(userManager.getUserType().getGraph()));
+		templateEngine.setTemplateLoader(templateLoader);
 	}
 	@Override
 	public void deactivate() {
-	    rdfViewableWriter = null;
+	    templateEngine = null;
 	    super.deactivate();
 	}
 	
