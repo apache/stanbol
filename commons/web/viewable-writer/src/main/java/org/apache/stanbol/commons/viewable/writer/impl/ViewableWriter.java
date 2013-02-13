@@ -43,7 +43,7 @@ import org.apache.felix.scr.annotations.Service;
 @Component
 @Service(Object.class)
 @Property(name="javax.ws.rs", boolValue=true)
-@Produces("text/html")
+@Produces(MediaType.TEXT_HTML)
 @Provider
 public class ViewableWriter implements MessageBodyWriter<Viewable> {
 

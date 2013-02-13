@@ -71,7 +71,6 @@
               javax.ws.rs.*; version="[0,2)",
               org.apache.stanbol.commons.web.base; provide:=true,
               org.apache.felix.webconsole; provide:=true,
-              at.newmedialab.ldpath.template.engine; version="[0.9.5,1)",
               *
             </Import-Package>
             <Export-Package>
