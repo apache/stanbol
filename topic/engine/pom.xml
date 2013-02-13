@@ -64,6 +64,8 @@
             <Import-Package>
               org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
               org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.topic,
+              org.apache.stanbol.enhancer.topic.training,
               *
             </Import-Package>
             <Export-Package>

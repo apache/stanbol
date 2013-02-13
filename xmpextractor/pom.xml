@@ -50,6 +50,18 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              *
+            </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engines.xmpextractor
+            </Private-Package>
+          </instructions>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>

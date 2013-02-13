@@ -77,15 +77,19 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
+            <!-- Export-Package>
               org.apache.stanbol.enhancer.web.topic.*;version=${project.version}
-            </Export-Package>
+            </Export-Package -->
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",
               org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
               *
             </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.web.topic.fragment;version=${project.version},
+              org.apache.stanbol.enhancer.web.topic.resource;version=${project.version}
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>

@@ -60,10 +60,14 @@
           <instructions>
             <Import-Package>
               org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.engines.entitylinking; provide:=true,
+              org.apache.stanbol.enhancer.engines.entitylinking.config,
+              org.apache.stanbol.enhancer.engines.entitylinking.engine,
+              org.apache.stanbol.enhancer.engines.entitylinking.impl,
               *
             </Import-Package>
             <Export-Package>
-              org.apache.stanbol.enhancer.engines.entitylinking;version=${project.version}; provide:=true,
+              org.apache.stanbol.enhancer.engines.entitylinking;version=${project.version},
               org.apache.stanbol.enhancer.engines.entitylinking.config;version=${project.version},
               org.apache.stanbol.enhancer.engines.entitylinking.engine;version=${project.version},
               org.apache.stanbol.enhancer.engines.entitylinking.impl;version=${project.version}

@@ -63,12 +63,15 @@
             <Import-Package>
               org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
               org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.engines.keywordextraction.impl,
+              org.apache.stanbol.enhancer.engines.keywordextraction.engine,
+              org.apache.stanbol.enhancer.engines.keywordextraction.linking; provide:=true,
               *
             </Import-Package>
             <Export-Package>
               org.apache.stanbol.enhancer.engines.keywordextraction.impl;version=${project.version},
               org.apache.stanbol.enhancer.engines.keywordextraction.engine;version=${project.version},
-              org.apache.stanbol.enhancer.engines.keywordextraction.linking;version=${project.version}; provide:=true,
+              org.apache.stanbol.enhancer.engines.keywordextraction.linking;version=${project.version}
             </Export-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl

@@ -67,6 +67,10 @@
             <Export-Package>
               org.apache.stanbol.enhancer.engines.uimaremote;version=${project.version}
             </Export-Package>
+            <Import-Package>
+              org.apache.stanbol.enhancer.engines.uimaremote,
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

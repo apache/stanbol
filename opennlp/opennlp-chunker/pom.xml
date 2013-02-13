@@ -54,14 +54,11 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <!-- Extension used to provide files in that directory to the 
-              DataFileProvider -->
-            <Data-Files>${opennlp.model.path}</Data-Files>
-            <!-- Use a priority lower than 0 to allow providers without a 
-              defined ranking to override this default data. -->
-            <Data-Files-Priority>
-              -100
-            </Data-Files-Priority>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              *
+            </Import-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.engines.opennlp.chunker.*;version=${project.version}
             </Private-Package>
@@ -75,7 +72,6 @@
           <excludes>
             <!-- AL20 License -->
             <exclude>src/license/THIRD-PARTY.properties</exclude>
-            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.chunker.services.ChunkingEngine-snml.config</exclude>
           </excludes>
         </configuration>
       </plugin>

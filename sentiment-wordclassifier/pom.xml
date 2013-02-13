@@ -64,17 +64,19 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <!-- Extension used to provide files in that directory to the 
-              DataFileProvider -->
-            <Data-Files>
-              ${sentiment.model.path}/de,
-              ${sentiment.model.path}/en
-            </Data-Files>
-            <!-- Use a priority lower than 0 to allow providers without a 
-              defined ranking to override this default data. -->
-            <Data-Files-Priority>
-              -100
-            </Data-Files-Priority>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.engines.sentiment.api; provide:=true,
+              *
+            </Import-Package>
+            <Export-Package>
+              org.apache.stanbol.enhancer.engines.sentiment.api;version=${project.version}
+            </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engines.sentiment.classifiers;version=${project.version},
+              org.apache.stanbol.enhancer.engines.sentiment.services;version=${project.version}
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
