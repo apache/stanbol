@@ -58,6 +58,10 @@
             <Import-Package>
               at.newmedialab.ldpath.api.backend; provide:=true,
               at.newmedialab.ldpath.api.functions; provide:=true,
+              org.apache.stanbol.enhancer.ldpath,
+              org.apache.stanbol.enhancer.ldpath.backend,
+              org.apache.stanbol.enhancer.ldpath.function,
+              org.apache.stanbol.enhancer.ldpath.utils,
               *
             </Import-Package>
             <Export-Package>
