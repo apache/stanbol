@@ -51,6 +51,12 @@
             <Export-Package>
               org.apache.stanbol.enhancer.engines.opennlp.pos.model;version=${project.version}
             </Export-Package>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.engines.opennlp.pos.model,
+              *
+            </Import-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.engines.opennlp.pos.services;version=${project.version}
             </Private-Package>

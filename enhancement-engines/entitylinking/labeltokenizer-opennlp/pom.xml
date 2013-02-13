@@ -56,11 +56,9 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.enhancer.engines.entitylinking;version=${project.version}; provide:=true,
+              org.apache.stanbol.enhancer.engines.entitylinking; provide:=true,
               *
             </Import-Package>
-            <Export-Package>
-            </Export-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.opennlp;version=${project.version}
             </Private-Package>

@@ -63,12 +63,29 @@
               org.apache.stanbol.enhancer.nlp.nif;version=${project.version},
               org.apache.stanbol.enhancer.nlp.ner;version=${project.version},
               org.apache.stanbol.enhancer.nlp.pos;version=${project.version},
-              org.apache.stanbol.enhancer.nlp.pos.*;version=${project.version},
+              org.apache.stanbol.enhancer.nlp.ontology;version=${project.version},
+              org.apache.stanbol.enhancer.nlp.pos.olia;version=${project.version},
               org.apache.stanbol.enhancer.nlp.phrase;version=${project.version},
               org.apache.stanbol.enhancer.nlp.morpho;version=${project.version},
               org.apache.stanbol.enhancer.nlp.sentiment;version=${project.version},
               org.apache.stanbol.enhancer.nlp.utils;version=${project.version}
             </Export-Package>
+            <Import-Package>
+              org.apache.stanbol.enhancer.nlp,
+              org.apache.stanbol.enhancer.nlp.model; provide:=true,
+              org.apache.stanbol.enhancer.nlp.model.annotation; provide:=true,
+              org.apache.stanbol.enhancer.nlp.model.tag; provide:=true,
+              org.apache.stanbol.enhancer.nlp.nif,
+              org.apache.stanbol.enhancer.nlp.ner,
+              org.apache.stanbol.enhancer.nlp.ontology,
+              org.apache.stanbol.enhancer.nlp.pos,
+              org.apache.stanbol.enhancer.nlp.pos.olia,
+              org.apache.stanbol.enhancer.nlp.phrase,
+              org.apache.stanbol.enhancer.nlp.morpho,
+              org.apache.stanbol.enhancer.nlp.sentiment,
+              org.apache.stanbol.enhancer.nlp.utils,
+              *
+            </Import-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.nlp.model.impl.*;version=${project.version}
             </Private-Package>

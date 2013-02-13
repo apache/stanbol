@@ -63,8 +63,16 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.enhancer.engines.uimatotriples;version=${project.version}
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.engines.uimatotriples;version=${project.version},
+              org.apache.stanbol.enhancer.engines.uimatotriples.tools;version=${project.version}
             </Export-Package>
+            <Import-Package>
+              org.apache.stanbol.enhancer.engines.uimatotriples,
+              org.apache.stanbol.enhancer.engines.uimatotriples.tools,
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

@@ -53,10 +53,11 @@
           <instructions>
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
+              org.apache.stanbol.enhancer.benchmark; provide:=true,
               *
             </Import-Package>
             <Export-Package>
-              org.apache.stanbol.enhancer.benchmark
+              org.apache.stanbol.enhancer.benchmark; version=${project.version}
             </Export-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.benchmark.impl.*

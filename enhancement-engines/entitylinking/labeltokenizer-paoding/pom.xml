@@ -45,8 +45,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>*</Import-Package>
-            <!-- used instead of Export-Package to preserve the jars -->
+            <Import-Package>
+              org.apache.stanbol.enhancer.engines.entitylinking; provide:=true,
+              *
+            </Import-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.paoding
             </Private-Package>

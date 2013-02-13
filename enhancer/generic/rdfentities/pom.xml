@@ -54,8 +54,17 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.enhancer.rdfentities.*;version=${project.version}
+              org.apache.stanbol.enhancer.rdfentities; provide:=true,
+              org.apache.stanbol.enhancer.rdfentities.fise; provide:=true,
+              *
             </Export-Package>
+            <Export-Package>
+              org.apache.stanbol.enhancer.rdfentities;version=${project.version}
+              org.apache.stanbol.enhancer.rdfentities.fise;version=${project.version}
+            </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.rdfentities.impl;version=${project.version}
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>

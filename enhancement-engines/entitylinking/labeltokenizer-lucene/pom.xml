@@ -56,7 +56,7 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.enhancer.engines.entitylinking;version=${project.version}; provide:=true,
+              org.apache.stanbol.enhancer.engines.entitylinking; provide:=true,
               *
             </Import-Package>
             <Private-Package>

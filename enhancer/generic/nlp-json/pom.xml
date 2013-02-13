@@ -50,6 +50,12 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.nlp.json,
+              org.apache.stanbol.enhancer.nlp.json.valuetype; provide:=true,
+              org.apache.stanbol.enhancer.nlp.json.writer,
+              *
+            </Import-Package>
             <Export-Package>
               org.apache.stanbol.enhancer.nlp.json;version=${project.version},
               org.apache.stanbol.enhancer.nlp.json.valuetype;version=${project.version},

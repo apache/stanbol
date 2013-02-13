@@ -62,7 +62,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>org.apache.stanbol.enhancer.engines.uimalocal</Export-Package>
+            <Export-Package>
+              org.apache.stanbol.enhancer.engines.uimalocal;version=${project.version}
+            </Export-Package>
+            <Import-Package>
+              org.apache.stanbol.enhancer.engines.uimalocal,
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>
