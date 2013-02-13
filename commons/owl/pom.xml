@@ -57,8 +57,11 @@
               owlapi-metrics, owlapi-change, owlapi-owlexpression
             </Embed-Dependency>
             <Embed-Transitive>false</Embed-Transitive>
+            <Private-Package>
+              org.apache.stanbol.commons.owl.web; version=${project.version} 
+            </Private-Package>
             <Export-Package>
-              org.apache.stanbol.commons.owl.*
+              org.apache.stanbol.commons.owl.*; version=${project.version} 
             </Export-Package>
             <_exportcontents> <!-- used instead of Export-Package to preserve the owlapi jar -->
               org.semanticweb.owlapi.*;version=${owlapi-version},
@@ -72,8 +75,22 @@
               uk.ac.manchester.cs.owl.*;version=${owlapi-version}
             </_exportcontents>
             <Import-Package>
+              javax.servlet.*; version="[2.5.0,4.0.0)",
+              javax.ws.rs.*; version="[0,2)",
+              org.apache.stanbol.commons.web.base; provide:=true,
+              org.apache.stanbol.commons.owl,
+              org.apache.stanbol.commons.owl.transformation,
+              org.apache.stanbol.commons.owl.util,
+              org.apache.stanbol.commons.owl.web,
               org.semanticweb.owlapi.*,
-              org.slf4j.*,
+              com.clarkparsia.owlapi.*,
+              de.uulm.ecs.ai.owlapi.*,
+              org.coode.owl.*,
+              org.coode.owlapi.*,
+              org.coode.string,
+              org.coode.xml,
+              uk.ac.manchester.cs.bhig.util,
+              uk.ac.manchester.cs.owl.*,
               *
             </Import-Package>
             <_nouses>true</_nouses>

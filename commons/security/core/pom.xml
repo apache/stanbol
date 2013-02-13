@@ -75,6 +75,8 @@
           <instructions>
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
+              org.apache.stanbol.commons.security,
+              org.apache.stanbol.commons.security.auth,
               *
             </Import-Package>
             <Export-Package>

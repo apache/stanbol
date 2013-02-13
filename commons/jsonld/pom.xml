@@ -56,8 +56,12 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.commons.jsonld.*,
+              *
+            </Import-Package>
             <Export-Package>
-              org.apache.stanbol.commons.jsonld.*;version=${project.version}ion}
+              org.apache.stanbol.commons.jsonld.*;version=${project.version}
             </Export-Package>
           </instructions>
         </configuration>

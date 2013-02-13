@@ -65,7 +65,7 @@
               org.apache.stanbol.commons.opennlp;version=${project.version} 
             </Export-Package>
             <Import-Package>
-              org.apache.stanbol.commons.opennlp;version=${project.version},
+              org.apache.stanbol.commons.opennlp,
               *
             </Import-Package>
           </instructions>

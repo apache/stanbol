@@ -55,6 +55,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              at.newmedialab.ldpath.template.engine,
+              at.newmedialab.ldpath.template.model.freemarker,
+              at.newmedialab.ldpath.template.model.transformers,
+              at.newmedialab.ldpath.template.util,
+              *
+            </Import-Package>
             <Export-Package>
               at.newmedialab.ldpath.template.*;version=0.9.5
             </Export-Package>

@@ -48,13 +48,13 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.commons.jobs.api,
-              org.apache.stanbol.commons.jobs.impl,
+              org.apache.stanbol.commons.jobs.api; provide:=true,
+              org.apache.stanbol.commons.jobs.impl; provide:=true,
               *
             </Import-Package>
             <Export-Package>
-              org.apache.stanbol.commons.jobs.api;version=${project.version}; provide:=true,
-              org.apache.stanbol.commons.jobs.impl;version=${project.version}; provide:=true
+              org.apache.stanbol.commons.jobs.api;version=${project.version},
+              org.apache.stanbol.commons.jobs.impl;version=${project.version}
             </Export-Package>
           </instructions>
         </configuration>

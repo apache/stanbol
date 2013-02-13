@@ -61,13 +61,22 @@
              For now export all paoding packages.This might however change
              -->
             <Export-Package>
-              org.apache.stanbol.commons.solr.extras.paoding;version=${project.version}
+              org.apache.stanbol.commons.solr.extras.paoding;version=${project.version},
               net.paoding.analysis;version=2.0.4,
               net.paoding.analysis.analyzer;version=2.0.4,
               net.paoding.analysis.knife;version=2.0.4,
               net.paoding.analysis.analyzer.*;version=2.0.4,
               net.paoding.analysis.dictionary.*;version=2.0.4
             </Export-Package>
+            <Import-Package>
+              org.apache.stanbol.commons.solr.extras.paoding,
+              net.paoding.analysis,
+              net.paoding.analysis.analyzer,
+              net.paoding.analysis.knife,
+              net.paoding.analysis.analyzer.*,
+              net.paoding.analysis.dictionary.*,
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

@@ -51,18 +51,15 @@
 
   <build>
     <plugins>
-      <plugin>
+      <!-- plugin> - NOT A BUNDLE
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
-              org.apache.stanbol.commons.indexedgraph.*;version=${project.version}
-            </Export-Package>
           </instructions>
         </configuration>
-      </plugin>
+      </plugin -->
     </plugins>
   </build>
 

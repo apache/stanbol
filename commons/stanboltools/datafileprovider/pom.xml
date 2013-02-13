@@ -62,10 +62,10 @@
               *
             </Import-Package>
             <Export-Package>
-              org.apache.stanbol.commons.stanboltools.datafileprovider;version=${project.version}; provide:=true
+              org.apache.stanbol.commons.stanboltools.datafileprovider;version=${project.version}
             </Export-Package>
             <Private-Package>
-              org.apache.stanbol.commons.stanboltools.datafileprovider.impl.*
+              org.apache.stanbol.commons.stanboltools.datafileprovider.impl.*;version=${project.version}
             </Private-Package>
           </instructions>
         </configuration>

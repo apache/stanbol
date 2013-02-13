@@ -51,7 +51,12 @@
         <configuration>
           <instructions>
             <Embed-Dependency>lucene-stempel</Embed-Dependency>
-            <Import-Package>*</Import-Package>
+            <Import-Package>
+              org.apache.lucene.analysis.pl,
+              org.apache.lucene.analysis.stempel,
+              org.egothor.stemmer,
+              *
+            </Import-Package>
             <!-- used instead of Export-Package to preserve the jars -->
             <_exportcontents>
               org.apache.lucene.analysis.pl;version=3.6.1,

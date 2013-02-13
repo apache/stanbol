@@ -59,6 +59,7 @@
           <instructions>
             <Import-Package>
               org.apache.stanbol.commons.namespaceprefix; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.commons.namespaceprefix.mappings,
               *
             </Import-Package>
             <Export-Package>

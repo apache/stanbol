@@ -61,18 +61,20 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.entityhub.servicesapi;version=${project.version},
-              org.apache.stanbol.entityhub.servicesapi.defaults;version=${project.version},
-              org.apache.stanbol.entityhub.servicesapi.model;version=${project.version},
-              org.apache.stanbol.entityhub.servicesapi.model.rdf;version=${project.version},
-              org.apache.stanbol.entityhub.servicesapi.mapping;version=${project.version},
-              org.apache.stanbol.entityhub.servicesapi.query;version=${project.version}; provide:=true,
-              org.apache.stanbol.entityhub.servicesapi.site;version=${project.version},
-              org.apache.stanbol.entityhub.servicesapi.util;version=${project.version}, provide:=true,
-              org.apache.stanbol.entityhub.servicesapi.yard;version=${project.version}
+              org.apache.stanbol.entityhub.servicesapi.*;version=${project.version},
             </Export-Package>
-            <Private-Package>
-            </Private-Package>
+            <Import-Package>
+              org.apache.stanbol.entityhub.servicesapi,
+              org.apache.stanbol.entityhub.servicesapi.defaults,
+              org.apache.stanbol.entityhub.servicesapi.model,
+              org.apache.stanbol.entityhub.servicesapi.model.rdf,
+              org.apache.stanbol.entityhub.servicesapi.mapping,
+              org.apache.stanbol.entityhub.servicesapi.query; provide:=true,
+              org.apache.stanbol.entityhub.servicesapi.site,
+              org.apache.stanbol.entityhub.servicesapi.util; provide:=true,
+              org.apache.stanbol.entityhub.servicesapi.yard,
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

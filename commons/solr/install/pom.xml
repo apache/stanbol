@@ -64,8 +64,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.sling.installer.api.tasks; provide:=true,
+              org.apache.stanbol.commons.solr.install,
+              *
+            </Import-Package>
             <Export-Package>
-              org.apache.stanbol.commons.solr.install;version=${project.version}; provide:=true
+              org.apache.stanbol.commons.solr.install;version=${project.version}
             </Export-Package>
             <Private-Package>
               org.apache.stanbol.commons.solr.install.impl;version=${project.version}

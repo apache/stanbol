@@ -56,8 +56,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.commons.namespaceprefix; provide:=true; version="[0.11,0.13)",
+              *
+            </Import-Package>
             <Private-Package>
-              org.apache.stanbol.commons.namespaceprefix.provider.prefixcc
+              org.apache.stanbol.commons.namespaceprefix.provider.prefixcc,
+              org.apache.stanbol.commons.namespaceprefix.provider.prefixcc.component
             </Private-Package>
           </instructions>
         </configuration>

@@ -57,8 +57,14 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              org.apache.stanbol.commons.solr.managed;provide:=true,
+              org.apache.stanbol.commons.solr.managed.util,
+              org.apache.stanbol.commons.solr.managed.standalone,
+              *
+            </Import-Package>
             <Export-Package>
-              org.apache.stanbol.commons.solr.managed;version=${project.version}; provide:=true,
+              org.apache.stanbol.commons.solr.managed;version=${project.version},
               org.apache.stanbol.commons.solr.managed.util;version=${project.version},
               org.apache.stanbol.commons.solr.managed.standalone;version=${project.version}
             </Export-Package>

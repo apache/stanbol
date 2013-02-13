@@ -50,8 +50,12 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-           <Embed-Dependency>lucene-smartcn</Embed-Dependency>
-           <Import-Package>*</Import-Package>
+            <Embed-Dependency>lucene-smartcn</Embed-Dependency>
+            <Import-Package>
+              org.apache.lucene.analysis.cn.smart,
+              org.apache.lucene.analysis.cn.smart.hhmm,
+              *
+            </Import-Package>
             <!-- used instead of Export-Package to preserve the jars -->
             <_exportcontents>
               org.apache.lucene.analysis.cn.smart;version=3.6.1,
