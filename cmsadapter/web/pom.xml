@@ -34,6 +34,21 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              javax.servlet.*; version="[2.5.0,4.0.0)",
+              javax.ws.rs.*; version="[0,2)",
+              org.apache.stanbol.commons.web.base; provide:=true,
+              *
+            </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.cmsadapter.web; version=${project.version},
+              org.apache.stanbol.cmsadapter.web.resources; version=${project.version},
+              org.apache.stanbol.cmsadapter.web.utils; version=${project.version}
+            </Private-Package>
+          </instructions>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
