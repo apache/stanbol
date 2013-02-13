@@ -65,6 +65,7 @@
     <module>web/home</module>
     <module>web/viewable</module>
     <module>web/viewable-ldpath</module>
+    <module>web/viewable-writer</module>
     <module>web/resources</module>
     <module>web/sparql</module>
     <module>freemarker</module>

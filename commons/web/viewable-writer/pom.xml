@@ -26,18 +26,18 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+  <artifactId>org.apache.stanbol.commons.web.viewable.writer</artifactId>
   <version>0.12.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Commons Web Template Viewable</name>
-  <description>A service providing classes and message body writer for response rendering with the viewable pattern.</description>
+  <name>Apache Stanbol Commons Web Template Viewable Writer</name>
+  <description>A bundle providing MessageBodyWriters for Viewable</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/viewable
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/viewable-writer
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/web/viewable
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/web/viewable-writer
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -55,16 +55,6 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
-              org.apache.stanbol.commons.viewable;version=${project.version},
-              org.apache.stanbol.commons.web.viewable;version=${project.version},
-              org.apache.stanbol.commons.web.viewable.writer;version=${project.version}
-            </Export-Package>
-            <Private-Package>
-              org.apache.stanbol.commons.web.viewable.impl;version=${project.version},
-              org.apache.stanbol.commons.web.viewable.webfragment;version=${project.version},
-            </Private-Package>
-            <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",
@@ -82,14 +72,23 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-   	<dependency>
-		<groupId>org.apache.clerezza</groupId>
-	  	<artifactId>rdf.utils</artifactId>
-  	</dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
-    </dependency>  
+    </dependency> 
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+  	  <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+  	  <version>0.12.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
 </project>

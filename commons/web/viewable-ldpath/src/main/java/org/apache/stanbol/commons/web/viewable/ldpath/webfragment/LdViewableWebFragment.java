@@ -33,7 +33,6 @@ import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.commons.web.viewable.ldpath.writer.LdViewableWriter;
-import org.apache.stanbol.commons.web.viewable.writer.ViewableWriter;
 import org.osgi.service.component.ComponentContext;
 
 import freemarker.cache.TemplateLoader;

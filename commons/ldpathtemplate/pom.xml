@@ -80,7 +80,20 @@
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
     </dependency>
+    <dependency>
+  		<groupId>org.apache.clerezza</groupId>
+  		<artifactId>rdf.ontologies</artifactId>
+  	</dependency>
+    <dependency>
+    	<groupId>org.apache.clerezza</groupId>
+    	<artifactId>rdf.utils</artifactId>
+    </dependency>
        
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    
     <dependency>
       <groupId>at.newmedialab.ldpath</groupId>
       <artifactId>ldpath-core-bundle</artifactId>
@@ -92,6 +105,11 @@
 	    <version>0.9.3-SNAPSHOT</version>
 	  </dependency>
 	  -->
+	  <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.ldpath.clerezza</artifactId>
+      <version>0.11.0</version>
+    </dependency>
 
   </dependencies>
 </project>

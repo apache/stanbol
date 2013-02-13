@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.commons.web.viewable.writer;
+package org.apache.stanbol.commons.viewable.writer.impl;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,21 +35,22 @@ import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateException;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Produces("text/html")
 @Provider
 public class ViewableWriter implements MessageBodyWriter<Viewable> {
 
     
-    
+    @Reference
 	private TemplateLoader templateLoader;
 
-	public ViewableWriter(TemplateLoader templateLoader) {
-	    if(templateLoader == null){
-	        throw new IllegalArgumentException("The parsed templateLoader MUST NOT be NULL");
-	    }
-        this.templateLoader = templateLoader;
-    }
 	
 	@Override
 	public boolean isWriteable(Class<?> type, Type genericType,
