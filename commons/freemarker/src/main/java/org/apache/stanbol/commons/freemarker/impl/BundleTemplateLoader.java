@@ -14,18 +14,15 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.commons.web.viewable.impl;
+package org.apache.stanbol.commons.freemarker.impl;
 
+import freemarker.cache.TemplateLoader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.Writer;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
-
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -36,11 +33,6 @@ import org.osgi.framework.BundleListener;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import freemarker.cache.TemplateLoader;
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapper;
-import freemarker.template.TemplateException;
 
 /**
  * This Service provides an {@link TemplateLoader} that provides templates
