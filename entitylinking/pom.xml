@@ -40,10 +40,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entityinging
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entitylinking
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entityinging
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entitylinking
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

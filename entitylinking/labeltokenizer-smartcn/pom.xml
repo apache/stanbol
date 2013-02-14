@@ -82,7 +82,7 @@
     <dependency> <!-- depend on the module the config is for -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.10.0</version>
     </dependency>
   </dependencies>
 
