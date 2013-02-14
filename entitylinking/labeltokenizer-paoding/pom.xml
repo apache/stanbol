@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines-entitylinking</artifactId>
-    <version>0.10.0</version>
+    <version>0.10.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -28,12 +28,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/entitylinking/labeltokenizer-paoding
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entitylinking/labeltokenizer-paoding
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/entitylinking/labeltokenizer-paoding
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entitylinking/labeltokenizer-paoding
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0//stanbol.apache.org</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>
@@ -81,7 +81,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.engine</artifactId>
-      <version>0.10.0</version>
+      <version>0.10.1-SNAPSHOT</version>
     </dependency>
     <!-- Testing -->
     <dependency>

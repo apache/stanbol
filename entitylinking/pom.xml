@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.10.0</version>
+    <version>0.10.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>apache-stanbol-enhancement-engines-entitylinking</artifactId>
-  <version>0.10.0</version>
+  <version>0.10.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Enhancement Engine : Entity Linking</name>
@@ -39,12 +39,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/entitylinking
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entitylinking
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/entitylinking
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entitylinking
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <modules>

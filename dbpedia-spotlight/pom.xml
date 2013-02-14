@@ -16,13 +16,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.10.0</version>
+    <version>0.10.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.dbpspotlight</artifactId>
-    <version>0.10.0</version>
+    <version>0.10.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancement Engine : DBPedia Spotlight</name>
@@ -42,12 +42,12 @@
 
   <scm> 
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/dbpedia-spotlight-annotate 
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/dbpedia-spotlight-annotate 
     </connection>
     <developerConnection> 
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/dbpedia-spotlight-annotate
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/dbpedia-spotlight-annotate
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
