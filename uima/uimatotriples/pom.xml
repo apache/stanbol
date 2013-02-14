@@ -31,12 +31,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/uima/uimatotriple
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/uima/uimatotriple
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/uima/uimatotriple
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/uima/uimatotriple
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

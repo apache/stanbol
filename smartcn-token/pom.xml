@@ -32,12 +32,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/smartcn-token
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/smartcn-token/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/smartcn-token
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/smartcn-token/
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

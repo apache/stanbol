@@ -38,12 +38,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/entitylinking/labeltokenizer-opennlp
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entitylinking/labeltokenizer-opennlp
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/entitylinking/labeltokenizer-opennlp
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entitylinking/labeltokenizer-opennlp
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

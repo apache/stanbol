@@ -41,12 +41,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/topic/web
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engine/topic/web/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/topic/web
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engine/topic/web/
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

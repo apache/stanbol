@@ -28,7 +28,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.tika</artifactId>
-  <version>yes</version>
+  <version>0.10.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancement Engine : Tika</name>
@@ -40,12 +40,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/tika
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/tika/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/tika
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/tika/
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-enhancement-engines-0.10.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
