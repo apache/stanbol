@@ -142,7 +142,6 @@
       <artifactId>commons-lang</artifactId>
     </dependency>
     
-    <!-- Jersey, servlet and freemarker -->
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>

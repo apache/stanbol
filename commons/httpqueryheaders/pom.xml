@@ -76,7 +76,6 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     
-    <!-- Jersey, servlet and freemarker -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
