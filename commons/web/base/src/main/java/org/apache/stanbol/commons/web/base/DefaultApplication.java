@@ -29,8 +29,6 @@ import org.apache.stanbol.commons.web.base.writers.ResultSetWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import freemarker.cache.MultiTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 /**
  * Define the list of available resources and providers to be used by the Stanbol JAX-RS Endpoint.
@@ -44,7 +42,6 @@ public class DefaultApplication extends Application {
 
     protected final Set<Object> contributedSingletons = new HashSet<Object>();
 
-    protected List<TemplateLoader> templateLoaders = new ArrayList<TemplateLoader>();
 
     @Override
     public Set<Class<?>> getClasses() {
@@ -63,10 +60,6 @@ public class DefaultApplication extends Application {
     public Set<Object> getSingletons() {
         Set<Object> singletons = new HashSet<Object>();
         singletons.addAll(contributedSingletons);
-
-        TemplateLoader[] loadersArray = templateLoaders.toArray(new TemplateLoader[templateLoaders.size()]);
-        MultiTemplateLoader templateLoader = new MultiTemplateLoader(loadersArray);
-        //singletons.add(new FreemarkerViewProcessor(templateLoader));
         return singletons;
     }
 
@@ -78,9 +71,4 @@ public class DefaultApplication extends Application {
         contributedSingletons.addAll(singletons);
     }
 
-    public void contributeTemplateLoader(TemplateLoader templateLoader) {
-        if (templateLoader != null) {
-            this.templateLoaders.add(templateLoader);
-        }
-    }
 }

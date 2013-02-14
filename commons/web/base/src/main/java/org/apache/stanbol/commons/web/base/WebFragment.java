@@ -19,9 +19,6 @@ package org.apache.stanbol.commons.web.base;
 import java.util.List;
 import java.util.Set;
 
-import org.osgi.framework.BundleContext;
-
-import freemarker.cache.TemplateLoader;
 
 /**
  * Interface to be implemented by bundles that want to customize the stanbol web interface and REST API by

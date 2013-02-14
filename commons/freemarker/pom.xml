@@ -54,6 +54,35 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Embed-Dependency>freemarker</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Export-Package>freemarker.*</Export-Package>
+            <Import-Package>
+              !javax.servlet.jsp.*,
+              !org.apache.tools.*,
+              !org.mortbay.*,
+              !org.apache.xpath.*,
+              !org.jdom.*,
+              !org.jaxen.*,
+              !org.apache.xml.*,
+              !org.mozilla.javascript.*,
+              !org.python.*,
+              !org.dom4j.*,
+              !org.apache.log.*,
+              !com.sun.org.apache.*,
+              !javax.el,
+              !org.slf4j.spi,
+              !org.zeroturnaround.javarebel,
+              javax.servlet.*; version="[2.5.0,4.0.0)",
+              javax.ws.rs;version="[0,2)",
+              javax.ws.rs.ext;version="[0,2)",
+              javax.ws.rs.core;version="[0,2)",
+              *
+            </Import-Package>
+          </instructions>
+        </configuration>
       </plugin>
     </plugins>
   </build>

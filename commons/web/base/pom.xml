@@ -68,31 +68,7 @@
               org.apache.stanbol.commons.web.base;version=${project.version},
               org.apache.stanbol.commons.web.base.*;version=${project.version}
             </Export-Package>
-            <_exportcontents> <!-- used instead of Export-Package to preserve the embedded jar -->
-              freemarker.cache;version=${freemarker-version},
-              freemarker.template.*;version=${freemarker-version},
-              freemarker.core;version=${freemarker-version}
-            </_exportcontents>
-            <!-- Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jettison|jackson-core-asl
-            </Embed-Dependency -->
-            <Embed-Dependency>freemarker</Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
-              !javax.servlet.jsp.*,
-              !org.apache.tools.*,
-              !org.mortbay.*,
-              !org.apache.xpath.*,
-              !org.jdom.*,
-              !org.jaxen.*,
-              !org.apache.xml.*,
-              !org.mozilla.javascript.*,
-              !org.python.*,
-              !org.dom4j.*,
-              !org.apache.log.*,
-              !com.sun.org.apache.*,
-              !javax.el,
-              !org.slf4j.spi,
-              !org.zeroturnaround.javarebel,
               javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs;version="[0,2)",
               javax.ws.rs.ext;version="[0,2)",
@@ -103,10 +79,6 @@
               org.apache.stanbol.commons.web.base.resource,
               org.apache.stanbol.commons.web.base.utils,
               org.apache.stanbol.commons.web.base.writers,
-              freemarker.cache,
-              freemarker.template,
-              freemarker.template.utility,
-              freemarker.core,
               *
             </Import-Package>
           </instructions>
@@ -128,10 +100,6 @@
       <artifactId>rdf.jena.serializer</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-    </dependency>
     <dependency>
         <groupId>javax.ws.rs</groupId>
         <artifactId>jsr311-api</artifactId>
