@@ -28,7 +28,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.tika</artifactId>
-  <version>yes</version>
+  <version>0.10.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancement Engine : Tika</name>
