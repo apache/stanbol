@@ -151,16 +151,6 @@
       <artifactId>jersey-core</artifactId>
     </dependency>
 
-    <!-- Freemarker -->
-    <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-    </dependency>
-    <!-- indirect dependency for freemarker -->
-    <dependency>
-      <groupId>org.codehaus.jettison</groupId>
-      <artifactId>jettison</artifactId>
-    </dependency>   
 
   </dependencies>
 </project>
