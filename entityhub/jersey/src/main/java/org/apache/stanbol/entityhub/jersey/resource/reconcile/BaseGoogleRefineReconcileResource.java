@@ -164,7 +164,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
         } else if(queries != null){
             log.debug("multi-query: {}",queries);
             try {
-                jResult = reoncile(ReconcileQuery.parseQueries(queries,nsPrefixService));
+                jResult = reconcile(ReconcileQuery.parseQueries(queries,nsPrefixService));
             } catch (JSONException e) {
                 throw new WebApplicationException(
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
@@ -178,7 +178,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
             }
         } else {
             if(MediaTypeUtil.isAcceptableMediaType(header,MediaType.TEXT_HTML_TYPE)){
-                ResponseBuilder rb = Response.ok(new Viewable("index", this));
+                ResponseBuilder rb = Response.ok(new Viewable("index", this, BaseGoogleRefineReconcileResource.class));
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
                 addCORSOrigin(servletContext, rb, header);
                 return rb.build();
@@ -195,7 +195,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
     }
 
 
-    private JSONObject reoncile(Map<String,ReconcileQuery> parsedQueries) throws JSONException, EntityhubException {
+    private JSONObject reconcile(Map<String,ReconcileQuery> parsedQueries) throws JSONException, EntityhubException {
         JSONObject container = new JSONObject();
         for(Entry<String,ReconcileQuery> query : parsedQueries.entrySet()){
             container.put(query.getKey(), reconcile(query.getValue()));
