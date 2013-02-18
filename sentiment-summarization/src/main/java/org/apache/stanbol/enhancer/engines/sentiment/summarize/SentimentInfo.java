@@ -16,19 +16,24 @@
  */
 package org.apache.stanbol.enhancer.engines.sentiment.summarize;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.stanbol.enhancer.nlp.model.Section;
 
 /**
  * Holds the information about the Sentiment tags found for a
- * {@link Section}
+ * {@link Section}.
+ * Values returned by the getters are the geometric mean normalised by the
+ * number of tags with an sentiment value. By this words with an high sentiment
+ * value will have much more influence as those with lower values
  * @author Rupert Westenthaler
  *
  */
 public final class SentimentInfo {
 
     private Section section;
-    private double positive = 0;
-    private double negative = 0;
+    private List<Sentiment> sentiments;
 
     SentimentInfo(Section section){
         if(section == null){
@@ -38,34 +43,68 @@ public final class SentimentInfo {
     }
     
     public Double getPositive(){
-        return positive > 0.0 ? positive : null;
+        if(sentiments == null){
+            return null;
+        }
+        double positive = 0;
+        int num = 0;
+        for(Sentiment s : sentiments){
+            double v = s.getValue();
+            if(v > 0){
+                positive = positive+(v*v);
+                num++;
+            }
+        }
+        return positive > 0.0 ? Math.sqrt(positive/(double)num) : null;
     }
     
     public Double getNegative(){
-        return negative < 0.0 ? negative : null;
+        if(sentiments == null){
+            return null;
+        }
+        double negative = 0;
+        int num = 0;
+        for(Sentiment s : sentiments){
+            double v = s.getValue();
+            if(v < 0){
+                negative = negative+(v*v);
+                num++;
+            }
+        }
+        return negative > 0.0 ? Math.sqrt(negative/(double)num)*-1 : null;
     }
     
     public Double getSentiment(){
-        return negative+positive;
+        if(sentiments == null){
+            return null;
+        }
+        Double pos = getPositive();
+        Double neg = getNegative();
+        if(pos == null && neg == null){
+            return null;
+        }
+        double sum = pos != null ? pos : 0.0;
+        sum = neg != null ? sum+neg : sum;
+        return sum;
     }
     
     public boolean hasSentiment(){
-        return positive != 0 || negative != 0;
+        return sentiments != null;
     }
-    
-    void addSentiment(Double sentiment){
-        if(sentiment == null){ //ignore null
-            return;
+        
+    void addSentiment(Sentiment sentiment){
+        if(sentiments == null){
+            sentiments = new ArrayList<Sentiment>(4);
         }
-        if(sentiment > 0){
-            positive = positive + sentiment;
-        } else if (sentiment < 0){
-            negative = negative + sentiment;
-        }
+        sentiments.add(sentiment);
     }
     
     public Section getSection() {
         return section;
+    }
+    
+    public List<Sentiment> getSentiments() {
+        return sentiments;
     }
     
 }
