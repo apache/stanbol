@@ -26,21 +26,20 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.commons.web.viewable.ldpath</artifactId>
+  <artifactId>org.apache.stanbol.commons.web.rdfviewable.writer</artifactId>
   <version>0.12.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Commons Web Viewable for LDpath</name>
+  <name>Apache Stanbol Commons Web Message Body Writers for RDFViewable</name>
   <description>
-    A service providing classes and message body writer for response rendering 
-    allowing to use LDpath based templates over RDF resources.
+    A bundle proving JAX-RS MessageBodyWriter-Service to render RDFViewableS.
   </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/viewable-ldpath
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/rdfviewable-writer
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/web/viewable-ldpath
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/web/rdfviewable-writer
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

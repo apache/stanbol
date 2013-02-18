@@ -510,7 +510,7 @@
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.viewable.ldpath</artifactId>
+      <artifactId>org.apache.stanbol.commons.web.rdfviewable.writer</artifactId>
       <version>0.12.0-SNAPSHOT</version>
     </bundle>
     <bundle>
