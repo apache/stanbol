@@ -28,8 +28,10 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.SKO
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LAT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LONG;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
@@ -94,9 +96,9 @@ import org.apache.stanbol.enhancer.servicesapi.helper.execution.ChainExecution;
 import org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.CONFIDENCE_LEVEL_ENUM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 public class ContentItemResource extends BaseStanbolResource {
 
@@ -136,8 +138,8 @@ public class ContentItemResource extends BaseStanbolResource {
      * {@link Properties#ENHANCER_SELECTED_TEXT}.
      * This map is initialised by {@link #initOccurrences()}.
      */
-    protected Map<UriRef,Map<String,EntityExtractionSummary>> extractionsByTypeMap = 
-        new HashMap<UriRef,Map<String,EntityExtractionSummary>>();
+    protected Map<UriRef,Map<EntityExtractionSummary,EntityExtractionSummary>> extractionsByTypeMap = 
+        new HashMap<UriRef,Map<EntityExtractionSummary,EntityExtractionSummary>>();
 
     private MGraph executionMetadata;
 
@@ -247,7 +249,7 @@ public class ContentItemResource extends BaseStanbolResource {
      * Checks if there are Occurrences
      */
     public boolean hasOccurrences(){
-        for(Map<String,EntityExtractionSummary> occ : extractionsByTypeMap.values()){
+        for(Map<EntityExtractionSummary,EntityExtractionSummary> occ : extractionsByTypeMap.values()){
             if(!occ.isEmpty()){
                 return true;
             }
@@ -278,7 +280,7 @@ public class ContentItemResource extends BaseStanbolResource {
         }
     }
     public Collection<EntityExtractionSummary> getOccurrences(UriRef type){
-        Map<String,EntityExtractionSummary> typeMap = extractionsByTypeMap.get(type);
+        Map<EntityExtractionSummary,EntityExtractionSummary> typeMap = extractionsByTypeMap.get(type);
         Collection<EntityExtractionSummary> typeOccurrences;
         if(typeMap != null){
             typeOccurrences = typeMap.values();
@@ -343,31 +345,33 @@ public class ContentItemResource extends BaseStanbolResource {
         Iterator<Triple> textAnnotations = graph.filter(null, RDF.type, ENHANCER_TEXTANNOTATION);
         while(textAnnotations.hasNext()){
             NonLiteral textAnnotation = textAnnotations.next().getSubject();
-            if (graph.filter(textAnnotation, DC_RELATION, null).hasNext()) {
-                // this is not the most specific occurrence of this name: skip
-                continue;
-            }
+            //if (graph.filter(textAnnotation, DC_RELATION, null).hasNext()) {
+            //    // this is not the most specific occurrence of this name: skip
+            //    continue;
+            //}
             String text = getString(graph, textAnnotation, Properties.ENHANCER_SELECTED_TEXT);
             if(text == null){
                 //ignore text annotations without text
                 continue;
             }
+            Integer start = EnhancementEngineHelper.get(graph,textAnnotation, 
+                ENHANCER_START,Integer.class,lf);
+            Integer end = EnhancementEngineHelper.get(graph,textAnnotation, 
+                ENHANCER_END,Integer.class,lf);
+            Double confidence = EnhancementEngineHelper.get(graph, textAnnotation, 
+                ENHANCER_CONFIDENCE, Double.class, lf);
             Iterator<UriRef> types = getReferences(graph, textAnnotation, DC_TYPE);
             if(!types.hasNext()){ //create an iterator over null in case no types are present
                 types = Collections.singleton((UriRef)null).iterator();
             }
             while(types.hasNext()){
                 UriRef type = types.next();
-                Map<String,EntityExtractionSummary> occurrenceMap = extractionsByTypeMap.get(type);
+                Map<EntityExtractionSummary,EntityExtractionSummary> occurrenceMap = extractionsByTypeMap.get(type);
                 if(occurrenceMap == null){
-                    occurrenceMap = new TreeMap<String,EntityExtractionSummary>(String.CASE_INSENSITIVE_ORDER);
+                    occurrenceMap = new TreeMap<EntityExtractionSummary,EntityExtractionSummary>();
                     extractionsByTypeMap.put(type, occurrenceMap);
                 }
-                EntityExtractionSummary entity = occurrenceMap.get(text);
-                if(entity == null){
-                    entity = new EntityExtractionSummary(text, type, defaultThumbnails);
-                    occurrenceMap.put(text, entity);
-                }
+                EntityExtractionSummary entity = new EntityExtractionSummary(text, type, start,end,confidence,defaultThumbnails);
                 Collection<NonLiteral> suggestions = suggestionMap.get(textAnnotation);
                 if(suggestions != null){
                     for(NonLiteral entityAnnotation : suggestions){
@@ -379,10 +383,106 @@ public class ContentItemResource extends BaseStanbolResource {
                             graph);
                     }
                 }
+                EntityExtractionSummary existingSummary = occurrenceMap.get(entity);
+                if(existingSummary == null){//new extraction summary
+                    occurrenceMap.put(entity, entity);
+                } else {
+                    //extraction summary with this text and suggestions already
+                    //present ... only add a mention to the existing
+                    existingSummary.addMention(new Mention(text, start, end, confidence));
+                }
             }
         }
     }
+    /**
+     * Mentions of {@link EntityExtractionSummary EntityExtractionSummaries}. 
+     * @author Rupert Westenthaler
+     *
+     */
+    public static class Mention implements Comparable<Mention>{
+        private String name;
+        private Integer start;
+        private Integer end;
+        private Double conf;
 
+        Mention(String name,Integer start, Integer end, Double confidence){
+            if(name == null){
+                throw new IllegalStateException("The name for a Mention MUST NOT be NULL!");
+            }
+            this.name = name;
+            this.start = start;
+            this.end = end;
+            this.conf = confidence;
+        }
+        
+        public String getName() {
+            return name;
+        }
+        public Integer getStart() {
+            return start;
+        }
+        public Integer getEnd() {
+            return end;
+        }
+        public Double getConfidence() {
+            return conf;
+        }
+        public boolean hasOccurrence() {
+            return start != null && end != null;
+        }
+        public boolean hasConfidence(){
+            return conf != null;
+        }
+        @Override
+        public int hashCode() {
+            return name.hashCode() + 
+                    (start != null ? start.hashCode() : 0) +
+                    (end != null ? end.hashCode() : 0);
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if(obj instanceof Mention){
+                Mention o = (Mention)obj;
+                if(o.name.equals(name)){
+                    if((o.start != null && o.start.equals(start)) ||
+                            (o.start == null && start == null)){
+                        if(o.end != null && o.end.equals(end)){
+                            return true;
+                        } else {
+                            return o.end == null && end == null;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        
+        @Override
+        public int compareTo(Mention o) {
+            int c = String.CASE_INSENSITIVE_ORDER.compare(o.name, this.name);
+            if(c == 0){
+                if(start != null && o.start != null){
+                    c = start.compareTo(o.start);
+                } else if(o.start != null){
+                    c = 1;
+                } else if(start != null){
+                    c = -1;
+                }
+                if(c == 0){
+                    if(o.end != null && end != null){
+                        c = end.compareTo(o.end);
+                    } else if(o.end != null){
+                        c = -1;
+                    } else if(end != null){
+                        c = 1;
+                    }
+                }
+            }
+            return c;
+        }
+    }
+    
     public ChainExecution getChainExecution(){
         return chainExecution;
     }
@@ -439,27 +539,47 @@ public class ContentItemResource extends BaseStanbolResource {
 
         protected final String name;
 
+        
         protected final UriRef type;
 
         protected List<EntitySuggestion> suggestions = new ArrayList<EntitySuggestion>();
+        protected Set<UriRef> suggestionSet = new HashSet<UriRef>();
 
-        protected List<String> mentions = new ArrayList<String>();
+        protected List<Mention> mentions = new ArrayList<Mention>();
 
         public final Map<UriRef,String> defaultThumbnails;
 
-        public EntityExtractionSummary(String name, UriRef type, Map<UriRef,String> defaultThumbnails) {
+
+        private Integer start;
+
+        private Integer end;
+
+
+        private Double confidence;
+
+        public EntityExtractionSummary(String name, UriRef type, Integer start, Integer end, Double confidence, Map<UriRef,String> defaultThumbnails) {
             this.name = name;
             this.type = type;
-            mentions.add(name);
+            mentions.add(new Mention(name, start, end, confidence));
             this.defaultThumbnails = defaultThumbnails;
+            this.start = start;
+            this.end = end;
+            this.confidence = confidence;
         }
 
         public void addSuggestion(UriRef uri, String label, Double confidence, TripleCollection properties) {
             EntitySuggestion suggestion = new EntitySuggestion(uri, type, label, confidence, properties,
                     defaultThumbnails);
+            suggestionSet.add(uri);
             if (!suggestions.contains(suggestion)) {
                 suggestions.add(suggestion);
                 Collections.sort(suggestions);
+            }
+        }
+        public void addMention(Mention mention){
+            if(!mentions.contains(mention)){
+                mentions.add(mention);
+                Collections.sort(mentions);
             }
         }
 
@@ -470,13 +590,22 @@ public class ContentItemResource extends BaseStanbolResource {
             }
             return name;
         }
-
+        public String getSelected(){
+            return name;
+        }
         public String getUri() {
             EntitySuggestion bestGuess = getBestGuess();
             if (bestGuess != null) {
                 return bestGuess.getUri();
             }
             return null;
+        }
+        public Double getConfidence(){
+            EntitySuggestion bestGuess = getBestGuess();
+            if (bestGuess != null) {
+                return bestGuess.getConfidence();
+            }
+            return confidence;
         }
 
         public String getSummary() {
@@ -485,7 +614,15 @@ public class ContentItemResource extends BaseStanbolResource {
             }
             return suggestions.get(0).getSummary();
         }
-
+        public Integer getStart() {
+            return start;
+        }
+        public Integer getEnd() {
+            return end;
+        }
+        public boolean hasOccurrence(){
+            return start != null && end != null;
+        }
         public String getThumbnailSrc() {
             if (suggestions.isEmpty()) {
                 return getMissingThumbnailSrc();
@@ -507,18 +644,41 @@ public class ContentItemResource extends BaseStanbolResource {
             }
             return suggestions.get(0);
         }
-
+        
         public List<EntitySuggestion> getSuggestions() {
             return suggestions;
         }
 
-        public List<String> getMentions() {
+        public List<Mention> getMentions() {
             return mentions;
         }
 
         @Override
         public int compareTo(EntityExtractionSummary o) {
-            return getName().compareTo(o.getName());
+            int c = String.CASE_INSENSITIVE_ORDER.compare(getName(),o.getName());
+            if(c == 0){
+                if(suggestionSet.equals(o.suggestionSet)){
+                    return 0; //assume as equals if name and suggestionSet is the same
+                } else { //sort by mention
+                    if(start != null && o.start != null){
+                        c = start.compareTo(o.start);
+                    } else if(o.start != null){
+                        c = 1;
+                    } else if(start != null){
+                        c = -1;
+                    }
+                    if(c == 0){
+                        if(o.end != null && end != null){
+                            c = end.compareTo(o.end);
+                        } else if(o.end != null){
+                            c = -1;
+                        } else if(end != null){
+                            c = 1;
+                        }
+                    }
+                }
+            }
+            return c;
         }
 
         @Override
@@ -529,10 +689,14 @@ public class ContentItemResource extends BaseStanbolResource {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-
             EntityExtractionSummary that = (EntityExtractionSummary) o;
-
-            return !(name != null ? !name.equals(that.name) : that.name != null);
+            //if name and suggestions are the same ... consider as equals
+            if(getName().equalsIgnoreCase(getName())){
+                return suggestionSet.equals(that.suggestionSet);
+            } else {
+                return false;
+            }
+            //return !(name != null ? !name.equals(that.name) : that.name != null);
         }
 
         @Override
