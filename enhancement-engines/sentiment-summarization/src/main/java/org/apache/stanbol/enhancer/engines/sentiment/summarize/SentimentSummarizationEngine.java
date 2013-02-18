@@ -18,8 +18,6 @@ package org.apache.stanbol.enhancer.engines.sentiment.summarize;
 
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.PHRASE_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.SENTIMENT_ANNOTATION;
-import static org.apache.stanbol.enhancer.servicesapi.ServiceProperties.ENHANCEMENT_ENGINE_ORDERING;
-import static org.apache.stanbol.enhancer.servicesapi.ServiceProperties.ORDERING_EXTRACTION_ENHANCEMENT;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.createTextEnhancement;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
@@ -35,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.clerezza.rdf.core.Language;
@@ -50,6 +49,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Section;
 import org.apache.stanbol.enhancer.nlp.model.Span;
@@ -58,6 +58,8 @@ import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
+import org.apache.stanbol.enhancer.nlp.pos.Pos;
+import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.apache.stanbol.enhancer.nlp.utils.NIFHelper;
 import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -91,6 +93,17 @@ import org.slf4j.LoggerFactory;
 public class SentimentSummarizationEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
+
+    
+    private static final EnumSet<Pos> DEFAULT_NEGATION_TAGS = EnumSet.of(
+        Pos.NegativeAdverb,Pos.NegativeDeterminer, Pos.NegativeParticle,
+        Pos.NegativePronoun);
+    
+    private static final EnumSet<LexicalCategory> DEFAULT_COUNT_LEXICAL_CATEGORIES = EnumSet.of(
+        LexicalCategory.Noun,LexicalCategory.Verb,LexicalCategory.Adjective);
+    
+    
+    private static final Double ZERO = Double.valueOf(0.0);
     
     public static final String DEFAULT_ENGINE_NAME = "sentiment-summarization";
     
@@ -111,13 +124,26 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
      * The dc:type value used for fise:TextAnnotations indicating a Sentiment
      */
     public static final UriRef SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"Sentiment");
+
+
+    private static final int DEFAULT_NEGATION_CONTEXT = 2;
+
+
+    private static final int DEFAULT_NOUN_CONTET = 2;
     boolean writeNounPhraseSentiments = true;
     boolean writeSentenceSentimets = true;
     boolean writeTextSectionSentiments = true;
     boolean wirteDocumentSentiments = true;
     boolean writeTextSentiments = true;
     
+    private EnumSet<Pos> negativePosTags = DEFAULT_NEGATION_TAGS;
+    private EnumSet<LexicalCategory> countableLexCats = DEFAULT_COUNT_LEXICAL_CATEGORIES;
+    
     private final LiteralFactory lf = LiteralFactory.getInstance();
+
+
+    private int negationContext = DEFAULT_NEGATION_CONTEXT;
+    private int nounContext = DEFAULT_NOUN_CONTET;
     
     @Override
     @Activate
@@ -134,12 +160,14 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
     
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
-        return NlpEngineHelper.getAnalysedText(this, ci, false) != null ?
+        return NlpEngineHelper.getAnalysedText(this, ci, false) != null &&
+                NlpEngineHelper.getLanguage(this, ci, false) != null ?
                ENHANCE_ASYNC : CANNOT_ENHANCE; 
     }
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
+        String language = NlpEngineHelper.getLanguage(this, ci, true);
         AnalysedText at = NlpEngineHelper.getAnalysedText(this, ci, true);
         //configure the spanTypes based on the configuration
         EnumSet<Span.SpanTypeEnum> spanTypes = EnumSet.noneOf(SpanTypeEnum.class);
@@ -156,7 +184,7 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
             spanTypes.add(SpanTypeEnum.Text);
         }
         
-        List<SentimentInfo> sentimentInfos = summarizeSentiments(at, spanTypes);
+        List<SentimentInfo> sentimentInfos = summarizeSentiments(at, spanTypes, language);
         String detectedLang = EnhancementEngineHelper.getLanguage(ci);
         ci.getLock().writeLock().lock();
         try {
@@ -176,28 +204,36 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
      * @param at
      * @return
      */
-    private List<SentimentInfo> summarizeSentiments(AnalysedText at, EnumSet<SpanTypeEnum> spanTypes) {
+    private List<SentimentInfo> summarizeSentiments(AnalysedText at, EnumSet<SpanTypeEnum> spanTypes, String language) {
         spanTypes.add(SpanTypeEnum.Token);
         Iterator<Span> tokenIt = at.getEnclosed(spanTypes);
-        // use double array of length 1 as value to avoid final double values
         //List with the section that contain sentiments
         List<SentimentInfo> sentimentInfos = new ArrayList<SentimentInfo>();
         NavigableMap<Span,SentimentInfo> activeSpans = new TreeMap<Span,SentimentInfo>();
         if(spanTypes.contains(SpanTypeEnum.Text)){
             activeSpans.put(at, new SentimentInfo(at));
         }
+//        int index = -1;
+        List<Sentiment> sentimentTokens = new ArrayList<Sentiment>(32);
+        SortedMap<Integer,Token> negations = new TreeMap<Integer,Token>();
+        SortedMap<Integer,Token> nouns = new TreeMap<Integer,Token>();
+        boolean firstTokenInSentence = true;
         while(tokenIt.hasNext()){
             Span span = tokenIt.next();
             switch (span.getType()) {
                 case Token:
-                    Value<Double> sentiment = span.getAnnotation(SENTIMENT_ANNOTATION);
+                    Token word = (Token)span;
+                    Value<Double> sentimentAnnotation = span.getAnnotation(SENTIMENT_ANNOTATION);
                     Iterator<Entry<Span,SentimentInfo>> entries = activeSpans.entrySet().iterator();
-                    if(sentiment != null){
+                    if(sentimentAnnotation != null && sentimentAnnotation.value() != null &&
+                            !sentimentAnnotation.value().equals(ZERO)){
+                        Sentiment sentiment = new Sentiment(word, sentimentAnnotation.value());
+                        sentimentTokens.add(sentiment); //add the token
                         while(entries.hasNext()){
                             Entry<Span,SentimentInfo> entry = entries.next();
                             //if(span.getEnd() > entry.getKey().getEnd()){ //fully enclosed
                             if(entry.getKey().getEnd() > span.getStart()){ //partly enclosed
-                                entry.getValue().addSentiment(sentiment.value());
+                                entry.getValue().addSentiment(sentiment);
                             } else { // span has completed
                                 if(entry.getValue().hasSentiment()){ //if a sentiment was found
                                     //add it to the list
@@ -206,16 +242,45 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                                 entries.remove(); // remove completed
                             }
                         }
+                    } else if(isNegation((Token)span, language)){
+                        sentimentTokens.add(null); //count negations
+                        negations.put(sentimentTokens.size()-1, word);
+                    } else if(isNoun(word, firstTokenInSentence, language)){
+                        sentimentTokens.add(null); //count nouns
+                        nouns.put(sentimentTokens.size()-1, word);
+                    } else if(isCountable(word, language)){ //no sentiment tag
+                        sentimentTokens.add(null); //to keep distances for context
                     }
+                    firstTokenInSentence = false;
                     break;
                 case Chunk:
                     Value<PhraseTag> phraseTag = span.getAnnotation(PHRASE_ANNOTATION);
-                    if(phraseTag.value().getCategory() == LexicalCategory.Noun){
+                    //for Noun Phrases or detected Named Entities
+                    if(phraseTag.value().getCategory() == LexicalCategory.Noun ||
+                            span.getAnnotation(NlpAnnotations.NER_ANNOTATION) != null){
                         //noun phrase
                         activeSpans.put(span, new SentimentInfo((Section)span));
                     }
                     break;
                 case Sentence:
+                    //cleanup the previous sentence
+                    for(int index = 0; index < sentimentTokens.size(); index++){
+                        Sentiment sentiment = sentimentTokens.get(index);
+                        if(sentiment != null){
+                            for(Token negationToken : negations.subMap(index-negationContext , index+negationContext)
+                                    .values()){
+                                sentiment.negate(negationToken);
+                            }
+                            for(Token noun : nouns.subMap(index-nounContext , index+nounContext)
+                                    .values()){
+                                sentiment.noun(noun);
+                            }
+                        }
+                    }
+                    negations.clear();
+                    nouns.clear();
+                    sentimentTokens.clear();
+                    firstTokenInSentence = true;
                     activeSpans.put(span, new SentimentInfo((Section)span));
                     break;
                 case TextSection:
@@ -231,13 +296,89 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                 sentimentInfos.add(sentInfo);
             } //else no sentiment in that section
         }
+        //write related tokens to sentiments for the last sentence
+        for(int index = 0; index < sentimentTokens.size(); index++){
+            Sentiment sentiment = sentimentTokens.get(index);
+            if(sentiment != null){
+                for(Token negationToken : negations.subMap(index-negationContext , index+negationContext)
+                        .values()){
+                    sentiment.negate(negationToken);
+                }
+                for(Token noun : nouns.subMap(index-nounContext , index+nounContext)
+                        .values()){
+                    sentiment.noun(noun);
+                }
+            }
+        }
         return sentimentInfos;
     }
 
+    /**
+     * Checks if the parsed {@link Token} represents an negation
+     * @param token the word
+     * @param language the language
+     * @return <code>true</code> if the {@link Token} represents a negation.
+     * Otherwise <code>false</code>
+     */
+    private boolean isNegation(Token token, String language) {
+        Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
+        if(posAnnotation != null && !Collections.disjoint(negativePosTags, posAnnotation.value().getPos())){
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Checks if the parsed {@link Token} represents an negation
+     * @param token the word
+     * @param index the index of the token relative to the sentence | section
+     * @param language the language
+     * @return <code>true</code> if the {@link Token} represents a negation.
+     * Otherwise <code>false</code>
+     */
+    private boolean isNoun(Token token, boolean firstTokenInSentence, String language) {
+        String word = token.getSpan();
+        if(!firstTokenInSentence && !word.isEmpty() && Character.isUpperCase(word.charAt(0))){
+            return true; //assume all upper case tokens are Nouns
+        }
+        Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
+        if(posAnnotation != null && posAnnotation.value().hasCategory(LexicalCategory.Noun)){
+            return true;
+        }
+        return false;
+    }
+    /**
+     * If the current Token should be considered for counting distances to
+     * negations and nouns
+     * @param token
+     * @param language
+     * @return
+     */
+    private boolean isCountable(Token token, String language){
+        Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
+        if(posAnnotation != null && !Collections.disjoint(countableLexCats, posAnnotation.value().getCategories())){
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    
     private void writeSentimentEnhancements(ContentItem ci, List<SentimentInfo> sentimentInfos, AnalysedText at, Language lang) {
         // TODO Auto-generated method stub
         MGraph metadata = ci.getMetadata();
         for(SentimentInfo sentInfo : sentimentInfos){
+            if(log.isDebugEnabled()){ //debug sentiment info
+                String spanText = sentInfo.getSection().getSpan();
+                log.debug("Write Sentiments for {} (text: {})",sentInfo.getSection(),
+                    spanText.length() > 17 ? (spanText.subSequence(0,17) + "...") : spanText);
+                List<Sentiment> sentiments = sentInfo.getSentiments();
+                log.debug(" > {} Sentiments:",sentiments.size());
+                for(int i = 0; i < sentiments.size(); i++){
+                    log.debug("    {}. {}",i+1,sentiments.get(i));
+                }
+            }
             UriRef enh = createTextEnhancement(ci, this);
             if(sentInfo.getSection().getType() == SpanTypeEnum.Chunk) {
                 metadata.add(new TripleImpl(enh, ENHANCER_SELECTED_TEXT, 
