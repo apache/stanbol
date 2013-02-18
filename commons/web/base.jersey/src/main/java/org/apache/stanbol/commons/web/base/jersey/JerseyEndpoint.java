@@ -70,6 +70,9 @@ import org.apache.stanbol.commons.web.base.WebFragment;
     @Reference(name="component", referenceInterface=Object.class, 
         target="(javax.ws.rs=true)", 
 		cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE, 
+        policy=ReferencePolicy.DYNAMIC),
+    @Reference(name="navigationLink", referenceInterface=NavigationLink.class, 
+		cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE, 
         policy=ReferencePolicy.DYNAMIC)})
 public class JerseyEndpoint {
 
@@ -105,6 +108,7 @@ public class JerseyEndpoint {
 
     protected Set<String> exposedHeaders;
     private Set<Object> components = new HashSet<Object>();
+    private List<NavigationLink> navigationLinks = new ArrayList<NavigationLink>();
 
     public Dictionary<String,String> getInitParams() {
         Dictionary<String,String> initParams = new Hashtable<String,String>();
@@ -183,11 +187,11 @@ public class JerseyEndpoint {
         // incrementally contribute fragment resources
         List<LinkResource> linkResources = new ArrayList<LinkResource>();
         List<ScriptResource> scriptResources = new ArrayList<ScriptResource>();
-        List<NavigationLink> navigationLinks = new ArrayList<NavigationLink>();
         for (WebFragment fragment : webFragments) {
             log.debug("Registering web fragment '{}' into jaxrs application", fragment.getName());
             linkResources.addAll(fragment.getLinkResources());
             scriptResources.addAll(fragment.getScriptResources());
+            navigationLinks.removeAll(fragment.getNavigationLinks());
             navigationLinks.addAll(fragment.getNavigationLinks());
             app.contributeClasses(fragment.getJaxrsResourceClasses());
             app.contributeSingletons(fragment.getJaxrsResourceSingletons());
@@ -262,6 +266,14 @@ public class JerseyEndpoint {
         components.remove(component);
         initJersey();
     }    
+    
+    protected void bindNavigationLink(NavigationLink navigationLink) {
+        navigationLinks.add(navigationLink);
+    }
+    
+    protected void unbindNavigationLink(NavigationLink navigationLink) {
+        navigationLinks.remove(navigationLink);
+    }
     
     public List<WebFragment> getWebFragments() {
         return webFragments;
