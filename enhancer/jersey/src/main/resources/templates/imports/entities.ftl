@@ -31,6 +31,12 @@
     <#else>
     ${entity.name}
     </#if>
+    <br><span class="metadata">
+    <#if entity.name != entity.selected>for:'${entity.selected}',</#if>
+    <#if entity.mentions?size &gt; 1>${entity.mentions?size} mentions
+    <#else>
+      <#if entity.hasOccurrence()>pos:[${entity.start},${entity.end}]</#if></#if>,
+     conf:${entity.confidence?string("0.##")}</span>
   </th>
 </tr>
 </thead>
@@ -44,7 +50,9 @@
 <tr>
   <td class="thumb"><img src="${suggestion.thumbnailSrc}"
     onerror="$(this).attr('src', '${suggestion.missingThumbnailSrc}');" alt="${suggestion.label}" /></td>
-  <td><a href="${suggestion.uri}" title="${suggestion.summary}" class="external">${suggestion.label}</a></td>
+  <td><a href="${suggestion.uri}" title="${suggestion.summary}" class="external">
+  	${suggestion.label}</a><br>
+  	<span class="metadata">conf:${suggestion.confidence?string("0.##")}</span></td>
 </tr>
 </#list>
 <#if entity.mentions?size != 0>
@@ -55,7 +63,12 @@
 <#list entity.mentions as mention>
 <tr>
   <td></td>
-  <td>${mention}</td>
+  <td>${mention.name}<br><span class="metadata">
+  <#if mention.hasOccurrence()>
+    pos:[${mention.start},${mention.end}]
+   </#if>
+   <#if mention.hasConfidence()>
+    , conf: ${mention.confidence}</#if></span></td>
 </tr>
 </#list>
 </tbody>
