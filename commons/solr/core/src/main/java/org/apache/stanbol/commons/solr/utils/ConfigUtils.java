@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -385,7 +386,7 @@ public final class ConfigUtils {
      * @return the file representing the resource within the target directory. In cases the context can not be
      *         found in the parsed resource this method returns <code>null</code>
      */
-    private static File prepairCopy(String resource, File targetDir, String context) {
+    private static File prepairCopy(String resource, File targetDir, String context) throws IOException {
         context = FilenameUtils.separatorsToSystem(context);
         if (!(context.charAt(context.length() - 1) == File.separatorChar)) {
             context = context + File.separatorChar;
@@ -399,16 +400,17 @@ public final class ConfigUtils {
             return null;
         }
         String relativePath = resource.substring(contextPos);
-        String[] relativePathElements = relativePath.split(File.separator);
-        File parentElement = targetDir;
-        for (int i = 0; i < relativePathElements.length - 1; i++) {
-            File pathElement = new File(parentElement, relativePathElements[i]);
-            if (!pathElement.exists()) {
-                pathElement.mkdir();
-            }
-            parentElement = pathElement;
+        String path = FilenameUtils.getPath(relativePath);
+        File directory;
+        if(!path.isEmpty()){
+            directory = new File(targetDir, path);
+        } else {
+            directory = targetDir;
         }
-        File file = new File(parentElement, relativePathElements[relativePathElements.length - 1]);
+        if(!directory.exists()){ //in case this is a new directory
+            FileUtils.forceMkdir(directory); // create it!
+        }
+        File file = new File(directory, FilenameUtils.getName(relativePath));
         return file;
     }
 
