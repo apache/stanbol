@@ -84,6 +84,9 @@
     <module>sentiment-wordclassifier</module>
     <module>sentiment-summarization</module>
 
+    <!-- Disambiguation -->
+    <module>disambiguation-mlt</module>
+    
     <!-- UIMA based engines -->
     <module>uima</module>
     
@@ -93,6 +96,7 @@
     <module>geonames</module> <!-- http://geonames.org -->
     <module>opencalais</module> <!-- http://opencalais.com/ -->
     <module>zemanta</module> <!-- htt://zemanta.com -->
+  
   </modules>
 
   <build>
