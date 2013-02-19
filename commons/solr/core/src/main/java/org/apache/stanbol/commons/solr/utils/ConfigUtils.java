@@ -386,6 +386,7 @@ public final class ConfigUtils {
      *         found in the parsed resource this method returns <code>null</code>
      */
     private static File prepairCopy(String resource, File targetDir, String context) {
+        context = FilenameUtils.separatorsToSystem(context);
         if (!(context.charAt(context.length() - 1) == File.separatorChar)) {
             context = context + File.separatorChar;
         }
