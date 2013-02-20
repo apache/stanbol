@@ -47,6 +47,7 @@ import java.util.regex.Pattern;
 
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Resource;
@@ -93,6 +94,8 @@ public class TikaEngineTest {
     public static void setUpServices() throws IOException {
         context = new MockComponentContext();
         context.properties.put(TikaEngine.PROPERTY_NAME, "tika");
+        //to test unmapped properties
+        context.properties.put(TikaEngine.UNMAPPED_PROPERTIES, "true");
     }
 
     @Before
@@ -488,6 +491,24 @@ public class TikaEngineTest {
         verifyValue(ci, new UriRef(NamespaceEnum.dc+"created"),XSD.dateTime,"2009-08-11T09:09:45");
         verifyValue(ci, new UriRef(NamespaceEnum.dc+"modified"),XSD.dateTime,"2009-10-02T23:02:49");
         verifyValues(ci, new UriRef(NamespaceEnum.dc+"subject"), null, "serbor","moscow-birds","canon-55-250");
+    }
+    
+    /**
+     * Tests unmapped properties as added by <a href="https://issues.apache.org/jira/browse/STANBOL-947">
+     * STANBOL-947</a>
+     * @throws EngineException
+     * @throws IOException
+     * @throws ParseException 
+     */
+    @Test
+    public void testUnmappedProperties() throws EngineException, IOException, ParseException {
+        log.info(">>> testUnmappedProperties <<<");
+        //reuses the image with EXIF metadata
+        ContentItem ci = createContentItem("testMP4.m4a", "audio/mp4");
+        assertFalse(engine.canEnhance(ci) == CANNOT_ENHANCE);
+        engine.computeEnhancements(ci);
+        //test that the "xmpDM:logComment" is present
+        verifyValue(ci, new UriRef("urn:tika.apache.org:tika:xmpDM:logComment"), null,"Test Comments");
     }
     
     @Test

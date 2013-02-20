@@ -39,10 +39,14 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -63,6 +67,7 @@ import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AutoDetectParser;
@@ -96,7 +101,8 @@ import org.xml.sax.SAXException;
     @Property(name=TikaEngine.MAPPING_NEPOMUK_EXIF,boolValue=TikaEngine.DEFAULT_MAPPING_NEPOMUK_EXIF_STATE),
     @Property(name=TikaEngine.MAPPING_SKOS,boolValue=TikaEngine.DEFAULT_MAPPING_SKOS_STATE),
     @Property(name=TikaEngine.MAPPING_RDFS,boolValue=TikaEngine.DEFAULT_MAPPING_RDFS_STATE),
-    @Property(name=TikaEngine.MAPPING_GEO,boolValue=TikaEngine.DEFAULT_MAPPING_GEO_STATE)
+    @Property(name=TikaEngine.MAPPING_GEO,boolValue=TikaEngine.DEFAULT_MAPPING_GEO_STATE),
+    @Property(name=TikaEngine.UNMAPPED_PROPERTIES,boolValue=TikaEngine.DEFAULT_UNMAPPED_PROPERTIES_STATE)
 })
 public class TikaEngine 
         extends AbstractEnhancementEngine<RuntimeException,RuntimeException> 
@@ -120,9 +126,17 @@ public class TikaEngine
     public static final String MAPPING_GEO = "stanbol.engine.tika.mapping.geo";
     public static final boolean DEFAULT_MAPPING_GEO_STATE = true;
     
+    public static final String UNMAPPED_PROPERTIES = "stanbol.engine.tika.mapping.unmapped";
+    public static final boolean DEFAULT_UNMAPPED_PROPERTIES_STATE = false;
+    
     public static final boolean DEFAULT_SKIP_LINEBREAKS = false;
     
     private boolean skipLinebreaks = DEFAULT_SKIP_LINEBREAKS;
+    
+    /**
+     * This prefix is used as prefix for Tika properties to ensure valid URN. 
+     */
+    public static final String TIKA_URN_PREFIX = "urn:tika.apache.org:tika:";
     /**
      * The default value for the Execution of this Engine. Currently set to
      * {@link ServiceProperties#ORDERING_PRE_PROCESSING}
@@ -142,6 +156,18 @@ public class TikaEngine
      */
     @Reference
     private ContentItemFactory ciFactory;
+
+    /**
+     * If <code>true</code> unmapped properties are added by using
+     * <code>urn:tika.apache.org:tika:{property-name}</code> to the URI of the
+     * contentItem.
+     */
+    private boolean includeUnmappedProperties;
+    
+    /**
+     * Include also properties without a namespace. Currently those are ignored
+     */
+    private boolean includeAllUnmappedProperties = false;
     
     private static class MediaTypeAndStream {
         String uri;
@@ -261,7 +287,23 @@ public class TikaEngine
             }
             ci.getLock().writeLock().lock();
             try {
-                ontologyMappings.apply(ci.getMetadata(), ci.getUri(), metadata);
+                MGraph graph = ci.getMetadata();
+                UriRef id = ci.getUri();
+                Set<String> mapped = ontologyMappings.apply(graph, id, metadata);
+                if(includeUnmappedProperties){
+                    Set<String> unmapped = new HashSet<String>(Arrays.asList(metadata.names()));
+                    unmapped.removeAll(mapped);
+                    for(String name : unmapped){
+                        if(name.indexOf(':') >=0 || includeAllUnmappedProperties){ //only mapped
+                            UriRef prop = new UriRef(new StringBuilder(TIKA_URN_PREFIX).append(name).toString());
+                            for(String value : metadata.getValues(name)){
+                                //TODO: without the Property for the name we have no datatype
+                                //      information ... so we add PlainLiterals for now
+                                graph.add(new TripleImpl(id, prop, new PlainLiteralImpl(value)));
+                            }
+                        }
+                    }
+                }
             }finally{
                 ci.getLock().writeLock().unlock();
             }
@@ -351,6 +393,8 @@ public class TikaEngine
             MAPPING_GEO, DEFAULT_MAPPING_GEO_STATE)){
             addGeoMappings(ontologyMappings);
         }
+        includeUnmappedProperties = getBoolean(ctx.getProperties(), 
+            UNMAPPED_PROPERTIES, DEFAULT_UNMAPPED_PROPERTIES_STATE);
     }
     @Override
     protected void deactivate(ComponentContext ctx) throws RuntimeException {

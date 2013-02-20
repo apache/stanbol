@@ -45,8 +45,12 @@ import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Message;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.Office;
+import org.apache.tika.metadata.OfficeOpenXMLCore;
+import org.apache.tika.metadata.OfficeOpenXMLExtended;
 import org.apache.tika.metadata.TIFF;
 import org.apache.tika.metadata.XMPDM;
+import org.apache.tika.parser.opendocument.OpenOfficeParser;
 
 /**
  * Defines mappings for keys used by Apache Tika in the {@link Metadata} to
@@ -165,12 +169,12 @@ public class OntologyMappings implements Iterable<Mapping>{
         String dc = NamespaceEnum.dc.getNamespace();
         mappings.addMapping(
             new PropertyMapping(dc+"contributor",
-                DublinCore.CONTRIBUTOR.getName(),MSOffice.LAST_AUTHOR));
+                DublinCore.CONTRIBUTOR.getName(),Office.LAST_AUTHOR.getName()));
         mappings.addMapping(
             new PropertyMapping(dc+"coverage",DublinCore.COVERAGE.getName()));
         mappings.addMappings(
             new PropertyMapping(dc+"creator",
-                DublinCore.CREATOR.getName(),MSOffice.AUTHOR,"initial-creator"));
+                DublinCore.CREATOR.getName(),Office.AUTHOR.getName(),"initial-creator"));
         mappings.addMappings( 
             new PropertyMapping(dc+"description",DublinCore.DESCRIPTION.getName()));
         mappings.addMappings( 
@@ -195,17 +199,22 @@ public class OntologyMappings implements Iterable<Mapping>{
             new PropertyMapping(dc+"source",DublinCore.SOURCE.getName()));
         mappings.addMappings( 
             new PropertyMapping(dc+"subject",
-                DublinCore.SUBJECT.getName(),MSOffice.KEYWORDS));
+                DublinCore.SUBJECT.getName(),Office.KEYWORDS.getName()));
         mappings.addMappings( 
             new PropertyMapping(dc+"title",DublinCore.TITLE.getName()));
         mappings.addMappings( 
             new PropertyMapping(dc+"type",DublinCore.TYPE.getName()));
         mappings.addMappings( 
             new PropertyMapping(dc+"date",XSD.dateTime,DublinCore.DATE.getName()));
-        //MS Office -> DC
         mappings.addMappings(
-            new PropertyMapping(NamespaceEnum.dc+"created",XSD.dateTime,
-                MSOffice.CREATION_DATE.getName(),"created"));
+            new PropertyMapping(dc+"created",XSD.dateTime,
+                DublinCore.CREATED.getName(),"created"));
+        //MS Office -> DC
+        mappings.addMappings( 
+            new PropertyMapping(dc+"title",OfficeOpenXMLCore.SUBJECT.getName()));
+        mappings.addMappings(
+            new PropertyMapping(dc+"created",XSD.dateTime,
+                Office.CREATION_DATE.getName(),"created"));
         
     }
     public static void addMediaResourceOntologyMappings(OntologyMappings mappings){
@@ -464,14 +473,25 @@ public class OntologyMappings implements Iterable<Mapping>{
         this.mappings.remove(property);
     }
     
-    public void apply(MGraph graph, UriRef context, Metadata metadata){
+    /**
+     * Applies the registered Ontology Mappings to the parsed metadata and
+     * context. Mappings are added to the parsed Graph
+     * @param graph
+     * @param context
+     * @param metadata
+     * @return Set containing the names of mapped keys
+     */
+    public Set<String> apply(MGraph graph, UriRef context, Metadata metadata){
         Set<String> keys = new HashSet<String>(Arrays.asList(metadata.names()));
+        Set<String> mappedKeys = new HashSet<String>();
         for(Mapping mapping : this){
             if(mapping.getMappedTikaProperties().isEmpty() ||
                     !disjoint(keys, mapping.getMappedTikaProperties())){
                 mapping.apply(graph, context, metadata);
+                mappedKeys.addAll(mapping.getMappedTikaProperties());
             }
         }
+        return mappedKeys;
     }
     @Override
     public Iterator<Mapping> iterator() {
