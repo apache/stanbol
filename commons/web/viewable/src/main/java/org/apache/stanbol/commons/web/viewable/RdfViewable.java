@@ -19,43 +19,44 @@ package org.apache.stanbol.commons.web.viewable;
 import org.apache.clerezza.rdf.utils.GraphNode;
 
 /**
- * An RdfViewable is a GraphNode associated with a template path. The template 
- * path will be attempted to be resolved based on the accepted target formats
- * to create a representation of the GraphNode. 
+ * An RdfViewable is a GraphNode associated with a rendering specification. The 
+ * rendering specification determines the way the GraphNode is rendered in the 
+ * requested format. The rendering specification is typically a path to a 
+ * template. 
  *
  */
 public class RdfViewable {
 
     /**
      * 
-     * @param templatePath the templatePath
+     * @param renderingSpecification the rendering specification
      * @param graphNode the graphNode with the actual content
      */
-    public RdfViewable(final String templatePath, final GraphNode graphNode) {
-        this.templatePath = templatePath;
+    public RdfViewable(final String renderingSpecification, final GraphNode graphNode) {
+        this.renderingSpecification = renderingSpecification;
         this.graphNode = graphNode;
     }
     
     /**
-     * With this version of the constructor the templatePath is prefixed with
+     * With this version of the constructor the rendering specification is prefixed with
      * the slash-separated package name of the given Class.
      * 
      */
-    public RdfViewable(final String templatePath, final GraphNode graphNode, final Class<?> clazz) {
+    public RdfViewable(final String renderingSpecification, final GraphNode graphNode, final Class<?> clazz) {
         final String slahSeparatedPacakgeName = clazz.getPackage().getName().replace('.', '/');
-        if (templatePath.startsWith("/")) {
-            this.templatePath = slahSeparatedPacakgeName+templatePath;
+        if (renderingSpecification.startsWith("/")) {
+            this.renderingSpecification = slahSeparatedPacakgeName+renderingSpecification;
         } else {
-            this.templatePath = slahSeparatedPacakgeName+'/'+templatePath;
+            this.renderingSpecification = slahSeparatedPacakgeName+'/'+renderingSpecification;
         }
         this.graphNode = graphNode;
     }
     
-    private String templatePath;
+    private String renderingSpecification;
     private GraphNode graphNode;
     
-    public String getTemplatePath() {
-        return templatePath;
+    public String getRenderingSpecification() {
+        return renderingSpecification;
     }
     
     public GraphNode getGraphNode() {

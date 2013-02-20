@@ -30,7 +30,7 @@
   <version>0.12.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Commons Web Template Viewable</name>
+  <name>Apache Stanbol Commons Web Viewable</name>
   <description>A service providing classes and message body writer for response rendering with the viewable pattern.</description>
   <scm>
     <connection>

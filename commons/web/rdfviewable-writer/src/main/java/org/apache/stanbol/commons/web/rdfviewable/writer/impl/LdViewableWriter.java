@@ -70,7 +70,7 @@ public class LdViewableWriter implements MessageBodyWriter<RdfViewable> {
             OutputStream entityStream) throws IOException,
             WebApplicationException {
         Writer out = new OutputStreamWriter(entityStream, "utf-8");
-        ldRenderer.render(t.getGraphNode(), "html/" + t.getTemplatePath(), out);
+        ldRenderer.render(t.getGraphNode(), "html/" + t.getRenderingSpecification(), out);
         out.flush();
     }
 }

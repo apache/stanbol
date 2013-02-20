@@ -104,7 +104,7 @@ public class RdfSerializingWriter implements MessageBodyWriter<RdfViewable> {
             MultivaluedMap<String, Object> httpHeaders,
             OutputStream entityStream) throws IOException, WebApplicationException {
         GraphNode node = v.getGraphNode();
-        GraphNode recipe = getRecipe(v.getTemplatePath());
+        GraphNode recipe = getRecipe(v.getRenderingSpecification());
         serializer.serialize(entityStream, getExpandedContext(node, recipe), mediaType.toString());
     }
 
