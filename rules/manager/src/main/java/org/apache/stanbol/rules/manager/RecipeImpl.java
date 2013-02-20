@@ -17,7 +17,6 @@
 package org.apache.stanbol.rules.manager;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.clerezza.rdf.core.UriRef;
@@ -36,26 +35,25 @@ import com.hp.hpl.jena.rdf.model.Model;
  * @author anuzzolese
  * 
  */
-
 public class RecipeImpl implements Recipe {
 
     private UriRef recipeID;
     private String recipeDescription;
-    private RuleList ruleList;
+    private RuleList ruleList = new RuleList();
 
     /**
-     * 
      * Create a new {@code RecipeImpl} from a set of rule expressed in KReS rule syntax.
-     * 
      * 
      * @param recipeID
      * @param recipeDescription
-     * @param kReSRuleList
+     * @param ruleList
      */
     public RecipeImpl(UriRef recipeID, String recipeDescription, RuleList ruleList) {
         this.recipeID = recipeID;
         this.recipeDescription = recipeDescription;
-        this.ruleList = ruleList;
+        if ( ruleList != null ) {
+          this.ruleList.addAll( ruleList );
+        }
     }
 
     public RuleList getRuleList() {
@@ -97,16 +95,14 @@ public class RecipeImpl implements Recipe {
         StringBuilder sb = new StringBuilder();
         String separator = System.getProperty("line.separator");
         boolean firstLoop = true;
-        if (ruleList != null) {
-            for (Rule rule : ruleList) {
-                if (!firstLoop) {
-                    sb.append(" . ");
-                    sb.append(separator);
-                } else {
-                    firstLoop = false;
-                }
-                sb.append(rule.toString());
+        for (Rule rule : ruleList) {
+            if (!firstLoop) {
+                sb.append(" . ");
+                sb.append(separator);
+            } else {
+                firstLoop = false;
             }
+            sb.append(rule.toString());
         }
 
         return sb.toString();
@@ -114,11 +110,7 @@ public class RecipeImpl implements Recipe {
 
     @Override
     public void addRule(Rule rule) {
-        if (ruleList == null) {
-            ruleList = new RuleList();
-        }
         ruleList.add(rule);
-
     }
 
     @Override
@@ -142,7 +134,6 @@ public class RecipeImpl implements Recipe {
     @Override
     public void removeRule(Rule rule) {
         ruleList.remove(rule);
-
     }
 
     @Override
@@ -165,32 +156,24 @@ public class RecipeImpl implements Recipe {
 
     @Override
     public List<UriRef> listRuleIDs() {
-        if (ruleList != null && !ruleList.isEmpty()) {
-            List<UriRef> ruleIDs = new ArrayList<UriRef>();
+        List<UriRef> ruleIDs = new ArrayList<UriRef>();
 
-            for (Rule rule : ruleList) {
-                ruleIDs.add(rule.getRuleID());
-            }
-
-            return ruleIDs;
-        } else {
-            return Collections.emptyList();
+        for (Rule rule : ruleList) {
+            ruleIDs.add(rule.getRuleID());
         }
+
+        return ruleIDs;
     }
 
     @Override
     public List<String> listRuleNames() {
-        if (ruleList != null && !ruleList.isEmpty()) {
-            List<String> ruleNames = new ArrayList<String>();
+        List<String> ruleNames = new ArrayList<String>();
 
-            for (Rule rule : ruleList) {
-                ruleNames.add(rule.getRuleName());
-            }
-
-            return ruleNames;
-        } else {
-            return Collections.emptyList();
+        for (Rule rule : ruleList) {
+            ruleNames.add(rule.getRuleName());
         }
+
+        return ruleNames;
     }
 
     @Override
@@ -214,5 +197,4 @@ public class RecipeImpl implements Recipe {
         }
         return false;
     }
-
 }
