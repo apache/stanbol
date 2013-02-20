@@ -105,11 +105,6 @@ public class RdfSerializingWriter implements MessageBodyWriter<RdfViewable> {
             OutputStream entityStream) throws IOException, WebApplicationException {
         GraphNode node = v.getGraphNode();
         GraphNode recipe = getRecipe(v.getTemplatePath());
-        if (recipe != null) {
-            serializer.serialize(System.out, recipe.getNodeContext(), "text/turtle");
-        } else {
-            System.out.println("no recipe found");
-        }
         serializer.serialize(entityStream, getExpandedContext(node, recipe), mediaType.toString());
     }
 
