@@ -22,7 +22,7 @@ package org.apache.stanbol.entityhub.servicesapi;
  * @author Rupert Westenthaler
  *
  */
-public abstract class EntityhubException extends Exception {
+public abstract class EntityhubException extends RuntimeException {
 
     /**
      * default serial version uid.
