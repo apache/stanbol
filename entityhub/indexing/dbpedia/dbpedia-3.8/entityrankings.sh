@@ -74,7 +74,7 @@ cat $INCOMING_FILE \
 mv $INCOMING_FILE $WORKSPACE/original_incoming_links_${LANGUAGE}.txt
 
 # Sort redirects
-zcat redirects_en.nt.gz | grep -v "^#" \
+zcat ${REDIRECTS_FILE} | grep -v "^#" \
     | sed 's/.*dbpedia\.org\/resource\/\([^>]*\)>.*dbpedia\.org\/resource\/\([^>]*\)> ./\1 \2/' \
     | sort -k 2b,2 > $WORKSPACE/redirects_sorted_k2.txt
 

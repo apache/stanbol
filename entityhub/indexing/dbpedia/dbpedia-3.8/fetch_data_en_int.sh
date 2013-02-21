@@ -40,7 +40,7 @@ files=(dbpedia_3.8.owl \
     en/redirects_en.nt \
     en/page_links_en.nt \
     en/mappingbased_properties_en.nt \
-    de/labels_en_uris_ar.nt \
+    de/labels_en_uris_de.nt \
     ar/labels_en_uris_ar.nt es/labels_en_uris_es.nt fr/labels_en_uris_fr.nt \
     he/labels_en_uris_he.nt it/labels_en_uris_it.nt ja/labels_en_uris_ja.nt \
     ru/labels_en_uris_ru.nt tr/labels_en_uris_tr.nt nl/labels_en_uris_nl.nt \
