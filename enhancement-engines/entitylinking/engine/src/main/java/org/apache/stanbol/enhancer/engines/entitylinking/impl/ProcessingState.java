@@ -24,6 +24,7 @@ import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.PHRASE_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -44,6 +45,7 @@ import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
+import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,6 +98,9 @@ public class ProcessingState {
             return ((TokenData)object).isProcessable;
         }
     };
+
+    public static final Collection<Pos> SUB_SENTENCE_START_POS = EnumSet.of(
+        Pos.Quote);
     
     public ProcessingState(AnalysedText at, String language, LanguageProcessingConfig tpc, EntityLinkerConfig elc){
         if(at == null){
@@ -235,7 +240,7 @@ public class ProcessingState {
                 }
                 if(span.getType() == SpanTypeEnum.Chunk){
                     ChunkData chunkData = new ChunkData((Chunk)span);
-                    if(chunkData.isProcessable){
+                    if(chunkData.isProcessable()){
                         if(activeChunk != null){ //current Chunk not yet closed -> overlapping chunks!
                             if(activeChunk.getEndChar() < span.getEnd()){ //merge partly overlapping chunks
                                 log.info("   - merge overlapping and processable Chunks {} <-> {}",
@@ -264,12 +269,32 @@ public class ProcessingState {
                                          tokenData.inChunk != null ? tokenData.inChunk.chunk.getSpan() : "none",
                                          tokenData.morpho != null ? tokenData.morpho : "none"});
                     }
+                    //determine if the token should be linked/matched
+                    tokenData.isProcessable = tokenData.isLinkablePos;
+                    tokenData.isMatchable = tokenData.isProcessable || tokenData.isMatchablePos;
+                    //for non processable but upper case tolkens we need to check
+                    //the uper case token configuration
+                    if(!tokenData.isProcessable && tokenData.upperCase){
+                        if(tokenData.index > 0 && //not a sentence or sub-sentence start
+                                !tokens.get(tokenData.index-1).isSubSentenceStart){
+                            if(tpc.isLinkUpperCaseTokens() && //if upper case tokens should be linked
+                                    tokenData.isMatchable) { //convert matchable to 
+                                tokenData.isProcessable = true; //linkable
+                            } else if(tpc.isMatchUpperCaseTokens() || tpc.isLinkUpperCaseTokens()){
+                                //if matching for upperCase Tokens is activated or
+                                //linking is activated, but the current Token is not
+                                //matchable, than mark the Token as matchable
+                                tokenData.isMatchable = true;
+                            } //else upper case matching and linking is deactivated
+                        }
+                    }
+                    //add the token to the list
                     tokens.add(tokenData);
                     if(!foundProcessable){
                         foundProcessable = tokenData.isProcessable;
                     }
                     if(activeChunk != null){
-                        if(tokenData.isMatchable ){
+                        if(tokenData.isMatchable){
                             activeChunk.matchableCount++;
                         } 
                         if (span.getEnd() >= activeChunk.getEndChar()){
@@ -469,7 +494,24 @@ public class ProcessingState {
         final ChunkData inChunk;
         /** the morphological features of the Token (selected based on the POS Tag) */
         final MorphoFeatures morpho;
-        
+        /**
+         * if this token starts with an upperCase letter
+         */
+        final boolean upperCase;
+        /**
+         * If the POS type of this word matches a linkable category
+         */
+        final boolean isLinkablePos;
+        /**
+         * if the POS type of this word matches a matchable category
+         */
+        final boolean isMatchablePos;
+        /**
+         * if this Token represents the start of an sub-sentence such as an 
+         * starting ending quote 
+         * @see ProcessingState#SUB_SENTENCE_START_POS
+         */
+        final boolean isSubSentenceStart;
         /**
          * Constructs and initializes meta data needed for linking based 
          * on the current tokens (and its NLP annotation)
@@ -488,49 +530,47 @@ public class ProcessingState {
             boolean matchedPosTag = false; //matched any of the POS annotations
             
             //(1) check if this Token should be linked against the Vocabulary (isProcessable)
-            boolean upperCase = index > 0 && //not a sentence start
-                    token.getEnd() > token.getStart() && //not an empty token
+            upperCase = token.getEnd() > token.getStart() && //not an empty token
                     Character.isUpperCase(token.getSpan().codePointAt(0)); //and upper case
-            if(tpc.isLinkUpperCaseTokens() && upperCase){
-                isProcessable = true;
-            } else { //else use POS tag & token length
-                for(Value<PosTag> posAnnotation : token.getAnnotations(POS_ANNOTATION)){
-                    // check three possible match
-                    //  1. the LexicalCategory matches
-                    //  2. the Pos matches
-                    //  3. the String tag matches
-                    PosTag posTag = posAnnotation.value();
-                    if((!disjoint(tpc.getLinkedLexicalCategories(), posTag.getCategories())) ||
-                            (!disjoint(tpc.getLinkedPos(), posTag.getPosHierarchy())) ||
-                            tpc.getLinkedPosTags().contains(posTag.getTag())){
-                        if(posAnnotation.probability() >= tpc.getMinPosAnnotationProbability()){
-                            selectedPosTag = posTag;
-                            isProcessable = true;
-                            matchedPosTag = true;
-                            break;
-                        } // else probability to low for inclusion
-                    } else if(posAnnotation.probability() >= tpc.getMinExcludePosAnnotationProbability()){
-                        selectedPosTag = posTag; //also rejected PosTags are selected
-                        matchedPosTag = true;
-                        isProcessable = false;
+            boolean isLinkablePos = false;
+            boolean isMatchablePos = false;
+            boolean isSubSentenceStart = false;
+            List<Value<PosTag>> posAnnotations = token.getAnnotations(POS_ANNOTATION);
+            for(Value<PosTag> posAnnotation : posAnnotations){
+                // check three possible match
+                //  1. the LexicalCategory matches
+                //  2. the Pos matches
+                //  3. the String tag matches
+                PosTag posTag = posAnnotation.value();
+                if((!disjoint(tpc.getLinkedLexicalCategories(), posTag.getCategories())) ||
+                        (!disjoint(tpc.getLinkedPos(), posTag.getPosHierarchy())) ||
+                        tpc.getLinkedPosTags().contains(posTag.getTag())){
+                    if(posAnnotation.probability() >= tpc.getMinPosAnnotationProbability()){
+                        selectedPosTag = posTag;
+                        isLinkablePos = true;
+                        isMatchablePos = true;
                         break;
-                    } // else probability to low for exclusion
-                }
-                if(!matchedPosTag) { //not matched against a POS Tag ...
-                    // ... fall back to the token length
-                    isProcessable = token.getSpan().length() >= elc.getMinSearchTokenLength();
-                }
+                    } // else probability to low for inclusion
+                } else if(posAnnotation.probability() >= tpc.getMinExcludePosAnnotationProbability()){
+                    selectedPosTag = posTag; //also rejected PosTags are selected
+                    matchedPosTag = true;
+                    isLinkablePos = false;
+                    break;
+                } // else probability to low for exclusion
+            }
+            if(!matchedPosTag) { //not matched against a POS Tag ...
+                // ... fall back to the token length
+                this.isLinkablePos = token.getSpan().length() >= elc.getMinSearchTokenLength();
+            } else {
+                this.isLinkablePos = isLinkablePos;
             }
             
             //(2) check if this token should be considered to match labels of suggestions
-            if(isProcessable){ //processable tokens are also matchable
-                isMatchable = true;
-            } else if(tpc.isMatchUpperCaseTokens() && upperCase){
-                //match upper case tokens regardless of POS and length
-                isMatchable = true;
+            if(this.isLinkablePos){ //processable tokens are also matchable
+                this.isMatchablePos = true;
             } else { //check POS and length to see if token is matchable
                 matchedPosTag = false; //reset to false!
-                for(Value<PosTag> posAnnotation : token.getAnnotations(POS_ANNOTATION)){
+                for(Value<PosTag> posAnnotation : posAnnotations){
                     PosTag posTag = posAnnotation.value();
                     if(posTag.isMapped()){
                         if(!Collections.disjoint(tpc.getMatchedLexicalCategories(), 
@@ -538,7 +578,7 @@ public class ProcessingState {
                             if(posAnnotation.probability() >= tpc.getMinPosAnnotationProbability()){
                                 //override selectedPosTag if present
                                 selectedPosTag = posTag; //mark the matchable as selected PosTag
-                                isMatchable = true;
+                                isMatchablePos = true;
                                 matchedPosTag = true;
                                 break;
                             } // else probability to low for inclusion
@@ -546,7 +586,7 @@ public class ProcessingState {
                             if(selectedPosTag == null){ //do not override existing values
                                 selectedPosTag = posTag; //also rejected PosTags are selected
                             }
-                            isMatchable = false;
+                            isMatchablePos = false;
                             matchedPosTag = true;
                             break;
                         } // else probability to low for exclusion
@@ -554,11 +594,25 @@ public class ProcessingState {
                 }
                 if(!matchedPosTag){ //not matched against POS tag ...
                     //fall back to the token length
-                    isMatchable = token.getSpan().length() >= elc.getMinSearchTokenLength();    
+                    this.isMatchablePos = token.getSpan().length() >= elc.getMinSearchTokenLength();    
+                } else {
+                    this.isMatchablePos = isMatchablePos;
                 }
             }
+            //(3) check if the POS tag indicates the start/end of an sub-sentence
+            for(Value<PosTag> posAnnotation : posAnnotations){
+                PosTag posTag = posAnnotation.value();
+                if((!disjoint(SUB_SENTENCE_START_POS,posTag.getPosHierarchy()))){
+                    if(posAnnotation.probability() >= tpc.getMinPosAnnotationProbability()){
+                        isSubSentenceStart = true;
+                    } // else probability to low for inclusion
+                } else if(posAnnotation.probability() >= tpc.getMinExcludePosAnnotationProbability()){
+                    isSubSentenceStart = false;
+                }
+            }
+            this.isSubSentenceStart = isSubSentenceStart;
             
-            //(3) check for morpho analyses
+            //(4) check for morpho analyses
             if(selectedPosTag == null){ //token is not processable or matchable
                 //we need to set the selectedPoas tag to the first POS annotation
                 Value<PosTag> posAnnotation = token.getAnnotation(POS_ANNOTATION);
@@ -583,6 +637,7 @@ public class ProcessingState {
                 morpho = mf;
             }
         }
+        
         /**
          * Getter for the text as used for searching/matching
          * Entities in the linked vocabulary. If 
@@ -600,6 +655,7 @@ public class ProcessingState {
                 return token.getSpan();
             }
         }
+                
     }
     /** 
      * Represents a Chunk (group of tokens) used as context for EntityLinking.
@@ -677,6 +733,9 @@ public class ProcessingState {
          */
         public int getEndChar(){
             return merged == null ? chunk.getEnd() : merged.getEnd();
+        }
+        public boolean isProcessable() {
+            return isProcessable;
         }
     }
     

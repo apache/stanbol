@@ -103,7 +103,11 @@ public class TextProcessingConfig {
      * The languages this engine is configured to enhance. An empty List is
      * considered as active for any language
      */
-    private LanguageConfiguration languages = new LanguageConfiguration(PROCESSED_LANGUAGES, new String[]{"*"});
+    private LanguageConfiguration languages = new LanguageConfiguration(PROCESSED_LANGUAGES, 
+        // link multiple matchable tokens in chunks; link upper case words
+        new String[]{"*;lmmtip;uc=LINK;prop=0.75;pprob=0.75", 
+            "de;uc=MATCH", //in German all Nouns are upper case
+            });
 
     private LanguageProcessingConfig defaultConfig;
     private Map<String,LanguageProcessingConfig> languageConfigs = new HashMap<String,LanguageProcessingConfig>();
