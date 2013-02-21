@@ -85,6 +85,8 @@
 
     <module>launchers/stable</module>
     <module>launchers/full-war</module>
+    
+    <module>development/archetypes/statefull-webmodule</module>
   </modules>
 
   <profiles>
