@@ -82,6 +82,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.multipart.FormDataParam;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.UriBuilder;
+import org.apache.clerezza.rdf.core.MGraph;
 
 @Component
 @Service(UserResource.class)
@@ -95,53 +101,92 @@ public class UserResource {
     private Parser parser;
     @Reference
     private Serializer serializer;
-
-    @GET
-    public String index() throws UnsupportedEncodingException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        serializer.serialize(baos, systemGraph, SupportedFormat.TURTLE);
-        String serialized = new String(baos.toByteArray(), "utf-8");
-        return serialized;
-    }
-
-    @GET
-    @Path("users")
-    @Produces(MediaType.TEXT_HTML)
-    public RdfViewable listUsers() {
-        return new RdfViewable("listUser.ftl", getUserType(), this.getClass());
-    }
-
-    public GraphNode getUserType() {
-        return new GraphNode(FOAF.Agent, systemGraph);
-    }
-
-    @GET
-    @Path("user/{username}")
-    public RdfViewable editUser(@PathParam("username") String userName) {
-        return new RdfViewable("editUser.ftl", getUser(userName),
-                this.getClass());
-    }
     private static GraphNode dummyNode;
 
     static {
         dummyNode = new GraphNode(new BNode(), new SimpleMGraph());
         dummyNode.addProperty(RDF.type, FOAF.Agent);
     }
+    // **********************************
+    // ****** SHOW USER DETAILS ****** 
+    // **********************************
 
-    @GET
-    @Path("create-form")
-    public RdfViewable getCreateUserForm(@Context UriInfo uriInfo) {
-        return new RdfViewable("editUser.ftl", dummyNode,
-                this.getClass());
-    }
-
+    /**
+     * 
+     * @param userName
+     * @return 
+     */
     @GET
     @Path("view-user")
     @Produces(MediaType.TEXT_HTML)
     public RdfViewable viewUser(@QueryParam("userName") String userName) {
+       // System.out.println("HEEEEEEEEEEEEEEEEERE");
         return new RdfViewable("edit.ftl", getUser(userName), this.getClass());
     }
 
+    @GET
+    @Path("user/{username}")
+    @Produces(MediaType.TEXT_HTML)
+    public RdfViewable editUser(@PathParam("username") String userName) {
+        return new RdfViewable("editUser.ftl", getUser(userName),
+                this.getClass());
+    }
+
+    @GET
+    @Path("user/{username}/permissionsCheckboxes")
+    @Produces(MediaType.TEXT_HTML)
+    public RdfViewable permissionsCheckboxes(@PathParam("username") String userName) { //getUser(userName)
+        return new RdfViewable("permissionsCheckboxes.ftl", getUser(userName), this.getClass());
+    }
+
+    /**
+     * RESTful access to individual user data [has integration test]
+     *
+     * @param userName
+     * @return context graph for user
+     * @throws UnsupportedEncodingException
+     */
+    @GET
+    @Path("users/{username}")
+    @Produces(SupportedFormat.TURTLE)
+    public Response getUserTurtle(@PathParam("username") String userName)
+            throws UnsupportedEncodingException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        serializer.serialize(baos, getUser(userName).getNodeContext(),
+                SupportedFormat.TURTLE);
+        String serialized = new String(baos.toByteArray(), "utf-8");
+        // System.out.println("User = "+serialized);
+        return Response.ok(serialized).build();
+    }
+
+    /**
+     * RESTful access to user roles (and permissions right now - may change)
+     * [has integration test]
+     *
+     * @param userName
+     * @return context graph for user
+     * @throws UnsupportedEncodingException
+     */
+    @GET
+    @Path("roles/{username}")
+    @Produces(SupportedFormat.TURTLE)
+    public Response getUserRoles(@PathParam("username") String userName)
+            throws UnsupportedEncodingException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        MGraph rolesGraph = getUserRolesGraph(userName);
+
+        // case of no roles not handled - what best to return : empty graph or
+        // 404?
+        serializer.serialize(baos, rolesGraph, SupportedFormat.TURTLE);
+        String serialized = new String(baos.toByteArray(), "utf-8");
+        return Response.ok(serialized).build();
+    }
+
+    // **********************************
+    // ****** UPDATE USER DETAILS *******  
+    // **********************************
     @POST
     @Path("store-user")
     // @Consumes("multipart/form-data")
@@ -157,24 +202,391 @@ public class UserResource {
 
         GraphNode userNode;
 
-        if(currentLogin != null){ // 
+        if (currentLogin != null) { // 
             currentLogin = currentLogin.trim();
         }
-        
+
         // System.out.println("CURRENTUSERNAME = ["+currentUserName+"]");
         if (currentLogin != null && !currentLogin.equals("")) {
             userNode = getUser(currentLogin);
             return store(userNode, uriInfo, currentLogin, newLogin, fullName, email, password, roles, permissions);
         }
-        
+
 //        try {
 //             userNode = getUser(newLogin);
 //        } catch(Exception e) {
-            userNode = createUser(newLogin);
-      //  }
+        userNode = createUser(newLogin);
+        //  }
         // System.out.println("NEWLOGIN = [" + newLogin + "]");
-       
+
         return store(userNode, uriInfo, newLogin, newLogin, fullName, email, password, roles, permissions);
+    }
+
+    @GET
+    @Path("rolesCheckboxes")
+    @Produces(SupportedFormat.HTML)
+    public RdfViewable rolesCheckboxes() {
+        return new RdfViewable("rolesCheckboxes.ftl", getRoleType(), this.getClass());
+    }
+
+    // needs refactoring and locks adding?
+       /*
+     * API/Turtle style
+     */
+    @POST
+    @Consumes(SupportedFormat.TURTLE)
+    @Path("change-user")
+    public Response changeUser(String userData) {
+
+        log.debug("changeUser called with " + userData);
+
+        Graph inputGraph = readData(userData);
+
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        Iterator<Triple> changes = inputGraph.filter(null, null,
+                Ontology.Change);
+
+        while (changes.hasNext()) {
+            Triple changeTriple = changes.next();
+
+            NonLiteral changeNode = changeTriple.getSubject();
+
+            Literal userName = (Literal) inputGraph
+                    .filter(changeNode, PLATFORM.userName, null).next()
+                    .getObject();
+
+            NonLiteral userNode = (NonLiteral) systemGraph
+                    .filter(null, PLATFORM.userName, userName).next()
+                    .getSubject();
+
+            UriRef predicateUriRef = (UriRef) inputGraph
+                    .filter(changeNode, Ontology.predicate, null).next()
+                    .getObject();
+
+            // System.out.println("predicateUriRef = " + predicateUriRef);
+
+            // handle old value (if it exists)
+            Iterator<Triple> iterator = inputGraph.filter(changeNode,
+                    Ontology.oldValue, null);
+            Resource oldValue = null;
+
+            if (iterator.hasNext()) {
+                oldValue = iterator.next().getObject();
+
+                // Triple oldTriple = systemGraph.filter(null, predicateUriRef,
+                // oldValue).next();
+                Triple oldTriple = systemGraph.filter(userNode,
+                        predicateUriRef, oldValue).next();
+
+                systemGraph.remove(oldTriple);
+            }
+
+            Resource newValue = inputGraph
+                    .filter(changeNode, Ontology.newValue, null).next()
+                    .getObject();
+
+            Triple newTriple = new TripleImpl(userNode, predicateUriRef,
+                    newValue);
+
+            systemGraph.add(newTriple);
+        }
+
+        // it's not actually creating a resource at this URI so this
+        // seems the most appropriate response
+        return Response.noContent().build();
+    }
+
+    /*
+     * Isn't very pretty but is just a one-off
+     */
+    @GET
+    @Path("user/{username}/rolesCheckboxes")
+    @Produces(MediaType.TEXT_HTML)
+    public Response rolesCheckboxes(@PathParam("username") String userName) {
+        // return new RdfViewable("rolesCheckboxes.ftl", getRoleType(), this.getClass());
+        StringBuffer html = new StringBuffer();
+
+        Iterator<Triple> allRoleTriples = systemGraph.filter(null, RDF.type, PERMISSION.Role);
+
+        ArrayList<String> allRoleNames = new ArrayList<String>();
+
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try { // pulls out all role names
+            while (allRoleTriples.hasNext()) {
+                Triple triple = allRoleTriples.next();
+                //                if (triple.getPredicate().equals(DC.title)) {
+                //                    allRoleNames.add(((Literal) triple.getObject()).getLexicalForm());
+                //                    System.out.println("system role = "+((Literal) triple.getObject()).getLexicalForm());
+                //                }
+                //   NonLiteral roleNode = triple.getSubject();
+                GraphNode roleNode = new GraphNode(triple.getSubject(), systemGraph);
+                Iterator<Literal> titlesIterator = roleNode.getLiterals(DC.title);
+                while (titlesIterator.hasNext()) {
+                    allRoleNames.add(titlesIterator.next().getLexicalForm());
+                    //   System.out.println("system role = " + titlesIterator.next().getLexicalForm());
+                }
+            }
+        } finally {
+            readLock.unlock();
+        }
+
+        MGraph rolesGraph = getUserRolesGraph(userName);
+
+        ArrayList<String> userRoleNames = new ArrayList<String>();
+
+        Iterator<Triple> userRoleTriples = rolesGraph.filter(null, RDF.type, PERMISSION.Role);
+        while (userRoleTriples.hasNext()) {
+            Triple triple = userRoleTriples.next();
+            GraphNode roleNode = new GraphNode(triple.getSubject(), rolesGraph);
+
+            Iterator<Literal> titlesIterator = roleNode.getLiterals(DC.title);
+            while (titlesIterator.hasNext()) {
+                userRoleNames.add(titlesIterator.next().getLexicalForm());
+                //   System.out.println("user role = " + titlesIterator.next().getLexicalForm());
+            }
+        }
+        for (int i = 0; i < allRoleNames.size(); i++) {
+            // BasePermissionsRole
+            String role = allRoleNames.get(i);
+            if (role.equals("BasePermissionsRole")) {
+                continue;
+            }
+            if (userRoleNames.contains(role)) {
+                html.append("<input class=\"role\" type=\"checkbox\" id=\"" + role + "\" name=\"" + role + "\" value=\"" + role + "\" checked=\"checked\" />");
+            } else {
+                html.append("<input class=\"role\" type=\"checkbox\" id=\"" + role + "\" name=\"" + role + "\" value=\"" + role + "\" />");
+            }
+            html.append("<label for=\"" + role + "\">" + role + "</label>");
+            html.append("<br />");
+        }
+        return Response.ok(html.toString()).build();
+    }
+
+    // **********************************
+    // ****** LIST USERS ****** 
+    // **********************************
+    @GET
+    @Path("users")
+    @Produces(MediaType.TEXT_HTML)
+    public RdfViewable listUsers() {
+        return new RdfViewable("listUser.ftl", getUserType(), this.getClass());
+    }
+
+    // **********************************
+// ****** CREATE USER ****** 
+    // **********************************
+    @GET
+    @Path("create-form")
+    public RdfViewable getCreateUserForm(@Context UriInfo uriInfo) {
+        return new RdfViewable("editUser.ftl", dummyNode,
+                this.getClass());
+    }
+
+    /**
+     * Endpoint-style user creation takes a little bunch of Turtle e.g. [] a
+     * foaf:Agent ; cz:userName "Hugo Ball" .
+     * 
+     * [has test]
+     *
+     * @param userData
+     * @return HTTP/1.1 204 No Content
+     */
+    @POST // @TODO add RESTful PUT version
+    @Consumes(SupportedFormat.TURTLE)
+    @Path("add-user")
+    public Response addUser(@Context UriInfo uriInfo, String userData) {
+
+        log.debug(("addUser called with " + userData));
+
+        Graph inputGraph = readData(userData);
+
+        Iterator<Triple> agents = inputGraph.filter(null, null, FOAF.Agent);
+
+        NonLiteral userNode = agents.next().getSubject();
+
+        Iterator<Triple> userTriples = inputGraph.filter(userNode, null, null);
+
+        String userName = "";
+        Triple userTriple= null;
+
+        Lock writeLock = systemGraph.getLock().writeLock();
+        writeLock.lock();
+        try {
+            while (userTriples.hasNext()) {
+                userTriple = userTriples.next();
+                systemGraph.add(userTriple);
+            }
+            userName = ((Literal) userTriple.getObject()).getLexicalForm();
+        } finally {
+            writeLock.unlock();
+        }
+
+        UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
+                
+        URI createdResource = null;
+    //    try {
+          //  createdResource = new URI("http://localhost:8080/user-management/users/" + userName);
+            createdResource = uriBuilder.replacePath("/user-management/users/" + userName).build();
+//        } catch (URISyntaxException ex) {
+//            java.util.logging.Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+       System.out.println("URI ="+createdResource);
+// from HTTPbis
+//The request has been fulfilled and has resulted in one or more new
+//   resources being created.
+//        Response.ResponseBuilder builder = Response.status(Response.Status.CREATED);
+//       // builder.header("Location", createdResource);
+//        
+//        Response response = builder.build();
+//         MultivaluedMap<String,Object> meta = response.getMetadata(); 
+//         meta.putSingle("Location", createdResource);
+        return Response.created(createdResource).build();
+    }
+    //  // http://localhost:8080/user-management/add-user/user-management/users/hugob
+    // http://localhost:8080/user-management/users/hugob
+
+// **********************************
+// ****** REMOVE USER *************** 
+// **********************************
+    @POST
+    @Path("delete")
+    public void removeUser(@FormParam("user") String userName) {
+        // System.out.println("DELETE " + userName);
+        Resource userResource = getNamedUser(userName).getNode();
+        Iterator<Triple> userTriples = systemGraph.filter((NonLiteral) userResource, null, null);
+
+        ArrayList<Triple> buffer = new ArrayList<Triple>();
+
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try {
+            while (userTriples.hasNext()) {
+                Triple triple = userTriples.next();
+                buffer.add(triple);
+            }
+        } finally {
+            readLock.unlock();
+        }
+
+        // Graph context = getNamedUser(userName).getNodeContext();
+        Lock writeLock = systemGraph.getLock().writeLock();
+        writeLock.lock();
+        try {
+            systemGraph.removeAll(buffer);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    /**
+     * Endpoint-style user deletion takes a little bunch of Turtle e.g. [] a
+     * foaf:Agent ; cz:userName "Hugo Ball" .
+     *
+     * @param userData
+     * @return HTTP/1.1 204 No Content
+     */
+    @POST
+    @Consumes(SupportedFormat.TURTLE)
+    @Path("delete-user")
+    public Response deleteUser(String userData) {
+
+        log.debug("deleteUser called with " + userData);
+
+        Graph inputGraph = readData(userData);
+
+        Iterator<Triple> userNameTriples = inputGraph.filter(null,
+                PLATFORM.userName, null);
+
+        Literal userNameNode = (Literal) userNameTriples.next().getObject();
+
+        // gives concurrent mod exception otherwise
+        ArrayList<Triple> tripleBuffer = new ArrayList<Triple>();
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try {
+            Iterator<Triple> userTriples = systemGraph.filter(null, null,
+                    userNameNode);
+
+            Triple userTriple = userTriples.next();
+            Iterator<Triple> systemUserTriples = systemGraph.filter(
+                    userTriple.getSubject(), null, null);
+
+
+            while (systemUserTriples.hasNext()) {
+                tripleBuffer.add(systemUserTriples.next());
+            }
+        } finally {
+            readLock.unlock();
+        }
+
+        systemGraph.removeAll(tripleBuffer);
+
+        // it's not actually creating a resource at this URI so this
+        // seems the most appropriate response
+        return Response.noContent().build();
+    }
+
+// **********************************
+// ****** SHOW ROLE DETAILS *********
+// **********************************
+// **********************************
+// ****** LIST ROLES **************** 
+// **********************************
+    @GET
+    @Path("roles")
+    @Produces(MediaType.TEXT_HTML)
+    public RdfViewable listRoles() {
+        return new RdfViewable("listRole.ftl", getRoleType(), this.getClass());
+    }
+
+// **********************************
+// ****** ADD ROLE ****************** 
+// **********************************
+// **********************************
+// ****** REMOVE ROLE *************** 
+// **********************************
+// **********************************
+// ****** ASSIGN ROLE TO USER ******* 
+// **********************************
+// **********************************
+// ****** REMOVE ROLE FROM USER ***** 
+// **********************************
+// **********************************
+// ****** LIST PERMISSIONS ********** 
+// **********************************
+    @GET
+    @Path("permissions")
+    @Produces(MediaType.TEXT_HTML)
+    public RdfViewable listPermissions() {
+        addClassToPermissions();
+        return new RdfViewable("listPermission.ftl", getPermissionType(), this.getClass());
+    }
+
+// **********************************
+// ****** ADD PERMISSION TO USER **** 
+// **********************************
+// **************************************
+// ****** REMOVE PERMISSION FROM USER *** 
+// **************************************
+// ************************************
+// ****** ADD PERMISSION TO ROLE ****** 
+// ************************************
+// **************************************
+// ****** REMOVE PERMISSION FROM ROLE *** 
+// **************************************
+    // misc
+    @GET
+    public String index() throws UnsupportedEncodingException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.serialize(baos, systemGraph, SupportedFormat.TURTLE);
+        String serialized = new String(baos.toByteArray(), "utf-8");
+        return serialized;
+    }
+
+    public GraphNode getUserType() {
+        return new GraphNode(FOAF.Agent, systemGraph);
     }
 
     /**
@@ -282,7 +694,7 @@ public class UserResource {
     public void replaceSubGraph(@QueryParam("graph") UriRef graphUri,
             @FormDataParam("assert") String assertedString,
             @FormDataParam("revoke") String revokedString,
-            @FormDataParam("format") @DefaultValue("text/turtle") String format) {
+            @FormDataParam("format") @DefaultValue(SupportedFormat.TURTLE) String format) {
         final Graph assertedGraph;
         final Graph revokedGraph;
         try {
@@ -301,28 +713,6 @@ public class UserResource {
             throw new RuntimeException(ex);
         }
         systemGraph.addAll(assertedGraph);
-    }
-
-    @GET
-    @Path("roles")
-    @Produces(MediaType.TEXT_HTML)
-    public RdfViewable listRoles() {
-        return new RdfViewable("listRole.ftl", getRoleType(), this.getClass());
-    }
-
-    @GET
-    @Path("permissions")
-    @Produces(MediaType.TEXT_HTML)
-    public RdfViewable listPermissions() {
-        addClassToPermissions();
-        return new RdfViewable("listPermission.ftl", getPermissionType(), this.getClass());
-    }
-
-    @GET
-    @Path("user/{username}/permissionsCheckboxes")
-    @Produces(MediaType.TEXT_HTML)
-    public RdfViewable permissionsCheckboxes(@PathParam("username") String userName) { //getUser(userName)
-        return new RdfViewable("permissionsCheckboxes.ftl", getUser(userName), this.getClass());
     }
 
     public GraphNode getPermissionType() {
@@ -362,240 +752,12 @@ public class UserResource {
         }
     }
 
-    @GET
-    @Path("rolesCheckboxes")
-    @Produces(MediaType.TEXT_HTML)
-    public RdfViewable rolesCheckboxes() {
-        return new RdfViewable("rolesCheckboxes.ftl", getRoleType(), this.getClass());
-    }
-
     public GraphNode getRoleType() {
         return new GraphNode(PERMISSION.Role,
                 systemGraph);
     }
 
-    @POST
-    @Path("delete")
-    public void removeUser(@FormParam("user") String userName) {
-        // System.out.println("DELETE " + userName);
-        Resource userResource = getNamedUser(userName).getNode();
-        Iterator<Triple> userTriples = systemGraph.filter((NonLiteral) userResource, null, null);
-
-        ArrayList<Triple> buffer = new ArrayList<Triple>();
-
-        Lock readLock = systemGraph.getLock().readLock();
-        readLock.lock();
-        try {
-            while (userTriples.hasNext()) {
-                Triple triple = userTriples.next();
-                buffer.add(triple);
-            }
-        } finally {
-            readLock.unlock();
-        }
-
-        // Graph context = getNamedUser(userName).getNodeContext();
-        Lock writeLock = systemGraph.getLock().writeLock();
-        writeLock.lock();
-        try {
-            systemGraph.removeAll(buffer);
-        } finally {
-            writeLock.unlock();
-        }
-    }
-
-    /**
-     * ********************
-     * Endpoint API ********************
-     */
-    /**
-     * Endpoint-style user creation takes a little bunch of Turtle e.g. [] a
-     * foaf:Agent ; cz:userName "Hugo Ball" .
-     *
-     * @param userData
-     * @return HTTP/1.1 204 No Content
-     */
-    @POST
-    @Consumes(SupportedFormat.TURTLE)
-    @Path("add-user")
-    public Response addUser(String userData) {
-
-        log.debug(("addUser called with " + userData));
-
-        Graph inputGraph = readData(userData);
-
-        Iterator<Triple> agents = inputGraph.filter(null, null, FOAF.Agent);
-
-        NonLiteral userNode = agents.next().getSubject();
-
-        Iterator<Triple> userTriples = inputGraph.filter(userNode, null, null);
-
-
-        Lock writeLock = systemGraph.getLock().writeLock();
-        writeLock.lock();
-        try {
-            while (userTriples.hasNext()) {
-                Triple userTriple = userTriples.next();
-                systemGraph.add(userTriple);
-            }
-        } finally {
-            writeLock.unlock();
-        }
-
-        // it's not actually creating a resource at this URI so this
-        // seems the most appropriate response
-        return Response.noContent().build();
-    }
-
-    /**
-     * Endpoint-style user deletion takes a little bunch of Turtle e.g. [] a
-     * foaf:Agent ; cz:userName "Hugo Ball" .
-     *
-     * @param userData
-     * @return HTTP/1.1 204 No Content
-     */
-    @POST
-    @Consumes(SupportedFormat.TURTLE)
-    @Path("delete-user")
-    public Response deleteUser(String userData) {
-
-        log.debug("deleteUser called with " + userData);
-
-        Graph inputGraph = readData(userData);
-
-        Iterator<Triple> userNameTriples = inputGraph.filter(null,
-                PLATFORM.userName, null);
-
-        Literal userNameNode = (Literal) userNameTriples.next().getObject();
-
-        // gives concurrent mod exception otherwise
-        ArrayList<Triple> tripleBuffer = new ArrayList<Triple>();
-        Lock readLock = systemGraph.getLock().readLock();
-        readLock.lock();
-        try {
-            Iterator<Triple> userTriples = systemGraph.filter(null, null,
-                    userNameNode);
-
-            Triple userTriple = userTriples.next();
-            Iterator<Triple> systemUserTriples = systemGraph.filter(
-                    userTriple.getSubject(), null, null);
-
-
-            while (systemUserTriples.hasNext()) {
-                tripleBuffer.add(systemUserTriples.next());
-            }
-        } finally {
-            readLock.unlock();
-        }
-
-        systemGraph.removeAll(tripleBuffer);
-
-        // it's not actually creating a resource at this URI so this
-        // seems the most appropriate response
-        return Response.noContent().build();
-    }
-
-    // needs refactoring and locks adding
-    @POST
-    @Consumes(SupportedFormat.TURTLE)
-    @Path("change-user")
-    public Response changeUser(String userData) {
-
-        log.debug("changeUser called with " + userData);
-
-        Graph inputGraph = readData(userData);
-
-        Lock readLock = systemGraph.getLock().readLock();
-        readLock.lock();
-        Iterator<Triple> changes = inputGraph.filter(null, null,
-                Ontology.Change);
-
-        while (changes.hasNext()) {
-            Triple changeTriple = changes.next();
-
-            NonLiteral changeNode = changeTriple.getSubject();
-
-            Literal userName = (Literal) inputGraph
-                    .filter(changeNode, PLATFORM.userName, null).next()
-                    .getObject();
-
-            NonLiteral userNode = (NonLiteral) systemGraph
-                    .filter(null, PLATFORM.userName, userName).next()
-                    .getSubject();
-
-            UriRef predicateUriRef = (UriRef) inputGraph
-                    .filter(changeNode, Ontology.predicate, null).next()
-                    .getObject();
-
-            // System.out.println("predicateUriRef = " + predicateUriRef);
-
-            // handle old value (if it exists)
-            Iterator<Triple> iterator = inputGraph.filter(changeNode,
-                    Ontology.oldValue, null);
-            Resource oldValue = null;
-
-            if (iterator.hasNext()) {
-                oldValue = iterator.next().getObject();
-
-                // Triple oldTriple = systemGraph.filter(null, predicateUriRef,
-                // oldValue).next();
-                Triple oldTriple = systemGraph.filter(userNode,
-                        predicateUriRef, oldValue).next();
-
-                systemGraph.remove(oldTriple);
-            }
-
-            Resource newValue = inputGraph
-                    .filter(changeNode, Ontology.newValue, null).next()
-                    .getObject();
-
-            Triple newTriple = new TripleImpl(userNode, predicateUriRef,
-                    newValue);
-
-            systemGraph.add(newTriple);
-        }
-
-        // it's not actually creating a resource at this URI so this
-        // seems the most appropriate response
-        return Response.noContent().build();
-    }
-
-    /**
-     * RESTful access to individual user data
-     *
-     * @param userName
-     * @return context graph for user
-     * @throws UnsupportedEncodingException
-     */
-    @GET
-    @Path("users/{username}")
-    @Produces(SupportedFormat.TURTLE)
-    public Response getUserTurtle(@PathParam("username") String userName)
-            throws UnsupportedEncodingException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        serializer.serialize(baos, getUser(userName).getNodeContext(),
-                SupportedFormat.TURTLE);
-        String serialized = new String(baos.toByteArray(), "utf-8");
-        // System.out.println("User = "+serialized);
-        return Response.ok(serialized).build();
-    }
-
-    /// LOCKS MAYBE OK TO HERE
-    /**
-     * RESTful access to user roles (and permissions right now - may change)
-     *
-     * @param userName
-     * @return context graph for user
-     * @throws UnsupportedEncodingException
-     */
-    @GET
-    @Path("roles/{username}")
-    @Produces(SupportedFormat.TURTLE)
-    public Response getUserRoles(@PathParam("username") String userName)
-            throws UnsupportedEncodingException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
+    private MGraph getUserRolesGraph(String userName) {
         GraphNode userNode = getUser(userName);
 
         Iterator<Resource> functionIterator = userNode
@@ -622,16 +784,12 @@ public class UserResource {
                 rolesGraph.addAll(detailsGraph);
             }
         }
-        // case of no roles not handled - what best to return : empty graph or
-        // 404?
-        serializer.serialize(baos, rolesGraph, SupportedFormat.TURTLE);
-        String serialized = new String(baos.toByteArray(), "utf-8");
-        return Response.ok(serialized).build();
+        return rolesGraph;
     }
 
     /**
      **********************
-     * helper methods
+     * helper methods *********************
      */
     private GraphNode createUser(String newUserName) {
         BNode subject = new BNode();
@@ -835,7 +993,7 @@ public class UserResource {
         try {
             inputGraph = parser.parse(
                     new ByteArrayInputStream(data.getBytes("utf-8")),
-                    "text/turtle");
+                    SupportedFormat.TURTLE);
         } catch (IOException ex) {
             log.error("parsing error with userData", ex);
             throw new WebApplicationException(ex, 500);
@@ -857,8 +1015,8 @@ public class UserResource {
         if (!iter.hasNext()) {
             return null;
         }
-      
-       return new GraphNode(iter.next().getSubject(), systemGraph);
+
+        return new GraphNode(iter.next().getSubject(), systemGraph);
     }
 
     public Set<GraphNode> getUsers() {
@@ -871,12 +1029,12 @@ public class UserResource {
         try {
             final Iterator<Triple> triples = systemGraph.filter(null, RDF.type,
                     type);
-            Set<GraphNode> userRoles = new HashSet<GraphNode>();
+            Set<GraphNode> resources = new HashSet<GraphNode>();
             while (triples.hasNext()) {
-                userRoles.add(new GraphNode(triples.next().getSubject(),
+                resources.add(new GraphNode(triples.next().getSubject(),
                         systemGraph));
             }
-            return userRoles;
+            return resources;
         } finally {
             readLock.unlock();
         }

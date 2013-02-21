@@ -31,12 +31,6 @@ limitations under the License.
 <br />
 
 
-<!--
-<#assign userName>
-<@ldpath path="platform:userName :: xsd:string"/>
-</#assign>
--->
-
 <div  title="Edit User" id="editUserForm">
 </div>
 <!-- #include "/html/editUserForm.ftl" -->
@@ -54,10 +48,8 @@ limitations under the License.
 
 <script>
         
-    $(function() {
-
-        
-        
+    $(function() {   
+        $.ajaxSetup({dataType:"text/html"}); // set default
         $("#tabs").tabs();
         showUserList();
         showRoleList();
@@ -258,17 +250,21 @@ limitations under the License.
         });
     }  
 
+// accepts: "text/html",
+
     function editUser(userName){
+    $.ajaxSetup({dataType:"text/html"});
         $.ajax({
             url: '/user-management/user/'+userName,
             success: function(data) {
                 $("#editUserForm").html(data);
                 $("#password-label").html("<label for='password' id='password-label'>Password (leave blank to retain existing password)</label>");
                 
-                $.get("/user-management/rolesCheckboxes",
+                $.get("/user-management/user/"+userName+"/rolesCheckboxes",
                 function(data){
                     $("#roles-checkboxes").html(data);
                 }, "text/html");
+                
         
                 $.get("/user-management/user/"+userName+"/permissionsCheckboxes",
                 function(data){

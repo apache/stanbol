@@ -5,19 +5,18 @@ A usermanager for stanbol. It provides a felix webconsole plugin as well as the
 following HTTP resources to manage users and roles, the HTTP services are 
 described in terms of curl-commands and assume Stanbol to be running on localhost.
 
-Note that users are uniquely identified by their clerezza:userName (= login) but may also have a foaf:name (= full name).
+Note that users are uniquely identified by their cz:userName (= login) but may also have a foaf:name (= full name).
 
 The following assumes your stanbol instance is running on localhost port 8080.
 
 Add user:
 
     curl -i -X POST -H "Content-Type: text/turtle" \
-         --user admin:admin \
-         --data \
-         ' @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . 
+        --user admin:admin \
+        --data \
+        ' @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . 
          @prefix foaf: <http://xmlns.com/foaf/0.1/> . 
          @prefix cz: <http://clerezza.org/2009/08/platform#> . 
-
           [] a foaf:Agent ; 
              cz:userName "hugob" . ' \
          http://localhost:8080/user-management/add-user
@@ -33,8 +32,10 @@ Delete user:
 
           [] a foaf:Agent ; 
              cz:userName "tristant" . ' \
-[TODO: also add password, maybe showing 2 options one setting encryed passord (as its stored) and other transmitting clear text password]
          http://localhost:8080/user-management/delete-user
+
+[TODO: also add password, maybe showing 2 options one setting encryed password 
+(as its stored) and other transmitting clear text password]
 
 Change user details. Multiple change blocks may appear in a message. If old 
 value isn't specified, the corresponding triple won't be removed from the system.
@@ -67,7 +68,7 @@ e.g. add email (replacing a previous address if any):
 
 Get user Turtle :
 
-    curl --user admin:admin -H "Accept:text/turtle" http://localhost:8080/user-management/user/anonymous
+    curl --user admin:admin -H "Accept:text/turtle" http://localhost:8080/user-management/users/anonymous
 
 Get user roles :
 
