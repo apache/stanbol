@@ -82,12 +82,12 @@ public class ContentItemBackend implements RDFBackend<Resource>{
                 unmodifiableMap(getContentParts(ci, TripleCollection.class)) :
                     EMPTY_INCLUDED;
         MGraph graph;
-        if(!included.isEmpty()){
+        if(included.isEmpty()){
             graph = ci.getMetadata();
         } else {
             TripleCollection[] tcs = new TripleCollection[included.size()+1];
             tcs[0] = ci.getMetadata();
-            System.arraycopy(tcs, 1, included.values().toArray(), 0, included.size());
+            System.arraycopy(included.values().toArray(), 0, tcs, 1, included.size());
             graph = new UnionMGraph(tcs);
         }
         backend = new ClerezzaBackend(graph);

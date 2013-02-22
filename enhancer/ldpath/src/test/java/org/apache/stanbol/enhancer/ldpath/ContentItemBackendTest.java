@@ -35,10 +35,15 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
@@ -48,6 +53,7 @@ import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFacto
 import org.apache.stanbol.enhancer.ldpath.backend.ContentItemBackend;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.junit.Before;
@@ -185,6 +191,28 @@ public class ContentItemBackendTest {
         content = ((Literal)r).getLexicalForm();
         assertEquals(content, htmlContent);
     }
+    
+    @Test
+    public void testContentWithAdditionalMetadata() throws IOException, LDPathParseException {
+        byte[] content = "text content".getBytes();
+        UriRef uri = ContentItemHelper.makeDefaultUrn(content);
+
+        ContentItem contentItem = ciFactory.createContentItem(uri, new ByteArraySource(content,
+                "text/plain; charset=UTF-8"));
+
+        TripleCollection tc = new SimpleMGraph();
+        TypedLiteral literal = LiteralFactory.getInstance().createTypedLiteral("Michael Jackson");
+        UriRef subject = new UriRef("dummyUri");
+        tc.add(new TripleImpl(subject, new UriRef("http://xmlns.com/foaf/0.1/givenName"), literal));
+        contentItem.addPart(new UriRef(uri.getUnicodeString() + "_additionalMetadata"), tc);
+
+        ContentItemBackend ciBackend = new ContentItemBackend(contentItem, true);
+        LDPath<Resource> ldPath = new LDPath<Resource>(ciBackend, EnhancerLDPath.getConfig());
+        Collection<Resource> result = ldPath.pathQuery(subject, "foaf:givenName", null);
+
+        assertTrue("Additional metadata cannot be found", result.contains(literal));
+    }
+    
     @Test
     public void testTextAnnotationFunction() throws LDPathParseException {
         String path = "fn:textAnnotation(.)/fise:selected-text";
