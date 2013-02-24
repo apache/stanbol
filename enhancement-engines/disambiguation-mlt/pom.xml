@@ -3,15 +3,14 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache.stanbol</groupId>
-    <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
-    <relativePath>..</relativePath>
-  </parent>
-	<groupId>org.apache.stanbol</groupId>
+    <parent>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>apache-stanbol-enhancement-engines</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+      <relativePath>..</relativePath>
+    </parent>
 	<artifactId>org.apache.stanbol.enhancer.engine.disambiguation.mlt</artifactId>
-	<version>0.10.0-SNAPSHOT</version>
+    <version>0.10.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<name>Apache Stanbol Enhancer Enhancement Engine : Disambiguation using Solr MLT</name>
@@ -67,6 +66,11 @@
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
 			<version>0.10.0</version>
 		</dependency>
+        <dependency>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.enhancer.nlp</artifactId>
+            <version>0.10.0</version>
+        </dependency>
 
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
