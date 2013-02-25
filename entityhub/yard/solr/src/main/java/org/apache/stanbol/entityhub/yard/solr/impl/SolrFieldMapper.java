@@ -341,6 +341,7 @@ public class SolrFieldMapper implements FieldMapper {
                         break;
                     case references:
                         fieldNames = Collections.singleton(getReferredDocumentField());
+                        break;
                     default:
                         throw new IllegalStateException("Unsupported Special Field '"
                             +specialField.getUri()+"! Please report this to the "
@@ -348,7 +349,7 @@ public class SolrFieldMapper implements FieldMapper {
                             + "JIRA issue at https://issues.apache.org/jira/browse/STANBOL!");
                 }
             } else {
-                fieldNames = new HashSet<String>(2); //typically onle 1 or 2 values
+                fieldNames = new HashSet<String>(2); //typically only 1 or 2 values
                 IndexDataTypeEnum dataTypeConfig = IndexDataTypeEnum.forIndexType(indexField.getDataType());
                 if (dataTypeConfig == null) {
                     throw new IllegalStateException(String.format(
