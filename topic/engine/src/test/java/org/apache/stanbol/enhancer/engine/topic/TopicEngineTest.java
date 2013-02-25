@@ -39,6 +39,7 @@ import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -57,7 +58,9 @@ import org.apache.stanbol.enhancer.topic.TopicSuggestion;
 import org.apache.stanbol.enhancer.topic.training.SolrTrainingSet;
 import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
@@ -66,6 +69,12 @@ import org.slf4j.LoggerFactory;
 public class TopicEngineTest extends EmbeddedSolrHelper {
 
     private static final Logger log = LoggerFactory.getLogger(TopicEngineTest.class);
+
+    private static final String TEST_ROOT = 
+        FilenameUtils.separatorsToSystem("/target/enginetest-files");
+    private static String  userDir;
+    private static File testRoot;
+    private static int testCounter = 1;
 
     EmbeddedSolrServer classifierSolrServer;
 
@@ -76,12 +85,40 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
     SolrTrainingSet trainingSet;
 
     TopicClassificationEngine classifier;
+    
 
+    
+    @BeforeClass
+    public static void initTestFolder() throws IOException {
+        //basedir - if present - is the project base folder
+        String baseDir = System.getProperty("basedir");
+        if(baseDir == null){ //if missing fall back to user.dir
+            baseDir = System.getProperty("user.dir");
+        }
+        //store the current user.dir
+        userDir = System.getProperty("user.dir");
+        testRoot = new File(baseDir,TEST_ROOT);
+        log.info("Topic Enigne Test Folder : "+testRoot);
+        if(testRoot.exists()){
+            log.info(" ... delete files from previouse test");
+            FileUtils.deleteDirectory(testRoot);
+        }
+        FileUtils.forceMkdir(testRoot);
+        System.setProperty("user.dir", testRoot.getName());
+    }
+    /**
+     * resets the "user.dir" system property the the original value
+     */
+    @AfterClass
+    public static void cleanup(){
+        System.setProperty("user.dir", userDir);
+    }
+    
     @Before
     public void setup() throws Exception {
-        solrHome = File.createTempFile("topicEngineTest_", "_solr_cores");
-        solrHome.delete();
-        solrHome.mkdir();
+        solrHome = new File(testRoot, "test"+testCounter);
+        testCounter++;
+        assertTrue("Unable to create solr.home directory '"+solrHome+"'!",solrHome.mkdir());
         classifierSolrServer = makeEmbeddedSolrServer(solrHome, "classifierserver", "test-topic-model",
             "default-topic-model");
         classifier = TopicClassificationEngine.fromParameters(getDefaultClassifierConfigParams());
@@ -94,7 +131,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
 
     @After
     public void cleanupEmbeddedSolrServer() {
-        FileUtils.deleteQuietly(solrHome);
+        //FileUtils.deleteQuietly(solrHome);
         solrHome = null;
         classifierSolrServer = null;
         trainingSetSolrServer = null;
