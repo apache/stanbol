@@ -35,6 +35,7 @@ import java.util.TimeZone;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.stanbol.enhancer.topic.Batch;
 import org.apache.stanbol.enhancer.topic.EmbeddedSolrHelper;
@@ -43,13 +44,25 @@ import org.apache.stanbol.enhancer.topic.training.Example;
 import org.apache.stanbol.enhancer.topic.training.SolrTrainingSet;
 import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 public class TrainingSetTest extends EmbeddedSolrHelper {
 
+    private static final Logger log = LoggerFactory.getLogger(TrainingSetTest.class);
+    private static final String TEST_ROOT = 
+            FilenameUtils.separatorsToSystem("/target/triningtest-files");
+    private static String  userDir;
+    private static File testRoot;
+    private static int testCounter = 1;
+
+    
     public static final String TOPIC_1 = "http://example.com/topics/topic1";
 
     public static final String TOPIC_2 = "http://example.com/topics/topic2";
@@ -62,14 +75,40 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
 
     protected SolrTrainingSet trainingSet;
 
+    @BeforeClass
+    public static void initTestFolder() throws IOException {
+        //basedir - if present - is the project base folder
+        String baseDir = System.getProperty("basedir");
+        if(baseDir == null){ //if missing fall back to user.dir
+            baseDir = System.getProperty("user.dir");
+        }
+        //store the current user.dir
+        userDir = System.getProperty("user.dir");
+        testRoot = new File(baseDir,TEST_ROOT);
+        log.info("Topic TrainingSet Test Folder : "+testRoot);
+        if(testRoot.exists()){
+            log.info(" ... delete files from previouse test");
+            FileUtils.deleteDirectory(testRoot);
+        }
+        FileUtils.forceMkdir(testRoot);
+        System.setProperty("user.dir", testRoot.getName());
+    }
+    /**
+     * resets the "user.dir" system property the the original value
+     */
+    @AfterClass
+    public static void cleanup(){
+        System.setProperty("user.dir", userDir);
+    }
+    
     @Before
     public void setup() throws IOException,
                        ParserConfigurationException,
                        SAXException,
                        ConfigurationException {
-        solrHome = File.createTempFile("topicTrainingSetTest_", "_solr_cores");
-        solrHome.delete();
-        solrHome.mkdir();
+        solrHome = new File(testRoot, "test"+testCounter);
+        testCounter++;
+        assertTrue("Unable to create solr.home directory '"+solrHome+"'!",solrHome.mkdir());
         trainingsetSolrServer = makeEmbeddedSolrServer(solrHome, "trainingsetserver",
             "default-topic-trainingset", "default-topic-trainingset");
         trainingSet = new SolrTrainingSet();
@@ -79,7 +118,7 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
 
     @After
     public void cleanupEmbeddedSolrServer() {
-        FileUtils.deleteQuietly(solrHome);
+        //FileUtils.deleteQuietly(solrHome);
         solrHome = null;
         trainingsetSolrServer = null;
     }
