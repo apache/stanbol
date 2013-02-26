@@ -130,18 +130,20 @@ public class FeaturedSearchImpl implements FeaturedSearch {
 
     private List<FacetResult> convertFacetFields(List<FacetField> facetFields, List<FacetResult> allFacets) {
         List<FacetResult> facets = new ArrayList<FacetResult>();
-        if (allFacets == null) {
-            for (FacetField facetField : facetFields) {
-                if (facetField.getValues() != null) {
-                    facets.add(new FacetResultImpl(facetField));
+        if (facetFields != null) {
+            if (allFacets == null) {
+                for (FacetField facetField : facetFields) {
+                    if (facetField.getValues() != null) {
+                        facets.add(new FacetResultImpl(facetField));
+                    }
                 }
-            }
-        } else {
-            for (FacetField facetField : facetFields) {
-                if (facetField.getValues() != null) {
-                    for (FacetResult facetResult : allFacets) {
-                        if (facetResult.getFacetField().getName().equals(facetField.getName())) {
-                            facets.add(new FacetResultImpl(facetField, facetResult.getType()));
+            } else {
+                for (FacetField facetField : facetFields) {
+                    if (facetField.getValues() != null) {
+                        for (FacetResult facetResult : allFacets) {
+                            if (facetResult.getFacetField().getName().equals(facetField.getName())) {
+                                facets.add(new FacetResultImpl(facetField, facetResult.getType()));
+                            }
                         }
                     }
                 }
@@ -187,7 +189,6 @@ public class FeaturedSearchImpl implements FeaturedSearch {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.add(solrParams);
         List<FacetResult> allFacets = getAllFacetResults(ldProgramName);
-        SolrQueryUtil.setFacetFields(solrQuery, allFacets);
         QueryResponse queryResponse = solrSearch.search(solrQuery, ldProgramName);
         String queryTerm = SolrQueryUtil.extractQueryTermFromSolrQuery(solrParams);
         return search(queryTerm, queryResponse, ontologyURI, ldProgramName, allFacets);

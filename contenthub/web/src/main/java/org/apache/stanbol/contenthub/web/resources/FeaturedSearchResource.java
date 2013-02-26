@@ -46,6 +46,8 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -213,7 +215,8 @@ public class FeaturedSearchResource extends BaseStanbolResource {
                                           MediaType acceptedMediaType) throws SearchException {
 
         if (solrQuery != null) {
-            this.searchResults = featuredSearch.search(new SolrQuery(solrQuery), ontologyURI, indexName);
+            SolrParams solrParams = SolrRequestParsers.parseQueryString(solrQuery);
+            this.searchResults = featuredSearch.search(solrParams, ontologyURI, indexName);
         } else if (queryTerm != null) {
             Map<String,List<Object>> constraintsMap = JSONUtils.convertToMap(jsonCons);
             this.chosenFacets = JSONUtils.convertToString(constraintsMap);
