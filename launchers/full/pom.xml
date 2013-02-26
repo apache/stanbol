@@ -131,6 +131,18 @@
           <excludes></excludes>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <configuration>
+          <target>
+            <java fork="true" jar="${project.build.directory}/${project.build.finalName}.jar">
+              <jvmarg line="-Xmx1024m -XX:MaxPermSize=256M"/>
+            </java>
+          </target>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

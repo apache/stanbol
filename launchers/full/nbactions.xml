@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+    <action>
+        <actionName>run</actionName>
+        <goals>
+            <goal>package</goal>
+            <goal>antrun:run</goal>
+        </goals>
+    </action>
+    <action>
+        <actionName>debug</actionName>
+        <goals>
+            <goal>package</goal>
+            <goal>antrun:run</goal>
+        </goals>
+        <properties>
+            <vm.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address}</vm.args>
+            <jpda.listen>true</jpda.listen>
+        </properties>
+    </action>
+    <action>
+        <actionName>profile</actionName>
+        <goals>
+            <goal>package</goal>
+            <goal>antrun:run</goal>
+        </goals>
+        <properties>
+            <vm.args>${profiler.args}</vm.args>
+            <!-- XXX <java jvm="${profiler.java}" ...> -->
+            <profiler.action>profile</profiler.action>
+        </properties>
+    </action>
+</actions>
