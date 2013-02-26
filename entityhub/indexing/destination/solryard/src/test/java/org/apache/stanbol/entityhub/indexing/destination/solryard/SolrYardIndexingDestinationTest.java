@@ -77,8 +77,7 @@ public class SolrYardIndexingDestinationTest {
             "segments.gen");
     
     private static final Logger log = LoggerFactory.getLogger(SolrYardIndexingDestinationTest.class);
-    private static final String CONFIG_ROOT = 
-        FilenameUtils.separatorsToSystem("testConfigs/");
+    private static final String CONFIG_ROOT = "testConfigs";
     /**
      * mvn copies the resources in "src/test/resources" to target/test-classes.
      * This folder is than used as classpath.<p>
@@ -86,7 +85,7 @@ public class SolrYardIndexingDestinationTest {
      * {@link IndexingConfig}.
      */
     private static final String TEST_ROOT = 
-        FilenameUtils.separatorsToSystem("/target/test-files");
+        FilenameUtils.separatorsToSystem("target/test-files");
     private static String  userDir;
     private static String testRoot;
     /**
@@ -100,7 +99,7 @@ public class SolrYardIndexingDestinationTest {
         }
         //store the current user.dir
         userDir = System.getProperty("user.dir");
-        testRoot = baseDir+TEST_ROOT;
+        testRoot = FilenameUtils.concat(baseDir,TEST_ROOT);
         log.info("ConfigTest Root : "+testRoot);
         //set the user.dir to the testRoot (needed to test loading of missing
         //configurations via classpath
@@ -123,12 +122,16 @@ public class SolrYardIndexingDestinationTest {
     }
     @Test(expected=IllegalArgumentException.class)
     public void testMissingBoostConfig(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingBoostConfig",CONFIG_ROOT+"missingBoostConfig"){};
+        String testName = "missingBoostConfig";
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+File.separatorChar+testName,
+            CONFIG_ROOT+'/'+testName){};
         config.getIndexingDestination();
     }
     @Test(expected=IllegalArgumentException.class)
     public void testInvalidBoostConfig(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"invalidBoostConfig",CONFIG_ROOT+"invalidBoostConfig"){};
+        String testName = "invalidBoostConfig";
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+File.separatorChar+testName,
+            CONFIG_ROOT+'/'+testName){};
         config.getIndexingDestination();
     }
     /**
@@ -137,7 +140,9 @@ public class SolrYardIndexingDestinationTest {
      */
     @Test(expected=IllegalArgumentException.class)
     public void testMissingDefaultSolrSchemaConfig(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingDefaultSolrConf",CONFIG_ROOT+"missingDefaultSolrConf"){};
+        String testName = "missingDefaultSolrConf";
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+File.separatorChar+testName,
+            CONFIG_ROOT+'/'+testName){};
         config.getIndexingDestination();
     }
     /**
@@ -146,17 +151,23 @@ public class SolrYardIndexingDestinationTest {
      */
     @Test(expected=IllegalArgumentException.class)
     public void testMissingSolrSchemaConfig(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingSolrConf",CONFIG_ROOT+"missingSolrConf"){};
+        String testName = "missingSolrConf";
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+File.separatorChar+testName,
+            CONFIG_ROOT+'/'+testName){};
         config.getIndexingDestination();
     }
     @Test
     public void testSimple() throws YardException, IOException {
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"simple",CONFIG_ROOT+"simple"){};
+        String testName = "simple";
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+File.separatorChar+testName,
+            CONFIG_ROOT+'/'+testName){};
         validateSolrDestination(config);
     }
     @Test
     public void testWithSolrConf() throws YardException, IOException {
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"withSolrConf",CONFIG_ROOT+"withSolrConf"){};
+        String testName = "withSolrConf";
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+File.separatorChar+testName,
+            CONFIG_ROOT+'/'+testName){};
         validateSolrDestination(config);
     }
     
@@ -198,10 +209,11 @@ public class SolrYardIndexingDestinationTest {
         Set<String> expected = new HashSet<String>(EXPECTED_INDEX_ARCHIVE_FILE_NAMES);
         for(Enumeration<? extends ZipEntry> entries = archive.entries();entries.hasMoreElements();){
             ZipEntry entry = entries.nextElement();
-            log.info("Validate Entry : "+entry.getName());
             //the name of the index MUST be the root folder within the Archive!
             assertTrue(entry.getName().startsWith(config.getName()));
-            expected.remove(FilenameUtils.getName(entry.getName()));
+            if(expected.remove(FilenameUtils.getName(entry.getName()))){
+                log.info("found expected Entry '{}'",entry.getName());
+            }
         }
         assertTrue("missing Files in index archive: "+expected,expected.isEmpty());
         

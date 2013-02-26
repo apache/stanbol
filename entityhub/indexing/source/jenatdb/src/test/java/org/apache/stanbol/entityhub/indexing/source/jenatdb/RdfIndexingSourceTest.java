@@ -46,8 +46,7 @@ public class RdfIndexingSourceTest {
     
     private static final long NUMBER_OF_ENTITIES_EXPECTED = 5;
     
-    private static final String CONFIG_ROOT = 
-        FilenameUtils.separatorsToSystem("testConfigs/");
+    private static final String CONFIG_ROOT = "testConfigs";
     /**
      * mvn copies the resources in "src/test/resources" to target/test-classes.
      * This folder is than used as classpath.<p>
@@ -55,7 +54,7 @@ public class RdfIndexingSourceTest {
      * {@link IndexingConfig}.
      */
     private static final String TEST_ROOT = 
-        FilenameUtils.separatorsToSystem("/target/test-files");
+        FilenameUtils.separatorsToSystem("target/test-files");
     private static String  userDir;
     private static String testRoot;
     /**
@@ -69,7 +68,7 @@ public class RdfIndexingSourceTest {
         }
         //store the current user.dir
         userDir = System.getProperty("user.dir");
-        testRoot = baseDir+TEST_ROOT;
+        testRoot = FilenameUtils.concat(baseDir, TEST_ROOT);
         log.info("ConfigTest Root : "+testRoot);
         //set the user.dir to the testRoot (needed to test loading of missing
         //configurations via classpath
@@ -77,7 +76,7 @@ public class RdfIndexingSourceTest {
         System.setProperty("user.dir", testRoot);
 
         //we need also to delete results of previous runs of the test
-        File testConfigs = new File(testRoot,"testConfigs");
+        File testConfigs = new File(testRoot,CONFIG_ROOT);
         if(testConfigs.exists()){
             log.info(" ... clean old test data");
             for(File testConfig : testConfigs.listFiles()){
@@ -120,7 +119,10 @@ public class RdfIndexingSourceTest {
     }
     @Test
     public void testEntityDataIterable(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"iterable",CONFIG_ROOT+"iterable"){};
+        log.info(" --- testEntityDataIterable ---");
+        String testName = "iterable";
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+File.separatorChar+testName,
+            CONFIG_ROOT+'/'+testName){};
         EntityDataIterable iterable = config.getDataIterable();
         assertNotNull(iterable);
         assertEquals(iterable.getClass(), RdfIndexingSource.class);
@@ -144,7 +146,10 @@ public class RdfIndexingSourceTest {
     }
     @Test
     public void testEntityDataProvider(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"provider",CONFIG_ROOT+"provider"){};
+        log.info(" --- testEntityDataProvider ---");
+        String testName = "provider";
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+File.separatorChar+testName,
+            CONFIG_ROOT+'/'+testName){};
         EntityIterator entityIdIterator = config.getEntityIdIterator();
         assertNotNull("Unable to perform test whithout EntityIterator",entityIdIterator);
         if(entityIdIterator.needsInitialisation()){
@@ -174,7 +179,10 @@ public class RdfIndexingSourceTest {
      */
     @Test
     public void testQuadsImport(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"quads",CONFIG_ROOT+"quads"){};
+        log.info(" --- testQuadsImport ---");
+        String testName = "quads";
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+File.separatorChar+testName,
+            CONFIG_ROOT+'/'+testName){};
         EntityIterator entityIdIterator = config.getEntityIdIterator();
         assertNotNull("Unable to perform test whithout EntityIterator",entityIdIterator);
         if(entityIdIterator.needsInitialisation()){
@@ -202,13 +210,16 @@ public class RdfIndexingSourceTest {
     }
     @Test
     public void testBNodeSupport(){
-        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"bnode",CONFIG_ROOT+"bnode"){};
+        log.info(" --- testBNodeSupport ---");
+        String testName = "bnode";
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+File.separatorChar+testName,
+            CONFIG_ROOT+'/'+testName){};
         EntityDataIterable iterable = config.getDataIterable();
         assertNotNull(iterable);
         assertEquals(iterable.getClass(), RdfIndexingSource.class);
         assertTrue(iterable.needsInitialisation());
         iterable.initialise();
-        ((RdfIndexingSource)iterable).debug();
+        //((RdfIndexingSource)iterable).debug();
         EntityDataIterator it = iterable.entityDataIterator();
         long count = 0;
         while(it.hasNext()){

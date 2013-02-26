@@ -97,24 +97,25 @@
   </build>  
 
   <dependencies>
+
     <!-- indexing dependencies -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.source.jenatdb</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
     <!-- dependencies of the solr yard destination -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.destination.solryard</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
 
@@ -138,7 +139,10 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -150,7 +154,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <scope>runtime</scope>
     </dependency>
     <dependency> <!-- we use log4j 1.2 -->
       <groupId>org.slf4j</groupId>

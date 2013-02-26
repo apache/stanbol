@@ -312,7 +312,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
         Var o = Var.alloc(valueVar);
         while (rs.hasNext()){
             Binding b = rs.nextBinding();
-            log.info("{} {} {}",new Object[]{b.get(s),b.get(p),b.get(o)});
+            log.debug("{} {} {}",new Object[]{b.get(s),b.get(p),b.get(o)});
         }
     }
     

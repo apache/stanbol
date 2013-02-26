@@ -493,6 +493,8 @@ public class IndexingConfig {
         } else { //loaded form a jar file
             boolean found = false;
             JarFile jar = null;
+            //when loading from a jar file we need Unix style separators
+            String unixResourcePath = FilenameUtils.separatorsToUnix(resourcePath);
             try {
                 jar = new JarFile(classPathRootDir);
                 //String resourceName = resource.getPath();
@@ -503,9 +505,10 @@ public class IndexingConfig {
                 while(entries.hasMoreElements() && !completed){
                     JarEntry entry = entries.nextElement();
                     String entryName = entry.getName();
-                    if(entryName.startsWith(resourcePath)){
+                    if(entryName.startsWith(resourcePath) || entryName.startsWith(unixResourcePath)){
                         log.info("found entry : {}[dir={}]",entryName,entry.isDirectory());
-                        if(entryName.equals(resourcePath) && !entry.isDirectory()){
+                        if((entryName.equals(resourcePath) || entryName.equals(unixResourcePath))
+                                && !entry.isDirectory()){
                             //found the resource and it is an file -> copy and return
                             completed = true;
                         }
@@ -566,11 +569,12 @@ public class IndexingConfig {
      * @return the URL for the resource or <code>null</code> if not found
      */
     private static URL loadViaClasspath(String resource) {
+        String unixResource = FilenameUtils.separatorsToUnix(resource);
         URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource(
-            resource);
+            unixResource);
         if(resourceUrl == null){
             resourceUrl = IndexingConfig.class.getClassLoader().getResource(
-                resource);
+                unixResource);
         }
         return resourceUrl;
     }
