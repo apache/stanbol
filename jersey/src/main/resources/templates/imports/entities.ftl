@@ -35,8 +35,9 @@
     <#if entity.name != entity.selected>for:'${entity.selected}',</#if>
     <#if entity.mentions?size &gt; 1>${entity.mentions?size} mentions
     <#else>
-      <#if entity.hasOccurrence()>pos:[${entity.start},${entity.end}]</#if></#if>,
-     conf:${entity.confidence?string("0.##")}</span>
+      <#if entity.hasOccurrence()>pos:[${entity.start},${entity.end}]</#if></#if>
+      ,conf:<#if entity.confidence??>${entity.confidence?string("0.##")}<#else>unknown</#if>
+    </span>
   </th>
 </tr>
 </thead>
