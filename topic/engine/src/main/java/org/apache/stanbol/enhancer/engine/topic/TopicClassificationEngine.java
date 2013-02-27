@@ -1036,6 +1036,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             throw new ClassifierException("Another evaluation is already running");
         }
         int updatedTopics = 0;
+        // NOTE: The folder used to create the SolrServer used for CVFold
+        //       is now created within the #embeddedSolrServerDir
+        File solrServerDir = new File(embeddedSolrServerDir,engineName + "-evaluation");
         try {
             evaluationRunning = true;
             int cvFoldCount = 3; // 3-folds CV is hardcoded for now
@@ -1044,11 +1047,11 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             // We will use the training set quite intensively, ensure that the index is packed and its
             // statistics are up to date
             getTrainingSet().optimize();
-
-            // NOTE: The folder used to create the SolrServer used for CVFold
-            //       is now created within the #embeddedSolrServerDir
+            if(!solrServerDir.exists()){
+                FileUtils.forceMkdir(solrServerDir);
+            }
             for (int cvFoldIndex = 0; cvFoldIndex < cvIterationCount; cvFoldIndex++) {
-                updatedTopics = performCVFold(cvFoldIndex, cvFoldCount, cvIterationCount,
+                updatedTopics = performCVFold(solrServerDir, cvFoldIndex, cvFoldCount, cvIterationCount,
                     incremental);
             }
             SolrServer solrServer = getActiveSolrServer();
@@ -1060,12 +1063,14 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         } catch (SolrServerException e) {
             throw new ClassifierException(e);
         } finally {
+            FileUtils.deleteQuietly(solrServerDir);
             evaluationRunning = false;
         }
         return updatedTopics;
     }
 
-    protected int performCVFold(int cvFoldIndex,
+    protected int performCVFold(File tempFolder,
+                                int cvFoldIndex,
                                 int cvFoldCount,
                                 int cvIterations,
                                 boolean incremental) throws ConfigurationException,
@@ -1085,12 +1090,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 classifier.activate(context, getCanonicalConfiguration(engineName + "-evaluation"));
             } else {
                 // non-OSGi runtime, need to do the setup manually
-                File solrServerDir = new File(embeddedSolrServerDir,engineName + "-evaluation");
-                if(solrServerDir.isDirectory()){
-                    FileUtils.forceDelete(solrServerDir);
-                }
-                FileUtils.forceMkdir(solrServerDir);
-                EmbeddedSolrServer evaluationServer = EmbeddedSolrHelper.makeEmbeddedSolrServer(solrServerDir,
+                EmbeddedSolrServer evaluationServer = EmbeddedSolrHelper.makeEmbeddedSolrServer(tempFolder,
                     "evaluationclassifierserver", "default-topic-model", "default-topic-model");
                 classifier.configure(getCanonicalConfiguration(evaluationServer));
             }
