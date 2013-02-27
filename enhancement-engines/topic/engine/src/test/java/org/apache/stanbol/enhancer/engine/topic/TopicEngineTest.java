@@ -137,6 +137,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         classifierSolrServer = null;
         trainingSetSolrServer = null;
         trainingSet = null;
+        classifier.deactivate(null);
     }
 
     protected void loadSampleTopicsFromTSV() throws IOException, SolrServerException {
