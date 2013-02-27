@@ -89,12 +89,10 @@ public class TestData {
 
 		TestData.foaf = ModelFactory.createDefaultModel();
 
-		log.debug(
+		log.info(
 				"Loading FOAF ontology from {}",
-				TestData.class.getResource(System.getProperty("file.separator")
-						+ LOCAL_RESOURCE_FOAF));
-		TestData.foaf.read(TestData.class.getResource(
-				System.getProperty("file.separator") + LOCAL_RESOURCE_FOAF)
+				TestData.class.getResource("/"+LOCAL_RESOURCE_FOAF));
+		TestData.foaf.read(TestData.class.getResource("/"+LOCAL_RESOURCE_FOAF)
 				.toString());
 	}
 }
