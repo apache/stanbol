@@ -43,8 +43,10 @@ import org.slf4j.LoggerFactory;
 /**
  * 
  * @author anil.pacaci
- * 
+ * @deprecated This class was moved to 
+ *   {@link org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrQueryUtil}
  */
+@Deprecated
 public class SolrQueryUtil {
 
     private final static Logger log = LoggerFactory.getLogger(SolrQueryUtil.class);
@@ -60,6 +62,7 @@ public class SolrQueryUtil {
 
     public final static List<Character> queryDelimiters = Arrays.asList(' ', ',');
 
+    @Deprecated
     private static String removeFacetConstraints(String query) {
         int delimiteri = query.indexOf(facetDelimiter);
         while (delimiteri > -1) {
@@ -87,6 +90,7 @@ public class SolrQueryUtil {
         return query;
     }
 
+    @Deprecated
     private static String removeSpecialCharacter(String query, char ch) {
         int starti = query.indexOf(ch);
         while (starti > -1) {
@@ -99,6 +103,7 @@ public class SolrQueryUtil {
         return query;
     }
 
+    @Deprecated
     private static String removeSpecialCharacters(String query) {
         query = query.replaceAll("[+|\\-&!\\(\\)\\{\\}\\[\\]\\*\\?\\\\]", "");
         query = removeSpecialCharacter(query, '^');
@@ -106,6 +111,7 @@ public class SolrQueryUtil {
         return query;
     }
 
+    @Deprecated
     public static String extractQueryTermFromSolrQuery(SolrParams solrQuery) {
         String queryFull = solrQuery instanceof SolrQuery ? ((SolrQuery) solrQuery).getQuery() : solrQuery
                 .get(CommonParams.Q);
@@ -125,6 +131,7 @@ public class SolrQueryUtil {
      * @param allAvailableFacetNames
      *            list of facets
      */
+    @Deprecated
     public static <T> void setFacetFields(SolrQuery solrQuery, List<T> allAvailableFacetNames) {
         solrQuery.setFields("*", SCORE_FIELD);
         solrQuery.setFacet(true);
@@ -162,6 +169,7 @@ public class SolrQueryUtil {
      * @throws SolrServerException
      * @throws IOException
      */
+    @Deprecated
     public static SolrQuery prepareSolrQuery(SolrServer solrServer, String queryTerm) throws SolrServerException,
                                                                                      IOException {
         SolrQuery solrQuery = new SolrQuery();
@@ -177,6 +185,7 @@ public class SolrQueryUtil {
      *            {@link String} query term to be represented as a {@link SolrQuery}
      * @return {@link SolrQuery} wrapping the given <code>queryTerm</code>
      */
+    @Deprecated
     public static SolrQuery prepareSolrQuery(String queryTerm) {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setQuery(queryTerm);
@@ -196,6 +205,7 @@ public class SolrQueryUtil {
      *            additional constraints to be applied in the {@link SolrQuery}.
      * @return {@link SolrQuery} constructed by using the given parameters
      */
+    @Deprecated
     public static SolrQuery prepareSolrQuery(String queryTerm,
                                              List<FacetResult> allAvailableFacets,
                                              Map<String,List<Object>> constraints) {
@@ -222,6 +232,7 @@ public class SolrQueryUtil {
         return query;
     }
 
+    @Deprecated
     private static String getFacetFieldType(String fieldName, List<FacetResult> allAvailableFacets) {
         for (FacetResult fr : allAvailableFacets) {
             if (fieldName.equals(fr.getFacetField().getName())) {
@@ -231,6 +242,7 @@ public class SolrQueryUtil {
         return "";
     }
 
+    @Deprecated
     public static List<String> getAllFacetNames(SolrServer solrServer) throws SolrServerException,
                                                                       IOException {
         List<String> facetNames = new ArrayList<String>();
@@ -241,6 +253,7 @@ public class SolrQueryUtil {
         return facetNames;
     }
 
+    @Deprecated
     public static NamedList<Object> getAllFacetFields(SolrServer solrServer) throws SolrServerException,
                                                                             IOException {
         LukeRequest qr = new LukeRequest();
@@ -266,6 +279,7 @@ public class SolrQueryUtil {
      * @param solrQuery
      *            {@link SolrQuery} to be updated with the given <code>constraints</code>
      */
+    @Deprecated
     public static void addConstraintsToSolrQuery(Set<Constraint> constraints, SolrQuery solrQuery) {
         if (constraints != null) {
             for (Constraint constraint : constraints) {

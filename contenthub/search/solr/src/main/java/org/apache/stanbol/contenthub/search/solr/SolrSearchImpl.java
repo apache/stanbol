@@ -30,8 +30,8 @@ import org.apache.stanbol.commons.semanticindex.index.IndexException;
 import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
 import org.apache.stanbol.contenthub.index.solr.SolrSemanticIndex;
-import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
+import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +53,7 @@ public class SolrSearchImpl implements SolrSearch {
         SolrQuery solrQuery = null;
         SolrServer solrServer = null;
         try {
-            SolrSemanticIndex semanticIndex = (SolrSemanticIndex) semanticIndexManager
-                    .getIndex(indexName);
+            SolrSemanticIndex semanticIndex = (SolrSemanticIndex) semanticIndexManager.getIndex(indexName);
             solrServer = semanticIndex.getServer();
             solrQuery = SolrQueryUtil.prepareSolrQuery(solrServer, queryTerm);
         } catch (SolrServerException e) {
@@ -77,8 +76,7 @@ public class SolrSearchImpl implements SolrSearch {
     public QueryResponse search(SolrParams solrQuery, String indexName) throws SearchException {
         SolrServer solrServer = null;
         try {
-            SolrSemanticIndex semanticIndex = (SolrSemanticIndex) semanticIndexManager
-                    .getIndex(indexName);
+            SolrSemanticIndex semanticIndex = (SolrSemanticIndex) semanticIndexManager.getIndex(indexName);
             solrServer = semanticIndex.getServer();
         } catch (IndexManagementException e) {
             log.error(e.getMessage(), e);

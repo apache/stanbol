@@ -34,7 +34,7 @@ public final class QueryFactory {
     private static final String SEARCH = "PREFIX ss: <" + Constants.SEARCH_URI + ">";
     private static final String CMS = "PREFIX cms: <http://www.apache.org/stanbol/cms#>";
 
-    public static final Query getClassQuery(String keyword) {
+    public static Query getClassQuery(String keyword) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(RDF).append("\n");
@@ -49,7 +49,7 @@ public final class QueryFactory {
         return com.hp.hpl.jena.query.QueryFactory.create(sb.toString());
     }
 
-    public static final Query getIndividualQuery(String keyword) {
+    public static Query getIndividualQuery(String keyword) {
         StringBuilder sb = new StringBuilder();
         sb.append(RDF).append("\n");
         sb.append(OWL).append("\n");
@@ -64,7 +64,7 @@ public final class QueryFactory {
         return com.hp.hpl.jena.query.QueryFactory.create(sb.toString());
     }
 
-    public static final Query getCMSObjectQuery(String keyword) {
+    public static Query getCMSObjectQuery(String keyword) {
         StringBuilder sb = new StringBuilder();
         sb.append(RDF).append("\n");
         sb.append(OWL).append("\n");

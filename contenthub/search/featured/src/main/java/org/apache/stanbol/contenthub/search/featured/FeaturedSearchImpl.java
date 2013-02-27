@@ -43,7 +43,6 @@ import org.apache.stanbol.commons.semanticindex.index.IndexException;
 import org.apache.stanbol.commons.semanticindex.index.IndexManagementException;
 import org.apache.stanbol.commons.semanticindex.index.SemanticIndexManager;
 import org.apache.stanbol.contenthub.index.solr.SolrSemanticIndex;
-import org.apache.stanbol.contenthub.search.solr.util.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.index.search.SearchException;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.ConstrainedDocumentSet;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.Constraint;
@@ -52,6 +51,7 @@ import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FeaturedS
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeyword;
 import org.apache.stanbol.contenthub.servicesapi.index.search.related.RelatedKeywordSearchManager;
+import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrQueryUtil;
 import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrSearch;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
 @Service
 public class FeaturedSearchImpl implements FeaturedSearch {
 
-    private final static Logger log = LoggerFactory.getLogger(FeaturedSearchImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(FeaturedSearchImpl.class);
 
     private static Map<String,List<String>> stopWords;
 
@@ -229,7 +229,8 @@ public class FeaturedSearchImpl implements FeaturedSearch {
             log.error("Failed to get enmancements for the query term: {}", queryTerm, e);
             error = true;
         } catch (IOException e) {
-            log.error("Failed to get bytes of query term: {}", queryTerm, e);
+            log.error(
+                "Failed to create a ContentItem by using " + contentItemFactory.getClass().getSimpleName() + "!", e);
             error = true;
         }
 

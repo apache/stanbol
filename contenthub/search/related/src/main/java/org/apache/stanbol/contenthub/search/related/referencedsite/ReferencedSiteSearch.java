@@ -65,7 +65,7 @@ public class ReferencedSiteSearch implements RelatedKeywordSearch {
     /**
      * dbpedia-owl:place ranged properties for related places
      */
-    public final static List<String> placeTypedProperties = Arrays
+    public static final List<String> placeTypedProperties = Arrays
             .asList(new String[] {DBPEDIA_ONT_NAMESPACE + DBPEDIA_ONT_NAMESPACE + "country",
                                   DBPEDIA_ONT_NAMESPACE + "largestCity", DBPEDIA_ONT_NAMESPACE + "city",
                                   DBPEDIA_ONT_NAMESPACE + "state", DBPEDIA_ONT_NAMESPACE + "capital",
@@ -76,7 +76,7 @@ public class ReferencedSiteSearch implements RelatedKeywordSearch {
     /**
      * dbpedia-owl:person ranged properties for related persons
      */
-    public final static List<String> personTypedProperties = Arrays
+    public static final List<String> personTypedProperties = Arrays
             .asList(new String[] {DBPEDIA_ONT_NAMESPACE + "leader", DBPEDIA_ONT_NAMESPACE + "leaderName",
                                   DBPEDIA_ONT_NAMESPACE + "child", DBPEDIA_ONT_NAMESPACE + "spouse",
                                   DBPEDIA_ONT_NAMESPACE + "partner", DBPEDIA_ONT_NAMESPACE + "president"});
@@ -84,7 +84,7 @@ public class ReferencedSiteSearch implements RelatedKeywordSearch {
     /**
      * dbpedia-owl:organization ranged properties for related organizations
      */
-    public final static List<String> organizationTypedProperties = Arrays
+    public static final List<String> organizationTypedProperties = Arrays
             .asList(new String[] {DBPEDIA_ONT_NAMESPACE + "leaderParty",
                                   DBPEDIA_ONT_NAMESPACE + "affiliation", DBPEDIA_ONT_NAMESPACE + "team",
                                   DBPEDIA_ONT_NAMESPACE + "party", DBPEDIA_ONT_NAMESPACE + "otherParty",

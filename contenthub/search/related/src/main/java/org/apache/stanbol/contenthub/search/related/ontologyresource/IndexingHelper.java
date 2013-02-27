@@ -58,8 +58,7 @@ public class IndexingHelper {
         }
 
         // Add CMS objects
-        Resource cmsObject = ResourceFactory.createResource(Constants.CMS_OBJECT
-                .getUnicodeString());
+        Resource cmsObject = ResourceFactory.createResource(Constants.CMS_OBJECT.getUnicodeString());
         List<Statement> cmsOBjects = model.listStatements(null, RDF.type, cmsObject).toList();
         for (Statement stmt : cmsOBjects) {
             Resource subject = stmt.getSubject();
@@ -78,8 +77,7 @@ public class IndexingHelper {
 
     public static String getCMSObjectName(Resource subject) {
         String name = "";
-        Property cmsNameProp = ResourceFactory.createProperty(Constants.CMS_OBJECT_NAME
-                .getUnicodeString());
+        Property cmsNameProp = ResourceFactory.createProperty(Constants.CMS_OBJECT_NAME.getUnicodeString());
         if (subject.hasProperty(cmsNameProp)) {
             name = subject.getProperty(cmsNameProp).getString();
         }

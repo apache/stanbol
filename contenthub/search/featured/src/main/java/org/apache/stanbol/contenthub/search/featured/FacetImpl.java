@@ -86,7 +86,7 @@ public class FacetImpl implements Facet {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Facet) {
-            return this.getLabel(null).equals(((Facet) obj).getLabel(null));
+            return this.getLabel(null) == ((Facet) obj).getLabel(null);
         } else {
             return false;
         }

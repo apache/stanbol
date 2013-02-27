@@ -16,9 +16,9 @@
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>org.apache.stanbol.contenthub.parent</artifactId>
-    <version>0.10.0-incubating-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
+    <artifactId>apache-stanbol-contenthub</artifactId>
+    <version>0.11.0-SNAPSHOT</version>
+    <relativePath>../..</relativePath>
   </parent>
 
   <artifactId>org.apache.stanbol.contenthub.search.featured</artifactId>
@@ -33,6 +33,18 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              org.apache.stanbol.contenthub.servicesapi.index.search.featured; provide:=true,
+              *
+            </Import-Package>
+            <Export-Package>
+              org.apache.stanbol.contenthub.search.featured,
+              org.apache.stanbol.contenthub.search.featured.util
+            </Export-Package>
+          </instructions>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -40,27 +52,25 @@
       </plugin>
     </plugins>
   </build>
+  
   <dependencies>
+    <!-- Increased version because of the Faceted search API -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.store.solr</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.contenthub.index</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.search.solr</artifactId>
-      <version>0.10.0-incubating-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
+
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
