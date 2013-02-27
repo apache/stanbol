@@ -313,6 +313,16 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
      */
     private File embeddedSolrServerDir;
 
+    /**
+     * Embedded Solr server used for {@link #performCVFold(File, int, int, int, boolean)}
+     * if no ManagedSolrServer is present (e.g. when running outside of OSGI).
+     * Lazily initialised relative to {@link #embeddedSolrServerDir} on the first
+     * call to performCVFold
+     */
+    private EmbeddedSolrServer __evaluationServer;
+
+    private File __evaluationServerDir;
+
     void configureEmbeddedSolrServerDir(File directory){
         embeddedSolrServerDir = directory;
     }
@@ -350,6 +360,16 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         }
         if (trainingSetTracker != null) {
             trainingSetTracker.close();
+        }
+        //shutdown the evaluation server and delete the data of the evaluation server
+        if(__evaluationServer != null){
+            try {
+                __evaluationServer.getCoreContainer().shutdown();
+            }catch (Exception e){
+              //ignore  
+            } finally {
+                FileUtils.deleteQuietly(__evaluationServerDir);
+            }
         }
         context = null;
     }
@@ -1038,7 +1058,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         int updatedTopics = 0;
         // NOTE: The folder used to create the SolrServer used for CVFold
         //       is now created within the #embeddedSolrServerDir
-        File solrServerDir = new File(embeddedSolrServerDir,engineName + "-evaluation");
         try {
             evaluationRunning = true;
             int cvFoldCount = 3; // 3-folds CV is hardcoded for now
@@ -1047,11 +1066,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             // We will use the training set quite intensively, ensure that the index is packed and its
             // statistics are up to date
             getTrainingSet().optimize();
-            if(!solrServerDir.exists()){
-                FileUtils.forceMkdir(solrServerDir);
-            }
             for (int cvFoldIndex = 0; cvFoldIndex < cvIterationCount; cvFoldIndex++) {
-                updatedTopics = performCVFold(solrServerDir, cvFoldIndex, cvFoldCount, cvIterationCount,
+                updatedTopics = performCVFold(cvFoldIndex, cvFoldCount, cvIterationCount,
                     incremental);
             }
             SolrServer solrServer = getActiveSolrServer();
@@ -1063,14 +1079,13 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         } catch (SolrServerException e) {
             throw new ClassifierException(e);
         } finally {
-            FileUtils.deleteQuietly(solrServerDir);
+            FileUtils.deleteQuietly(__evaluationServerDir);
             evaluationRunning = false;
         }
         return updatedTopics;
     }
 
-    protected int performCVFold(File tempFolder,
-                                int cvFoldIndex,
+    protected int performCVFold(int cvFoldIndex,
                                 int cvFoldCount,
                                 int cvIterations,
                                 boolean incremental) throws ConfigurationException,
@@ -1089,10 +1104,15 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 classifier.bindManagedSolrServer(managedSolrServer);
                 classifier.activate(context, getCanonicalConfiguration(engineName + "-evaluation"));
             } else {
-                // non-OSGi runtime, need to do the setup manually
-                EmbeddedSolrServer evaluationServer = EmbeddedSolrHelper.makeEmbeddedSolrServer(tempFolder,
-                    "evaluationclassifierserver", "default-topic-model", "default-topic-model");
-                classifier.configure(getCanonicalConfiguration(evaluationServer));
+                if(__evaluationServer == null){
+                    __evaluationServerDir = new File(embeddedSolrServerDir,engineName + "-evaluation");
+                    if(!__evaluationServerDir.exists()){
+                        FileUtils.forceMkdir(__evaluationServerDir);
+                    }
+                    __evaluationServer = EmbeddedSolrHelper.makeEmbeddedSolrServer(__evaluationServerDir,
+                        "evaluationclassifierserver", "default-topic-model", "default-topic-model");
+                }
+                classifier.configure(getCanonicalConfiguration(__evaluationServer));
             }
         } catch (Exception e) {
             throw new ClassifierException(e);
