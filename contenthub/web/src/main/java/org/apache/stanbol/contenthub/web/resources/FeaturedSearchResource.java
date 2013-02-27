@@ -222,12 +222,13 @@ public class FeaturedSearchResource extends BaseStanbolResource {
             this.chosenFacets = JSONUtils.convertToString(constraintsMap);
 
             SolrQuery sq;
+            List<FacetResult> allAvailableFacets = featuredSearch.getAllFacetResults(indexName);
             if (this.chosenFacets != null) {
-                List<FacetResult> allAvailableFacets = featuredSearch.getAllFacetResults(indexName);
                 sq = SolrQueryUtil.prepareSolrQuery(queryTerm, allAvailableFacets, constraintsMap);
             } else {
                 sq = SolrQueryUtil.prepareSolrQuery(queryTerm);
             }
+            SolrQueryUtil.setFacetFields(sq, allAvailableFacets);
             sq.setStart(offset);
             sq.setRows(limit + 1);
             this.searchResults = featuredSearch.search(sq, ontologyURI, indexName);
