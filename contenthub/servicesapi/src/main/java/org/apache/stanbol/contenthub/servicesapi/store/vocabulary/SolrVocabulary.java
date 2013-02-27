@@ -275,7 +275,7 @@ public class SolrVocabulary {
      */
     public static boolean isNameExcluded(String name) {
         // trim the data type extension if there is one
-        int underscoreIndex = name.lastIndexOf("_");
+        int underscoreIndex = name.lastIndexOf('_');
         if (underscoreIndex != -1) {
             String extension = name.substring(underscoreIndex);
             if (DYNAMIC_FIELD_EXTENSIONS.contains(extension)) {
