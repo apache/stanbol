@@ -125,6 +125,7 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
 
     @Test
     public void testDateSerialization() throws Exception {
+        log.info(" --- testDateSerialization --- ");
         GregorianCalendar timeUtc = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         timeUtc.set(2012, 23, 12, 06, 43, 00);
         timeUtc.set(Calendar.MILLISECOND, 0);
@@ -138,6 +139,7 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
 
     @Test
     public void testEmptyTrainingSet() throws TrainingSetException {
+        log.info(" --- testEmptyTrainingSet --- ");
         Batch<Example> examples = trainingSet.getPositiveExamples(new ArrayList<String>(), null);
         assertEquals(examples.items.size(), 0);
         assertFalse(examples.hasMore);
@@ -157,6 +159,7 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
 
     @Test
     public void testStoringExamples() throws ConfigurationException, TrainingSetException {
+        log.info(" --- testStoringExamples --- ");
         trainingSet.registerExample("example1", "Text of example1.", Arrays.asList(TOPIC_1));
         trainingSet.registerExample("example2", "Text of example2.", Arrays.asList(TOPIC_1, TOPIC_2));
         trainingSet.registerExample("example3", "Text of example3.", new ArrayList<String>());
@@ -201,6 +204,7 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
 
     @Test
     public void testBatchingPositiveExamples() throws ConfigurationException, TrainingSetException {
+        log.info(" --- testBatchingPositiveExamples --- ");
         Set<String> expectedCollectedIds = new HashSet<String>();
         Set<String> expectedCollectedText = new HashSet<String>();
         Set<String> collectedIds = new HashSet<String>();
@@ -243,6 +247,7 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
 
     @Test
     public void testBatchingNegativeExamplesAndAutoId() throws ConfigurationException, TrainingSetException {
+        log.info(" --- testBatchingNegativeExamplesAndAutoId --- ");
         Set<String> expectedCollectedIds = new HashSet<String>();
         Set<String> expectedCollectedText = new HashSet<String>();
         Set<String> collectedIds = new HashSet<String>();
@@ -276,6 +281,7 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
 
     @Test
     public void testHasChangedSince() throws Exception {
+        log.info(" --- testHasChangedSince --- ");
         Date date0 = new Date();
         assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_1), date0));
         assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_2), date0));

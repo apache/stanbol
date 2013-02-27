@@ -306,6 +306,17 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, bind = "bindManagedSolrServer", unbind = "unbindManagedSolrServer", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC)
     protected ManagedSolrServer managedSolrServerDummy; // trick to call the super class binders
 
+    /**
+     * Only used for testing outside an OSGI environment (see STANBOL-811: 
+     * the previously used {@link File#createTempFile(String, String)} does not
+     * work on some Windows versions.
+     */
+    private File embeddedSolrServerDir;
+
+    void configureEmbeddedSolrServerDir(File directory){
+        embeddedSolrServerDir = directory;
+    }
+    
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, InvalidSyntaxException {
         @SuppressWarnings("unchecked")
@@ -1025,11 +1036,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             throw new ClassifierException("Another evaluation is already running");
         }
         int updatedTopics = 0;
-        File tmpfolder = null;
         try {
-            tmpfolder = File.createTempFile("stanbol-evaluation-folder-", ".tmp");
-            tmpfolder.delete();
-            tmpfolder.mkdir();
             evaluationRunning = true;
             int cvFoldCount = 3; // 3-folds CV is hardcoded for now
             int cvIterationCount = 3; // make it possible to limit the number of folds to use
@@ -1038,9 +1045,10 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             // statistics are up to date
             getTrainingSet().optimize();
 
-            // TODO: make the temporary folder path configurable with a property
+            // NOTE: The folder used to create the SolrServer used for CVFold
+            //       is now created within the #embeddedSolrServerDir
             for (int cvFoldIndex = 0; cvFoldIndex < cvIterationCount; cvFoldIndex++) {
-                updatedTopics = performCVFold(tmpfolder, cvFoldIndex, cvFoldCount, cvIterationCount,
+                updatedTopics = performCVFold(cvFoldIndex, cvFoldCount, cvIterationCount,
                     incremental);
             }
             SolrServer solrServer = getActiveSolrServer();
@@ -1052,14 +1060,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         } catch (SolrServerException e) {
             throw new ClassifierException(e);
         } finally {
-            FileUtils.deleteQuietly(tmpfolder);
             evaluationRunning = false;
         }
         return updatedTopics;
     }
 
-    protected int performCVFold(File tmpfolder,
-                                int cvFoldIndex,
+    protected int performCVFold(int cvFoldIndex,
                                 int cvFoldCount,
                                 int cvIterations,
                                 boolean incremental) throws ConfigurationException,
@@ -1079,7 +1085,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 classifier.activate(context, getCanonicalConfiguration(engineName + "-evaluation"));
             } else {
                 // non-OSGi runtime, need to do the setup manually
-                EmbeddedSolrServer evaluationServer = EmbeddedSolrHelper.makeEmbeddedSolrServer(tmpfolder,
+                File solrServerDir = new File(embeddedSolrServerDir,engineName + "-evaluation");
+                if(solrServerDir.isDirectory()){
+                    FileUtils.forceDelete(solrServerDir);
+                }
+                FileUtils.forceMkdir(solrServerDir);
+                EmbeddedSolrServer evaluationServer = EmbeddedSolrHelper.makeEmbeddedSolrServer(solrServerDir,
                     "evaluationclassifierserver", "default-topic-model", "default-topic-model");
                 classifier.configure(getCanonicalConfiguration(evaluationServer));
             }

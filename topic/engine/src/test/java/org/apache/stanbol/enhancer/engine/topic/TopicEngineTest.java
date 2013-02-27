@@ -122,7 +122,8 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         classifierSolrServer = makeEmbeddedSolrServer(solrHome, "classifierserver", "test-topic-model",
             "default-topic-model");
         classifier = TopicClassificationEngine.fromParameters(getDefaultClassifierConfigParams());
-
+        //configure the directory used to create Embedded SolrServers for CVFold
+        classifier.configureEmbeddedSolrServerDir(solrHome);
         trainingSetSolrServer = makeEmbeddedSolrServer(solrHome, "trainingsetserver",
             "test-topic-trainingset", "default-topic-trainingset");
         trainingSet = new SolrTrainingSet();
@@ -162,6 +163,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
 
     @Test
     public void testEngineConfiguration() throws ConfigurationException {
+        log.info(" --- testEngineConfiguration --- ");
         Hashtable<String,Object> config = getDefaultClassifierConfigParams();
         TopicClassificationEngine classifier = TopicClassificationEngine.fromParameters(config);
         assertNotNull(classifier);
@@ -199,6 +201,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
 
     @Test
     public void testImportModelFromSKOS() throws Exception {
+        log.info(" --- testImportModelFromSKOS --- ");
         Parser parser = Parser.getInstance();
         parser.bindParsingProvider(new JenaParserProvider());
         Graph graph = parser.parse(getClass().getResourceAsStream("/sample-scheme.skos.rdf.xml"),
@@ -215,6 +218,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
 
     @Test
     public void testProgrammaticThesaurusConstruction() throws Exception {
+        log.info(" --- testProgrammaticThesaurusConstruction --- ");
         // Register the roots of the taxonomy
         classifier.addConcept("http://example.com/topics/root1", null);
         classifier.addConcept("http://example.com/topics/root2", null);
@@ -254,6 +258,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
 
     @Test
     public void testEmptyIndexTopicClassification() throws Exception {
+        log.info(" --- testEmptyIndexTopicClassification --- ");
         TopicClassificationEngine engine = TopicClassificationEngine
                 .fromParameters(getDefaultClassifierConfigParams());
         List<TopicSuggestion> suggestedTopics = engine.suggestTopics("This is a test.");
@@ -265,6 +270,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
     // to get updated to work with the new Solr schema + move the CSV import directly to the classifier or
     // training set API
     public void testTopicClassification() throws Exception {
+        log.info(" --- testTopicClassification --- ");
         loadSampleTopicsFromTSV();
         List<TopicSuggestion> suggestedTopics = classifier
                 .suggestTopics("The Man Who Shot Liberty Valance is a 1962"
@@ -279,7 +285,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
 
     @Test
     public void testTrainClassifierFromExamples() throws Exception {
-
+        log.info(" --- testTrainClassifierFromExamples --- ");
         // mini taxonomy for news articles
         String[] business = {"urn:topics/business", "http://dbpedia.org/resource/Business"};
         String[] technology = {"urn:topics/technology", "http://dbpedia.org/resource/Technology"};
@@ -410,6 +416,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
 
     @Test
     public void testUpdatePerformanceEstimates() throws Exception {
+        log.info(" --- testUpdatePerformanceEstimates --- ");
         ClassificationReport performanceEstimates;
         // no registered topic
         try {
@@ -453,6 +460,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
 
     @Test
     public void testCrossValidation() throws Exception {
+        log.info(" --- testCrossValidation --- ");
         // seed a pseudo random number generator for reproducible tests
         Random rng = new Random(0);
         ClassificationReport performanceEstimates;
