@@ -17,12 +17,12 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>2-incubating-SNAPSHOT</version>
+    <version>4-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <artifactId>org.apache.stanbol.commons.semanticindex.servicesapi</artifactId>
-  <version>0.10.0-incubating-SNAPSHOT</version>
+  <version>0.12.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Semantic Index API Bundle</name>
