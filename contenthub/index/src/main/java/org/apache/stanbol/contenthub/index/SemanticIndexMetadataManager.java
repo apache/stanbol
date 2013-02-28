@@ -85,10 +85,10 @@ public class SemanticIndexMetadataManager {
                         configFile.getAbsolutePath());
                 } catch (FileNotFoundException e) {
                     logger.error("IndexMetadata file cannot be found");
-                    throw new IndexManagementException("IndexMetadata file cannot be found");
+                    throw new IndexManagementException("IndexMetadata file cannot be found", e);
                 } catch (IOException e) {
                     logger.error("Failed to read from input stream");
-                    throw new IndexManagementException("Failed to read from input stream");
+                    throw new IndexManagementException("Failed to read from input stream", e);
                 } finally {
                     IOUtils.closeQuietly(is);
                 }
@@ -153,7 +153,7 @@ public class SemanticIndexMetadataManager {
             } catch (IOException e) {
                 logger.error("Failed to write indexMetadataFilePath to the specified output stream");
                 throw new IndexManagementException(
-                        "Failed to write indexMetadataFilePath to the specified output stream");
+                        "Failed to write indexMetadataFilePath to the specified output stream", e);
             } finally {
                 IOUtils.closeQuietly(out);
             }

@@ -22,9 +22,9 @@
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>org.apache.stanbol.contenthub.parent</artifactId>
-    <version>0.10.0-incubating-SNAPSHOT</version>
-    <relativePath>../parent</relativePath>
+    <artifactId>apache-stanbol-contenthub</artifactId>
+    <version>0.11.0-SNAPSHOT</version>
+    <relativePath>..</relativePath>
   </parent>
 
   <artifactId>org.apache.stanbol.contenthub.defaults</artifactId>

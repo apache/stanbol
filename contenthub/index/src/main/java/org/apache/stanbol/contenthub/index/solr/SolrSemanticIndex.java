@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.ws.rs.core.MediaType;
-
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -62,6 +60,7 @@ import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.index.AbstractLDPathSemanticIndex;
+import org.apache.stanbol.contenthub.index.AbstractSemanticIndex;
 import org.apache.stanbol.contenthub.servicesapi.index.search.featured.FeaturedSearch;
 import org.apache.stanbol.contenthub.servicesapi.index.search.solr.SolrSearch;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
@@ -79,7 +78,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * LDPath based {@link SemanticIndex} implementation. This implementations creates the underlying Solr core by
+ * Solr based {@link SemanticIndex} implementation. This implementations creates the underlying Solr core by
  * parsing the provided LDPath program. Several LDPath based semantic indexes can be created through the
  * associated RESTful services deployed under {stanbolhost}/contenthub/index/ldpath or through the Felix Web
  * Console.
@@ -121,14 +120,14 @@ public class SolrSemanticIndex extends AbstractLDPathSemanticIndex {
     private static final Logger logger = LoggerFactory.getLogger(SolrSemanticIndex.class);
 
     private static final Set<String> SUPPORTED_MIMETYPES = Collections.unmodifiableSet(new HashSet<String>(
-            Arrays.asList(MediaType.TEXT_HTML, MediaType.TEXT_PLAIN, MediaType.TEXT_XML)));
+            Arrays.asList("text/html", "text/plain", "text/xml")));
 
     private boolean indexContent;
 
     @Reference
     private SolrSemanticIndexFactory solrSemanticIndexFactory;
 
-    @Reference(target = "(org.apache.solr.core.CoreContainer.name=contenthub)")
+    @Reference(target = "(org.apache.solr.core.CoreContainer.name=contenthubSolrSemanticIndex)")
     private ManagedSolrServer managedSolrServer;
 
     private int solrCheckTime;
@@ -332,7 +331,9 @@ public class SolrSemanticIndex extends AbstractLDPathSemanticIndex {
 
     private void performRemove(String ciURI) throws IndexException {
         if (ciURI == null || ciURI.isEmpty()) {
-            return;
+            String msg = "URI of ContentItem cannot be null or empty";
+            logger.error(msg);
+            throw new IndexException(msg);
         }
 
         SolrServer solrServer = null;
@@ -503,13 +504,13 @@ public class SolrSemanticIndex extends AbstractLDPathSemanticIndex {
             properties.get(AbstractLDPathSemanticIndex.PROP_LD_PATH_PROGRAM));
         propertiesSubset.put(SolrSemanticIndex.PROP_INDEX_CONTENT,
             properties.get(SolrSemanticIndex.PROP_INDEX_CONTENT));
-        propertiesSubset.put(AbstractLDPathSemanticIndex.PROP_BATCH_SIZE,
-            properties.get(AbstractLDPathSemanticIndex.PROP_BATCH_SIZE));
-        propertiesSubset.put(AbstractLDPathSemanticIndex.PROP_INDEXING_SOURCE_NAME,
-            properties.get(AbstractLDPathSemanticIndex.PROP_INDEXING_SOURCE_NAME));
+        propertiesSubset.put(AbstractSemanticIndex.PROP_BATCH_SIZE,
+            properties.get(AbstractSemanticIndex.PROP_BATCH_SIZE));
+        propertiesSubset.put(AbstractSemanticIndex.PROP_INDEXING_SOURCE_NAME,
+            properties.get(AbstractSemanticIndex.PROP_INDEXING_SOURCE_NAME));
         propertiesSubset.put(PROP_SOLR_CHECK_TIME, properties.get(PROP_SOLR_CHECK_TIME));
-        propertiesSubset.put(AbstractLDPathSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD,
-            properties.get(AbstractLDPathSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD));
+        propertiesSubset.put(AbstractSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD,
+            properties.get(AbstractSemanticIndex.PROP_INDEXING_SOURCE_CHECK_PERIOD));
         propertiesSubset.put(Constants.SERVICE_PID, properties.get(Constants.SERVICE_PID));
         propertiesSubset.put(Constants.SERVICE_RANKING, properties.get(Constants.SERVICE_RANKING));
         propertiesSubset.put(PROP_REVISION, this.revision);

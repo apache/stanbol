@@ -64,7 +64,7 @@ public class SolrSemanticIndexFactory extends AbstractLDPathSemanticIndexFactory
 
     private BundleContext bundleContext;
 
-    @Reference(target = "(org.apache.solr.core.CoreContainer.name=contenthub)")
+    @Reference(target = "(org.apache.solr.core.CoreContainer.name=contenthubSolrSemanticIndex)")
     private ManagedSolrServer managedSolrServer;
 
     @Reference
@@ -272,7 +272,7 @@ public class SolrSemanticIndexFactory extends AbstractLDPathSemanticIndexFactory
             logger.info("Semantic Index: {} was removed successfully", indexName);
         } catch (IOException e) {
             throw new IndexManagementException(String.format(
-                "Failed to remove configuration for the Semantic Index: %s", indexName));
+                "Failed to remove configuration for the Semantic Index: %s", indexName), e);
         }
     }
 }

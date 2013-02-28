@@ -274,7 +274,9 @@ public class LDPathUtils {
 
     private InputStream getSolrTemplateStream() throws IndexManagementException {
         String solrCorePath = SOLR_CORE_PATH;
-        if (!solrCorePath.endsWith(File.separator)) solrCorePath += File.separator;
+        if (!solrCorePath.endsWith(File.separator)) {
+            solrCorePath += File.separator;
+        }
         String templateZip = solrCorePath + SOLR_TEMPLATE_ZIP;
 
         URL resource = bundle.getEntry(templateZip);
