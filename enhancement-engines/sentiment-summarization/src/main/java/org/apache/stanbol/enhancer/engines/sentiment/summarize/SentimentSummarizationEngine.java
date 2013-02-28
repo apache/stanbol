@@ -17,6 +17,7 @@
 package org.apache.stanbol.enhancer.engines.sentiment.summarize;
 
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.PHRASE_ANNOTATION;
+import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.SENTIMENT_ANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.createTextEnhancement;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
@@ -27,6 +28,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ST
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +37,8 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import javax.swing.DebugGraphics;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -52,6 +56,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Section;
+import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Span;
 import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
@@ -87,13 +92,26 @@ import org.slf4j.LoggerFactory;
     configurationFactory=true) //allow multiple instances to be configured
 @Service
 @Properties(value={
-    @Property(name= EnhancementEngine.PROPERTY_NAME,value=SentimentSummarizationEngine.DEFAULT_ENGINE_NAME),
+    @Property(name=EnhancementEngine.PROPERTY_NAME,value=SentimentSummarizationEngine.DEFAULT_ENGINE_NAME),
+    @Property(name=SentimentSummarizationEngine.PROPERTY_DOCUMENT_SENTIMENT_STATE, boolValue=true),
+    @Property(name=SentimentSummarizationEngine.PROPERTY_SENTENCE_SENTIMENT_STATE, boolValue=true),
+    @Property(name=SentimentSummarizationEngine.PROPERTY_PHRASE_SENTIMENT_STATE, boolValue=true),
     @Property(name=Constants.SERVICE_RANKING,intValue=-100) //give the default instance a ranking < 0
 })
 public class SentimentSummarizationEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties {
 
+    public static final String PROPERTY_PHRASE_SENTIMENT_STATE = "enhancer.engine.sentiment.summarization.phraseSentimentState";
+    public static final boolean DEFAULT_PHRASE_SENTIMENT_STATE = true;
+    public static final String PROPERTY_SENTENCE_SENTIMENT_STATE = "enhancer.engine.sentiment.summarization.sentenceSentimentState";
+    public static final boolean DEFAULT_SENTENCE_SENTIMENT_STATE = true;
+    public static final String PROPERTY_DOCUMENT_SENTIMENT_STATE = "enhancer.engine.sentiment.summarization.documentSentimentState";
+    public static final boolean DEFAULT_DOCUMENT_SENTIMENT_STATE = true;
+//    public static final String PROPERTY_NOUN_CONTEXT_SIZE = "enhancer.engine.sentiment.summarization.nounContextSize";
+    
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    private static final EnumSet<Pos> DEFAULT_SECTION_BORDER_TAGS  = EnumSet.of(
+        Pos.SentenceMedialPunctuation);
     
     private static final EnumSet<Pos> DEFAULT_NEGATION_TAGS = EnumSet.of(
         Pos.NegativeAdverb,Pos.NegativeDeterminer, Pos.NegativeParticle,
@@ -127,29 +145,63 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
 
 
     private static final int DEFAULT_NEGATION_CONTEXT = 2;
+    private static final int DEFAULT_CONJUCTION_CONTEXT = 1;
 
+    private static final int DEFAULT_NOUN_CONTEXT = 4;
 
-    private static final int DEFAULT_NOUN_CONTET = 2;
-    boolean writeNounPhraseSentiments = true;
-    boolean writeSentenceSentimets = true;
-    boolean writeTextSectionSentiments = true;
-    boolean wirteDocumentSentiments = true;
-    boolean writeTextSentiments = true;
+    boolean writeSentimentPhrases = true;
+    boolean writeSentencesSentimet = true;
+    boolean writeDocumentSentiment = true;
+    boolean writeSentimentData = false;
     
     private EnumSet<Pos> negativePosTags = DEFAULT_NEGATION_TAGS;
+    private EnumSet<Pos> sectionBorderPosTags = DEFAULT_SECTION_BORDER_TAGS;
     private EnumSet<LexicalCategory> countableLexCats = DEFAULT_COUNT_LEXICAL_CATEGORIES;
     
     private final LiteralFactory lf = LiteralFactory.getInstance();
 
 
     private int negationContext = DEFAULT_NEGATION_CONTEXT;
-    private int nounContext = DEFAULT_NOUN_CONTET;
+    private int nounContext = DEFAULT_NOUN_CONTEXT;
+ 
+    private int conjuctionContext = DEFAULT_CONJUCTION_CONTEXT;
+    
+    /**
+     * Used to sort {@link Sentiment}s before merging them to {@link SentimentPhrase}s
+     */
+    private static final Comparator<Sentiment> sentimentComparator = new Comparator<Sentiment>(){
+
+        @Override
+        public int compare(Sentiment s1, Sentiment s2) {
+            if(s1.getStart() == s2.getStart()){
+                return s1.getEnd() > s2.getEnd() ? -1 : s1.getEnd() == s2.getEnd() ?  0 : -1;
+            } else {
+                return s1.getStart() < s2.getStart() ? -1 : 1;
+            }
+        }
+        
+    };
     
     @Override
     @Activate
     protected void activate(ComponentContext ctx) throws ConfigurationException {
         log.info(" activate {} with config {}",getClass().getSimpleName(),ctx.getProperties());
         super.activate(ctx);
+        //should we write sentiment values for the document
+        Object value = ctx.getProperties().get(PROPERTY_DOCUMENT_SENTIMENT_STATE);
+        this.writeDocumentSentiment = value == null ? DEFAULT_DOCUMENT_SENTIMENT_STATE :
+            value instanceof Boolean ? ((Boolean)value).booleanValue() : 
+                Boolean.parseBoolean(value.toString());
+        //should we write sentiment values for sentences
+        value = ctx.getProperties().get(PROPERTY_SENTENCE_SENTIMENT_STATE);
+        this.writeDocumentSentiment = value == null ? DEFAULT_SENTENCE_SENTIMENT_STATE :
+            value instanceof Boolean ? ((Boolean)value).booleanValue() : 
+                Boolean.parseBoolean(value.toString());
+        //should we write sentiment values for phrases
+        value = ctx.getProperties().get(PROPERTY_PHRASE_SENTIMENT_STATE);
+        this.writeDocumentSentiment = value == null ? DEFAULT_PHRASE_SENTIMENT_STATE :
+            value instanceof Boolean ? ((Boolean)value).booleanValue() : 
+                Boolean.parseBoolean(value.toString());
     }
     
     @Override
@@ -170,25 +222,25 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
         String language = NlpEngineHelper.getLanguage(this, ci, true);
         AnalysedText at = NlpEngineHelper.getAnalysedText(this, ci, true);
         //configure the spanTypes based on the configuration
-        EnumSet<Span.SpanTypeEnum> spanTypes = EnumSet.noneOf(SpanTypeEnum.class);
-        if(writeNounPhraseSentiments){
-            spanTypes.add(SpanTypeEnum.Chunk);
-        }
-        if(writeSentenceSentimets){
-            spanTypes.add(SpanTypeEnum.Sentence);
-        }
-        if(writeTextSectionSentiments){
-            spanTypes.add(SpanTypeEnum.TextSection);
-        }
-        if(writeTextSentiments ){
-            spanTypes.add(SpanTypeEnum.Text);
-        }
+//        EnumSet<Span.SpanTypeEnum> spanTypes = EnumSet.noneOf(SpanTypeEnum.class);
+//        if(writeSentimentPhrases){
+//            spanTypes.add(SpanTypeEnum.Chunk);
+//        }
+//        if(writeSentencesSentimet){
+//            spanTypes.add(SpanTypeEnum.Sentence);
+//        }
+//        if(writeTextSectionSentiments){
+//            spanTypes.add(SpanTypeEnum.TextSection);
+//        }
+//        if(writeTextSentiments ){
+//            spanTypes.add(SpanTypeEnum.Text);
+//        }
         
-        List<SentimentInfo> sentimentInfos = summarizeSentiments(at, spanTypes, language);
+        List<SentimentPhrase> sentiments = extractSentiments(at, language);
         String detectedLang = EnhancementEngineHelper.getLanguage(ci);
         ci.getLock().writeLock().lock();
         try {
-            writeSentimentEnhancements(ci,sentimentInfos,at,
+            writeSentimentEnhancements(ci,sentiments,at,
                 detectedLang == null ? null : new Language(detectedLang));
         } finally {
             ci.getLock().writeLock().unlock();
@@ -200,117 +252,289 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
         return Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING, (Object)ORDERING_EXTRACTION_ENHANCEMENT);
     }
     /**
-     * 
-     * @param at
-     * @return
+     * Extracts {@link Sentiment}s for words with a {@link NlpAnnotations#SENTIMENT_ANNOTATION}.
+     * The {@link NlpAnnotations#POS_ANNOTATION}s are used to link those words with
+     * {@link LexicalCategory#Noun}s.
+     * @param at the AnalyzedText to process
+     * @return the {@link Sentiment} instances organised along {@link Sentence}s. If
+     * no {@link Sentence}s are present on the parsed {@link AnalysedText}, than all
+     * {@link Sentiment}s are added to the {@link AnalysedText}. Otherwise only 
+     * {@link Sentiment}s not contained within a {@link Sentence} are added to the
+     * {@link AnalysedText} key.
      */
-    private List<SentimentInfo> summarizeSentiments(AnalysedText at, EnumSet<SpanTypeEnum> spanTypes, String language) {
-        spanTypes.add(SpanTypeEnum.Token);
-        Iterator<Span> tokenIt = at.getEnclosed(spanTypes);
-        //List with the section that contain sentiments
-        List<SentimentInfo> sentimentInfos = new ArrayList<SentimentInfo>();
-        NavigableMap<Span,SentimentInfo> activeSpans = new TreeMap<Span,SentimentInfo>();
-        if(spanTypes.contains(SpanTypeEnum.Text)){
-            activeSpans.put(at, new SentimentInfo(at));
-        }
-//        int index = -1;
+    private List<SentimentPhrase> extractSentiments(AnalysedText at, String language) {
+        //we do use Sentences (optional) and Tokens (required)
+        Iterator<Span> tokenIt = at.getEnclosed(EnumSet.of(
+            SpanTypeEnum.Sentence, SpanTypeEnum.Token));
         List<Sentiment> sentimentTokens = new ArrayList<Sentiment>(32);
-        SortedMap<Integer,Token> negations = new TreeMap<Integer,Token>();
-        SortedMap<Integer,Token> nouns = new TreeMap<Integer,Token>();
+        NavigableMap<Integer,Token> negations = new TreeMap<Integer,Token>();
+        NavigableMap<Integer,Token> nounsAndPronouns = new TreeMap<Integer,Token>();
+        NavigableMap<Integer,Token> verbs = new TreeMap<Integer,Token>();
+        NavigableMap<Integer,Token> conjuctions = new TreeMap<Integer,Token>();
+        NavigableMap<Integer,Token> sectionBorders = new TreeMap<Integer,Token>();
         boolean firstTokenInSentence = true;
+        Sentence sentence = null;
+        final List<SentimentPhrase> sentimentPhrases = new ArrayList<SentimentPhrase>();
         while(tokenIt.hasNext()){
             Span span = tokenIt.next();
             switch (span.getType()) {
                 case Token:
                     Token word = (Token)span;
+                    Integer wordIndex = sentimentTokens.size();
                     Value<Double> sentimentAnnotation = span.getAnnotation(SENTIMENT_ANNOTATION);
-                    Iterator<Entry<Span,SentimentInfo>> entries = activeSpans.entrySet().iterator();
+                    boolean addToList = false;
+                    Sentiment sentiment = null;
                     if(sentimentAnnotation != null && sentimentAnnotation.value() != null &&
                             !sentimentAnnotation.value().equals(ZERO)){
-                        Sentiment sentiment = new Sentiment(word, sentimentAnnotation.value());
+                        sentiment = new Sentiment(word, sentimentAnnotation.value(),
+                            sentence == null || word.getEnd() > sentence.getEnd() ?
+                                    null : sentence);
+                        addToList = true;
+                    }
+                    if(isNegation((Token)span, language)){
+                        addToList = true;
+                        negations.put(wordIndex, word);
+                    } else if(isNoun(word, firstTokenInSentence, language) ||
+                            isPronoun(word,language)){
+                        addToList = true;
+                        nounsAndPronouns.put(wordIndex, word);
+                    } else if(isSectionBorder(word, language)){
+                        addToList = true;
+                        sectionBorders.put(wordIndex, word);
+                    } else if(isVerb(word, language)){
+                        addToList = true;
+                        verbs.put(wordIndex, word);
+                    } else if(isCoordinatingConjuction(word,language)){
+                        addToList = true;
+                        conjuctions.put(wordIndex, word);
+                    } else if(isCountable(word, language)){ 
+                        addToList = true;
+                    }
+                    if(log.isDebugEnabled()){
+                        Value<PosTag> pos = word.getAnnotation(NlpAnnotations.POS_ANNOTATION);
+                        log.debug(" [{}] '{}' pos: {}, sentiment {}", new Object[]{
+                                addToList ? sentimentTokens.size() : "-", 
+                                word.getSpan(),pos.value().getCategories(), 
+                                sentiment == null ? "none" : sentiment.getValue()});
+                    }
+                    if(addToList){
                         sentimentTokens.add(sentiment); //add the token
-                        while(entries.hasNext()){
-                            Entry<Span,SentimentInfo> entry = entries.next();
-                            //if(span.getEnd() > entry.getKey().getEnd()){ //fully enclosed
-                            if(entry.getKey().getEnd() > span.getStart()){ //partly enclosed
-                                entry.getValue().addSentiment(sentiment);
-                            } else { // span has completed
-                                if(entry.getValue().hasSentiment()){ //if a sentiment was found
-                                    //add it to the list
-                                    sentimentInfos.add(entry.getValue());
-                                }
-                                entries.remove(); // remove completed
-                            }
-                        }
-                    } else if(isNegation((Token)span, language)){
-                        sentimentTokens.add(null); //count negations
-                        negations.put(sentimentTokens.size()-1, word);
-                    } else if(isNoun(word, firstTokenInSentence, language)){
-                        sentimentTokens.add(null); //count nouns
-                        nouns.put(sentimentTokens.size()-1, word);
-                    } else if(isCountable(word, language)){ //no sentiment tag
-                        sentimentTokens.add(null); //to keep distances for context
                     }
                     firstTokenInSentence = false;
                     break;
-                case Chunk:
-                    Value<PhraseTag> phraseTag = span.getAnnotation(PHRASE_ANNOTATION);
-                    //for Noun Phrases or detected Named Entities
-                    if(phraseTag.value().getCategory() == LexicalCategory.Noun ||
-                            span.getAnnotation(NlpAnnotations.NER_ANNOTATION) != null){
-                        //noun phrase
-                        activeSpans.put(span, new SentimentInfo((Section)span));
-                    }
-                    break;
                 case Sentence:
                     //cleanup the previous sentence
-                    for(int index = 0; index < sentimentTokens.size(); index++){
-                        Sentiment sentiment = sentimentTokens.get(index);
-                        if(sentiment != null){
-                            for(Token negationToken : negations.subMap(index-negationContext , index+negationContext)
-                                    .values()){
-                                sentiment.negate(negationToken);
-                            }
-                            for(Token noun : nouns.subMap(index-nounContext , index+nounContext)
-                                    .values()){
-                                sentiment.noun(noun);
-                            }
-                        }
-                    }
+                    sentimentPhrases.addAll(summarizeSentence(sentimentTokens, 
+                        negations, nounsAndPronouns, verbs, conjuctions, sectionBorders));
                     negations.clear();
-                    nouns.clear();
+                    nounsAndPronouns.clear();
                     sentimentTokens.clear();
+                    verbs.clear();
+                    sectionBorders.clear();
                     firstTokenInSentence = true;
-                    activeSpans.put(span, new SentimentInfo((Section)span));
+                    sentence = (Sentence)span;
                     break;
                 case TextSection:
-                    activeSpans.put(span, new SentimentInfo((Section)span));
                     break;
                 default:
                     break;
             }
         }
-        //finally cleanup still active Sections
-        for(SentimentInfo sentInfo : activeSpans.values()){
-            if(sentInfo.hasSentiment()){
-                sentimentInfos.add(sentInfo);
-            } //else no sentiment in that section
-        }
-        //write related tokens to sentiments for the last sentence
-        for(int index = 0; index < sentimentTokens.size(); index++){
-            Sentiment sentiment = sentimentTokens.get(index);
+        sentimentPhrases.addAll(summarizeSentence(sentimentTokens, negations, 
+            nounsAndPronouns, verbs, conjuctions, sectionBorders));
+        return sentimentPhrases;
+    }
+
+    /**
+     * @param sentimentTokens
+     * @param negations
+     * @param nounsAndPronouns
+     * @param verbs
+     * @param sectionBorders
+     */
+    private List<SentimentPhrase> summarizeSentence(List<Sentiment> sentimentTokens, NavigableMap<Integer,Token> negations,
+            NavigableMap<Integer,Token> nounsAndPronouns, NavigableMap<Integer,Token> verbs, NavigableMap<Integer,Token> conjunctions,
+            NavigableMap<Integer,Token> sectionBorders) {
+        List<Sentiment> processedSentiments = new ArrayList<Sentiment>();
+        Integer[] searchSpan = new Integer[]{-1,-1};
+        for(int i = 0; i < sentimentTokens.size(); i++){
+            Integer index = Integer.valueOf(i);
+            Sentiment sentiment = sentimentTokens.get(i);
             if(sentiment != null){
-                for(Token negationToken : negations.subMap(index-negationContext , index+negationContext)
-                        .values()){
+                //check for a new section
+                if(index.compareTo(searchSpan[1]) > 0) {
+                    searchSpan[0] = sectionBorders.floorKey(index);
+                    if(searchSpan[0] == null) {
+                        searchSpan[0] = Integer.valueOf(0);
+                    }
+                    searchSpan[1] = sectionBorders.ceilingKey(index);
+                    if(searchSpan[1] == null) {
+                        searchSpan[1] = Integer.valueOf(sentimentTokens.size()-1);
+                    }
+                }
+                //for negation use the negation context
+                Integer[] context = getNegationContext(index, conjunctions, searchSpan);
+                for(Token negationToken : negations.subMap(context[0] , true, context[1], true).values()){
                     sentiment.negate(negationToken);
                 }
-                for(Token noun : nouns.subMap(index-nounContext , index+nounContext)
-                        .values()){
-                    sentiment.noun(noun);
+                //for nouns use the sentiment context
+                context = getSentimentContext(index, sentiment, verbs, conjunctions, nounsAndPronouns, searchSpan);
+                for(Token word : nounsAndPronouns.subMap(context[0] , true, context[1], true).values()){
+                    sentiment.addAbout(word);
                 }
+                processedSentiments.add(sentiment);
             }
         }
-        return sentimentInfos;
+        //now combine the processed sentiments to SentimentPhrases
+        Collections.sort(processedSentiments, sentimentComparator);
+        List<SentimentPhrase> sentimentPhrases = new ArrayList<SentimentPhrase>();
+        SentimentPhrase phrase = null;
+        for(Sentiment sentiment : processedSentiments){
+            if(phrase == null || sentiment.getStart() > phrase.getEndIndex()){
+                phrase = new SentimentPhrase(sentiment);
+                sentimentPhrases.add(phrase);
+            } else {
+                phrase.addSentiment(sentiment);
+            }
+        }
+        return sentimentPhrases;
+    }
+
+    private Integer[] getNegationContext(Integer index, NavigableMap<Integer,Token> conjunctions, Integer[] sectionSpan) {
+        Integer[] context = new Integer[]{
+                Integer.valueOf(Math.max(index-negationContext,sectionSpan[0])),
+                Integer.valueOf(Math.min(index+negationContext,sectionSpan[1]))};
+        Integer floorConjunction = conjunctions.floorKey(index);
+        //consider conjuction "The helmet is not comfortable and easy to use"
+        //the "not" refers both to "comfortable" and  "easy"
+        if(floorConjunction != null && floorConjunction.compareTo(index-conjuctionContext) >= 0){
+            context[0] = Integer.valueOf(Math.max(floorConjunction-negationContext-1,sectionSpan[0]));
+        }
+        return context;
+    }
+    private Integer[] getSentimentContext(Integer index, Sentiment sentiment, NavigableMap<Integer,Token> verbs, NavigableMap<Integer,Token> conjunctions, NavigableMap<Integer,Token> nouns, Integer[] sectionSpan) {
+        Integer[] context;
+        PosTag pos = sentiment.getPosTag();
+        boolean isPredicative;
+        if(pos.getPosHierarchy().contains(Pos.PredicativeAdjective)){
+            isPredicative = true;
+        } else if(pos.hasCategory(LexicalCategory.Adjective) && 
+                //Adjective that are not directly in front of a Noun
+                nouns.get(Integer.valueOf(index+1)) == null){ 
+          isPredicative = true;
+        } else {
+            isPredicative = false;
+        }
+        if(isPredicative){
+//            Integer floorConjunction = conjunctions.floorKey(index);
+//            if(floorConjunction != null && floorConjunction.compareTo(
+//                Integer.valueOf(Math.max(index-conjuctionContext,sectionSpan[0]))) >= 0){
+//                lowIndex = Integer.valueOf(floorConjunction-1);
+//            }
+//            Integer ceilingConjunction = conjunctions.ceilingKey(index);
+//            if(ceilingConjunction != null && ceilingConjunction.compareTo(
+//                Integer.valueOf(Math.min(index+conjuctionContext,sectionSpan[1]))) <= 0){
+//                highIndex = Integer.valueOf(ceilingConjunction+1);
+//            }
+            //use the verb as context
+            Integer floorNoun = nouns.floorKey(index);
+            Entry<Integer,Token> floorVerb = verbs.floorEntry(index);
+            Integer ceilingNoun = nouns.ceilingKey(index);
+            Entry<Integer,Token> ceilingVerb = verbs.ceilingEntry(index);
+            floorVerb = floorVerb == null || floorVerb.getKey().compareTo(sectionSpan[0]) < 0 ||
+                    //do not use verbs with an noun in-between
+                    (floorNoun != null && floorVerb.getKey().compareTo(floorNoun) < 0) ? 
+                            null : floorVerb;
+            ceilingVerb = ceilingVerb == null || ceilingVerb.getKey().compareTo(sectionSpan[1]) > 0 ||
+                    //do not use verbs with an noun in-between
+                    (ceilingNoun != null && ceilingVerb.getKey().compareTo(ceilingNoun) > 0) ? 
+                            null : ceilingVerb;
+            Entry<Integer,Token> verb;
+            if(ceilingVerb != null && floorVerb != null){
+                verb = (index - floorVerb.getKey()) < (ceilingVerb.getKey()-index) ? floorVerb : ceilingVerb;
+            } else if(ceilingVerb != null){
+                verb =  ceilingVerb;
+            } else if(floorVerb != null){
+                verb = floorVerb;
+            } else { //no verb that can be used as context ... return an area around the current pos.
+                verb = null;
+            }
+            if(verb != null){
+                if(verb.getKey().compareTo(index) < 0){
+                    Integer floorConjunction = conjunctions.floorKey(verb.getKey());
+                    if(floorConjunction != null && floorConjunction.compareTo(
+                        Integer.valueOf(Math.max(verb.getKey()-conjuctionContext,sectionSpan[0]))) >= 0){
+                        //search an other verb in the same direction
+                        floorVerb = verbs.floorEntry(Integer.valueOf(floorConjunction));
+                        if(floorVerb != null && floorVerb.getKey().compareTo(sectionSpan[0]) >= 0 &&
+                                //do not step over an noun
+                                (floorNoun == null || floorVerb.getKey().compareTo(floorNoun) >= 0)){
+                          verb = floorVerb;
+                        }
+                    }
+                } else if(verb.getKey().compareTo(index) > 0){
+                    Integer ceilingConjunction = conjunctions.ceilingKey(verb.getKey());
+                    if(ceilingConjunction != null && ceilingConjunction.compareTo(
+                        Integer.valueOf(Math.min(verb.getKey()+conjuctionContext,sectionSpan[1]))) >= 0){
+                        //search an other verb in the same direction
+                        ceilingVerb = verbs.floorEntry(Integer.valueOf(ceilingConjunction));
+                        if(ceilingVerb != null && ceilingVerb.getKey().compareTo(sectionSpan[1]) <= 0 &&
+                                //do not step over an noun
+                                (ceilingNoun == null || ceilingVerb.getKey().compareTo(ceilingNoun) <= 0)){
+                            verb = ceilingVerb;
+                        }
+                    }
+                }
+                context = new Integer[]{Integer.valueOf(verb.getKey()-nounContext),
+                        Integer.valueOf(verb.getKey()+nounContext)};
+                sentiment.setVerb(verb.getValue());
+            } else {
+                context = new Integer[]{Integer.valueOf(index-nounContext),
+                        Integer.valueOf(index+nounContext)};
+            }
+        } else if(pos.hasCategory(LexicalCategory.Adjective)){
+            //for all other adjective the affected noun is expected directly
+            //after the noun
+            context = new Integer[]{index,Integer.valueOf(index+1)};
+        } else if(pos.hasCategory(LexicalCategory.Noun)){
+            //a noun with an sentiment
+            context = new Integer[]{index,index};
+        } else { //else return default
+            context = new Integer[]{Integer.valueOf(index-nounContext),
+                    Integer.valueOf(index+nounContext)};
+        }
+        //ensure the returned context does not exceed the parsed sectionSpan 
+        if(context[0].compareTo(sectionSpan[0]) < 0){
+            context[0] = sectionSpan[0];
+        }
+        if(context[1].compareTo(sectionSpan[1]) > 0) {
+            context[1] = sectionSpan[1];
+        }
+        return context;
+        }
+
+    private boolean isPronoun(Token token, String language) {
+        Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
+        return posAnnotation.value().getPosHierarchy().contains(Pos.Pronoun);
+    }
+
+    private boolean isVerb(Token token, String language) {
+        Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
+        return posAnnotation.value().hasCategory(LexicalCategory.Verb);
+    }
+    
+    private boolean isCoordinatingConjuction(Token token, String language) {
+        Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
+        return posAnnotation.value().getPosHierarchy().contains(Pos.CoordinatingConjunction);
+    }
+
+    private boolean isSectionBorder(Token token, String language) {
+        Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
+        if(posAnnotation != null && !Collections.disjoint(sectionBorderPosTags, posAnnotation.value().getPosHierarchy())){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -322,7 +546,7 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
      */
     private boolean isNegation(Token token, String language) {
         Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
-        if(posAnnotation != null && !Collections.disjoint(negativePosTags, posAnnotation.value().getPos())){
+        if(posAnnotation != null && !Collections.disjoint(negativePosTags, posAnnotation.value().getPosHierarchy())){
             return true;
         } else {
             return false;
@@ -343,7 +567,8 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
             return true; //assume all upper case tokens are Nouns
         }
         Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
-        if(posAnnotation != null && posAnnotation.value().hasCategory(LexicalCategory.Noun)){
+        if(posAnnotation != null && (posAnnotation.value().hasCategory(LexicalCategory.Noun)
+                || posAnnotation.value().getPosHierarchy().contains(Pos.CardinalNumber))){
             return true;
         }
         return false;
@@ -365,66 +590,131 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
     }
     
     
-    private void writeSentimentEnhancements(ContentItem ci, List<SentimentInfo> sentimentInfos, AnalysedText at, Language lang) {
+    private void writeSentimentEnhancements(ContentItem ci, List<SentimentPhrase> sentimentPhrases, AnalysedText at, Language lang) {
         // TODO Auto-generated method stub
         MGraph metadata = ci.getMetadata();
-        for(SentimentInfo sentInfo : sentimentInfos){
+        Sentence currentSentence = null;
+        final List<SentimentPhrase> sentencePhrases = new ArrayList<SentimentPhrase>();
+        for(SentimentPhrase sentPhrase : sentimentPhrases){
+            Sentence sentence = sentPhrase.getSentence();
             if(log.isDebugEnabled()){ //debug sentiment info
-                String spanText = sentInfo.getSection().getSpan();
-                log.debug("Write Sentiments for {} (text: {})",sentInfo.getSection(),
-                    spanText.length() > 17 ? (spanText.subSequence(0,17) + "...") : spanText);
-                List<Sentiment> sentiments = sentInfo.getSentiments();
+                CharSequence phraseText = at.getText().subSequence(sentPhrase.getStartIndex(), sentPhrase.getEndIndex());
+                log.debug("Write SentimentPhrase for {} (sentence: {})", phraseText,
+                    sentence == null ? "none" : sentence.getSpan().length() > 17 ? (sentence.getSpan().subSequence(0,17) + "...") : sentence.getSpan());
+                List<Sentiment> sentiments = sentPhrase.getSentiments();
                 log.debug(" > {} Sentiments:",sentiments.size());
                 for(int i = 0; i < sentiments.size(); i++){
                     log.debug("    {}. {}",i+1,sentiments.get(i));
                 }
             }
-            UriRef enh = createTextEnhancement(ci, this);
-            if(sentInfo.getSection().getType() == SpanTypeEnum.Chunk) {
+            if(writeSentimentPhrases){
+                UriRef enh = createTextEnhancement(ci, this);
+                String phraseText = at.getSpan().substring(sentPhrase.getStartIndex(), sentPhrase.getEndIndex());
                 metadata.add(new TripleImpl(enh, ENHANCER_SELECTED_TEXT, 
-                    new PlainLiteralImpl(sentInfo.getSection().getSpan(), lang)));
-                metadata.add(new TripleImpl(enh, ENHANCER_SELECTION_CONTEXT, 
-                    new PlainLiteralImpl(getSelectionContext(
-                        at.getSpan(), 
-                        sentInfo.getSection().getSpan(), 
-                        sentInfo.getSection().getStart()))));
-                //NOTE: fall through intended!
-            } else if(sentInfo.getSection().getType() != SpanTypeEnum.Text){ //sentence, textsection
-                //For longer selections it does not make sense to include selection context
-                //and the selected text.
-                //We can add prefix, suffix, selection-start, selection-end
-                //as soon as we use the new TextAnnotation model
-            }
-            //add start/end positions
-            if(sentInfo.getSection().getType() != SpanTypeEnum.Text){
+                    new PlainLiteralImpl(phraseText, lang)));
+                if(sentPhrase.getSentence() == null){
+                    metadata.add(new TripleImpl(enh, ENHANCER_SELECTION_CONTEXT, 
+                        new PlainLiteralImpl(getSelectionContext(
+                            at.getSpan(), phraseText, sentPhrase.getStartIndex()),lang)));
+                } else {
+                    metadata.add(new TripleImpl(enh, ENHANCER_SELECTION_CONTEXT, 
+                        new PlainLiteralImpl(sentPhrase.getSentence().getSpan(),lang)));
+                }
                 metadata.add(new TripleImpl(enh, ENHANCER_START, 
-                    lf.createTypedLiteral(sentInfo.getSection().getStart())));
+                    lf.createTypedLiteral(sentPhrase.getStartIndex())));
                 metadata.add(new TripleImpl(enh, ENHANCER_END, 
-                    lf.createTypedLiteral(sentInfo.getSection().getEnd())));
-            } //else do not add start/end pos for sentiment of the whole text
-            
-            //add the sentiment information
-            if(sentInfo.getPositive() != null){
-                metadata.add(new TripleImpl(enh, POSITIVE_SENTIMENT_PROPERTY, 
-                    lf.createTypedLiteral(sentInfo.getPositive())));
+                    lf.createTypedLiteral(sentPhrase.getEndIndex())));
+                if(sentPhrase.getPositiveSentiment() != null){
+                    metadata.add(new TripleImpl(enh, POSITIVE_SENTIMENT_PROPERTY, 
+                        lf.createTypedLiteral(sentPhrase.getPositiveSentiment())));
+                }
+                if(sentPhrase.getNegativeSentiment() != null){
+                    metadata.add(new TripleImpl(enh, NEGATIVE_SENTIMENT_PROPERTY, 
+                        lf.createTypedLiteral(sentPhrase.getNegativeSentiment())));
+                }
+                metadata.add(new TripleImpl(enh, SENTIMENT_PROPERTY, 
+                    lf.createTypedLiteral(sentPhrase.getSentiment())));               
+                //add the Sentiment type as well as the type of the SSO Ontology
+                metadata.add(new TripleImpl(enh, DC_TYPE, SENTIMENT_TYPE));
+                UriRef ssoType = NIFHelper.SPAN_TYPE_TO_SSO_TYPE.get(SpanTypeEnum.Chunk);
+                if(ssoType != null){
+                    metadata.add(new TripleImpl(enh, DC_TYPE, ssoType));
+                }
             }
-            if(sentInfo.getNegative() != null){
-                metadata.add(new TripleImpl(enh, NEGATIVE_SENTIMENT_PROPERTY, 
-                    lf.createTypedLiteral(sentInfo.getNegative())));
-            }
-            metadata.add(new TripleImpl(enh, SENTIMENT_PROPERTY, 
-                lf.createTypedLiteral(sentInfo.getSentiment())));
-
-            //add the Sentiment type as well as the type of the SSO Ontology
-            metadata.add(new TripleImpl(enh, DC_TYPE, SENTIMENT_TYPE));
-            UriRef ssoType = NIFHelper.SPAN_TYPE_TO_SSO_TYPE.get(sentInfo.getSection().getType());
-            if(ssoType != null){
-                metadata.add(new TripleImpl(enh, DC_TYPE, ssoType));
+            if(writeSentencesSentimet && sentence != null){
+                if(sentence.equals(currentSentence)){
+                    sentencePhrases.add(sentPhrase);
+                } else {
+                    writeSentiment(ci, currentSentence,sentencePhrases);
+                    //reset
+                    currentSentence = sentence;
+                    sentencePhrases.clear();
+                    sentencePhrases.add(sentPhrase);
+                }
             }
         }
+        if(!sentencePhrases.isEmpty()){
+            writeSentiment(ci, currentSentence,sentencePhrases);
+        }
+        if(writeDocumentSentiment){
+            writeSentiment(ci, at,sentimentPhrases);
+        }
+
     }
     
     
+    private void writeSentiment(ContentItem ci, Section section, List<SentimentPhrase> sectionPhrases) {
+        if(section == null || sectionPhrases == null || sectionPhrases.isEmpty()){
+            return; //nothing to do
+        }
+        UriRef enh = createTextEnhancement(ci, this);
+        MGraph metadata = ci.getMetadata();
+        if(section.getType() == SpanTypeEnum.Sentence){
+            //TODO use the fise:TextAnnotation new model for 
+            //add start/end positions
+            metadata.add(new TripleImpl(enh, ENHANCER_START, 
+                lf.createTypedLiteral(section.getStart())));
+            metadata.add(new TripleImpl(enh, ENHANCER_END, 
+                lf.createTypedLiteral(section.getEnd())));
+        }
+        //TODO: Summarize the sentiments of this section
+        //add the sentiment information
+        double positiveSent = 0.0;
+        int positiveCount = 0;
+        double negativeSent = 0.0;
+        int negativeCount = 0;
+        for(SentimentPhrase sentPhrase : sectionPhrases){
+            if(sentPhrase.getNegativeSentiment() != null){
+                double neg = sentPhrase.getNegativeSentiment();
+                negativeSent = negativeSent+(neg*neg);
+                negativeCount++;
+            }
+            if(sentPhrase.getPositiveSentiment() != null){
+                double pos = sentPhrase.getPositiveSentiment();
+                positiveSent = positiveSent+(pos*pos);
+                positiveCount++;
+            }
+        }
+        if(positiveCount > 0){
+            positiveSent = Math.sqrt(positiveSent/(double)positiveCount);
+            metadata.add(new TripleImpl(enh, POSITIVE_SENTIMENT_PROPERTY, 
+                lf.createTypedLiteral(Double.valueOf(positiveSent))));
+        }
+        if(negativeCount > 0){
+            negativeSent = Math.sqrt(negativeSent/(double)negativeCount)*-1;
+            metadata.add(new TripleImpl(enh, NEGATIVE_SENTIMENT_PROPERTY, 
+                lf.createTypedLiteral(Double.valueOf(negativeSent))));
+        }
+        metadata.add(new TripleImpl(enh, SENTIMENT_PROPERTY, 
+            lf.createTypedLiteral(Double.valueOf(negativeSent+positiveSent))));
+
+        //add the Sentiment type as well as the type of the SSO Ontology
+        metadata.add(new TripleImpl(enh, DC_TYPE, SENTIMENT_TYPE));
+        UriRef ssoType = NIFHelper.SPAN_TYPE_TO_SSO_TYPE.get(section.getType());
+        if(ssoType != null){
+            metadata.add(new TripleImpl(enh, DC_TYPE, ssoType));
+        }
+    }
     /**
      * The maximum size of the preix/suffix for the selection context
      */
