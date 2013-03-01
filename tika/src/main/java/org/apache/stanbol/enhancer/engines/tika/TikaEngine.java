@@ -67,7 +67,6 @@ import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.exception.TikaException;
-import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AutoDetectParser;
@@ -215,6 +214,11 @@ public class TikaEngine
             final Metadata metadata = new Metadata();
             //set the already parsed contentType
             metadata.set(Metadata.CONTENT_TYPE, mtas.mediaType.toString());
+            //also explicitly set the charset as contentEncoding
+            String charset = mtas.mediaType.getParameters().get("charset");
+            if(charset != null){
+                metadata.set(Metadata.CONTENT_ENCODING, charset);
+            }
             ContentSink plainTextSink;
             try {
                 plainTextSink = ciFactory.createContentSink(TEXT_PLAIN +"; charset="+UTF8.name());
@@ -248,6 +252,22 @@ public class TikaEngine
                     xhtmlHandler = null;
                     xhtmlSink = null;
                 }
+                /* 
+                 * We need to replace the context Classloader with the Bundle ClassLoader
+                 * to ensure that Singleton instances of XML frameworks (such as node4j) 
+                 * do not leak into the OSGI environment.
+                 * 
+                 * Most Java XML libs prefer to load implementations by using the 
+                 * {@link Thread#getContextClassLoader()}. However OSGI has no control over
+                 * this {@link ClassLoader}. Because of that there can be situations where
+                 * Interfaces are loaded via the Bundle Classloader and the implementations
+                 * are taken from the context Classloader. What can cause 
+                 * {@link ClassCastException}, {@link ExceptionInInitializerError}s, ...
+                 * 
+                 * Setting the context Classloader to the Bundle classloader helps to avoid
+                 * those situations.
+                 */
+                ClassLoader contextClassLoader = updateContextClassLoader();
                 try {
                     AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
                         public Object run() throws IOException, SAXException, TikaException {
@@ -264,6 +284,9 @@ public class TikaEngine
                     } else { //runtime exception
                         throw RuntimeException.class.cast(e);
                     }
+                } finally {
+                    //reset the previous context ClassLoader
+                    Thread.currentThread().setContextClassLoader(contextClassLoader);
                 }
             } finally { //ensure that the writers are closed correctly
                 IOUtils.closeQuietly(in);
@@ -356,6 +379,32 @@ public class TikaEngine
                 blob.getParameter());
         }
     }
+    
+    /**
+     * Sets the Bundle {@link ClassLoader} context Classloader of the 
+     *  {@link Thread#currentThread()}.
+     * <p>
+     * Users of this utility method need to make sure that the 
+     * ClassLoader is reset to the original value - as
+     * returned by this method by adding a 
+     * <pre><code>
+     *     ClassLoader classLoader = updateContextClassLoader();
+     *     try {
+     *         //the code that needs to be executed
+     *     } finally {
+     *         Thread.currentThread().setContextClassLoader(classLoader);
+     *     }
+     * </code></pre><p>
+     * @return the {@link ClassLoader} of {@link Thread#currentThread()} before
+     * calling this method
+     */
+    private ClassLoader updateContextClassLoader() {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(TikaEngine.class.getClassLoader());
+        return classLoader;
+    }
+    
+    
     @Override
     protected void activate(ComponentContext ctx) throws ConfigurationException {
         super.activate(ctx);
