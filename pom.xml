@@ -87,6 +87,7 @@
     <module>launchers/full-war</module>
     
     <module>development/archetypes/statefull-webmodule</module>
+    <module>development/archetypes/enhancement-engine</module>
   </modules>
 
   <profiles>
