@@ -76,7 +76,7 @@ public class EnhancementSemanticIndex extends AbstractSemanticIndex {
 
     @Reference
     private TcManager tcManager;
-    
+
     private ServiceRegistration enhancementGraphRegistry;
 
     // URI of the graph documents are indexed or removed
