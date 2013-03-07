@@ -11,6 +11,9 @@
     <name>Skeleton for ${artifactId}</name>
     <description>Looks up entities on the Entityhub-Sites and Logs the queries</description>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <build>
         <!-- make it an OSGi bundle -->
