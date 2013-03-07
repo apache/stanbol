@@ -230,6 +230,12 @@
     </bundle>
     <!-- needed to read data from mime multipart requests -->
     <bundle>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>jaxrs.utils</artifactId>
+      <version>0.6-incubating</version>
+    </bundle>
+    <!-- still used in many places also it only runs on jersey and the code is not portable across jax-rs implementations -->
+    <bundle>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
       <version>1.15</version>
