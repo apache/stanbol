@@ -42,6 +42,7 @@ import static org.osgi.framework.Constants.SERVICE_RANKING;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.NavigableSet;
+import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -212,74 +213,87 @@ public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {
             entitySearcher = new ReferencedSiteSearcher(bundleContext,siteName,10,this);
         }
         labelTokenizerTracker = new ServiceTracker(bundleContext, LabelTokenizer.class.getName(), 
-            new ServiceTrackerCustomizer() {
-                
-            @Override
-            public Object addingService(ServiceReference reference) {
-                Object service = bundleContext.getService(reference);
-                synchronized (labelTokenizersRefs) {
-                    labelTokenizersRefs.add(reference);
-                    ServiceReference higest = labelTokenizersRefs.last();
-                    EntityLinkingEngine engine = entityLinkingEngine;
-                    if(engine != null){
-                        LabelTokenizer lt = (LabelTokenizer)
-                                (higest.equals(reference) ? service : 
-                                    labelTokenizerTracker.getService(higest));
-                        if(!lt.equals(engine.getLabelTokenizer())){
-                            log.info(" ... setting LabelTokenizer of Engine '{}' to {}",
-                                engine.getName(),lt);
-                            engine.setLabelTokenizer(lt);
+                new ServiceTrackerCustomizer() {
+                    
+                @Override
+                public Object addingService(ServiceReference reference) {
+                    Object service = bundleContext.getService(reference);
+                    synchronized (labelTokenizersRefs) {
+                        labelTokenizersRefs.add(reference);
+                        ServiceReference higest;
+                        try {
+                            higest = labelTokenizersRefs.last();
+                        } catch (NoSuchElementException e) {
+                            higest = null;
                         }
-                    }
-                }
-                return service;
-            }
-
-            @Override
-            public void removedService(ServiceReference reference, Object service) {
-                synchronized (labelTokenizersRefs) {
-                    labelTokenizersRefs.remove(reference); //override
-                    EntityLinkingEngine engine = entityLinkingEngine;
-                    if(engine != null){
-                        if(labelTokenizersRefs.isEmpty()){
-                            log.info(" ... setting LabelTokenizer of Engine '{}' to null",
-                                engine.getName());
-                            engine.setLabelTokenizer(null);
-                        } else {
-                            LabelTokenizer lt = (LabelTokenizer)labelTokenizerTracker.getService(
-                                labelTokenizersRefs.last());
+                        EntityLinkingEngine engine = entityLinkingEngine;
+                        ServiceTracker tracker = labelTokenizerTracker;
+                        if(engine != null && tracker != null){
+                            LabelTokenizer lt = (LabelTokenizer)
+                                    (reference.equals(higest) || higest == null ? service : 
+                                        tracker.getService(higest));
                             if(!lt.equals(engine.getLabelTokenizer())){
                                 log.info(" ... setting LabelTokenizer of Engine '{}' to {}",
                                     engine.getName(),lt);
                                 engine.setLabelTokenizer(lt);
                             }
+                        }//if engine or tracker is null deactivate was already called
+                    }
+                    return service;
+                }
+
+                @Override
+                public void removedService(ServiceReference reference, Object service) {
+                    synchronized (labelTokenizersRefs) {
+                        labelTokenizersRefs.remove(reference); //override
+                        EntityLinkingEngine engine = entityLinkingEngine;
+                        ServiceTracker tracker = labelTokenizerTracker;
+                        if(engine != null && tracker != null){
+                            if(labelTokenizersRefs.isEmpty()){
+                                log.info(" ... setting LabelTokenizer of Engine '{}' to null",
+                                    engine.getName());
+                                engine.setLabelTokenizer(null);
+                            } else {
+                                LabelTokenizer lt = (LabelTokenizer)tracker.getService(
+                                    labelTokenizersRefs.last());
+                                if(!lt.equals(engine.getLabelTokenizer())){
+                                    log.info(" ... setting LabelTokenizer of Engine '{}' to {}",
+                                        engine.getName(),lt);
+                                    engine.setLabelTokenizer(lt);
+                                }
+                            }
+                        } //if engine or tracker is null deactivate was already called
+                    }
+                    bundleContext.ungetService(reference);
+                }
+                    
+                @Override
+                public void modifiedService(ServiceReference reference, Object service) {
+                    synchronized (labelTokenizersRefs) {
+                        labelTokenizersRefs.remove(reference); //override
+                        labelTokenizersRefs.add(reference);
+                        ServiceReference higest;
+                        try {
+                            higest = labelTokenizersRefs.last();
+                        } catch (NoSuchElementException e) {
+                            higest = null;
                         }
+                        EntityLinkingEngine engine = entityLinkingEngine;
+                        ServiceTracker tracker = labelTokenizerTracker;
+                        if(engine != null && tracker != null){
+                            LabelTokenizer lt = (LabelTokenizer)
+                                    (reference.equals(higest) || higest == null ? service : 
+                                        tracker.getService(higest));
+                            if(!lt.equals(engine.getLabelTokenizer())){
+                                log.info(" ... setting LabelTokenizer of Engine '{}' to {}",
+                                    engine.getName(),lt);
+                                engine.setLabelTokenizer(lt);
+                            }
+                        } //if engine or tracker is null deactivate was already called
                     }
                 }
-                bundleContext.ungetService(reference);
-            }
-                
-            @Override
-            public void modifiedService(ServiceReference reference, Object service) {
-                synchronized (labelTokenizersRefs) {
-                    labelTokenizersRefs.remove(reference); //override
-                    labelTokenizersRefs.add(reference);
-                    ServiceReference higest = labelTokenizersRefs.last();
-                    EntityLinkingEngine engine = entityLinkingEngine;
-                    if(engine != null){
-                        LabelTokenizer lt = (LabelTokenizer)
-                            (higest.equals(reference) ? service : 
-                                labelTokenizerTracker.getService(higest));
-                        if(!lt.equals(engine.getLabelTokenizer())){
-                            log.info(" ... setting LabelTokenizer of Engine '{}' to {}",
-                                engine.getName(),lt);
-                            engine.setLabelTokenizer(lt);
-                        }
-                    }
-                }
-            }
-                
-            });
+                    
+                });
         //create the engine
         entityLinkingEngine = new EntityLinkingEngine(engineName,
             entitySearcher, //the searcher might not be available
