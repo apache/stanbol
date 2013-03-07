@@ -3,6 +3,7 @@
     <action>
         <actionName>run</actionName>
         <goals>
+            <goal>clean</goal>
             <goal>package</goal>
             <goal>antrun:run</goal>
         </goals>
@@ -10,6 +11,7 @@
     <action>
         <actionName>debug</actionName>
         <goals>
+            <goal>clean</goal>
             <goal>package</goal>
             <goal>antrun:run</goal>
         </goals>
@@ -21,6 +23,7 @@
     <action>
         <actionName>profile</actionName>
         <goals>
+            <goal>clean</goal>
             <goal>package</goal>
             <goal>antrun:run</goal>
         </goals>

@@ -140,7 +140,8 @@
         <version>1.7</version>
         <configuration>
           <target>
-            <java fork="true" jar="${project.build.directory}/${project.build.finalName}.jar">
+            <java fork="true" jar="${project.build.directory}/${project.build.finalName}.jar"
+                dir="${project.build.directory}">
               <jvmarg line="-Xmx1024m -XX:MaxPermSize=256M"/>
             </java>
           </target>
