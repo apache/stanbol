@@ -62,12 +62,12 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.store.solr</artifactId>
-      <version>0.10.0</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0-SNAPSHOT</version>
     </dependency>
     
     <dependency>

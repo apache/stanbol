@@ -217,16 +217,7 @@ public class StandaloneManagedSolrServer implements ManagedSolrServer {
         }
         server = new CoreContainer(managedSolrDir.getAbsolutePath());
         File solrXml = new File(managedSolrDir,"solr.xml");
-        try {
-            server.load(managedSolrDir.getAbsolutePath(), solrXml);
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Unable to initialise XML parsers for parsing 'solr.xml'",e);
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to access Solr base directory '"+managedSolrDir+"'!",e);
-        } catch (SAXException e) {
-            throw new IllegalStateException("Error while parsing 'solr.xml' within " +
-                    "directory '"+managedSolrDir+"'!",e);
-        }
+        server.load(managedSolrDir.getAbsolutePath(), solrXml);
         server.setPersistent(true);
     }    
     private void shutdown() {
@@ -460,18 +451,7 @@ public class StandaloneManagedSolrServer implements ManagedSolrServer {
         SolrCore core;
         CoreDescriptor coreDescriptor = new CoreDescriptor(server, 
             coreName, coreDir.getAbsolutePath());
-        try {
-            core = server.create(coreDescriptor);
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Unable to configure XML parser for parsing" +
-                    "configurations for SolrCore '"+coreName+"'(dir:+"+coreDir+")!",e);
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to initialise SolrCore '"+
-                coreName+"'(dir:+"+coreDir+")!",e);
-        } catch (SAXException e) {
-            throw new IllegalStateException("Unable to parse configuratin for SolrCore '"+
-                coreName+"'(dir:+"+coreDir+")!",e);
-        }
+        core = server.create(coreDescriptor);
         //this will also replace an existing core with the same name
         server.register(coreName, core, false);
         server.persist(); //store the new/updated SolrCore in the solr.xml

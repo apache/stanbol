@@ -154,6 +154,7 @@ public class PaodingTokenizerEngine extends AbstractEnhancementEngine<RuntimeExc
         TokenStream ts = pa.tokenStream("dummy", new CharSequenceReader(at.getText()));
         int lastEnd = 0;
         try {
+        	ts.reset();
             while(ts.incrementToken()){
                 OffsetAttribute offset = ts.addAttribute(OffsetAttribute.class);
                 //when tokenizing labels we need to preserve all chars

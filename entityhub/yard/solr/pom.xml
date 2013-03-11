@@ -105,12 +105,12 @@
     <dependency> <!-- provides Solr and OSGI utilities for Solr -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0-SNAPSHOT</version>
     </dependency>
     <dependency> <!-- provides managed Solr servers -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0-SNAPSHOT</version>
     </dependency>
 
     <!-- Stanbol Entityhub internal dependencies -->

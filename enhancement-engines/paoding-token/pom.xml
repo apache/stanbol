@@ -95,6 +95,17 @@
       <artifactId>org.apache.stanbol.commons.solr.extras.paoding</artifactId>
       <version>0.11.0</version>
     </dependency>
+    <!-- paoding does not support solr4 yet -->
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>3.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers</artifactId>
+      <version>3.6.1</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.nlp</artifactId>

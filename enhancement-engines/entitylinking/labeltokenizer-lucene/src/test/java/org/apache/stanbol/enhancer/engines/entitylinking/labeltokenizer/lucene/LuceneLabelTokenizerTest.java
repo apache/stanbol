@@ -31,7 +31,7 @@ import org.osgi.service.component.ComponentContext;
 public class LuceneLabelTokenizerTest {
 
     
-    private static final Object TOKENIZER_FACTORY_CLASS = "org.apache.solr.analysis.WhitespaceTokenizerFactory";
+    private static final Object TOKENIZER_FACTORY_CLASS = "org.apache.lucene.analysis.core.WhitespaceTokenizerFactory";
     private static LuceneLabelTokenizer luceneLabelTokenizer;
 
     @BeforeClass

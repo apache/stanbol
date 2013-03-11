@@ -34,8 +34,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.ws.rs.core.MediaType;
-
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
@@ -104,7 +102,7 @@ public class SolrStoreImpl implements SolrStore {
     private static final Logger log = LoggerFactory.getLogger(SolrStoreImpl.class);
 
     private static final Set<String> SUPPORTED_MIMETYPES = Collections.unmodifiableSet(new HashSet<String>(
-            Arrays.asList(MediaType.TEXT_HTML, MediaType.TEXT_PLAIN, MediaType.TEXT_XML)));
+            Arrays.asList("text/html", "text/plain", "text/xml")));
 
     @Reference
     private ManagedSolrServer managedSolrServer;

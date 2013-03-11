@@ -57,7 +57,6 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.solr.core.SolrCore;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.SolrConstants;
 import org.apache.stanbol.commons.solr.SolrServerAdapter;

@@ -58,7 +58,7 @@ public abstract class DelegatingSolrDispatchFilter extends org.apache.solr.servl
      */
     private Initializer initialiser = new Initializer() {
         @Override
-        public CoreContainer initialize() throws IOException, ParserConfigurationException, SAXException {
+        public CoreContainer initialize() {
             //support multiple calls
             if(delegate != null){
                 ungetCoreContainer(); //cleanup current

@@ -515,15 +515,15 @@ public class SolrYard extends AbstractYard implements Yard {
             server = _registeredServerTracker.getService();
             //TODO: remove and replace with a setting where the SolrYard does not
             //      not activate until the SolrServer is available.
-            if(server == null){
-                for(int i = 0;i<5;i++){//waiting for a maximum of 5sec 
-                    try {
-                        log.info(" ... waiting 1sec for SolrServer");
-                        
-                        server = (SolrServer)_registeredServerTracker.waitForService(1000);
-                    } catch (InterruptedException e) {}
-                }
-            }
+//            if(server == null){
+//                for(int i = 0;i<5;i++){//waiting for a maximum of 5sec 
+//                    try {
+//                        log.info(" ... waiting 1sec for SolrServer");
+//                        
+//                        server = (SolrServer)_registeredServerTracker.waitForService(1000);
+//                    } catch (InterruptedException e) {}
+//                }
+//            }
             if(server != null && !server.equals(this._server)){
                 //reset the fieldMapper so that it is reinitialised for the new one
                 //STANBOL-519

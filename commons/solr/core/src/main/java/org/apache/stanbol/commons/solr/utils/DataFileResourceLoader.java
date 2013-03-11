@@ -19,24 +19,21 @@ package org.apache.stanbol.commons.solr.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.collections.Predicate;
-import org.apache.commons.collections.iterators.FilterIterator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.solr.common.ResourceLoader;
+import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 
 /**
  * SolrResourceLoader that supports loading resources via the Apache Stanbol
  * {@link DataFileProvider}<p>
- * This does NOT implement the {@link #newInstance(String, String...)} method.
+ * This does NOT implement the {@link #newInstance(String, Class)} method.
  * Calls will throw an {@link UnsupportedOperationException}.
  * Users that need to also load classes should combine this implementation with
  * the {@link StanbolResourceLoader} that supports instantiation of classes via
@@ -75,7 +72,6 @@ public class DataFileResourceLoader implements ResourceLoader {
         return dfp.getInputStream(null, resource, null);
     }
 
-    @Override
     public List<String> getLines(String resource) throws IOException {
         List<String> lines = new ArrayList<String>();
         LineIterator it = IOUtils.lineIterator(openResource(resource), "UTF-8");
@@ -90,10 +86,10 @@ public class DataFileResourceLoader implements ResourceLoader {
     /**
      * Not implemented!
      * @throws UnsupportedOperationException on every call to this mehtod
-     * @see StanbolResourceLoader#newInstance(String, String...)
+     * @see StanbolResourceLoader#newInstance(String, Class)
      */
     @Override
-    public Object newInstance(String cname, String... subpackages) throws UnsupportedOperationException {
+    public <T> T newInstance(String cname, Class<T> expectedType) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Loading of ClassFiles is not supported");
     }
 

@@ -89,7 +89,10 @@
                     are set to 1.4.0 as specified for Java SE 6 by
                     http://docs.oracle.com/javase/6/docs/technotes/guides/xml/jaxp/index.html
                      -->
+                <!-- The packages com.sun.management.* are referenced by zookeper -->
                <Export-Package>
+                 com.sun.management,
+                 com.sun.management.jmx,
                  com.sun.xml.bind.v2.model.runtime,
                  com.sun.xml.bind.v2.model.core,
                  com.sun.xml.bind.v2.runtime,

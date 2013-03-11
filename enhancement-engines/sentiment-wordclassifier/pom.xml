@@ -108,10 +108,14 @@
       <artifactId>org.apache.stanbol.enhancer.nlp</artifactId>
       <version>0.10.0</version>
     </dependency>
-    <dependency>
+    <dependency> <!-- for tracking and loading sentiment wordlists -->
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
       <version>0.11.0</version>
+    </dependency>
+    <dependency><!-- for stemming English words -->
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>

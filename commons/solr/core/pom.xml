@@ -70,93 +70,43 @@
             </Export-Package>
             <!-- used instead of Export-Package to preserve the jars -->
             <_exportcontents> 
-              org.apache.solr.client.solrj;version=${solr-version},
-              org.apache.solr.client.solrj.beans;version=${solr-version},
-              org.apache.solr.client.solrj.impl;version=${solr-version},
-              org.apache.solr.client.solrj.request;version=${solr-version},
-              org.apache.solr.client.solrj.response;version=${solr-version},
-              org.apache.solr.client.solrj.util;version=${solr-version},
-              org.apache.solr.client.solrj.embedded;version=${solr-version},
-              org.apache.solr.common;version=${solr-version},
-              org.apache.solr.common.luke;version=${solr-version},
-              org.apache.solr.common.params;version=${solr-version},
-              org.apache.solr.common.util;version=${solr-version},
-              org.apache.solr.servlet;version=${solr-version},
-              org.apache.solr.core;version=${solr-version},
-              org.apache.solr.handler.*;version=${solr-version},
-              org.apache.solr.request;version=${solr-version},
-              org.apache.solr.response;version=${solr-version},
-              org.apache.solr.schema;version=${solr-version},
-              org.apache.solr.search.*;version=${solr-version},
-              org.apache.solr.update.*;version=${solr-version},
-              org.apache.solr.util.*;version=${solr-version},
+              org.apache.solr.*;version=${solr-version},
               org.apache.solr.analysis;-split-package:=merge-last;version=${solr-version},
               org.apache.lucene.*;version=${solr-version}
             </_exportcontents>
-            <!-- NOTE: 
-               * The exclusion of javax.xml.stream assumes that only serialised
-                 java objects are used as serialisation to and from the SolrServer
-                 and therefore no XML API is needed
-               * The exclusion of some  "org.apache.lucene.analysis." is to
-                 avoid the inclusion of big dependencies (other than ICU) for
-                 the "solr-analysis-extras" bundle -->
+            <!-- packages marked with resolution:=optional are not provided by
+                 this module. Users that need them will need to provide bundles
+                 exporting those frameworks -->
             <Import-Package>
-              !org.mortbay.jetty.*,
-              !org.mortbay.log,
-              !com.sun.msv.*,
-              !org.relaxng.datatype,
-              !org.apache.tika.*,
-              !javax.servlet.jsp.*,  
-              !org.apache.commons.digester.*, 
-              !org.apache.commons.validator.*,
-              !org.apache.log.*,
-              !org.apache.struts.*,
-              !org.apache.tools.ant.*,
-              !org.dom4j.*, 
-              !org.jdom.*, 
-              !antlr.*, 
-              !com.werken.*,
-              !org.apache.oro.*,
+              org.slf4j.impl;resolution:=optional,
+              org.apache.log4j.jmx;resolution:=optional,
+              org.apache.log4j.spi;resolution:=optional,
+              org.jboss.netty.*;resolution:=optional,
+              jline.*;resolution:=optional,
+              org.apache.tika.*;resolution:=optional,
               org.apache.lucene.analysis.cn.smart.*;resolution:=optional,
               org.apache.lucene.analysis.pl.*;resolution:=optional,
               org.apache.lucene.analysis.ja.*;resolution:=optional,
               org.apache.lucene.analysis.stempel.*;resolution:=optional,
               org.apache.lucene.search.grouping.*;resolution:=optional,
+              org.apache.zookeeper.*;resolution:=optional,
+              org.eclipse.jetty.*;resolution:=optional,
               org.egothor.stemmer.*;resolution:=optional,
               javax.servlet.*; version="[2.5.0,4.0.0)",
-              org.apache.stanbol.commons.solr,
-              org.apache.stanbol.commons.solr.utils,
-              org.apache.solr.client.solrj,
-              org.apache.solr.client.solrj.beans,
-              org.apache.solr.client.solrj.impl,
-              org.apache.solr.client.solrj.request,
-              org.apache.solr.client.solrj.response,
-              org.apache.solr.client.solrj.util,
-              org.apache.solr.client.solrj.embedded,
-              org.apache.solr.common,
-              org.apache.solr.common.luke,
-              org.apache.solr.common.params,
-              org.apache.solr.common.util,
-              org.apache.solr.servlet,
-              org.apache.solr.core,
-              org.apache.solr.handler.*,
-              org.apache.solr.request,
-              org.apache.solr.response,
-              org.apache.solr.schema,
-              org.apache.solr.search.*,
-              org.apache.solr.update.*,
-              org.apache.solr.util.*,
-              org.apache.solr.analysis,
-              org.apache.lucene.*,
+              org.tartarus.snowball;resolution:=optional,
+              morfologik.*;resolution:=optional,
               *
             </Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
             <Embed-Dependency>
               solr-solrj, solr-core, solr-dataimporthandler,
-              solr-analysis-extras, commons-httpclient,
-              lucene-core, lucene-analyzers, lucene-highlighter, lucene-memory,
+              solr-analysis-extras,
+              lucene-core, lucene-analyzers-common, lucene-highlighter, 
               lucene-spatial, lucene-spellchecker, lucene-misc, lucene-queries,
-              lucene-icu, lucene-phonetic, lucene-grouping
+              lucene-icu, lucene-analyzers-icu, lucene-memory,
+              lucene-phonetic, lucene-grouping, lucene-codecs, 
+              lucene-queryparser, lucene-sandbox, lucene-suggest, 
+              zookeeper
             </Embed-Dependency>
           </instructions>
         </configuration>
@@ -181,11 +131,6 @@
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-solrj</artifactId>
     </dependency>
-      <dependency>
-        <groupId>commons-httpclient</groupId>
-        <artifactId>commons-httpclient</artifactId>
-        <version>3.1</version>
-      </dependency>
 
     <!-- Solr/Lucene dependencies (needed for using embedded Solr servers) -->
     <dependency>
@@ -206,7 +151,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-analyzers</artifactId>
+      <artifactId>lucene-analyzers-common</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
@@ -218,6 +163,10 @@
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-codecs</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-misc</artifactId>
     </dependency>
     <dependency>
@@ -226,7 +175,15 @@
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-spellchecker</artifactId>
+      <artifactId>lucene-queryparser</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-suggest</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-sandbox</artifactId>
     </dependency>
     <dependency>
         <groupId>org.apache.lucene</groupId>
@@ -234,20 +191,20 @@
     </dependency>
     <dependency>
         <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-icu</artifactId>
+        <artifactId>lucene-analyzers-icu</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-phonetic</artifactId>
+      <artifactId>lucene-analyzers-phonetic</artifactId>
     </dependency>
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-grouping</artifactId>
     </dependency>
-    <dependency>
+    <!-- dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.regexp</artifactId>
-    </dependency>
+    </dependency -->
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
@@ -264,21 +221,27 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
-    <dependency>
+    <!-- dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.commons-beanutils</artifactId>
-    </dependency>
+    </dependency -->
     <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
     </dependency>
-    <dependency>
+    <!--dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.woodstox</artifactId>
+    </dependency -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
-<!-- NOTE: With Solr/Lucene 3.6.1 there is no longer a Lucene specific
-            Xerces. Because of that we can use the XML stuff exported by the
-            System Bundle from the JDK-->
+    <dependency>
+      <groupId>org.apache.zookeeper</groupId>
+      <artifactId>zookeeper</artifactId>
+    </dependency>
+
     <!-- The Solr-Core depends on the Servlet API and in case of running an
          EmbeddedSolrServer the servlet-api is not available.
          However this bundle assumes that servlet-api and portlet-api are
@@ -294,14 +257,8 @@
         <scope>provided</scope>
     </dependency>
 
-    <!-- Solr has support of velocity templating (respone writer). This is not
-         used by the Entityhub, but the related classes are direct part of the
-         solr distribution. SolrCores can not be initialised without velocity!
-         Because of this the velocity and velocity-tools jars need to be
-         included however all additional dependencies are excluded. This allows
-         to init Solr, but this will not allow to use the velocity related
-         Response writer.
-         To enable velocity one would need to add another 10+ dependencies. -->
+    <!-- Solr has support of velocity templating (respone writer). Dependency
+         is marked as optional for OSGI imported packages-->
     <dependency>
         <groupId>org.apache.velocity</groupId>
         <artifactId>velocity</artifactId>

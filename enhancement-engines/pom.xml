@@ -64,6 +64,9 @@
     <module>paoding-token</module> <!-- tokenizing -->
     <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
 
+    <!-- Japanese NLP processing -->
+    <module>kuromoji-nlp</module>
+
     <!-- RESTful NLP analyser service engine-->
     <module>restful-nlp</module> <!-- see STANBOL-893 -->
     <module>restful-langident</module> <!-- see STANBOL-895 -->

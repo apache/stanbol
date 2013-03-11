@@ -50,7 +50,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Embed-Dependency>lucene-stempel</Embed-Dependency>
+            <Embed-Dependency>lucene-analyzers-stempel</Embed-Dependency>
             <Import-Package>
               org.apache.lucene.analysis.pl,
               org.apache.lucene.analysis.stempel,
@@ -59,9 +59,9 @@
             </Import-Package>
             <!-- used instead of Export-Package to preserve the jars -->
             <_exportcontents>
-              org.apache.lucene.analysis.pl;version=3.6.1,
-              org.apache.lucene.analysis.stempel;version=3.6.1,
-              org.egothor.stemmer;version=3.6.1
+              org.apache.lucene.analysis.pl;version=${solr-version},
+              org.apache.lucene.analysis.stempel;version=${solr-version},
+              org.egothor.stemmer;version=${solr-version}
             </_exportcontents>
           </instructions>
         </configuration>
@@ -80,8 +80,7 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-stempel</artifactId>
-      <version>3.6.1</version>
+      <artifactId>lucene-analyzers-stempel</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
@@ -89,7 +88,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-analyzers</artifactId>
+      <artifactId>lucene-analyzers-common</artifactId>
     </dependency>
   </dependencies>
 
