@@ -232,7 +232,7 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>jaxrs.utils</artifactId>
-      <version>0.6-incubating</version>
+      <version>0.7-incubating-SNAPSHOT</version>
     </bundle>
     <!-- still used in many places also it only runs on jersey and the code is not portable across jax-rs implementations -->
     <bundle>
