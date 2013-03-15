@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.commons.usermanagement.resource;
 
+import com.sun.jersey.multipart.FormDataParam;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
@@ -43,16 +43,17 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.clerezza.platform.config.SystemConfig;
 import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.LockableMGraph;
@@ -65,6 +66,7 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.DC;
 import org.apache.clerezza.rdf.ontologies.FOAF;
+import org.apache.clerezza.rdf.ontologies.PERMISSION;
 import org.apache.clerezza.rdf.ontologies.PLATFORM;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.ontologies.SIOC;
@@ -74,20 +76,11 @@ import org.apache.clerezza.rdf.utils.MGraphUtils.NoSuchSubGraphException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.clerezza.rdf.ontologies.PERMISSION;
 import org.apache.stanbol.commons.security.PasswordUtil;
 import org.apache.stanbol.commons.usermanagement.Ontology;
 import org.apache.stanbol.commons.web.viewable.RdfViewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.jersey.multipart.FormDataParam;
-import java.net.URISyntaxException;
-import java.util.logging.Level;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.UriBuilder;
-import org.apache.clerezza.rdf.core.MGraph;
 
 @Component
 @Service(UserResource.class)
@@ -112,31 +105,41 @@ public class UserResource {
     // **********************************
 
     /**
-     * 
+     * lookup a user by name.
+     *
      * @param userName
-     * @return 
+     * @return
      */
     @GET
     @Path("view-user")
     @Produces(MediaType.TEXT_HTML)
     public RdfViewable viewUser(@QueryParam("userName") String userName) {
-       // System.out.println("HEEEEEEEEEEEEEEEEERE");
-        return new RdfViewable("edit.ftl", getUser(userName), this.getClass());
+        return new RdfViewable("edit", getUser(userName), this.getClass());
     }
 
+    /**
+     * lookup a user by name presenting it with "editUser" as rendering
+     * instruction.
+     *
+     * @param userName
+     * @return
+     */
     @GET
     @Path("user/{username}")
     @Produces(MediaType.TEXT_HTML)
     public RdfViewable editUser(@PathParam("username") String userName) {
-        return new RdfViewable("editUser.ftl", getUser(userName),
+        return new RdfViewable("editUser", getUser(userName),
                 this.getClass());
     }
 
+    /**
+     * Produces suitable permission-checkboxes
+     */
     @GET
     @Path("user/{username}/permissionsCheckboxes")
     @Produces(MediaType.TEXT_HTML)
     public RdfViewable permissionsCheckboxes(@PathParam("username") String userName) { //getUser(userName)
-        return new RdfViewable("permissionsCheckboxes.ftl", getUser(userName), this.getClass());
+        return new RdfViewable("permissionsCheckboxes", getUser(userName), this.getClass());
     }
 
     /**
@@ -184,9 +187,19 @@ public class UserResource {
         return Response.ok(serialized).build();
     }
 
-    // **********************************
-    // ****** UPDATE USER DETAILS *******  
-    // **********************************
+    /**
+     * Update user details.
+     *
+     * @param uriInfo
+     * @param currentLogin
+     * @param newLogin
+     * @param fullName
+     * @param email
+     * @param password
+     * @param roles
+     * @param permissions
+     * @return
+     */
     @POST
     @Path("store-user")
     // @Consumes("multipart/form-data")
@@ -206,32 +219,31 @@ public class UserResource {
             currentLogin = currentLogin.trim();
         }
 
-        // System.out.println("CURRENTUSERNAME = ["+currentUserName+"]");
         if (currentLogin != null && !currentLogin.equals("")) {
             userNode = getUser(currentLogin);
             return store(userNode, uriInfo, currentLogin, newLogin, fullName, email, password, roles, permissions);
         }
 
-//        try {
-//             userNode = getUser(newLogin);
-//        } catch(Exception e) {
         userNode = createUser(newLogin);
-        //  }
-        // System.out.println("NEWLOGIN = [" + newLogin + "]");
+
 
         return store(userNode, uriInfo, newLogin, newLogin, fullName, email, password, roles, permissions);
     }
 
+    /**
+     * produces suitable role checkboxes
+     *
+     * @return
+     */
     @GET
     @Path("rolesCheckboxes")
     @Produces(SupportedFormat.HTML)
     public RdfViewable rolesCheckboxes() {
-        return new RdfViewable("rolesCheckboxes.ftl", getRoleType(), this.getClass());
+        return new RdfViewable("rolesCheckboxes", getRoleType(), this.getClass());
     }
 
-    // needs refactoring and locks adding?
-       /*
-     * API/Turtle style
+    /*
+     * Modify user given give a graph describing the change.
      */
     @POST
     @Consumes(SupportedFormat.TURTLE)
@@ -304,7 +316,7 @@ public class UserResource {
     @Path("user/{username}/rolesCheckboxes")
     @Produces(MediaType.TEXT_HTML)
     public Response rolesCheckboxes(@PathParam("username") String userName) {
-        // return new RdfViewable("rolesCheckboxes.ftl", getRoleType(), this.getClass());
+        // return new RdfViewable("rolesCheckboxes", getRoleType(), this.getClass());
         StringBuffer html = new StringBuffer();
 
         Iterator<Triple> allRoleTriples = systemGraph.filter(null, RDF.type, PERMISSION.Role);
@@ -364,30 +376,37 @@ public class UserResource {
         return Response.ok(html.toString()).build();
     }
 
-    // **********************************
-    // ****** LIST USERS ****** 
-    // **********************************
+    /**
+     * List the users. I.e. renders the user type with the "listUser" rendering
+     * specification.
+     *
+     * @return
+     */
     @GET
     @Path("users")
     @Produces(MediaType.TEXT_HTML)
     public RdfViewable listUsers() {
-        return new RdfViewable("listUser.ftl", getUserType(), this.getClass());
+        return new RdfViewable("listUser", getUserType(), this.getClass());
     }
 
-    // **********************************
-// ****** CREATE USER ****** 
-    // **********************************
+    /**
+     * Create a user. I.e. returns a dummy use with "editUSer" as rendering
+     * specification.
+     *
+     * @param uriInfo
+     * @return
+     */
     @GET
     @Path("create-form")
     public RdfViewable getCreateUserForm(@Context UriInfo uriInfo) {
-        return new RdfViewable("editUser.ftl", dummyNode,
+        return new RdfViewable("editUser", dummyNode,
                 this.getClass());
     }
 
     /**
      * Endpoint-style user creation takes a little bunch of Turtle e.g. [] a
      * foaf:Agent ; cz:userName "Hugo Ball" .
-     * 
+     *
      * [has test]
      *
      * @param userData
@@ -409,7 +428,7 @@ public class UserResource {
         Iterator<Triple> userTriples = inputGraph.filter(userNode, null, null);
 
         String userName = "";
-        Triple userTriple= null;
+        Triple userTriple = null;
 
         Lock writeLock = systemGraph.getLock().writeLock();
         writeLock.lock();
@@ -424,15 +443,15 @@ public class UserResource {
         }
 
         UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
-                
+
         URI createdResource = null;
-    //    try {
-          //  createdResource = new URI("http://localhost:8080/user-management/users/" + userName);
-            createdResource = uriBuilder.replacePath("/user-management/users/" + userName).build();
+        //    try {
+        //  createdResource = new URI("http://localhost:8080/user-management/users/" + userName);
+        createdResource = uriBuilder.replacePath("/user-management/users/" + userName).build();
 //        } catch (URISyntaxException ex) {
 //            java.util.logging.Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-       System.out.println("URI ="+createdResource);
+        System.out.println("URI =" + createdResource);
 // from HTTPbis
 //The request has been fulfilled and has resulted in one or more new
 //   resources being created.
@@ -444,8 +463,6 @@ public class UserResource {
 //         meta.putSingle("Location", createdResource);
         return Response.created(createdResource).build();
     }
-    //  // http://localhost:8080/user-management/add-user/user-management/users/hugob
-    // http://localhost:8080/user-management/users/hugob
 
 // **********************************
 // ****** REMOVE USER *************** 
@@ -538,7 +555,7 @@ public class UserResource {
     @Path("roles")
     @Produces(MediaType.TEXT_HTML)
     public RdfViewable listRoles() {
-        return new RdfViewable("listRole.ftl", getRoleType(), this.getClass());
+        return new RdfViewable("listRole", getRoleType(), this.getClass());
     }
 
 // **********************************
@@ -561,7 +578,7 @@ public class UserResource {
     @Produces(MediaType.TEXT_HTML)
     public RdfViewable listPermissions() {
         addClassToPermissions();
-        return new RdfViewable("listPermission.ftl", getPermissionType(), this.getClass());
+        return new RdfViewable("listPermission", getPermissionType(), this.getClass());
     }
 
 // **********************************
@@ -655,12 +672,6 @@ public class UserResource {
                 writeLock.unlock();
             }
         }
-
-        //  System.out.println("AFTER ========================================================");
-//        serializeTriplesWithSubject(System.out, userNode);
-//        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
-//        System.out
-//                .println("^^^^ ========================================================");
 
         URI pageUri = uriInfo.getBaseUriBuilder()
                 .path("system/console/usermanagement").build();
@@ -788,8 +799,10 @@ public class UserResource {
     }
 
     /**
-     **********************
-     * helper methods *********************
+     * Creates a new user withe the specified user name
+     *
+     * @param newUserName
+     * @return
      */
     private GraphNode createUser(String newUserName) {
         BNode subject = new BNode();

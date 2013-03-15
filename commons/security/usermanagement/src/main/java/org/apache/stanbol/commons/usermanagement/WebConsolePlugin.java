@@ -18,13 +18,10 @@ package org.apache.stanbol.commons.usermanagement;
 
 import java.io.IOException;
 import java.net.URL;
-
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.clerezza.rdf.core.Resource;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -68,14 +65,12 @@ public class WebConsolePlugin extends
 		return NAME;
 	}
 
+    @Override
 	protected void renderContent(HttpServletRequest req,
-			HttpServletResponse response) throws ServletException, IOException {
-            
+			HttpServletResponse response) throws ServletException, IOException {          
 		//TODO enhance LDPath template to support rdf:Lists and return list
 		ldRenderer.render(userManager.getUserType(), 
 				"html/org/apache/stanbol/commons/usermanagement/webConsole.ftl", response.getWriter());
-		// serializer.serialize(System.out, userManager.getUserType().getGraph(), SupportedFormat.TURTLE);
-// log me for debug!
 	}
 	
     @Override
@@ -89,6 +84,7 @@ public class WebConsolePlugin extends
 		super.activate(bundleContext);
 	}
 
+    @Override
 	public void deactivate() {
 		super.deactivate();
 
