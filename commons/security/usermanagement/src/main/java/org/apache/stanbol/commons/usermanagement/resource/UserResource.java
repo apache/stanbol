@@ -153,16 +153,9 @@ public class UserResource {
      */
     @GET
     @Path("users/{username}")
-    @Produces(SupportedFormat.TURTLE)
-    public Response getUserTurtle(@PathParam("username") String userName)
+    public TripleCollection getUserContext(@PathParam("username") String userName)
             throws UnsupportedEncodingException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        serializer.serialize(baos, getUser(userName).getNodeContext(),
-                SupportedFormat.TURTLE);
-        String serialized = new String(baos.toByteArray(), "utf-8");
-        // System.out.println("User = "+serialized);
-        return Response.ok(serialized).build();
+        return getUser(userName).getNodeContext();
     }
 
     /**

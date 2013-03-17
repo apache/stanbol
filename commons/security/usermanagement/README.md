@@ -70,6 +70,8 @@ Get user Turtle :
 
     curl --user admin:admin -H "Accept:text/turtle" http://localhost:8080/user-management/users/anonymous
 
+Note: Other formats are supported, e.g. you may use -H "Accept: application/rdf+xml"
+
 Get user roles :
 
    curl --user admin:admin -H "Accept:text/turtle" http://localhost:8080/user-management/roles/anonymous
