@@ -94,8 +94,7 @@ public class UserResource {
     private LockableMGraph systemGraph;
     @Reference
     private Parser parser;
-    @Reference
-    private Serializer serializer;
+
     private static GraphNode dummyNode;
 
     static {
@@ -169,17 +168,13 @@ public class UserResource {
     @GET
     @Path("roles/{username}")
     @Produces(SupportedFormat.TURTLE)
-    public Response getUserRoles(@PathParam("username") String userName)
+    public TripleCollection getUserRoles(@PathParam("username") String userName)
             throws UnsupportedEncodingException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
         MGraph rolesGraph = getUserRolesGraph(userName);
 
         // case of no roles not handled - what best to return : empty graph or
         // 404?
-        serializer.serialize(baos, rolesGraph, SupportedFormat.TURTLE);
-        String serialized = new String(baos.toByteArray(), "utf-8");
-        return Response.ok(serialized).build();
+        return rolesGraph;
     }
 
     /**
@@ -589,13 +584,13 @@ public class UserResource {
 // ****** REMOVE PERMISSION FROM ROLE *** 
 // **************************************
     // misc
-    @GET
+   /* @GET
     public String index() throws UnsupportedEncodingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.serialize(baos, systemGraph, SupportedFormat.TURTLE);
         String serialized = new String(baos.toByteArray(), "utf-8");
         return serialized;
-    }
+    }*/
 
     public GraphNode getUserType() {
         return new GraphNode(FOAF.Agent, systemGraph);
@@ -615,11 +610,6 @@ public class UserResource {
 
         //   GraphNode userNode = getUser(currentUserName);
 
-        // System.out.println("currentUserName = " + currentUserName);
-//        System.out
-//                .println("BEFORE ========================================================");
-//        // serializeTriplesWithSubject(System.out, userNode);
-//        serializer.serialize(System.out, systemGraph, SupportedFormat.TURTLE);
 
         if (newUserName != null && !newUserName.equals("")) {
             changeLiteral(userNode, PLATFORM.userName, newUserName);
@@ -975,17 +965,6 @@ public class UserResource {
         userNode.addProperty(predicate, newValue);
 
         systemGraph.removeAll(oldBuffer);
-    }
-
-    private void serializeTriplesWithSubject(OutputStream stream, GraphNode node) {
-        serializer.serialize(stream, getTriplesWithSubject(node),
-                SupportedFormat.TURTLE);
-    }
-
-    private TripleCollection getTriplesWithSubject(GraphNode node) {
-        TripleCollection containerGraph = node.getGraph();
-        return new SimpleGraph(containerGraph.filter(
-                (NonLiteral) node.getNode(), null, null));
     }
 
     /**
