@@ -74,6 +74,7 @@ import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.clerezza.rdf.utils.MGraphUtils;
 import org.apache.clerezza.rdf.utils.MGraphUtils.NoSuchSubGraphException;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.security.PasswordUtil;
@@ -83,7 +84,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component
-@Service(UserResource.class)
+@Service( {Object.class, UserResource.class })
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("user-management")
 public class UserResource {
 
