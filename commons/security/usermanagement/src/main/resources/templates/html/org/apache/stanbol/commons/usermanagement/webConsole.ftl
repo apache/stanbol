@@ -203,6 +203,7 @@ limitations under the License.
     function addUser(){
         $.ajax({
             url: '/user-management/create-form',
+            dataType: 'html',
             success: function(data) {
                 $("#editUserForm").html(data);
                 $("#editUserForm").title = "Create User"; 
