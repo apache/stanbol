@@ -16,7 +16,7 @@
 */
 package org.apache.commons.opennlp;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +30,7 @@ import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+@SuppressWarnings("deprecation") //test for a deprecated component
 public class TextAnalyzerTest {
 
     public static final String SINGLE_SENTENCE = "Dr Patrick Marshall (1869 - November 1950) was a"
