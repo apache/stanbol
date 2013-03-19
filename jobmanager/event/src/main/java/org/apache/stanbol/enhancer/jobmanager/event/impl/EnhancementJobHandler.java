@@ -421,33 +421,27 @@ public class EnhancementJobHandler implements EventHandler {
         }
 
         public boolean waitForCompletion(int maxEnhancementJobWaitTime) {
-            boolean acquire = false;
+            boolean finished = false;
             if(semaphore.availablePermits() < 1){
                 // The only permit is taken by the EnhancementJobHander
                 try {
-                    acquire = semaphore.tryAcquire(1,
+                    finished = semaphore.tryAcquire(1,
                         Math.max(MIN_WAIT_TIME, maxEnhancementJobWaitTime),TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     //interupted
-                    acquire = false;
+                    finished = false;
                 }
             } else if(!hasCompleted()){
-                int wait = Math.max(100, maxEnhancementJobWaitTime/10);
-                log.warn("Unexpected permit available for Semaphore of "
-                    + "EnhancementJob of ContentItem {}. Fallback to wait({})"
-                    + "for detecting if Job has finished. While the fallback "
-                    + "should ensure correct Enhancement results this indicates a "
-                    + "Bug in the EventHobManager. Please feel free to report "
-                    + "This on dev@stanbol.apache.org or the Apache Stanbol "
-                    + "Issue Tracker.",enhancementJob.getContentItem().getUri(),wait);
-                try {
-                    Thread.currentThread().wait(wait);
-                } catch (InterruptedException e) {
-                    //interupted
-                }
-                acquire = true;
-            }// else completed
-            return acquire;
+                log.error("Unexpected {} permit(s) (expected = 0) available for "
+                    + "Semaphore of  EnhancementJob of ContentItem {}. Please "
+                    + "report this on dev@stanbol.apache.org and/or the Apache "
+                    + "Stanbol Issue Tracker.", semaphore.availablePermits(),
+                    enhancementJob.getContentItem().getUri());
+                finished = false;
+            } else { //already completed
+                finished = true;
+            }
+            return finished;
         }
     }
     
