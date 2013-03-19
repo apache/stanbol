@@ -82,6 +82,7 @@ public class CeliLemmatizerEnhancementEngineTest {
 		properties.put(EnhancementEngine.PROPERTY_NAME, "celiLemmatizer");
         properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
 	    properties.put(SERVICE_URL, "http://linguagrid.org/LSGrid/ws/morpho-analyser");
+        properties.put(CeliConstants.CELI_CONNECTION_TIMEOUT, "5");
 	    properties.put(MORPHOLOGICAL_ANALYSIS, completeMorphoAnalysis);
 		MockComponentContext context = new MockComponentContext(properties);
 		CeliLemmatizerEnhancementEngine morphoAnalysisEngine = new CeliLemmatizerEnhancementEngine();

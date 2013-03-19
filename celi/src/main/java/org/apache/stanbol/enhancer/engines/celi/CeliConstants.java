@@ -54,7 +54,12 @@ public interface CeliConstants {
      */
     String CELI_TEST_ACCOUNT = "celi.testaccount";
     
- 
+    String CELI_CONNECTION_TIMEOUT = "celi.connectionTimeout";
+    /**
+     * The default connection timeout for HTTP connections (30sec)
+     */
+    int DEFAULT_CONECTION_TIMEOUT = 30;
+
     /**
      * Concept used to annotate sentiment expressions within text
      *  TODO: Find standard ontology for reference or check if it is OK to define new properties in the FISE namespace

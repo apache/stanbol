@@ -90,6 +90,7 @@ public class CeliAnalyzedTextLemmatizerEngineTest {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put(EnhancementEngine.PROPERTY_NAME, "celiLemmatizer");
         properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
+        properties.put(CeliConstants.CELI_CONNECTION_TIMEOUT, "5");
         properties.put(SERVICE_URL, "http://linguagrid.org/LSGrid/ws/morpho-analyser");
         MockComponentContext context = new MockComponentContext(properties);
         engine = new CeliAnalyzedTextLemmatizerEngine();

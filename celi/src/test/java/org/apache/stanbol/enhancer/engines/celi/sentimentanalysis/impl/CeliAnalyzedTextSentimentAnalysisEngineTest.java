@@ -76,6 +76,7 @@ public class CeliAnalyzedTextSentimentAnalysisEngineTest {
         properties.put(EnhancementEngine.PROPERTY_NAME, "celiSentimentAnalysis");
 		properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
 		properties.put(CeliAnalyzedTextSentimentAnalysisEngine.SERVICE_URL, CELI_SENTIMENT_ANALYSIS_SERVICE_URL);
+        properties.put(CeliConstants.CELI_CONNECTION_TIMEOUT, "5");
 		MockComponentContext context = new MockComponentContext(properties);
         engine =  new CeliAnalyzedTextSentimentAnalysisEngine();
         engine.activate(context);

@@ -69,6 +69,7 @@ public class CeliClassificationEnhancementEngineTest {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EnhancementEngine.PROPERTY_NAME, "celiClassification");
 		properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
+		properties.put(CeliConstants.CELI_CONNECTION_TIMEOUT, "5");
 	    properties.put(CeliClassificationEnhancementEngine.SERVICE_URL, "http://linguagrid.org/LSGrid/ws/dbpedia-classification");
 	 	
 		MockComponentContext context = new MockComponentContext(properties);

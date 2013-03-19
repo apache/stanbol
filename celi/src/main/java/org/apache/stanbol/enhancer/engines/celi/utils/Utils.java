@@ -39,6 +39,7 @@ public final class Utils {
      * The maximum size of the preix/suffix for the selection context
      */
     private static final int DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE = 50;
+    
     /**
      * Extracts the selection context based on the content, selection and
      * the start char offset of the selection
@@ -75,11 +76,13 @@ public final class Utils {
      * Creates a POST Request with the parsed URL and optional headers
      * @param serviceURL the service URL
      * @param headers optional header
+     * @param conTimeout the connection timeout in seconds. If &lt;= 0 the default
+     * (30sec) is used.
      * @return the HTTP connection
      * @throws IOException if the connection to the parsed service could not be established.
      * @throws IllegalArgumentException if <code>null</code> is parsed as service URL
      */
-    public static HttpURLConnection createPostRequest(URL serviceURL, Map<String,String> headers) throws IOException {
+    public static HttpURLConnection createPostRequest(URL serviceURL, Map<String,String> headers, int conTimeout) throws IOException {
         if(serviceURL == null){
             throw new IllegalArgumentException("The parsed service URL MUST NOT be NULL!");
         }
@@ -88,6 +91,11 @@ public final class Utils {
         urlConn.setDoInput(true);
         urlConn.setDoOutput(true);
         urlConn.setUseCaches(false);
+        if(conTimeout < 0){
+            conTimeout = CeliConstants.DEFAULT_CONECTION_TIMEOUT;
+        }
+        urlConn.setConnectTimeout(conTimeout*1000);
+        urlConn.setReadTimeout(conTimeout*1000);
         if(headers != null){
             for(Entry<String,String> entry : headers.entrySet()){
                 urlConn.setRequestProperty(entry.getKey(), entry.getValue());
@@ -129,5 +137,37 @@ public final class Utils {
             }
         }
         return licenseKey;
+    }
+    /**
+     * Retrieves the connection timeout from the enignes configuration
+     * @param configuration the configuration of the CELI engine
+     * @param ctx the {@link BundleContext} used to read the configuration of
+     * the environment.
+     * @return The connection timeout or <code>-1</code> if none is configured
+     */
+    public static int getConnectionTimeout(Dictionary<String,Object> configuration,BundleContext ctx) throws ConfigurationException {
+        Object value = configuration.get(CeliConstants.CELI_CONNECTION_TIMEOUT);
+        int timeout = -1;
+        if (value instanceof Number){
+            timeout = ((Number)value).intValue();
+        } else if(value != null){
+            try {
+                timeout = Integer.parseInt(value.toString());
+            } catch (NumberFormatException e) {
+                throw new ConfigurationException(CeliConstants.CELI_CONNECTION_TIMEOUT, 
+                    "The configured value '"+value+"'is not a valid integer",e);
+            }
+        } else {
+            value = ctx.getProperty(CeliConstants.CELI_TEST_ACCOUNT);
+            if(value != null){
+                try {
+                    timeout = Integer.parseInt(value.toString());
+                } catch (NumberFormatException e) {
+                    throw new ConfigurationException(CeliConstants.CELI_CONNECTION_TIMEOUT, 
+                        "The configured value '"+value+"' taken from the system properties is not a valid integer",e);
+                }
+            }
+        }
+        return timeout;
     }
 }

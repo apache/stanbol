@@ -80,6 +80,7 @@ public class CeliNamedEntityExtractionEnhancementEngineTest {
         properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
 	    properties.put(CeliNamedEntityExtractionEnhancementEngine.SERVICE_URL, "http://linguagrid.org/LSGrid/ws/com.celi-france.linguagrid.namedentityrecognition.v0u0.demo");
 	    properties.put(CeliNamedEntityExtractionEnhancementEngine.SUPPORTED_LANGUAGES, "fr;it");
+        properties.put(CeliConstants.CELI_CONNECTION_TIMEOUT, "5");
 	    MockComponentContext context = new MockComponentContext(properties);
 		nerEngine.activate(context);
 	}

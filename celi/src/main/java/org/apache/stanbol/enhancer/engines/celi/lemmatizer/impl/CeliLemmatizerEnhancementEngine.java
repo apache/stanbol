@@ -81,7 +81,8 @@ import org.slf4j.LoggerFactory;
 @Properties(value = { 
 		@Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiLemmatizer"), 
 		@Property(name = CeliConstants.CELI_LICENSE), 
-		@Property(name = CeliConstants.CELI_TEST_ACCOUNT, boolValue = false) 
+		@Property(name = CeliConstants.CELI_TEST_ACCOUNT, boolValue = false),
+	    @Property(name = CeliConstants.CELI_CONNECTION_TIMEOUT, intValue=CeliConstants.DEFAULT_CONECTION_TIMEOUT) 
 })
 public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 	// TODO: check if it is OK to define new properties in the FISE namespace
@@ -154,7 +155,8 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 		} catch (Exception e) {
 			this.completeMorphoAnalysis = false;
 		}
-		this.client = new LemmatizerClientHTTP(this.serviceURL, this.licenseKey);
+		int conTimeout = Utils.getConnectionTimeout(properties, ctx.getBundleContext());
+		this.client = new LemmatizerClientHTTP(this.serviceURL, this.licenseKey, conTimeout);
 	}
 
 	@Override

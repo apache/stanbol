@@ -60,7 +60,8 @@ import org.osgi.service.component.ComponentContext;
 @Properties(value = { 
     @Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiSentiment"),
     @Property(name = CeliConstants.CELI_LICENSE),
-    @Property(name = CeliConstants.CELI_TEST_ACCOUNT,boolValue=false)
+    @Property(name = CeliConstants.CELI_TEST_ACCOUNT,boolValue=false),
+    @Property(name = CeliConstants.CELI_CONNECTION_TIMEOUT, intValue=CeliConstants.DEFAULT_CONECTION_TIMEOUT)
 })
 public class CeliAnalyzedTextSentimentAnalysisEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 	
@@ -106,8 +107,8 @@ public class CeliAnalyzedTextSentimentAnalysisEngine extends AbstractEnhancement
         this.serviceURL = new URL(url);
         //parse the parsed language configuration
         languageConfig.setConfiguration(properties);
-
-        this.client = new SentimentAnalysisServiceClientHttp(this.serviceURL, this.licenseKey);
+        int connectionTimeout = Utils.getConnectionTimeout(properties, ctx.getBundleContext());
+        this.client = new SentimentAnalysisServiceClientHttp(this.serviceURL, this.licenseKey,connectionTimeout);
     }
 
     @Override

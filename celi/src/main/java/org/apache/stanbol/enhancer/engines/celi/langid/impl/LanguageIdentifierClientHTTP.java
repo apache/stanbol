@@ -70,12 +70,13 @@ public class LanguageIdentifierClientHTTP {
     
 	private URL serviceEP;
     private final Map<String,String> requestHeaders;
-	
+	private final int conTimeout;
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	
-	public LanguageIdentifierClientHTTP(URL serviceUrl, String licenseKey){
+	public LanguageIdentifierClientHTTP(URL serviceUrl, String licenseKey, int conTimeout){
 		this.serviceEP=serviceUrl;
+		this.conTimeout = conTimeout;
         Map<String,String> headers = new HashMap<String,String>();
         headers.put("Content-Type", CONTENT_TYPE);
         if(licenseKey != null){
@@ -94,7 +95,7 @@ public class LanguageIdentifierClientHTTP {
 	        return Collections.emptyList(); //no language
 	    }
         //create the POST request
-        HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders);
+        HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders,conTimeout);
         //write content
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(),UTF8));
         writer.write(SOAP_PREFIX);
@@ -145,7 +146,7 @@ public class LanguageIdentifierClientHTTP {
             return Collections.emptyList();
         }
         //create the POST request
-        HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders);
+        HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders,conTimeout);
         //write content
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(),UTF8));
         writer.write(SOAP_PREFIX);

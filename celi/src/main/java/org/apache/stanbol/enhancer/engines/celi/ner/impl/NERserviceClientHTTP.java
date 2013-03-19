@@ -68,14 +68,15 @@ public class NERserviceClientHTTP {
 	
 	private final URL serviceEP;
 	private final String licenseKey;
-	
+	private final int conTimeout;
 	private final Map<String,String> requestHeaders;
 	
 	private final Logger log = LoggerFactory.getLogger(getClass());
 		
-	public NERserviceClientHTTP(URL serviceUrl, String licenseKey){
+	public NERserviceClientHTTP(URL serviceUrl, String licenseKey, int conTimeout){
 		this.serviceEP=serviceUrl;
 		this.licenseKey = licenseKey;
+		this.conTimeout = conTimeout;
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", CONTENT_TYPE);
 		if(licenseKey != null){
@@ -93,7 +94,7 @@ public class NERserviceClientHTTP {
 	    }
 
 	    //create the POST request
-		HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders);
+		HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders,-1);
 		//write content
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(),UTF8));
 		writer.write(SOAP_PREFIX);

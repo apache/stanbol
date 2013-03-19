@@ -20,13 +20,11 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -40,7 +38,6 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.util.Base64;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.stanbol.enhancer.engines.celi.utils.Utils;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
@@ -79,15 +76,15 @@ public class ClassificationClientHTTP {
 	
 	private final URL serviceEP;
 	private final String licenseKey;
+	private final int conTimeout;
 	
-	//NOTE: the request headers are the same for all request - so they can be
-	//      initialized in the constructor.
 	private final Map<String,String> requestHeaders;
 	
 	
-	public ClassificationClientHTTP(URL serviceUrl, String licenseKey){
+	public ClassificationClientHTTP(URL serviceUrl, String licenseKey, int conTimeout){
 		this.serviceEP=serviceUrl;
 		this.licenseKey=licenseKey;
+		this.conTimeout = conTimeout;
         Map<String,String> headers = new HashMap<String,String>();
         headers.put("Content-Type", CONTENT_TYPE);
         if(licenseKey != null){
@@ -97,53 +94,6 @@ public class ClassificationClientHTTP {
         this.requestHeaders = Collections.unmodifiableMap(headers);
 	}
 	
-	/*
-	 * NOTE: parsing/returning a String requires to create in-memory copies
-	 *       of the sent/received data. Imaging users that send the text of
-	 *       100 pages PDF files to the Stanbol Enhancer.
-	 *       Because of that an implementation that directly streams the
-	 *       StringEscapeUtils.escapeXml(..) to the request is preferable 
-	 *       
-	 *       This will no longer allow to debug the data of the request and
-	 *       response. See the commented main method at the end for alternatives
-	 */
-//	public String doPostRequest(URL url, String body) throws IOException {
-//		
-//		HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
-//		urlConn.setRequestMethod("POST");
-//		urlConn.setDoInput(true);
-//		if (null != body) {
-//			urlConn.setDoOutput(true);
-//		} else {
-//			urlConn.setDoOutput(false);
-//		}
-//		urlConn.setUseCaches(false);
-//		String	contentType = "text/xml; charset=utf-8";
-//		urlConn.setRequestProperty("Content-Type", contentType);
-//		if(this.licenseKey!=null){
-//			String encoded = Base64.encode(this.licenseKey.getBytes("UTF-8"));
-//			urlConn.setRequestProperty("Authorization", "Basic "+encoded);
-//		}
-//		
-//		// send POST output
-//		if (null != body) {
-//			OutputStreamWriter printout = new OutputStreamWriter(urlConn.getOutputStream(), "UTF-8");
-//			printout.write(body);
-//			printout.flush();
-//			printout.close();
-//		}
-//		
-//		//close connection
-//		urlConn.disconnect();
-//		
-//		// get response data
-//		return IOUtils.toString(urlConn.getInputStream(), "UTF-8");
-//	}
-
-
-	//NOTE: forward IOException and SOAPExceptions to allow correct error handling
-	//      by the EnhancementJobManager.
-	//      Also RuntimeExceptions MUST NOT be cached out of the same reason!
 	public List<Concept> extractConcepts(String text,String lang) throws IOException, SOAPException {
         if(text == null || text.isEmpty()){
             //no text -> no classification
@@ -151,7 +101,7 @@ public class ClassificationClientHTTP {
         }
 
         //create the POST request
-        HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders);
+        HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders,conTimeout);
         //"stream" the request content directly to the buffered writer
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(),UTF8));
         writer.write(SOAP_PREFIX);
@@ -172,19 +122,10 @@ public class ClassificationClientHTTP {
         InputStream stream = con.getInputStream();
         log.debug("Request to {} took {}ms",serviceEP,System.currentTimeMillis()-start);
 
-        //NOTE: forward IOException and SOAPExceptions to allow correct error handling
-        //      by the EnhancementJobManager.
-        //      Also RuntimeExceptions MUST NOT be cached out of the same reason!
-
-//		try {
-
-		// Create SoapMessage
 		MessageFactory msgFactory = MessageFactory.newInstance();
 		SOAPMessage message = msgFactory.createMessage();
 		SOAPPart soapPart = message.getSOAPPart();
 
-		// NOTE: directly use the InputStream provided by the URLConnection!
-//			ByteArrayInputStream stream = new ByteArrayInputStream(responseXml.getBytes("UTF-8"));
 		StreamSource source = new StreamSource(stream);
 
 		// Set contents of message
@@ -193,11 +134,7 @@ public class ClassificationClientHTTP {
 		SOAPBody soapBody = message.getSOAPBody();
         List<Concept> extractedConcepts = new Vector<Concept>();
 		NodeList nlist = soapBody.getElementsByTagNameNS("*","return");
-		HashSet<String> inserted=new HashSet<String>();
 		for (int i = 0; i < nlist.getLength() && i<maxResultToReturn; i++) {
-		    //NOTE: do not catch RuntimeExceptions. Error handling is done by
-		    //      the EnhancementJobManager!
-//			try {
 			Element result = (Element) nlist.item(i);
 
 			//NOTE: (rwesten) implemented a mapping from the CELI classification
@@ -215,14 +152,7 @@ public class ClassificationClientHTTP {
 			String conf=result.getElementsByTagNameNS("*","score").item(0).getTextContent();
 			Double confidence= new Double(conf);
 			extractedConcepts.add(new Concept(model,modelConcept,confidence));
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-
 		}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
 		return extractedConcepts;
 	}
     /**
@@ -258,51 +188,4 @@ public class ClassificationClientHTTP {
             (tmps.length > 1 ? tmps[1] : tmps[0])); //the Class for the label
     }	
 	
-	//NOTE: If you stream the contents directly to the stream, you can no longer
-	//      debug the request/response. Because of that it is sometimes
-	//      helpful to have a main method for those tests
-	//      An even better variant would be to write a UnitTest for that!!
-	//      This would be recommended of the called service is still in beta
-	//      and may change at any time
-    public static void main(String[] args) throws Exception {
-        String lang = "fr";
-        String text = "Brigitte Bardot, née  le 28 septembre " +
-                "1934 à Paris, est une actrice de cinéma et chanteuse française.";
-        
-        //For request testing
-        //Writer request = new StringWriter();
-        
-        //For response testing
-        HttpURLConnection con = Utils.createPostRequest(
-            new URL("http://linguagrid.org/LSGrid/ws/dbpedia-classification"),
-            Collections.singletonMap("Content-Type", CONTENT_TYPE));
-        Writer request = new OutputStreamWriter(con.getOutputStream(),UTF8);
-        
-        //"stream" the request content directly to the buffered writer
-        BufferedWriter writer = new BufferedWriter(request);
-        
-        writer.write(SOAP_PREFIX);
-        writer.write("<clas:classify>");
-        writer.write("<clas:user>wiki</clas:user>");//TODO: should the user be configurable?
-        writer.write("<clas:model>");
-        writer.write(lang);
-        writer.write("</clas:model>");
-        writer.write("<clas:text>");
-        StringEscapeUtils.escapeXml(writer, text); //write the escaped text directly to the request
-        writer.write("</clas:text>");
-        writer.write("</clas:classify>");
-        writer.write(SOAP_SUFFIX);
-        writer.close();
-        
-        //log the Request (if request testing)
-        //log.info("Request \n{}",request.toString());
-        
-        //for response testing we need to call the service
-        //Call the service
-        long start = System.currentTimeMillis();
-        InputStream stream = con.getInputStream();
-        log.info("Request to took {}ms",System.currentTimeMillis()-start);
-        log.info("Response:\n{}",IOUtils.toString(stream));
-        stream.close();
-    }
 }
