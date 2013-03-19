@@ -246,6 +246,12 @@
       <artifactId>mimepull</artifactId>
       <version>1.4</version>
     </bundle>
+    <!-- MessageBodyReaders and Writers for Clereza RDF entities -->
+    <bundle>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>jaxrs.rdf.providers</artifactId>
+      <version>0.13-incubating</version>
+    </bundle>
   </startLevel>
 
   <!-- Clerezza storage and sparql infrastructure -->
