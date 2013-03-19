@@ -17,9 +17,8 @@
 package org.apache.stanbol.enhancer.servicesapi.helper;
 
 import static java.util.Collections.singleton;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +32,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
+import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
@@ -42,13 +42,12 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
-import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
-import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,10 +95,69 @@ public class EnhancementEngineHelper {
                 EnhancementEngine engine, UriRef contentItemId){
         UriRef enhancement = createEnhancement(metadata, engine,contentItemId);
         //add the Text Annotation Type
-        metadata.add(new TripleImpl(enhancement, Properties.RDF_TYPE,
-                TechnicalClasses.ENHANCER_TEXTANNOTATION));
+        metadata.add(new TripleImpl(enhancement, RDF_TYPE,
+                ENHANCER_TEXTANNOTATION));
         return enhancement;
     }
+    /**
+     * This method sets the fise:start, fise:end, fise:selection-prefix, 
+     * fise:selected-text and fise:selection-suffix properties for the 
+     * parsed fise:TextAnnotation instance according to the parsed parameters.<p>
+     * While it is intended to be used for TextAnnotations this method can also
+     * be used to add the mentioned properties to {@link UriRef}s with different
+     * type.<p>
+     * <b>NOTE</b> the <code>allowSelectionHeadTail</code>: This parameter allows
+     * to deactivate the usage of fise:selection-head and fise:selection-tail.
+     * Typically users should parse <code>false</code> in case of 'named entities'
+     * and <code>true</code> in case sections of the text (e.g. phrases, sentences,
+     * chapters ...) are selected.
+     * @param metadata The RDF graph to add the information
+     * @param textAnnotation the UriRef of the fise:TextAnnotation
+     * @param content the plain text content as String
+     * @param start the start index of the occurrence 
+     * @param end the end index of the occurrence
+     * @param lang the lanugage of the content or <code>null</code> if not known
+     * @param prefixSuffixSize the size of the prefix, suffix. If the parsed
+     * value &lt; 3 than the default 10 is used.
+     * @param allowSelectionHeadTail if <code>true</code> the fise:selection-head
+     * and fise:selection-tail properties are used instead of fise:selected-text
+     * if the selected text is longer as <code>Math.max(30, prefixSuffixSize*5);</code>.
+     * If <code>false</code> the fise:selected-text is added regardless of the
+     * size of the selected area.
+     * @since 0.11.0
+     */
+    public static void setOccurrence(MGraph metadata, UriRef textAnnotation,
+            String content, Integer start, Integer end, Language lang, int prefixSuffixSize, 
+            boolean allowSelectionHeadTail){
+        //set start, end
+        metadata.add(new TripleImpl(textAnnotation, ENHANCER_START, 
+            lf.createTypedLiteral(start)));
+        metadata.add(new TripleImpl(textAnnotation, ENHANCER_END, 
+            lf.createTypedLiteral(end)));
+        //set selection prefix and suffix (TextAnnotation new model)
+        prefixSuffixSize = prefixSuffixSize < 3 ? 10 : prefixSuffixSize;
+        metadata.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_PREFIX, 
+            new PlainLiteralImpl(content.substring(
+                Math.max(0,start-prefixSuffixSize), start), lang)));
+        metadata.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_SUFFIX, 
+            new PlainLiteralImpl(content.substring(
+                end,Math.min(content.length(), end+prefixSuffixSize)),lang)));
+        //set the selected text (or alternatively head and tail)
+        int maxSelectedTextSize = Math.max(30, prefixSuffixSize*5);
+        if(!allowSelectionHeadTail || end-start <= maxSelectedTextSize){
+            metadata.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, 
+                new PlainLiteralImpl(content.substring(start, end),lang)));
+        } else { //selected area to long for fise:selected-text
+            //use fise:selection-head and fise:selection-tail instead
+            metadata.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_HEAD, 
+                new PlainLiteralImpl(content.substring(
+                    start,start+prefixSuffixSize),lang)));
+            metadata.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_TAIL, 
+                new PlainLiteralImpl(content.substring(
+                    end-prefixSuffixSize,end),lang)));
+        }
+    }
+    
     /**
      * Create a new instance with the types enhancer:Enhancement and
      * enhancer:EntityAnnotation in the metadata-graph of the content
@@ -129,8 +187,7 @@ public class EnhancementEngineHelper {
     public static UriRef createEntityEnhancement(MGraph metadata,
                 EnhancementEngine engine, UriRef contentItemId){
         UriRef enhancement = createEnhancement(metadata, engine, contentItemId);
-        metadata.add(new TripleImpl(enhancement, Properties.RDF_TYPE,
-                TechnicalClasses.ENHANCER_ENTITYANNOTATION));
+        metadata.add(new TripleImpl(enhancement, RDF_TYPE, ENHANCER_ENTITYANNOTATION));
         return enhancement;
     }
     /**
@@ -148,8 +205,7 @@ public class EnhancementEngineHelper {
     public static UriRef createTopicEnhancement(MGraph metadata,
                  EnhancementEngine engine, UriRef contentItemId){
          UriRef enhancement = createEnhancement(metadata, engine, contentItemId);
-         metadata.add(new TripleImpl(enhancement, Properties.RDF_TYPE,
-                 TechnicalClasses.ENHANCER_TOPICANNOTATION));
+         metadata.add(new TripleImpl(enhancement, RDF_TYPE, ENHANCER_TOPICANNOTATION));
          return enhancement;
      }
     /**
@@ -183,13 +239,13 @@ public class EnhancementEngineHelper {
         UriRef enhancement = new UriRef("urn:enhancement-"
                 + EnhancementEngineHelper.randomUUID());
         //add the Enhancement Type
-        metadata.add(new TripleImpl(enhancement, Properties.RDF_TYPE,
-                TechnicalClasses.ENHANCER_ENHANCEMENT));
+        metadata.add(new TripleImpl(enhancement, RDF_TYPE,
+                ENHANCER_ENHANCEMENT));
         //add the extracted from content item
         metadata.add(new TripleImpl(enhancement,
-                Properties.ENHANCER_EXTRACTED_FROM, contentItemId));
+                ENHANCER_EXTRACTED_FROM, contentItemId));
         // creation date
-        metadata.add(new TripleImpl(enhancement, Properties.DC_CREATED,
+        metadata.add(new TripleImpl(enhancement, DC_CREATED,
                 literalFactory.createTypedLiteral(new Date())));
 
         // the engines that extracted the data
@@ -203,7 +259,7 @@ public class EnhancementEngineHelper {
          * We would need to add getEnhancerID() method to the enhancer interface
          * to access this information
           */
-        metadata.add(new TripleImpl(enhancement, Properties.DC_CREATOR,
+        metadata.add(new TripleImpl(enhancement, DC_CREATOR,
                 literalFactory.createTypedLiteral(engine.getClass().getName())));
         return enhancement;
     }
@@ -218,10 +274,10 @@ public class EnhancementEngineHelper {
                                              EnhancementEngine engine){
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         // TODO: use a public dereferencing URI instead?
-        metadata.add(new TripleImpl(enhancement, Properties.DC_CONTRIBUTOR,
+        metadata.add(new TripleImpl(enhancement, DC_CONTRIBUTOR,
             literalFactory.createTypedLiteral(engine.getClass().getName())));
         //set the modification date to the current date.
-        set(metadata,enhancement,Properties.DC_MODIFIED,new Date(),literalFactory);
+        set(metadata,enhancement,DC_MODIFIED,new Date(),literalFactory);
     }
     
     /**
@@ -232,7 +288,7 @@ public class EnhancementEngineHelper {
      * @param ci the ContentItem being under analysis
      * @param engine the Engine performing the analysis
      * @return the URI of the new extraction instance
-     * @deprecated
+     * @deprecated will be remove with 1.0
      * @see EnhancementEngineHelper#createEntityEnhancement(ContentItem, EnhancementEngine)
      * @see EnhancementEngineHelper#createTextEnhancement(ContentItem, EnhancementEngine)
      */
@@ -245,22 +301,22 @@ public class EnhancementEngineHelper {
         UriRef extraction = new UriRef("urn:extraction-"
                 + EnhancementEngineHelper.randomUUID());
 
-        metadata.add(new TripleImpl(extraction, Properties.RDF_TYPE,
-                TechnicalClasses.ENHANCER_EXTRACTION));
+        metadata.add(new TripleImpl(extraction, RDF_TYPE,
+                ENHANCER_EXTRACTION));
 
         // relate the extraction to the content item
         metadata.add(new TripleImpl(extraction,
-                Properties.ENHANCER_RELATED_CONTENT_ITEM, new UriRef(ci.getUri().getUnicodeString())));
+                ENHANCER_RELATED_CONTENT_ITEM, new UriRef(ci.getUri().getUnicodeString())));
 
         // creation date
-        metadata.add(new TripleImpl(extraction, Properties.DC_CREATED,
+        metadata.add(new TripleImpl(extraction, DC_CREATED,
                 literalFactory.createTypedLiteral(new Date())));
 
         // the engines that extracted the data
         // TODO: add some kind of versioning info for the extractor?
         // TODO: use a public dereferencing URI instead? that would allow for
         // explicit versioning too
-        metadata.add(new TripleImpl(extraction, Properties.DC_CREATOR,
+        metadata.add(new TripleImpl(extraction, DC_CREATOR,
                 literalFactory.createTypedLiteral(engine.getClass().getName())));
 
         return extraction;
@@ -557,7 +613,7 @@ public class EnhancementEngineHelper {
             NonLiteral textAnnotation = textAnnoataions.next().getSubject();
             String language = getString(graph, textAnnotation, DC_LANGUAGE);
             if(language != null){
-                Double confidence = get(graph, textAnnotation, Properties.ENHANCER_CONFIDENCE, Double.class, lf);
+                Double confidence = get(graph, textAnnotation, ENHANCER_CONFIDENCE, Double.class, lf);
                 confidences.put(textAnnotation,confidence);
                 langAnnotations.add(textAnnotation);
             }

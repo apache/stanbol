@@ -16,6 +16,7 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.rdf;
 
+import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 
 /**
@@ -110,11 +111,14 @@ public class Properties {
      * and longitude) concatenated as a string literal using a whitespace as
      * separator.
      */
+    @Deprecated
     public static final UriRef GEORSS_POINT = new UriRef(NamespaceEnum.georss
             + "point");
 
+    @Deprecated
     public static final UriRef GEO_LAT = new UriRef(NamespaceEnum.geo + "lat");
 
+    @Deprecated
     public static final UriRef GEO_LONG = new UriRef(NamespaceEnum.geo + "long");
 
     public static final UriRef SKOS_BROADER = new UriRef(NamespaceEnum.skos + "broader");
@@ -150,6 +154,36 @@ public class Properties {
      */
     public static final UriRef ENHANCER_SELECTION_CONTEXT = new UriRef(
             NamespaceEnum.fise + "selection-context");
+    /**
+     * The prefix of the {@link #ENHANCER_SELECTED_TEXT}. Intended to be used
+     * to find the exact position within the text if char indexes can not be used
+     * @since 0.11.0
+     */
+    public final static UriRef ENHANCER_SELECTION_PREFIX = new UriRef(
+        NamespaceEnum.fise + "selection-prefix");
+    /**
+     * The first few chars of the {@link #ENHANCER_SELECTED_TEXT}. To be used if
+     * the selected text is to long to be included as a {@link PlainLiteral} (
+     * e.g. when selection sentences or whole sections of the text).
+     * @since 0.11.0
+     */
+    public final static UriRef ENHANCER_SELECTION_HEAD = new UriRef(
+        NamespaceEnum.fise + "selection-head");
+    /**
+     * The last few chars of the {@link #ENHANCER_SELECTED_TEXT}. To be used if
+     * the selected text is to long to be included as a {@link PlainLiteral} (
+     * e.g. when selection sentences or whole sections of the text).
+     * @since 0.11.0
+     */
+    public final static UriRef ENHANCER_SELECTION_TAIL = new UriRef(
+        NamespaceEnum.fise + "selection-tail");
+    /**
+     * The suffix of the {@link #ENHANCER_SELECTED_TEXT}. Intended to be used
+     * to find the exact position within the text if char indexes can not be used
+     * @since 0.11.0
+     */
+    public final static UriRef ENHANCER_SELECTION_SUFFIX = new UriRef(
+        NamespaceEnum.fise + "selection-suffix");
 
     /**
      * A positive double value to rank extractions according to the algorithm
@@ -212,6 +246,7 @@ public class Properties {
     /**
      * The sha1 hexadecimal digest of a content item.
      */
+    @Deprecated
     public static final UriRef FOAF_SHA1 = new UriRef(NamespaceEnum.foaf
             + "sha1");
 
