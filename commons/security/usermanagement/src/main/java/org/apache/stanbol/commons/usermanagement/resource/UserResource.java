@@ -238,11 +238,7 @@ public class UserResource {
     @POST
     @Consumes(SupportedFormat.TURTLE)
     @Path("change-user")
-    public Response changeUser(String userData) {
-
-        log.debug("changeUser called with " + userData);
-
-        Graph inputGraph = readData(userData);
+    public Response changeUser(Graph inputGraph) {
 
         Lock readLock = systemGraph.getLock().readLock();
         readLock.lock();
@@ -405,11 +401,7 @@ public class UserResource {
     @POST // @TODO add RESTful PUT version
     @Consumes(SupportedFormat.TURTLE)
     @Path("add-user")
-    public Response addUser(@Context UriInfo uriInfo, String userData) {
-
-        log.debug(("addUser called with " + userData));
-
-        Graph inputGraph = readData(userData);
+    public Response addUser(@Context UriInfo uriInfo, Graph inputGraph) {
 
         Iterator<Triple> agents = inputGraph.filter(null, null, FOAF.Agent);
 
@@ -497,11 +489,7 @@ public class UserResource {
     @POST
     @Consumes(SupportedFormat.TURTLE)
     @Path("delete-user")
-    public Response deleteUser(String userData) {
-
-        log.debug("deleteUser called with " + userData);
-
-        Graph inputGraph = readData(userData);
+    public Response deleteUser(Graph inputGraph) {
 
         Iterator<Triple> userNameTriples = inputGraph.filter(null,
                 PLATFORM.userName, null);
@@ -967,26 +955,7 @@ public class UserResource {
         systemGraph.removeAll(oldBuffer);
     }
 
-    /**
-     * Read string into graph
-     *
-     * @param data Turtle string
-     * @return graph from Turtle
-     */
-    private Graph readData(String data) {
 
-        Graph inputGraph;
-
-        try {
-            inputGraph = parser.parse(
-                    new ByteArrayInputStream(data.getBytes("utf-8")),
-                    SupportedFormat.TURTLE);
-        } catch (IOException ex) {
-            log.error("parsing error with userData", ex);
-            throw new WebApplicationException(ex, 500);
-        }
-        return inputGraph;
-    }
 
     private GraphNode getUser(@QueryParam("userName") String userName) {
         return getNamedUser(userName);
