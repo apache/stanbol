@@ -78,7 +78,8 @@ import org.slf4j.LoggerFactory;
 @Properties(value = { 
     @Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiNer"),
     @Property(name = CeliConstants.CELI_LICENSE),
-    @Property(name = CeliConstants.CELI_TEST_ACCOUNT,boolValue=false)
+    @Property(name = CeliConstants.CELI_TEST_ACCOUNT,boolValue=false),
+    @Property(name = CeliConstants.CELI_CONNECTION_TIMEOUT, intValue=CeliConstants.DEFAULT_CONECTION_TIMEOUT)
 })
 public class CeliNamedEntityExtractionEnhancementEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 	
@@ -156,8 +157,8 @@ public class CeliNamedEntityExtractionEnhancementEngine extends AbstractEnhancem
 			throw new ConfigurationException(SERVICE_URL, String.format("%s : please configure the URL of the CELI Web Service (e.g. by" + "using the 'Configuration' tab of the Apache Felix Web Console).", getClass().getSimpleName()));
 		}
 		this.serviceURL = new URL(url);
-		
-		this.client = new NERserviceClientHTTP(this.serviceURL, this.licenseKey);
+		int conTimeout = Utils.getConnectionTimeout(properties, ctx.getBundleContext());
+		this.client = new NERserviceClientHTTP(this.serviceURL, this.licenseKey,conTimeout);
         log.info(" > CELI service: {}",serviceURL);
 		
 		//init the supported languages (now configurable)

@@ -60,6 +60,7 @@ public class CeliLanguageIdentifierEnhancementEngineTest {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EnhancementEngine.PROPERTY_NAME, "celiLangIdentifier");
         properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
+        properties.put(CeliConstants.CELI_CONNECTION_TIMEOUT, "5");
 	    properties.put(CeliLanguageIdentifierEnhancementEngine.SERVICE_URL, CELI_LANGID_SERVICE_URL);
 	    
 		MockComponentContext context = new MockComponentContext(properties);

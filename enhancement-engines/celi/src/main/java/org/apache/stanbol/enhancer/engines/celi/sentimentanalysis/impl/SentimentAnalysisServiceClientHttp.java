@@ -69,12 +69,6 @@ public class SentimentAnalysisServiceClientHttp {
      */
     private static final String SOAP_SUFFIX = "</soapenv:Body></soapenv:Envelope>";
 	
-	public static void main(String[]args) throws SOAPException, IOException{
-		SentimentAnalysisServiceClientHttp cl=new SentimentAnalysisServiceClientHttp(new URL("http://linguagrid.org/LSGrid/ws/sentiment-analysis"),null);
-		List<SentimentExpression> list = cl.extractSentimentExpressions("J'aime Paris", "fr");
-		for(SentimentExpression e:list)
-			System.out.println(e.getSnippetStr()+" "+e.getSentimentType());
-	}
 	private final URL serviceEP;
 	
 	private final String licenseKey;
@@ -82,10 +76,13 @@ public class SentimentAnalysisServiceClientHttp {
 	private final Map<String,String> requestHeaders;
 	
 	private final Logger log = LoggerFactory.getLogger(getClass());
+
+    private int connectionTimeout;
 	
-	public SentimentAnalysisServiceClientHttp(URL serviceUrl, String licenseKey){
+	public SentimentAnalysisServiceClientHttp(URL serviceUrl, String licenseKey, int connectionTimeout){
 		this.serviceEP=serviceUrl;
 		this.licenseKey = licenseKey;
+		this.connectionTimeout = connectionTimeout;
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", CONTENT_TYPE);
 		if(licenseKey != null){
@@ -103,7 +100,7 @@ public class SentimentAnalysisServiceClientHttp {
 	    }
 
 	    //create the POST request
-		HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders);
+		HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders,connectionTimeout);
 		//write content
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(),UTF8));
 		writer.write(SOAP_PREFIX);

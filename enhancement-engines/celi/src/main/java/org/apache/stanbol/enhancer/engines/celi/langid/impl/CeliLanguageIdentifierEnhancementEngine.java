@@ -69,7 +69,8 @@ import org.slf4j.LoggerFactory;
 @Properties(value = { 
     @Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiLangid"),
     @Property(name = CeliConstants.CELI_LICENSE),
-    @Property(name = CeliConstants.CELI_TEST_ACCOUNT,boolValue=false)
+    @Property(name = CeliConstants.CELI_TEST_ACCOUNT,boolValue=false),
+    @Property(name = CeliConstants.CELI_CONNECTION_TIMEOUT, intValue=CeliConstants.DEFAULT_CONECTION_TIMEOUT) 
 })
 public class CeliLanguageIdentifierEnhancementEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 	/**
@@ -136,7 +137,8 @@ public class CeliLanguageIdentifierEnhancementEngine extends AbstractEnhancement
                 String.format("%s : The URL of the CELI Web Service is not well formatted.", 
                     getClass().getSimpleName()),e);
         }
-		this.client = new LanguageIdentifierClientHTTP(this.serviceURL, this.licenseKey);
+		int conTimeout = Utils.getConnectionTimeout(properties, ctx.getBundleContext());
+		this.client = new LanguageIdentifierClientHTTP(this.serviceURL, this.licenseKey, conTimeout);
 	}
 	
 	@Override

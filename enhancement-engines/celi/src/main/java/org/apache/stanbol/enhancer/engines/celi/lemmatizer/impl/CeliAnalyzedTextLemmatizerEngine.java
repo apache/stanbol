@@ -67,7 +67,8 @@ import org.osgi.service.component.ComponentContext;
 @Properties(value = { 
     @Property(name = EnhancementEngine.PROPERTY_NAME, value = "celiLemmatizer"), 
     @Property(name = CeliConstants.CELI_LICENSE), 
-    @Property(name = CeliConstants.CELI_TEST_ACCOUNT, boolValue = false) 
+    @Property(name = CeliConstants.CELI_TEST_ACCOUNT, boolValue = false) ,
+    @Property(name = CeliConstants.CELI_CONNECTION_TIMEOUT, intValue=CeliConstants.DEFAULT_CONECTION_TIMEOUT)
 })
 public class CeliAnalyzedTextLemmatizerEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 
@@ -115,8 +116,8 @@ public class CeliAnalyzedTextLemmatizerEngine extends AbstractEnhancementEngine<
         this.serviceURL = new URL(url);
         //parse the parsed language configuration
         languageConfig.setConfiguration(properties);
-
-        this.client = new LemmatizerClientHTTP(this.serviceURL, this.licenseKey);
+        int conTimeout = Utils.getConnectionTimeout(properties, ctx.getBundleContext());
+        this.client = new LemmatizerClientHTTP(this.serviceURL, this.licenseKey,conTimeout);
     }
 
     @Override

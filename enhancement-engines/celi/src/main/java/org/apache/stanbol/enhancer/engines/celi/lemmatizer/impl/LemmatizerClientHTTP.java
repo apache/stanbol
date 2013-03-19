@@ -67,12 +67,14 @@ public class LemmatizerClientHTTP {
     
     private URL serviceEP;
 	private String licenseKey;
+	private final int conTimeout;
     private final Map<String,String> requestHeaders;
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
-	public LemmatizerClientHTTP(URL serviceUrl, String licenseKey){
+	public LemmatizerClientHTTP(URL serviceUrl, String licenseKey, int conTimeout){
 		this.serviceEP=serviceUrl;
 		this.licenseKey=licenseKey;
+		this.conTimeout = conTimeout;
         Map<String,String> headers = new HashMap<String,String>();
         headers.put("Content-Type", CONTENT_TYPE);
         if(licenseKey != null){
@@ -85,7 +87,7 @@ public class LemmatizerClientHTTP {
 	public List<LexicalEntry> performMorfologicalAnalysis(String text,String lang) throws IOException, SOAPException {
 
         //create the POST request
-        HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders);
+        HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders,conTimeout);
         //write content
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(),UTF8));
         //write the SOAP envelope, header and start the body
@@ -166,7 +168,7 @@ public class LemmatizerClientHTTP {
 
 	public String lemmatizeContents(String text,String lang) throws SOAPException, IOException {
         //create the POST request
-        HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders);
+        HttpURLConnection con = Utils.createPostRequest(serviceEP, requestHeaders,conTimeout);
         //write content
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(),UTF8));
         //write the SOAP envelope, header and start the body

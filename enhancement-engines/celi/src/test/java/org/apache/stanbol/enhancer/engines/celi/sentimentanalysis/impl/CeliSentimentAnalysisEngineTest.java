@@ -69,7 +69,7 @@ public class CeliSentimentAnalysisEngineTest {
 		properties.put(CeliConstants.CELI_TEST_ACCOUNT, "true");
 		properties.put(CeliSentimentAnalysisEngine.SERVICE_URL, CELI_SENTIMENT_ANALYSIS_SERVICE_URL);
 		properties.put(CeliSentimentAnalysisEngine.SUPPORTED_LANGUAGES, "fr;it");
-
+        properties.put(CeliConstants.CELI_CONNECTION_TIMEOUT, "5");
 		MockComponentContext context = new MockComponentContext(properties);
 		sentimentAnalysisEngine.activate(context);
 	}
