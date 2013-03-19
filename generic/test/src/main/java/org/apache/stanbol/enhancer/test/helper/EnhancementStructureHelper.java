@@ -65,9 +65,12 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.CONFIDENCE_LEVEL_ENUM;
+import org.junit.Assert;
 
 public class EnhancementStructureHelper {
 
+    private static final LiteralFactory lf = LiteralFactory.getInstance();
+    
     /**
      * Validates all TextAnnotations contained in the parsed enhancement graph
      * @param enhancements the enhancement graph
@@ -78,8 +81,28 @@ public class EnhancementStructureHelper {
      * {@link Class#getName()} as value.
      * @return the number of found TextAnnotations
      */
-    @SuppressWarnings("unchecked")
     public static int validateAllTextAnnotations(TripleCollection enhancements, String content, Map<UriRef,Resource> expectedValues) {
+        return validateAllTextAnnotations(enhancements,content,expectedValues,false);
+    }
+    /**
+     * Validates all TextAnnotations contained in the parsed enhancement graph.
+     * If <code>validatePrefixSuffix</code> is
+     * enabled the fise:selection-prefix and fise:selection-suffix (as defined by
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-987">STANBOL-987</a>
+     * are enforced and validated. If disabled those properties are not enforced but still
+     * validated when present.
+     * @param enhancements the enhancement graph
+     * @param content the enhanced content
+     * @param expectedValues the expected values of all validated EntityAnnotations.
+     * Properties are used as keys. Typical example would be fise:extracted-from
+     * with the id of the ContentItem as value; dc-terms:creator with the
+     * {@link Class#getName()} as value.
+     * @param validatePrefixSuffix enforce the presence of fise:selection-prefix and 
+     * fise:selection-suffix if fise:start and fise:end are set.
+     * @return the number of found TextAnnotations
+     */
+    @SuppressWarnings("unchecked")
+    public static int validateAllTextAnnotations(TripleCollection enhancements, String content, Map<UriRef,Resource> expectedValues, boolean validatePrefixSuffix) {
         expectedValues = expectedValues == null ? Collections.EMPTY_MAP : expectedValues;
         Iterator<Triple> textAnnotationIterator = enhancements.filter(null,
                 RDF_TYPE, ENHANCER_TEXTANNOTATION);
@@ -90,12 +113,12 @@ public class EnhancementStructureHelper {
         while (textAnnotationIterator.hasNext()) {
             UriRef textAnnotation = (UriRef) textAnnotationIterator.next().getSubject();
             // test if selected Text is added
-            validateTextAnnotation(enhancements, textAnnotation,content,expectedValues);
+            validateTextAnnotation(enhancements, textAnnotation,content,expectedValues, validatePrefixSuffix);
             textAnnotationCount++;
         }
         return textAnnotationCount;
     }
-
+        
     /**
      * Validates the parsed TextAnnotation with a fise:selected-text. This
      * method also validates rules defined by fise:Enhancement by calling
@@ -109,6 +132,22 @@ public class EnhancementStructureHelper {
      * @param expectedValues expected values (properties for the values are used as keys)
      */
     public static void validateTextAnnotation(TripleCollection enhancements, UriRef textAnnotation, String content, Map<UriRef,Resource> expectedValues) {
+        validateTextAnnotation(enhancements,textAnnotation,content,expectedValues,false);
+    }
+    /**
+     * Validates fise:TextAnnotations. If <code>validatePrefixSuffix</code> is
+     * enabled the fise:selection-prefix and fise:selection-suffix (as defined by
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-987">STANBOL-987</a>
+     * are enforced and validated. If disabled those properties are not enforced but still
+     * validated when present.
+     * @param enhancements the enhancements graph containing the text annotation
+     * @param textAnnotation the TextAnnotation to validate
+     * @param content the enhanced content
+     * @param expectedValues expected values (properties for the values are used as keys)
+     * @param validatePrefixSuffix enforce the presence of fise:selection-prefix and 
+     * fise:selection-suffix if fise:start and fise:end are set.
+     */
+    public static void validateTextAnnotation(TripleCollection enhancements, UriRef textAnnotation, String content, Map<UriRef,Resource> expectedValues, boolean validatePrefixSuffix) {
         //validate the rdf:type
         Iterator<Triple> rdfTypeIterator = enhancements.filter(textAnnotation, RDF_TYPE, ENHANCER_TEXTANNOTATION);
         assertTrue("Parsed Enhancement "+textAnnotation +" is missing the fise:TextAnnotation type ",
@@ -125,6 +164,7 @@ public class EnhancementStructureHelper {
             Literal selectedText = (Literal)selectedTextResource;
             assertTrue("The parsed content MUST contain the fise:selected-text value '"
                 +selectedText.getLexicalForm()+"' (uri: "+textAnnotation+")!",content.contains(selectedText.getLexicalForm()));
+            Assert.assertFalse("fise:selected-text MUST be single valued (uri: "+textAnnotation+")",selectedTextIterator.hasNext());
         } else {
             selectedTextResource = null; //no selected text
         }
@@ -134,14 +174,55 @@ public class EnhancementStructureHelper {
             assertEquals("The fise:selected-text is not the expected value "+expectedSelectedText+" (uri: "+textAnnotation+")!",
                 expectedSelectedText, selectedTextResource);
         }
+        //check for fise:selection-head and fise:selection-tail (STANBOL-987)
+        Iterator<Triple> selectionHeadIterator = enhancements.filter(textAnnotation, Properties.ENHANCER_SELECTION_HEAD, null);
+        if(selectedTextResource != null){
+            Assert.assertFalse("If fise:selected-text is present fise:selection-head MUST NOT be present",selectionHeadIterator.hasNext());
+        }
+        Resource selectionHeadResource;
+        if(selectionHeadIterator.hasNext()){
+            // test if the selected text is part of the TEXT_TO_TEST
+            selectionHeadResource = selectionHeadIterator.next().getObject();
+            assertTrue("fise:selection-head MUST BE of type PlainLiteral (uri: "+textAnnotation+")",
+                selectionHeadResource instanceof PlainLiteral);
+            Literal selectionHeadText = (Literal)selectionHeadResource;
+            assertTrue("The parsed content MUST contain the fise:selected-head value '"
+                +selectionHeadText.getLexicalForm()+"' (uri: "+textAnnotation+")!",content.contains(selectionHeadText.getLexicalForm()));
+            Assert.assertFalse("fise:selection-head MUST be single valued (uri: "+textAnnotation+")",selectionHeadIterator.hasNext());
+        } else {
+            selectionHeadResource = null;
+        }
+        
+        Iterator<Triple> selectionTailIterator = enhancements.filter(textAnnotation, Properties.ENHANCER_SELECTION_TAIL, null);
+        if(selectedTextResource != null){
+            Assert.assertFalse("If fise:selected-text is present fise:selection-tail MUST NOT be present",selectionTailIterator.hasNext());
+        }
+        Resource selectionTailResource;
+        if(selectionTailIterator.hasNext()){
+            // test if the selected text is part of the TEXT_TO_TEST
+            selectionTailResource = selectionTailIterator.next().getObject();
+            assertTrue("fise:selection-head MUST BE of type PlainLiteral (uri: "+textAnnotation+")",
+                selectionTailResource instanceof PlainLiteral);
+            Literal selectionTailText = (Literal)selectionTailResource;
+            assertTrue("The parsed content MUST contain the fise:selected-tail value '"
+                +selectionTailText.getLexicalForm()+"' (uri: "+textAnnotation+")!",content.contains(selectionTailText.getLexicalForm()));
+            Assert.assertFalse("fise:selection-tail MUST be single valued (uri: "+textAnnotation+")",selectionTailIterator.hasNext());
+        } else {
+            selectionTailResource = null;
+        }
+        Assert.assertTrue("Both fise:selection-tail AND fise:selection-head MUST BE defined "
+            +"(if one of them is present) (uri: "+textAnnotation+")",
+            (selectionHeadResource != null && selectionTailResource != null) ||
+            (selectionHeadResource == null && selectionTailResource == null));
+        
         Resource selectionContextResource;
         // test if context is added
         Iterator<Triple> selectionContextIterator = enhancements.filter(textAnnotation,
                 ENHANCER_SELECTION_CONTEXT, null);
         if(selectionContextIterator.hasNext()) { //context is optional
             //selection context is not allowed without selected-text
-            assertNotNull("If fise:selection-context is present also fise:selected-text MUST BE present (uri: "+textAnnotation+")",
-                selectedTextResource);
+            assertTrue("If fise:selection-context is present also fise:selected-text or fise:selection-head and fise:selection-tail MUST BE present (uri: "+textAnnotation+")",
+                selectedTextResource != null || (selectionHeadResource != null && selectionTailResource != null));
             // test if the selected text is part of the TEXT_TO_TEST
             selectionContextResource = selectionContextIterator.next().getObject();
             assertTrue("The fise:selection-context MUST BE of type PlainLiteral (uri: "+textAnnotation+")",
@@ -150,9 +231,21 @@ public class EnhancementStructureHelper {
             assertTrue("The fise:selection-context MUST BE contained in the Content | context= "+ selectionContextResource,
             content.contains(((Literal)selectionContextResource).getLexicalForm()));
             //check that the context contains the selected text
-            assertTrue("The fise:selected-text value MUST BE containted within the fise:selection-context value",
-                ((Literal)selectionContextResource).getLexicalForm().contains(
-                    ((Literal)selectedTextResource).getLexicalForm()));
+            if(selectedTextResource != null){
+                assertTrue("The fise:selected-text value MUST BE containted within the fise:selection-context value",
+                    ((Literal)selectionContextResource).getLexicalForm().contains(
+                        ((Literal)selectedTextResource).getLexicalForm()));
+            }
+            if(selectionHeadResource != null){
+                assertTrue("The fise:selection-head value MUST BE containted within the fise:selection-context value",
+                    ((Literal)selectionContextResource).getLexicalForm().contains(
+                        ((Literal)selectionHeadResource).getLexicalForm()));
+            }
+            if(selectionTailResource != null){
+                assertTrue("The fise:selection-tail value MUST BE containted within the fise:selection-context value",
+                    ((Literal)selectionContextResource).getLexicalForm().contains(
+                        ((Literal)selectionTailResource).getLexicalForm()));
+            }
         } else {
             assertNull("If no fise:selection-context is present also fise:selected-text MUST BE NOT present!", selectedTextResource);
             selectionContextResource = null;
@@ -197,7 +290,6 @@ public class EnhancementStructureHelper {
             resource = null;
             Integer end = LiteralFactory.getInstance().createObject(Integer.class, endPosLiteral);
             assertNotNull("Unable to parse Integer from TypedLiteral "+endPosLiteral,end);
-            endPosLiteral = null;
             //check for equality of the selected text and the text on the selected position in the content
             //System.out.println("TA ["+start+"|"+end+"]"+selectedText.getLexicalForm()+"<->"+content.substring(start,end));
             if(selectedTextResource != null){
@@ -221,6 +313,80 @@ public class EnhancementStructureHelper {
         if(expectedEndPos != null){
             assertEquals("The fise:end value is not the expected "+expectedEndPos,
                 expectedEndPos, endPosLiteral);
+        }
+
+        //fise:selection-prefix and fise:selection-suffix (STANBOL-987)
+        Literal prefixLiteral;
+        Iterator<Triple> selectionPrefixIterator = enhancements.filter(textAnnotation,
+            Properties.ENHANCER_SELECTION_PREFIX, null);
+        if(startPosLiteral != null){
+            // check if the selectionPrefix text is present
+            assertTrue("fise:selection-prefix property is missing for fise:TextAnnotation "
+                + textAnnotation, selectionPrefixIterator.hasNext() || 
+                !validatePrefixSuffix); //to support old and new fise:TextAnnotation model
+            // test if the selected text is part of the TEXT_TO_TEST
+            if(selectionPrefixIterator.hasNext()){
+                Resource selectionPrefixResource = selectionPrefixIterator.next().getObject();
+                assertTrue("fise:selection-prefix MUST BE of type PlainLiteral (uri: "+textAnnotation+")",
+                    selectionPrefixResource instanceof PlainLiteral);
+                prefixLiteral = (Literal)selectionPrefixResource;
+                assertTrue("The parsed content MUST contain the fise:selection-prefix value '"
+                        +prefixLiteral.getLexicalForm()+"' (uri: "+textAnnotation+")!",content.contains(prefixLiteral.getLexicalForm()));
+                assertFalse("fise:selection-prefix MUST BE single valued (uri: "+textAnnotation+")!",
+                    selectionPrefixIterator.hasNext());
+            } else {
+                prefixLiteral = null;
+            }
+        } else {
+            prefixLiteral = null;
+        }
+        Literal suffixLiteral;
+        Iterator<Triple> selectionSuffixIterator = enhancements.filter(textAnnotation,
+            Properties.ENHANCER_SELECTION_SUFFIX, null);
+        if(endPosLiteral != null){
+            // check if the selectionPrefix text is present
+            assertTrue("fise:selection-suffix property is missing for fise:TextAnnotation "
+                + textAnnotation, selectionSuffixIterator.hasNext() || 
+                !validatePrefixSuffix); //to support old and new fise:TextAnnotation model
+            if(selectionSuffixIterator.hasNext()){
+                // test if the selected text is part of the TEXT_TO_TEST
+                Resource selectionSuffixResource = selectionSuffixIterator.next().getObject();
+                assertTrue("fise:selection-suffix MUST BE of type PlainLiteral (uri: "+textAnnotation+")",
+                    selectionSuffixResource instanceof PlainLiteral);
+                suffixLiteral = (Literal)selectionSuffixResource;
+                assertTrue("The parsed content MUST contain the fise:selection-suffix value '"
+                        +suffixLiteral.getLexicalForm()+"' (uri: "+textAnnotation+")!",content.contains(suffixLiteral.getLexicalForm()));
+                assertFalse("fise:selection-suffix MUST BE single valued (uri: "+textAnnotation+")!",
+                    selectionSuffixIterator.hasNext());
+            } else {
+                suffixLiteral = null;
+            }
+        } else {
+            suffixLiteral = null;
+        }
+        Assert.assertTrue("Both fise:selection-prefix AND fise:selection-suffix need to be present "
+            + "(if one of them is present) (uri: "+textAnnotation+")",
+            (suffixLiteral != null && prefixLiteral != null) ||
+            (suffixLiteral == null && prefixLiteral == null));
+        if(prefixLiteral != null && selectedTextResource != null){
+            String occurrence = prefixLiteral.getLexicalForm() + 
+                    ((Literal)selectedTextResource).getLexicalForm() +
+                    suffixLiteral.getLexicalForm();
+            assertTrue("The parsed content MUST contain the concated value of fise:selection-prefix,"
+                + "fise:selected-text and fise:selection-suffix (value: '"+occurrence
+                + "' (uri: "+textAnnotation+")!",content.contains(occurrence));
+        }
+        if(prefixLiteral != null && selectionHeadResource != null){
+            String occurrence = prefixLiteral.getLexicalForm() +
+                    ((Literal)selectionHeadResource).getLexicalForm();
+            assertTrue("The parsed content MUST contain the concated value of fise:selection-prefix,"
+                    + "fise:selection-head (value: '"+occurrence
+                    + "' (uri: "+textAnnotation+")!",content.contains(occurrence));
+            occurrence = ((Literal)selectionTailResource).getLexicalForm() +
+                    suffixLiteral.getLexicalForm();
+            assertTrue("The parsed content MUST contain the concated value of fise:selection-tail "
+                    + "and fise:selection-suffix (value: '"+occurrence
+                    + "' (uri: "+textAnnotation+")!",content.contains(occurrence));
         }
         
         //validate fise:Enhancement specific rules
@@ -412,9 +578,11 @@ public class EnhancementStructureHelper {
         assertTrue("Enhancements MUST HAVE a creator",creatorIterator.hasNext());
         Resource creatorResource = creatorIterator.next().getObject();
         assertTrue("Creator MUST BE an TypedLiteral (found '"+creatorResource.getClass().getSimpleName()+"')!",
-            creatorResource instanceof TypedLiteral);
-        assertEquals("The dc:creator value MUST be of dataType xsd:string",
-            XSD.string,((TypedLiteral)creatorResource).getDataType());
+            creatorResource instanceof TypedLiteral || creatorResource instanceof UriRef);
+        if(creatorResource instanceof TypedLiteral){
+            assertEquals("The dc:creator value MUST be of dataType xsd:string",
+                XSD.string,((TypedLiteral)creatorResource).getDataType());
+        }
         Resource expectedCreator = expectedValues.get(Properties.DC_CREATOR);
         if(expectedCreator != null){
             assertEquals("Creator is not the expected value!",expectedCreator, creatorResource);
@@ -425,8 +593,12 @@ public class EnhancementStructureHelper {
         Iterator<Triple> contributorIterator = enhancements.filter(enhancement, DCTERMS.contributor, null);
         while(contributorIterator.hasNext()){
             Resource contributorResource = contributorIterator.next().getObject();
-            assertTrue("Creator MUST BE an UriRef (found '"+contributorResource.getClass().getSimpleName()+"')!",
-                contributorResource instanceof UriRef);
+            assertTrue("Creator MUST BE an TypedLiteral or an UriRef (found '"+contributorResource.getClass().getSimpleName()+"')!",
+                contributorResource instanceof TypedLiteral || contributorResource instanceof UriRef);
+            if(contributorResource instanceof TypedLiteral){
+                assertEquals("The dc:contributor value MUST be of dataType xsd:string",
+                    XSD.string,((TypedLiteral)contributorResource).getDataType());
+            }
             if(expectedContributor != null && expectedContributor.equals(expectedContributor)){
                 expectedContributor = null; //found
             }
@@ -464,7 +636,7 @@ public class EnhancementStructureHelper {
             extractedResource instanceof UriRef);
         Resource expectedExtractedFrom = expectedValues.get(Properties.ENHANCER_EXTRACTED_FROM);
         if(expectedExtractedFrom != null){
-            assertEquals("Creator is not the expected value!",extractedResource, expectedExtractedFrom);
+            assertEquals("fise:extracted-from has not the expected value!",expectedExtractedFrom, extractedResource);
         }
         assertFalse("only a single creater MUST BE present for an Enhancement", extractedIterator.hasNext());
         //validate that all dc:requires and dc:relation link to resources of type fise:Enhancement
