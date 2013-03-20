@@ -54,6 +54,25 @@ import org.slf4j.LoggerFactory;
 
 public class EnhancementEngineHelper {
 
+    /**
+     * The minimum length of the selected text so that fise:selection-head and
+     * fise:selection.tail are being used instead of fise:selected-text. The
+     * actual size is calculated by using <code>prefixSuffixLength*5</code>.
+     * So if a user does not chage the {@link #DEFAULT_PREFIX_SUFFIX_LENGTH} the
+     * default value us <code>10 * 5 = 50</code> chars.
+     */
+    public static final int MIN_SELECTEN_HEAD_TAIL_USAGE_LENGTH = 30;
+    /**
+     * The default length of fise:selection-prefix and fise:selection-suffix
+     * literals (value = 10).
+     */
+    public static final int DEFAULT_PREFIX_SUFFIX_LENGTH = 10;
+    /**
+     * The minimum size for fise:selection-prefix and fise:selection-suffix
+     * literals (value = 3).
+     */
+    public static final int MIN_PREFIX_SUFFIX_SIZE = 3;
+
     protected final static Random rng = new Random();
 
     private final static Logger log = LoggerFactory.getLogger(EnhancementEngineHelper.class);
@@ -135,7 +154,8 @@ public class EnhancementEngineHelper {
         metadata.add(new TripleImpl(textAnnotation, ENHANCER_END, 
             lf.createTypedLiteral(end)));
         //set selection prefix and suffix (TextAnnotation new model)
-        prefixSuffixSize = prefixSuffixSize < 3 ? 10 : prefixSuffixSize;
+        prefixSuffixSize = prefixSuffixSize < MIN_PREFIX_SUFFIX_SIZE ? 
+                DEFAULT_PREFIX_SUFFIX_LENGTH : prefixSuffixSize;
         metadata.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_PREFIX, 
             new PlainLiteralImpl(content.substring(
                 Math.max(0,start-prefixSuffixSize), start), lang)));
@@ -143,7 +163,8 @@ public class EnhancementEngineHelper {
             new PlainLiteralImpl(content.substring(
                 end,Math.min(content.length(), end+prefixSuffixSize)),lang)));
         //set the selected text (or alternatively head and tail)
-        int maxSelectedTextSize = Math.max(30, prefixSuffixSize*5);
+        int maxSelectedTextSize = Math.max(MIN_SELECTEN_HEAD_TAIL_USAGE_LENGTH, 
+            prefixSuffixSize*5);
         if(!allowSelectionHeadTail || end-start <= maxSelectedTextSize){
             metadata.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, 
                 new PlainLiteralImpl(content.substring(start, end),lang)));
