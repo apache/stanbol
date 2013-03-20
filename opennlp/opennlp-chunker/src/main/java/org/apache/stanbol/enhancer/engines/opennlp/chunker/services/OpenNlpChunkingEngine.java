@@ -231,7 +231,7 @@ public class OpenNlpChunkingEngine extends AbstractEnhancementEngine<RuntimeExce
                     Value<PosTag> posValue = token.getAnnotation(POS_ANNOTATION);
                     if(posValue == null){
                         throw new EngineException("Missing POS value for Token '"
-                            + token.getSpan()+" of ContentItem "+ci.getUri()
+                            + token.getSpan()+"' of ContentItem "+ci.getUri()
                             + "(Sentence: '"+sentence.getSpan()+"'). This may "
                             + "indicate that a POS tagging Engine is missing in "
                             + "the EnhancementChain or that the used POS tagging "
