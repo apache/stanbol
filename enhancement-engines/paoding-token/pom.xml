@@ -41,10 +41,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/paoding-token
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/paoding-token
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/paoding-token
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/paoding-token
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

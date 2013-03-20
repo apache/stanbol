@@ -38,10 +38,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entityhublinking/lucene-labeltokenizer
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityhublinking/lucene-labeltokenizer
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entityhublinking/lucene-labeltokenizer
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityhublinking/lucene-labeltokenizer
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
