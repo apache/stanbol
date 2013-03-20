@@ -341,9 +341,19 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
             StatusLine statusLine = response.getStatusLine();
             HttpEntity entity = response.getEntity();
             if (statusLine.getStatusCode() >= 300) {
+                String reason;
+                if(entity != null) {
+                    StringBuilder sb = new StringBuilder(statusLine.getReasonPhrase());
+                    String message = EntityUtils.toString(entity);
+                    if(message != null && !message.isEmpty()){
+                        sb.append("\nMessage:\n").append(message);
+                    }
+                    reason = sb.toString();
+                } else {
+                    reason = statusLine.getReasonPhrase();
+                }
                 EntityUtils.consume(entity);
-                throw new HttpResponseException(statusLine.getStatusCode(),
-                    statusLine.getReasonPhrase());
+                throw new HttpResponseException(statusLine.getStatusCode(), reason);
             }
             //parse the results
             InputStream in = null;
