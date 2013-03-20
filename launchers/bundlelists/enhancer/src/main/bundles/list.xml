@@ -136,6 +136,24 @@
   <!-- Stanbol Enhancer plug-ins (the Enhancement Engines) -->
   <startLevel level="35">
 
+    <!-- Content conversion -->
+    
+    <!-- bundle> - Metaxa deactivated - STANBOL-510
+     <groupId>org.apache.stanbol</groupId>
+     <artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
+     <version>0.10.0-SNAPSHOT</version>
+     </bundle -->
+    <bundle><!-- Apache Tika Engine -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.tika</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
+	  <bundle><!-- XMP Extractor engine -->
+		  <groupId>org.apache.stanbol</groupId>
+		  <artifactId>org.apache.stanbol.enhancer.engines.xmpextractor</artifactId>
+		  <version>0.10.1-SNAPSHOT</version>
+	  </bundle>
+
     <!-- language identification -->
 
     <bundle> 
@@ -143,32 +161,14 @@
       <artifactId>org.apache.stanbol.enhancer.engines.langdetect</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
-
-	 <bundle> 
+	  <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
-
     <bundle><!-- RESTful Language Identification engine -->
       <groupId>org.apache.stanbol</groupId> <!-- see STANBOL-895 -->
       <artifactId>org.apache.stanbol.enhancer.engines.restful.nlp</artifactId>
-      <version>0.10.1-SNAPSHOT</version>
-    </bundle>
-
-    <!-- Content conversion (2 engines)-->
-
-    <!-- Metaxa deactivated - STANBOL-510
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
-    </bundle>
-    -->
-    
-    <bundle><!-- Apache Tika Engine -->
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.engines.tika</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
     
@@ -256,29 +256,26 @@
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
 
-    <!-- Disambiguation Enhancement Engine -->
 
-    <bundle>
+	  <!-- Post-Processing engine -->
+    
+    <bundle> <!-- Disambigutation using Solr MLT queries -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.disambiguation.mlt</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
-
-    <!-- Refactor Enhancement Engine -->
-
-    <bundle>
+	  <bundle> <!-- Converts TextAnnotations to the STANBOL-987 model extensions -->
+		  <groupId>org.apache.stanbol</groupId>
+		  <artifactId>org.apache.stanbol.enhancer.engines.textannotationnewmodel</artifactId>
+		  <version>0.10.1-SNAPSHOT</version>
+	  </bundle>
+    <bundle> <!-- Refactor Enhancement Engine -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.refactor</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
-	
-	<!-- XMP Extractor engine -->
-	<bundle>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.enhancer.engines.xmpextractor</artifactId>
-		<version>0.10.1-SNAPSHOT</version>
-	</bundle>
 
+    
     <!-- External Service Integration -->
 
     <bundle> <!-- http://www.opencalais.com/ -->
@@ -296,15 +293,12 @@
       <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
-    
     <bundle> <!-- http://linguagrid.org/ -->
       <groupId>org.apache.stanbol</groupId>
 	  <artifactId>org.apache.stanbol.enhancer.engines.celi</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
-    
-     <!-- DBpedia Spotlight Engines (STANBOL-706) -->
-    <bundle>
+    <bundle> <!-- DBpedia Spotlight Engines (STANBOL-706) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.dbpspotlight</artifactId>
       <version>0.10.1-SNAPSHOT</version>
