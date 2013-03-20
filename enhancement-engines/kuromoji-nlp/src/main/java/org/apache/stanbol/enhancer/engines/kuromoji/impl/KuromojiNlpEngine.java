@@ -110,7 +110,7 @@ import org.slf4j.LoggerFactory;
     policy = ConfigurationPolicy.OPTIONAL) //create a default instance with the default configuration
 @Service
 @Properties(value={
-        @Property(name= EnhancementEngine.PROPERTY_NAME,value="kuromoji-token"),
+        @Property(name= EnhancementEngine.PROPERTY_NAME,value="kuromoji-nlp"),
         @Property(name=Constants.SERVICE_RANKING,intValue=0) //give the default instance a ranking < 0
 })
 public class KuromojiNlpEngine extends AbstractEnhancementEngine<IOException,RuntimeException> implements ServiceProperties {
@@ -357,7 +357,10 @@ public class KuromojiNlpEngine extends AbstractEnhancementEngine<IOException,Run
         log.info("activating smartcn tokenizing engine");
         super.activate(ce);
         //init the Solr ResourceLoader used for initialising the components
-        resourceLoader = new StanbolResourceLoader(parentResourceLoader);
+        //first a ResourceLoader for this classloader, 2nd one using the commons.solr.core classloader
+        //and third the parentResourceLoader (if present).
+        resourceLoader = new StanbolResourceLoader(KuromojiNlpEngine.class.getClassLoader(), 
+            new StanbolResourceLoader(parentResourceLoader));
         tokenizerFactory = new JapaneseTokenizerFactory();
         tokenizerFactory.init(TOKENIZER_FACTORY_CONFIG);
         tokenizerFactory.setLuceneMatchVersion(LUCENE_VERSION);
