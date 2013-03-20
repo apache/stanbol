@@ -636,7 +636,7 @@ public class SolrServerAdapter {
          * @return the name under witch the SolrCore is registered. This can be
          * also retrieved by using {@link ServiceReference#getProperty(String)
          * gerServiceReference().getProperty(String)} with the key
-         * {@link SolrConstants#NAME}.
+         * {@link SolrConstants#PROPERTY_CORE_NAME}.
          */
         public String getName() {
             return name;

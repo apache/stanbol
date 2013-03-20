@@ -32,9 +32,9 @@ import org.osgi.service.component.ComponentContext;
 
 public class TokenizerAndTokenFIlterTest {
 
-    private static final Object TOKENIZER_FACTORY_CLASS = "org.apache.solr.analysis.SmartChineseSentenceTokenizerFactory";
+    private static final Object TOKENIZER_FACTORY_CLASS = "org.apache.lucene.analysis.cn.smart.SmartChineseSentenceTokenizerFactory";
     private static final String[] TOKEN_FILTER_FACTORY_CLASSES = new String[]{
-        "org.apache.solr.analysis.SmartChineseWordTokenFilterFactory"
+        "org.apache.lucene.analysis.cn.smart.SmartChineseWordTokenFilterFactory"
     };
     private static LuceneLabelTokenizer luceneLabelTokenizer;
 

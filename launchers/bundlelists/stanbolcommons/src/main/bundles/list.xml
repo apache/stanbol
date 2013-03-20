@@ -134,6 +134,16 @@
       <version>1.8.3_1</version>
     </bundle>
     <bundle>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>13.0.1</version>
+    </bundle>
+    <bundle> <!-- used by Solr4 spatial -->
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.spatial4j</artifactId>
+      <version>0.3_1</version>
+    </bundle>
+    <bundle>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore-osgi</artifactId>
       <version>4.2.3</version>
@@ -229,11 +239,11 @@
       <version>1.15</version>
     </bundle>
     <!-- needed to read data from mime multipart requests -->
-    <bundle>
+    <!-- bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>jaxrs.utils</artifactId>
       <version>0.7-incubating-SNAPSHOT</version>
-    </bundle>
+    </bundle -->
     <!-- still used in many places also it only runs on jersey and the code is not portable across jax-rs implementations -->
     <bundle>
       <groupId>com.sun.jersey.contribs</groupId>

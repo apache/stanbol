@@ -50,7 +50,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Embed-Dependency>lucene-smartcn</Embed-Dependency>
+            <Embed-Dependency>lucene-analyzers-smartcn</Embed-Dependency>
             <Import-Package>
               org.apache.lucene.analysis.cn.smart,
               org.apache.lucene.analysis.cn.smart.hhmm,
@@ -58,8 +58,8 @@
             </Import-Package>
             <!-- used instead of Export-Package to preserve the jars -->
             <_exportcontents>
-              org.apache.lucene.analysis.cn.smart;version=3.6.1,
-              org.apache.lucene.analysis.cn.smart.hhmm;version=3.6.1
+              org.apache.lucene.analysis.cn.smart;version=${solr-version},
+              org.apache.lucene.analysis.cn.smart.hhmm;version=${solr-version}
             </_exportcontents>
           </instructions>
         </configuration>
@@ -78,8 +78,8 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-smartcn</artifactId>
-      <version>3.6.1</version>
+      <artifactId>lucene-analyzers-smartcn</artifactId>
+      <!--<version>3.6.1</version>-->
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
@@ -87,7 +87,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-analyzers</artifactId>
+      <artifactId>lucene-analyzers-common</artifactId>
     </dependency>
   </dependencies>
 

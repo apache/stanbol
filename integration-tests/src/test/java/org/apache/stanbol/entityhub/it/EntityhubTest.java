@@ -117,6 +117,8 @@ public final class EntityhubTest extends QueryTestBase {
         testEntityUpdated();
         testEntityDelete();
         testEntityDeleted();
+        testEntityDeleteAll();
+        testAllEntitiesDeleted();
     }
     private void testEntityCreation() throws IOException {
         InputStream in = EntityhubTest.class.getClassLoader().getResourceAsStream("doap_Stanbol.rdf");
@@ -193,6 +195,19 @@ public final class EntityhubTest extends QueryTestBase {
 
     private void testEntityDeleted() throws IOException {
         String id = "http://stanbol.apache.org";
+        RequestExecutor re = executor.execute(
+            builder.buildGetRequest("/entityhub/entity","id",id)
+            .withHeader("Accept", "application/json"));
+        re.assertStatus(404);
+    }
+    private void testEntityDeleteAll() throws IOException {
+        Request request = builder.buildOtherRequest(new HttpDelete(
+            builder.buildUrl("/entityhub/entity", "id", "*")));
+        RequestExecutor re = executor.execute(request);
+        re.assertStatus(200);
+    }
+    private void testAllEntitiesDeleted() throws IOException {
+        String id = "http://xml.apache.org/xerces-c/";
         RequestExecutor re = executor.execute(
             builder.buildGetRequest("/entityhub/entity","id",id)
             .withHeader("Accept", "application/json"));
@@ -285,30 +300,36 @@ public final class EntityhubTest extends QueryTestBase {
     }
 
     private void testFindLimitAndOffsetQuery() throws IOException, JSONException {
-        FindQueryTestCase test = new FindQueryTestCase("XML*",
+    	//With Solr4 we need a test that produces different scores for results,
+    	//to ensure consistant odering
+        FindQueryTestCase test = new FindQueryTestCase("XML XSL*",
             Arrays.asList(
-                "http://xerces.apache.org/xml-commons/components/external/",
-                "http://xml.apache.org/xerces-c/",
-                "http://xerces.apache.org/xerces2-j/",
-                "http://xerces.apache.org/xerces-p",
-                "http://xerces.apache.org/xml-commons/components/resolver/"),
+                    "http://velocity.apache.org/anakia/",
+                    "http://xalan.apache.org/xalan-c/",
+                    "http://xalan.apache.org/xalan-j/",
+                    "http://velocity.apache.org/dvsl/devel/",
+                    "http://xmlgraphics.apache.org/commons/",
+                    "http://xmlgraphics.apache.org/fop"),
             null);
-        test.setField("http://usefulinc.com/ns/doap#name");
+        test.setField("http://usefulinc.com/ns/doap#description");
+        test.setLimit(10);
         test.setLanguage(null);
         executeQuery(test);
         //repeat the test with offset 2 and limit 2 to only retrieve the 3-4 result
-        test = new FindQueryTestCase("XML*",
+        test = new FindQueryTestCase("XML XSL*",
             Arrays.asList(
-                "http://xerces.apache.org/xml-commons/components/external/",
-                "http://xerces.apache.org/xerces-p"),
+                    "http://xalan.apache.org/xalan-j/",
+                    "http://velocity.apache.org/dvsl/devel/"),
             Arrays.asList(
-                "http://xml.apache.org/xerces-c/",
-                "http://xerces.apache.org/xerces2-j/",
-                "http://xerces.apache.org/xml-commons/components/resolver/"));
-        test.setField("http://usefulinc.com/ns/doap#name");
+                    "http://velocity.apache.org/anakia/",
+                    "http://xalan.apache.org/xalan-c/",
+                    "http://xmlgraphics.apache.org/commons/",
+                    "http://xmlgraphics.apache.org/fop"));
+        test.setField("http://usefulinc.com/ns/doap#description");
         test.setOffset(2);
         test.setLimit(2);
         test.setLanguage(null);
+        executeQuery(test);
         
     }
 

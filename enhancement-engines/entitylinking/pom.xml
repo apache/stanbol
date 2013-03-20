@@ -56,6 +56,8 @@
     <!-- Chinese Label Tokenizer -->
     <module>labeltokenizer-smartcn</module> <!-- config for the lucene label tokenizer -->
     <module>labeltokenizer-paoding</module> <!-- implementation based on paoding -->
+    <!-- Japanese -->
+    <module>labeltokenizer-kuromoji</module> <!-- configuration based on kuromoji-->
   </modules>
 
   <profiles>

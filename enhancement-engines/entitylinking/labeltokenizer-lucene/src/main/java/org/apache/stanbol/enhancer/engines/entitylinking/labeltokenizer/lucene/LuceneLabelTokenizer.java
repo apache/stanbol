@@ -16,6 +16,7 @@
 */
 package org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene;
 
+import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -37,16 +38,17 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.lucene.analysis.CharReader;
+import org.apache.lucene.analysis.CharFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.util.AbstractAnalysisFactory;
+import org.apache.lucene.analysis.util.CharFilterFactory;
+import org.apache.lucene.analysis.util.ResourceLoader;
+import org.apache.lucene.analysis.util.ResourceLoaderAware;
+import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.util.Version;
-import org.apache.solr.analysis.CharFilterFactory;
-import org.apache.solr.analysis.TokenFilterFactory;
-import org.apache.solr.analysis.TokenizerFactory;
-import org.apache.solr.common.ResourceLoader;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.util.plugin.ResourceLoaderAware;
 import org.apache.stanbol.commons.solr.utils.StanbolResourceLoader;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
@@ -69,28 +71,28 @@ import org.slf4j.LoggerFactory;
         @Property(name=Constants.SERVICE_RANKING,intValue=0)
 })
 public class LuceneLabelTokenizer implements LabelTokenizer {
-    
+
     private Logger log = LoggerFactory.getLogger(LuceneLabelTokenizer.class);
 
     private static final String[] EMPTY = new String[]{};
 
     @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
     private ResourceLoader parentResourceLoader;
-    
+
     protected ResourceLoader resourceLoader;
-    
-    
+
+
     public static final String PROPERTY_CHAR_FILTER_FACTORY = "enhancer.engine.linking.labeltokenizer.lucene.charFilterFactory";
     public static final String PROPERTY_TOKENIZER_FACTORY = "enhancer.engine.linking.labeltokenizer.lucene.tokenizerFactory";
     public static final String PROPERTY_TOKEN_FILTER_FACTORY = "enhancer.engine.linking.labeltokenizer.lucene.tokenFilterFactory";
-    
+
     static final String DEFAULT_CLASS_NAME_CONFIG = "{full-qualified-class-name}";
-    
+
     private CharFilterFactory charFilterFactory;
     private TokenizerFactory tokenizerFactory;
     private List<TokenFilterFactory> filterFactories = new ArrayList<TokenFilterFactory>();
     private LanguageConfiguration langConf = new LanguageConfiguration(SUPPORTED_LANUAGES, new String[]{});
-    
+
     @Activate
     protected void activate(ComponentContext ctx) throws ConfigurationException {
         //init the Solr ResourceLoader used for initialising the components
@@ -102,30 +104,32 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
                 PROPERTY_CHAR_FILTER_FACTORY, value.toString());
             Object factoryObject;
             try {
-                factoryObject = resourceLoader.newInstance(charFilterConfig.getKey(), (String[])null);
+                factoryObject = resourceLoader.newInstance(charFilterConfig.getKey(), Object.class);
             } catch (SolrException e) {
                 throw new ConfigurationException(PROPERTY_CHAR_FILTER_FACTORY, "Unable to instantiate the "
                         + "class '"+charFilterConfig.getKey()+"'!", e);
             }
-            
+
             if(factoryObject instanceof CharFilterFactory){
                 charFilterFactory = (CharFilterFactory)factoryObject;
                 Map<String,String> config = charFilterConfig.getValue();
-                if(!config.containsKey("luceneMatchVersion")){
-                    config.put("luceneMatchVersion", Version.LUCENE_36.toString());
-                }
+                addLuceneMatchVersionIfNotPresent(config, charFilterFactory);
                 charFilterFactory.init(config);
                 if(factoryObject instanceof ResourceLoaderAware){
-                    ((ResourceLoaderAware)factoryObject).inform(resourceLoader);
+                    try {
+                        ((ResourceLoaderAware)factoryObject).inform(resourceLoader);
+                    } catch (IOException e) {
+                        throw new ConfigurationException(PROPERTY_CHAR_FILTER_FACTORY, "Could not load configuration");
+                    }
                 }
             } else {
                 throw new ConfigurationException(PROPERTY_CHAR_FILTER_FACTORY, "The parsed class '"
                         + charFilterConfig.getKey() +"' is not assignable to "+CharFilterFactory.class);
-            }     
+            }
         } else {
             charFilterFactory = null;
         }
-        
+
         //now initialise the TokenizerFactory (required)
         value = ctx.getProperties().get(PROPERTY_TOKENIZER_FACTORY);
         if(value == null || value.toString().isEmpty() || DEFAULT_CLASS_NAME_CONFIG.equals(value)){
@@ -136,26 +140,28 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
 
         Object factoryObject;
         try {
-            factoryObject = resourceLoader.newInstance(tokenizerConfig.getKey(), (String[])null);
+            factoryObject = resourceLoader.newInstance(tokenizerConfig.getKey(), Object.class);
         } catch (SolrException e) {
             throw new ConfigurationException(PROPERTY_TOKENIZER_FACTORY, "Unable to instantiate the "
                     + "class '"+tokenizerConfig.getKey()+"'!", e);
         }
-        
+
         if(factoryObject instanceof TokenizerFactory){
             tokenizerFactory = (TokenizerFactory)factoryObject;
             Map<String,String> config = tokenizerConfig.getValue();
-            if(!config.containsKey("luceneMatchVersion")){
-                config.put("luceneMatchVersion", Version.LUCENE_36.toString());
-            }
+            addLuceneMatchVersionIfNotPresent(config, tokenizerFactory);
             tokenizerFactory.init(config);
         } else {
             throw new ConfigurationException(PROPERTY_TOKENIZER_FACTORY, "The instance "
-                    + factoryObject + "of the parsed parsed class '" + tokenizerConfig.getKey() 
+                    + factoryObject + "of the parsed parsed class '" + tokenizerConfig.getKey()
                     + "' is not assignable to "+TokenizerFactory.class);
         }
         if(factoryObject instanceof ResourceLoaderAware){
-            ((ResourceLoaderAware)factoryObject).inform(resourceLoader);
+            try {
+                ((ResourceLoaderAware)factoryObject).inform(resourceLoader);
+            } catch (IOException e) {
+                throw new ConfigurationException(PROPERTY_TOKENIZER_FACTORY, "Could not load configuration");
+            }
         }
 
         //initialise the list of Token Filters
@@ -185,18 +191,16 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
                 PROPERTY_CHAR_FILTER_FACTORY, filterConfigLine);
             Object filterFactoryObject;
             try {
-                filterFactoryObject = resourceLoader.newInstance(filterConfig.getKey(), (String[])null);
+                filterFactoryObject = resourceLoader.newInstance(filterConfig.getKey(), Object.class);
             } catch (SolrException e) {
                 throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "Unable to instantiate the "
                         + "class '"+filterConfig.getKey()+"'!", e);
             }
-            
+
             if(filterFactoryObject instanceof TokenFilterFactory){
                 TokenFilterFactory tff = (TokenFilterFactory)filterFactoryObject;
                 Map<String,String> config = filterConfig.getValue();
-                if(!config.containsKey("luceneMatchVersion")){
-                    config.put("luceneMatchVersion", Version.LUCENE_36.toString());
-                }
+                addLuceneMatchVersionIfNotPresent(config,tff);
                 tff.init(config);
                 filterFactories.add(tff);
             } else {
@@ -204,7 +208,11 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
                         + filterConfig.getKey() +"' is not assignable to "+TokenFilterFactory.class);
             }
             if(filterFactoryObject instanceof ResourceLoaderAware){
-                ((ResourceLoaderAware)filterFactoryObject).inform(resourceLoader);
+                try {
+                    ((ResourceLoaderAware)filterFactoryObject).inform(resourceLoader);
+                } catch (IOException e) {
+                    throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "Could not load configuration");
+                }
             }
         }
         //init the language configuration
@@ -215,7 +223,16 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
         }
         langConf.setConfiguration(ctx.getProperties());
     }
-    
+
+	private void addLuceneMatchVersionIfNotPresent(Map<String, String> config, AbstractAnalysisFactory factory) {
+		if(!config.containsKey("luceneMatchVersion")){
+		    config.put("luceneMatchVersion", Version.LUCENE_41.toString());
+		}
+		if(factory.getLuceneMatchVersion() == null){
+			factory.setLuceneMatchVersion(Version.LUCENE_41);
+		}
+	}
+
     @Deactivate
     protected void deactivate(ComponentContext ctx){
         resourceLoader = null;
@@ -224,7 +241,7 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
         filterFactories.clear();
         langConf.setDefault();
     }
-    
+
     @Override
     public String[] tokenize(String label, String language) {
         if(label == null){
@@ -239,16 +256,17 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
             TokenStream tokenizer;
             if(charFilterFactory != null){
                 tokenizer = tokenizerFactory.create(charFilterFactory.create(
-                    CharReader.get(reader)));
+                		reader));
             } else {
                 tokenizer = tokenizerFactory.create(reader);
             }
             //build the analysing chain
             for(TokenFilterFactory filterFactory : filterFactories){
-                tokenizer = filterFactory.create(tokenizer); 
+                tokenizer = filterFactory.create(tokenizer);
             }
             List<String> tokens = new ArrayList<String>(8);
             try {
+                tokenizer.reset();
                 while(tokenizer.incrementToken()){
                     OffsetAttribute offset = tokenizer.addAttribute(OffsetAttribute.class);
                     tokens.add(label.substring(offset.startOffset(), offset.endOffset()));
@@ -259,12 +277,12 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
                 log.error("IOException while reading from a StringReader :(",e);
                 return null;
             }
-            return tokens.toArray(new String[tokens.size()]);            
+            return tokens.toArray(new String[tokens.size()]);
         } else {
             log.trace("Language {} not configured to be supported",language);
             return null;
         }
-        
+
     }
     /**
      * Parses the configured component including parameters formatted like
@@ -272,7 +290,7 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
      *     {component};{param}={value};{param1}={value1};
      * </pre></code>
      * This can be used to parse the same configuration as within the XML schema
-     * 
+     *
      * @param property
      * @param line
      * @return
@@ -286,11 +304,11 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
             throw new ConfigurationException(property, "The component name MUST NOT be NULL "
                 + "(illegal formatted line: '"+line+"')!");
         }
-        return Collections.singletonMap(component,sepIndex >= 0 && sepIndex < line.length()-2 ? 
+        return Collections.singletonMap(component,sepIndex >= 0 && sepIndex < line.length()-2 ?
                         parseParameters(property,line.substring(sepIndex+1, line.length()).trim()) :
                             new HashMap<String,String>()).entrySet().iterator().next();
     }
-    
+
     /**
      * Parses optional parameters <code>{key}[={value}];{key2}[={value2}]</code>. Using
      * the same key multiple times will override the previouse value
@@ -305,14 +323,14 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
             param = param.trim();
             int equalsPos = param.indexOf('=');
             if(equalsPos == 0){
-                throw new ConfigurationException(property, 
+                throw new ConfigurationException(property,
                     "Parameter '"+param+"' has empty key!");
             }
             String key = equalsPos > 0 ? param.substring(0, equalsPos).trim() : param;
             String value;
             if(equalsPos > 0){
                 if(equalsPos < param.length()-2) {
-                    value = param.substring(equalsPos+1).trim(); 
+                    value = param.substring(equalsPos+1).trim();
                 } else {
                     value = "";
                 }

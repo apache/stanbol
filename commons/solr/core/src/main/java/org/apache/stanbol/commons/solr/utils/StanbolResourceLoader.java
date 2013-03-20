@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
-import org.apache.solr.common.ResourceLoader;
+import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
@@ -33,14 +33,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Solr {@link ResourceLoader} implementation that supports adding an parent as
  * well as parsing the classloader used for 
- * {@link #newInstance(String, String...)}.<p>
+ * {@link #newInstance(String, Class)}.<p>
  * This implementation can be used in combination with the 
  * {@link DataFileResourceLoader} to allow providing resources via the
  * Stanbol {@link DataFileProvider} infrastructure.<p>
- * The {@link #newInstance(String, String...)} method uses the same algorithm as
- * the {@link SolrResourceLoader#newInstance(String, String...)} method to 
- * build candidate class names. It also supports the default packages if
- * <code>null</code> or an empty array is parsed as second parameter.
+ * The {@link #newInstance(String, Class)} method uses the same algorithm as
+ * the {@link SolrResourceLoader#newInstance(String, Class)} method to
+ * build candidate class names. It supports the default packages.
  * @author Rupert Westenthaler
  *
  */
@@ -103,7 +102,6 @@ public class StanbolResourceLoader implements ResourceLoader {
         return in;
     }
 
-    @Override
     public List<String> getLines(String resource) throws IOException {
         List<String> lines = new ArrayList<String>();
         LineIterator it = IOUtils.lineIterator(openResource(resource), "UTF-8");
@@ -117,36 +115,33 @@ public class StanbolResourceLoader implements ResourceLoader {
     }
 
     @Override
-    public Object newInstance(String cname, String... subpackages) {
+    public <T> T newInstance(String cname, Class<T> expectedType) {
         String parentMessage = null;
         if(parent != null){
             try {
-                return parent.newInstance(cname, subpackages);
+                return parent.newInstance(cname, expectedType);
             } catch (SecurityException e) { //do not catch security related exceptions
                 throw e;
             } catch (RuntimeException e) {
                 parentMessage = e.getMessage();
             }
         }
-        if (subpackages == null || subpackages.length == 0 || subpackages == packages) {
-            subpackages = packages;
-        }
-        Class clazz = null;
+        Class<T> clazz = null;
         // first try cname == full name
         try {
-            clazz = classloader.loadClass(cname);
-        } catch (ClassNotFoundException e) {
+            clazz = (Class<T>) classloader.loadClass(cname);
+        } catch (Exception e) {
             String newName = cname;
             if (newName.startsWith(project)) {
                 newName = cname.substring(project.length() + 1);
             }
-            for (String subpackage : subpackages) {
+            for (String subpackage : packages) {
                 try {
                     String name = base + '.' + subpackage + newName;
                     log.trace("Trying class name " + name);
-                    clazz = classloader.loadClass(name);
+                    clazz = (Class<T>) classloader.loadClass(name);
                     break;
-                } catch (ClassNotFoundException e1) {
+                } catch (Exception e1) {
                     // ignore... assume first exception is best.
                 }
             }

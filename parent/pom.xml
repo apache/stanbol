@@ -60,7 +60,7 @@
     <jersey-version>1.15</jersey-version>
     <freemarker-version>2.3.19</freemarker-version>
     <owlapi-version>3.3</owlapi-version>
-    <solr-version>3.6.1</solr-version>
+    <solr-version>4.1.0</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
     <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
   </properties>
@@ -736,6 +736,13 @@
         <artifactId>httpmime</artifactId>
         <version>4.2.1</version>
       </dependency>
+      
+      <!-- Google Commons -->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>13.0.1</version>
+      </dependency>
 
       <!-- Joda Time -->
       <dependency>
@@ -966,12 +973,16 @@
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-core</artifactId>
         <version>${solr-version}</version>
-        <!-- exclusions>
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+            </exclusion>
             <exclusion>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-jdk14</artifactId>
             </exclusion>
-        </exclusions -->
+        </exclusions>
       </dependency>
       <!-- dependency>
         <groupId>org.apache.solr</groupId>
@@ -1023,7 +1034,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-analyzers</artifactId>
+      <artifactId>lucene-analyzers-common</artifactId>
       <version>${solr-version}</version>
     </dependency>
     <dependency>
@@ -1038,6 +1049,11 @@
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-codecs</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-misc</artifactId>
       <version>${solr-version}</version>
     </dependency>
@@ -1048,9 +1064,29 @@
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-phonetic</artifactId>
+      <artifactId>lucene-queryparser</artifactId>
       <version>${solr-version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-phonetic</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-stempel</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-smartcn</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+      <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-analyzers-kuromoji</artifactId>
+        <version>${solr-version}</version>
+      </dependency>
     <!-- Snowball moved to analyzer in 3.1<dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-snowball</artifactId>
@@ -1058,7 +1094,12 @@
     </dependency>  -->
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-spellchecker</artifactId>
+      <artifactId>lucene-suggest</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-sandbox</artifactId>
       <version>${solr-version}</version>
     </dependency>
     <dependency>
@@ -1068,7 +1109,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-icu</artifactId>
+      <artifactId>lucene-analyzers-icu</artifactId>
       <version>${solr-version}</version>
     </dependency>
     <dependency>
@@ -1081,28 +1122,6 @@
         <artifactId>lucene-grouping</artifactId>
         <version>${solr-version}</version>
     </dependency>
-    <!-- other unused Lucene bundes
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-queryparser</artifactId>
-        <version>${solr-version}</version>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-smartcn</artifactId>
-        <version>${solr-version}</version>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-stempel</artifactId>
-        <version>${solr-version}</version>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-kuromoji</artifactId>
-        <version>${solr-version}</version>
-    </dependency>
-    -->
     <!-- Other Solr/Lucene dependendies -->
     <!-- StAX Parser (used by Solr/Lucene) -->
     <!-- dependency> stay api is included in java 1.6
@@ -1121,17 +1140,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-    <!-- dependency>
-      <groupId>stax</groupId>
-      <artifactId>stax-api</artifactId>
-      <version>1.0.1</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.woodstox</groupId>
-      <artifactId>wstx-asl</artifactId>
-      <version>3.2.7</version>
-    </dependency -->
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.regexp</artifactId>
@@ -1146,6 +1154,21 @@
       <groupId>javax.portlet</groupId>
       <artifactId>portlet-api</artifactId>
       <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.zookeeper</groupId>
+      <artifactId>zookeeper</artifactId>
+      <version>3.4.5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- END Solr/Lucene dependencies -->
 

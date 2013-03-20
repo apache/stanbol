@@ -27,9 +27,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.icu.segmentation.DefaultICUTokenizerConfig;
+import org.apache.lucene.analysis.icu.segmentation.ICUTokenizer;
+import org.apache.lucene.analysis.icu.segmentation.ICUTokenizerConfig;
+import org.apache.lucene.analysis.icu.segmentation.ICUTokenizerFactory;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
-import org.apache.solr.analysis.ICUTokenizerFactory;
-import org.apache.solr.analysis.TokenizerFactory;
+import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
@@ -38,18 +41,14 @@ import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 public final class QueryUtils {
     private QueryUtils() {}
     /**
-     * The {@link TokenizerFactory} used to create Tokens for parsed 
-     * {@link IndexValue#getValue()} in case <code>false</code> is parsed for
-     * the tokenize property of {@link #encodeQueryValue(IndexValue, boolean)}.
-     * <p>
-     * Currently the {@link ICUTokenizerFactory} is used for Tokenizing.
+     * The {@link DefaultICUTokenizerConfig}
      */
-    private final static TokenizerFactory tokenizerFactory = new ICUTokenizerFactory();
+    private final static ICUTokenizerConfig tokenizerConfig = new DefaultICUTokenizerConfig();
     /**
      * Regex patter that searches for Wildcard chars '*' and '?' excluding
      * escaped versions '\*' and '\?'
      */
-    private final static Pattern wILDCARD_QUERY_CHAR_PATTERN = Pattern.compile("[^\\\\][\\*\\?]");
+    private final static Pattern WILDCARD_QUERY_CHAR_PATTERN = Pattern.compile("[^\\\\][\\*\\?]");
     
     /**
      * This method encodes a parsed index value as needed for queries.
@@ -76,7 +75,7 @@ public final class QueryUtils {
      * instead
      * </ul>
      * 
-     * @param value
+     * @param indexValue
      *            the index value
      * @param escape if <code>true</code> all Solr special chars are escaped if
      * <code>false</code> than '*' and '?' as used for wildcard searches are
@@ -182,8 +181,8 @@ public final class QueryUtils {
     private static String[] parseWildcardQueryTerms(String value,boolean loewercaseWildcardTokens) {
         //This assumes that the Tokenizer does tokenize '*' and '?',
         //what makes it a little bit tricky. 
-        Tokenizer tokenizer = tokenizerFactory.create(new StringReader(value));
-        Matcher m = wILDCARD_QUERY_CHAR_PATTERN.matcher(value);
+        Tokenizer tokenizer = new ICUTokenizer(new StringReader(value),tokenizerConfig);
+        Matcher m = WILDCARD_QUERY_CHAR_PATTERN.matcher(value);
         int next = m.find()?m.start()+1:-1;
         if(next < 0){ //No wildcard
             return new String[]{'"'+value+'"'};
@@ -194,6 +193,7 @@ public final class QueryUtils {
         boolean foundWildcard = false;
         //Lucene tokenizer are really low level ...
         try {
+        	tokenizer.reset(); //starting with Solr4 reset MUST BE called before using
             while(tokenizer.incrementToken()){
                 //only interested in the start/end indexes of tokens
                 OffsetAttribute offset = tokenizer.addAttribute(OffsetAttribute.class);

@@ -82,6 +82,7 @@
     <!-- language specific extensions -->
     <module>language-extras/smartcn</module>
     <module>language-extras/paoding</module>
+    <module>language-extras/kuromoji</module>
   </modules>
 
   <profiles>

@@ -20,6 +20,7 @@ import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.initAnalysedText;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -170,6 +171,7 @@ public class SmartcnTokenizerEngine extends AbstractEnhancementEngine<RuntimeExc
         //now the tokens
         TokenStream tokens = new WordTokenFilter(new AnalyzedTextSentenceTokenizer(at));
         try {
+        	tokens.reset();
             while(tokens.incrementToken()){
                 OffsetAttribute offset = tokens.addAttribute(OffsetAttribute.class);
                 Token t = at.addToken(offset.startOffset(), offset.endOffset());
@@ -219,6 +221,7 @@ public class SmartcnTokenizerEngine extends AbstractEnhancementEngine<RuntimeExc
         private Sentence sentence = null;
 
         protected AnalyzedTextSentenceTokenizer(AnalysedText at) {
+            super(new StringReader(at.getText().toString()));
             this.at = at;
             sentences = at.getSentences();
         }

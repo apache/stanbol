@@ -32,12 +32,12 @@
  to specific requirements. See the comments within this schema for more
  details!
 
- For more information, on how to customize the Solr schema.xml in general, 
- please see http://wiki.apache.org/solr/SchemaXml.
+ For more information, on how to customize this file, please see
+ http://wiki.apache.org/solr/SchemaXml
 
 -->
 
-<schema name="Apache Stanbol SolrYard Schema" version="1.2">
+<schema name="Apache Stanbol SolrYard Schema" version="1.5">
   <!--
     The SolrYard supports a list of types that is reflected by
     "fieldType" specifications within this schema.
@@ -50,14 +50,17 @@
       used for ISBN numbers, article numbers, string representations of
       unsupported data types ...
     -->
-    <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="false"/>
+    <!-- The StrField type is not analyzed, but indexed/stored verbatim. -->
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="false"/>    
+
     <!-- 
       This can be used as alternative to "string" to enable case insensitive
       searches on string values.
       The KeywordTokenizerFactory ensures that the whole string is preserved as
       a single token.
     -->
-    <fieldType name="lowercase" class="solr.TextField" positionIncrementGap="100">
+    <!-- lowercases the entire field value, keeping it as a single token.  -->
+    <fieldType name="lowercase" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
       <analyzer>
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory" />
@@ -70,38 +73,51 @@
     <!--Binary data type. The data should be sent/retrieved in as Base64 encoded Strings.
         Currently not used by the SolrYard implementation, but reserved for future use. -->
     <fieldtype name="binary" class="solr.BinaryField"/>
-    <!--
-      Default numeric and date field types. By default used to index numeric values.
-      Note that the "solr.TrieIntField" does support indexing values at various
-      levels of precision to accelerate range queries. However the
-      precisionStep of 0 used by this fieldTypes disables this feature.
-      Change presisionStep to values > 0 to activate hierarchival indexing
-      for all numeric fields of that types. See Solr documentation for
-      suitable values and examples.
-    -->
-    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" omitNorms="false" positionIncrementGap="0"/>
-    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" omitNorms="false" positionIncrementGap="0"/>
-    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" omitNorms="false" positionIncrementGap="0"/>
-    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" omitNorms="false" positionIncrementGap="0"/>
-    <fieldType name="date" class="solr.TrieDateField" omitNorms="false" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="tint" class="solr.TrieIntField" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tfloat" class="solr.TrieFloatField" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tlong" class="solr.TrieLongField" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tdouble" class="solr.TrieDoubleField" precisionStep="8" positionIncrementGap="0"/>
+ 
+    <fieldType name="date" class="solr.TrieDateField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="tdate" class="solr.TrieDateField" precisionStep="6" positionIncrementGap="0"/>
+    
+    <fieldType name="random" class="solr.RandomSortField" indexed="true" />
 
+    <!-- Special non-natural language field types -->
+    
+    <!-- This point type indexes the coordinates as separate fields (subFields)
+     If subFieldType is defined, it references a type, and a dynamic field
+     definition is created matching *___<typename>.  Alternately, if
+     subFieldSuffix is defined, that is used to create the subFields.
+     Example: if subFieldType="double", then the coordinates would be
+     indexed in fields myloc_0___double,myloc_1___double.
+     Example: if subFieldSuffix="_d" then the coordinates would be indexed
+     in fields myloc_0_d,myloc_1_d
+     The subFields are an implementation detail of the fieldType, and end
+     users normally should not need to know about them.
+     -->
+    <fieldType name="point" class="solr.PointType" dimension="2" subFieldSuffix="_d"/>
+    
+    <!-- A specialized field for geospatial search. If indexed, this fieldType must not be multivalued. -->
+    <fieldType name="location" class="solr.LatLonType" subFieldSuffix="_coordinate"/>
+    
+    <!-- An alternative geospatial field type new to Solr 4.  It supports multiValued and polygon shapes.
+     For more information about this and other Spatial fields new to Solr 4, see:
+     http://wiki.apache.org/solr/SolrAdaptersForLuceneSpatial4
+     -->
+    <fieldType name="location_rpt" class="solr.SpatialRecursivePrefixTreeFieldType"
+    geo="true" distErrPct="0.025" maxDistErr="0.000009" units="degrees" />
+    
+    
     <!--
-      Numeric and date field types that do activate indexing values at various
-      levels of precision to accelerate range queries.
-      This can be used to activate hierarchival indexing for specific
-      fields. See Notes within the field section.
-    -->
-    <fieldType name="tint" class="solr.TrieIntField" precisionStep="8" omitNorms="false" positionIncrementGap="0"/>
-    <fieldType name="tfloat" class="solr.TrieFloatField" precisionStep="8" omitNorms="false" positionIncrementGap="0"/>
-    <fieldType name="tlong" class="solr.TrieLongField" precisionStep="8" omitNorms="false" positionIncrementGap="0"/>
-    <fieldType name="tdouble" class="solr.TrieDoubleField" precisionStep="8" omitNorms="false" positionIncrementGap="0"/>
-    <fieldType name="tdate" class="solr.TrieDateField" omitNorms="false" precisionStep="6" positionIncrementGap="0"/>
-
-    <!-- 
       Natural Language Texts
-      
+     
       Indexing of natural language texts are supported by the solr.TextField class that
-      allows the specification of custom text analyzers specified as a tokenizer and a 
+      allows the specification of custom text analyzers specified as a tokenizer and a
       list of token filters.
       
       For more info on customizing your analyzer chain, please see
@@ -117,137 +133,93 @@
       together with string values within a special field to support searches for
       texts without an specified language.
     -->
+
     <!-- 
-      A general unstemmed text field - good if one does not know the language of the field.
-      This is used as the default fieldType for fields that store values of different
-      languages.
-      It is also the default fieldType for languages that do not define special fieldTypes.
-    -->
-    <fieldType name="textgen" class="solr.TextField" positionIncrementGap="100">
+         ENGLISH
+     
+         This is the default fieldType used for english language texts. It is
+         based on the "text_en_splitting_tight" of the default Solr 4.1 distribution
+         
+         Less flexible matching, but less false matches.  Probably not ideal for product names,
+         but may be good for SKUs.  Can insert dashes in the wrong place and still match. -->
+    <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
       <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="0" splitOnCaseChange="0"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="false"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_en.txt"/>
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="0" generateNumberParts="0" catenateWords="1" catenateNumbers="1" catenateAll="0"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+        <filter class="solr.EnglishMinimalStemFilterFactory"/>
+        <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true"/>
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-      </analyzer>
-    </fieldType>
-    
-    <!-- 
-      A text field that only splits on whitespace for exact matching of words.
-      Currently not used. May be used as an alternative to the textgen fieldType.
-    -->
-    <!--
-    <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="100">
-      <analyzer>
-        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-      </analyzer>
-    </fieldType>
-    -->
-    
-    <!-- 
-      This is the default fieldType used for english language texts.
-      
-      Less flexible matching than the text_en field type, but less false matches.  
-      Probably not ideal for product names, but may be good for SKUs. 
-      Can insert dashes in the wrong place and still match.
-    -->
-    <fieldType name="text_en_Tight" class="solr.TextField" positionIncrementGap="100" >
-      <analyzer>
-        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="false"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_en.txt"/>
         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="0" generateNumberParts="0" catenateWords="1" catenateNumbers="1" catenateAll="0"/>
         <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
-        <!-- this filter can remove any duplicate tokens that appear at the same position - sometimes
-             possible with WordDelimiterFilter in conjuncton with stemming. -->
+        <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+        <filter class="solr.EnglishMinimalStemFilterFactory"/>
         <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
       </analyzer>
     </fieldType>
 
-
     <!-- 
-      This can be used as an alternative to the "text_en_Tight" fieldTpye for
-      english langauge texts.
-      
-      A text field that uses WordDelimiterFilter to enable splitting and matching of
-      words on case-change, alpha numeric boundaries, and non-alphanumeric chars,
-      so that a query of "wifi" or "wi fi" could match a document containing "Wi-Fi".
-      Synonyms and stopwords are customized by external files, and stemming is enabled.
-    -->
-    <!--
-    <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100">
-      <analyzer type="index">
-        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true"/>
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
-      </analyzer>
-      <analyzer type="query">
-        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true"/>
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="1"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
-      </analyzer>
-    </fieldType>
-    -->
-    
-    <!--
-      The SolrYard allows leading Wildcards (e.g. "*aris"). To provide
-      good query performance for such queries one need to configure
-      fieldTypes that use the ReversedWildcardFilterFactory as shown by
-      this example.
-      See Solr documentation for details
-      
-      A general unstemmed text field that indexes tokens normally and also
-      reversed (via ReversedWildcardFilterFactory), to enable more efficient 
-	  leading wildcard queries. 
-    -->
-    <!--
-    <fieldType name="text_rev" class="solr.TextField" positionIncrementGap="100">
-      <analyzer type="index">
-        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="0" splitOnCaseChange="0"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.ReversedWildcardFilterFactory" withOriginal="true" maxPosAsterisk="3" maxPosQuestion="2" maxFractionAsterisk="0.33"/>
-      </analyzer>
-      <analyzer type="query">
-        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true"/>
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-      </analyzer>
-    </fieldType>
-    -->
-    <!-- charFilter + WhitespaceTokenizer  -->
-    <!--
-    <fieldType name="textCharNorm" class="solr.TextField" positionIncrementGap="100" >
+         GENERIC (no specific lanugage support)
+     
+         The default for any language without a special field definition.
+         
+         Uses the ICUTokenizer and tries to convert alphabetic, numeric, and symbolic Unicode characters which 
+         are not in the first 127 ASCII characters (the "Basic Latin" Unicode block) into their ASCII 
+         equivalents, if one exists. (STANBOL-
+         (see http://lucene.apache.org/java/2_9_1/api/all/org/apache/lucene/analysis/ASCIIFoldingFilter.html)
+
+     	-->
+    <fieldType name="textgen" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
       <analyzer>
-        <charFilter class="solr.MappingCharFilterFactory" mapping="mapping-ISOLatin1Accent.txt"/>
-        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <tokenizer class="solr.ICUTokenizerFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
-    -->
 
-    <!--
-      This can be used to deactivate some functionality of the SolrYard or
-      to configure that some fields of a data set are not stored nor indexed
-      regardless of the Apache Stanbol Entityhub configuration!
-    --> 
-    <fieldtype name="ignored" stored="false" indexed="false" multiValued="true" class="solr.StrField" /> 
 
+    <!-- A KeywordTokenizer that does not include some properties of the source text.
+         
+         TODO:
+          - This might be usefull for searching labels
+          - Rename to label if used for that
+          - Add 0-9 to the regex patter to preserve numbers
+         
+      -->
+    <fieldType name="alphaOnlySort" class="solr.TextField" sortMissingLast="true" omitNorms="false">
+      <analyzer>
+        <!-- KeywordTokenizer does not tokenize -->
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.TrimFilterFactory" />
+        <filter class="solr.PatternReplaceFilterFactory" pattern="([^a-z])" replacement="" replace="all" />
+      </analyzer>
+    </fieldType>
+    
+    <fieldType name="text_path" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+      <analyzer>
+        <tokenizer class="solr.PathHierarchyTokenizerFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <!-- since fields of this type are by default not stored or indexed,
+         any data added to them will be ignored outright.  --> 
+    <fieldtype name="ignored" stored="false" indexed="false" multiValued="true" class="solr.StrField" />
+
+    <!-- Spatial features are not yet supported by the Entityhub
+    <fieldType name="point" class="solr.PointType" dimension="2" subFieldSuffix="_d"/>
+    <fieldType name="location" class="solr.LatLonType" subFieldSuffix="_coordinate"/>
+    <fieldtype name="geohash" class="solr.GeoHashField"/>
+     -->
  </types>
 
 
@@ -267,7 +239,7 @@
     (via copyField). This is used as default search field.
     The type may be changed.
      -->
-   <field name="_text" type="textgen" indexed="true" stored="false" multiValued="true"/>
+   <field name="_text" type="textgen" indexed="true" stored="false" multiValued="true" termVectors="true"/>
    <!-- 
      used to store all references of the document (via copyField).
      This field may be used to search for related entities.
@@ -280,6 +252,9 @@
      Do not change this definition!
    -->
    <field name="_domain" type="string" indexed="true" stored="false" multiValued="true"/>
+   
+   <!-- defined to fullfill required fields for SolrCloud (see http://wiki.apache.org/solr/SolrCloud#schema.xml )-->
+   <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
 
    <!-- 
      Dynamic field definitions (used if a field name is not found)
@@ -312,12 +287,17 @@
    <dynamicField name="dou/*"  type="double"  indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="cal/*"  type="date"    indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="dur/*"  type="string"  indexed="true"  stored="true" multiValued="true"/>
-   <!-- 
+   <!-- Additional dynamic fiels for geo spatial search (currently not supported by the SolrYard) -->
+   <dynamicField name="coord/*"  type="tdouble" indexed="true"  stored="false" />
+   <dynamicField name="loc/*"    type="location" indexed="true" stored="true"/>
+   <dynamicField name="geo/*"    type="location_rpt"  indexed="true" stored="true"  multiValued="true" />
+
+   <!--
      String fields that are not natural language
      To support case insensitive searches in such fields change 
      the type to "lowercase"
    -->
-   <dynamicField name="str/*"  type="string"  indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="str/*"  type="string"  indexed="true"  stored="true" multiValued="true" omitNorms="false"/>
    <!-- 
      references are values that represent IDs of other resources.
      Typically this will store URIs but in principle also other IDs
@@ -349,15 +329,16 @@
          en-GB and one for other english text
    -->
    <!-- 
-     Dynamic field for english languages.
-     Note that the prefix "@en*" matches also "@en-GB" and "@en-US"
+    Dynamic field for English languages.
+    Note that the prefix "@en*" matches also "@en-GB" and "@en-US"
    -->
-   <dynamicField name="@en*"  type="text_en_Tight" indexed="true" stored="true" multiValued="true"/>
-   <!-- 
-     The "@*" catches all the other languages including "@/" 
+   <dynamicField name="@en*"  type="text_en" indexed="true" stored="true" multiValued="true" omitNorms="false"/>
+
+   <!--
+     The "@*" catches all the other languages including "@/"
      (default language) used for texts without a defined language
    -->
-   <dynamicField name="@*"  type="textgen"  indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="@*"  type="textgen"  indexed="true"  stored="true" multiValued="true" omitNorms="false"/>
 
    <!--
      To add special configurations for specific fields one
@@ -400,14 +381,14 @@
      This field need not to be stored. The type can be changed to alternatives
      as described in the types section of this configuration.
    -->
-   <dynamicField name="_!@*"  type="textgen"  indexed="true"  stored="false" multiValued="true"/>
+   <dynamicField name="_!@*"  type="textgen"  indexed="true"  stored="false" multiValued="true" omitNorms="false"/>
    <!-- 
      fields starting with "_config/" are used to store configurations about how the
      index was created within the index (e.g. used namespace prefixes).
      Do not change this definition!
    -->
    <dynamicField name="_config/*" type="string" indexed="false" multiValued="true"/>
-      
+   
  </fields>
 
  <!-- 
@@ -416,20 +397,12 @@
  <uniqueKey>uri</uniqueKey>
 
  <!-- 
-   field for the QueryParser to use when an explicit fieldname is absent.
-   The SolrYard does currently not take advantage of this. However it can
-   be used when directly accessing the SolrYard.
- -->
- <defaultSearchField>_text</defaultSearchField>
+   defaultSearchFiel is DEPRECATED as of Solr 4
+ <defaultSearchField>_text</defaultSearchField> -->
 
  <!--
-   The SolrYard explizitly adds AND and OR for all boolean terms in
-   generated queries. So changing that should have no influence on
-   the SolrYard (not tested) 
-   
-   SolrQueryParser configuration: defaultOperator="AND|OR" 
- -->
- <solrQueryParser defaultOperator="OR"/>
+   solrQueryParser defaultOperator is DEPRECATED as of Solr 4
+ <solrQueryParser defaultOperator="OR"/> -->
 
   <!--
     The SolrYard Implementation assumes the following copyField commands.
@@ -454,5 +427,7 @@
      all references to it)
    -->
    <copyField source="ref/*" dest="_ref"/>
-   
+	
+
+
 </schema>
