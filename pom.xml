@@ -89,6 +89,9 @@
     <!-- UIMA based engines -->
     <module>uima</module>
     
+    <!-- Post-Processing-->
+    <module>textannotationnewmodel</module> <!-- converts TextAnnotations to the STANBOL-987 model -->
+    
     <!-- Enhancement Engines using external services -->
     <module>celi</module> <!-- http://linguagrid.org -->
     <module>dbpedia-spotlight</module> <!-- dbpedia Spotlight -->
