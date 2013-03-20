@@ -37,10 +37,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/zemanta/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/zemanta/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/zemanta/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/zemanta/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -139,7 +139,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.7</version>
       <scope>test</scope>
     </dependency>
     <dependency><!--  for debugging enhancements -->

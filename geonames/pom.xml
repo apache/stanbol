@@ -41,10 +41,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/geonames/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/geonames/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/geonames/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/geonames/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

@@ -31,10 +31,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/uima/uimalocal-template
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/uima/uimalocal-template
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/uima/uimalocal-template
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/uima/uimalocal-template
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

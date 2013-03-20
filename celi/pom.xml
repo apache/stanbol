@@ -24,9 +24,20 @@
   <artifactId>org.apache.stanbol.enhancer.engines.celi</artifactId>
   <packaging>bundle</packaging>
 
-	<name>Apache Stanbol Enhancement Engine : CELI Engine</name>
-	<description>Enhancement Engine using the CELI service.</description>
-	<inceptionYear>2012</inceptionYear>
+  <name>Apache Stanbol Enhancement Engine : CELI Engine</name>
+  <description>Enhancement Engine using the CELI service.</description>
+  <inceptionYear>2012</inceptionYear>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/celi
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/celi
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
 
   <build>
     <plugins>
