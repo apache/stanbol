@@ -20,22 +20,21 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.enhancer.engines.smartcn.token</artifactId>
+  <artifactId>org.apache.stanbol.enhancer.engines.kuromoji.nlp</artifactId>
   <version>0.10.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancement Engine : Smart Chinese Tokenizer</name>
-  <description>Sententence detection and Tokenizer for Chinese based on the
-  Solr/Lucene smartcn (Smart Chinese) analyzer module </description>
+  <name>Apache Stanbol Enhancement Engine : Kuromoji NLP </name>
+  <description>NLP processing based on the Lucene Kuromoji module</description>
 
-  <inceptionYear>2012</inceptionYear>
+  <inceptionYear>2013</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/smartcn-token/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/kuromoji-nlp
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/smartcn-token/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/kuromoji-nlp
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -51,11 +50,10 @@
             <Import-Package>
               org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
               org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
-              org.apache.lucene.analysis.cn.smart,
               *
             </Import-Package>
             <Private-Package>
-              org.apache.stanbol.enhancer.engines.smartcn.impl
+              org.apache.stanbol.enhancer.engines.kuromoji.impl
             </Private-Package>
           </instructions>
         </configuration>
@@ -81,12 +79,16 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.10.0</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.extras.smartcn</artifactId>
+      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
       <version>0.12.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-kuromoji</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -97,6 +99,29 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
+    <!-- for tests -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.test</artifactId>
+      <version>0.11.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.core</artifactId>
+      <version>0.11.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>    
   </dependencies>
 
 </project>

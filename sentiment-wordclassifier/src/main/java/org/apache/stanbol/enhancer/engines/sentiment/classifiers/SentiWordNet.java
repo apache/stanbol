@@ -167,7 +167,7 @@ public class SentiWordNet {
         private ReadWriteLock lock = new ReentrantReadWriteLock();
         private Map<String,Double> wordMap = new TreeMap<String,Double>();
 
-        private EnglishMinimalStemmer stemmer = new EnglishMinimalStemmer();
+        private org.apache.lucene.analysis.en.EnglishMinimalStemmer stemmer = new EnglishMinimalStemmer();
 
         protected SentiWordNetClassifierEN() {}
 

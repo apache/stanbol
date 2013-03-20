@@ -26,22 +26,23 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene</artifactId>
+  <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.kuromoji</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Enhancement Engine : Entity Linking LabelTokenizer : Lucene </name>
+  <name>Apache Stanbol Enhancement Engine : Entity Linking LabelTokenizer : Kuromoji Japanese</name>
   <description>
-    LabelTokenizer implementation based on the Apache Lucene Tokenizer interface.
+    Configuration for the Lucene LabelTokenizer based on the Kuromoji Analyzer
+    for Japanese
   </description>
 
-  <inceptionYear>2012</inceptionYear>
+  <inceptionYear>2013</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityhublinking/lucene-labeltokenizer
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entityhublinking/labeltokenizer-kuromoji
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entityhublinking/lucene-labeltokenizer
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913/entityhublinking/labeltokenizer-kuromoji
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -54,13 +55,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>
-              org.apache.stanbol.enhancer.engines.entitylinking; provide:=true,
-              *
-            </Import-Package>
-            <Private-Package>
-              org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene;version=${project.version}
-            </Private-Package>
+            <Install-Path>config</Install-Path>
           </instructions>
         </configuration>
       </plugin>
@@ -68,53 +63,31 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 License  -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene.LuceneLabelTokenizer-kuromoji.config</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
   <dependencies>
-
-    <dependency>
+    <dependency> <!-- depend on the module the config is for -->
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.engine</artifactId>
+      <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </dependency>
-    <dependency>
+    <dependency> <!-- depend on the kuromoji analyzer module -->
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <artifactId>org.apache.stanbol.commons.solr.extras.kuromoji</artifactId>
       <version>0.12.0-SNAPSHOT</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>      
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>      
-    </dependency>
-    
-    <dependency> <!-- To test ch text tokenizing conf -->
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-smartcn</artifactId>
-      <version>3.6.1</version>
-      <scope>test</scope>      
-    </dependency>
-    <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-analysis-extras</artifactId>
-      <scope>test</scope>      
-    </dependency>    
   </dependencies>
 
 </project>
