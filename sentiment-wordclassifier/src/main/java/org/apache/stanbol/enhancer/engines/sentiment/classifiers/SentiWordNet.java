@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -194,7 +195,12 @@ public class SentiWordNet {
                                     // synonymTokens are of the form word#position, so we strip out the position
                                     // part
                                     String[] synonym = synonymToken.split("#");
-                                    wordMap.put(getStemmed(synonym[0]), score);
+                                    String stemmed = getStemmed(synonym[0]);
+                                    Double existing = wordMap.put(stemmed.toLowerCase(Locale.ENGLISH), score);
+                                    if(existing != null){
+                                        log.warn("Multiple Sentiment Scores [{},{}] for word {}",
+                                            new Object[]{existing, score, stemmed.toLowerCase(Locale.ENGLISH)});
+                                    }
                                 }
                             }
     
@@ -230,7 +236,7 @@ public class SentiWordNet {
             String stemmed = getStemmed(word);
             lock.readLock().lock();
             try {
-                Double sentiment = wordMap.get(stemmed);
+                Double sentiment = wordMap.get(stemmed.toLowerCase(Locale.ENGLISH));
                 return sentiment != null ? sentiment.doubleValue() : 0.0;
             } finally {
                 lock.readLock().unlock();

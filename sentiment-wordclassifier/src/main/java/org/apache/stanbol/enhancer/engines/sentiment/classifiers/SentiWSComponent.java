@@ -24,6 +24,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -203,7 +204,12 @@ public class SentiWSComponent {
                     // get the remaining words (deflections)
                     if(components.length > 2) {
                         for(String word : components[2].split(",")) {
-                            wordMap.put(word,weight);
+                            String lcWord = word.toLowerCase(Locale.GERMAN);
+                            Double current = wordMap.put(lcWord,weight);
+                            if(current != null){
+                                log.warn("Multiple sentiments [{},{}] for word {}",
+                                    new Object[]{current,weight,lcWord});
+                            }
                         }
                     }
                 }
@@ -239,7 +245,7 @@ public class SentiWSComponent {
         public double classifyWord(String word) {
             lock.readLock().lock();
             try {
-                Double sentiment = wordMap.get(word);
+                Double sentiment = wordMap.get(word.toLowerCase(Locale.GERMAN));
                 return sentiment != null ? sentiment.doubleValue() : 0.0;
             } finally {
                 lock.readLock().unlock();  
