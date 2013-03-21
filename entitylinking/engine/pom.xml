@@ -41,10 +41,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entitylinking/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/enhancement-engines-0.10.1/entitylinking/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entitylinking/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/enhancement-engines-0.10.1/entitylinking/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

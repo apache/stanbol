@@ -41,7 +41,7 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/topic/web/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/enhancement-engines-0.10.1/topic/web/
     </connection>
     <developerConnection>
       scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engine/topic/web/

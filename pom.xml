@@ -38,10 +38,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/enhancement-engines-0.10.1
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/STANBOL-913
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/enhancement-engines-0.10.1
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

@@ -32,10 +32,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/restful-langidnet/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/enhancement-engines-0.10.1/restful-langidnet/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/restful-langident/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/enhancement-engines-0.10.1/restful-langident/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

@@ -28,10 +28,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entitylinking/labeltokenizer-paoding
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/enhancement-engines-0.10.1/entitylinking/labeltokenizer-paoding
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entitylinking/labeltokenizer-paoding
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/enhancement-engines-0.10.1/entitylinking/labeltokenizer-paoding
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>
