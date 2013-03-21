@@ -26,9 +26,11 @@ import java.util.Map;
 import org.apache.stanbol.entityhub.indexing.core.IndexingComponent;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.tdb.store.DatasetGraphTDB;
+import com.hp.hpl.jena.tdb.sys.TDBMaker;
 
 public final class Utils {
 
@@ -57,7 +59,10 @@ public final class Utils {
             }
         }
         Location location = new Location(modelLocation.getAbsolutePath());
-        return TDBFactory.createDatasetGraph(location);
+        //TODO: change this to support transactions
+        //    TDBMaker.createDatasetGraphTransaction(location);
+        //  if we need transaction support!
+        return TDBMaker.createDatasetGraphTDB(location);
     }
 
     /**

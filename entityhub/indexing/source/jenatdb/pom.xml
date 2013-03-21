@@ -115,8 +115,9 @@
       <artifactId>commons-compress</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-core</artifactId>
+      <version>2.10.0</version>
       <exclusions>
         <exclusion>
           <artifactId>slf4j-log4j12</artifactId>
@@ -125,12 +126,14 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>tdb</artifactId>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-tdb</artifactId>
+      <version>0.10.0</version>
     </dependency>
     <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>arq</artifactId>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-arq</artifactId>
+      <version>2.10.0</version>
     </dependency>
     <!-- dependencies for testing -->
     <dependency>  <!-- used for debug level logging during tests -->

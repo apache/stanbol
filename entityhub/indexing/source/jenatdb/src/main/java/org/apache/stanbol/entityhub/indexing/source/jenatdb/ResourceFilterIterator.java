@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.tdb.store.DatasetGraphTDB;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
@@ -69,7 +70,7 @@ public class ResourceFilterIterator implements EntityIterator{
     /**
      * The RDF data
      */
-    private DatasetGraphTDB indexingDataset;
+    private DatasetGraph indexingDataset;
     /**
      * The Iterator over the current EntityFilter (or <code>null</code> if not
      * yet initialised)

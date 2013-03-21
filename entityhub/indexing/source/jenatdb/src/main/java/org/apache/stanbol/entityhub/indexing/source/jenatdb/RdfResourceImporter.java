@@ -16,42 +16,33 @@
 */
 package org.apache.stanbol.entityhub.indexing.source.jenatdb;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.stanbol.entityhub.indexing.core.source.ResourceState;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFLanguages;
+import org.apache.jena.riot.RiotReader;
 import org.apache.stanbol.entityhub.indexing.core.source.ResourceImporter;
-import org.openjena.riot.Lang;
-import org.openjena.riot.RiotReader;
+import org.apache.stanbol.entityhub.indexing.core.source.ResourceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.rdf.model.AnonId;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.sparql.core.Quad;
-import com.hp.hpl.jena.tdb.TDBLoader;
 import com.hp.hpl.jena.tdb.store.DatasetGraphTDB;
-import com.hp.hpl.jena.tdb.store.bulkloader.BulkLoader;
-import com.hp.hpl.jena.tdb.store.bulkloader.Destination;
-import com.hp.hpl.jena.tdb.store.bulkloader.LoadMonitor;
-import com.hp.hpl.jena.tdb.store.bulkloader.LoaderNodeTupleTable;
 
 public class RdfResourceImporter implements ResourceImporter {
 
     private static final Logger log = LoggerFactory.getLogger(RdfResourceImporter.class);
-    private final DatasetGraphTDB indexingDataset;
+   // private final DatasetGraphTDB indexingDataset;
+    private final DestinationTripleGraph destination;
     public RdfResourceImporter(DatasetGraphTDB indexingDataset){
         if(indexingDataset == null){
             throw new IllegalArgumentException("The parsed DatasetGraphTDB instance MUST NOT be NULL!");
         }
-        this.indexingDataset = indexingDataset;
+        //this.indexingDataset = indexingDataset;
+        this.destination = new DestinationTripleGraph(indexingDataset,log);
     }
 
     @Override
@@ -62,119 +53,51 @@ public class RdfResourceImporter implements ResourceImporter {
             name = FilenameUtils.removeExtension(name);
             log.debug("   - from GZIP Archive");
         } else if ("bz2".equalsIgnoreCase(FilenameUtils.getExtension(name))) {
-            is = new BZip2CompressorInputStream(is);
+            is = new BZip2CompressorInputStream(is,
+                true); //use true as 2nd param (see http://s.apache.org/QbK) 
             name = FilenameUtils.removeExtension(name);
             log.debug("   - from BZip2 Archive");
         }// TODO: No Zip Files inside Zip Files supported :o( ^^
-        Lang format = Lang.guess(name);
-        // For N-Triple we can use the TDBLoader
+        Lang format = RDFLanguages.filenameToLang(name);
         if (format == null) {
             log.warn("ignore File {} because of unknown extension ");
             return ResourceState.IGNORED;
-        } else if (format == Lang.NTRIPLES) {
-            TDBLoader.load(indexingDataset, is, true);
-        } else if(format == Lang.NQUADS || format == Lang.TRIG){ //quads
-            TDBLoader loader = new TDBLoader();
-            loader.setShowProgress(true);
-            Destination<Quad> dest = createQuad2TripleDestination();
-            dest.start();
-            RiotReader.parseQuads(is,format,null, dest);
-            dest.finish();
-        } else if (format != Lang.RDFXML) {
-            // use RIOT to parse the format but with a special configuration
-            // RiotReader!
-            TDBLoader loader = new TDBLoader();
-            loader.setShowProgress(true);
-            Destination<Triple> dest = createDestination();
-            dest.start();
-            RiotReader.parseTriples(is, format, null, dest);
-            dest.finish();
-        } else { // RDFXML
-            // in that case we need to use ARP
-            Model model = ModelFactory.createModelForGraph(indexingDataset.getDefaultGraph());
-            model.read(is, null);
+        } else {
+            log.info("    - bulk loading File {} using Format {}",resourceName,format);
+            try {
+            destination.startBulk() ;
+            RiotReader.parse(is, format, null, destination) ;
+            }catch (RuntimeException e) {
+                return ResourceState.ERROR;
+            } finally {
+                destination.finishBulk() ;
+            }
         }
+// old code - just keep it in case the above else does not support any of the below RDF formats.
+//        if (format == Lang.NTRIPLES) {
+//            BulkLoader.
+//            TDBLoader.load(indexingDataset, is, true);
+//        } else if(format == Lang.NQUADS || format == Lang.TRIG){ //quads
+//            TDBLoader loader = new TDBLoader();
+//            loader.setShowProgress(true);
+//            RDFSt dest = createQuad2TripleDestination();
+//            dest.start();
+//            RiotReader.parseQuads(is,format,null, dest);
+//            dest.finish();
+//        } else if (format != Lang.RDFXML) {
+//            // use RIOT to parse the format but with a special configuration
+//            // RiotReader!
+//            TDBLoader loader = new TDBLoader();
+//            loader.setShowProgress(true);
+//            Destination<Triple> dest = createDestination();
+//            dest.start();
+//            RiotReader.parseTriples(is, format, null, dest);
+//            dest.finish();
+//        } else { // RDFXML
+//            // in that case we need to use ARP
+//            Model model = ModelFactory.createModelForGraph(indexingDataset.getDefaultGraph());
+//            model.read(is, null);
+//        }
         return ResourceState.LOADED;
-    }
-    /**
-     * Creates a triple destination for the default dataset of the
-     * {@link #indexingDataset}.
-     * This code is based on how Destinations are created in the {@link BulkLoader},
-     * implementation. Note that
-     * {@link BulkLoader#loadDefaultGraph(DatasetGraphTDB, InputStream, boolean)}
-     * can not be used for formats other than {@link Lang#NTRIPLES} because it
-     * hard codes this format for loading data form the parsed InputStream.
-     * @return the destination!
-     */
-    private Destination<Triple> createDestination() {
-        LoadMonitor monitor = new LoadMonitor(indexingDataset, 
-            log, "triples",50000,100000);
-        final LoaderNodeTupleTable loaderTriples = new LoaderNodeTupleTable(
-            indexingDataset.getTripleTable().getNodeTupleTable(), "triples", monitor) ;
-
-        Destination<Triple> sink = new Destination<Triple>() {
-            long count = 0 ;
-            public final void start()
-            {
-                loaderTriples.loadStart() ;
-                loaderTriples.loadDataStart() ;
-            }
-            public final void send(Triple triple)
-            {
-                loaderTriples.load(triple.getSubject(), triple.getPredicate(), 
-                    triple.getObject()) ;
-                count++ ;
-            }
-
-            public final void flush() { }
-            public void close() { }
-
-            public final void finish()
-            {
-                loaderTriples.loadDataFinish() ;
-                loaderTriples.loadIndexStart() ;
-                loaderTriples.loadIndexFinish() ;
-                loaderTriples.loadFinish() ;
-            }
-        } ;
-        return sink ;
-    }
-    /**
-     * Creates a Destination that consumes {@link Quad}s and stores
-     * {@link Triple}s to the {@link #indexingDataset}
-     * @return
-     */
-    private Destination<Quad> createQuad2TripleDestination() {
-        LoadMonitor monitor = new LoadMonitor(indexingDataset, 
-            log, "triples",50000,100000);
-        final LoaderNodeTupleTable loaderTriples = new LoaderNodeTupleTable(
-            indexingDataset.getTripleTable().getNodeTupleTable(), "triples", monitor) ;
-
-        Destination<Quad> sink = new Destination<Quad>() {
-            //long count = 0 ;
-            public final void start()
-            {
-                loaderTriples.loadStart() ;
-                loaderTriples.loadDataStart() ;
-            }
-            public final void send(Quad quad)
-            {
-                loaderTriples.load(quad.getSubject(), quad.getPredicate(), quad.getObject()) ;
-                //count++ ;
-            }
-
-            public final void flush() { }
-            public void close() { }
-
-            public final void finish()
-            {
-                loaderTriples.loadDataFinish() ;
-                loaderTriples.loadIndexStart() ;
-                loaderTriples.loadIndexFinish() ;
-                loaderTriples.loadFinish() ;
-            }
-
-        } ;
-        return sink ;
     }
 }
