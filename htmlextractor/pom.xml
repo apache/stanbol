@@ -54,8 +54,8 @@
           <instructions>
             <Import-Package>
               !org.apache.tools.*,
-              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
-              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
               *
             </Import-Package>
             <Private-Package>
