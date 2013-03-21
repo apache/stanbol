@@ -252,26 +252,31 @@ public class TikaEngine
                     xhtmlHandler = null;
                     xhtmlSink = null;
                 }
-                /* 
-                 * We need to replace the context Classloader with the Bundle ClassLoader
-                 * to ensure that Singleton instances of XML frameworks (such as node4j) 
-                 * do not leak into the OSGI environment.
-                 * 
-                 * Most Java XML libs prefer to load implementations by using the 
-                 * {@link Thread#getContextClassLoader()}. However OSGI has no control over
-                 * this {@link ClassLoader}. Because of that there can be situations where
-                 * Interfaces are loaded via the Bundle Classloader and the implementations
-                 * are taken from the context Classloader. What can cause 
-                 * {@link ClassCastException}, {@link ExceptionInInitializerError}s, ...
-                 * 
-                 * Setting the context Classloader to the Bundle classloader helps to avoid
-                 * those situations.
-                 */
-                ClassLoader contextClassLoader = updateContextClassLoader();
                 try {
                     AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
                         public Object run() throws IOException, SAXException, TikaException {
-                            parser.parse(in, mainHandler, metadata, context);
+                            /* 
+                             * We need to replace the context Classloader with the Bundle ClassLoader
+                             * to ensure that Singleton instances of XML frameworks (such as node4j) 
+                             * do not leak into the OSGI environment.
+                             * 
+                             * Most Java XML libs prefer to load implementations by using the 
+                             * {@link Thread#getContextClassLoader()}. However OSGI has no control over
+                             * this {@link ClassLoader}. Because of that there can be situations where
+                             * Interfaces are loaded via the Bundle Classloader and the implementations
+                             * are taken from the context Classloader. What can cause 
+                             * {@link ClassCastException}, {@link ExceptionInInitializerError}s, ...
+                             * 
+                             * Setting the context Classloader to the Bundle classloader helps to avoid
+                             * those situations.
+                             */
+                            ClassLoader contextClassLoader = updateContextClassLoader();
+                            try {
+                                parser.parse(in, mainHandler, metadata, context);
+                            }finally {
+                                //reset the previous context ClassLoader
+                                Thread.currentThread().setContextClassLoader(contextClassLoader);
+                            }
                             return null;
                         }
                     });
@@ -284,9 +289,6 @@ public class TikaEngine
                     } else { //runtime exception
                         throw RuntimeException.class.cast(e);
                     }
-                } finally {
-                    //reset the previous context ClassLoader
-                    Thread.currentThread().setContextClassLoader(contextClassLoader);
                 }
             } finally { //ensure that the writers are closed correctly
                 IOUtils.closeQuietly(in);
