@@ -218,6 +218,9 @@ public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {
                 @Override
                 public Object addingService(ServiceReference reference) {
                     Object service = bundleContext.getService(reference);
+                    if(service == null){
+                        return service;
+                    }
                     synchronized (labelTokenizersRefs) {
                         labelTokenizersRefs.add(reference);
                         ServiceReference higest;
