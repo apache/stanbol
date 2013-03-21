@@ -25,15 +25,11 @@ If not yet build by the built process of the entityhub call
 
     mvn install
 
-in this directory and than
-
-    mvn assembly:single
-
 to build the jar with all the dependencies used later for indexing.
 
 If the build succeeds go to the /target directory and copy the
 
-    org.apache.stanbol.entityhub.indexing.dbpedia-*-jar-with-dependencies.jar
+    org.apache.stanbol.entityhub.indexing.dbpedia-*.jar
 
 to the directory you would like to start the indexing.
 
@@ -43,7 +39,7 @@ to the directory you would like to start the indexing.
 
 The configuration can be initialized with the defaults by calling
 
-    java -jar org.apache.stanbol.entityhub.indexing.dbpedia-*-jar-with-dependencies.jar init
+    java -jar org.apache.stanbol.entityhub.indexing.dbpedia-*.jar init
 
 This will create a sub-folder with the name indexing in the current directory.
 Within this folder all the
@@ -57,7 +53,7 @@ will be located.
 
 The indexing itself can be started by
 
-    java -jar org.apache.stanbol.entityhub.indexing.dbpedia-*-jar-with-dependencies.jar index
+    java -jar org.apache.stanbol.entityhub.indexing.dbpedia-*.jar index
 
 but before doing this please note the points (2), (3) and (4)
 

@@ -24,15 +24,11 @@ If not yet built during the build process of the entityhub call
 
     mvn install
 
-in this directory and than
-
-    mvn assembly:single
-    
 to build the jar with all the dependencies used later for indexing.
 
 If the build succeeds go to the /target directory and copy the
 
-    org.apache.stanbol.entityhub.indexing.genericrdf-*-jar-with-dependencies.jar
+    org.apache.stanbol.entityhub.indexing.genericrdf-*.jar
 
 to the directory you would like to start the indexing.
 
@@ -42,7 +38,7 @@ to the directory you would like to start the indexing.
 
 The default configuration is initialized by calling
 
-    java -jar org.apache.stanbol.entityhub.indexing.genericrdf-*-jar-with-dependencies.jar init
+    java -jar org.apache.stanbol.entityhub.indexing.genericrdf-*.jar init
 
 This will create a sub-folder "indexing" in the current directory.
 Within this folder all the
@@ -196,7 +192,7 @@ will be imported.
 
 ### (4) Create the Index
 
-    java -Xmx1024m -jar org.apache.stanbol.entityhub.indexing.dblp-*-jar-with-dependencies.jar index
+    java -Xmx1024m -jar org.apache.stanbol.entityhub.indexing.genericrdf-*.jar index
 
 Note that calling the utility with the option -h will print the help.
 
