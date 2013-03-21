@@ -56,28 +56,38 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
         <configuration>
-          <descriptors>
-            <descriptor>src/main/assembly/assembly.xml</descriptor>
-          </descriptors>
           <archive>
             <manifest>
-                <addClasspath>true</addClasspath>
+              <addClasspath>true</addClasspath>
               <mainClass>org.apache.stanbol.entityhub.indexing.Main</mainClass>
             </manifest>
           </archive>
         </configuration>
-<!--        <executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <configuration>
+            <artifactSet>
+              <includes>
+                <include>*</include>
+              </includes>
+            </artifactSet>
+            <transformers>
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+            </transformers>
+          </configuration>
+        <executions>
           <execution>
-            <id>make-assembly</id>
             <phase>package</phase>
             <goals>
-              <goal>single</goal>
+              <goal>shade</goal>
             </goals>
           </execution>
-        </executions>  -->
+        </executions>
       </plugin>
     </plugins>
   </build>
