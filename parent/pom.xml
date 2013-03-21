@@ -65,6 +65,10 @@
     <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
   </properties>
 
+  <prerequisites>
+    <maven>3.0.3</maven>
+  </prerequisites>
+
   <build>
     <plugins>
       <!-- requires Java 6 -->
