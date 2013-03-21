@@ -38,10 +38,10 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/test/
+            scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/enhancer-0.10.1/generic/test/
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/test/
+            scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/enhancer-0.10.1/generic/test/
         </developerConnection>
         <url>http://stanbol.apache.org/</url>
     </scm>

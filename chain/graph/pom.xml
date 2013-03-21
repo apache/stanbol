@@ -40,10 +40,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/chain/graph/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/enhancer-0.10.1/chain/graph/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/chain/graph/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/enhancer-0.10.1/chain/graph/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

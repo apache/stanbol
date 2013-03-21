@@ -31,10 +31,10 @@
   <name>Apache Stanbol Enhancer Benchmark</name>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/benchmark/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/enhancer-0.10.1/benchmark/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/benchmark/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/enhancer-0.10.1/benchmark/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
