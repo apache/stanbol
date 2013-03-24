@@ -49,7 +49,7 @@ limitations under the License.
 <script>
         
     $(function() {   
-        $.ajaxSetup({dataType:"text/html"}); // set default
+        $.ajaxSetup({dataType:"html"}); // set default
         $("#tabs").tabs();
         showUserList();
         showRoleList();
@@ -60,7 +60,7 @@ limitations under the License.
         autoOpen: false,
         minHeight: 400,
         autoResize:true,
-        width: 350,
+        width: 500,
         modal: true,
         buttons: {
             "Submit": function() {  
@@ -208,12 +208,13 @@ limitations under the License.
                 $("#editUserForm").html(data);
                 $("#editUserForm").title = "Create User"; 
                 
-                $.get("/user-management/rolesCheckboxes",
-                function(data){
-                    $("#roles-checkboxes").html(data);
-                }, "text/html");
+//                $.get("/user-management/rolesCheckboxes",
+//                function(data){
+//                    $("#roles-checkboxes").html(data);
+//                }, "text/html");
         
                 $("#editUserForm").dialog("open");
+                
             }
         });
       
@@ -251,23 +252,21 @@ limitations under the License.
         });
     }  
 
-// accepts: "text/html",
-
     function editUser(userName){
-    $.ajaxSetup({dataType:"text/html"});
         $.ajax({
-            url: '/user-management/user/'+userName,
+            url: '/user-management/users/edit/'+userName,
+            dataType: "html",
             success: function(data) {
                 $("#editUserForm").html(data);
                 $("#password-label").html("<label for='password' id='password-label'>Password (leave blank to retain existing password)</label>");
                 
-                $.get("/user-management/user/"+userName+"/rolesCheckboxes",
+                $.get("/user-management/users/"+userName+"/rolesCheckboxes",
                 function(data){
                     $("#roles-checkboxes").html(data);
                 }, "text/html");
                 
         
-                $.get("/user-management/user/"+userName+"/permissionsCheckboxes",
+                $.get("/user-management/users/"+userName+"/permissionsCheckboxes",
                 function(data){
                     console.log("permissionsCheckboxes = "+data);
                     $("#permissions-checkboxes").html(data);
