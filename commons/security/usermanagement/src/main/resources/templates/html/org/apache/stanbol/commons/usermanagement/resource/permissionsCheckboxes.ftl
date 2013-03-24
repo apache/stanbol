@@ -3,14 +3,15 @@
 <@namespace sioc="http://rdfs.org/sioc/ns#" />
 <@namespace dc="http://purl.org/dc/elements/1.1/" />
 
-<@ldpath path="fn:sort(^rdf:type)">
-
+<!-- @ldpath path="fn:sort(^rdf:type)" -->
+ <@ldpath path="fn:sort(sioc:has_function)">
+ 
 <#assign permission>
 <@ldpath path="permission:javaPermissionEntry :: xsd:string"/>
 </#assign>
-<!-- div class="permission" --> <!-- labelCheckbox  -->
+
     <input class="permission" type="checkbox" id="${permission}" name="${permission}" value="${permission}" checked="checked"  />
     <label for="${permission}">${permission}</label>
     <br/>
-
+    
 </@ldpath>

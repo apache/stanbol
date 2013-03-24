@@ -50,18 +50,18 @@ limitations under the License.
 
     <fieldset id="roles-checkboxes">
          </fieldset> 
-
-    <br/>
     
-    <fieldset id="permission-checkboxes" class="labelCheckbox">
- 
+    <fieldset id="permissions-checkboxes" class="labelCheckbox">
+    </fieldset> 
+    
+    <fieldset>
         <div class="labelTextbox">
             <label for="newPermission">Add Permission</label>
+            <br/>
             <input type="text" id="newPermission" name="newPermission">
         </div>
-        <br/>
-        <p>e.g. (org.osgi.framework.ServicePermission "*" "get")</p>
     </fieldset>
+        <p>e.g. (org.osgi.framework.ServicePermission "*" "get")</p>
     <!-- <button name="addPermission">Add permission</button> -->
 </form>
 <!--

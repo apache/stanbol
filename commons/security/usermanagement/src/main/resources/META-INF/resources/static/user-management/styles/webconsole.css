@@ -23,7 +23,7 @@ ul {
 label, input { display:block; float:left }
 input.text { margin-bottom:12px; width:95%; padding: .4em; }
 
-fieldset { padding:10px; margin-top:25px; border: 1px }
+fieldset { padding:4px; margin-top:4px; border: 1px }
 
 legend {
     padding: 0.2em 0.5em;
