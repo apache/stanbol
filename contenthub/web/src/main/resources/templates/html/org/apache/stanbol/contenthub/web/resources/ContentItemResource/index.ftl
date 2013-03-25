@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <#import "/imports/common.ftl" as common>
-<#import "/imports/contentitem.ftl" as contentitem>
+<#import "/imports/contenthubcontentitem.ftl" as contentitem>
 <#escape x as x?html>
 <@common.page title="Content Item: ${it.localId} (${it.contentItem.mimeType})" hasrestapi=false> 
 

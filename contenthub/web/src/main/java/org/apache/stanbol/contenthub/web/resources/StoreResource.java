@@ -72,7 +72,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
@@ -116,8 +115,6 @@ public class StoreResource extends BaseStanbolResource {
 
     private static final Logger log = LoggerFactory.getLogger(StoreResource.class);
 
-    private TcManager tcManager;
-
     private SolrStore solrStore;
 
     private SolrSearch solrSearch;
@@ -150,7 +147,6 @@ public class StoreResource extends BaseStanbolResource {
         this.indexName = indexName;
         this.solrStore = ContextHelper.getServiceFromContext(SolrStore.class, context);
         this.solrSearch = ContextHelper.getServiceFromContext(SolrSearch.class, context);
-        this.tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
         this.serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
         this.uriInfo = uriInfo;
 
@@ -165,10 +161,6 @@ public class StoreResource extends BaseStanbolResource {
         if (this.solrSearch == null) {
             log.error("Missing SolrSearch service");
             throw new IllegalStateException("Missing SolrSearch service");
-        }
-        if (this.tcManager == null) {
-            log.error("Missing TcManager service");
-            throw new IllegalStateException("Missing TcManager service");
         }
     }
 
@@ -718,7 +710,7 @@ public class StoreResource extends BaseStanbolResource {
             throw new WebApplicationException(404);
         }
         return new ContentItemResource(uri, ci, uriInfo, "/contenthub/" + indexName + "/store/download",
-                tcManager, serializer, servletContext);
+                serializer, servletContext, null);
     }
 
     // Helper methods for HTML view
