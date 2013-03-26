@@ -7,3 +7,4 @@ Feel free to modify and commit this file to test your commit rights.
 - cihan is able to play
 - anil starts to play
 - meric is able to play
+- rwesten is able to play
