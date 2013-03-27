@@ -27,7 +27,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.commons.solr.managed.standalone.StandaloneEmbeddedSolrServerProvider;
 import org.apache.stanbol.entityhub.ldpath.backend.YardBackend;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
@@ -35,6 +38,7 @@ import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -52,7 +56,8 @@ public abstract class LDPathTestBase {
      * The SolrDirectoryManager also tested within this unit test
      */
     public static final String TEST_YARD_ID = "dbpedia";
-    public static final String TEST_SOLR_CORE_NAME = "dbpedia_43k";
+    public static final String TEST_SOLR_CORE_NAME = "dbpedia";
+    public static final String TEST_SOLR_CORE_CONFIGURATION = "dbpedia_43k";
     protected static final String TEST_INDEX_REL_PATH = File.separatorChar + "target" + File.separatorChar
                                                         + ManagedSolrServer.DEFAULT_SOLR_DATA_DIR;
 
@@ -67,11 +72,18 @@ public abstract class LDPathTestBase {
         log.info("Test Solr Server Directory: {}", solrServerDir);
         System.setProperty(ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY, solrServerDir);
         SolrYardConfig config = new SolrYardConfig(TEST_YARD_ID, TEST_SOLR_CORE_NAME);
-        config.setDefaultInitialisation(false);
+        config.setAllowInitialisation(false);
+        config.setIndexConfigurationName(TEST_SOLR_CORE_CONFIGURATION); //the dbpedia default data
+        config.setAllowInitialisation(true); //init from datafile provider
         config.setName("DBpedia.org default data");
         config.setDescription("Data used for the LDPath setup");
         // create the Yard used for the tests
-        yard = new SolrYard(config);
+        IndexReference solrIndexRef = IndexReference.parse(config.getSolrServerLocation());
+        
+        SolrServer server = StandaloneEmbeddedSolrServerProvider.getInstance().getSolrServer(
+            solrIndexRef, config.getIndexConfigurationName());
+        Assert.assertNotNull("Unable to initialise SolrServer for testing",server);
+        yard = new SolrYard(server,config,null);
         backend = new YardBackend(yard);
     }
     @AfterClass

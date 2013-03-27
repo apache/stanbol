@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.stanbol.commons.solr.IndexReference;
+import org.apache.stanbol.commons.solr.managed.standalone.StandaloneEmbeddedSolrServerProvider;
 import org.apache.stanbol.entityhub.core.model.EntityImpl;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
@@ -37,6 +40,7 @@ import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,9 +57,15 @@ class MockEntityhub implements Entityhub {
     protected SolrYard yard;
     
     protected MockEntityhub(){
-        SolrYardConfig config = new SolrYardConfig("dbpedia", "dbpedia_43k");
+        SolrYardConfig config = new SolrYardConfig("dbpedia", "dbpedia");
+        config.setIndexConfigurationName("dbpedia_43k");//use dbpedia default data for initialisation
+        config.setAllowInitialisation(true);
+        IndexReference solrIndexRef = IndexReference.parse(config.getSolrServerLocation());
+        SolrServer server = StandaloneEmbeddedSolrServerProvider.getInstance().getSolrServer(
+            solrIndexRef, config.getIndexConfigurationName());
+        Assert.assertNotNull("Unable to initialise SolrServer for testing",server);
         try {
-            yard = new SolrYard(config);
+            yard = new SolrYard(server,config,null);
             Representation paris = yard.getRepresentation("http://dbpedia.org/resource/Paris");
             if(paris == null){
                 throw new IllegalStateException("Initialised Yard does not contain the expected resource dbpedia:Paris!");

@@ -16,6 +16,11 @@
 */
 package org.apache.stanbol.entityhub.indexing.destination.solryard;
 
+import static org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig.ALLOW_INITIALISATION_STATE;
+import static org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig.DOCUMENT_BOOST_FIELD;
+import static org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig.MULTI_YARD_INDEX_LAYOUT;
+import static org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig.SOLR_SERVER_LOCATION;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,6 +37,7 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.solr.client.solrj.SolrServer;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.site.CacheUtils;
 import org.apache.stanbol.entityhub.indexing.core.IndexingDestination;
@@ -42,9 +48,11 @@ import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
+import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.SolrConstants;
 import org.apache.stanbol.commons.solr.managed.ManagedIndexConstants;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.commons.solr.managed.standalone.StandaloneEmbeddedSolrServerProvider;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
 import org.slf4j.Logger;
@@ -453,6 +461,8 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         //parameters and initialise the member variables. This method performs 
         //the the actual initialisation of the SolrYard!
         //copy a custom configuration (if present)
+        SolrServer server;
+        IndexReference solrServerRef = IndexReference.parse(solrYardConfig.getSolrServerLocation());
         if(solrIndexConfig != null){ //can only be != null if also solrIndexLocation
             //copy the configuration
             try {
@@ -463,20 +473,18 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                     "Unable to copy the Solr index configuration from %s to %s!",
                     solrIndexConfig,solrIndexLocation),e);
             }
-            //disallow the default initialisation
-            solrYardConfig.setDefaultInitialisation(Boolean.FALSE);
+            solrYardConfig.setAllowInitialisation(Boolean.FALSE);
+            server = StandaloneEmbeddedSolrServerProvider.getInstance().getSolrServer(
+                solrServerRef,solrServerRef.getIndex());
         } else {
             //allow the default initialisation
             log.info("   ... use default Solr Configuration");
-            solrYardConfig.setDefaultInitialisation(Boolean.TRUE);
+            solrYardConfig.setAllowInitialisation(Boolean.TRUE);
+            server = StandaloneEmbeddedSolrServerProvider.getInstance().getSolrServer(
+                solrServerRef,solrYardConfig.getIndexConfigurationName());
         }
-        try {
-            log.info("   ... create SolrYard");
-            this.solrYard = new SolrYard(solrYardConfig);
-        } catch (YardException e) {
-            throw new IllegalStateException("Unable to initialise SolrYard "+
-                solrYardConfig.getId(),e);
-        }
+        log.info("   ... create SolrYard");
+        this.solrYard = new SolrYard(server,solrYardConfig,indexingConfig.getNamespacePrefixService());
     }
 
     @Override
@@ -607,7 +615,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         //we need now add the solrYard specific parameters
         String fieldBoostName = solrYardConfig.getDocumentBoostFieldName();
         if(fieldBoostName != null){
-            yardConfig.put(SolrYard.DOCUMENT_BOOST_FIELD, fieldBoostName);
+            yardConfig.put(DOCUMENT_BOOST_FIELD, fieldBoostName);
         }
         //TODO: fieldBoosts are currently not supported by the SolrYard Config
         //solrYardConfig.getFieldBoosts();
@@ -615,20 +623,20 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         //The default values for the following parameters are OK 
         //solrYardConfig.getMaxBooleanClauses();
         //solrYardConfig.getMaxQueryResultNumber();
-        yardConfig.put(SolrYard.SOLR_SERVER_LOCATION, FilenameUtils.getName(solrYardConfig.getSolrServerLocation()));
+        yardConfig.put(SOLR_SERVER_LOCATION, FilenameUtils.getName(solrYardConfig.getSolrServerLocation()));
         //the server type needs not to be set. It is automatically detected by
         //the value of the server location
         //solrYardConfig.getSolrServerType();
         
         //deactivate default initialisation!
-        yardConfig.put(SolrYard.SOLR_INDEX_DEFAULT_CONFIG, Boolean.FALSE);
+        yardConfig.put(ALLOW_INITIALISATION_STATE, Boolean.FALSE);
         
         //for immediate commit use the default value (optionally one could also
         //fore TRUE)
         //yardConfig.put(SolrYard.IMMEDIATE_COMMIT, Boolean.TRUE);
         
         //deactivate multi yard layout!
-        yardConfig.put(SolrYard.MULTI_YARD_INDEX_LAYOUT, Boolean.FALSE);
+        yardConfig.put(MULTI_YARD_INDEX_LAYOUT, Boolean.FALSE);
         
         String solrYardConfigFileName = SOLR_YARD_COMPONENT_ID+'-'+indexingConfig.getName()+".config";
         OsgiConfigurationUtil.writeOsgiConfig(indexingConfig,solrYardConfigFileName, yardConfig);
