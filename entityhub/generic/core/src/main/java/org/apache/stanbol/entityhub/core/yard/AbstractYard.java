@@ -464,6 +464,15 @@ public abstract class AbstractYard implements Yard {
             }
         }
         /**
+         * Getter for the {@link Dictionary} used to store the configuration
+         * wrapped by this API
+         * @return the configuration
+         */
+        public final Dictionary<String,Object> getDictionary(){
+            return this.config;
+        }
+        
+        /**
          * Checks if the configuration is valid and throws a {@link ConfigurationException}
          * if not.<p>
          * This method checks the {@link Yard#ID} property and than calls
