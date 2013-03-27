@@ -189,11 +189,12 @@ public class EnhancerTestBase extends StanbolTestBase {
                 );
                 //also assert that the SolrYard for the dbpedia site is fully
                 //initialized
-                executor.execute(
-                        builder.buildGetRequest("/entityhub/site/dbpedia" +
-                        		"/entity?id=urn:does:not:exist:f82js95xsig39s.23987")
-                        .withHeader("Accept", "application/json"))
-                .assertStatus(404);
+                //No longer needed with STANBOL-996
+//                executor.execute(
+//                        builder.buildGetRequest("/entityhub/site/dbpedia" +
+//                        		"/entity?id=urn:does:not:exist:f82js95xsig39s.23987")
+//                        .withHeader("Accept", "application/json"))
+//                .assertStatus(404);
                 log.info("Enhancement engines checked for '{}', all present", endpoint);
                 return true;
             }
