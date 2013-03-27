@@ -17,22 +17,16 @@
 package org.apache.stanbol.entityhub.core.site;
 
 
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
-import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
-import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -40,15 +34,10 @@ import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.apache.stanbol.entityhub.servicesapi.yard.Cache;
 import org.apache.stanbol.entityhub.servicesapi.yard.CacheStrategy;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,74 +46,36 @@ import org.slf4j.LoggerFactory;
 /**
  * This is the Implementation of the {@link Cache} Interface as defined by the
  * entityhub services API.<p>
- * Currently the dependency to the Cache is managed vial a {@link ServiceTracker}.
- * This means that the Cache is activated/keeps active even if the Yard is not
- * available or is disabled.
- * If the Yard is not available all Yard related methods like get/store/remove/
- * find(..) throw {@link YardException}s.<p>
- * TODO This is not the intended way to do it, but because I have no Idea how
- * to start/stop a OSGI Component from within a class :(
- *
+ * 
  * @author Rupert Westenthaler
- * @see Cache
  */
-@Component(
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE, //the baseUri is required!
-        specVersion = "1.1",
-        metatype = true,
-        immediate = true)
-@Service(value = Cache.class)
-@Properties(
-    value = {
-        @Property(name = Cache.CACHE_YARD), 
-        @Property(name = Cache.ADDITIONAL_MAPPINGS, cardinality = 1000)})
 public class CacheImpl implements Cache {
     private Logger log = LoggerFactory.getLogger(CacheImpl.class);
-    public static final String CACHE_FACTORY_NAME = "org.apache.stanbol.entityhub.yard.CacheFactory";
-
-    private ServiceTracker yardTracker;
-    //private Yard yard;
-
-    private String yardId;
-    private boolean initWithYard = false;
 
     private FieldMapper baseMapper;
     private FieldMapper additionalMapper;
-    private ComponentContext context;
-    
-    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
-    protected NamespacePrefixService nsPrefixService;
-
-    @Activate
-    protected void activate(ComponentContext context) throws ConfigurationException, YardException, IllegalStateException, InvalidSyntaxException {
-        if (context == null || context.getProperties() == null) {
-            throw new IllegalStateException(String.format("Invalid ComponentContext parsed in activate (context=%s)", context));
-        }
-        this.context = context;
-        yardId = OsgiUtils.checkProperty(context.getProperties(), CACHE_YARD).toString();
-        String cacheFilter = String.format("(&(%s=%s)(%s=%s))", Constants.OBJECTCLASS, Yard.class.getName(), Yard.ID, yardId);
-        yardTracker = new ServiceTracker(context.getBundleContext(), context.getBundleContext().createFilter(cacheFilter), null);
-        yardTracker.open();
-    }
+    private final Yard yard;
 
     /**
-     * Lazy initialisation of the yard the first time the yard is ued by this
-     * cache
-     *
-     * @param yard the yard instance. MUST NOT be NULL!
-     * @throws YardException
+     * Constructs a new Cache for the parsed Yard and mappings
+     * @param yard
+     * @param additionalMappings
+     * @param nsPrefixService
+     * @throws YardException if loading the base mappings from the Yard fails
+     * @throws IllegalStateException when parsing the additional mappings do fail
+     * throws {@link IllegalArgumentException} if <code>null</code> is parsed as Yard
      */
-    protected void initWithCacheYard(Yard yard) throws YardException {
+    public CacheImpl(Yard yard, String[] additionalMappings, NamespacePrefixService nsPrefixService) throws YardException {
+        if(yard == null){
+            throw new IllegalArgumentException("The parsed Yard MUST NOT be NULL!");
+        }
+        this.yard = yard;
         //(1) Read the base mappings from the Yard
         this.baseMapper = CacheUtils.loadBaseMappings(yard,nsPrefixService);
-
-        //(2) Init the additional mappings based on the configuration
-        Object mappings = context.getProperties().get(Cache.ADDITIONAL_MAPPINGS);
         FieldMapper configuredMappings = null;
-        if (mappings instanceof String[] && ((String[]) mappings).length > 0) {
+        if(additionalMappings != null && additionalMappings.length > 0){
             configuredMappings = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
-            for (String mappingString : (String[]) mappings) {
+            for (String mappingString : additionalMappings) {
                 FieldMapping fieldMapping = FieldMappingUtils.parseFieldMapping(mappingString, nsPrefixService);
                 if (fieldMapping != null) {
                     configuredMappings.addMapping(fieldMapping);
@@ -142,27 +93,14 @@ public class CacheImpl implements Cache {
             }
         } else if (!yardAdditionalMappings.equals(configuredMappings)) {
             //this may also set the additional mappings to null!
-            log.info("Replace Additional Mappings for Cache " + yardId + "with Mappings configured by OSGI");
+            log.info("Replace Additional Mappings for Cache {} with Mappings configured by OSGI",yard.getId());
             setAdditionalMappings(yard, configuredMappings);
-        } //else current config equals configured one -> nothing to do!
-        initWithYard = true;
+        } //else current config equals configured one -> nothing to do!    
     }
-
-    @Deactivate
-    protected void deactivate(ComponentContext context) {
-//        context.getBundleContext().removeServiceListener(this);
-        this.yardTracker.close();
-        this.yardTracker = null;
-        this.initWithYard = false;
-        this.yardId = null;
-        this.baseMapper = null;
-        this.additionalMapper = null;
-        this.context = null;
-    }
-
+    
     @Override
     public boolean isAvailable() {
-        return yardTracker.getService() != null;
+        return true;
     }
 
     @Override
@@ -183,46 +121,6 @@ public class CacheImpl implements Cache {
         return null;
     }
 
-// Currently not needed, because instances are created and disposed by the YardManagerImpl!
-//    @Override
-//    public void serviceChanged(ServiceEvent event) {
-//        log.info("Print Service Event for "+event.getSource());
-//        for(String key : event.getServiceReference().getPropertyKeys()){
-//            log.info("  > "+key+"="+event.getServiceReference().getProperty(key));
-//        }
-//        Object cacheYardPropertyValue = event.getServiceReference().getProperty(CACHE_YARD);
-//        //TODO: check the type of the Service provided by the Reference!
-//        if(cacheYardPropertyValue != null && yardId.equals(cacheYardPropertyValue.toString())){
-//            //process the Event
-//            if(event.getType() == ServiceEvent.REGISTERED){
-//
-//            } else if(event.getType() == ServiceEvent.UNREGISTERING){
-//
-//            }
-//
-//        }
-//    }
-
-    /**
-     * Getter for the Yard used by this Cache.
-     *
-     * @return the Yard used by this Cache or <code>null</code> if currently not
-     *         available.
-     */
-    public Yard getCacheYard() {
-        Yard yard = (Yard) yardTracker.getService();
-        if (yard != null && !initWithYard) {
-            try {
-                initWithCacheYard(yard);
-            } catch (YardException e) {
-                //this case can be recovered because initWithYard will not be
-                //set to true.
-                throw new IllegalStateException("Unable to initialize the Cache with Yard " + yardId + "! This is usually caused by Errors while reading the Cache Configuration from the Yard.", e);
-            }
-        }
-        return yard;
-    }
-
     /*--------------------------------------------------------------------------
      * Store and Update calls MUST respect the mappings configured for the
      * Cache!
@@ -230,22 +128,12 @@ public class CacheImpl implements Cache {
      */
     @Override
     public Representation store(Representation representation) throws IllegalArgumentException, YardException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            return yard.store(applyCacheMappings(yard, representation));
-        }
+        return yard.store(applyCacheMappings(yard, representation));
     }
 
     @Override
     public Representation update(Representation representation) throws YardException, IllegalArgumentException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            return yard.update(applyCacheMappings(yard, representation));
-        }
+        return yard.update(applyCacheMappings(yard, representation));
     }
 
     /**
@@ -281,130 +169,67 @@ public class CacheImpl implements Cache {
      */
     @Override
     public Representation create() throws YardException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            return createRepresentation(null);
-        } else {
-            return yard.create();
-        }
+        return yard.create();
     }
 
     @Override
     public Representation create(String id) throws IllegalArgumentException, YardException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            return createRepresentation(id);
-        } else {
-            return yard.create(id);
-        }
-    }
-
-    /**
-     * Only used to create a representation if the Yard is currently not available
-     *
-     * @param id the id or <code>null</code> if a random one should be generated
-     * @return the created Representation
-     */
-    private Representation createRepresentation(String id) {
-        if (id == null) {
-            id = String.format("urn:org.apache.stanbol:entityhub.yard.%s:%s.%s", getClass().getSimpleName(), yardId, ModelUtils.randomUUID().toString());
-        }
-        return InMemoryValueFactory.getInstance().createRepresentation(id);
+        return yard.create(id);
     }
 
     @Override
     public QueryResultList<Representation> find(FieldQuery query) throws YardException, IllegalArgumentException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            return yard.find(query);
-        }
+        return yard.find(query);
     }
 
     @Override
     public QueryResultList<String> findReferences(FieldQuery query) throws YardException, IllegalArgumentException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            return yard.findReferences(query);
-        }
+        return yard.findReferences(query);
     }
 
     @Override
     public QueryResultList<Representation> findRepresentation(FieldQuery query) throws YardException, IllegalArgumentException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            return yard.findRepresentation(query);
-        }
+        return yard.findRepresentation(query);
     }
 
     @Override
     public String getDescription() {
-        return String.format("Cache Wrapper for Yard %s ", yardId);
+        return String.format("Cache Wrapper for Yard %s ", yard.getId());
     }
 
     @Override
     public String getId() {
-        return yardId;
+        return yard.getId();
     }
 
     @Override
     public String getName() {
-        return yardId + " Cache";
+        return yard.getName() + " Cache";
     }
 
     @Override
     public FieldQueryFactory getQueryFactory() {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            return DefaultQueryFactory.getInstance();
-        } else {
-            return yard.getQueryFactory();
-        }
+        return DefaultQueryFactory.getInstance();
     }
 
     @Override
     public Representation getRepresentation(String id) throws YardException, IllegalArgumentException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            return yard.getRepresentation(id);
-        }
+        return yard.getRepresentation(id);
     }
 
     @Override
     public ValueFactory getValueFactory() {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            return InMemoryValueFactory.getInstance();
-        } else {
-            return yard.getValueFactory();
-        }
+        return yard.getValueFactory();
     }
 
     @Override
     public boolean isRepresentation(String id) throws YardException, IllegalArgumentException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            return yard.isRepresentation(id);
-        }
+        return yard.isRepresentation(id);
     }
 
     @Override
     public void remove(String id) throws IllegalArgumentException, YardException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            yard.remove(id);
-        }
+        yard.remove(id);
     }
 
 
@@ -447,12 +272,7 @@ public class CacheImpl implements Cache {
 
     @Override
     public void setAdditionalMappings(FieldMapper fieldMapper) throws YardException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            setAdditionalMappings(yard, fieldMapper);
-        }
+        setAdditionalMappings(yard, fieldMapper);
     }
 
     /**
@@ -475,65 +295,40 @@ public class CacheImpl implements Cache {
 
     @Override
     public void setBaseMappings(FieldMapper fieldMapper) throws YardException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            if (isAvailable()) {
-                FieldMapper old = this.baseMapper;
-                this.baseMapper = fieldMapper;
-                try {
-                    CacheUtils.storeBaseMappingsConfiguration(yard, baseMapper);
-                } catch (YardException e) {
-                    this.baseMapper = old;
-                    throw e;
-                }
+        if (isAvailable()) {
+            FieldMapper old = this.baseMapper;
+            this.baseMapper = fieldMapper;
+            try {
+                CacheUtils.storeBaseMappingsConfiguration(yard, baseMapper);
+            } catch (YardException e) {
+                this.baseMapper = old;
+                throw e;
             }
         }
     }
 
     @Override
     public void remove(Iterable<String> ids) throws IllegalArgumentException, YardException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            yard.remove(ids);
-        }
+        yard.remove(ids);
     }
     @Override
     public void removeAll() throws YardException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            //ensure that the baseConfig (if present) is not deleted by this
-            //operation
-            Representation baseConfig = yard.getRepresentation(Cache.BASE_CONFIGURATION_URI);
-            yard.removeAll();
-            if(baseConfig != null){
-                yard.store(baseConfig);
-            }
+        //ensure that the baseConfig (if present) is not deleted by this
+        //operation
+        Representation baseConfig = yard.getRepresentation(Cache.BASE_CONFIGURATION_URI);
+        yard.removeAll();
+        if(baseConfig != null){
+            yard.store(baseConfig);
         }
     }
     
     @Override
     public Iterable<Representation> store(Iterable<Representation> representations) throws IllegalArgumentException, YardException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            return yard.store(representations);
-        }
+        return yard.store(representations);
     }
 
     @Override
     public Iterable<Representation> update(Iterable<Representation> representations) throws YardException, IllegalArgumentException {
-        Yard yard = getCacheYard();
-        if (yard == null) {
-            throw new YardException(String.format("The Yard %s for this cache is currently not available", yardId));
-        } else {
-            return yard.update(representations);
-        }
+        return yard.update(representations);
     }
 }
