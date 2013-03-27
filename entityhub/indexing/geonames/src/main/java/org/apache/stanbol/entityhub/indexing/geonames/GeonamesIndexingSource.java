@@ -113,10 +113,12 @@ public class GeonamesIndexingSource implements EntityDataIterable, ResourceImpor
             value = GeonamesConstants.DEFAULT_SOURCE_FOLDER_NAME + GEONAMES_DUMP;
             log.info("No Geonames.org dump source set use the default: {}",value);
         }
+        log.info("Source File(s): ");
         for(String source : value.toString().split(",")){
             File sourceFileOrDirectory = indexingConfig.getSourceFile(source);
             if(sourceFileOrDirectory.exists()){
                 //register the configured source with the ResourceLoader
+                log.info(" > {}",sourceFileOrDirectory.getName());
                 this.loader.addResource(sourceFileOrDirectory);
             } else {
                 if(FilenameUtils.getExtension(source).isEmpty()){
