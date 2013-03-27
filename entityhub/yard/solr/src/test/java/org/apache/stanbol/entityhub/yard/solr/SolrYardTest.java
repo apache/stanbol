@@ -20,10 +20,21 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
 import java.io.File;
+import java.io.IOError;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.ServiceLoader;
 
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
+import org.apache.stanbol.commons.solr.IndexReference;
+import org.apache.stanbol.commons.solr.SolrConstants;
+import org.apache.stanbol.commons.solr.SolrServerAdapter;
+import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.commons.solr.managed.standalone.StandaloneEmbeddedSolrServerProvider;
+import org.apache.stanbol.commons.solr.managed.standalone.StandaloneManagedSolrServer;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -36,6 +47,7 @@ import org.apache.stanbol.entityhub.test.yard.YardTest;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -63,22 +75,36 @@ public class SolrYardTest extends YardTest {
     protected static final String TEST_INDEX_REL_PATH = File.separatorChar + "target" + File.separatorChar
                                                         + ManagedSolrServer.DEFAULT_SOLR_DATA_DIR;
     private static final Logger log = LoggerFactory.getLogger(SolrYardTest.class);
+    
+    private static StandaloneEmbeddedSolrServerProvider solrServerProvider;
 
     @BeforeClass
-    public static final void initYard() throws YardException {
+    public static final void initYard() throws YardException, IOException {
         // get the working directory
         // use property substitution to test this feature!
         String prefix = System.getProperty("basedir") == null ? "." : "${basedir}";
         String solrServerDir = prefix + TEST_INDEX_REL_PATH;
         log.info("Test Solr Server Directory: " + solrServerDir);
-        System.setProperty(ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY, solrServerDir);
         SolrYardConfig config = new SolrYardConfig(TEST_YARD_ID, TEST_SOLR_CORE_NAME);
         config.setName("Solr Yard Test");
         config.setDescription("The Solr Yard instance used to execute the Unit Tests defined for the Yard Interface");
-        //use the default Solr Index configuration for this tests
-        config.setDefaultInitialisation(true);
-        // create the Yard used for the tests
-        yard = new SolrYard(config);
+        config.setAllowInitialisation(true);
+        //init the ManagedSolrServer used for the UnitTest
+        System.setProperty(ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY, solrServerDir);
+        IndexReference solrServerRef = IndexReference.parse(config.getSolrServerLocation());
+        solrServerProvider = StandaloneEmbeddedSolrServerProvider.getInstance();
+        SolrServer server = solrServerProvider.getSolrServer(solrServerRef,
+            config.isAllowInitialisation() ? config.getIndexConfigurationName() : null);
+        //Optional support for the nsPrefix service
+        final NamespacePrefixService nsPrefixService;
+        ServiceLoader<NamespacePrefixService> spsl = ServiceLoader.load(NamespacePrefixService.class);
+        Iterator<NamespacePrefixService> it = spsl.iterator();
+        if(it.hasNext()){
+            nsPrefixService = it.next();
+        } else {
+            nsPrefixService = null;
+        }
+        yard = new SolrYard(server, config, nsPrefixService);
     }
 
     @Override

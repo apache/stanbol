@@ -23,45 +23,22 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.Map.Entry;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.SolrRequest.METHOD;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
-import org.apache.stanbol.commons.solr.IndexReference;
-import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
-import org.apache.stanbol.commons.solr.managed.IndexMetadata;
-import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
-import org.apache.stanbol.commons.solr.managed.standalone.StandaloneEmbeddedSolrServerProvider;
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
@@ -84,12 +61,9 @@ import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 import org.apache.stanbol.entityhub.yard.solr.model.NoConverterException;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 /**
  * Implementation of the {@link Yard} interface based on a Solr Server.
@@ -126,143 +100,22 @@ import org.xml.sax.SAXException;
  * @author Rupert Westenthaler
  * 
  */
-@Component(
-    metatype = true, 
-    immediate = true,
-    configurationFactory = true, 
-    policy = ConfigurationPolicy.REQUIRE,
-    specVersion = "1.1")
-@Service
-@Properties(
-    value = {
-         // NOTE: Added propertied from AbstractYard to fix ordering!
-         @Property(name = Yard.ID),
-         @Property(name = Yard.NAME),
-         @Property(name = Yard.DESCRIPTION),
-         @Property(name = AbstractYard.DEFAULT_QUERY_RESULT_NUMBER, intValue = -1),
-         @Property(name = AbstractYard.MAX_QUERY_RESULT_NUMBER, intValue = -1),
-         // BEGIN SolrYard specific Properties
-         @Property(name = SolrYard.SOLR_SERVER_LOCATION),
-         @Property(name = SolrYard.SOLR_INDEX_DEFAULT_CONFIG,boolValue=SolrYard.DEFAULT_SOLR_INDEX_DEFAULT_CONFIG_STATE),
-         @Property(name = SolrYard.MULTI_YARD_INDEX_LAYOUT,boolValue=false),
-         @Property(name = SolrYard.MAX_BOOLEAN_CLAUSES, intValue = SolrYard.defaultMaxBooleanClauses)})
 public class SolrYard extends AbstractYard implements Yard {
-    /**
-     * The key used to configure the URL for the SolrServer
-     */
-    public static final String SOLR_SERVER_LOCATION = "org.apache.stanbol.entityhub.yard.solr.solrUri";
-    /**
-     * The key used to configure if data of multiple Yards are stored within the same index (
-     * <code>default=false</code>)
-     */
-    public static final String MULTI_YARD_INDEX_LAYOUT = "org.apache.stanbol.entityhub.yard.solr.multiYardIndexLayout";
-    /**
-     * The maximum boolean clauses as configured in the solrconfig.xml of the SolrServer. The default value
-     * for this config in Solr 1.4 is 1024.
-     * <p>
-     * This value is important for generating queries that search for multiple documents, because it
-     * determines the maximum number of OR combination for the searched document ids.
-     */
-    public static final String MAX_BOOLEAN_CLAUSES = "org.apache.stanbol.entityhub.yard.solr.maxBooleanClauses";
-    /**
-     * This property allows to define a field that is used to parse the boost for the parsed representation.
-     * Typically this will be the pageRank of that entity within the referenced site (e.g.
-     * {@link Math#log1p(double)} of the number of incoming links
-     */
-    public static final String DOCUMENT_BOOST_FIELD = "org.apache.stanbol.entityhub.yard.solr.documentBoost";
-    /**
-     * Key used to configure {@link Entry Entry&lt;String,Float&gt;} for fields with the boost. If no Map is
-     * configured or a field is not present in the Map, than 1.0f is used as Boost. If a Document boost is
-     * present than the boost of a Field is documentBoost*fieldBoost.
-     */
-    public static final String FIELD_BOOST_MAPPINGS = "org.apache.stanbol.entityhub.yard.solr.fieldBoosts";
-//    /**
-//     * Key used to configure the implementation of the {@link SolrServer} to be used by this SolrYard
-//     * implementation. The default value is determined by the type of the value configured by the
-//     * {@link #SOLR_SERVER_LOCATION}. In case a path of a File URI is used, the type is set to
-//     * {@link SolrServerTypeEnum#EMBEDDED} otherwise {@link SolrServerTypeEnum#HTTP} is used as default.
-//     */
-//    public static final String SOLR_SERVER_TYPE = "org.apache.stanbol.entityhub.yard.solr.solrServerType";
-    /**
-     * Key used to to enable/disable the default configuration. If this is enabled,
-     * that the index will get initialised with the Default configuration.<p>
-     * Notes:<ul>
-     * <li> Configuration is only supported for EmbeddedSolrServers that use a
-     * relative path
-     * <li> If this property is enabled the value of the 
-     * {@link #SOLR_INDEX_CONFIGURATION_NAME} will be ignored.
-     * </ul>
-     * Only applies in case a EmbeddedSolrServer is used.
-     * @see SolrYardConfig#isDefaultInitialisation()
-     * @see SolrYardConfig#setDefaultInitialisation(Boolean)
-     */
-    public static final String SOLR_INDEX_DEFAULT_CONFIG = "org.apache.stanbol.entityhub.yard.solr.useDefaultConfig";
-    /**
-     * By default the use of an default configuration is disabled!
-     */
-    public static final boolean DEFAULT_SOLR_INDEX_DEFAULT_CONFIG_STATE = false;
-    /**
-     * The name of the configuration use as default. 
-     */
-    public static final String DEFAULT_SOLR_INDEX_CONFIGURATION_NAME = "default";
-    /**
-     * Allows to configure the name of the index used for the configuration of the Solr Core.
-     * Only applies in case of using an EmbeddedSolrServer and
-     * {@link #SOLR_INDEX_DEFAULT_CONFIG} is disabled.
-     * As default the value of the {@link #SOLR_SERVER_LOCATION} is used.
-     * @see SolrYardConfig#getIndexConfigurationName()
-     * @see SolrYardConfig#setIndexConfigurationName(String)
-     */
-    public static final String SOLR_INDEX_CONFIGURATION_NAME = "org.apache.stanbol.entityhub.yard.solr.configName";
-    /**
-     * The default value for the maxBooleanClauses of SolrQueries. Set to {@value #defaultMaxBooleanClauses}
-     * the default of Slor 1.4
-     */
-    protected static final int defaultMaxBooleanClauses = 1024;
-    /**
-     * Key used to enable/disable committing of update(..) and store(..) operations. Enabling this ensures
-     * that indexed documents are immediately available for searches, but it will also decrease the
-     * performance for updates.
-     */
-    public static final String IMMEDIATE_COMMIT = "org.apache.stanbol.entityhub.yard.solr.immediateCommit";
-    /**
-     * By default {@link #IMMEDIATE_COMMIT} is enabled
-     */
-    public static final boolean DEFAULT_IMMEDIATE_COMMIT_STATE = true;
-    /**
-     * If {@link #IMMEDIATE_COMMIT} is deactivated, than this time is parsed to update(..) and store(..)
-     * operations as the maximum time (in ms) until a commit.
-     */
-    public static final String COMMIT_WITHIN_DURATION = "org.apache.stanbol.entityhub.yard.solr.commitWithinDuration";
-    /**
-     * The default value for the {@link #COMMIT_WITHIN_DURATION} parameter is 10 sec.
-     */
-    public static final int DEFAULT_COMMIT_WITHIN_DURATION = 1000 * 10;
+
     /**
      * What a surprise it's the logger!
      */
     private Logger log = LoggerFactory.getLogger(SolrYard.class);
     /**
-     * The SolrServer used for this Yard. Initialisation is done based on the configured parameters in
-     * {@link #activate(ComponentContext)}.
+     * The SolrServer used for this Yard.
      */
-    private SolrServer _server;
+    private final SolrServer server;
     
-    /**
-     * In case the {@link SolrServer} changes during normal operation the
-     * {@link SolrFieldMapper} needs to be reinitialised for the new Core.
-     * This lock is used to avoid NPE when setting the {@link #_fieldMapper}
-     * variable back to <code>null</code> in those cases. While this will
-     * trigger automatic re-initialisation on the next call to 
-     * {@link #getFieldMapper()} there would be the possibility that calls to
-     * {@link #getFieldMapper()} return <code>null</code>.
-     */
-    private final ReadWriteLock fieldMapperLock = new ReentrantReadWriteLock();
     /**
      * The {@link FieldMapper} is responsible for converting fields of {@link Representation} to fields in the
      * {@link SolrInputDocument} and vice versa
      */
-    private SolrFieldMapper _fieldMapper;
+    private final SolrFieldMapper fieldMapper;
     /**
      * The {@link IndexValueFactory} is responsible for converting values of fields in the
      * {@link Representation} to the according {@link IndexValue}. One should note, that some properties of
@@ -281,34 +134,21 @@ public class SolrYard extends AbstractYard implements Yard {
      * needs to undergo some refactoring!
      * 
      */
-    private SolrQueryFactory _solrQueryFactoy;
+    private final SolrQueryFactory solrQueryFactoy;
     /**
      * Used to store the name of the field used to get the {@link SolrInputDocument#setDocumentBoost(float)}
      * for a Representation. This name is available via {@link SolrYardConfig#getDocumentBoostFieldName()}
      * however it is stored here to prevent lookups for field of every stored {@link Representation}.
      */
-    private String documentBoostFieldName;
+    private final String documentBoostFieldName;
     /**
      * Map used to store boost values for fields. The default Boost for fields is 1.0f. This is used if this
      * map is <code>null</code>, a field is not a key in this map, the value of a field in that map is
      * <code>null</code> or lower equals zero. Also NOTE that the boost for fields is multiplied with the
      * boost for the Document if present.
      */
-    private Map<String,Float> fieldBoostMap;
+    private final Map<String,Float> fieldBoostMap;
 
-    /**
-     * Optionally a {@link ManagedSolrServer} that is used to create new 
-     * Solr indexes based on parsed configurations.
-     */
-    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY,
-        bind="bindManagedSolrServer",
-        unbind="unbindManagedSolrServer",
-        strategy=ReferenceStrategy.EVENT,
-        policy=ReferencePolicy.DYNAMIC)
-    private ManagedSolrServer managedSolrServer;
-    
-    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
-    private NamespacePrefixService nsPrefixService;
     /**
      * If update(..) and store(..) calls should be immediately committed.
      */
@@ -318,470 +158,51 @@ public class SolrYard extends AbstractYard implements Yard {
      * documents parsed to update(..) and store(..) need to be committed.
      */
     private int commitWithin = DEFAULT_COMMIT_WITHIN_DURATION;
-    /**
-     * the {@link ComponentContext}. Will be <code>null</code> if not running
-     * within OSGI
-     */
-    private ComponentContext context;
-    private RegisteredSolrServerTracker _registeredServerTracker;
 
+    private final SolrYardConfig config;
+    private boolean closed;
     /**
-     * Default constructor as used by the OSGI environment.
-     * <p>
-     * DO NOT USE to manually create instances! The SolrYard instances do need to be configured. YOU NEED TO
-     * USE {@link #SolrYard(SolrYardConfig)} to parse the configuration and the initialise the Yard if running
-     * outside a OSGI environment.
+     * Creates a new SolrYard by parsing the SolrServer, the SolrYard config and
+     * optionally a namespace prefix service
+     * @param server the {@link SolrServer} used by this Yard
+     * @param config the configuration
+     * @param nsPrefixService the {@link NamespacePrefixService} or <code>null</code>
+     * if not available.
      */
-    public SolrYard() {
+    public SolrYard(SolrServer server, SolrYardConfig config, 
+            NamespacePrefixService nsPrefixService) {
         super();
-    }
-
-    /**
-     * Constructor to be used outside of an OSGI environment
-     * 
-     * @param config
-     *            the configuration for the SolrYard
-     * @throws IllegalArgumentException
-     *             if the configuration is not valid
-     * @throws YardException
-     *             on any Error while initialising the Solr Server for this Yard
-     */
-    public SolrYard(SolrYardConfig config) throws IllegalArgumentException, YardException {
-//        solrServerProviderManager = SolrServerProviderManager.getInstance();
-        // init via java.util.ServiceLoader
-        Iterator<ManagedSolrServer> providerIt = ServiceLoader.load(ManagedSolrServer.class,
-            ManagedSolrServer.class.getClassLoader()).iterator();
-        if (providerIt.hasNext()) {
-            managedSolrServer = providerIt.next();
-//            if(config.getSolrServerType() == SolrServerTypeEnum.EMBEDDED){
-//                File location = ConfigUtils.toFile(config.getSolrServerLocation());
-//                if(!location.isAbsolute()){
-//                    location = solrDirectoryManager.getSolrIndexDirectory(location.toString());
-//                    config.setSolrServerLocation(location.getAbsolutePath());
-//                }
-//            }
-        } else {
-            throw new IllegalStateException("Unable to instantiate "
-                                            + ManagedSolrServer.class.getSimpleName()
-                                            + " service by using " + ServiceLoader.class.getName() + "!");
+        if(server == null){
+            throw new IllegalArgumentException("The parsed SolrServer instance" +
+            		"MUST NOT be NULL!");
         }
-        // we need to change the exceptions, because this will be called outside
-        // of an OSGI environment!
-        try {
-            activate(config);
-        } catch (IOException e) {
-            new YardException("Unable to access SolrServer" + config.getSolrServerLocation());
-        } catch (SolrServerException e) {
-            new YardException("Unable to initialize SolrServer" + config.getSolrServerLocation());
-        } catch (ConfigurationException e) {
-            new IllegalArgumentException("Unable to initialise SolrYard with the provided configuration", e);
+        this.server = server;
+        if(config == null){
+            throw new IllegalArgumentException("The parsed SolrYard configuration" +
+            		"MUST NOT be NULL");
         }
-    }
-
-//    protected void bindSolrServerProviderManager(SolrServerProviderManager manager){
-//        this.solrServerProviderManager = manager;
-//    }
-//    protected void unbindSolrServerProviderManager(SolrServerProviderManager manager){
-//        this.solrServerProviderManager = null;
-//    }
-    protected void bindManagedSolrServer(ManagedSolrServer manager){
-        SolrYardConfig config = (SolrYardConfig) this.getConfig();
-        log.info(" ... bind ManagedSolrServer '{}' to SolrYard '{}'",
-            manager.getServerName(),config != null ? config.getId() : "<not yet activated>");
-        this.managedSolrServer = manager;
-        if(config != null){ //if activated
-            try {
-                checkManagedSolrIndex(manager, config);
-            } catch (Exception e) {
-                log.error("Exception while checking SolrIndex '"+ config.getSolrServerLocation()
-                    +"' on ManagedSolrServer '"+manager.getServerName()+"'!",e);
-            }
-        }
-    }
-    
-    protected void unbindManagedSolrServer(ManagedSolrServer manager){
-        log.info(" ... unbind ManagedSolrServer '{}' from SolrYard '{}'",
-            manager.getServerName(),getConfig() != null ? getConfig().getId() : "<not yet activated>");
-        this.managedSolrServer = null;
-    }
-    /**
-     * Builds an {@link SolrYardConfig} instance based on the parsed {@link ComponentContext} and forwards to
-     * {@link #activate(SolrYardConfig)}.
-     * 
-     * @param context
-     *            The component context only used to create the {@link SolrYardConfig} based on
-     *            {@link ComponentContext#getProperties()}.
-     * @throws ConfigurationException
-     *             If the configuration is not valid
-     * @throws IOException
-     *             In case the initialisation of the Solr index was not possible
-     * @throws SolrServerException
-     *             Indicates that the referenced SolrServer has some problems (usually an invalid
-     *             configuration).
-     */
-    @SuppressWarnings("unchecked")
-    @Activate
-    protected final void activate(ComponentContext context) throws ConfigurationException,
-                                                           IOException,
-                                                           SolrServerException {
-        log.info("in {}.activate(..) with config {}",SolrYard.class.getSimpleName(), context.getProperties());
-        this.context = context;
-        activate(new SolrYardConfig((Dictionary<String,Object>) context.getProperties()));
-    }
-
-    /**
-     * Internally used to configure an instance (within and without an OSGI container
-     * 
-     * @param config
-     *            The configuration
-     * @throws ConfigurationException
-     *             If the configuration is not valid
-     * @throws IOException
-     *             In case the initialisation of the Solr index was not possible
-     * @throws SolrServerException
-     *             Indicates that the referenced SolrServer has some problems (usually an invalid
-     *             configuration).
-     */
-    private void activate(SolrYardConfig config) throws ConfigurationException,
-                                                IOException,
-                                                SolrServerException {
-        // init with the default implementations of the ValueFactory and the QueryFactory
-        super.activate(InMemoryValueFactory.getInstance(), DefaultQueryFactory.getInstance(), config);
-        // mayby the super activate has updated the configuration
-        config = (SolrYardConfig) this.getConfig();
-        // check if immediateCommit is enable or disabled
-        if (config.isImmediateCommit() != null) {
-            immediateCommit = config.isImmediateCommit().booleanValue();
-        } else {
-            immediateCommit = DEFAULT_IMMEDIATE_COMMIT_STATE;
-        }
-        // check the maximum duration until changes are commited
-        if (config.getCommitWithinDuration() != null) {
-            commitWithin = config.getCommitWithinDuration().intValue();
-        } else {
-            commitWithin = DEFAULT_COMMIT_WITHIN_DURATION;
-        }
+        this.config = config;
+        //set the value/query/indexValue factory
+        activate(InMemoryValueFactory.getInstance(), DefaultQueryFactory.getInstance(), config);
         this.indexValueFactory = IndexValueFactory.getInstance();
+        // Set often accessed fields based on config
+        this.immediateCommit = config.isImmediateCommit();
+        this.commitWithin = config.getCommitWithinDuration();
         this.documentBoostFieldName = config.getDocumentBoostFieldName();
         this.fieldBoostMap = config.getFieldBoosts();
-        //try to initialise the SolrServer
-        ManagedSolrServer managedSolrServer = this.managedSolrServer;
-        if(managedSolrServer != null){ 
-            //check also if we need to create/init an SolrServer on startup
-            try {
-                checkManagedSolrIndex(managedSolrServer, config);
-            } catch (Exception e) {
-                log.error("Exception while checking SolrIndex '"+ config.getSolrServerLocation()
-                    +"' on ManagedSolrServer '"+managedSolrServer.getServerName()+"'!",e);
-            }
-        }
-        log.info("Activated SolrYard {}",config.getId());
+        //init fieldMapper and queryFactory
+        this.fieldMapper = new SolrFieldMapper(this.server, nsPrefixService);
+        this.solrQueryFactoy = new SolrQueryFactory(getValueFactory(), indexValueFactory, fieldMapper);
     }
 
-    /**
-     * @param config
-     */
-    private SolrQueryFactory getSolrQueryFactory() throws YardException {
-        SolrYardConfig config = (SolrYardConfig)getConfig();
-        if(_solrQueryFactoy == null){
-            _solrQueryFactoy = new SolrQueryFactory(getValueFactory(), indexValueFactory, getFieldMapper());
-            if (config.isMultiYardIndexLayout()) { // set the yardID as domain if multiYardLayout is activated
-                _solrQueryFactoy.setDomain(config.getId());
-            }
-            _solrQueryFactoy.setDefaultQueryResults(config.getDefaultQueryResultNumber());
-            _solrQueryFactoy.setMaxQueryResults(config.getMaxQueryResultNumber());
-        }
-        return _solrQueryFactoy;
-    }
-
-    /**
-     * Getter for the {@link SolrServer} used by this {@link SolrYard}.<p>
-     * This method tries to {@link #initSolrServer()} if both {@link #_server}
-     * and {@link #_registeredServerTracker} are <code>null</code>. The
-     * {@link #_server} is used for remote SolrServers or if the component is
-     * not running within an OSGI Environment. THe {@link #_registeredServerTracker}
-     * is used for tracking SolrServers that do run in the same JVM.
-     * @throws YardException if the {@link SolrServer} is currently not 
-     * active.
-     */
-    private SolrServer getServer() throws YardException {
-        SolrServer server = null;
-        if(_server == null && _registeredServerTracker == null){
-            initSolrServer();
-        }
-        //when an internally managed Solr server is used by this SolrYard
-        //we dynamically return the tracked version
-        if(_registeredServerTracker != null){
-            server = _registeredServerTracker.getService();
-            //TODO: remove and replace with a setting where the SolrYard does not
-            //      not activate until the SolrServer is available.
-//            if(server == null){
-//                for(int i = 0;i<5;i++){//waiting for a maximum of 5sec 
-//                    try {
-//                        log.info(" ... waiting 1sec for SolrServer");
-//                        
-//                        server = (SolrServer)_registeredServerTracker.waitForService(1000);
-//                    } catch (InterruptedException e) {}
-//                }
-//            }
-            if(server != null && !server.equals(this._server)){
-                //reset the fieldMapper so that it is reinitialised for the new one
-                //STANBOL-519
-                _server = server;
-                Lock writeLock = fieldMapperLock.writeLock();
-                writeLock.lock();
-                try {
-                    _fieldMapper = null;
-                }finally{
-                    writeLock.unlock();
-                }
-            }
-        } else {
-            //for remove servers and when running outside OSGI
-            server = _server;
-        }
-        //the server is not available -> throw an exception!
-        if(server != null){
-            return server;
-        } else {
-            _server = null;
-            Lock writeLock = fieldMapperLock.writeLock();
-            writeLock.lock();
-            try {
-                _fieldMapper = null;
-            }finally{
-                writeLock.unlock();
-            }
-            throw new YardException(String.format("The SolrIndex '%s' for SolrYard '%s' is currently not active!",
-                ((SolrYardConfig)getConfig()).getSolrServerLocation(),getName()));
-            
-        }
-    }
-
-    /**
-     * If the {@link SolrServer} of this SolrYard is managed on the
-     * {@link #managedSolrServer}, than this method deactivates it. If a
-     * remote server is used than calling this method does not have any effect. 
-     */
-    private void deactivateSolrServer(){
-        SolrYardConfig config = (SolrYardConfig) this.getConfig();
-        String indexLocation = config.getSolrServerLocation();
-        if(!(indexLocation.startsWith("http") && indexLocation.indexOf("://") > 0)){
-            IndexReference indexReference = IndexReference.parse(indexLocation);
-            ManagedSolrServer managedSolrServer = this.managedSolrServer;
-            if(indexReference.isName() && managedSolrServer != null
-                    && (indexReference.getServer() == null ||
-                            indexReference.getServer().equals(managedSolrServer.getServerName()))){
-                managedSolrServer.deactivateIndex(indexReference.getIndex());
-            } //else no managed index or index not managed on #managedSolrServer
-        }//an remote server
-    }
-    /**
-     * Assumes that this method is only called if {@link #_server} and 
-     * {@link #_registeredServerTracker} is <code>null</code>
-     * @throws YardException
-     */
-    private void initSolrServer() throws YardException {
-        SolrYardConfig config = (SolrYardConfig) this.getConfig();
-        String indexLocation = config.getSolrServerLocation();
-        if(indexLocation.startsWith("http") && indexLocation.indexOf("://") > 0){
-            //init remote server
-            try {
-                _server = new HttpSolrServer(indexLocation);
-                _server.ping(); //test if remove service is available
-            } catch (RuntimeException e) {
-                throw new YardException("Unable to connect to remote SolrServer '"+
-                    config.getSolrServerLocation() +"' because of "+e.getMessage(),e);
-            } catch (SolrServerException e) {
-                throw new YardException("Unable to initialise to remote SolrServer '"+
-                    config.getSolrServerLocation() +"' because of "+e.getMessage(),e);
-            } catch (IOException e) {
-                throw new YardException("Unable to connect to remote SolrServer '"+
-                    config.getSolrServerLocation() +"' because of "+e.getMessage(),e);
-            }
-        } else { //locally managed Server
-            //(1) check if available (also tries to create if not available and
-            //    create is allowed based on the configuration)
-            IndexReference indexReference = checkManagedSolrIndex(managedSolrServer,config);
-            if(indexReference != null){
-                if(context == null){ // outside OSGI
-                    try {
-                        _server = StandaloneEmbeddedSolrServerProvider.getInstance().getSolrServer(indexReference);
-                    } catch (RuntimeException e) {
-                        throw new YardException("Unable to initialise configured SolrServer'"+
-                            config.getSolrServerLocation() +"'!",e);
-                    }
-                } else { //within OSGI dynamically track the service
-                    try {
-                        _registeredServerTracker = new RegisteredSolrServerTracker(
-                            context.getBundleContext(), indexReference, null);
-                        log.info(" ... start tracking for SolrCore based on {}",indexReference);
-                        _registeredServerTracker.open(); //start tracking
-                    } catch (InvalidSyntaxException e) {
-                        throw new YardException("Unable to track configured SolrServer'"+
-                            config.getSolrServerLocation() +"'!",e);
-                    } catch (RuntimeException e) {
-                        throw new YardException("Unable to initialise configured SolrServer'"+
-                            config.getSolrServerLocation() +"'!",e);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Checks if the SolrYard is active on the {@link #managedSolrServer}
-     * @param config
-     * @param indexReference
-     * @throws YardException
-     */
-    private IndexReference checkManagedSolrIndex(ManagedSolrServer managedSolrServer, SolrYardConfig config) throws YardException {
-        IndexReference indexReference = IndexReference.parse(config.getSolrServerLocation());
-        if(indexReference.isName()){
-            if(managedSolrServer == null){
-                log.warn("Unable to init SolrIndex '{}' because ManagedSolrServer service is not available",
-                    config.getSolrServerLocation());
-                return null; //indicate that the server is not yet active
-            } else if(indexReference.getServer() == null || 
-                        indexReference.getServer().equals(managedSolrServer.getServerName())){
-                //check if the referenced Index is Managed
-                IndexMetadata indexMetadata = managedSolrServer.getIndexMetadata(indexReference.getIndex());
-                if(indexMetadata == null){
-                    // not managed -> try to create
-                    IndexReference createdIndexRef = createSolrIndex(managedSolrServer,config, indexReference.getIndex());
-                    if(context == null){
-                        //in that case we need to replace the parse SolrServerLocation
-                        //with the name of the created solr index
-                        config.setSolrServerLocation(createdIndexRef.getIndex());
-                    }
-                    //return the created IndexReference
-                    return createdIndexRef;
-                } else if(!indexMetadata.isActive()){ //already managed, but not active
-                    //try to activate
-                    try {
-                        IndexMetadata activatedMetadata = managedSolrServer.activateIndex(indexReference.getIndex());
-                        if(activatedMetadata == null){
-                            throw new YardException(String.format(
-                                "Unable to actiate SolrIndex '%s' for SolrYard '%s" +
-                                "on MnagedSolrServer '%s'!",indexReference,
-                                getConfig().getName(),managedSolrServer.getServerName()));
-                        } else {
-                            return activatedMetadata.getIndexReference();
-                        }
-                    } catch (IOException e) {
-                        throw new YardException("Unable to actiate SolrIndex for SolrYard "+getConfig().getName(),e);
-                    } catch (SAXException e) {
-                        throw new YardException("Unable to actiate SolrIndex for SolrYard "+getConfig().getName(),e);
-                    } catch (RuntimeException e){
-                        throw new YardException("Unable to actiate SolrIndex for SolrYard "+getConfig().getName(),e);
-                    }
-                } else{ //already active ... noting todo
-                    return indexReference;
-                }
-            } else { //indexReference.getServer() != managedSolrServer.getServerName
-                //TODO we would need to track all active ManagedSolrServer and 
-                //     check/create the core on the requested one!
-                throw new IllegalStateException("Support for multiple ManagedSolrServer" +
-                		"is not yet implemented (defaultServerName: '"+
-                		managedSolrServer.getServerName()+"' requested: '"+
-                		indexReference.getServer()+"')!");
-            }
-        } else { //a path was parsed 
-            // -> create not supported. Users are responsible to provide the server
-            return indexReference;
-        }
-    }
-
-    /**
-     * Creates a new SolrIndex based on this Yards configuration by using the
-     * {@link ManagedSolrServer} service
-     * @param config the configuration of this SolrYard
-     * @param solrIndexLocation the name of the index to create
-     * @throws YardException On any Exception while creating the index
-     */
-    private IndexReference createSolrIndex(ManagedSolrServer managedServer, SolrYardConfig config, final String solrIndexLocation) throws YardException {
-        String configName;
-        if(config.isDefaultInitialisation()){
-            configName = SolrYard.DEFAULT_SOLR_INDEX_CONFIGURATION_NAME;
-        } else {
-            configName = config.getIndexConfigurationName();
-        }
-        log.info(" ... initialise new SolrDirectory Index with name {} by using Index Configuration {}",
-            solrIndexLocation,configName);
-        try {
-            IndexMetadata metadata = managedServer.createSolrIndex(solrIndexLocation,configName,null);
-            if (metadata == null) {
-                throw new YardException("SolrIndex "+ config.getSolrServerLocation() + 
-                        " is not available" + (config.isDefaultInitialisation() ? 
-                                " and could not be initialised!" : 
-                                    ". The necessary Index is not yet installed."));
-            } else {
-                log.info(" ... created IndexDirectory {} for SolrIndex {} by using config {}",
-                    new Object[]{metadata.getDirectory(),solrIndexLocation,configName});
-            }
-            return metadata.getIndexReference();
-        } catch (IOException e) {
-            throw new YardException("SolrIndex "+ config.getSolrServerLocation() + 
-                    " could not be initialised!",e);
-        }
-    }
-    private SolrFieldMapper getFieldMapper() throws YardException {
-        Lock readLock = fieldMapperLock.readLock();
-        readLock.lock();
-        try {
-            if(_fieldMapper != null){
-                return _fieldMapper;
-            }
-        } finally {
-            readLock.unlock();
-        }
-        Lock writeLock = fieldMapperLock.writeLock();
-        writeLock.lock();
-        try {
-            if(_fieldMapper == null){ //might be init by an other thread
-                _fieldMapper = new SolrFieldMapper(getServer(), nsPrefixService);
-            }
-            return _fieldMapper;
-        } finally {
-            writeLock.unlock();
-        }
-    }
-    
-    /**
-     * Deactivates this SolrYard instance after committing remaining changes
-     * 
-     * @param context
-     */
-    @Deactivate
-    protected final void deactivate(ComponentContext context) {
-        SolrYardConfig config = (SolrYardConfig) getConfig();
-        log.info("... deactivating SolrYard " + config.getName() + " (id=" + config.getId() + ")");
-
-        //close the RegisteredSolrServer tracker if used
-        if(_registeredServerTracker != null){
-            _registeredServerTracker.close();
-            _registeredServerTracker = null;
-        }
-        this._server = null;
-        this._fieldMapper = null; //in this case we can directly access the lazy field
-        this.indexValueFactory = null;
-        this._solrQueryFactoy = null;  //in this case we can directly access the lazy field
-        this.documentBoostFieldName = null;
-        this.fieldBoostMap = null;
-        // reset the commitWithin and immediateCommit to the defaults
-        this.commitWithin = DEFAULT_COMMIT_WITHIN_DURATION;
-        this.immediateCommit = DEFAULT_IMMEDIATE_COMMIT_STATE;
-        //deactivates the SolrCore used by this Yard if running in the local JVM
-        deactivateSolrServer();
-        super.deactivate(); // deactivate the super implementation
-        this.context = null;
-    }
     /**
      * This will case the SolrIndex to be optimised
      * @throws YardException on any error while optimising
      */
-    public final void optimize() throws YardException{
-        SolrServer server = getServer();
+    public final void optimize() throws YardException {
+        if(closed){
+            throw new IllegalStateException("The SolrYard is already closed!");
+        }
         try {
             server.optimize();
         } catch (SolrServerException e) {
@@ -795,7 +216,18 @@ public class SolrYard extends AbstractYard implements Yard {
      * to be committed and optimised.
      */
     public void close() {
-        deactivate(null);
+        if(closed){
+            return;
+        }
+        log.info("... deactivating SolrYard " + config.getName() + " (id=" + config.getId() + ")");
+        try {
+            server.commit();
+        } catch (SolrServerException e) {
+            log.warn("Unable to perform final commit during deactivation",e);
+        } catch (IOException e) {
+            log.warn("Unable to perform final commit during deactivation",e);
+        }
+        closed = true;
     }
 
     /**
@@ -803,16 +235,16 @@ public class SolrYard extends AbstractYard implements Yard {
      */
     @Override
     protected void finalize() throws Throwable {
-        deactivate(null);
+        close();
         super.finalize();
     }
 
     @Override
     public final QueryResultList<Representation> find(final FieldQuery parsedQuery) throws YardException {
-        return find(getFieldMapper(),parsedQuery, SELECT.QUERY);
+        return find(parsedQuery, SELECT.QUERY);
     }
 
-    private QueryResultList<Representation> find(final FieldMapper fieldMapper,final FieldQuery parsedQuery, SELECT select) throws YardException {
+    private QueryResultList<Representation> find(final FieldQuery parsedQuery, SELECT select) throws YardException {
         //create a clone of the query, because we need to refine it because the
         //query (as executed) needs to be included in the result set
         FieldQuery fieldQuery = parsedQuery.clone();
@@ -829,9 +261,11 @@ public class SolrYard extends AbstractYard implements Yard {
             selected = null;
         }
 
-        final SolrQuery query = getSolrQueryFactory().parseFieldQuery(fieldQuery, select);
+        final SolrQuery query = solrQueryFactoy.parseFieldQuery(fieldQuery, select);
         long queryGeneration = System.currentTimeMillis();
-        final SolrServer server = getServer();
+        if(closed){
+            log.warn("The SolrYard '{}' was already closed!",config.getName());
+        }
         QueryResponse response;
         try {
             response = AccessController.doPrivileged(new PrivilegedExceptionAction<QueryResponse>() {
@@ -855,7 +289,7 @@ public class SolrYard extends AbstractYard implements Yard {
                 throw RuntimeException.class.cast(e);
             }
         }
-        if(query.getQueryType() == SolrQueryFactory.MLT_QUERY_TYPE){
+        if(query.getRequestHandler() == SolrQueryFactory.MLT_QUERY_TYPE){
             log.info("{}",response);
         }
         long queryTime = System.currentTimeMillis();
@@ -868,7 +302,7 @@ public class SolrYard extends AbstractYard implements Yard {
                             @Override
                             public Representation adapt(SolrDocument doc, Class<Representation> type) {
                                 // use this method for the conversion!
-                                return createRepresentation(fieldMapper, doc, selected);
+                                return createRepresentation(doc, selected);
                             }
                         }, Representation.class), Representation.class);
         long resultProcessing = System.currentTimeMillis();
@@ -884,9 +318,11 @@ public class SolrYard extends AbstractYard implements Yard {
         //create a clone of the query, because we need to refine it because the
         //query (as executed) needs to be included in the result set
         FieldQuery fieldQuery = parsedQuery.clone();
-        final SolrQuery query = getSolrQueryFactory().parseFieldQuery(fieldQuery, SELECT.ID);
+        final SolrQuery query = solrQueryFactoy.parseFieldQuery(fieldQuery, SELECT.ID);
+        if(closed){
+            log.warn("The SolrYard '{}' was already closed!",config.getName());
+        }
         QueryResponse response;
-        final SolrServer server = getServer();
         try {
             response = AccessController.doPrivileged(new PrivilegedExceptionAction<QueryResponse>() {
                 public QueryResponse run() throws IOException, SolrServerException {
@@ -904,7 +340,6 @@ public class SolrYard extends AbstractYard implements Yard {
                 throw RuntimeException.class.cast(e);
             }
         }
-        final FieldMapper fieldMapper = getFieldMapper();
         // return a queryResultList
         return new QueryResultListImpl<String>(fieldQuery,
         // by adapting SolrDocuments to Representations
@@ -921,7 +356,7 @@ public class SolrYard extends AbstractYard implements Yard {
 
     @Override
     public final QueryResultList<Representation> findRepresentation(FieldQuery parsedQuery) throws YardException {
-        return find(getFieldMapper(),parsedQuery, SELECT.ALL);
+        return find(parsedQuery, SELECT.ALL);
     }
 
     @Override
@@ -932,12 +367,13 @@ public class SolrYard extends AbstractYard implements Yard {
         if (id.isEmpty()) {
             throw new IllegalArgumentException("The parsed Representation id MUST NOT be empty!");
         }
-        SolrServer server = getServer();
-        FieldMapper fieldMapper = getFieldMapper();
+        if(closed){
+            log.warn("The SolrYard '{}' was already closed!",config.getName());
+        }
         SolrDocument doc;
         long start = System.currentTimeMillis();
         try {
-            doc = getSolrDocument(server,fieldMapper,id);
+            doc = getSolrDocument(id);
         } catch (SolrServerException e) {
             throw new YardException("Error while getting SolrDocument for id" + id, e);
         } catch (IOException e) {
@@ -949,7 +385,7 @@ public class SolrYard extends AbstractYard implements Yard {
             // create an Representation for the Doc! retrieve
             log.debug(String.format("Create Representation %s from SolrDocument",
                 doc.getFirstValue(fieldMapper.getDocumentIdField())));
-            rep = createRepresentation(fieldMapper,doc, null);
+            rep = createRepresentation(doc, null);
         } else {
             rep = null;
         }
@@ -968,7 +404,7 @@ public class SolrYard extends AbstractYard implements Yard {
      *            if NOT NULL only this fields are added to the Representation
      * @return the Representation
      */
-    protected final Representation createRepresentation(FieldMapper fieldMapper, SolrDocument doc, Set<String> fields) {
+    protected final Representation createRepresentation(SolrDocument doc, Set<String> fields) {
         if(fieldMapper == null){
             throw new IllegalArgumentException("The parsed FieldMapper MUST NOT be NULL!");
         }
@@ -1026,10 +462,8 @@ public class SolrYard extends AbstractYard implements Yard {
         if (id.isEmpty()) {
             throw new IllegalArgumentException("The parsed Representation id MUST NOT be empty!");
         }
-        final SolrServer server = getServer();
-        final FieldMapper fieldMapper = getFieldMapper();
         try {
-            return getSolrDocument(server,fieldMapper,id, Arrays.asList(fieldMapper.getDocumentIdField())) != null;
+            return getSolrDocument(id, Arrays.asList(fieldMapper.getDocumentIdField())) != null;
         } catch (SolrServerException e) {
             throw new YardException("Error while performing getDocumentByID request for id " + id, e);
         } catch (IOException e) {
@@ -1048,13 +482,11 @@ public class SolrYard extends AbstractYard implements Yard {
      * @throws IOException
      *             an any IO exception while accessing the SolrServer
      */
-    protected final Set<String> checkRepresentations(SolrServer server, 
-                                                     FieldMapper fieldMapper,
-                                                     Set<String> ids) 
+    protected final Set<String> checkRepresentations(Set<String> ids) 
                                                      throws SolrServerException, IOException {
         Set<String> found = new HashSet<String>();
         String field = fieldMapper.getDocumentIdField();
-        for (SolrDocument foundDoc : getSolrDocuments(server,fieldMapper,ids, Arrays.asList(field))) {
+        for (SolrDocument foundDoc : getSolrDocuments(ids, Arrays.asList(field))) {
             Object value = foundDoc.getFirstValue(field);
             if (value != null) {
                 found.add(value.toString());
@@ -1071,9 +503,7 @@ public class SolrYard extends AbstractYard implements Yard {
         if (id.isEmpty()) {
             throw new IllegalArgumentException("The parsed Representation id MUST NOT be empty!");
         }
-        final SolrServer server = getServer();
         final SolrYardConfig config = (SolrYardConfig)getConfig();
-        final SolrFieldMapper fieldMapper = getFieldMapper();
         try {
             AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
                 public Object run() throws IOException, SolrServerException {
@@ -1119,9 +549,6 @@ public class SolrYard extends AbstractYard implements Yard {
                 toRemove.add(id);
             }
         }
-        final SolrServer server = getServer();
-        final SolrYardConfig config = (SolrYardConfig)getConfig();
-        final SolrFieldMapper fieldMapper = getFieldMapper();
         try {
             AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
                 public Object run() throws IOException, SolrServerException {
@@ -1160,15 +587,15 @@ public class SolrYard extends AbstractYard implements Yard {
     }
     @Override
     public void removeAll() throws YardException {
-        final SolrServer server = getServer();
-        final SolrYardConfig config = (SolrYardConfig)getConfig();
+        if(closed){
+            log.warn("The SolrYard '{}' was already closed!",config.getName());
+        }
         try {
             //delete all documents
             AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
                 public Object run() throws IOException, SolrServerException, YardException {
                     //ensures that the fildMapper is initialised and reads the
                     //namespace config before deleting all documents
-                    FieldMapper fieldMapper = getFieldMapper();
                     if(config.isMultiYardIndexLayout()){
                         //only delete entities of this referenced site
                         server.deleteByQuery(String.format("%s:%s", 
@@ -1179,7 +606,7 @@ public class SolrYard extends AbstractYard implements Yard {
                     }
                     //ensure that the namespace config is stored again after deleting
                     //all documents
-                    getFieldMapper().saveNamespaceConfig(false);
+                    fieldMapper.saveNamespaceConfig(false);
                     server.commit();
                     return null;
                 }
@@ -1199,17 +626,17 @@ public class SolrYard extends AbstractYard implements Yard {
     }
 
     @Override
-    public final Representation store(Representation representation) throws YardException,
-                                                                    IllegalArgumentException {
+    public final Representation store(Representation representation) throws YardException, IllegalArgumentException {
         log.debug("Store {}", representation != null ? representation.getId() : null);
         if (representation == null) {
             throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
         }
-        final SolrServer server = getServer();
-        FieldMapper fieldMapper = getFieldMapper();
         long start = System.currentTimeMillis();
-        final SolrInputDocument inputDocument = createSolrInputDocument(fieldMapper,representation);
+        final SolrInputDocument inputDocument = createSolrInputDocument(representation);
         long create = System.currentTimeMillis();
+        if(closed){
+            log.warn("The SolrYard '{}' was already closed!",config.getName());
+        }
         try {
             final UpdateRequest update = new UpdateRequest();
             if (!immediateCommit) {
@@ -1250,15 +677,16 @@ public class SolrYard extends AbstractYard implements Yard {
         Collection<Representation> added = new HashSet<Representation>();
         long start = System.currentTimeMillis();
         Collection<SolrInputDocument> inputDocs = new HashSet<SolrInputDocument>();
-        SolrServer server = getServer();
-        FieldMapper fieldMapper = getFieldMapper();
         for (Representation representation : representations) {
             if (representation != null) {
-                inputDocs.add(createSolrInputDocument(fieldMapper,representation));
+                inputDocs.add(createSolrInputDocument(representation));
                 added.add(representation);
             }
         }
         long created = System.currentTimeMillis();
+        if(closed){
+            log.warn("The SolrYard '{}' was already closed!",config.getName());
+        }
         try {
             UpdateRequest update = new UpdateRequest();
             if (!immediateCommit) {
@@ -1294,7 +722,7 @@ public class SolrYard extends AbstractYard implements Yard {
      *            the representation
      * @return the Solr document for indexing
      */
-    protected final SolrInputDocument createSolrInputDocument(FieldMapper fieldMapper,Representation representation) {
+    protected final SolrInputDocument createSolrInputDocument(Representation representation) {
         SolrYardConfig config = (SolrYardConfig) getConfig();
         SolrInputDocument inputDocument = new SolrInputDocument();
         // If multiYardLayout is active, than we need to add the YardId as
@@ -1434,11 +862,12 @@ public class SolrYard extends AbstractYard implements Yard {
                 ids.add(representation.getId());
             }
         }
-        final SolrServer server = getServer();
-        FieldMapper fieldMapper = getFieldMapper();
+        if(closed){
+            log.warn("The SolrYard '{}' was already closed!",config.getName());
+        }
         int numDocs = ids.size(); // for debuging
         try {
-            ids = checkRepresentations(server, fieldMapper,ids); // returns the ids found in the solrIndex
+            ids = checkRepresentations(ids); // returns the ids found in the solrIndex
         } catch (SolrServerException e) {
             throw new YardException(
                     "Error while searching for alredy present documents before executing the actual update for the parsed Representations",
@@ -1452,7 +881,7 @@ public class SolrYard extends AbstractYard implements Yard {
         for (Representation representation : representations) {
             if (representation != null && ids.contains(representation.getId())) { // null parsed or not
                                                                                   // already present
-                inputDocs.add(createSolrInputDocument(fieldMapper,representation));
+                inputDocs.add(createSolrInputDocument(representation));
                 updated.add(representation);
             }
         }
@@ -1500,7 +929,7 @@ public class SolrYard extends AbstractYard implements Yard {
      * @param inputDoc
      *            the document to store
      */
-    protected final void storeSolrDocument(final SolrServer server, final SolrInputDocument inputDoc) 
+    protected final void storeSolrDocument(final SolrInputDocument inputDoc) 
                                            throws SolrServerException,IOException {
         try {
             AccessController.doPrivileged(new PrivilegedExceptionAction<UpdateResponse>() {
@@ -1526,13 +955,11 @@ public class SolrYard extends AbstractYard implements Yard {
      * @param inputDoc
      *            the document to store
      */
-    protected final SolrDocument getSolrDocument(SolrServer server, FieldMapper fieldMapper,String uri) throws SolrServerException, IOException {
-        return getSolrDocument(server, fieldMapper, uri, null);
+    protected final SolrDocument getSolrDocument(String uri) throws SolrServerException, IOException {
+        return getSolrDocument(uri, null);
     }
 
-    protected final Collection<SolrDocument> getSolrDocuments(final SolrServer server,
-                                                              FieldMapper fieldMapper,
-                                                              Collection<String> uris, 
+    protected final Collection<SolrDocument> getSolrDocuments(Collection<String> uris, 
                                                               Collection<String> fields) 
                                                               throws SolrServerException, IOException {
         SolrYardConfig config = (SolrYardConfig) getConfig();
@@ -1549,13 +976,7 @@ public class SolrYard extends AbstractYard implements Yard {
         // NOTE: If there are more requested documents than allowed boolean
         // clauses in one query, than we need to send several requests!
         Iterator<String> uriIterator = uris.iterator();
-        int maxClauses;
-        Integer configuredMaxClauses = config.getMaxBooleanClauses();
-        if (configuredMaxClauses != null && configuredMaxClauses > 0) {
-            maxClauses = configuredMaxClauses;
-        } else {
-            maxClauses = defaultMaxBooleanClauses;
-        }
+        int maxClauses  = config.getMaxBooleanClauses();
         int num = 0;
         StringBuilder queryBuilder = new StringBuilder();
         boolean myList = false;
@@ -1614,9 +1035,7 @@ public class SolrYard extends AbstractYard implements Yard {
         return resultDocs;
     }
 
-    protected final SolrDocument getSolrDocument(final SolrServer server,
-                                                 FieldMapper fieldMapper,
-                                                 String uri, 
+    protected final SolrDocument getSolrDocument(String uri, 
                                                  Collection<String> fields) 
                                                  throws SolrServerException, IOException {
         final SolrQuery solrQuery = new SolrQuery();
@@ -1656,4 +1075,94 @@ public class SolrYard extends AbstractYard implements Yard {
             return queryResponse.getResults().get(0);
         }
     }
+    
+    /*
+     * Deprecated Constants -- moved to SolrYardConfig
+     */
+    /**
+     * The key used to configure the URL for the SolrServer
+     * @deprecated use {@link SolrYardConfig#SOLR_SERVER_LOCATION} instead
+     */
+    @Deprecated
+    public static final String SOLR_SERVER_LOCATION = SolrYardConfig.SOLR_SERVER_LOCATION;
+    /**
+     * The key used to configure if data of multiple Yards are stored within the same index (
+     * <code>default=false</code>)
+     * @deprecated use {@link SolrYardConfig#MULTI_YARD_INDEX_LAYOUT} instead
+     */
+    public static final String MULTI_YARD_INDEX_LAYOUT = SolrYardConfig.MULTI_YARD_INDEX_LAYOUT;
+    /**
+     * The maximum boolean clauses as configured in the solrconfig.xml of the SolrServer. The default value
+     * for this config in Solr 1.4 is 1024.
+     * <p>
+     * This value is important for generating queries that search for multiple documents, because it
+     * determines the maximum number of OR combination for the searched document ids.
+     * @deprecated use {@link SolrYardConfig#MAX_BOOLEAN_CLAUSES} instead
+     */
+    public static final String MAX_BOOLEAN_CLAUSES = SolrYardConfig.MAX_BOOLEAN_CLAUSES;
+    /**
+     * This property allows to define a field that is used to parse the boost for the parsed representation.
+     * Typically this will be the pageRank of that entity within the referenced site (e.g.
+     * {@link Math#log1p(double)} of the number of incoming links
+     * @deprecated use {@link SolrYardConfig#DOCUMENT_BOOST_FIELD} instead
+     */
+    public static final String DOCUMENT_BOOST_FIELD = SolrYardConfig.DOCUMENT_BOOST_FIELD;
+    /**
+     * Key used to configure {@link Entry Entry&lt;String,Float&gt;} for fields with the boost. If no Map is
+     * configured or a field is not present in the Map, than 1.0f is used as Boost. If a Document boost is
+     * present than the boost of a Field is documentBoost*fieldBoost.
+     * @deprecated use {@link SolrYardConfig#FIELD_BOOST_MAPPINGS} instead
+     */
+    public static final String FIELD_BOOST_MAPPINGS = SolrYardConfig.FIELD_BOOST_MAPPINGS;
+    /**
+     * Key used to to enable/disable the default configuration. If this is enabled,
+     * that the index will get initialised with the configuration as specified by
+     * the configuration name.
+     * @deprecated use {@link SolrYardConfig#ALLOW_INITIALISATION_STATE} instead
+     */
+    public static final String SOLR_INDEX_DEFAULT_CONFIG = SolrYardConfig.ALLOW_INITIALISATION_STATE;
+    /**
+     * By default the use of an default configuration is disabled!
+     * @deprecated use {@link SolrYardConfig#DEFAULT_ALLOW_INITIALISATION_STATE} instead
+     */
+    public static final boolean DEFAULT_SOLR_INDEX_DEFAULT_CONFIG_STATE = SolrYardConfig.DEFAULT_ALLOW_INITIALISATION_STATE;
+    /**
+     * The name of the configuration use as default. 
+     * @deprecated use {@link SolrYardConfig#DEFAULT_SOLR_INDEX_CONFIGURATION_NAME} instead
+     */
+    public static final String DEFAULT_SOLR_INDEX_CONFIGURATION_NAME = SolrYardConfig.DEFAULT_SOLR_INDEX_CONFIGURATION_NAME;
+    /**
+     * Allows to configure the name of the index used for the configuration of the Solr Core.
+     * @deprecated use {@link SolrYardConfig#SOLR_INDEX_CONFIGURATION_NAME} instead
+     */
+    public static final String SOLR_INDEX_CONFIGURATION_NAME = SolrYardConfig.SOLR_INDEX_CONFIGURATION_NAME;
+    /**
+     * The default value for the maxBooleanClauses of SolrQueries. Set to {@value #defaultMaxBooleanClauses}
+     * the default of Slor 1.4
+     * @deprecated use {@link SolrYardConfig#DEFAULT_MAX_BOOLEAN_CLAUSES} instead
+     */
+    protected static final int defaultMaxBooleanClauses = SolrYardConfig.DEFAULT_MAX_BOOLEAN_CLAUSES;
+    /**
+     * Key used to enable/disable committing of update(..) and store(..) operations. Enabling this ensures
+     * that indexed documents are immediately available for searches, but it will also decrease the
+     * performance for updates.
+     * @deprecated use {@link SolrYardConfig#IMMEDIATE_COMMIT} instead
+     */
+    public static final String IMMEDIATE_COMMIT = SolrYardConfig.IMMEDIATE_COMMIT;
+    /**
+     * By default {@link #IMMEDIATE_COMMIT} is enabled
+     * @deprecated use {@link SolrYardConfig#DEFAULT_IMMEDIATE_COMMIT_STATE} instead
+     */
+    public static final boolean DEFAULT_IMMEDIATE_COMMIT_STATE = SolrYardConfig.DEFAULT_IMMEDIATE_COMMIT_STATE;
+    /**
+     * If {@link #IMMEDIATE_COMMIT} is deactivated, than this time is parsed to update(..) and store(..)
+     * operations as the maximum time (in ms) until a commit.
+     * @deprecated use {@link SolrYardConfig#COMMIT_WITHIN_DURATION} instead
+     */
+    public static final String COMMIT_WITHIN_DURATION = SolrYardConfig.COMMIT_WITHIN_DURATION;
+    /**
+     * The default value for the {@link #COMMIT_WITHIN_DURATION} parameter is 10 sec.
+     * @deprecated use {@link SolrYardConfig#DEFAULT_COMMIT_WITHIN_DURATION} instead
+     */
+    public static final int DEFAULT_COMMIT_WITHIN_DURATION = SolrYardConfig.DEFAULT_COMMIT_WITHIN_DURATION;
 }
