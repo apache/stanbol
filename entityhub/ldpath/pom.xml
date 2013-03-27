@@ -59,6 +59,10 @@
               at.newmedialab.ldpath.api.backend; provide:=true,
               at.newmedialab.ldpath.api.transformers; provide:=true,
               org.apache.stanbol.entityhub.servicesapi.query; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.entityhub.ldpath,
+              org.apache.stanbol.entityhub.ldpath.backend,
+              org.apache.stanbol.entityhub.ldpath.query,
+              org.apache.stanbol.entityhub.ldpath.transformer,
               *
             </Import-Package>
             <Export-Package>

@@ -65,6 +65,8 @@
             <Import-Package>
               org.apache.stanbol.entityhub.servicesapi.model; provide:=true; version="[0.11,0.13)",
               org.apache.stanbol.entityhub.servicesapi.util; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.entityhub.model.clerezza,
+              org.apache.stanbol.entityhub.model.clerezza.utils,
               *
             </Import-Package>
             <Export-Package>

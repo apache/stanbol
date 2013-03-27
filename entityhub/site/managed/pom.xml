@@ -64,10 +64,8 @@
               org.apache.stanbol.entityhub.servicesapi.site; provide:=true; version="[0.11,0.13)",
               *
             </Import-Package>
-            <Export-Package>
-              org.apache.stanbol.entityhub.site.managed;version=${project.version}
-            </Export-Package>
             <Private-Package>
+              org.apache.stanbol.entityhub.site.managed;version=${project.version},
               org.apache.stanbol.entityhub.site.managed.impl;version=${project.version}
             </Private-Package>
           </instructions>

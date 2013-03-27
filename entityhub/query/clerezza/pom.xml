@@ -63,6 +63,7 @@
           <instructions>
             <Import-Package>
               org.apache.stanbol.entityhub.servicesapi.query; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.entityhub.query.clerezza,
               *
             </Import-Package>
             <Export-Package>
