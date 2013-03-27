@@ -32,7 +32,7 @@
     ${entity.name}
     </#if>
     <br><span class="metadata">
-    <#if entity.name != entity.selected>for:'${entity.selected}',</#if>
+    <#if entity.selected?exists && entity.name != entity.selected>for:'${entity.selected}',</#if>
     <#if entity.mentions?size &gt; 1>${entity.mentions?size} mentions
     <#else>
       <#if entity.hasOccurrence()>pos:[${entity.start},${entity.end}]</#if></#if>
