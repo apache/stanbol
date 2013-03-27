@@ -16,6 +16,8 @@
 */
 package org.apache.stanbol.commons.solr.managed.standalone;
 
+import java.io.IOException;
+
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;
@@ -52,7 +54,29 @@ public class StandaloneEmbeddedSolrServerProvider {
      */
     private StandaloneEmbeddedSolrServerProvider() {}
     
+    /**
+     * Getter for the SolrServer based on the parsed IndexReference
+     * @param indexRef the index reference
+     * @return the SolrServer or <code>null</code> if the referenced SolrServer
+     * is not managed
+     */
     public SolrServer getSolrServer(IndexReference indexRef){
+        return getSolrServer(indexRef,null);
+    }
+    /**
+     * Getter for the SolrServer based on the parsed IndexReference. If the
+     * parsed <code>configName</code> is NOT <code>null</code> than the
+     * referenced index is created if it does not yet exist. 
+     * @param indexRef the index reference
+     * @param configName the SolrCore configuration used to create the SolrCore
+     * on the ManagedSOlrServer
+     * @return the SolrServer, <code>null</code> if it does not exist and 
+     * configName is not present.
+     * @throws IllegalStateException if the SolrServer could not be created
+     * by using the configName on the ManagedSolrServer referenced by 
+     * {@link IndexReference#getServer()}
+     */
+    public SolrServer getSolrServer(IndexReference indexRef, String configName){
         if(indexRef == null){
             throw new IllegalArgumentException("The parsed InexReference MUST NOT be NULL!");
         }
@@ -63,11 +87,16 @@ public class StandaloneEmbeddedSolrServerProvider {
             server = StandaloneManagedSolrServer.getManagedServer();
         } else {
             server = StandaloneManagedSolrServer.getManagedServer(indexRef.getServer());
+            if(server == null && configName != null){
+                server = StandaloneManagedSolrServer.createManagedServer(indexRef.getServer());
+            }
         }
         if(server == null){
-            log.debug("  > Managed Solr server with name {} not found -> return null",
-                indexRef.getServer());
-            return null;
+            if(configName == null){
+                log.debug("  > Managed Solr server with name {} not found -> return null",
+                    indexRef.getServer());
+                return null;
+            }
         }
         log.debug("  > use managed Solr server with name {}",server.getServerName());
 
@@ -79,6 +108,21 @@ public class StandaloneEmbeddedSolrServerProvider {
         } else {
             coreName = indexRef.getIndex();
         } 
+        if(!server.isManagedIndex(coreName)){
+            if(configName != null){
+                try {
+                    server.createSolrIndex(coreName, configName, null);
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("Unable to create SolrCore '"
+                        + coreName +"' by using config '"+configName+"' on ManagedSolrServer '"
+                        + server.getServerName()+"'!",e);
+                }
+            } else {
+                log.info("Core with the name '"+coreName+"' is not managed on the "
+                    + "ManagedSolrServer '"+server.getServerName()+"'. Initialisation "
+                    + "might fail if the core was not initialised by some other component.");
+            }
+        }
         if(coreName != null){
             return new EmbeddedSolrServer(server.getCoreContainer(), coreName);
         } else {
