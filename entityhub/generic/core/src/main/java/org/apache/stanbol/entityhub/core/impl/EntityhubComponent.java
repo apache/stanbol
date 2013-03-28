@@ -16,37 +16,55 @@
  */
 package org.apache.stanbol.entityhub.core.impl;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.Hashtable;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
+import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
 import org.apache.stanbol.entityhub.servicesapi.model.MappingState;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
+import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- * Implementation of the Entityhub Configuration as an own component.
- * TODO: Currently the {@link EntityhubImpl} has a 1..1 dependency to this one.
- * One could also just extend the {@link EntityhubImpl} from this class.
+ * Implementation of the Entityhub Configuration that consumes the configuration
+ * form OSGI. This replaces the old EntityhubConfigurationImpl (up to 0.11.0)
+ * @since 0.12.0
  * @author Rupert Westenthaler
  *
  */
-@Component(immediate=true,metatype=true)
-@Service
-public class EntityhubConfigurationImpl implements EntityhubConfiguration {
+@Component(immediate=true,metatype=true,
+        name = "org.apache.stanbol.entityhub.core.impl.EntityhubConfigurationImpl")
+public class EntityhubComponent implements EntityhubConfiguration {
 
-    private final Logger log = LoggerFactory.getLogger(EntityhubConfigurationImpl.class);
+    private final Logger log = LoggerFactory.getLogger(EntityhubComponent.class);
 
     @Property(name=EntityhubConfiguration.ID,value="entityhub")
     private String entityhubID;
@@ -130,37 +148,172 @@ public class EntityhubConfigurationImpl implements EntityhubConfiguration {
             },value="proposed")
     private String defaultSymblStateString;
 
+    private BundleContext bc;
+    
+    /**
+     * Tracks the availability of the Yard used by the Entityhub.
+     */
+    private ServiceTracker entityhubYardTracker; //reference initialised in the activate method
+    private Yard entityhubYard;
+    
+    private ServiceRegistration entityhubRegistration;
+    private Entityhub entityhub;
+    
+    /**
+     * The site manager is used to search for entities within the Entityhub framework
+     */
+    @Reference // 1..1, static
+    private SiteManager siteManager;
+    
+    
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "bindNamespacePrefixService",
+            unbind = "unbindNamespacePrefixService",
+            strategy = ReferenceStrategy.EVENT)
+    private NamespacePrefixService nsPrefixService;
+    
+    
+    protected void bindNamespacePrefixService(NamespacePrefixService ps){
+        this.nsPrefixService = ps;
+        updateServiceRegistration(bc, entityhubYard, siteManager, nsPrefixService);
+    }
+    
+
+    protected void unbindNamespacePrefixService(NamespacePrefixService ps){
+        if(ps.equals(this.nsPrefixService)){
+            this.nsPrefixService = null;
+            updateServiceRegistration(bc, entityhubYard, siteManager, nsPrefixService);
+        }
+    }
+
+    
     @Activate
-    protected void activate(ComponentContext context) throws ConfigurationException {
+    protected void activate(final ComponentContext context) throws ConfigurationException {
+        this.bc = context.getBundleContext();
         Dictionary<?, ?> properties = context.getProperties();
-        log.debug("Activate Entityhub Configuration:");
-        log.info("entityhubID:{}",entityhubID); //TODO remove ... just there to check if property annotations do actually set the property value
-        log.info("entityhubName:{}",entityhubName);
-        this.entityhubID = OsgiUtils.checkProperty(properties, EntityhubConfiguration.ID).toString();
-        this.entityhubName = OsgiUtils.checkProperty(properties, EntityhubConfiguration.NAME, this.entityhubID).toString();
-        Object entityhubDescriptionObject = properties.get(EntityhubConfiguration.DESCRIPTION);
-        this.entityhubDescription = entityhubDescriptionObject==null?null:entityhubDescriptionObject.toString();
-        this.entityhubPrefix = OsgiUtils.checkProperty(properties, EntityhubConfiguration.PREFIX).toString();
-        this.entityhubYardId = OsgiUtils.checkProperty(properties, EntityhubConfiguration.ENTITYHUB_YARD_ID).toString();
-        Object defaultSymbolState = properties.get(EntityhubConfiguration.DEFAULT_SYMBOL_STATE);
+        log.info("Activate Entityhub Component:");
+
+        
+        this.entityhubID = OsgiUtils.checkProperty(properties, ID).toString();
+        if(entityhubID == null || entityhubID.isEmpty()){
+            throw new ConfigurationException(ID, "The id for the Entityhub MUST NOT be empty!");
+        } else {
+            log.debug("   + id: {}", entityhubID);
+        }
+        this.entityhubName = OsgiUtils.checkProperty(properties, NAME, this.entityhubID).toString();
+        if(entityhubName.isEmpty()){
+            throw new ConfigurationException(NAME, "The name for the Entityhub MUST NOT be empty!");
+        } else {
+            log.debug("   + name: {}",entityhubName);
+        }
+        Object entityhubDescriptionObject = properties.get(DESCRIPTION);
+        this.entityhubDescription = entityhubDescriptionObject==null ? null : entityhubDescriptionObject.toString();
+        log.debug("   + description: {}",entityhubDescription == null ? "<none>" : entityhubDescription);
+        
+        this.entityhubPrefix = OsgiUtils.checkProperty(properties, PREFIX).toString();
+        if(entityhubPrefix.isEmpty()){
+            throw new ConfigurationException(PREFIX, "The UIR preix for the Entityub MUST NOT be empty!");
+        }
+        try {
+            new URI(entityhubPrefix);
+            log.info("   + prefix: "+entityhubPrefix);
+        } catch (URISyntaxException e) {
+            throw new ConfigurationException(PREFIX, "The URI prefix for the Entityhub "
+                + "MUST BE an valid URI (prefix="+entityhubPrefix+")",e);
+        }
+        
+        Object defaultSymbolState = properties.get(DEFAULT_SYMBOL_STATE);
         if(defaultSymbolState == null){
             this.defaultSymblStateString = ManagedEntity.DEFAULT_SYMBOL_STATE.name();
         } else {
             this.defaultSymblStateString = defaultSymbolState.toString();
         }
-        Object defaultMappingState = properties.get(EntityhubConfiguration.DEFAULT_MAPPING_STATE);
+        Object defaultMappingState = properties.get(DEFAULT_MAPPING_STATE);
         if(defaultMappingState == null){
             this.defaultMappingStateString = EntityMapping.DEFAULT_MAPPING_STATE.name();
         } else {
             this.defaultMappingStateString = defaultMappingState.toString();
         }
-        Object fieldMappingConfigObject = OsgiUtils.checkProperty(properties, EntityhubConfiguration.FIELD_MAPPINGS);
+        Object fieldMappingConfigObject = OsgiUtils.checkProperty(properties, FIELD_MAPPINGS);
         if(fieldMappingConfigObject instanceof String[]){
             this.fieldMappingConfig = (String[])fieldMappingConfigObject;
         } else {
-            throw new ConfigurationException(EntityhubConfiguration.FIELD_MAPPINGS, "Values for this property must be of type Stirng[]!");
+            throw new ConfigurationException(FIELD_MAPPINGS, "Values for this property must be of type Stirng[]!");
         }
+        String entityhubYardId = OsgiUtils.checkProperty(properties, ENTITYHUB_YARD_ID).toString();
+        String filterString = String.format("(&(%s=%s)(%s=%s))",
+            Constants.OBJECTCLASS,Yard.class.getName(),
+            Yard.ID,entityhubYardId);
+        log.debug(" ... tracking EntityhubYard by Filter:"+filterString);
+        Filter filter;
+        try {
+            filter = context.getBundleContext().createFilter(filterString);
+        } catch (InvalidSyntaxException e) {
+            throw new ConfigurationException(ENTITYHUB_YARD_ID, "Unable to parse OSGI filter '"
+                + filterString + "' for configured Yard id '"+entityhubYardId+"'!",e);
+        }
+        entityhubYardTracker = new ServiceTracker(context.getBundleContext(), filter, 
+            new ServiceTrackerCustomizer() {
+                final BundleContext bc = context.getBundleContext();
+                @Override
+                public void removedService(ServiceReference reference, Object service) {
+                    if(service.equals(entityhubYard)){
+                        entityhubYard = (Yard)entityhubYardTracker.getService();
+                        updateServiceRegistration(bc, entityhubYard, siteManager, nsPrefixService);
+                    }
+                    bc.ungetService(reference);
+                }
+                
+                @Override
+                public void modifiedService(ServiceReference reference, Object service) {
+                    //the service.ranking might have changed ... so check if the
+                    //top ranked yard is a different one
+                    Yard newYard = (Yard)entityhubYardTracker.getService();
+                    if(newYard == null || !newYard.equals(entityhubYard)){
+                        entityhubYard = newYard; //set the new yard
+                        //and update the service registration
+                        updateServiceRegistration(bc, entityhubYard, siteManager, nsPrefixService);
+                    }
+                }
+                
+                @Override
+                public Object addingService(ServiceReference reference) {
+                    Object service = bc.getService(reference);
+                    if(service != null){
+                        if(entityhubYardTracker.getServiceReference() == null || //the first added Service or
+                                //the new service as higher ranking as the current
+                                (reference.compareTo(entityhubYardTracker.getServiceReference()) > 0)){
+                            entityhubYard = (Yard)service;
+                            updateServiceRegistration(bc, entityhubYard, siteManager, nsPrefixService);
+                        } // else the new service has lower ranking as the currently use one
+                    } //else service == null -> ignore
+                    return service;
+                }
+            });
+        entityhubYardTracker.open(); //start the tracking
+
     }
+    
+    private synchronized void updateServiceRegistration(BundleContext bc, Yard entityhubYard,
+            SiteManager siteManager, NamespacePrefixService nsPrefixService) {
+        
+        if(entityhubRegistration != null){
+            entityhubRegistration.unregister();
+            entityhubRegistration = null;
+            entityhub = null;
+        }
+        
+        if(bc != null && entityhubYard != null && siteManager != null){
+            entityhub = new EntityhubImpl(entityhubYard,siteManager, this, nsPrefixService);
+            entityhubRegistration = bc.registerService(Entityhub.class.getName(), entityhub, 
+                new Hashtable<String,Object>());
+        }
+        
+    }
+
+    
     @Override
     public String getID() {
         return entityhubID;

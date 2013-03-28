@@ -16,8 +16,6 @@
  */
 package org.apache.stanbol.entityhub.core.impl;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,13 +24,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
@@ -56,19 +47,12 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
-import org.apache.stanbol.entityhub.servicesapi.site.ManagedSiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.site.Site;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,102 +61,44 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-@Component(immediate=true)
-@Service
 public final class EntityhubImpl implements Entityhub {//, ServiceListener {
 
     private final Logger log = LoggerFactory.getLogger(EntityhubImpl.class);
 
     /**
-     * The OSGI component context of the Entityhub
-     */
-    @SuppressWarnings("unused")
-    private ComponentContext context;
-    /**
      * The field mapper holding global mappings that are used for mapping
      * representations of entities for any referenced sites
      */
-    private FieldMapper fieldMapper;
+    private final FieldMapper fieldMapper;
 
-    /**
-     * Tracks the availability of the Yard used by the Entityhub.
-     */
-    private ServiceTracker entityhubYardTracker; //reference initialised in the activate method
     /**
      * The Configuration of the Entityhub
      */
-    @Reference // 1..1, static
-    private EntityhubConfiguration config;
+    private final EntityhubConfiguration config;
     /**
      * The site manager is used to search for entities within the Entityhub framework
      */
-    @Reference // 1..1, static
-    private SiteManager siteManager;
+    private final SiteManager siteManager;
     
-    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
-    private NamespacePrefixService nsPrefixService;
+    private final Yard entityhubYard;
 
     private static final String DEFAULT_MANAGED_ENTITY_PREFIX = "entity";
     private static final String DEFAULT_MAPPING_PREFIX = "mapping";
-    /**
-     * Activates the Entityhub (OSGI Lifecycle method)
-     * @param context the OSGI component context (stored in {@link #context})
-     * @throws ConfigurationException On any error during the activation of
-     * the Entityhub
-     */
-    @Activate
-    protected void activate(final ComponentContext context) throws ConfigurationException {
-        if(context == null){
-            throw new IllegalStateException("Unable to activate if parsed ComponentContext is NULL");
+    
+    public EntityhubImpl(Yard entityhubYard, SiteManager siteManager, 
+            EntityhubConfiguration config, NamespacePrefixService nsPrefixService) {
+        if(entityhubYard == null){
+            throw new IllegalArgumentException("The parsed Yard MUST NOT be NULL!");
         }
-        log.info("activating Entityhub with configuration "+context.getProperties());
-        this.context = context;
-        //First check the entityhub ID and
-        log.info(" ... init Basic Properties");
-        if(config.getID() == null || config.getID().isEmpty()){
-            throw new ConfigurationException(EntityhubConfiguration.ID, "The Entityhub Configuration does not define a ID for the Entityhub");
-        } else {
-            log.info("   + id: "+config.getID());
+        this.entityhubYard = entityhubYard;
+        if(siteManager == null){
+            throw new IllegalArgumentException("The parsed SiteManager MUST NOT be NULL!");
         }
-        if(config.getName() == null || config.getName().isEmpty()){
-            throw new ConfigurationException(EntityhubConfiguration.NAME, "The Entityhub Configuration does not define a name for the Entityhub");
-        } else {
-            log.info("   + id: "+config.getName());
+        this.siteManager = siteManager;
+        if(config == null){
+            throw new IllegalArgumentException("The parsed EntityhubConfig MUST NOT be NULL!");
         }
-        if(config.getDescription() != null){
-            log.info("   + id: "+config.getDescription());
-        }
-        if(config.getEntityhubPrefix() == null){
-            throw new ConfigurationException(EntityhubConfiguration.PREFIX, "The Entityhub Configuration does not define a Prefix for the Entityhub");
-        }
-        try {
-            new URI(config.getEntityhubPrefix());
-            log.info("   + prefix: "+config.getEntityhubPrefix());
-        } catch (URISyntaxException e1) {
-            throw new ConfigurationException(EntityhubConfiguration.PREFIX, "The Prefix configured for the Entityhub is not an valied URI (prefix="+config.getEntityhubPrefix()+")");
-        }
-        //next get the reference to the configured EntityhubYard
-        if(config.getEntityhubPrefix() == null){
-            throw new ConfigurationException(EntityhubConfiguration.ENTITYHUB_YARD_ID, "The ID of the Yard used by the Entityhub MUST NOT be NULL");
-        }
-        if(config.getEntityhubYardId().isEmpty()){
-            throw new ConfigurationException(EntityhubConfiguration.ENTITYHUB_YARD_ID, "The ID of the Yard used by the Entityhub MUST NOT be empty");
-        }
-        String entityhubYardFilterString = String.format("(&(%s=%s)(%s=%s))",
-            Constants.OBJECTCLASS,Yard.class.getName(),
-            Yard.ID,config.getEntityhubYardId());
-        log.info(" ... tracking EntityhubYard by Filter:"+entityhubYardFilterString);
-        try {
-            entityhubYardTracker = new ServiceTracker(context.getBundleContext(), 
-                context.getBundleContext().createFilter(entityhubYardFilterString), null);
-        } catch (InvalidSyntaxException e) {
-            throw new IllegalStateException("Got Invalid Syntax Exception for Entityhub filter ",e);
-        }
-        entityhubYardTracker.open(); //start the tracking
-        //at last get the FieldMappingConfig and create the FieldMappings instance
-        // -> we need to do that after the init of the Entityhub-yard, because than we
-        //    can use the valueFactory of the configured Yard to create instances
-        //    of converted values!
+        this.config = config;
         log.info(" ... init FieldMappings");
         fieldMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
         for(String mappingString : config.getFieldMappingConfig()){
@@ -184,42 +110,13 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         }
     }
 
-    @Deactivate
-    protected void deactivate(ComponentContext context) {
-        log.info("deactivate "+EntityhubImpl.class);
-        this.fieldMapper = null;
-        if(entityhubYardTracker != null){
-            this.entityhubYardTracker.close();
-            this.entityhubYardTracker = null;
-        }
-        this.context = null;
-    }
-
-//    @Override
-//    public EntityhubConfiguration getEntityhubConfiguration() {
-//        return config;
-//    }
-    @Override
-    public Yard getYard() {
-        return (Yard)entityhubYardTracker.getService();
-    }
-    /**
-     * Internally used to lookup the yard. This throws an {@link YardException}
-     * in case the yard is currently not available
-     * @return the yard
-     * @throws YardException in case the yard is not active
-     */
-    private Yard lookupYard() throws YardException {
-        Yard yard = getYard();
-        if(yard == null){
-            throw new YardException("The Entityhub Yard (ID="+config.getEntityhubYardId()+") is not active! Please check the configuration!!");
-        }
-        return yard;
-    }
-
     @Override
     public final EntityhubConfiguration getConfig() {
         return config;
+    }
+    @Override
+    public Yard getYard() {
+        return entityhubYard;
     }
     
     @Override
@@ -309,8 +206,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         if(entityId == null || entityId.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor empty!");
         }
-        Yard entityhubYard = lookupYard();
-        Entity entity = loadEntity(entityhubYard, entityId);
+        Entity entity = loadEntity(entityId);
         if(entity == null){
             return null;
         } else if (ManagedEntity.canWrap(entity)){
@@ -325,17 +221,16 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         if(entityId == null || entityId.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor empty!");
         }
-        return lookupYard().isRepresentation(entityId);
+        return entityhubYard.isRepresentation(entityId);
     }
     @Override
     public final Entity store(Representation representation) throws EntityhubException, IllegalArgumentException {
         if(representation == null){
             throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
         }
-        Yard yard = lookupYard();
         //parse only the id of the representation, because we need the current
         //stored version of the entity!
-        Entity entity = loadEntity(yard, representation.getId());
+        Entity entity = loadEntity(representation.getId());
         //now we need to check if the parsed representation is the data or the
         //metadata of the Entity
         ManagedEntity updated;
@@ -355,7 +250,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
             updated = ManagedEntity.init(
                 entity, config.getDefaultManagedEntityState());
         }
-        storeEntity(yard,updated.getWrappedEntity());
+        storeEntity(updated.getWrappedEntity());
         return updated.getWrappedEntity();
     }
     @Override
@@ -363,13 +258,12 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         if(id == null || id.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor emtpty!");
         }
-        Yard yard = lookupYard();
-        Entity entity = loadEntity(yard, id);
+        Entity entity = loadEntity(id);
         if(entity != null){
             log.debug("delete Entity {} as requested by the parsed id {}",entity.getId(),id);
             //we need to remove all mappings for this Entity
-            deleteMappingsbyTarget(yard,entity.getId());
-            deleteEntity(yard,entity);
+            deleteMappingsbyTarget(entity.getId());
+            deleteEntity(entity);
         } else {
             log.debug("Unable to delete Entity for id {}, because no Entity for this id is" +
             		"managed by the Entityhub",id);
@@ -378,8 +272,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
     }
     @Override
     public final void deleteAll() throws EntityhubException {
-        Yard yard = lookupYard();
-        yard.removeAll();
+        entityhubYard.removeAll();
     }
     @Override
     public final Entity setState(String id, ManagedEntityState state) throws EntityhubException,
@@ -390,13 +283,12 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         if(state == null){
             throw new IllegalStateException("The parsed state for the Entity MUST NOT ne NULL");
         }
-        Yard yard = lookupYard();
-        Entity entity = loadEntity(yard, id);
+        Entity entity = loadEntity(id);
         if(entity != null){
             ManagedEntity managed = new ManagedEntity(entity);
             if(managed.getState() != state){
                 managed.setState(state);
-                storeEntity(yard, entity);
+                storeEntity(entity);
             }
         }
         return entity;
@@ -407,36 +299,36 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
      * @param entity the entity to delete
      * @throws YardException an any Exception while deleting the Entity
      */
-    private void deleteEntity(Yard yard,Entity entity) throws YardException {
+    private void deleteEntity(Entity entity) throws YardException {
         if(entity != null){
-            yard.remove(Arrays.asList(
+            entityhubYard.remove(Arrays.asList(
                 entity.getRepresentation().getId(),
                 entity.getMetadata().getId()));
         }
     }
-    private void deleteEntities(Yard yard, Collection<String> ids) throws YardException {
+    private void deleteEntities(Collection<String> ids) throws YardException {
         FieldQuery fieldQuery = getQueryFactory().createFieldQuery();
         Collection<String> toDelete = new HashSet<String>(ids);
         for(String id : ids){
             if(id != null && !id.isEmpty()){
                 fieldQuery.setConstraint(RdfResourceEnum.aboutRepresentation.getUri(), new ReferenceConstraint(id));
-                for(Iterator<String> it = yard.findReferences(fieldQuery).iterator();it.hasNext();){
+                for(Iterator<String> it = entityhubYard.findReferences(fieldQuery).iterator();it.hasNext();){
                     toDelete.add(it.next());
                 }
             }
         }
         if(!toDelete.isEmpty()){
-            yard.remove(toDelete);
+            entityhubYard.remove(toDelete);
         }
         
     }
 
-    private void deleteMappingsbyTarget(Yard yard,String id) throws YardException {
+    private void deleteMappingsbyTarget(String id) throws YardException {
         if(id != null && !id.isEmpty()){
             FieldQuery fieldQuery = getQueryFactory().createFieldQuery();
             fieldQuery.setConstraint(RdfResourceEnum.mappingTarget.getUri(), new ReferenceConstraint(id));
-            deleteEntities(yard, ModelUtils.asCollection(
-                yard.findReferences(fieldQuery).iterator()));
+            deleteEntities(ModelUtils.asCollection(
+                entityhubYard.findReferences(fieldQuery).iterator()));
         }
     }
 
@@ -456,22 +348,21 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
                 remoteEntity.getId(),remoteEntity.getSite());
             return null;
         }
-        Yard entityhubYard = lookupYard();
         ValueFactory valueFactory = entityhubYard.getValueFactory();
         //Create the locally managed Entity
         Representation localRep = entityhubYard.create(constructResourceId(DEFAULT_MANAGED_ENTITY_PREFIX));
-        Entity localEntity = loadEntity(entityhubYard, localRep);
+        Entity localEntity = loadEntity(localRep);
         importEntity(remoteEntity, site, localEntity, valueFactory);
 
         //Second create and init the Mapping
         Representation entityMappingRepresentation = entityhubYard.create(
             constructResourceId(DEFAULT_MAPPING_PREFIX));
-        Entity entityMappingEntity = loadEntity(entityhubYard, entityMappingRepresentation);
+        Entity entityMappingEntity = loadEntity(entityMappingRepresentation);
         establishMapping(localEntity, remoteEntity, site, entityMappingEntity);
         
         //Store the entity and the mappedEntity in the entityhubYard
-        storeEntity(entityhubYard, localEntity);
-        storeEntity(entityhubYard,entityMappingEntity);
+        storeEntity(localEntity);
+        storeEntity(entityMappingEntity);
         return localEntity;
     }
     /**
@@ -596,11 +487,10 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         }
         FieldQuery fieldQuery = getQueryFactory().createFieldQuery();
         fieldQuery.setConstraint(RdfResourceEnum.mappingSource.getUri(), new ReferenceConstraint(reference));
-        Yard entityhubYard = lookupYard();
         QueryResultList<Representation> resultList = entityhubYard.findRepresentation(fieldQuery);
         if(!resultList.isEmpty()){
             Iterator<Representation> resultIterator = resultList.iterator();
-            Entity mapping = loadEntity(entityhubYard, resultIterator.next());
+            Entity mapping = loadEntity(resultIterator.next());
            //print warnings in case of multiple mappings
             if(resultIterator.hasNext()){ 
                 log.warn("Multiple Mappings found for Entity {}!",reference);
@@ -627,11 +517,10 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         }
         FieldQuery fieldQuery = getQueryFactory().createFieldQuery();
         fieldQuery.setConstraint(RdfResourceEnum.mappingTarget.getUri(), new ReferenceConstraint(targetId));
-        Yard enttiyhubYard = lookupYard();
-        QueryResultList<Representation> resultList = enttiyhubYard.findRepresentation(fieldQuery);
+        QueryResultList<Representation> resultList = entityhubYard.findRepresentation(fieldQuery);
         Collection<Entity> mappings = new HashSet<Entity>();
         for(Representation rep : resultList){
-            mappings.add(loadEntity(enttiyhubYard, rep));
+            mappings.add(loadEntity(rep));
         }
         return mappings;
     }
@@ -640,21 +529,19 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
      * Loads an Entity (Representation and Metadata) for the parsed id. In case
      * the parsed id represents metadata, than the id of the returned Entity will
      * be different from the parsed id.
-     * @param entityhubYard the yard used by the Entityhub
      * @param id the id of the data or the metadata of the Entity to load
      * @return the Entity or <code>null</code> if not found
      * @throws YardException On any error with the parsed Yard.
      */
-    private Entity loadEntity(Yard entityhubYard,String id) throws YardException {
+    private Entity loadEntity(String id) throws YardException {
         return id == null || id.isEmpty() ? null :
-            loadEntity(entityhubYard,entityhubYard.getRepresentation(id));
+            loadEntity(entityhubYard.getRepresentation(id));
     }
     /**
      * Loads the Entity based on the parsed representation. The parsed
      * {@link Representation} can be both the data and the metadata. In case the
      * parsed representation are metadat the id of the returned Entity will be
      * not the same as the id of the parsed {@link Representation}.
-     * @param entityhubYard the yard used by the Entityhub
      * @param rep the representation or metadata of an entity
      * @return the created Entity including both data and metadata or 
      * <code>null</code> if the parsed Representation does not represent a 
@@ -662,7 +549,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
      * thread has deleted that Entity in the meantime)
      * @throws YardException On any error with the parsed Yard.
      */
-    private Entity loadEntity(Yard entityhubYard, Representation rep) throws YardException {
+    private Entity loadEntity(Representation rep) throws YardException {
         if(rep != null){
             Representation data;
             Representation metadata = null;
@@ -675,7 +562,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
                 entityId = rep.getId(); //needed for logs
             }
             if(data != null){
-                metadata = lookupMetadata(entityhubYard, rep.getId(),true);
+                metadata = lookupMetadata(rep.getId(),true);
                 return new EntityImpl(config.getID(), data,metadata);
             } else {
                 log.warn("Unable find representation for Entity {} (metadata: {}",
@@ -689,14 +576,13 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
 
     /**
      * Lookups (or initialises) the metadata for the entity with the parsed id 
-     * @param entityhubYard the yard to search the metadata
      * @param entityId The id of the entity
      * @param init if the metadata should be initialised of not existing
      * @return the metadata for that Entity or <code>null</code> if not existing
      * and <code>init == false</code>
      * @throws YardException
      */
-    private Representation lookupMetadata(Yard entityhubYard, String entityId, boolean init) throws YardException {
+    private Representation lookupMetadata(String entityId, boolean init) throws YardException {
         Representation metadata;
         //TODO: check the asumption that the Metadata always use the
         //      extension ".meta"
@@ -711,11 +597,10 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
      * Stores both the Representation and the Metadata of the parsed Entity to the
      * parsed yard.<p>
      * This Method also updated the modification date of the Metadata.
-     * @param entityhubYard the Yard used to store the Entity
      * @param entity the stored entity
      * @throws YardException
      */
-    private void storeEntity(Yard entityhubYard, Entity entity) throws YardException{
+    private void storeEntity(Entity entity) throws YardException{
         if(entity != null){
             entityhubYard.store(entity.getRepresentation());
             entity.getMetadata().set(NamespaceEnum.dcTerms+"modified", new Date());
@@ -728,8 +613,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         if(id == null || id.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor empty");
         }
-        Yard entityhubYard = lookupYard();
-        Entity mapping = loadEntity(entityhubYard, id);
+        Entity mapping = loadEntity(id);
         if(mapping == null){
             return null;
         } else if(mapping != null && EntityMapping.isValid(mapping)){
@@ -753,15 +637,15 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
     }
     @Override
     public final QueryResultList<Representation> find(FieldQuery query) throws YardException{
-        return lookupYard().find(query);
+        return entityhubYard.find(query);
     }
     @Override
     public final QueryResultList<String> findEntityReferences(FieldQuery query) throws YardException{
-        return lookupYard().findReferences(query);
+        return entityhubYard.findReferences(query);
     }
     @Override
     public final QueryResultList<Entity> findEntities(FieldQuery query) throws YardException{
-        QueryResultList<String> references = lookupYard().findReferences(query);
+        QueryResultList<String> references = entityhubYard.findReferences(query);
         List<Entity> entities = new ArrayList<Entity>(references.size());
         for(String reference : references){
             Entity entity = lookupLocalEntity(reference);
