@@ -94,6 +94,7 @@
     <module>solr/extras/smartcn</module> <!-- support for the smartcn (Chinese) analyzer -->
     <module>solr/extras/paoding</module> <!-- alternative support for Chinese -->
     <module>solr/extras/kuromoji</module> <!-- support for Japanese -->
+    <module>solr/extras/icu</module> <!-- support for ICU -->
     <module>solr/extras/stempel</module> <!-- support for the Polish stemmer -->
     
     <module>jobs</module> <!-- Stanbol Background Jobs Framework -->
