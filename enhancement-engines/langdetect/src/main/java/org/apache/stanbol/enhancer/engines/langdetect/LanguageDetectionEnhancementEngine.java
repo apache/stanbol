@@ -215,7 +215,8 @@ public class LanguageDetectionEnhancementEngine
         } catch (IOException e) {
             throw new InvalidContentException(this, ci, e);
         }
-        if (text.trim().length() == 0) {
+        //do not call trim() on long texts to check if the text is empty
+        if (text.length() < 50  && text.trim().length() == 0) {
             log.info("No text contained in ContentPart {} of ContentItem {}",
                 contentPart.getKey(),ci.getUri());
             return;
@@ -230,10 +231,14 @@ public class LanguageDetectionEnhancementEngine
         try {
             languages = languageIdentifier.getLanguages(text);
             log.debug("language identified: {}",languages);
-        }
-        catch (LangDetectException e) {
-            log.warn("Could not identify language", e);
-            throw new EngineException(this, ci, "Could not identify language", e);
+        } catch (LangDetectException e) {
+            StringBuilder msg = new StringBuilder("Could not identify language of text: ");
+            if(text.length() < 200){
+                msg.append(text);
+            } else {
+                msg.append(text.subSequence(0, 199)).append("...");
+            }
+            throw new EngineException(this, ci, msg.toString(), e);
         }
         
         // add language to metadata
