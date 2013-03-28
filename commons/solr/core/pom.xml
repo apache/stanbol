@@ -71,7 +71,6 @@
             <!-- used instead of Export-Package to preserve the jars -->
             <_exportcontents> 
               org.apache.solr.*;version=${solr-version},
-              org.apache.solr.analysis;-split-package:=merge-last;version=${solr-version},
               org.apache.lucene.*;version=${solr-version}
             </_exportcontents>
             <!-- packages marked with resolution:=optional are not provided by
@@ -83,18 +82,9 @@
               org.apache.log4j.spi;resolution:=optional,
               org.jboss.netty.*;resolution:=optional,
               jline.*;resolution:=optional,
-              org.apache.tika.*;resolution:=optional,
-              org.apache.lucene.analysis.cn.smart.*;resolution:=optional,
-              org.apache.lucene.analysis.pl.*;resolution:=optional,
-              org.apache.lucene.analysis.ja.*;resolution:=optional,
-              org.apache.lucene.analysis.stempel.*;resolution:=optional,
-              org.apache.lucene.search.grouping.*;resolution:=optional,
-              org.apache.zookeeper.*;resolution:=optional,
               org.eclipse.jetty.*;resolution:=optional,
-              org.egothor.stemmer.*;resolution:=optional,
               javax.servlet.*; version="[2.5.0,4.0.0)",
               org.tartarus.snowball;resolution:=optional,
-              morfologik.*;resolution:=optional,
               *
             </Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
