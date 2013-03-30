@@ -234,6 +234,7 @@
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.rdfjson</artifactId>
+      <version>0.4-SNAPSHOT</version>
     </dependency>
     <!-- use log4j for logging -->
     <dependency>  <!-- used for debug level logging during tests -->
