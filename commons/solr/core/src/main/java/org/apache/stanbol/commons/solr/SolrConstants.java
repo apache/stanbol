@@ -17,7 +17,10 @@
 package org.apache.stanbol.commons.solr;
 
 import java.io.File;
+import java.util.Locale;
 
+import org.apache.lucene.analysis.util.AbstractAnalysisFactory;
+import org.apache.lucene.util.Version;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrCore;
 import org.osgi.framework.Constants;
@@ -140,5 +143,16 @@ public final class SolrConstants {
      */
     public static final String SOLR_SCHEMA_NAME = "schema.xml";
 
+    /**
+     * Key used to store the name of the {@link AbstractAnalysisFactory}. This is
+     * the lower case version of the actual name excluding the detected
+     * suffix.<p>
+     * This property is added to {@link AbstractAnalysisFactory} instanced
+     * registered as OSGI services to workaround the SPI typically used by Solr 4
+     * to find anayzer factory instances.
+     */
+    public static final String PROPERTY_ANALYZER_FACTORY_NAME = "org.apache.lucene.analysis.factory.name";
+    
+    public static final String PROPERTY_LUCENE_MATCH_VERSION = Version.class.getName().toLowerCase(Locale.ROOT);
     
 }

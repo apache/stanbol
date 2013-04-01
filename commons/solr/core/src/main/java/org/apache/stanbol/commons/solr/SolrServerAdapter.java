@@ -54,7 +54,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.solr.core.CloseHook;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
+import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.core.SolrResourceLoader;
+import org.apache.solr.schema.IndexSchema;
+import org.apache.stanbol.commons.solr.impl.OsgiSolrResourceLoader;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -371,15 +375,23 @@ public class SolrServerAdapter {
         ClassLoader classLoader = updateContextClassLoader();
         SolrCore core;
         try {
-//            SolrResourceLoader loader = new OsgiResourceLoader(coreDir.getAbsolutePath(), 
-//                SolrServerAdapter.class.getClassLoader());
-//            SolrConfig config = new OsgiEnabledSolrConfig(loader, "solrconfig.xml", null);
-//            IndexSchema schema = new IndexSchema(config,"schema.xml",null);
+            //This API usage is based on CoreContainer#createFromLocal(..) 
+            //version 4.1
+            //Using this rather low level API is necessary to allow the usage
+            //of an own SolrResourceLoader
             CoreDescriptor coreDescriptor = new CoreDescriptor(server, 
                 coreName, coreDir.getAbsolutePath());
-//            core = new SolrCore(coreName, coreDir.getAbsolutePath(), config, schema,coreDescriptor);
-//            server.register(coreName, core, false);
-            core = server.create(coreDescriptor);
+            SolrResourceLoader loader = new OsgiSolrResourceLoader(context, coreDir.getAbsolutePath(), 
+                SolrServerAdapter.class.getClassLoader());
+            SolrConfig config = new SolrConfig(loader, coreDescriptor.getConfigName(), null);
+            IndexSchema schema = new IndexSchema(config,coreDescriptor.getSchemaName(),null);
+            core = new SolrCore(coreDescriptor.getName(), null, config, schema,coreDescriptor);
+            if (core.getUpdateHandler().getUpdateLog() != null) {
+                // always kick off recovery if we are in standalone mode.
+                core.getUpdateHandler().getUpdateLog().recoverFromLog();
+            }
+            server.register(coreName, core, false);
+            //core = server.create(coreDescriptor);
             //add the CloseHook
             core.addCloseHook(closeHook);
             // parse ture as third argument to avoid closing the current core for now

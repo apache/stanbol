@@ -97,6 +97,9 @@
               lucene-queryparser, lucene-sandbox, lucene-suggest, 
               zookeeper
             </Embed-Dependency>
+            <Private-Package>
+              org.apache.stanbol.commons.solr.impl;version=${project.version}
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
