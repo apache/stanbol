@@ -316,11 +316,12 @@
       <artifactId>wymiwyg-commons-core</artifactId>
       <version>0.7.5</version>
     </bundle>
-    <bundle>
+    <!-- ICU is also exported by the o.a.s.commons.solr.extra.icu module
+      bundle>
       <groupId>org.apache.clerezza.ext</groupId>
       <artifactId>com.ibm.icu</artifactId>
       <version>0.5-incubating</version>
-    </bundle>
+    </bundle -->
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.storage</artifactId>
@@ -448,6 +449,11 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.extras.icu</artifactId>
       <version>0.12.0-SNAPSHOT</version>
     </bundle>
     <bundle>
