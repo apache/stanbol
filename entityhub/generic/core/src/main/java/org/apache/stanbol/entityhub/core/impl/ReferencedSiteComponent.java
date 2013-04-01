@@ -574,10 +574,12 @@ public class ReferencedSiteComponent {
             log.info(" - register ReferencedSite '{}'",config.getId());
             try {
                 referencedSite = new ReferencedSiteImpl(config,
-                    offlineMode != null ? null : 
-                        (EntityDereferencer)dereferencerComponentInstance.getInstance(),
-                    offlineMode != null ? null :
-                        (EntitySearcher)searcherComponentInstance.getInstance(),
+                    offlineMode == null && dereferencerComponentInstance != null ? 
+                        (EntityDereferencer)dereferencerComponentInstance.getInstance() :
+                            null,
+                    offlineMode == null && searcherComponentInstance != null ? 
+                        (EntitySearcher)searcherComponentInstance.getInstance() :
+                            null,
                     cache, nsPrefixService);
                 referencedSiteRegistration = bc.registerService(Site.class.getName(), referencedSite, 
                     OsgiUtils.copyConfig(cc.getProperties()));
