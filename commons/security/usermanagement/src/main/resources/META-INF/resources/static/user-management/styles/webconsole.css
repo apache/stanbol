@@ -28,7 +28,8 @@ fieldset { padding:4px; margin-top:4px; border: 1px }
 legend {
     padding: 0.2em 0.5em;
     font-size:90%;
-    text-align:right;
+    text-align:left;
+    font-weight:bold
 }
 
 .ui-dialog .ui-state-error { padding: .3em; }
@@ -40,6 +41,11 @@ legend {
 .delete-dialog {
     padding: 20px;
     font-weight:bold;
+}
+
+.permission input
+{
+    width: 30em;
 }
 
 /*

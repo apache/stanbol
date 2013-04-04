@@ -71,6 +71,7 @@ import org.apache.clerezza.rdf.ontologies.FOAF;
 import org.apache.clerezza.rdf.ontologies.PERMISSION;
 import org.apache.clerezza.rdf.ontologies.PLATFORM;
 import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.clerezza.rdf.ontologies.SIOC;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.clerezza.rdf.utils.MGraphUtils;
@@ -87,7 +88,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handles HTTP requests related to a user
- * 
+ *
  */
 @Component
 @Service({Object.class, UserResource.class})
@@ -173,7 +174,9 @@ public class UserResource {
     @GET
     @Path("users/{username}/permissionsCheckboxes")
     @Produces(MediaType.TEXT_HTML)
-    public RdfViewable permissionsCheckboxes(@PathParam("username") String userName) { //getUser(userName)
+    public RdfViewable permissionsCheckboxes(@PathParam("username") String userName) {
+        addClassToPermissions(); // workaround
+        // showSystem();
         addClassToPermissions(); // workaround
         showSystem();
         return new RdfViewable("permissionsCheckboxes", getPermissionType(), this.getClass());
@@ -200,8 +203,7 @@ public class UserResource {
     }
 
     /**
-     * Update user details
-     * adds triples as appropriate to system graph
+     * Update user details adds triples as appropriate to system graph
      *
      * @param uriInfo
      * @param currentLogin
@@ -225,29 +227,27 @@ public class UserResource {
             @FormParam("roles") List<String> roles,
             @FormParam("permissions") List<String> permissions) {
 
-        GraphNode userNode;
+        GraphNode userNode = null;
 
         if (currentLogin != null) { // 
             currentLogin = currentLogin.trim();
         }
-
         if (currentLogin != null && !currentLogin.equals("")) {
             userNode = getUser(currentLogin);
-            return store(userNode, uriInfo, currentLogin, newLogin, fullName, email, password, roles, permissions);
+            if (userNode != null) {
+                return store(userNode, uriInfo, currentLogin, newLogin, fullName, email, password, roles, permissions);
+            }
         }
-
         userNode = createUser(newLogin);
-
-
         return store(userNode, uriInfo, newLogin, newLogin, fullName, email, password, roles, permissions);
     }
 
-/**
- * Modify user given a graph describing the change.
- * 
- * @param inputGraph change graph
- * @return HTTP response
- */
+    /**
+     * Modify user given a graph describing the change.
+     *
+     * @param inputGraph change graph
+     * @return HTTP response
+     */
     @POST
     @Consumes(SupportedFormat.TURTLE)
     @Path("change-user")
@@ -323,17 +323,16 @@ public class UserResource {
         return Response.noContent().build();
     }
 
-/**
- * Provides HTML corresponding to a user's roles
- * 
- * all roles are listed with checkboxes, 
- * the roles this user has are checked
- * 
- * (isn't very pretty but is just a one-off)
- * 
- * @param userName the user in question
- * @return HTML checkboxes as HTTP response
- */
+    /**
+     * Provides HTML corresponding to a user's roles
+     *
+     * all roles are listed with checkboxes, the roles this user has are checked
+     *
+     * (isn't very pretty but is just a one-off)
+     *
+     * @param userName the user in question
+     * @return HTML checkboxes as HTTP response
+     */
     @GET
     @Path("users/{username}/rolesCheckboxes")
     @Produces(MediaType.TEXT_HTML)
@@ -390,12 +389,12 @@ public class UserResource {
         return Response.ok(html.toString()).build();
     }
 
-/**
- * List the users. 
- * renders the user type with the "listUser" rendering template
- * 
- * @return rendering specification
- */
+    /**
+     * List the users. renders the user type with the "listUser" rendering
+     * template
+     *
+     * @return rendering specification
+     */
     @GET
     @Path("users")
     @Produces(MediaType.TEXT_HTML)
@@ -425,8 +424,7 @@ public class UserResource {
     }
 
     /**
-     * Create a user. 
-     * returns a dummy use with "editUser" as rendering
+     * Create a user. returns a dummy use with "editUser" as rendering
      * specification (this will be a HTML form)
      *
      * @param uriInfo request details
@@ -489,10 +487,10 @@ public class UserResource {
 // **********************************
     /**
      * Deletes a named user
-     * 
+     *
      * (called from HTML form)
-     * 
-     * @param userName 
+     *
+     * @param userName
      */
     @POST
     @Path("delete")
@@ -503,8 +501,8 @@ public class UserResource {
 
     /**
      * Deletes a named user
-     * 
-     * @param userName 
+     *
+     * @param userName
      */
     private void remove(String userName) {
         Resource userResource = getNamedUser(userName).getNode();
@@ -535,7 +533,7 @@ public class UserResource {
 
     /**
      * RESTful user deletion
-     * 
+     *
      * called direct from the URI, e.g.
      * http://localhost:8080/user-management/users/fred
      *
@@ -550,9 +548,8 @@ public class UserResource {
     }
 
     /**
-     * Endpoint-style user deletion takes a little bunch of Turtle describing the user to delete
-     * e.g. [] a
-     * foaf:Agent ; cz:userName "Hugo Ball" .
+     * Endpoint-style user deletion takes a little bunch of Turtle describing
+     * the user to delete e.g. [] a foaf:Agent ; cz:userName "Hugo Ball" .
      *
      * @param userData
      * @return HTTP/1.1 204 No Content
@@ -602,7 +599,8 @@ public class UserResource {
 // **********************************
     /**
      * Lists all roles using a rendering as specified in template listRole
-     * @return 
+     *
+     * @return
      */
     @GET
     @Path("roles")
@@ -613,7 +611,7 @@ public class UserResource {
 
     /**
      * Provides the node in the system graph corresponding to rdf:type Role
-     * 
+     *
      * @return Role class node
      */
     public GraphNode getRoleType() {
@@ -621,12 +619,224 @@ public class UserResource {
                 systemGraph);
     }
 
+    /**
+     * Produces suitable permission-checkboxes
+     */
+    @GET
+    @Path("roles/{rolename}/permissionsCheckboxes")
+    @Produces(MediaType.TEXT_HTML)
+    public RdfViewable rolePermissionsCheckboxes(@PathParam("rolename") String roleName) {
+        // addClassToPermissions(); // workaround
+        // showSystem();
+        return new RdfViewable("rolePermissionsCheckboxes", getRole(roleName), this.getClass());
+    } // getPermissionType()
+
 // **********************************
 // ****** ADD ROLE ****************** 
 // **********************************
+    /**
+     * Create a role. returns "editRole" as rendering specification (this will
+     * be a HTML form)
+     *
+     * @param uriInfo request details
+     * @return rendering specification
+     */
+    @GET
+    @Path("create-role")
+    @Produces(MediaType.TEXT_HTML)
+    public RdfViewable getCreateRoleForm(@Context UriInfo uriInfo) {
+        return new RdfViewable("editRole", dummyNode,
+                this.getClass());
+    }
+
+    // /user-management/roles/edit/'+roleName,
+    /**
+     * lookup a role by name presenting it with "editRole" as rendering
+     * instruction.
+     *
+     * @param userName
+     * @return
+     */
+    @GET
+    @Path("roles/edit/{rolename}")
+    @Produces(MediaType.TEXT_HTML)
+    public RdfViewable editRole(@PathParam("rolename") String roleName) {
+        return new RdfViewable("editRole", getRole(roleName),
+                this.getClass());
+    }
+
+    private GraphNode getRole(@QueryParam("roleName") String roleName) {
+        return getNamedRole(roleName);
+    }
+
+    /*
+     * returns an existing user node from the graph.
+     */
+    private GraphNode getNamedRole(String roleName) {
+        GraphNode roleNode = null;
+        Iterator<Triple> roleIterator = systemGraph.filter(null, RDF.type, PERMISSION.Role);
+        //new PlainLiteralImpl(userName));
+        if (!roleIterator.hasNext()) {
+            return null;
+        }
+        ArrayList<Triple> tripleBuffer = new ArrayList<Triple>();
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+
+        try {
+            while (roleIterator.hasNext()) {
+                NonLiteral role = roleIterator.next().getSubject();
+                Iterator<Triple> roleNameTriples = systemGraph.filter(role, DC.title,
+                        null);
+                while (roleNameTriples.hasNext()) {
+                    Literal roleLiteral = (Literal) roleNameTriples.next().getObject();
+                    if (roleName.equals(roleLiteral.getLexicalForm())) {
+                        roleNode = new GraphNode(role, systemGraph);
+                        break;
+                    }
+                }
+                if (roleNode != null) {
+                    break;
+                }
+            }
+
+        } finally {
+            readLock.unlock();
+        }
+        return roleNode;
+    }
 // **********************************
 // ****** REMOVE ROLE *************** 
 // **********************************
+
+    /**
+     * Deletes a named role
+     *
+     * (called from HTML form)
+     *
+     * @param roleName
+     */
+    @POST
+    @Path("delete-role")
+    public void removeRole(@FormParam("role") String roleName) {
+        deleteRole(roleName);
+
+    }
+
+    /**
+     * Deletes a named user
+     *
+     * @param userName
+     */
+    private void deleteRole(String roleName) {
+        Resource roleResource = getNamedRole(roleName).getNode();
+        Iterator<Triple> roleTriples = systemGraph.filter((NonLiteral) roleResource, null, null);
+
+        ArrayList<Triple> buffer = new ArrayList<Triple>();
+
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try {
+            while (roleTriples.hasNext()) {
+                Triple triple = roleTriples.next();
+                buffer.add(triple);
+            }
+        } finally {
+            readLock.unlock();
+        }
+
+        // is lock needed?
+        Lock writeLock = systemGraph.getLock().writeLock();
+        writeLock.lock();
+        try {
+            systemGraph.removeAll(buffer);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    /**
+     * Update role details - adds triples as appropriate to system graph
+     *
+     */
+    @POST
+    @Path("store-role")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response storeRoleFormHandler(@Context UriInfo uriInfo,
+            @FormParam("roleName") String roleName,
+            @FormParam("comment") String comment,
+            @FormParam("permissions") List<String> permissions) {
+
+        GraphNode roleNode = null;
+
+        if (roleName != null) { // 
+            roleName = roleName.trim();
+        }
+        if (roleName != null && !roleName.equals("")) {
+            roleNode = getRole(roleName);
+            if (roleNode != null) {
+                return storeRole(roleNode, uriInfo, roleName, comment, permissions);
+            }
+        }
+        roleNode = createRole(roleName, comment);
+        return storeRole(roleNode, uriInfo, roleName, comment, permissions);
+    }
+
+    /**
+     * Creates a new role wit the the specified role name
+     *
+     * @param newUserName
+     * @return user node in system graph
+     */
+    private GraphNode createRole(String newRoleName, String comment) {
+        BNode subject = new BNode();
+        GraphNode roleNode = new GraphNode(subject, systemGraph);
+        roleNode.addProperty(RDF.type, PERMISSION.Role);
+        roleNode.addProperty(DC.title, new PlainLiteralImpl(newRoleName));
+        roleNode.addProperty(RDFS.comment, new PlainLiteralImpl(comment));
+        return roleNode;
+    }
+
+    private Response storeRole(GraphNode roleNode, UriInfo uriInfo,
+            String roleName,
+            String comment,
+            List<String> permissions) {
+
+        NonLiteral roleResource = (NonLiteral) roleNode.getNode();
+
+        if (permissions != null) {
+            clearPermissions(roleResource);
+            Lock writeLock = systemGraph.getLock().writeLock();
+            writeLock.lock();
+            try {
+                for (int i = 0; i < permissions.size(); i++) {
+                    permissions.set(i, permissions.get(i).trim());
+                    if (!permissions.get(i).equals("")) {
+                        addPermission(roleNode, permissions.get(i));
+                    }
+                }
+            } finally {
+                writeLock.unlock();
+            }
+        }
+
+        // showSystem();
+
+        URI pageUri = uriInfo.getBaseUriBuilder()
+                .path("system/console/usermanagement").build();
+
+        // header Cache-control: no-cache, just in case intermediaries are
+        // holding onto old stuff
+        CacheControl cc = new CacheControl();
+        cc.setNoCache(true);
+
+        //showSystem();
+
+        // see other my not be the best response, but does seem the best given
+        // the jax-rs things available
+        return Response.seeOther(pageUri).cacheControl(cc).build();
+    }
+
 // **********************************
 // ****** ASSIGN ROLE TO USER ******* 
 // **********************************
@@ -648,9 +858,10 @@ public class UserResource {
         return new RdfViewable("listPermission", getPermissionType(), this.getClass());
     }
 
-        /**
-     * Provides the node in the system graph corresponding to rdf:type Permission
-     * 
+    /**
+     * Provides the node in the system graph corresponding to rdf:type
+     * Permission
+     *
      * @return Permission class node
      */
     public GraphNode getPermissionType() {
@@ -670,23 +881,21 @@ public class UserResource {
 // **************************************
 // ****** REMOVE PERMISSION FROM ROLE *** 
 // **************************************
-
     ////////////////////////////////////////////////////////////////
-    
-/**
- * Pushes user data into system graph
- * 
- * @param userNode
- * @param uriInfo
- * @param currentUserName
- * @param newUserName
- * @param fullName
- * @param email
- * @param password
- * @param roles
- * @param permissions
- * @return 
- */
+    /**
+     * Pushes user data into system graph
+     *
+     * @param userNode
+     * @param uriInfo
+     * @param currentUserName
+     * @param newUserName
+     * @param fullName
+     * @param email
+     * @param password
+     * @param roles
+     * @param permissions
+     * @return
+     */
     private Response store(GraphNode userNode, UriInfo uriInfo,
             String currentUserName,
             String newUserName,
@@ -755,7 +964,7 @@ public class UserResource {
         cc.setNoCache(true);
 
         //showSystem();
-        
+
         // see other my not be the best response, but does seem the best given
         // the jax-rs things available
         return Response.seeOther(pageUri).cacheControl(cc).build();
@@ -795,7 +1004,7 @@ public class UserResource {
 
     /**
      * Provides a graph containing Role triples associated with a given user
-     * 
+     *
      * @param userName
      * @return roles graph
      */
@@ -853,11 +1062,11 @@ public class UserResource {
 
     /**
      * convenience - used for buffering
-     * 
+     *
      * @param subject
      * @param predicate
      * @param object
-     * @return 
+     * @return
      */
     private ArrayList<Triple> filterToArray(NonLiteral subject, UriRef predicate, Resource object) {
         Iterator<Triple> triples = systemGraph.filter(subject, predicate, object);
@@ -876,7 +1085,7 @@ public class UserResource {
 
     /**
      * Add a role to a given user in system graph
-     * 
+     *
      * @param userNode node corresponding to user
      * @param roleName name of the role
      * @return user node
@@ -899,17 +1108,42 @@ public class UserResource {
         }
         return userNode;
     }
-    
-    public final static String permissionsBase = "urn:x-localhost/role/";
 
-    private GraphNode addPermission(GraphNode userNode, String permissionString) {
+    // public final static String permissionsBase = "urn:x-localhost/role/";
+    private GraphNode addPermission(GraphNode subjectNode, String permissionString) {
 
+        if (hasPermission(subjectNode, permissionString)) {
+            return subjectNode;
+        }
         GraphNode permissionNode = new GraphNode(new BNode(), systemGraph);
         permissionNode.addProperty(RDF.type, PERMISSION.Permission);
         // permissionNode.addProperty(DC.title, new PlainLiteralImpl(permissionName));
-        userNode.addProperty(PERMISSION.hasPermission, permissionNode.getNode());
+        subjectNode.addProperty(PERMISSION.hasPermission, permissionNode.getNode());
         permissionNode.addProperty(PERMISSION.javaPermissionEntry, new PlainLiteralImpl(permissionString));
-        return userNode;
+        return subjectNode;
+    }
+
+    private boolean hasPermission(GraphNode userNode, String permissionString) {
+        boolean has = false;
+        Iterator<Triple> existingPermissions = systemGraph.filter((NonLiteral) userNode.getNode(), PERMISSION.hasPermission, null);
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try { // check to see if the user already has this permission
+            while (existingPermissions.hasNext()) {
+                NonLiteral permissionNode = (NonLiteral) existingPermissions.next().getObject();
+                Iterator<Triple> permissionTriples = systemGraph.filter(permissionNode, PERMISSION.javaPermissionEntry, null);
+                while (permissionTriples.hasNext()) {
+                    Literal permission = (Literal) permissionTriples.next().getObject();
+                    if (permissionString.equals(permission.getLexicalForm())) {
+                        has = true;
+                    }
+                }
+
+            }
+        } finally {
+            readLock.unlock();
+        }
+        return has;
     }
 
 //    []    a       <http://xmlns.com/foaf/0.1/Agent> ;
@@ -918,8 +1152,26 @@ public class UserResource {
 //                <http://clerezza.org/2008/10/permission#javaPermissionEntry>
 //                        "(java.security.AllPermission \"\" \"\")"
 //              ] ;
-    private void clearPermissions(NonLiteral userResource) {
-        systemGraph.removeAll(filterToArray(userResource, PERMISSION.javaPermissionEntry, null));
+    private void clearPermissions(NonLiteral subject) {
+        ArrayList<Triple> buffer = new ArrayList<Triple>();
+
+        Lock readLock = systemGraph.getLock().readLock();
+        readLock.lock();
+        try {
+            Iterator<Triple> permissions = systemGraph.filter(subject, PERMISSION.hasPermission, null);
+            while (permissions.hasNext()) {
+                Triple permissionTriple = permissions.next();
+                buffer.add(permissionTriple);
+                NonLiteral permissionNode = (NonLiteral) permissionTriple.getObject();
+                Iterator<Triple> permissionTriples = systemGraph.filter(permissionNode, null, null);
+                while (permissionTriples.hasNext()) {
+                    buffer.add(permissionTriples.next());
+                }
+            }
+        } finally {
+            readLock.unlock();
+        }
+        systemGraph.removeAll(buffer);
     }
 
     /* 
@@ -993,8 +1245,6 @@ public class UserResource {
                 (NonLiteral) userNode.getNode(), predicate, null);
 
         ArrayList<Triple> oldBuffer = new ArrayList<Triple>();
-
-        // System.out.println("\n\n");
 
         Lock readLock = systemGraph.getLock().readLock();
         readLock.lock();
