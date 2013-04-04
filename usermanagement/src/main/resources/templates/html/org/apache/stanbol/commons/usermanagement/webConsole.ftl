@@ -27,11 +27,16 @@ limitations under the License.
 -->
 <br />
 
-<p><button id="create-user" onClick="addUser()"> Create New User </button></p>
+<p>
+    <button id="create-user" onClick="addUser()"> Create New User </button>
+    <button id="create-role" onClick="addRole()"> Create New Role </button>
+</p>
 <br />
 
 
 <div  title="Edit User" id="editUserForm">
+</div>
+<div  title="Edit Role" id="editRoleForm">
 </div>
 <!-- #include "/html/editUserForm.ftl" -->
 
@@ -90,7 +95,7 @@ limitations under the License.
                     var roleList = new Array();
                     var index = 0;
                     var roles = $(".role"); // .role,input:checkbox
-                   //  console.log("roles = "+roles);
+                    //  console.log("roles = "+roles);
                   
                     for (var attrname in roles) { 
                         console.log("roles[attrname] = "+roles[attrname]);
@@ -100,24 +105,26 @@ limitations under the License.
                     };
                     roleList[index++] = "BasePermissionsRole";
                     formData["roles"] = roleList;
-                    console.log("ROLES = "+roleList);
+                    // console.log("ROLES = "+roleList);
                     
                     /////////////
                     var permissionList = new Array();
                     var index = 0;
-                    var permissions = $(".permission"); // .labelCheckbox 
-                    console.log("permissions = "+permissions);
+                    var permissions = $(".checkboxPermission");  
+                    // console.log("permissions = "+permissions);
                     for (var attrname in permissions) { 
                         console.log("attrname = "+attrname);
                         if(permissions[attrname].checked) {
                             permissionList[index++] = permissions[attrname].name;
                         };
                     };
-                   // var newPermission = $("#newPermission").val();
-                    permissionList[index++] = $("#newPermission").val();
-                    
+
+                    $(".inputPermission").each(function(){
+                        permissionList[index++] = $(this).val();
+                    });
+            
                     formData["permissions"] = permissionList;
-                    console.log("PERMISSIONS = "+permissionList);
+                    // console.log("PERMISSIONS = "+permissionList);
                     
                     $.ajax({
                         type: 'POST',
@@ -131,14 +138,66 @@ limitations under the License.
         
                     $(this).dialog("close");
                 }
-                   
             },
             Cancel: function() {
-                // close();
                 $(this).dialog("close");
             }
         } 
     });
+    
+    $("#editRoleForm").dialog({
+        autoOpen: false,
+        minHeight: 400,
+        autoResize:true,
+        width: 500,
+        modal: true,
+        buttons: {
+            "Submit": function() {  
+
+               
+                var formData = {
+                    "roleName": $("#roleName").val(),
+                    "comment": $("#comment").val()
+                };
+                        
+                // gather permission checkbox values into array, to provide format
+                var permissionList = new Array();
+                var index = 0;
+                var permissions = $(".checkboxPermission"); // .labelCheckbox 
+                // console.log("permissions = "+permissions);
+                for (var attrname in permissions) { 
+                    // console.log("attrname = "+attrname);
+                    if(permissions[attrname].checked) {
+                        permissionList[index++] = permissions[attrname].name;
+                    };
+                };
+                $(".inputPermission").each(function(){
+                    // alert($(this).val());
+                    permissionList[index++] = $(this).val();
+                });
+                    
+                formData["permissions"] = permissionList;
+                // console.log("PERMISSIONS = "+permissionList);
+                    
+                $.ajax({
+                    type: 'POST',
+                    url: '/user-management/store-role',
+                    data: formData,
+                    success: function(data) {
+                        close();
+                        location.reload();
+                    }
+                });
+        
+                $(this).dialog("close");
+            }
+        },
+        "Cancel": function() {
+            // close();
+            $(this).dialog("close");
+        }
+    } 
+);
         
     function validate(login, email, password) {
         //        console.log("validate called");
@@ -207,17 +266,23 @@ limitations under the License.
             success: function(data) {
                 $("#editUserForm").html(data);
                 $("#editUserForm").title = "Create User"; 
-                
-//                $.get("/user-management/rolesCheckboxes",
-//                function(data){
-//                    $("#roles-checkboxes").html(data);
-//                }, "text/html");
-        
                 $("#editUserForm").dialog("open");
                 
             }
         });
-      
+    }
+    
+    function addRole(){
+        $.ajax({
+            url: '/user-management/create-role',
+            dataType: 'html',
+            success: function(data) {
+                $("#editRoleForm").html(data);
+                $("#editRoleForm").title = "Create Role"; 
+                $("#editRoleForm").dialog("open");
+                
+            }
+        });
     }
 
 
@@ -309,5 +374,57 @@ limitations under the License.
         });
     }
     
+    function editRole(roleName){
+        $.ajax({
+            url: '/user-management/roles/edit/'+roleName,
+            dataType: "html",
+            success: function(data) {
+                $("#editRoleForm").html(data);      
+        
+                $.get("/user-management/roles/"+roleName+"/permissionsCheckboxes",
+                function(data){
+                    console.log("permissionsCheckboxes = "+data);
+                    $("#role-permissions-checkboxes").html(data);
+                }, "text/html");
+                
+                $("#editRoleForm").dialog("open");
+            }
+        });
 
+        
+    }
+
+    function removeUser(name){
+        // console.log("Remove user ="+name);
+
+        $("#remove"+name).dialog({
+            resizable: false,
+            height:140,
+            modal: true,
+            title: "Delete",
+            buttons: {
+                "Delete User": function() {
+                    console.log("deleting user ="+name); 
+                    
+                    $.ajax({
+                        type: 'POST',
+                        url: '/user-management/delete',
+                        data: {"user" : name},
+                        success: function(data) {
+                            close();
+                            location.reload();
+                        }
+                    });
+                },
+                Cancel: function() {
+                    $(this).dialog("close");
+                    location.reload();
+                }
+            }
+        });
+    }
+    
+    function addPermissionField(){
+        $("#permission-inputs").append("<input type='text' class='inputPermission' /><br />");
+    }
 </script>

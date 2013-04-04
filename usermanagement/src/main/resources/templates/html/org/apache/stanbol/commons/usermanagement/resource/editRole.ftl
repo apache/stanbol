@@ -14,59 +14,44 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+<@namespace rdfs="http://www.w3.org/2000/01/rdf-schema#" />
 <@namespace platform="http://clerezza.org/2009/08/platform#" />
 <@namespace permission="http://clerezza.org/2008/10/permission#" />
 <@namespace sioc="http://rdfs.org/sioc/ns#" />
 
-<p id="validateTips" class="important">* required fields</p>
 <form>
 
-    <#assign userName>
-    <@ldpath path="platform:userName :: xsd:string"/>
+    <#assign roleName>
+    <@ldpath path="dc:title :: xsd:string"/>
     </#assign>	
 
-    <#assign mbox>
-    <@ldpath path="foaf:mbox" />
-    </#assign>
+    <#assign comment>
+    <@ldpath path="rdfs:comment :: xsd:string"/>
+    </#assign>	
 
-    <#attempt>
-    <#assign email><#if mbox != "">${mbox?substring(7)}</#if></#assign>
-    <#recover></#attempt>	
-
-
-    <input id="currentLogin" type="hidden" name="currentLogin" value="${userName}" />
     <input id="create-or-edit" type="hidden" name="create-or-edit" value="edit" />
 
     <fieldset>
-        <label for="newLogin">Login <span class="important">*</span></label>
-        <input id="newLogin" type="text" name="newLogin" value="${userName}" class="text ui-widget-content ui-corner-all" />
-        <label for="fullName">Full Name</label>
-        <input id="fullName" type="text" name="fullName" value="<@ldpath path="foaf:name :: xsd:string"/>" class="text ui-widget-content ui-corner-all" />
-               <label for="email">Email</label>
-        <input id="email" type="text" name="email" value="${email}" class="text ui-widget-content ui-corner-all" />
-        <label for="password" id="password-label">Password <span class="important">*</span></label>
-        <input id="password" type="password" name="password" value="" class="text ui-widget-content ui-corner-all" />
+        <label for="roleName">Role Name</label>
+        <input id="roleName" type="text" name="roleName" value="${roleName}" class="text ui-widget-content ui-corner-all" />
+        <label for="comment">Comment</label>
+        <input id="comment" type="text" name="comment" value="${comment}" class="text ui-widget-content ui-corner-all" />
     </fieldset>
 
     <fieldset class="labelCheckbox">
-        <legend>Roles</legend>
-        <div id="roles-checkboxes"></div>
-         </fieldset> 
-    
-    <fieldset class="labelCheckbox">
         <legend>Permissions</legend>
-        <div id="permissions-checkboxes"></div>
+        <div id="role-permissions-checkboxes"></div>
     </fieldset> 
-    
+
     <fieldset>
-        <div class="labelTextbox"  id="permission-inputs">
+        <div class="labelTextbox" id="permission-inputs">
             <label for="newPermission">Add Permission</label>
             <br/>
-            <input type="text" class="inputPermission">
+            <input type="text" class="inputPermission" />
             <div class="dynhover ui-state-default ui-corner-all" title="Add Permission Field" onClick="javascript:addPermissionField()"><span class="ui-icon ui-icon-circle-plus">&nbsp;</span></div>
         </div>
     </fieldset>
-        <p>e.g. (org.osgi.framework.ServicePermission "*" "get")</p>
+    <p>e.g. (org.osgi.framework.ServicePermission "*" "get")</p>
     <!-- <button name="addPermission">Add permission</button> -->
 </form>
 <!--

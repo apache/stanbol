@@ -44,7 +44,7 @@ http://localhost:8080/user-management/delete-user
 
 ### HTML Helper Resources
 
-
+curl --user admin:admin http://localhost:8080/user-management/users/anonymous/permissionsCheckboxes
 
 ## API Examples
 The following HTTP services are 
