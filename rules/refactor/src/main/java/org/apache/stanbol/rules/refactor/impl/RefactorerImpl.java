@@ -40,7 +40,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.transformation.JenaToClerezzaConverter;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+
 import org.apache.stanbol.rules.adapters.clerezza.ClerezzaAdapter;
 import org.apache.stanbol.rules.adapters.impl.RuleAdaptersFactoryImpl;
 import org.apache.stanbol.rules.adapters.impl.RuleAdaptersManagerImpl;
@@ -106,7 +106,7 @@ public class RefactorerImpl implements Refactorer {
      * <p>
      * DO NOT USE to manually create instances - the RefactorerImpl instances do need to be configured! YOU
      * NEED TO USE
-     * {@link #RefactorerImpl(WeightedTcProvider, Serializer, TcManager, ONManager, SemionManager, RuleStore, Reasoner, Dictionary)}
+     * {@link #RefactorerImpl(WeightedTcProvider, TcManager, RuleStore, RuleAdapterManager, Dictionary)}
      * or its overloads, to parse the configuration and then initialise the rule store if running outside a
      * OSGI environment.
      */
@@ -120,7 +120,6 @@ public class RefactorerImpl implements Refactorer {
      * @param weightedTcProvider
      * @param serializer
      * @param tcManager
-     * @param onManager
      * @param semionManager
      * @param ruleStore
      * @param kReSReasoner
