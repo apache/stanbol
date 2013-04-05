@@ -99,7 +99,7 @@ public class EndsWithAtom extends AbstractAdaptableAtom {
         nodes.add(arg1Node);
         nodes.add(arg2Node);
 
-        return (T) new Functor("regex", nodes, new BuiltinRegistry());
+        return (T) new Functor("regex", nodes, BuiltinRegistry.theRegistry);
 
     }
 

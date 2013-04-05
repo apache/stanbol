@@ -93,7 +93,7 @@ public class DivisionAtom extends AbstractAdaptableAtom {
         nodes.add(arg2Node);
         nodes.add(arg3Node);
 
-        ClauseEntry clauseEntry = new Functor("quotient", nodes, new BuiltinRegistry());
+        ClauseEntry clauseEntry = new Functor("quotient", nodes, BuiltinRegistry.theRegistry);
 
         clauseEntries.add(clauseEntry);
 

@@ -20,6 +20,7 @@ package org.apache.stanbol.rules.adapters.jena.atoms;
 import java.net.URI;
 
 import org.apache.stanbol.rules.adapters.AbstractAdaptableAtom;
+import org.apache.stanbol.rules.adapters.jena.JenaAdapter;
 import org.apache.stanbol.rules.adapters.jena.NodeClauseEntry;
 import org.apache.stanbol.rules.base.api.RuleAtom;
 import org.apache.stanbol.rules.base.api.RuleAtomCallExeption;
@@ -50,7 +51,15 @@ public class NumericVariableAtom extends AbstractAdaptableAtom {
         if (variable.startsWith("?")) {
             variable = variable.substring(1);
         }
+        
+        Integer index = ((JenaAdapter)adapter).variableMap.get(variable);
+        if(index == null){
+            index = ((JenaAdapter)adapter).variableMap.size();
+            ((JenaAdapter)adapter).variableMap.put(variable, index);
+        }
+        
+        Node_RuleVariable ruleVariable = new Node_RuleVariable("?" + variable, index.intValue());
 
-        return (T) new NodeClauseEntry(Node_RuleVariable.createVariable(variable));
+        return (T) new NodeClauseEntry(ruleVariable);
     }
 }

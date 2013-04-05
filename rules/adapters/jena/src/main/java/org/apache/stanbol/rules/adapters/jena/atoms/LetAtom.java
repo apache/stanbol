@@ -84,7 +84,7 @@ public class LetAtom extends AbstractAdaptableAtom {
         nodes.add(variableNode);
         nodes.add(parameterNode);
 
-        ClauseEntry clauseEntry = new Functor("makeSkolem", nodes, new BuiltinRegistry());
+        ClauseEntry clauseEntry = new Functor("makeSkolem", nodes, BuiltinRegistry.theRegistry);
 
         clauseEntries.add(clauseEntry);
 

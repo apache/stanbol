@@ -87,7 +87,7 @@ public class DifferentAtom extends AbstractAdaptableAtom {
         nodes.add(arg1Node);
         nodes.add(arg2Node);
 
-        return (T) new Functor("notEqual", nodes, new BuiltinRegistry());
+        return (T) new Functor("notEqual", nodes, BuiltinRegistry.theRegistry);
 
     }
 

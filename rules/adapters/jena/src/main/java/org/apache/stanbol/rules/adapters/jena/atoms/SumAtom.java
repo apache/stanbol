@@ -91,7 +91,7 @@ public class SumAtom extends AbstractAdaptableAtom {
         nodes.add(arg2Node);
         nodes.add(arg3Node);
 
-        ClauseEntry clauseEntry = new Functor("sum", nodes, new BuiltinRegistry());
+        ClauseEntry clauseEntry = new Functor("sum", nodes, BuiltinRegistry.theRegistry);
 
         clauseEntries.add(clauseEntry);
 

@@ -42,6 +42,8 @@ public class NumberAtom extends AbstractAdaptableAtom {
         String number = tmp.getNumber();
 
         Node node = null;
+        
+        System.out.println("Number atom " + number); 
 
         if (number.startsWith("?")) {
 

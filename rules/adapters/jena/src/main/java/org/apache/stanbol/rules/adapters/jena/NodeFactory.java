@@ -60,18 +60,19 @@ public class NodeFactory {
             } else {
                 literal = Node_RuleVariable.createLiteral(argument.toString());
             }
-        } else if (argument instanceof String) {
-            literal = Node_RuleVariable.createLiteral((String) argument, null, XSDDatatype.XSDstring);
-        } else if (argument instanceof Integer) {
-            literal = Node_RuleVariable.createLiteral(argument.toString(), null, XSDDatatype.XSDinteger);
-        } else if (argument instanceof Double) {
-            literal = Node_RuleVariable.createLiteral(argument.toString(), null, XSDDatatype.XSDdouble);
-        } else if (argument instanceof Float) {
-            literal = Node_RuleVariable.createLiteral(argument.toString(), null, XSDDatatype.XSDfloat);
-        } else if (argument instanceof Boolean) {
-            literal = Node_RuleVariable.createLiteral(argument.toString(), null, XSDDatatype.XSDboolean);
+        } else if(argument instanceof String) {
+            
+            System.out.println(argument);
+            String argString = (String) argument;
+            if(argString.startsWith("\"") && argString.endsWith("\"")){
+                argString = argString.substring(1, argString.length()-1);
+            }
+            literal = Node_RuleVariable.createLiteral(argString);
+        } else if(argument instanceof Integer) {
+            
+            literal = Node_RuleVariable.createLiteral(argument.toString(), null, XSDDatatype.XSDint);
         } else {
-            literal = Node_RuleVariable.createLiteral((String) argument);
+            literal = Node_RuleVariable.createLiteral(argument.toString());
         }
 
         return literal;

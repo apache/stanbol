@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.stanbol.rules.adapters.AbstractAdaptableAtom;
+import org.apache.stanbol.rules.adapters.jena.HigherOrderClauseEntry;
 import org.apache.stanbol.rules.adapters.jena.NodeClauseEntry;
 import org.apache.stanbol.rules.base.api.RuleAtom;
 import org.apache.stanbol.rules.base.api.RuleAtomCallExeption;
@@ -66,7 +67,11 @@ public class StrAtom extends AbstractAdaptableAtom {
             args.add(emptyString);
             args.add(bindind);
 
-            return (T) new Functor("strConcat", args);
+            Functor functor = new Functor("strConcat", args);
+            
+            List<ClauseEntry> clauseEntries = new ArrayList<ClauseEntry>();
+            clauseEntries.add(functor);
+            return (T) new HigherOrderClauseEntry(node, clauseEntries);
 
         } else {
             throw new RuleAtomCallExeption(getClass());

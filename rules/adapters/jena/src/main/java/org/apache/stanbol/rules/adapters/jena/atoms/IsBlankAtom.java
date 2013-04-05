@@ -65,7 +65,7 @@ public class IsBlankAtom extends AbstractAdaptableAtom {
 
         nodes.add(argNode);
 
-        return (T) new Functor("isBNode", nodes, new BuiltinRegistry());
+        return (T) new Functor("isBNode", nodes, BuiltinRegistry.theRegistry);
 
     }
 

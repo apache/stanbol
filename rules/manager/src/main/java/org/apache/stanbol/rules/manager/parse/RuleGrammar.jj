@@ -245,7 +245,7 @@ TOKEN :
   < NUM : ([ "0"-"9"])+ > 
 | < VAR : ([ "0"-"9","a"-"z","A"-"Z","-", "_", "."])+ >
 | < VARIABLE : "?" ([ "0"-"9","a"-"z","A"-"Z","-", "_"])+ >
-| < URI : "<" ([ "0"-"9","a"-"z","A"-"Z","-", "_", ".", "#", ":", "/", "(", ")" ])+ ">" >
+| < URI : "<" ([ "0"-"9","a"-"z","A"-"Z","-", "_", ".", "#", ":", "/", "(", ")", "$", "%" ])+ ">" >
 | < STRING : "\"" ([ "0"-"9","a"-"z","A"-"Z","-", "_", ".", ":", "/", "#", "\\", "?", " ", "!", "$", "%" ])+ "\"" >
 | < BNODE : "_:" ([ "0"-"9","a"-"z","A"-"Z","-", "_", "."])+ >
 }
@@ -481,7 +481,6 @@ SubstringAtom substringAtom() :
 ExpressionAtom expressionAtom() :
 {ExpressionAtom expressionAtom;}
 {
-	LOOKAHEAD(2)
 		expressionAtom = stringFunctionAtom()
 	|	expressionAtom = numericFunctionAtom()
 	

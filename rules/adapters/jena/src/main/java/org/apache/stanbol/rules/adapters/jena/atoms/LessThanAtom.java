@@ -87,7 +87,7 @@ public class LessThanAtom extends AbstractAdaptableAtom {
         nodes.add(arg1Node);
         nodes.add(arg2Node);
 
-        Functor functor = new Functor("lessThan", nodes, new BuiltinRegistry());
+        Functor functor = new Functor("lessThan", nodes, BuiltinRegistry.theRegistry);
 
         clauseEntries.add(functor);
 

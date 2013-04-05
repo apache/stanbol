@@ -29,10 +29,12 @@ import org.apache.stanbol.rules.base.api.UnsupportedTypeForExportException;
 import org.apache.stanbol.rules.manager.atoms.ExpressionAtom;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.reasoner.rulesys.Builtin;
 import com.hp.hpl.jena.reasoner.rulesys.BuiltinRegistry;
 import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 import com.hp.hpl.jena.reasoner.rulesys.Functor;
 import com.hp.hpl.jena.reasoner.rulesys.Rule;
+import com.hp.hpl.jena.reasoner.rulesys.builtins.GreaterThan;
 
 /**
  * 
@@ -87,7 +89,13 @@ public class GreaterThanAtom extends AbstractAdaptableAtom {
         nodes.add(arg1Node);
         nodes.add(arg2Node);
 
-        Functor functor = new Functor("greaterThan", nodes, new BuiltinRegistry());
+        Builtin f = BuiltinRegistry.theRegistry.getImplementation("greaterThan");
+        
+        System.out.println("Class: " + f.getClass().getCanonicalName());
+        System.out.println("Arg1: " + arg1Node.getClass().getCanonicalName());
+        System.out.println("Arg2: " + arg2Node.getClass().getCanonicalName());
+        
+        Functor functor = new Functor("greaterThan", nodes, BuiltinRegistry.theRegistry);
 
         clauseEntries.add(functor);
 

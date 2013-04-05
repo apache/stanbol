@@ -17,6 +17,9 @@
 
 package org.apache.stanbol.rules.adapters.clerezza;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -25,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Expression;
 import org.apache.clerezza.rdf.core.sparql.query.TriplePattern;
@@ -48,9 +52,21 @@ import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.UnavailableRuleObjectException;
 import org.apache.stanbol.rules.base.api.UnsupportedTypeForExportException;
 import org.apache.stanbol.rules.base.api.util.RuleList;
+import org.apache.stanbol.rules.manager.KB;
+import org.apache.stanbol.rules.manager.RecipeImpl;
+import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.util.FileManager;
 
 /**
  * 
@@ -74,12 +90,14 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
 
     @Reference
     RuleAdaptersFactory ruleAdaptersFactory;
-
+    
+    ComponentContext componentContext;
+    
     /**
      * For OSGi environments.
      */
     public ClerezzaAdapter() {
-
+        
     }
 
     /**
@@ -102,6 +120,8 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
         } catch (UnavailableRuleObjectException e) {
             log.error("Failed to add the adapter to the registry.", e);
         }
+        
+        
     }
 
     @SuppressWarnings("unchecked")
@@ -190,16 +210,30 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
 
         if (type == ConstructQuery.class) {
 
+            //ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            
+            //log.info("loader : " + loader);
+           
+            
+           
+
             String className = ruleAtom.getClass().getSimpleName();
 
             String canonicalName = ARTIFACT + "." + className;
 
             try {
-
-                // ClassLoader loader = Thread.currentThread().getContextClassLoader();
-                // Class<AdaptableAtom> clerezzaAtomClass = (Class<AdaptableAtom>)
-                // loader.loadClass(canonicalName);
-                Class<AdaptableAtom> clerezzaAtomClass = (Class<AdaptableAtom>) Class.forName(canonicalName);
+                Class<AdaptableAtom> clerezzaAtomClass = null;
+                if(componentContext != null){
+                    // in OSGi environment 
+                    clerezzaAtomClass = componentContext.getBundleContext().getBundle().loadClass(canonicalName);
+                }
+                else{
+                    // in non-OSGi environment
+                    clerezzaAtomClass = (Class<AdaptableAtom>) Thread.currentThread().getContextClassLoader().loadClass(canonicalName);
+                }
+                /* Class<AdaptableAtom> clerezzaAtomClass = (Class<AdaptableAtom>) loader
+                        .loadClass(canonicalName);
+                        */
 
                 try {
                     AdaptableAtom clerezzaAtom = clerezzaAtomClass.newInstance();
@@ -243,6 +277,9 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
         if (context == null) {
             throw new IllegalStateException("No valid" + ComponentContext.class + " parsed in activate!");
         }
+        
+        componentContext = context;
+        
         activate((Dictionary<String,Object>) context.getProperties());
     }
 
@@ -270,10 +307,77 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
 
     @Override
     public <T> boolean canAdaptTo(Adaptable adaptable, Class<T> type) {
-        if (type == ConstructQuery.class) {
+        if(type == ConstructQuery.class){
             return true;
-        } else {
+        }
+        else{
             return false;
         }
     }
+    
+    
+    public static void main(String[] args){
+        RuleAdapter ruleAdapter = new ClerezzaAdapter();
+        try {
+            KB kb = RuleParserImpl.parse("http://sssw.org/2012/rules/", new FileInputStream("/Users/mac/Documents/CNR/SSSW2012/construct/exercise3"));
+            System.out.println("Rules: " + kb.getRuleList().size());
+            Recipe recipe = new RecipeImpl(new UriRef("http://sssw.org/2012/rules/"), "Recipe", kb.getRuleList());
+            
+            //List<ConstructQuery> jenaRules = (List<ConstructQuery>) ruleAdapter.adaptTo(recipe, ConstructQuery.class);
+            
+            String rules = "[ Exercise1: (http://dbpedia.org/resource/Madrid http://dbpedia.org/ontology/locationOf ?location) (?location rdf:type http://dbpedia.org/ontology/Museum) (?location http://dbpedia.org/ontology/numberOfVisitors ?visitors) greaterThan(?visitors '2000000'^^http://www.w3.org/2001/XMLSchema#integer) -> (?location rdf:type http://www.mytravels.com/Itinerary/MadridItinerary) ]";
+            
+            //List<com.hp.hpl.jena.reasoner.rulesys.Rule> jenaRules = com.hp.hpl.jena.reasoner.rulesys.Rule.parseRules(rules);
+            
+            
+            String spqral = "CONSTRUCT " +
+            "{ ?city a <http://www.mytravels.com/Itinerary/MovieCityItinerary> . " +
+            "   ?city <http://www.w3.org/2000/01/rdf-schema#label> ?cLabel . " +
+            "   ?event a <http://linkedevents.org/ontology/Event> . " +
+            "   ?event <http://linkedevents.org/ontology/atPlace> ?location . " +
+            "   ?location <http://www.w3.org/2000/01/rdf-schema#label> ?lLabel . " +
+            "   ?location <http://www.w3.org/2002/07/owl#sameAs> ?city" +
+            "} " +
+            "WHERE " +
+            "{ " +
+            "   ?city a <http://www.mytravels.com/Itinerary/MovieCityItinerary> . " +
+            "   ?city <http://www.w3.org/2000/01/rdf-schema#label> ?cLabel . " +
+            "   ?event a <http://linkedevents.org/ontology/Event> . " +
+            "   ?event <http://linkedevents.org/ontology/atPlace> ?location . " +
+            "   ?location <http://www.w3.org/2000/01/rdf-schema#label> ?lLabel . " +
+            "   FILTER(?lLabel = ?cLabel) " +            
+            "}";
+            Model m = ModelFactory.createDefaultModel();
+            Model model = FileManager.get().loadModel("/Users/mac/Documents/CNR/SSSW2012/datasets_new/Exercise5_tmp.rdf");
+            //for(ConstructQuery constructQuery : jenaRules){
+                //Query query = QueryFactory.create(constructQuery.toString(), Syntax.syntaxARQ);
+                Query query = QueryFactory.create(spqral, Syntax.syntaxARQ);
+                QueryExecution queryExecution = QueryExecutionFactory.create(query, model);
+                
+                //System.out.println(constructQuery.toString());
+                m.add(queryExecution.execConstruct());
+           //}
+            
+            FileOutputStream max = new FileOutputStream("/Users/mac/Documents/CNR/SSSW2012/datasets_new/example5.rdf");
+            m.write(max);
+            
+            
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } /*catch (RuleAtomCallExeption e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (UnavailableRuleObjectException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (UnsupportedTypeForExportException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }*/
+        
+        
+    }
+    
+    
 }

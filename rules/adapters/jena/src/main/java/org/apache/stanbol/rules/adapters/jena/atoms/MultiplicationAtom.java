@@ -92,7 +92,7 @@ public class MultiplicationAtom extends AbstractAdaptableAtom {
         nodes.add(arg2Node);
         nodes.add(arg3Node);
 
-        ClauseEntry clauseEntry = new Functor("product", nodes, new BuiltinRegistry());
+        ClauseEntry clauseEntry = new Functor("product", nodes, BuiltinRegistry.theRegistry);
 
         clauseEntries.add(clauseEntry);
 

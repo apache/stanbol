@@ -17,20 +17,31 @@
 
 package org.apache.stanbol.rules.adapters.clerezza;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
 import junit.framework.Assert;
 
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
+import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
+import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
+import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.rules.adapters.clerezza.ClerezzaAdapter;
+import org.apache.stanbol.rules.adapters.impl.RuleAdaptersFactoryImpl;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.RuleAdapter;
+import org.apache.stanbol.rules.base.api.RuleAdaptersFactory;
 import org.apache.stanbol.rules.base.api.RuleAtomCallExeption;
+import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.UnavailableRuleObjectException;
 import org.apache.stanbol.rules.base.api.UnsupportedTypeForExportException;
+import org.apache.stanbol.rules.manager.ClerezzaRuleStore;
 import org.apache.stanbol.rules.manager.KB;
 import org.apache.stanbol.rules.manager.RecipeImpl;
 import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
@@ -59,7 +70,24 @@ public class ClerezzaAdpterTest {
 
     @BeforeClass
     public static void setUpClass() {
-        ruleAdapter = new ClerezzaAdapter();
+        
+        class SpecialTcManager extends TcManager {
+            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
+                super();
+                bindQueryEngine(qe);
+                bindWeightedTcProvider(wtcp);
+            }
+        }
+        
+        QueryEngine qe = new JenaSparqlEngine();
+        WeightedTcProvider wtcp = new SimpleTcProvider();
+        TcManager tcm = new SpecialTcManager(qe, wtcp);
+
+        Dictionary<String,Object> configuration = new Hashtable<String,Object>();
+        RuleAdaptersFactory ruleAdaptersFactory = new RuleAdaptersFactoryImpl();
+        RuleStore ruleStore = new ClerezzaRuleStore(configuration, tcm);
+        
+        ruleAdapter = new ClerezzaAdapter(configuration, ruleStore, ruleAdaptersFactory);
     }
 
     @AfterClass

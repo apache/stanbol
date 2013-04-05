@@ -18,6 +18,7 @@ package org.apache.stanbol.rules.adapters.jena.atoms;
 
 import org.apache.stanbol.rules.adapters.AbstractAdaptableAtom;
 import org.apache.stanbol.rules.adapters.jena.NodeClauseEntry;
+import org.apache.stanbol.rules.adapters.jena.VariableClauseEntry;
 import org.apache.stanbol.rules.base.api.RuleAtom;
 import org.apache.stanbol.rules.base.api.RuleAtomCallExeption;
 import org.apache.stanbol.rules.base.api.UnavailableRuleObjectException;
@@ -50,6 +51,7 @@ public class IndividualPropertyAtom extends AbstractAdaptableAtom {
         IObjectAtom argument2 = tmp.getArgument2();
         IObjectAtom objectProperty = tmp.getObjectProperty();
 
+        System.out.println(argument1);
         ClauseEntry argument2ClauseEntry = (ClauseEntry) adapter.adaptTo(argument2, Rule.class);
         ClauseEntry argument1ClauseEntry = (ClauseEntry) adapter.adaptTo(argument1, Rule.class);
         ClauseEntry objectPropertyClauseEntry = (ClauseEntry) adapter.adaptTo(objectProperty, Rule.class);
@@ -58,8 +60,12 @@ public class IndividualPropertyAtom extends AbstractAdaptableAtom {
         Node predicateNode;
         Node objectNode;
 
+        System.out.println(argument1ClauseEntry.getClass());
         if (argument1ClauseEntry instanceof NodeClauseEntry) {
             subjectNode = ((NodeClauseEntry) argument1ClauseEntry).getNode();
+        } else if (argument1ClauseEntry instanceof VariableClauseEntry) {
+            subjectNode = ((VariableClauseEntry) argument1ClauseEntry).getNode();
+            System.out.println("Here");
         } else {
             throw new RuleAtomCallExeption(getClass());
         }

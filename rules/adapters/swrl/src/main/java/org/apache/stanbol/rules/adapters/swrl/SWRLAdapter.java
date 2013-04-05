@@ -73,6 +73,8 @@ public class SWRLAdapter extends AbstractRuleAdapter {
 
     @Reference
     RuleAdaptersFactory ruleAdaptersFactory;
+    
+    private ComponentContext componentContext;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -147,9 +149,16 @@ public class SWRLAdapter extends AbstractRuleAdapter {
             String canonicalName = ARTIFACT + "." + className;
 
             try {
-                // ClassLoader loader = Thread.currentThread().getContextClassLoader();
-                // Class<AdaptableAtom> swrlAtomClass = (Class<AdaptableAtom>)loader.loadClass(canonicalName);
-                Class<AdaptableAtom> swrlAtomClass = (Class<AdaptableAtom>) Class.forName(canonicalName);
+                
+                Class<AdaptableAtom> swrlAtomClass = null;
+                if(componentContext != null){
+                    // in OSGi environment 
+                    swrlAtomClass = componentContext.getBundleContext().getBundle().loadClass(canonicalName);
+                }
+                else{
+                    // in non-OSGi environment
+                    swrlAtomClass = (Class<AdaptableAtom>) Thread.currentThread().getContextClassLoader().loadClass(canonicalName);
+                }
 
                 try {
                     AdaptableAtom swrlAtom = swrlAtomClass.newInstance();
@@ -197,6 +206,9 @@ public class SWRLAdapter extends AbstractRuleAdapter {
         if (context == null) {
             throw new IllegalStateException("No valid" + ComponentContext.class + " parsed in activate!");
         }
+        
+        componentContext = context;
+        
         activate((Dictionary<String,Object>) context.getProperties());
     }
 
@@ -224,9 +236,10 @@ public class SWRLAdapter extends AbstractRuleAdapter {
 
     @Override
     public <T> boolean canAdaptTo(Adaptable adaptable, Class<T> type) {
-        if (type == SWRLRule.class) {
+        if(type == SWRLRule.class){
             return true;
-        } else {
+        }
+        else{
             return false;
         }
     }

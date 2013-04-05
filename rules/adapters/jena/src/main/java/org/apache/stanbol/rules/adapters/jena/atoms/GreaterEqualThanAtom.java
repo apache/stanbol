@@ -87,7 +87,7 @@ public class GreaterEqualThanAtom extends AbstractAdaptableAtom {
         nodes.add(arg1Node);
         nodes.add(arg2Node);
 
-        Functor functor = new Functor("ge", nodes, new BuiltinRegistry());
+        Functor functor = new Functor("ge", nodes, BuiltinRegistry.theRegistry);
 
         clauseEntries.add(functor);
 

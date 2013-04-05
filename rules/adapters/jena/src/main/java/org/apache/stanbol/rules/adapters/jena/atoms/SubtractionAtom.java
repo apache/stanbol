@@ -91,7 +91,7 @@ public class SubtractionAtom extends AbstractAdaptableAtom {
         nodes.add(arg2Node);
         nodes.add(arg3Node);
 
-        ClauseEntry clauseEntry = new Functor("difference", nodes, new BuiltinRegistry());
+        ClauseEntry clauseEntry = new Functor("difference", nodes, BuiltinRegistry.theRegistry);
 
         clauseEntries.add(clauseEntry);
 

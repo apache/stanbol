@@ -21,6 +21,9 @@
 
 package org.apache.stanbol.rules.manager;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -283,7 +286,8 @@ public class ClerezzaRuleStore implements RuleStore {
 
         UriRef recipeID = recipe.getRecipeID();
         String namespace = recipeID.toString().substring(1, recipeID.toString().length() - 1) + "/";
-
+        
+        log.info("Rule Namespace is " + namespace);
         RuleList ruleList = RuleParserImpl.parse(namespace, rulesStream).getRuleList();
 
         for (Rule rule : ruleList) {
@@ -661,5 +665,22 @@ public class ClerezzaRuleStore implements RuleStore {
         }
 
         return matchingRules;
+    }
+    
+    public static void main(String[] args){
+        
+        InputStream inputStream;
+        try {
+            inputStream = new FileInputStream(new File("/Users/mac/Desktop/domain.rule"));
+            
+            RuleList ruleList = RuleParserImpl.parse("http://www.prova.it/", inputStream).getRuleList();
+
+            for (Rule rule : ruleList) {
+                
+            }
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }

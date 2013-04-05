@@ -69,6 +69,8 @@ public class SPARQLAdapter extends AbstractRuleAdapter {
 
     @Reference
     RuleAdaptersFactory ruleAdaptersFactory;
+    
+    private ComponentContext componentContext;
 
     @SuppressWarnings("unchecked")
     protected <T> T adaptRecipeTo(Recipe recipe, Class<T> type) throws UnsupportedTypeForExportException,
@@ -204,11 +206,17 @@ public class SPARQLAdapter extends AbstractRuleAdapter {
             String canonicalName = ARTIFACT + "." + className;
 
             try {
-                // ClassLoader loader = Thread.currentThread().getContextClassLoader();
-                // Class<AdaptableAtom> sparqlAtomClass =
-                // (Class<AdaptableAtom>)loader.loadClass(canonicalName);
-                Class<AdaptableAtom> sparqlAtomClass = (Class<AdaptableAtom>) Class.forName(canonicalName);
-
+                
+                Class<AdaptableAtom> sparqlAtomClass = null;
+                if(componentContext != null){
+                    // in OSGi environment 
+                    sparqlAtomClass = componentContext.getBundleContext().getBundle().loadClass(canonicalName);
+                }
+                else{
+                    // in non-OSGi environment
+                    sparqlAtomClass = (Class<AdaptableAtom>) Thread.currentThread().getContextClassLoader().loadClass(canonicalName);
+                }
+                
                 try {
                     AdaptableAtom sparqlAtom = sparqlAtomClass.newInstance();
                     sparqlAtom.setRuleAdapter(this);
@@ -260,6 +268,9 @@ public class SPARQLAdapter extends AbstractRuleAdapter {
         if (context == null) {
             throw new IllegalStateException("No valid" + ComponentContext.class + " parsed in activate!");
         }
+        
+        componentContext = context;
+        
         activate((Dictionary<String,Object>) context.getProperties());
     }
 
@@ -287,9 +298,10 @@ public class SPARQLAdapter extends AbstractRuleAdapter {
 
     @Override
     public <T> boolean canAdaptTo(Adaptable adaptable, Class<T> type) {
-        if (type == SPARQLObject.class) {
+        if(type == SPARQLObject.class){
             return true;
-        } else {
+        }
+        else{
             return false;
         }
     }
