@@ -150,15 +150,7 @@ public class SWRLAdapter extends AbstractRuleAdapter {
 
             try {
                 
-                Class<AdaptableAtom> swrlAtomClass = null;
-                if(componentContext != null){
-                    // in OSGi environment 
-                    swrlAtomClass = componentContext.getBundleContext().getBundle().loadClass(canonicalName);
-                }
-                else{
-                    // in non-OSGi environment
-                    swrlAtomClass = (Class<AdaptableAtom>) Thread.currentThread().getContextClassLoader().loadClass(canonicalName);
-                }
+                Class<AdaptableAtom> swrlAtomClass = (Class<AdaptableAtom>) Class.forName(canonicalName);
 
                 try {
                     AdaptableAtom swrlAtom = swrlAtomClass.newInstance();
@@ -168,19 +160,15 @@ public class SWRLAdapter extends AbstractRuleAdapter {
                     return (T) swrlAtom.adapt(ruleAtom);
 
                 } catch (InstantiationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 } catch (IllegalAccessException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
 
             } catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             } catch (SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
 
         } else {

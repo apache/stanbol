@@ -207,15 +207,7 @@ public class SPARQLAdapter extends AbstractRuleAdapter {
 
             try {
                 
-                Class<AdaptableAtom> sparqlAtomClass = null;
-                if(componentContext != null){
-                    // in OSGi environment 
-                    sparqlAtomClass = componentContext.getBundleContext().getBundle().loadClass(canonicalName);
-                }
-                else{
-                    // in non-OSGi environment
-                    sparqlAtomClass = (Class<AdaptableAtom>) Thread.currentThread().getContextClassLoader().loadClass(canonicalName);
-                }
+                Class<AdaptableAtom> sparqlAtomClass = (Class<AdaptableAtom>) Class.forName(canonicalName);
                 
                 try {
                     AdaptableAtom sparqlAtom = sparqlAtomClass.newInstance();
@@ -224,22 +216,17 @@ public class SPARQLAdapter extends AbstractRuleAdapter {
                     return (T) sparqlAtom.adapt(ruleAtom);
 
                 } catch (InstantiationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 } catch (IllegalAccessException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 } catch (RuleAtomCallExeption e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
 
             } catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             } catch (SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
 
         }

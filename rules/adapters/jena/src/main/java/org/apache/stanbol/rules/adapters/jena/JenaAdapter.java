@@ -211,15 +211,7 @@ public class JenaAdapter extends AbstractRuleAdapter {
             try {
                 
                 
-                Class<AdaptableAtom> jenaAtomClass = null;
-                if(componentContext != null){
-                    // in OSGi environment 
-                    jenaAtomClass = componentContext.getBundleContext().getBundle().loadClass(canonicalName);
-                }
-                else{
-                    // in non-OSGi environment
-                    jenaAtomClass = (Class<AdaptableAtom>) Thread.currentThread().getContextClassLoader().loadClass(canonicalName);
-                }
+                Class<AdaptableAtom> jenaAtomClass = (Class<AdaptableAtom>) Class.forName(canonicalName);
                 
                 try 
                 
@@ -237,19 +229,15 @@ public class JenaAdapter extends AbstractRuleAdapter {
                     return (T) jenaAtom.adapt(ruleAtom);
 
                 } catch (InstantiationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 } catch (IllegalAccessException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
 
             } catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             } catch (SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
 
         } else {

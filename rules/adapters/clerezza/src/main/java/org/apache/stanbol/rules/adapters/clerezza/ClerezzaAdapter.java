@@ -167,6 +167,7 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
             RuleAtom ruleAtom = it.next();
             ClerezzaSparqlObject clerezzaSparqlObject = null;
 
+            log.debug("Type to adapt {}", type);
             clerezzaSparqlObject = (ClerezzaSparqlObject) adaptRuleAtomTo(ruleAtom, type);
 
             Object clerezzaObj = clerezzaSparqlObject.getClerezzaObject();
@@ -210,6 +211,7 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
 
         if (type == ConstructQuery.class) {
 
+            
             //ClassLoader loader = Thread.currentThread().getContextClassLoader();
             
             //log.info("loader : " + loader);
@@ -222,18 +224,7 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
             String canonicalName = ARTIFACT + "." + className;
 
             try {
-                Class<AdaptableAtom> clerezzaAtomClass = null;
-                if(componentContext != null){
-                    // in OSGi environment 
-                    clerezzaAtomClass = componentContext.getBundleContext().getBundle().loadClass(canonicalName);
-                }
-                else{
-                    // in non-OSGi environment
-                    clerezzaAtomClass = (Class<AdaptableAtom>) Thread.currentThread().getContextClassLoader().loadClass(canonicalName);
-                }
-                /* Class<AdaptableAtom> clerezzaAtomClass = (Class<AdaptableAtom>) loader
-                        .loadClass(canonicalName);
-                        */
+                Class<AdaptableAtom> clerezzaAtomClass = (Class<AdaptableAtom>) Class.forName(canonicalName);
 
                 try {
                     AdaptableAtom clerezzaAtom = clerezzaAtomClass.newInstance();
@@ -243,19 +234,15 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
                     return (T) clerezzaAtom.adapt(ruleAtom);
 
                 } catch (InstantiationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 } catch (IllegalAccessException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
 
             } catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             } catch (SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
 
         }
