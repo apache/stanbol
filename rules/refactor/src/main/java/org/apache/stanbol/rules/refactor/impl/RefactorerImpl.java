@@ -16,10 +16,8 @@
  */
 package org.apache.stanbol.rules.refactor.impl;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
 
 import org.apache.clerezza.rdf.core.Graph;
@@ -29,50 +27,32 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
-import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
-import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.owl.transformation.JenaToClerezzaConverter;
-
-import org.apache.stanbol.rules.adapters.clerezza.ClerezzaAdapter;
-import org.apache.stanbol.rules.adapters.impl.RuleAdaptersFactoryImpl;
-import org.apache.stanbol.rules.adapters.impl.RuleAdaptersManagerImpl;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.RecipeConstructionException;
 import org.apache.stanbol.rules.base.api.RuleAdapter;
 import org.apache.stanbol.rules.base.api.RuleAdapterManager;
-import org.apache.stanbol.rules.base.api.RuleAdaptersFactory;
 import org.apache.stanbol.rules.base.api.RuleAtomCallExeption;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.UnavailableRuleObjectException;
 import org.apache.stanbol.rules.base.api.UnsupportedTypeForExportException;
-import org.apache.stanbol.rules.manager.ClerezzaRuleStore;
-import org.apache.stanbol.rules.manager.KB;
-import org.apache.stanbol.rules.manager.RecipeImpl;
 import org.apache.stanbol.rules.manager.arqextention.CreatePropertyURIStringFromLabel;
 import org.apache.stanbol.rules.manager.arqextention.CreateStandardLabel;
 import org.apache.stanbol.rules.manager.arqextention.CreateURI;
-import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
 import org.apache.stanbol.rules.refactor.api.RefactoringException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.reasoner.Reasoner;
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
 import com.hp.hpl.jena.sparql.pfunction.PropertyFunctionRegistry;
-import com.hp.hpl.jena.vocabulary.XSD;
 
 /**
  * The RefactorerImpl is the concrete implementation of the Refactorer interface defined in the rule APIs of
@@ -309,71 +289,6 @@ public class RefactorerImpl implements Refactorer {
         }
 
     }
-    
-    
-    public static void main(String[] args){
-        String graph =  "<http://revyu.com/things/eswc-2008-paper-exposing-large-sitemaps> <http://purl.org/stuff/rev#hasReview> <http://revyu.com/reviews/bbecea3192d3c3bc5473ca8d9ab38cb143314a8e> ." +
-                        "<http://revyu.com/reviews/bbecea3192d3c3bc5473ca8d9ab38cb143314a8e> <http://purl.org/stuff/rev#reviewer> <http://revyu.com/people/ChrisBizer> . " +
-                        "<http://people.apache.org/~alexdma> <http://xmlns.com/foaf/0.1/knows> <http://revyu.com/people/ChrisBizer> . " +
-                        "<http://revyu.com/reviews/bbecea3192d3c3bc5473ca8d9ab38cb143314a8e> <http://purl.org/stuff/rev#rating> \"4\"^^<" + XSD.integer.getURI() + "> . ";
-        
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(graph.getBytes());
-        
-        Model model = ModelFactory.createDefaultModel();
-        model.read(inputStream, null, "N3");
-        MGraph deserializedGraph = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(model);
-        
-        String recipeString =   "foaf = <http://xmlns.com/foaf/0.1/> . " +
-                                "revyu = <http://purl.org/stuff/rev#> . " +
-                                "myvoc = <http://www.semanticweb.org/voc/my/> . " +
-                                "trustedContent[ " +
-                                "has(revyu:hasReview, ?ci, ?review) . " +
-                                "has(revyu:reviewer, ?review, ?y) . has(foaf:knows, ?x, ?y) . " +
-                                "values(revyu:rating, ?review, ?rating) . gt(str(?rating), 3) " +
-                                "-> has(myvoc:trustsContent, ?x, ?ci) " +
-                                "]";
-        
-        KB kb = RuleParserImpl.parse("http://test.org/recipe", recipeString);
-        
-        Recipe recipe = new RecipeImpl(new UriRef("recipe"), "A recipe", kb.getRuleList());
-        
-        class SpecialTcManager extends TcManager {
-            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
-                super();
-                bindQueryEngine(qe);
-                bindWeightedTcProvider(wtcp);
-            }
-        }
 
-        QueryEngine qe = new JenaSparqlEngine();
-        WeightedTcProvider wtcp = new SimpleTcProvider();
-        TcManager tcm = new SpecialTcManager(qe, wtcp);
-
-        Dictionary<String,Object> configuration = new Hashtable<String,Object>();
-        RuleStore store = new ClerezzaRuleStore(configuration, tcm);
-
-        Dictionary<String,Object> configuration2 = new Hashtable<String,Object>();
-
-        RuleAdaptersFactory ruleAdaptersFactory = new RuleAdaptersFactoryImpl();
-
-        Dictionary<String,Object> configuration3 = new Hashtable<String,Object>();
-        new ClerezzaAdapter(configuration3, store, ruleAdaptersFactory);
-
-        RuleAdapterManager ruleAdapterManager = new RuleAdaptersManagerImpl(configuration2,
-                ruleAdaptersFactory);
-
-        Dictionary<String,Object> configuration4 = new Hashtable<String,Object>();
-
-        RefactorerImpl refactorer = new RefactorerImpl(wtcp, tcm, store, ruleAdapterManager, configuration4);
-        try {
-            MGraph mGraph = new SimpleMGraph();
-            mGraph.addAll(refactorer.graphRefactoring(deserializedGraph, recipe));
-            JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph).write(System.out);
-        } catch (RefactoringException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-    }
 
 }
