@@ -239,11 +239,11 @@
       <version>1.15</version>
     </bundle>
     <!-- needed to read data from mime multipart requests -->
-    <!-- bundle>
+    <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>jaxrs.utils</artifactId>
       <version>0.7-incubating-SNAPSHOT</version>
-    </bundle -->
+    </bundle>
     <!-- still used in many places also it only runs on jersey and the code is not portable across jax-rs implementations -->
     <bundle>
       <groupId>com.sun.jersey.contribs</groupId>
