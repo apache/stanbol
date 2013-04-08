@@ -14,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
+import org.apache.clerezza.jaxrs.utils.TrailingSlash;
 import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -106,6 +107,9 @@ public class ResourceResolver {
     public RdfViewable serviceEntry(@Context final UriInfo uriInfo, 
             @QueryParam("iri") final UriRef iri, 
             @HeaderParam("user-agent") String userAgent) throws Exception {
+        //this maks sure we are nt invoked with a trailing slash which would affect
+        //relative resolution of links (e.g. css)
+        TrailingSlash.enforcePresent(uriInfo);
         final String resourcePath = uriInfo.getAbsolutePath().toString();
         //The URI at which this service was accessed accessed, this will be the 
         //central serviceUri in the response

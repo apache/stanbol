@@ -6,7 +6,7 @@
 <html>
   <head>
     <title>Multi-Enhancer Example Application - Apache Stanbol</title>
-    <link type="text/css" rel="stylesheet" href="example-service/styles/multi-enhancer.css" />
+    <link type="text/css" rel="stylesheet" href="styles/multi-enhancer.css" />
   </head>
 
   <body>
