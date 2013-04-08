@@ -81,19 +81,21 @@
             <artifactId>rdf.utils</artifactId>
             <version>0.13-incubating</version>
         </dependency>
- 
+        <dependency>
+            <groupId>org.apache.clerezza</groupId>
+            <artifactId>jaxrs.utils</artifactId>
+            <version>0.6-incubating</version>
+        </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <version>4.3.1</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
             <version>1.7.0</version>
         </dependency>
-
     </dependencies>
-
+    
 </project>

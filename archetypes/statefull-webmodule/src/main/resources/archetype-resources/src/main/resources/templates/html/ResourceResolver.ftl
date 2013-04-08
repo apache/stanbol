@@ -6,7 +6,7 @@
 <html>
   <head>
     <title>Example Application - Apache Stanbol</title>
-    <link type="text/css" rel="stylesheet" href="example-service/styles/resource-resolver.css" />
+    <link type="text/css" rel="stylesheet" href="styles/resource-resolver.css" />
   </head>
 
   <body>

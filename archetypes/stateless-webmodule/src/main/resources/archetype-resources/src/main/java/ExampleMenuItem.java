@@ -12,7 +12,7 @@ import org.apache.stanbol.commons.web.base.NavigationLink;
 public class ExampleMenuItem extends NavigationLink {
     
     public ExampleMenuItem() {
-        super("${artifactId}", 
+        super("${artifactId}/", 
                 "Example: ${artifactId}", 
                 "An stateless service example", 300);
     }
