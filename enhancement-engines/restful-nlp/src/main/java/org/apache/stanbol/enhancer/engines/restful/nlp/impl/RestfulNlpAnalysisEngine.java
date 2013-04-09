@@ -131,6 +131,8 @@ import org.slf4j.LoggerFactory;
         @Property(name=RestfulNlpAnalysisEngine.ANALYSIS_SERVICE_URL, value ="http://changeme"),
         @Property(name=RestfulNlpAnalysisEngine.ANALYSIS_SERVICE_USER, value =""),
         @Property(name=RestfulNlpAnalysisEngine.ANALYSIS_SERVICE_PWD, value =""),
+        @Property(name=RestfulNlpAnalysisEngine.WRITE_TEXT_ANNOTATIONS_STATE, 
+            boolValue=RestfulNlpAnalysisEngine.DEFAULT_WRITE_TEXT_ANNOTATION_STATE),
         @Property(name=Constants.SERVICE_RANKING,intValue=0)
 })
 public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOException,RuntimeException> implements ServiceProperties {
@@ -149,7 +151,12 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
      * The User for the remote analyses service
      */
     public static final String ANALYSIS_SERVICE_PWD = "enhancer.engine.restful.nlp.analysis.service.pwd";
-        
+    /**
+     * Allows to enable/disable the addition of <code>fise:TextAnnotation</code>s
+     * to the enhancement metadata of the ContentItem
+     */
+    public static final String WRITE_TEXT_ANNOTATIONS_STATE = "enhancer.engine.restful.nlp.analysis.write-textannotations";
+    public static final boolean DEFAULT_WRITE_TEXT_ANNOTATION_STATE = true;  
     /**
      * Language configuration. Takes a list of ISO language codes to be processed
      * by this engine. This list will be joined with the list of languages supported
@@ -196,6 +203,8 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
      */
     @Reference
     private AnalyzedTextParser analyzedTextParser;
+
+    private boolean writeTextAnnotations;
     
     /**
      * Indicate if this engine can enhance supplied ContentItem, and if it
@@ -282,49 +291,51 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                 throw RuntimeException.class.cast(e);
             }
         }
-        Iterator<Span> spans = at.getEnclosed(EnumSet.of(SpanTypeEnum.Sentence,SpanTypeEnum.Chunk));
-        Sentence context = null;
-        MGraph metadata = ci.getMetadata();
-        Language lang = new Language(language);
-        LiteralFactory lf = LiteralFactory.getInstance();
-        ci.getLock().writeLock().lock();
-        try { //write TextAnnotations for Named Entities
-            while(spans.hasNext()){
-                Span span = spans.next();
-                switch (span.getType()) {
-                    case Sentence:
-                        context = (Sentence)context;
-                        break;
-                    default:
-                        Value<NerTag> nerAnno = span.getAnnotation(NER_ANNOTATION);
-                        if(nerAnno != null){
-                            UriRef ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
-                            //add span related data
-                            metadata.add(new TripleImpl(ta, ENHANCER_SELECTED_TEXT, 
-                                new PlainLiteralImpl(span.getSpan(), lang)));
-                            metadata.add(new TripleImpl(ta, ENHANCER_START, 
-                                lf.createTypedLiteral(span.getStart())));
-                            metadata.add(new TripleImpl(ta, ENHANCER_END, 
-                                lf.createTypedLiteral(span.getEnd())));
-                            metadata.add(new TripleImpl(ta, ENHANCER_SELECTION_CONTEXT, 
-                                new PlainLiteralImpl(context == null ?
-                                        getDefaultSelectionContext(at.getSpan(), span.getSpan(), span.getStart()) :
-                                            context.getSpan(), lang)));
-                            //add the NER type
-                            if(nerAnno.value().getType() != null){
-                                metadata.add(new TripleImpl(ta,DC_TYPE,nerAnno.value().getType()));
+        if(writeTextAnnotations){
+            Iterator<Span> spans = at.getEnclosed(EnumSet.of(SpanTypeEnum.Sentence,SpanTypeEnum.Chunk));
+            Sentence context = null;
+            MGraph metadata = ci.getMetadata();
+            Language lang = new Language(language);
+            LiteralFactory lf = LiteralFactory.getInstance();
+            ci.getLock().writeLock().lock();
+            try { //write TextAnnotations for Named Entities
+                while(spans.hasNext()){
+                    Span span = spans.next();
+                    switch (span.getType()) {
+                        case Sentence:
+                            context = (Sentence)context;
+                            break;
+                        default:
+                            Value<NerTag> nerAnno = span.getAnnotation(NER_ANNOTATION);
+                            if(nerAnno != null){
+                                UriRef ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                                //add span related data
+                                metadata.add(new TripleImpl(ta, ENHANCER_SELECTED_TEXT, 
+                                    new PlainLiteralImpl(span.getSpan(), lang)));
+                                metadata.add(new TripleImpl(ta, ENHANCER_START, 
+                                    lf.createTypedLiteral(span.getStart())));
+                                metadata.add(new TripleImpl(ta, ENHANCER_END, 
+                                    lf.createTypedLiteral(span.getEnd())));
+                                metadata.add(new TripleImpl(ta, ENHANCER_SELECTION_CONTEXT, 
+                                    new PlainLiteralImpl(context == null ?
+                                            getDefaultSelectionContext(at.getSpan(), span.getSpan(), span.getStart()) :
+                                                context.getSpan(), lang)));
+                                //add the NER type
+                                if(nerAnno.value().getType() != null){
+                                    metadata.add(new TripleImpl(ta,DC_TYPE,nerAnno.value().getType()));
+                                }
+                                if(nerAnno.probability() >= 0) {
+                                    metadata.add(new TripleImpl(ta, ENHANCER_CONFIDENCE, 
+                                        lf.createTypedLiteral(nerAnno.probability())));
+                                }
                             }
-                            if(nerAnno.probability() >= 0) {
-                                metadata.add(new TripleImpl(ta, ENHANCER_CONFIDENCE, 
-                                    lf.createTypedLiteral(nerAnno.probability())));
-                            }
-                        }
-                        break;
+                            break;
+                    }
                 }
+            } finally {
+                ci.getLock().writeLock().unlock();
             }
-        } finally {
-            ci.getLock().writeLock().unlock();
-        }
+        } //else do not write fise:TextAnnotations
     }
 
     protected class AnalysisResponseHandler implements ResponseHandler<AnalysedText>{
@@ -455,6 +466,14 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
             supportedLanguages.add(st.nextToken());
         }
         
+        value = properties.get(WRITE_TEXT_ANNOTATIONS_STATE);
+        if(value instanceof Boolean){
+            this.writeTextAnnotations = ((Boolean)value).booleanValue();
+        } else if(value != null){
+            this.writeTextAnnotations = Boolean.parseBoolean(value.toString());
+        } else {
+            this.writeTextAnnotations = DEFAULT_WRITE_TEXT_ANNOTATION_STATE;
+        }
     }
     
     @Deactivate
