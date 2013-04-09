@@ -19,7 +19,7 @@
   <!-- 
    The kuromoji analyzer bundle (extension to o.a.s.commons.solr.core module)
    -->
-  <startLevel level="28"> <!-- commons.solr.core uses startlevel 27 -->
+  <startLevel level="27"> <!-- commons.solr.core uses startlevel 27 -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.extras.kuromoji</artifactId>
