@@ -125,10 +125,16 @@ public class EntityhubRootResource extends BaseStanbolResource {
      */
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
     private NamespacePrefixService nsPrefixService;
+    private Entityhub entityhub;
 
     // bind the job manager by looking it up from the servlet request context
     public EntityhubRootResource(@Context ServletContext servletContext) {
         super();
+        entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
+        if(entityhub == null){
+            throw new WebApplicationException(Response.status(Status.NOT_FOUND)
+                .entity("The Entityhub Service is currently not active!").build());
+        }
         nsPrefixService = ContextHelper.getServiceFromContext(NamespacePrefixService.class, servletContext);
     }
     @OPTIONS
@@ -208,7 +214,6 @@ public class EntityhubRootResource extends BaseStanbolResource {
                 // TODO: how to parse an error message
                 throw new WebApplicationException(BAD_REQUEST);
             }
-            Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
             Entity entity;
             try {
                 entity = entityhub.lookupLocalEntity(reference, create);
