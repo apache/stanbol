@@ -140,9 +140,10 @@
         <version>1.7</version>
         <configuration>
           <target>
+            <property name="vm.args" value=""/>
             <java fork="true" jar="${project.build.directory}/${project.build.finalName}.jar"
                 dir="${project.build.directory}">
-              <jvmarg line="-Xmx1024m -XX:MaxPermSize=256M"/>
+              <jvmarg line="-Xmx1024m -XX:MaxPermSize=256M ${vm.args}"/>
             </java>
           </target>
         </configuration>
