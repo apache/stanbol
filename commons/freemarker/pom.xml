@@ -56,6 +56,9 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Bundle-Activator>
+              org.apache.stanbol.commons.freemarker.impl.Activator
+            </Bundle-Activator>
             <Embed-Dependency>freemarker</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Export-Package>freemarker.*</Export-Package>
@@ -73,7 +76,6 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
               !org.apache.log.*,
               !com.sun.org.apache.*,
               !javax.el,
-              !org.slf4j.spi,
               !org.zeroturnaround.javarebel,
               javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs;version="[0,2)",
