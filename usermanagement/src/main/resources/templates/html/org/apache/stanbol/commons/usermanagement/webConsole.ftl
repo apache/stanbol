@@ -330,13 +330,6 @@ limitations under the License.
                     $("#roles-checkboxes").html(data);
                 }, "text/html");
                 
-        
-                $.get("/user-management/users/"+userName+"/permissionsCheckboxes",
-                function(data){
-                    console.log("permissionsCheckboxes = "+data);
-                    $("#permissions-checkboxes").html(data);
-                }, "text/html");
-                
                 $("#editUserForm").dialog("open");
             }
         });
@@ -380,12 +373,6 @@ limitations under the License.
             dataType: "html",
             success: function(data) {
                 $("#editRoleForm").html(data);      
-        
-                $.get("/user-management/roles/"+roleName+"/permissionsCheckboxes",
-                function(data){
-                    console.log("permissionsCheckboxes = "+data);
-                    $("#role-permissions-checkboxes").html(data);
-                }, "text/html");
                 
                 $("#editRoleForm").dialog("open");
             }

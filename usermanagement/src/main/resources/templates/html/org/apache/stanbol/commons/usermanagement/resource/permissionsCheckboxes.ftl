@@ -6,13 +6,13 @@
 <!-- @ldpath path="fn:sort(^rdf:type)" -->
  <@ldpath path="fn:sort(permission:hasPermission)">
  
-<#assign permission>
-<@ldpath path="permission:javaPermissionEntry :: xsd:string"/>
-</#assign>
-
-    <input class="checkboxPermission" type="checkbox" id="${permission}" name="${permission}" value="${permission}" checked="checked"  />
-    <label for="${permission}">${permission}</label>
-    <br/>
+    <#assign permission>
+    <@ldpath path="permission:javaPermissionEntry :: xsd:string"/>
+    </#assign>
+    <div class="role">
+        <input class="checkboxPermission" type="checkbox" id="${permission}" name="${permission}" value="${permission}" checked="checked"  />
+        <label for="${permission}">${permission}</label>
+    </div>
     
 </@ldpath>
 

@@ -162,25 +162,12 @@ public class UserResource {
      */
     @GET
     @Path("users/edit/{username}")
-    @Produces(MediaType.TEXT_HTML)
     public RdfViewable editUser(@PathParam("username") String userName) {
         return new RdfViewable("editUser", getUser(userName),
                 this.getClass());
     }
 
-    /**
-     * Produces suitable permission-checkboxes
-     */
-    @GET
-    @Path("users/{username}/permissionsCheckboxes")
-    @Produces(MediaType.TEXT_HTML)
-    public RdfViewable permissionsCheckboxes(@PathParam("username") String userName) {
-        addClassToPermissions(); // workaround
-        // showSystem();
-        addClassToPermissions(); // workaround
-        showSystem();
-        return new RdfViewable("permissionsCheckboxes", getPermissionType(), this.getClass());
-    }
+  
 
     /**
      * RESTful access to user roles (and nested permissions right now - may
@@ -619,17 +606,7 @@ public class UserResource {
                 systemGraph);
     }
 
-    /**
-     * Produces suitable permission-checkboxes
-     */
-    @GET
-    @Path("roles/{rolename}/permissionsCheckboxes")
-    @Produces(MediaType.TEXT_HTML)
-    public RdfViewable rolePermissionsCheckboxes(@PathParam("rolename") String roleName) {
-        // addClassToPermissions(); // workaround
-        // showSystem();
-        return new RdfViewable("rolePermissionsCheckboxes", getRole(roleName), this.getClass());
-    } // getPermissionType()
+
 
 // **********************************
 // ****** ADD ROLE ****************** 
