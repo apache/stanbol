@@ -40,7 +40,9 @@ limitations under the License.
 
     <fieldset class="labelCheckbox">
         <legend>Permissions</legend>
-        <div id="role-permissions-checkboxes"></div>
+        <div id="role-permissions-checkboxes">
+            <#include "permissionsCheckboxes.ftl">
+        </div>
     </fieldset> 
 
     <fieldset>
