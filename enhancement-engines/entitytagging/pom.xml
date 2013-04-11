@@ -123,6 +123,12 @@
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
+        <exclusions>
+          <exclusion> <!-- Do not override a newer version required by Solr 4.2.1 -->
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+          </exclusion>
+        </exclusions>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

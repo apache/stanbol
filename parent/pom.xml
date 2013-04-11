@@ -60,7 +60,7 @@
     <jersey-version>1.15</jersey-version>
     <freemarker-version>2.3.19</freemarker-version>
     <owlapi-version>3.3</owlapi-version>
-    <solr-version>4.1.0</solr-version>
+    <solr-version>4.2.1</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
     <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
   </properties>
