@@ -57,6 +57,7 @@
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
+        <version>0.8</version>
         <configuration>
           <excludes>
             <exclude>.svnignore</exclude>
@@ -64,6 +65,7 @@
             <exclude>src/license/THIRD-PARTY.properties</exclude>
             <!-- rdfQuery has MIT licence -->
             <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/jquery.rdfquery.min.js</exclude>
+            <exclude>src/main/resources/META-INF/resources/static/enhancervie/annotate.css</exclude>
             <!--
                 Annotate.js: MIT License
                 underscore.js: MIT license
@@ -82,6 +84,16 @@
             <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/test.js</exclude>
             -->
           </excludes>
+            <licenses>
+                <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+                    <licenseFamilyCategory>MIT</licenseFamilyCategory>
+                    <licenseFamilyName>The MIT License (MIT)</licenseFamilyName>
+                    <notes></notes>
+                    <patterns>
+                        <pattern>the MIT license</pattern>
+                    </patterns>
+                </license>
+            </licenses>
         </configuration>
       </plugin>
     </plugins>

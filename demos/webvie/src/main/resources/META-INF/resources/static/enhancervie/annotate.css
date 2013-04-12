@@ -2,7 +2,7 @@
      (c) 2011 Szaby Gruenwald, IKS Consortium
      Annotate may be freely distributed under the MIT license
 */
-.entity, a[typeof][about] {
+.entity, a[resource] {
 	z-index: -1;
 	padding: 0 3px;
 	background-color: #E0E0E0;
@@ -11,7 +11,7 @@
 	white-space: nowrap;
 	border-width:1px;
 }
-a[typeof][about] {
+a[resource] {
     border-width: 1px 0;
     border-color: rgba(0, 0, 0, 0.8);
     border-style: solid;
@@ -20,13 +20,13 @@ a[typeof][about] {
 .entity.withSuggestions {border-color: rgba(0, 0, 0, 0.8);}
 
 .entity.person, 
-a[typeof][about].person       {background-color: #ffe;}
+a[resource].person       {background-color: #ffe;}
 
 .entity.place,
-a[typeof][about].place        {background-color: #fef;}
+a[resource].place        {background-color: #fef;}
 
 .entity.organisation,
-a[typeof][about].organisation {background-color: #eff;}
+a[resource].organisation {background-color: #eff;}
 
 #loadingDiv {
     position: absolute;

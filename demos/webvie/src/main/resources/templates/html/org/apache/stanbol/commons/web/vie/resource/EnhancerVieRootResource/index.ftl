@@ -36,110 +36,225 @@ article {
      xmlns:enhancer="http://fise.iks-project.eu/ontology/"
      xmlns:dc="http://purl.org/dc/terms/">
 
+    <div>
+        <label>
+            Enhancement chain:
+            <select id="chain" value="default">
+                <option>not loaded yet</option>
+            </select>
+        </label>
+    </div>
+
     <script>
     $(document).ready(function(){
+        // var stanbolUrl = "http://dev.iks-project.eu:8081";
+        var stanbolUrl = window.location.href.replace(/\/[a-z]*\/?$/, "");
+        console.info("${it.publicBaseUri}");
         $('#loadingDiv')
-        .hide()  // hide it initially
-        .ajaxStart(function() {
-            $(this).show();
-        })
-        .ajaxStop(function() {
-            $(this).hide();
+                .hide()  // hide it initially
+                .ajaxStart(function () {
+                    $(this).show();
+                })
+                .ajaxStop(function () {
+                    $(this).hide();
+                });
+        function getChain() {
+            return $("#chain").val();
+        }
+
+        // Whenever the chain selector changes, tell annotate.js about it.
+        $("#chain").bind('change', function (e) {
+            var z = new VIE();
+            var chain = getChain();
+            z.use(new z.StanbolService({
+                // remove "/enhancervie" or "/enhancervie/" from the end of the uri.
+                // it.publicBaseUri gives back http://localhost:8080 or so if redirected so it's not useful.
+                url: stanbolUrl,
+                enhancer: {chain: chain}
+            }));
+
+            $('#content').annotate('option', 'vie', z);
+            var state = $('.enhanceButton').prop('checked');
+            if (state) {
+                $('#content').annotate('disable');
+                _.defer(function () {
+                    $('#content').annotate('enable');
+                });
+            }
         });
-        var z = new VIE();
-        z.use(new z.StanbolService({
-            // remove "/enhancervie" or "/enhancervie/" from the end of the uri.
-            // it.publicBaseUri gives back http://localhost:8080 or so if redirected so it's not useful.
-            url : window.location.href.replace(/\/[a-z]*\/?$/, ""), //"${it.publicBaseUri}",
-            proxyDisabled: true
-        }));
 
         // make the content element editable
         $('#content').hallo({
             plugins: {
-              'halloformat': {}
+//              'halloformat': {}
             },
             editable: true
         });
-        $('#content').annotate({
-            vie: z,
-            vieServices: ["stanbol"],
-            showTooltip: true,
-            debug: true,
-            decline: function(event, ui){
-                console.info('decline event', event, ui);
-            },
-            select: function(event, ui){
-                console.info('select event', event, ui);
-            },
-            remove: function(event, ui){
-                console.info('remove event', event, ui);
-            }
 
-        });
+        function enable() {
+            $('#content')
+                    .each(function () {
+                        $(this)
+                                .annotate('enable', function (success) {
+                                    if (success) {
+                                        $('.enhanceButton')
+                                                .button('enable')
+                                                .button('option', 'label', 'Done');
+
+                                        $('.acceptAllButton')
+                                                .show()
+                                                .button('enable')
+                                    } else {
+                                        $('.enhanceButton')
+                                                .button('enable')
+                                                .button('option', 'label', 'error, see the log.. Try to enhance again!');
+                                    }
+                                });
+                    });
+        }
+
+        function instantiate() {
+            var z = new VIE();
+            z.use(new z.StanbolService({
+                url: stanbolUrl
+                // enhancer: {chain: getChain()}
+            }));
+            $('#content').annotate({
+                vie: z,
+                // typeFilter: ["http://dbpedia.org/ontology/Place", "http://dbpedia.org/ontology/Organisation", "http://dbpedia.org/ontology/Person"],
+                debug: true,
+                //autoAnalyze: true,
+                showTooltip: true,
+                decline: function (event, ui) {
+                    console.info('decline event', event, ui);
+                },
+                select: function (event, ui) {
+                    console.info('select event', event, ui);
+                },
+                remove: function (event, ui) {
+                    console.info('remove event', event, ui);
+                },
+                success: function (event, ui) {
+                    console.info('success event', event, ui);
+                },
+                error: function (event, ui) {
+                    console.info('error event', event, ui);
+                    alert(ui.message);
+                }
+            });
+        }
+
+        instantiate();
 
         $('.acceptAllButton')
-        .button()
-        .hide()
-        .click(function(){
-            $('#content')
-            .annotate('acceptAll', function(report){
-                console.log('AcceptAll finished with the report:', report);
-            });
-            $('.acceptAllButton')
-            .button('disable');
-        });
+                .button()
+                .hide()
+                .click(function () {
+                    $('#content')
+                            .each(function () {
+                                $(this)
+                                        .annotate('acceptAll', function (report) {
+                                            console.log('AcceptAll finished with the report:', report);
+                                        });
+                            })
+                    $('.acceptAllButton')
+                            .button('disable');
+                });
 
         $('.enhanceButton')
-        .button({enhState: 'passiv'})
-        .click(function(){
-            // Button with two states
-            var oldState = $(this).button('option', 'enhState');
-            var newState = oldState === 'passiv' ? 'active' : 'passiv';
-            $('.enhanceButton').button('option', 'enhState', newState);
-            if($(this).button('option', 'enhState') === 'active'){
-                // annotate.enable()
-                try {
-                    $('#content').annotate('enable', function(success){
-                        if(success){
-                            $('.enhanceButton')
-                            .button('enable')
-                            .button('option', 'label', 'Done');
+                .button()
+                .change(function (e) {
+                    var button = $(e.target);
+                    var state = button.prop('checked');
+                    $('.enhanceButton').prop('checked', state).button('refresh');
 
-                            $('.acceptAllButton')
-                            .show()
-                            .button('enable')
-                        } else {
-                            $('.enhanceButton')
-                            .button('enable')
-                            .button('option', 'label', 'error, see the log.. Try to enhance again!');
-                        }
-                    });
-                    $('.enhanceButton')
-                    .button('disable')
-                    .button('option', 'label', 'in progress...')
-                } catch (e) {
-                    alert(e);
+                    if (state) {
+                        $('.enhanceButton').button('option', 'label', 'Done');
+                        enable();
+                        $('.acceptAllButton')
+                                .show();
+                    } else {
+                        // annotate.disable()
+                        $('#content').annotate('disable');
+                        $('.enhanceButton').button('option', 'label', 'Enhance!');
+                        $('.acceptAllButton')
+                                .hide();
+                    }
+
+                });
+
+        function getChains(stanbolUri, cb) {
+            var query = "PREFIX enhancer: <http://stanbol.apache.org/ontology/enhancer/enhancer#> \n" +
+                    "PREFIX rdfs:     <http://www.w3.org/2000/01/rdf-schema#> \n" +
+                    "SELECT distinct ?name ?chain " +
+                    "WHERE { " +
+                    "?chain a enhancer:EnhancementChain. \n" +
+                    "?chain rdfs:label ?name .\n" +
+                    "} " +
+                    "ORDER BY ASC(?name) ";
+
+            function success(res) {
+                var chains = $('binding[name=name] literal', res).map(function () {
+                    return this.textContent;
+                }).toArray();
+                if (_(chains).indexOf('default') != -1) {
+                    chains = _.union(['default'], chains);
                 }
-
-            } else {
-                // annotate.disable()
-                $('#content').annotate('disable');
-                $('.enhanceButton').button('option', 'label', 'Enhance!');
-                $('.acceptAllButton')
-                .hide()
+                cb(null, chains);
             }
-        });
+
+            function error(xhr) {
+                cb(xhr);
+            }
+
+            var uri = stanbolUri + "/enhancer/sparql";
+
+            $.ajax({
+                type: "POST",
+                url: uri,
+                data: {query: query},
+                // accepts: ["application/json"],
+                accepts: {'application/json': 'application/sparql-results+json'},
+                // dataType: "application/json",
+                success: success,
+                error: error
+            });
+            // var xhr = $.getJSON(uri,success);xhr.error(error);
+        }
+
+        function fillChainList(cb) {
+            var v = new VIE();
+            v.use(new v.StanbolService({url: stanbolUrl}));
+            getChains(stanbolUrl, function (err, chains) {
+                if (err) {
+                    console.info(err);
+                    $('#chain').html("<option>Error loading chains</option>");
+                    $('#error').html('Error loading list of chains from ' + stanbolUrl);
+                } else {
+                    console.info('Chains:', chains);
+                    $('#chain').html('');
+                    for (i in chains) {
+                        var chain = chains[i];
+                        $('#chain').append("<option value='" + chain + "'>" + chain + "</option>");
+                    }
+                    cb();
+                }
+            });
+
+        }
+
+        // Fill in the chain list, then initialize the annotate.js widget.
+        fillChainList(instantiate);
     });
     </script>
-    <button class="enhanceButton">Enhance!</button>
+    <input type="checkbox" class="enhanceButton" id="enhanceButton1"/><label for="enhanceButton1">Enhance!</label>
     <button class="acceptAllButton" style="display:none;">Accept all</button>
     <article typeof="schema:CreativeWork" about="http://stanbol.apache.org/enhancertest">
         <div property="sioc:content" id="content">
 Text here...
         </div>
     </article>
-    <button class="enhanceButton">Enhance!</button>
+    <input type="checkbox" class="enhanceButton" id="enhanceButton2"/><label for="enhanceButton2">Enhance!</label>
     <button class="acceptAllButton" style="display:none;">Accept all</button>
     
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>

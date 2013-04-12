@@ -1,64 +1,42 @@
-
-/*     Hallo - a rich text editing jQuery UI widget
-#     (c) 2011 Henri Bergius, IKS Consortium
-#     Hallo may be freely distributed under the MIT license
-*/
-
 (function() {
-
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   (function(jQuery) {
     return jQuery.widget("IKS.halloformat", {
       options: {
         editable: null,
         toolbar: null,
         uuid: "",
-        formattings: {
-          bold: true,
-          italic: true,
-          strikeThrough: true,
-          underline: true
-        }
+        formattings: ["bold", "italic"]
       },
       _create: function() {
-        var buttonize, buttonset, enabled, format, widget, _ref,
-          _this = this;
+        var buttonize, buttonset, format, widget, _i, _len, _ref;
         widget = this;
-        buttonset = jQuery("<span class=\"" + widget.widgetName + "\"></span>");
-        buttonize = function(format) {
-          var button, element, id, label, queryState;
+        buttonset = jQuery("<span></span>");
+        buttonize = __bind(function(format) {
+          var button, id, label;
           label = format.substr(0, 1).toUpperCase();
-          id = "" + _this.options.uuid + "-" + format;
-          buttonset.append(jQuery("<input id=\"" + id + "\" type=\"checkbox\" /><label for=\"" + id + "\" class=\"" + format + "_button\">" + label + "</label>").button());
+          id = "" + this.options.uuid + "-" + format;
+          buttonset.append(jQuery("<input id=\"" + id + "\" type=\"checkbox\" /><label for=\"" + id + "\">" + label + "</label>").button());
           button = jQuery("#" + id, buttonset);
           button.attr("hallo-command", format);
-          button.addClass(format);
           button.bind("change", function(event) {
             format = jQuery(this).attr("hallo-command");
             return widget.options.editable.execute(format);
           });
-          queryState = function(event) {
+          return this.element.bind("keyup paste change mouseup", function(event) {
             if (document.queryCommandState(format)) {
               button.attr("checked", true);
-              button.next("label").addClass("ui-state-clicked");
               return button.button("refresh");
             } else {
               button.attr("checked", false);
-              button.next("label").removeClass("ui-state-clicked");
               return button.button("refresh");
             }
-          };
-          element = _this.element;
-          _this.element.bind("halloenabled", function() {
-            return element.bind("keyup paste change mouseup", queryState);
           });
-          return _this.element.bind("hallodisabled", function() {
-            return element.unbind("keyup paste change mouseup", queryState);
-          });
-        };
+        }, this);
         _ref = this.options.formattings;
-        for (format in _ref) {
-          enabled = _ref[format];
-          if (enabled) buttonize(format);
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          format = _ref[_i];
+          buttonize(format);
         }
         buttonset.buttonset();
         return this.options.toolbar.append(buttonset);
@@ -66,5 +44,4 @@
       _init: function() {}
     });
   })(jQuery);
-
 }).call(this);

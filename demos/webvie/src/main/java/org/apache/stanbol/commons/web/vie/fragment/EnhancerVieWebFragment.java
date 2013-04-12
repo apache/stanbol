@@ -82,17 +82,18 @@ public class EnhancerVieWebFragment implements WebFragment {
     @Override
     public List<ScriptResource> getScriptResources() {
         List<ScriptResource> resources = new ArrayList<ScriptResource>();
-        resources.add(new ScriptResource("text/javascript", "lib/jquery-1.7.1.js", this, 10));
-        resources.add(new ScriptResource("text/javascript", "lib/jquery-ui.1.9m5.js", this, 10));
+        resources.add(new ScriptResource("text/javascript", "lib/jquery/jquery-1.8.2.js", this, 10));
+        resources.add(new ScriptResource("text/javascript", "lib/jqueryui/jquery-ui.1.9.2.js", this, 10));
         resources.add(new ScriptResource("text/javascript", "lib/underscore-min.js", this, 10));
         resources.add(new ScriptResource("text/javascript", "lib/backbone.js", this, 10));
 
         resources.add(new ScriptResource("text/javascript", "lib/jquery.rdfquery.debug.js", this, 10));
-        resources.add(new ScriptResource("text/javascript", "lib/vie/vie-latest.debug.js", this, 10));
+        resources.add(new ScriptResource("text/javascript", "lib/vie/vie-2.1.0.debug.js", this, 10));
 
         resources.add(new ScriptResource("text/javascript", "lib/hallo/hallo.js", this, 10));
         resources.add(new ScriptResource("text/javascript", "lib/hallo/format.js", this, 10));
 
+        resources.add(new ScriptResource("text/javascript", "lib/vie.entitypreview.js", this, 10));
         resources.add(new ScriptResource("text/javascript", "lib/annotate.js", this, 10));
 
         return resources;
@@ -101,7 +102,7 @@ public class EnhancerVieWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("enhancervie", "/enhancer VIE", htmlDescription, 20));
+        links.add(new NavigationLink("enhancervie", "/enhancer VIE", htmlDescription, 21));
         return links;
     }
 
