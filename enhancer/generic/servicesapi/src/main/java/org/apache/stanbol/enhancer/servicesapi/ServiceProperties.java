@@ -123,7 +123,12 @@ public interface ServiceProperties {
      * Ordering values < {@link #ORDERING_NLP_CHUNK} and >=
      * {@link #ORDERING_NLP_LEMMATIZE} are reserved for engines that lemmatize
      * texts.<p>
-     * TODO: maybe this should be the same as {@link #ORDERING_NLP_TOKENIZING}
      */
     Integer ORDERING_NLP_LEMMATIZE = ServiceProperties.ORDERING_CONTENT_EXTRACTION + 40;
+    /**
+     * Ordering values < {@link #ORDERING_NLP_LEMMATIZE} and >=
+     * {@link #ORDERING_NLP_NER} are reserved for engines that do perform 
+     * Named Entity Recognition (NER)<p>
+     */
+    Integer ORDERING_NLP_NER = ServiceProperties.ORDERING_CONTENT_EXTRACTION + 30;
 }
