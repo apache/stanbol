@@ -55,6 +55,16 @@ import org.slf4j.LoggerFactory;
 public class EnhancementEngineHelper {
 
     /**
+     * The maximum size of the prefix/suffix for the selection context
+     * @since 0.11.0
+     */
+    public static final int DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE = 50;
+    /**
+     * The minimum size of the prefix/suffix for the selection context
+     * @since 0.11.0
+     */
+    public static final int MIN_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE = 15;
+    /**
      * The minimum length of the selected text so that fise:selection-head and
      * fise:selection.tail are being used instead of fise:selected-text. The
      * actual size is calculated by using <code>prefixSuffixLength*5</code>.
@@ -178,6 +188,68 @@ public class EnhancementEngineHelper {
                     end-prefixSuffixSize,end),lang)));
         }
     }
+    
+    /**
+     * Extracts the selection context based on the content, selection and
+     * the start char offset of the selection. Tries to cut of the context 
+     * on whole words. The size of the prefix/suffix is set to
+     * {@link #DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE}.
+     * @param content the content
+     * @param selection the selected text
+     * @param selectionStartPos the start char position of the selection
+     * @return the context
+     * @since 0.11.0
+     */
+    public static String getSelectionContext(String content, String selection, int selectionStartPos){
+        return getSelectionContext(content, selection, selectionStartPos, 
+            DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE);
+    }
+    /**
+     * Extracts the selection context based on the content, selection and
+     * the start char offset of the selection. Tries to cut of the context 
+     * on whole words.
+     * @param content the content
+     * @param selection the selected text
+     * @param selectionStartPos the start char position of the selection
+     * @param contextSize the size of the prefix/suffix. If less than zero the
+     * {@link #DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE} is used. If in the
+     * range [0..{@link #MIN_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE}] than the
+     * size is set to {@link #MIN_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE}
+     * @return the context
+     * @since 0.11.0
+     */
+    public static String getSelectionContext(String content, String selection, int selectionStartPos, int contextSize){
+        if(contextSize < 0){
+            contextSize = DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE;
+        }
+        if(contextSize < MIN_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE){
+            contextSize = MIN_PREFIX_SUFFIX_SIZE;
+        }
+        //extract the selection context
+        int beginPos;
+        if(selectionStartPos <= DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE){
+            beginPos = 0;
+        } else {
+            int start = selectionStartPos-DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE;
+            beginPos = content.indexOf(' ',start);
+            if(beginPos < 0 || beginPos >= selectionStartPos){ //no words
+                beginPos = start; //begin within a word
+            }
+        }
+        int endPos;
+        if(selectionStartPos+selection.length()+DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE >= content.length()){
+            endPos = content.length();
+        } else {
+            int start = selectionStartPos+selection.length()+DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE;
+            endPos = content.lastIndexOf(' ', start);
+            if(endPos <= selectionStartPos+selection.length()){
+                endPos = start; //end within a word;
+            }
+        }
+        return content.substring(beginPos, endPos);
+    }
+
+    
     
     /**
      * Create a new instance with the types enhancer:Enhancement and
