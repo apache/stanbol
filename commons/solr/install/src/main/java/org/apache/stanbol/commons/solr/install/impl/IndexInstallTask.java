@@ -71,11 +71,11 @@ public class IndexInstallTask extends InstallTask {
             String serverName = (String) getResource().getAttribute(ManagedIndexConstants.SERVER_NAME);
             ManagedSolrServer server = managedServers.get(serverName);
             if(server == null){
-                log.warn("Unable to remove Managed Solr Index {} because the {} " +
+                log.warn("Unable to install Managed Solr Index {} because the {} " +
                         "Server {} is currently not active!", 
                         new Object[]{indexName,serverName == null ? "default" : "",
                                 serverName != null ? serverName : ""});
-                setFinishedState(ResourceState.IGNORED);
+                setFinishedState(ResourceState.IGNORED); //needs still to be installed
             } else {
                 //we have an index name and a server to in stall it ... 
                 //  ... let's do the work

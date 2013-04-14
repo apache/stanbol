@@ -30,16 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO: To remove a SolrIndex one would need first to close the SolrCore or shutdown the SolrContainer. This
- * is currently not possible be cause the current architecture was not intended to support that.
- * <p>
- * To implement this one would need access to the CoreContainer with the core running on top of the Core to
- * remove. Than one would need to call {@link CoreContainer#remove(String)} with the core and
- * {@link CoreContainer#persist()} to remove the core also from the solr.xml. After that one can remove the
- * files from the disk.
- * <p>
- * This would still have the problem that other components using an {@link EmbeddedSolrServer} that is based
- * on this core would not be notified about such a change.
+ * Removes the SolrCore from the {@link ManagedSolrServer} by calling
+ * {@link ManagedSolrServer#removeIndex(String, boolean)}.
  * 
  * @author Rupert Westenthaler
  * 
