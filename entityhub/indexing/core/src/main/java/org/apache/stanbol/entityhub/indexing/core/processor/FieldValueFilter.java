@@ -16,14 +16,17 @@
 */
 package org.apache.stanbol.entityhub.indexing.core.processor;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixProvider;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.indexing.core.EntityProcessor;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
@@ -50,29 +53,42 @@ public class FieldValueFilter implements EntityProcessor{
     
     public static final String DEFAULT_FIELD = "rdf:type";
 
-    public String field;
-    public Collection<String> values;
-    /**
-     * Parsing 'null' or '' as value can be used to include entities that do not
-     * define any values for the configured {@link #field}
-     */
-    boolean includeEmpty;
+    protected String field;
+    protected boolean includeAll = false;
+    protected Collection<String> included;
+    protected Collection<String> exclude;
+    //now represented by adding "" to included and exclude
+    //boolean includeEmpty;
 
-    private NamespacePrefixService nsPrefixService;
+    private NamespacePrefixProvider nsPrefixProvider;
+    
+    public FieldValueFilter() {}
+    
+    /**
+     * Only for unit testing
+     */
+    protected FieldValueFilter(NamespacePrefixProvider nsPrefixProvider, String field, Object filterConfig){
+        this.nsPrefixProvider = nsPrefixProvider;
+        this.field = getUri(field);
+        parseFilterConfig(filterConfig);
+    }
     
     @Override
     public Representation process(Representation source) {
-        if(includeEmpty && values.isEmpty()){ //no filter set
-            return source;
+        if(includeAll && exclude.isEmpty()){
+            return source; //filter inactive
         }
         Iterator<Reference> refs = source.getReferences(field);
-        if(includeEmpty && !refs.hasNext()){ //no values and includeNull
-            return source;
+        if(!refs.hasNext()){ //no values and includeNull
+            return (includeAll && !exclude.contains("")) || //include and empty not excluded
+                    (!includeAll && included.contains("")) ? //empty is included
+                            source : null;
         }
         while(refs.hasNext()){
-            //NOTE: if !includeEmpty values may be NULL (any value accepted)
-            if(values == null || values.contains(refs.next().getReference())){
-                return source;
+            String value = refs.next().getReference();
+            if((includeAll && !exclude.contains(value)) || //include and empty not excluded
+                    (!includeAll && included.contains(value))){ //empty is included
+               return source; 
             }
         }
         //not found -> filter
@@ -95,64 +111,96 @@ public class FieldValueFilter implements EntityProcessor{
     @Override
     public void setConfiguration(Map<String,Object> config) {
         IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
-        nsPrefixService = indexingConfig.getNamespacePrefixService();
+        nsPrefixProvider = indexingConfig.getNamespacePrefixService();
         Object value = config.get(PARAM_FIELD);
         if(value == null || value.toString().isEmpty()){
-            this.field = NamespaceMappingUtils.getConfiguredUri(nsPrefixService, DEFAULT_FIELD);
+            this.field = getUri(DEFAULT_FIELD);
             log.info("Using default Field {}",field);
         } else {
-            this.field = NamespaceMappingUtils.getConfiguredUri(nsPrefixService, value.toString());
+            this.field = getUri(value.toString());
             log.info("configured Field: {}",field);
         }
         value = config.get(PARAM_VALUES);
+        parseFilterConfig(value);
+    }
+
+    /**
+     * @param value
+     */
+    private void parseFilterConfig(Object value) {
+        Collection<String> values; 
         if(value instanceof String){
-            String stringValue = value.toString().trim();
-            if(stringValue.equals("*")){ // * -> deactivate Filtering
-                this.values = Collections.emptySet();
-                this.includeEmpty = true;
-            } else {
-                Set<String> values = new HashSet<String>();
-                for(String fieldValue : stringValue.split(";")){
-                    if(fieldValue != null){
-                        if(fieldValue.isEmpty() || fieldValue.equalsIgnoreCase("null")){
-                            this.includeEmpty = true;
-                        } else {
-                            values.add(NamespaceMappingUtils.getConfiguredUri(nsPrefixService, fieldValue));
-                        }
-                    } 
-                }
-                if(values.isEmpty() && !includeEmpty){
-                    throw new IllegalArgumentException("Parameter "+PARAM_VALUES+'='+value+" does not contain a valid field value!");
-                } else {
-                    this.values = values;
-                }
-            }
+            values = Arrays.asList(value.toString().split(";"));
         } else if (value instanceof String[]){
-            String[] typeArray = (String[])value;
-            if(typeArray.length == 0 || //if an empty array or
-                    typeArray.length == 1 && typeArray[0].equals("*")){ //only a * is parsed
-                this.values = Collections.emptySet(); // than deactivate filtering
-                this.includeEmpty = true;
-            } else {
-                Set<String> values = new HashSet<String>();
-                for(String filterString : typeArray){
-                    if(filterString != null){
-                        if(filterString.isEmpty() || filterString.equalsIgnoreCase("null")){
-                            this.includeEmpty = true;
-                        } else {
-                            values.add(NamespaceMappingUtils.getConfiguredUri(nsPrefixService, filterString));
-                        }
+            values = Arrays.asList((String[])value);
+        } else if(value == null){ // no values (accept all entities with any value)
+            values = Collections.emptySet();
+        } else if(value instanceof Collection<?>){
+            values = (Collection<String>)value;
+        } else {
+            throw new IllegalArgumentException("Parameter '" + PARAM_VALUES 
+                + "' must be of type String, String[] or Collection<String> (present: "
+                + value.getClass()+")!");
+        }
+        if(values.isEmpty()){
+            includeAll = true;
+            this.included = values;
+            this.exclude = Collections.emptySet();
+        } else {
+            this.included = new HashSet<String>();
+            this.exclude = new HashSet<String>();
+            for(String entry : values) {
+                if(entry == null){ //NULL is a valid option, but we use "" instead
+                    entry = "";
+                }
+                entry = entry.trim();
+                if(entry.equalsIgnoreCase("null")){
+                    entry = "";
+                }
+                if(!includeAll && entry.equals("*")){
+                    includeAll = true;
+                    continue;
+                }
+                boolean exclude = !entry.isEmpty() && entry.charAt(0) == '!';
+                if(exclude){
+                    entry = entry.substring(1);
+                    if(entry.equalsIgnoreCase("null")){
+                        entry = "";
+                    }
+                    if(entry.equals("*")){
+                        throw new IllegalArgumentException("'!*' is not allowed in the config ("
+                            + "it is the default if '*' is not present)!");
                     }
                 }
-                if(values.isEmpty() && !this.includeEmpty){
-                    throw new IllegalArgumentException("Parameter "+PARAM_VALUES+'='+value+" does not contain a valid field value!");
-                } else {
-                    this.values = values;
+                String uri = getUri(entry);
+                if((exclude ? this.included : this.exclude).contains(uri)){
+                    throw new IllegalArgumentException("'"+entry+"' both included and excluded by the"
+                        + "parsed configuration!");
                 }
+                //if exclude add to this.exclude otherwise to this.values
+                (exclude ? this.exclude : this.included).add(uri);
             }
-        } else {// no values (accept all entities with any value)
-            values = Collections.emptySet();
         }
+    }
+
+    /**
+     * @param entry
+     * @return
+     */
+    private String getUri(String entry) {
+        String uri; 
+        String nsPrefix = NamespaceMappingUtils.getPrefix(entry);
+        if(nsPrefix != null){
+            String ns = nsPrefixProvider.getNamespace(nsPrefix);
+            if(ns == null){
+                throw new IllegalArgumentException("Unable to resolve namesoace prefix used by '"
+                        +entry+"' by using the NamespacePrefixService!");
+            }
+            uri = new StringBuilder(ns).append(entry,nsPrefix.length()+1, entry.length()).toString();
+        } else {
+            uri = entry;
+        }
+        return uri;
     }
 
 }
