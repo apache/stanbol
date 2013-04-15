@@ -54,7 +54,8 @@ public abstract class AbstractTdbBackend extends AbstractBackend<Node> implement
     private TypeMapper typeMapper = TypeMapper.getInstance();
     
     private Locale toLocale(String lang){
-        if(lang == null){ 
+      //Jena TDB uses '' for representing Literals without language
+        if(lang == null || lang.isEmpty()){ 
             return null;
         }
         Locale locale = localeCache.get(lang);

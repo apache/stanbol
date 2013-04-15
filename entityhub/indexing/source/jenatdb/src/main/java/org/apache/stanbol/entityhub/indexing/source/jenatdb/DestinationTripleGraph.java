@@ -1,6 +1,9 @@
 package org.apache.stanbol.entityhub.indexing.source.jenatdb;
 
+import java.util.Map;
+
 import org.apache.jena.atlas.lib.Tuple;
+import org.apache.jena.atlas.logging.Log;
 import org.slf4j.Logger;
 
 import com.hp.hpl.jena.graph.Node;
@@ -25,23 +28,52 @@ import com.hp.hpl.jena.tdb.sys.Names;
  * <p>
  * This code is based on the DestinationGraph implementation private to the 
  * {@link TDBLoader} class.
+ * <p>
+ * In addition this implementation supports an {@link RdfImportFilter} that
+ * can be used to filter RDF triples read from RDF files before adding them
+ * to the RDF TripleStore. 
  * 
  * @author Rupert Westenthaler
  *
  */
 class DestinationTripleGraph implements BulkStreamRDF {
+    /**
+     * ImportFilter that accepts all triples. This is used in case 
+     * <code>null</code> is parsed as {@link RdfImportFilter} to the constructor
+     */
+    private static final RdfImportFilter NO_FILTER = new RdfImportFilter() {
+        @Override
+        public void setConfiguration(Map<String,Object> config) {}
+        @Override
+        public boolean needsInitialisation() { return false;}
+        @Override
+        public void initialise() {}
+        @Override
+        public void close() {}
+        @Override
+        public boolean accept(Node s, Node p, Node o) {return true;}
+    };
     final private DatasetGraphTDB dsg ;
     final private LoadMonitor monitor ;
     final private LoaderNodeTupleTable loaderTriples ;
     final private boolean startedEmpty ;
     private long count = 0 ;
+    private long filteredCount = 0;
     private StatsCollector stats ;
+    private RdfImportFilter importFilter;
+    private final Logger importLog;
 
-    DestinationTripleGraph(final DatasetGraphTDB dsg, Logger log) {
+    DestinationTripleGraph(final DatasetGraphTDB dsg, RdfImportFilter importFilter, Logger log) {
         this.dsg = dsg ;
         startedEmpty = dsg.isEmpty() ;
         monitor = new LoadMonitor(dsg, log, "triples", BulkLoader.DataTickPoint, BulkLoader.IndexTickPoint) ;
         loaderTriples = new LoaderNodeTupleTable(dsg.getTripleTable().getNodeTupleTable(), "triples", monitor) ;
+        if(importFilter == null){
+            this.importFilter = NO_FILTER;
+        } else {
+            this.importFilter = importFilter;
+        }
+        this.importLog = log;
     }
 
     @Override
@@ -49,19 +81,25 @@ class DestinationTripleGraph implements BulkStreamRDF {
     {
         loaderTriples.loadStart() ;
         loaderTriples.loadDataStart() ;
-
         this.stats = new StatsCollector() ;
     }
-    @Override
-    final public void triple(Triple triple)
-    {
-        Node s = triple.getSubject() ;
-        Node p = triple.getPredicate() ;
-        Node o = triple.getObject() ;
 
-        loaderTriples.load(s, p, o)  ;
-        stats.record(null, s, p, o) ; 
-        count++ ;
+    private void triple(Node s, Node p, Node o){
+        if(importFilter.accept(s, p, o)){
+            loaderTriples.load(s, p, o);
+            stats.record(null, s, p, o);
+            count++;
+        } else {
+            filteredCount++;
+            if(filteredCount%100000 == 0){
+                importLog.info("Filtered: {} triples ({}%)",filteredCount,
+                    ((double)filteredCount*100/(double)(filteredCount+count)));
+            }
+        }
+    }
+    @Override
+    final public void triple(Triple triple) {
+        triple(triple.getSubject(),triple.getPredicate(),triple.getObject());
     }
 
     @Override
@@ -81,23 +119,21 @@ class DestinationTripleGraph implements BulkStreamRDF {
     }
 
     @Override
-    public void start()                     {}
+    public void start(){}
     @Override
     public void quad(Quad quad) { 
-        triple(quad.asTriple());
+        triple(quad.getSubject(),quad.getPredicate(),quad.getObject());
     }
     @Override
     public void tuple(Tuple<Node> tuple) { 
         if(tuple.size() >= 3){
-            loaderTriples.load(tuple.get(0), tuple.get(1), tuple.get(2))  ;
-            stats.record(null, tuple.get(0), tuple.get(1), tuple.get(2)) ; 
-            count++ ;
+            triple(tuple.get(0),tuple.get(1),tuple.get(2));
         } else {
             throw new TDBException("Tuple with < 3 Nodes encountered while loading a single graph");
         }
     }
     @Override
-    public void base(String base)           { }
+    public void base(String base){}
     @Override
     public void prefix(String prefix, String iri)  { } // TODO
     @Override

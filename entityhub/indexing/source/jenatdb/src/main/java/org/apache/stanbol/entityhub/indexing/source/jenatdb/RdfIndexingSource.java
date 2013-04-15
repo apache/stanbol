@@ -44,6 +44,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
+import org.joda.time.field.ImpreciseDateTimeField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,6 +115,13 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
      */
     public static final String PARAM_IMPORT_SOURCE = "import";
     /**
+     * Allows to configure a {@link RdfImportFilter} (full qualified class name).
+     * If present it gets the full configuration set for this component parsed.
+     * This means that the import filter can be configured by the same 
+     * configuration as this component.
+     */
+    public static final String PARAM_IMPORT_FILTER = "import-filter";
+    /**
      * The default directory name used to search for RDF files to be imported
      */
     public static final String DEFAULT_SOURCE_FOLDER_NAME = "rdfdata";
@@ -140,6 +148,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
      * used for logging a single WARN level entry on the first ignored BNode
      */
     private boolean bnodeIgnored = false;
+    private RdfImportFilter importFilter;
     
     /**
      * Default Constructor relaying on that {@link #setConfiguration(Map)} is
@@ -168,17 +177,20 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
      * imported
      * @param valueFactory The {@link ValueFactory} used to create instances
      * or <code>null</code> to use the default implementation.
+     * @param importFilter Optionally an importFilter used for filtering some
+     * triples read from the RDF source files.
      */
     public RdfIndexingSource(File modelLocation, 
                                File sourceFileOrDirectory,
-                               ValueFactory valueFactory){
+                               ValueFactory valueFactory,
+                               RdfImportFilter importFilter){
         if(modelLocation == null){
             throw new IllegalArgumentException("The parsed model location MUST NOT be NULL!");
         }
         //init the store
         this.indexingDataset = initTDBDataset(modelLocation);
         //use a ResourceLoader that fails on the first invalid RDF file (STANBOL-328)
-        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset), true,true);
+        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset,importFilter), true,true);
         loader.addResource(sourceFileOrDirectory);
     }
     @Override
@@ -187,10 +199,48 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
         //first init the RDF Model
         this.indexingDataset = Utils.getTDBDataset(config);
         //second we need to check if we need to import RDF files to the RDF model
+        //look if we need want to use an import filter
+        Object value = config.get(PARAM_IMPORT_FILTER);
+        if(value == null){
+            log.info("No RDF Import Filter configured");
+            importFilter = null;
+        } else {
+            String[] filterNames = value.toString().split(",");
+            List<RdfImportFilter> filters = new ArrayList<RdfImportFilter>();
+            ClassLoader cl = indexingConfig.getClass().getClassLoader();
+            for(String filterName : filterNames){
+                filterName = filterName.trim();
+                try {
+                    Class<? extends RdfImportFilter> importFilterClass = cl.loadClass(
+                        filterName).asSubclass(RdfImportFilter.class);
+                    RdfImportFilter filter = importFilterClass.newInstance();
+                    filter.setConfiguration(config);
+                    filters.add(filter);
+                    log.info("Use RDF ImportFilter {} (type: {})",importFilter,importFilterClass.getSimpleName());
+                } catch (ClassNotFoundException e) {
+                    throw new IllegalArgumentException("Configured RdfImportFilter '"
+                        +filterName+"' not found", e);
+                } catch (InstantiationException e) {
+                    throw new IllegalArgumentException("Configured RdfImportFilter '"
+                            +filterName+"' can not be instantiated", e);
+                } catch (IllegalAccessException e) {
+                    throw new IllegalArgumentException("Configured RdfImportFilter '"
+                            +filterName+"' can not be created", e);
+                }
+            }
+            if(filters.isEmpty()){
+                this.importFilter = null;
+            } else if(filters.size() == 1){
+                this.importFilter = filters.get(0);
+            } else {
+                this.importFilter = new UnionImportFilter(filters.toArray(
+                    new RdfImportFilter[filters.size()]));
+            }
+        }
         //create the ResourceLoader
-        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset), true);
+        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset, importFilter), true);
         
-        Object value = config.get(PARAM_IMPORTED_FOLDER);
+        value = config.get(PARAM_IMPORTED_FOLDER);
         String importedFolderName;
         if(value != null && !value.toString().isEmpty()){
             importedFolderName = value.toString();
@@ -281,17 +331,25 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
     }
     @Override
     public boolean needsInitialisation() {
-        //if there are resources with the state REGISTERED we need an initialisation
-        return !loader.getResources(ResourceState.REGISTERED).isEmpty();
+        return (importFilter != null && importFilter.needsInitialisation()) ||
+                !loader.getResources(ResourceState.REGISTERED).isEmpty();
     }
     @Override
     public void initialise(){
-        loader.loadResources();
+        if(importFilter != null && importFilter.needsInitialisation()){
+            importFilter.initialise();
+        }
+        if(!loader.getResources(ResourceState.REGISTERED).isEmpty()){
+            loader.loadResources();
+        }
     }
     @Override
     public void close() {
         loader = null;
         indexingDataset.close();
+        if(importFilter != null){
+            importFilter.close();
+        }
     }
     public void debug(){
         String entityVar = "s";
@@ -345,20 +403,32 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
             resource = Node.createURI(id);
         }
         Representation source = vf.createRepresentation(id);
-        ExtendedIterator<Triple> outgoing = indexingDataset.getDefaultGraph().find(resource, null, null);
-        boolean found = outgoing.hasNext();
-        while(outgoing.hasNext()){ //iterate over the statements for that resource
-            Triple statement = outgoing.next();
-            Node predicate = statement.getPredicate();
-            if(predicate == null || !predicate.isURI()){
-                log.warn("Ignore field {} for resource {} because it is null or not an URI!",
-                    predicate,resource);
-            } else {
-                String field = predicate.getURI();
-                Node value = statement.getObject();
-                processValue(value, source, field);
-            } //end else predicate != null
-        } //end iteration over resource triple
+        boolean found;
+        ExtendedIterator<Triple> outgoing = null;
+        try { // There may still be exceptions while reading triples
+            outgoing = indexingDataset.getDefaultGraph().find(resource, null, null);
+            found = outgoing.hasNext();
+            while(outgoing.hasNext()){ //iterate over the statements for that resource
+                Triple statement = outgoing.next();
+                Node predicate = statement.getPredicate();
+                if(predicate == null || !predicate.isURI()){
+                    log.warn("Ignore field {} for resource {} because it is null or not an URI!",
+                        predicate,resource);
+                } else {
+                    String field = predicate.getURI();
+                    Node value = statement.getObject();
+                    processValue(value, source, field);
+                } //end else predicate != null
+            } //end iteration over resource triple
+        } catch (Exception e) {
+            log.warn("Unable to retrieve entity data for Entity '"+id+"'",e);
+            found = false;
+            try {
+                if(outgoing != null){
+                    outgoing.close();
+                }
+            } catch (Exception e1) { /* ignore */}
+        }
         if(found) {
             if(log.isTraceEnabled()){
                 log.info("Resource: \n{}", ModelUtils.getRepresentationInfo(source));
@@ -407,9 +477,9 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
                         if(duration != null && !duration.isEmpty()) {
                             source.add(field, literalValue.toString());
                         }
-                    } else {
+                    } else if(!ll.getLexicalForm().isEmpty()){
                         source.add(field, literalValue);
-                    }
+                    } //else ignore literals that are empty
                 } catch (DatatypeFormatException e) {
                     log.warn(" Unable to convert {} to {} -> use lecicalForm",
                         ll.getLexicalForm(),ll.getDatatype());
@@ -764,6 +834,41 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
         } else {
             return super.createURI(uri);
         }
+    }
+    /**
+     * used in case multiple {@link RdfImportFilter}s are configured.
+     * @author Rupert Westenthaler
+     *
+     */
+    private class UnionImportFilter implements RdfImportFilter {
+
+        RdfImportFilter[] filters;
+        
+        UnionImportFilter(RdfImportFilter[] filters){
+            this.filters = filters;
+        }
+        
+        @Override
+        public void setConfiguration(Map<String,Object> config) {}
+
+        @Override
+        public boolean needsInitialisation() { return false;}
+
+        @Override
+        public void initialise() {}
+
+        @Override
+        public void close() {}
+
+        @Override
+        public boolean accept(Node s, Node p, Node o) {
+            boolean state = true;
+            for(int i=0;state && i < filters.length;i++){
+                state = filters[i].accept(s, p, o);
+            }
+            return state;
+        }
+        
     }
     
 }

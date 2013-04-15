@@ -37,12 +37,12 @@ public class RdfResourceImporter implements ResourceImporter {
     private static final Logger log = LoggerFactory.getLogger(RdfResourceImporter.class);
    // private final DatasetGraphTDB indexingDataset;
     private final DestinationTripleGraph destination;
-    public RdfResourceImporter(DatasetGraphTDB indexingDataset){
+    public RdfResourceImporter(DatasetGraphTDB indexingDataset, RdfImportFilter importFilter){
         if(indexingDataset == null){
             throw new IllegalArgumentException("The parsed DatasetGraphTDB instance MUST NOT be NULL!");
         }
         //this.indexingDataset = indexingDataset;
-        this.destination = new DestinationTripleGraph(indexingDataset,log);
+        this.destination = new DestinationTripleGraph(indexingDataset,importFilter,log);
     }
 
     @Override
