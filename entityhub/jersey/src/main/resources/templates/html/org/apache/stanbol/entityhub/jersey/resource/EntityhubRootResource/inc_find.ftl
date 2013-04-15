@@ -68,7 +68,7 @@ with 'Pari'.</p>
     This supports Wildcards such as 'Exam?le*'</td>
   </tr><tr>
     <td><strong>Language:</strong></td>
-    <td><input type="text" name="lang" size="10" value="en" />
+    <td><input type="text" name="lang" size="10" value="" />
       (optional, default: any)</td>
   </tr><tr>
     <td><strong>Field:</strong> </td>
