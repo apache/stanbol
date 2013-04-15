@@ -26,8 +26,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.stanbol.enhancer.engines.entitylinking.engine.EntityLinkingEngine;
+import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
+import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
+import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
@@ -61,6 +64,24 @@ public class TextProcessingConfig {
      * See the documentation of {@link LanguageConfiguration} for details of the Syntax.
      */
     public static final String PROCESSED_LANGUAGES = "enhancer.engines.linking.processedLanguages";
+    
+    /**
+     * The minimum length of Token to be used for searches in case no
+     * POS (Part of Speech) tags are available.
+     */
+    public static final int DEFAULT_MIN_SEARCH_TOKEN_LENGTH = 3;
+    /**
+     * Used as fallback in case a {@link Token} does not have a {@link PosTag} or 
+     * {@link NlpAnnotations#POS_ANNOTATION POS annotations} do have a low confidence.
+     * In such cases only words that are longer than  this value will be considerd for
+     * linking
+     */
+    public static final String MIN_SEARCH_TOKEN_LENGTH = "enhancer.engines.linking.minSearchTokenLength";
+    /**
+     * The minimum length of labels that are looked-up in the directory
+     */
+    private int minSearchTokenLength = DEFAULT_MIN_SEARCH_TOKEN_LENGTH;
+
     /*
      * Parameters used for language specific text processing configurations
      */
@@ -210,6 +231,27 @@ public class TextProcessingConfig {
             log.debug("> Noun matching activated (matched LexicalCategories: {})",
                 tpc.defaultConfig.getLinkedLexicalCategories());
         }
+        // init MIN_SEARCH_TOKEN_LENGTH
+        value = configuration.get(MIN_SEARCH_TOKEN_LENGTH);
+        Integer minSearchTokenLength;
+        if(value instanceof Integer){
+            minSearchTokenLength = (Integer)value;
+        } else if (value != null){
+            try {
+                minSearchTokenLength = Integer.valueOf(value.toString());
+            } catch(NumberFormatException e){
+                throw new ConfigurationException(MIN_SEARCH_TOKEN_LENGTH, "Values MUST be valid Integer values > 0",e);
+            }
+        } else {
+            minSearchTokenLength = null;
+        }
+        if(minSearchTokenLength != null){
+            if(minSearchTokenLength < 1){
+                throw new ConfigurationException(MIN_SEARCH_TOKEN_LENGTH, "Values MUST be valid Integer values > 0");
+            }
+            tpc.defaultConfig.setMinSearchTokenLength(minSearchTokenLength);
+        }
+
         //parse the language configuration
         value = configuration.get(PROCESSED_LANGUAGES);
         if(value instanceof String){

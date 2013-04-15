@@ -20,12 +20,12 @@ import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLin
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_CASE_SENSITIVE_MATCHING_STATE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_DEREFERENCE_ENTITIES_STATE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_MATCHING_LANGUAGE;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_MIN_SEARCH_TOKEN_LENGTH;
+import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.DEFAULT_MIN_SEARCH_TOKEN_LENGTH;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_MIN_TOKEN_SCORE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_SUGGESTIONS;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES_FIELDS;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.MIN_SEARCH_TOKEN_LENGTH;
+import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.MIN_SEARCH_TOKEN_LENGTH;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.MIN_TOKEN_SCORE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.NAME_FIELD;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.REDIRECT_FIELD;
@@ -43,7 +43,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.NavigableSet;
 import java.util.NoSuchElementException;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -115,14 +114,17 @@ import org.slf4j.LoggerFactory;
                "es;lc=Noun", //the OpenNLP POS tagger for Spanish does not support ProperNouns
                "nl;lc=Noun"}), //same for Dutch 
     @Property(name=DEFAULT_MATCHING_LANGUAGE,value=""),
-    @Property(name=TYPE_MAPPINGS,cardinality=Integer.MAX_VALUE),
+    @Property(name=TYPE_MAPPINGS,cardinality=Integer.MAX_VALUE, value={
+        "dbp-ont:Organisation; dbp-ont:Newspaper; schema:Organization > dbp-ont:Organisation",
+        "dbp-ont:Person; foaf:Person; schema:Person > dbp-ont:Person",
+        "dbp-ont:Place; schema:Place > dbp-ont:Place",
+        "dbp-ont:Work; schema:CreativeWork > dbp-ont:Work",
+        "dbp-ont:Event; schema:Event > dbp-ont:Event",
+        "schema:Product > schema:Product",
+        "skos:Concept > skos:Concept"}),
     @Property(name=DEREFERENCE_ENTITIES, boolValue=DEFAULT_DEREFERENCE_ENTITIES_STATE),
     @Property(name=DEREFERENCE_ENTITIES_FIELDS,cardinality=Integer.MAX_VALUE,
-    	value={"http://www.w3.org/2000/01/rdf-schema#comment",
-            "http://www.w3.org/2003/01/geo/wgs84_pos#lat",
-            "http://www.w3.org/2003/01/geo/wgs84_pos#long",
-            "http://xmlns.com/foaf/0.1/depiction",
-            "http://dbpedia.org/ontology/thumbnail"}),
+    	value={"rdfs:comment","geo:lat","geo:long","foaf:depiction","dbp-ont:thumbnail"}),
     @Property(name=SERVICE_RANKING,intValue=0)
 })
 public class EntityhubLinkingEngine implements ServiceTrackerCustomizer {

@@ -270,7 +270,8 @@ public class Suggestion {
     public String toString() {
         return labelMatches.isEmpty() ? "no match" :labelMatches.get(0)
                 + " for "+entity.getId()
-                +(redirectsTo != null ? " redirected to "+redirectsTo.getId() : "");
+                + (redirectsTo != null ? " (redirects: "+redirectsTo.getId()+") " : "")
+                + " ranking: "+getEntityRank();
     }
 
     /**
@@ -287,6 +288,18 @@ public class Suggestion {
             return arg0.getScore() > arg1.getScore() ? -1 : //bigger score first
                 arg0.getScore() < arg1.getScore() ? 1 : 
                     DEFAULT_LABEL_TOKEN_COMPARATOR.compare(arg0.getLabelMatch(), arg1.getLabelMatch());
+        }
+    };
+    /**
+     * Compares {@link Suggestion}s based on the {@link Suggestion#getEntityRank()}.
+     * <code>null</code> values are assumed to be the smallest.
+     */
+    public static final Comparator<Suggestion> ENTITY_RANK_COMPARATOR = new Comparator<Suggestion>(){
+        @Override
+        public int compare(Suggestion arg0, Suggestion arg1) {
+            Float r1 = arg0.getEntityRank();
+            Float r2 = arg1.getEntityRank();
+            return r2 == null ? r1 == null ? 0 : -1 : r1 == null ? 1 : r2.compareTo(r1);
         }
     };
     /**

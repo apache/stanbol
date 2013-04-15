@@ -293,8 +293,8 @@ public class EntityLinkingEngineTest {
             linkedEntity.getSuggestions().iterator();
             assertEquals("Number of suggestions "+linkedEntity.getSuggestions().size()+
                 " != number of expected suggestions "+expectedSuggestions.size()+
-                "for selection "+linkedEntity.getSelectedText(), 
-                linkedEntity.getSuggestions().size(),
+                "for selection "+linkedEntity.getSelectedText() + "(Expected: " +
+                expectedSuggestions +")", linkedEntity.getSuggestions().size(), 
                 expectedSuggestions.size());
             double score = linkedEntity.getScore();
             for(int i=0;i<expectedSuggestions.size();i++){

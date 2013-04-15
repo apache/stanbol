@@ -160,6 +160,7 @@ public class LanguageProcessingConfig implements Cloneable{
      * linked.
      */
     private boolean linkMultiMatchableTokensInChunkState = DEFAULT_LINK_MULTIPLE_MATCHABLE_TOKENS_IN_CHUNKS_STATE;
+    private int minSearchTokenLength;
 
 
     /**
@@ -505,6 +506,28 @@ public class LanguageProcessingConfig implements Cloneable{
         }
     }
     /**
+     * The minimum number of character a {@link Token} (word) must have to be
+     * used {@link EntitySearcher#lookup(java.util.List, String...) lookup} concepts
+     * in the taxonomy. Note that this parameter is only used of no POS (Part-
+     * of-speech) tags are available in the {@link AnalysedText}.
+     * @param minSearchTokenLength the minSearchTokenLength to set
+     */
+    public void setMinSearchTokenLength(int minSearchTokenLength) {
+        this.minSearchTokenLength = minSearchTokenLength;
+    }
+    /**
+     * The minimum number of character a {@link Token} (word) must have to be
+     * used {@link EntitySearcher#lookup(java.util.List, String...) lookup} concepts
+     * in the taxonomy. Note that this parameter is only used of no POS (Part-
+     * of-speech) tags are available in the {@link AnalysedText}.
+     * @return the minSearchTokenLength
+     */
+    public int getMinSearchTokenLength() {
+        return minSearchTokenLength;
+    }
+
+    
+    /**
      * Clones the {@link LanguageProcessingConfig}. Intended to be used
      * to create language specific configs based on the default one.
      */
@@ -525,6 +548,7 @@ public class LanguageProcessingConfig implements Cloneable{
         c.matchUpperCaseTokensState = matchUpperCaseTokensState;
         c.linkMultiMatchableTokensInChunkState = linkMultiMatchableTokensInChunkState;
         c.matchedLexicalCategories = matchedLexicalCategories;
+        c.minSearchTokenLength = minSearchTokenLength;
         return c;
     }
 

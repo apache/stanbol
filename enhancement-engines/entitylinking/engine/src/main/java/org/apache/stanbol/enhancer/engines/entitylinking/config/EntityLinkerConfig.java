@@ -162,13 +162,6 @@ public class EntityLinkerConfig {
      */
     public static final String MIN_MATCH_FACTOR = "enhancer.engines.linking.minMatchScore";
     /**
-     * Used as fallback in case a {@link Token} does not have a {@link PosTag} or 
-     * {@link NlpAnnotations#POS_ANNOTATION POS annotations} do have a low confidence.
-     * In such cases only words that are longer than  this value will be considerd for
-     * linking
-     */
-    public static final String MIN_SEARCH_TOKEN_LENGTH = "enhancer.engines.linking.minSearchTokenLength";
-    /**
      * The maximum number of {@link Token} used as search terms with the 
      * {@link EntitySearcher#lookup(String, Set, java.util.List, String[], Integer)}
      * method
@@ -196,12 +189,12 @@ public class EntityLinkerConfig {
      * Allows to add a list of fields that are included when dereferencing Entities
      */
     public static final String DEREFERENCE_ENTITIES_FIELDS = "enhancer.engines.linking.dereferenceFields";
-
     /**
-     * The minimum length of Token to be used for searches in case no
-     * POS (Part of Speech) tags are available.
+     * Allows to enable/disable sorting of suggestion that have the same score
+     * based on the entity ranking (popularity of the entity within the knowledge base)
      */
-    public static final int DEFAULT_MIN_SEARCH_TOKEN_LENGTH = 3;
+    public static final String RANK_EQUAL_SCORES_BASED_ON_ENTITY_RANKINGS = "enhancer.engines.linking.useEntityRankings";
+    
     /**
      * The default number for the maximum number of terms suggested for a word
      */
@@ -339,10 +332,6 @@ public class EntityLinkerConfig {
      */
     private boolean dereferenceEntitiesState;
     /**
-     * The minimum length of labels that are looked-up in the directory
-     */
-    private int minSearchTokenLength = DEFAULT_MIN_SEARCH_TOKEN_LENGTH;
-    /**
      * The the maximum number of terms suggested for a word
      */
     private int maxSuggestions = DEFAULT_SUGGESTIONS;
@@ -428,6 +417,13 @@ public class EntityLinkerConfig {
      * By default Entities are dereferenced
      */
     public static final boolean DEFAULT_DEREFERENCE_ENTITIES_STATE = true;
+
+    /**
+     * The default value for the state if entities that would have the same score
+     * should get their score slightly changed to ensure that entities with an
+     * higher ranking (popularity) do have an higher score.
+     */
+    public static final boolean DEFAULT_RANK_EQUAL_SCORES_BASED_ON_ENTITY_RANKINGS = true;
     /**
      * If Tokens match is determined by comparing them using some algorithm.
      * Results need to be in the range [0..1]. This factor defines the minimum
@@ -445,12 +441,13 @@ public class EntityLinkerConfig {
     private double minTextScore = DEFAULT_MIN_TEXT_SCORE;
     private double minMatchScore = DEFAULT_MIN_MATCH_SCORE;
 
+    private boolean rankEqualScoresBasedOnEntityRankings = DEFAULT_RANK_EQUAL_SCORES_BASED_ON_ENTITY_RANKINGS;
+
     /**
      * Default constructor the initializes the configuration with the 
      * default values
      */
     public EntityLinkerConfig(){
-        setMinSearchTokenLength(DEFAULT_MIN_SEARCH_TOKEN_LENGTH);
         setMaxSuggestions(DEFAULT_SUGGESTIONS);
         setMaxSearchTokens(DEFAULT_MAX_SEARCH_TOKENS);
         setRedirectProcessingMode(DEFAULT_REDIRECT_PROCESSING_MODE);
@@ -626,28 +623,7 @@ public class EntityLinkerConfig {
         } catch (IllegalArgumentException e){
             throw new ConfigurationException(MIN_MATCH_FACTOR, e.getMessage());
         }
-        
-        // init MIN_SEARCH_TOKEN_LENGTH
-        value = configuration.get(MIN_SEARCH_TOKEN_LENGTH);
-        Integer minSearchTokenLength;
-        if(value instanceof Integer){
-            minSearchTokenLength = (Integer)value;
-        } else if (value != null){
-            try {
-                minSearchTokenLength = Integer.valueOf(value.toString());
-            } catch(NumberFormatException e){
-                throw new ConfigurationException(MIN_SEARCH_TOKEN_LENGTH, "Values MUST be valid Integer values > 0",e);
-            }
-        } else {
-            minSearchTokenLength = null;
-        }
-        if(minSearchTokenLength != null){
-            if(minSearchTokenLength < 1){
-                throw new ConfigurationException(MIN_SEARCH_TOKEN_LENGTH, "Values MUST be valid Integer values > 0");
-            }
-            linkerConfig.setMinSearchTokenLength(minSearchTokenLength);
-        }
-        
+                
         //init LEMMA_MATCHING_STATE
         value = configuration.get(LEMMA_MATCHING_STATE);
         if(value instanceof Boolean){
@@ -845,6 +821,17 @@ public class EntityLinkerConfig {
             }
         }
 
+        //init USE ENTITY RANKINGS (STANBOL-1030)
+        value = configuration.get(RANK_EQUAL_SCORES_BASED_ON_ENTITY_RANKINGS);
+        if(value instanceof Boolean){
+            linkerConfig.setRankEqualScoresBasedOnEntityRankings(((Boolean)value).booleanValue());
+        } else if (value != null){
+            linkerConfig.setRankEqualScoresBasedOnEntityRankings(
+                Boolean.parseBoolean(value.toString()));
+        } else {
+            linkerConfig.setRankEqualScoresBasedOnEntityRankings(
+                DEFAULT_RANK_EQUAL_SCORES_BASED_ON_ENTITY_RANKINGS);
+        }
         
     }
     
@@ -924,26 +911,6 @@ public class EntityLinkerConfig {
     public final void setTypeField(UriRef typeField) {
         this.typeField = typeField;
         __selectedFields = null;
-    }
-    /**
-     * The minimum number of character a {@link Token} (word) must have to be
-     * used {@link EntitySearcher#lookup(java.util.List, String...) lookup} concepts
-     * in the taxonomy. Note that this parameter is only used of no POS (Part-
-     * of-speech) tags are available in the {@link AnalysedText}.
-     * @param minSearchTokenLength the minSearchTokenLength to set
-     */
-    public void setMinSearchTokenLength(int minSearchTokenLength) {
-        this.minSearchTokenLength = minSearchTokenLength;
-    }
-    /**
-     * The minimum number of character a {@link Token} (word) must have to be
-     * used {@link EntitySearcher#lookup(java.util.List, String...) lookup} concepts
-     * in the taxonomy. Note that this parameter is only used of no POS (Part-
-     * of-speech) tags are available in the {@link AnalysedText}.
-     * @return the minSearchTokenLength
-     */
-    public int getMinSearchTokenLength() {
-        return minSearchTokenLength;
     }
     /**
      * Setter for the maximum number of suggestion returned. 
@@ -1344,4 +1311,27 @@ public class EntityLinkerConfig {
             return __selectedFields;
         }
     }
+    /**
+     * If suggested entities that would have the same score (e.g. 1.0 - for a
+     * perfect match) should have their score slightly adapted so that they
+     * are sorted based on their entity ranking.<p>
+     * The entity ranking is defined as the importance (popularity, connectivity, ...)
+     * of an entity within the knowledge base
+     * @return the state
+     */
+    public boolean isRankEqualScoresBasedOnEntityRankings() {
+        return rankEqualScoresBasedOnEntityRankings;
+    }
+    /**
+     * Setter for the state if suggested  that would have the same score (e.g. 1.0 - for a
+     * perfect match) should have their score slightly adapted so that they
+     * are sorted based on their entity ranking.<p>
+     * The entity ranking is defined as the importance (popularity, connectivity, ...)
+     * of an entity within the knowledge base
+     * @param state the state
+     */
+    public void setRankEqualScoresBasedOnEntityRankings(boolean state) {
+        this.rankEqualScoresBasedOnEntityRankings = state;
+    }
+    
 }

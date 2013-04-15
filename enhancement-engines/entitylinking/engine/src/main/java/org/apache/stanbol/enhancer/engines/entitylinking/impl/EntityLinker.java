@@ -16,6 +16,7 @@
 */
 package org.apache.stanbol.enhancer.engines.entitylinking.impl;
 
+import static org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion.ENTITY_RANK_COMPARATOR;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 
 import java.util.ArrayList;
@@ -81,7 +82,7 @@ public class EntityLinker {
         this.linkerConfig = linkerConfig;
         this.textProcessingConfig = textProcessingConfig;
         this.labelTokenizer = labelTokenizer;
-        this.state = new ProcessingState(analysedText,language,textProcessingConfig,linkerConfig);
+        this.state = new ProcessingState(analysedText,language,textProcessingConfig);
         this.lookupLimit  = Math.max(10,linkerConfig.getMaxSuggestions()*2);
     }
     /**
@@ -101,7 +102,12 @@ public class EntityLinker {
                                              "none"});
             }
             List<String> searchStrings = new ArrayList<String>(linkerConfig.getMaxSearchTokens());
-            searchStrings.add(token.getTokenText());
+            String searchString = linkerConfig.isLemmaMatching() ? token.getTokenLemma() :
+                token.getTokenText();
+            if(searchString == null){
+                searchString = token.getTokenText();
+            }
+            searchStrings.add(searchString);
             //Determine the range we are allowed to search for tokens
             final int minIncludeIndex;
             final int maxIndcludeIndex;
@@ -113,8 +119,8 @@ public class EntityLinker {
                     restrirctContextByChunks){
                 minIncludeIndex = Math.max(
                     state.getConsumedIndex()+1, 
-                    token.inChunk.startToken);
-                maxIndcludeIndex = token.inChunk.endToken;
+                    token.inChunk.getStartTokenIndex());
+                maxIndcludeIndex = token.inChunk.getEndTokenIndex();
             } else {
                 maxIndcludeIndex = state.getTokens().size() - 1;
                 minIncludeIndex = state.getConsumedIndex() + 1;
@@ -136,7 +142,12 @@ public class EntityLinker {
                         });
                     }
                     if(prevToken.isMatchable){
-                        searchStrings.add(0,prevToken.getTokenText());
+                        String prevSearchString = linkerConfig.isLemmaMatching() ? 
+                                prevToken.getTokenLemma() : prevToken.getTokenText();
+                        if(prevSearchString == null){
+                            prevSearchString = prevToken.getTokenText();
+                        }
+                        searchStrings.add(0,prevSearchString);
                     }
                 }
                 if(maxIndcludeIndex >= pastIndex){
@@ -150,7 +161,12 @@ public class EntityLinker {
                         });
                     }
                     if(pastToken.isMatchable){
-                        searchStrings.add(pastToken.getTokenText());
+                        String pastSearchString = linkerConfig.isLemmaMatching() ? 
+                                pastToken.getTokenLemma() : pastToken.getTokenText();
+                        if(pastSearchString == null){
+                            pastSearchString = pastToken.getTokenText();
+                        }
+                        searchStrings.add(pastSearchString);
                     }
                 }
             } while(searchStrings.size() < linkerConfig.getMaxSearchTokens() && distance <
@@ -202,6 +218,29 @@ public class EntityLinker {
                     log.warn(" currnet ranking : {}",suggestions);
                     log.warn("  ... this will result in worng confidence values relative to the best match");
                 }
+                //adapt equals rankings based on the entity rank
+                if(linkerConfig.isRankEqualScoresBasedOnEntityRankings()){
+                    List<Suggestion> equalScoreList = new ArrayList<Suggestion>(4);
+                    double score = 2f;
+                    for(Suggestion s : suggestions){
+                        double actScore = s.getScore();
+                        if(score == actScore){
+                            equalScoreList.add(s);
+                        } else {
+                            if(equalScoreList.size() > 1){
+                                adaptScoresForEntityRankings(equalScoreList, actScore);
+                            }
+                            score = actScore;
+                            equalScoreList.clear();
+                            equalScoreList.add(s);
+                        }
+                    }
+                    if(equalScoreList.size() > 1){
+                        adaptScoresForEntityRankings(equalScoreList,0);
+                    }
+                    //resort by score
+                    Collections.sort(suggestions, Suggestion.SCORE_COMPARATOR);
+                }
                 //remove all suggestions > config.maxSuggestions
                 if(suggestions.size() > linkerConfig.getMaxSuggestions()){
                     suggestions.subList(linkerConfig.getMaxSuggestions(),suggestions.size()).clear();
@@ -239,6 +278,41 @@ public class EntityLinker {
                 state.setConsumed(start+span-1);
             }
             
+        }
+    }
+    /**
+     * This method slightly adapts scores of Suggestions based on the Entity ranking.
+     * It is used for Suggestions that would have the exact same score (e.g. 1.0) to
+     * ensure ordering of the suggestions based on the rankings of the Entities
+     * within the knowledge base linked against
+     * @param equalScoreList Entities with the same {@link Suggestion#getScore()}
+     * values. If this is not the case this method will change scores in unintended
+     * ways
+     * @param nextScore the score of the {@link Suggestion} with a lower score as the
+     * list of suggestions parsed in the first parameter
+     */
+    private void adaptScoresForEntityRankings(List<Suggestion> equalScoreList, double nextScore) {
+        double score = equalScoreList.get(0).getScore();
+        log.debug("  > Adapt Score of multiple Suggestions "
+            + "with '{}' based on EntityRanking",score);
+        //Adapt the score to reflect the entity ranking
+        //but do not change order with entities of different
+        //score. Also do not change the score more that 0.1
+        //TODO: make the max change (0.1) configurable
+        double dif = (Math.min(0.1, score-nextScore))/equalScoreList.size();
+        Collections.sort(equalScoreList,ENTITY_RANK_COMPARATOR);
+        log.debug("    - keep socre of {} at {}", equalScoreList.get(0).getEntity().getId(), score);
+        for(int i=1;i<equalScoreList.size();i++){
+            score = score-dif;
+            if(ENTITY_RANK_COMPARATOR.compare(equalScoreList.get(i-1), 
+                equalScoreList.get(i)) != 0){
+                equalScoreList.get(i).setScore(score);
+                log.debug("    - set score of {} at {}", equalScoreList.get(i).getEntity().getId(), score);
+            } else {
+                double lastScore = equalScoreList.get(i-1).getScore();
+                equalScoreList.get(i).setScore(lastScore);
+                log.debug("    - set score of {} at {}", equalScoreList.get(i).getEntity().getId(), lastScore);
+            }
         }
     }
     /**
@@ -361,12 +435,18 @@ public class EntityLinker {
         log.debug("   - found {} entities ...",results.size());
         List<Suggestion> suggestions = new ArrayList<Suggestion>();
         for(Entity result : results){ 
-            log.debug("    > {}",result.getId());
+            if(log.isDebugEnabled()){
+                log.debug("    > {} (ranking: {})",result.getId(),result.getEntityRanking());
+            }
             Suggestion suggestion = matchLabels(result);
-            log.debug("      < {}",suggestion);
             if(suggestion.getMatch() != MATCH.NONE){
+                if(log.isDebugEnabled()){
+                    log.debug("      + {}",suggestion);
+                }
                 suggestions.add(suggestion);
-            }                    
+            } else {
+                log.debug("      - no match");
+            }
         }
         //sort the suggestions
         if(suggestions.size()>1){
@@ -517,7 +597,11 @@ public class EntityLinker {
                 && search ;currentIndex++){
             currentToken = state.getTokens().get(currentIndex);
             if(currentToken.hasAlphaNumeric){
-                currentTokenText = currentToken.getTokenText();
+                currentTokenText = linkerConfig.isLemmaMatching() ? 
+                        currentToken.getTokenLemma() : currentToken.getTokenText();
+                if(currentTokenText == null) { //no lemma available
+                    currentTokenText = currentToken.getTokenText(); //fallback to text
+                }
                 if(!linkerConfig.isCaseSensitiveMatching()){
                     currentTokenText = currentTokenText.toLowerCase();
                 }
@@ -596,7 +680,11 @@ public class EntityLinker {
             String labelTokenText = labelTokens[labelIndex];
             if(labelTokenSet.contains(labelTokenText)){ //still not matched
                 currentToken = state.getTokens().get(currentIndex);
-                currentTokenText = currentToken.getTokenText();
+                currentTokenText = linkerConfig.isLemmaMatching() ? 
+                        currentToken.getTokenLemma() : currentToken.getTokenText();
+                if(currentTokenText == null) { //no lemma available
+                    currentTokenText = currentToken.getTokenText(); //fallback to text
+                }
                 if(!linkerConfig.isCaseSensitiveMatching()){
                     currentTokenText = currentTokenText.toLowerCase();
                 }

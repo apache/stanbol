@@ -86,23 +86,23 @@ public class ProcessingState {
      * The language of the text
      */
     private String language;
-
+    
     protected final LanguageProcessingConfig tpc;
-    protected final EntityLinkerConfig elc;
+    //protected final EntityLinkerConfig elc;
 
     private AnalysedText at;
 
     private static final Predicate PROCESSABLE_TOKEN_OREDICATE = new Predicate() {
         @Override
         public boolean evaluate(Object object) {
-            return ((TokenData)object).isProcessable;
+            return ((TokenData)object).isLinkable;
         }
     };
 
     public static final Collection<Pos> SUB_SENTENCE_START_POS = EnumSet.of(
         Pos.Quote);
     
-    public ProcessingState(AnalysedText at, String language, LanguageProcessingConfig tpc, EntityLinkerConfig elc){
+    public ProcessingState(AnalysedText at, String language, LanguageProcessingConfig tpc){
         if(at == null){
             throw new IllegalArgumentException("The parsed AnalysedText MUST NOT be NULL!");
         }
@@ -112,11 +112,7 @@ public class ProcessingState {
         if(tpc == null){
             throw new IllegalArgumentException("The parsed TextProcessingConfig MUST NOT be NULL!");
         }
-        if(elc == null){
-            throw new IllegalArgumentException("The parsed EntityLinkerConfig MUST NOT be NULL!");
-        }
         this.tpc = tpc;
-        this.elc = elc;
         enclosedSpanTypes = EnumSet.of(SpanTypeEnum.Token);
         
         if(!tpc.isIgnoreChunks()){
@@ -270,16 +266,16 @@ public class ProcessingState {
                                          tokenData.morpho != null ? tokenData.morpho : "none"});
                     }
                     //determine if the token should be linked/matched
-                    tokenData.isProcessable = tokenData.isLinkablePos;
-                    tokenData.isMatchable = tokenData.isProcessable || tokenData.isMatchablePos;
+                    tokenData.isLinkable = tokenData.isLinkablePos;
+                    tokenData.isMatchable = tokenData.isLinkable || tokenData.isMatchablePos;
                     //for non processable but upper case tolkens we need to check
                     //the uper case token configuration
-                    if(!tokenData.isProcessable && tokenData.upperCase){
+                    if(!tokenData.isLinkable && tokenData.upperCase){
                         if(tokenData.index > 0 && //not a sentence or sub-sentence start
                                 !tokens.get(tokenData.index-1).isSubSentenceStart){
                             if(tpc.isLinkUpperCaseTokens() && //if upper case tokens should be linked
                                     tokenData.isMatchable) { //convert matchable to 
-                                tokenData.isProcessable = true; //linkable
+                                tokenData.isLinkable = true; //linkable
                             } else if(tpc.isMatchUpperCaseTokens() || tpc.isLinkUpperCaseTokens()){
                                 //if matching for upperCase Tokens is activated or
                                 //linking is activated, but the current Token is not
@@ -291,7 +287,7 @@ public class ProcessingState {
                     //add the token to the list
                     tokens.add(tokenData);
                     if(!foundProcessable){
-                        foundProcessable = tokenData.isProcessable;
+                        foundProcessable = tokenData.isLinkable;
                     }
                     if(activeChunk != null){
                         if(tokenData.isMatchable){
@@ -302,7 +298,7 @@ public class ProcessingState {
                             activeChunk.endToken = tokens.size()-1;
                             log.debug("   - end Chunk@pos: {}", activeChunk.endToken);
                             if(tpc.isLinkMultiMatchableTokensInChunk() && 
-                                    activeChunk.matchableCount > 1 ){
+                                    activeChunk.getMatchableCount() > 1 ){
                                 log.debug("   - multi-matchable Chunk:");
                                 //mark the last of two immediate following matchable
                                 //tokens as processable
@@ -310,10 +306,10 @@ public class ProcessingState {
                                     TokenData ct = tokens.get(i);
                                     TokenData pt = tokens.get(i-1);
                                     if(ct.isMatchable && pt.isMatchable){
-                                        if(!ct.isProcessable) { //if not already processable
+                                        if(!ct.isLinkable) { //if not already processable
                                             log.debug("     > convert Token {}: {} (pos:{}) from matchable to processable",
                                                 new Object[]{i,ct.token.getSpan(),ct.token.getAnnotations(POS_ANNOTATION)});
-                                            ct.isProcessable = true;
+                                            ct.isLinkable = true;
                                             if(!foundProcessable){
                                                 foundProcessable = true;
                                             }
@@ -479,39 +475,39 @@ public class ProcessingState {
      *            the {@link Token} to check.
      * @return <code>true</code> if the parsed token needs to be processed. Otherwise <code>false</code>
      */
-    class TokenData {
+    public class TokenData {
         /** The Token */
-        final Token token;
+        public final Token token;
         /** The index of the Token within the current Section (Sentence) */
-        final int index;
+        public final int index;
         /** If this Token should be linked with the Vocabulary */
-        boolean isProcessable;
+        public boolean isLinkable;
         /** If this Token should be used for multi word searches in the Vocabulary */
-        boolean isMatchable;
+        public boolean isMatchable;
         /** if this Token has an alpha or numeric char */
-        final boolean hasAlphaNumeric;
+        public final boolean hasAlphaNumeric;
         /** the chunk of this Token */
-        final ChunkData inChunk;
+        public final ChunkData inChunk;
         /** the morphological features of the Token (selected based on the POS Tag) */
-        final MorphoFeatures morpho;
+        public final MorphoFeatures morpho;
         /**
          * if this token starts with an upperCase letter
          */
-        final boolean upperCase;
+        public final boolean upperCase;
         /**
          * If the POS type of this word matches a linkable category
          */
-        final boolean isLinkablePos;
+        public final boolean isLinkablePos;
         /**
          * if the POS type of this word matches a matchable category
          */
-        final boolean isMatchablePos;
+        public final boolean isMatchablePos;
         /**
          * if this Token represents the start of an sub-sentence such as an 
          * starting ending quote 
          * @see ProcessingState#SUB_SENTENCE_START_POS
          */
-        final boolean isSubSentenceStart;
+        public final boolean isSubSentenceStart;
         /**
          * Constructs and initializes meta data needed for linking based 
          * on the current tokens (and its NLP annotation)
@@ -560,7 +556,7 @@ public class ProcessingState {
             }
             if(!matchedPosTag) { //not matched against a POS Tag ...
                 // ... fall back to the token length
-                this.isLinkablePos = token.getSpan().length() >= elc.getMinSearchTokenLength();
+                this.isLinkablePos = token.getSpan().length() >= tpc.getMinSearchTokenLength();
             } else {
                 this.isLinkablePos = isLinkablePos;
             }
@@ -594,7 +590,7 @@ public class ProcessingState {
                 }
                 if(!matchedPosTag){ //not matched against POS tag ...
                     //fall back to the token length
-                    this.isMatchablePos = token.getSpan().length() >= elc.getMinSearchTokenLength();    
+                    this.isMatchablePos = token.getSpan().length() >= tpc.getMinSearchTokenLength();    
                 } else {
                     this.isMatchablePos = isMatchablePos;
                 }
@@ -639,21 +635,18 @@ public class ProcessingState {
         }
         
         /**
-         * Getter for the text as used for searching/matching
-         * Entities in the linked vocabulary. If 
-         * {@link EntityLinkerConfig#isLemmaMatching()} is
-         * enabled this will return the
-         * {@link MorphoFeatures#getLemma()} (if available). 
-         * Otherwise the {@link Token#getSpan()} is returned
-         * @return the text of the token as to be used for
-         * matching. Guaranteed to be NOT NULL.
+         * Getter for token text
+         * @return the text of the token
          */
         public String getTokenText(){
-            if(elc.isLemmaMatching() && morpho != null){
-                return morpho.getLemma();
-            } else {
-                return token.getSpan();
-            }
+            return token.getSpan();
+        }
+        /**
+         * Getter for the Lemma of the token. 
+         * @return the Lemma of the Token or <code>null</code> if not available
+         */
+        public String getTokenLemma(){
+            return morpho != null ? morpho.getLemma() : null;
         }
                 
     }
@@ -670,12 +663,12 @@ public class ProcessingState {
      * and {@link ChunkData#getEndChar()} are the absolute [start,end) character
      * indices within the {@link AnalysedText#getSpan()}
      */
-    class ChunkData {
+    public class ChunkData {
         protected final static boolean DEFAULT_PROCESSABLE_STATE = true;
         /** if the Chunk is processable */
-        final boolean isProcessable;
+        public final boolean isProcessable;
         /** the Chunk */
-        final Chunk chunk;
+        public final Chunk chunk;
         /** 
          * In case multiple overlapping and processable {@link Chunk}s the
          * section selected by the chunks are merged. While {@link #chunk}
@@ -684,15 +677,11 @@ public class ProcessingState {
          * merged) are not available via this class, but can be retrieved
          * by iterating over the {@link AnalysedText} content part.
          */
-        Chunk merged;
+        private Chunk merged;
         /** the start token index relative to the current section (sentence) */
-        int startToken;
+        private int startToken;
         /** the end token index relative to the current section (sentence) */
-        int endToken;
-        /**
-         * The number of processable Tokens enclosed by this Chunk
-         */
-        int processableCount;
+        private int endToken;
         /**
          * The number of matchable Tokens enclosed by this Chunk
          */
@@ -734,8 +723,25 @@ public class ProcessingState {
         public int getEndChar(){
             return merged == null ? chunk.getEnd() : merged.getEnd();
         }
+        /**
+         * If this chunk is processable
+         * @return the state
+         */
         public boolean isProcessable() {
             return isProcessable;
+        }
+        /**
+         * Getter for the number of matchable tokens contained in this chunk
+         * @return The number of matchable tokens contained in this chunk
+         */
+        public int getMatchableCount() {
+            return matchableCount;
+        }
+        public int getStartTokenIndex() {
+            return startToken;
+        }
+        public int getEndTokenIndex() {
+            return endToken;
         }
     }
     
