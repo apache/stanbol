@@ -228,9 +228,11 @@ public class LdpathSourceProcessor implements EntityProcessor {
                     if(backend.isURI(value)){
                         result.addReference(entry.getKey(), backend.stringValue(value));
                     } else if(backend.isLiteral(value)){ //literal
-                        Locale lang = backend.getLiteralLanguage(value);
-                        if(lang != null){ //text with language
-                            result.addNaturalText(entry.getKey(), backend.stringValue(value), lang.getLanguage());
+                        Locale locale = backend.getLiteralLanguage(value);
+                        if(locale != null){ //text with language
+                            String lang = locale.getLanguage();
+                            result.addNaturalText(entry.getKey(), backend.stringValue(value), 
+                                lang.isEmpty() ? null : lang);
                         } else { // no language
                             URI type = backend.getLiteralType(value);
                             if(type != null){ //typed literal -> need to transform
