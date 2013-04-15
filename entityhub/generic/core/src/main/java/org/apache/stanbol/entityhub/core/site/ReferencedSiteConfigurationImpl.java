@@ -71,7 +71,7 @@ public class ReferencedSiteConfigurationImpl extends SiteConfigurationImpl imple
     @Override
     public final String getAccessUri() {
         Object accessUri = config.get(ACCESS_URI);
-        return accessUri == null?null:accessUri.toString();
+        return accessUri == null || accessUri.toString().isEmpty() ? null : accessUri.toString();
     }
     /**
      * 
