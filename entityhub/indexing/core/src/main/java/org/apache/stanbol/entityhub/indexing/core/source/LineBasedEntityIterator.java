@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.indexing.core.EntityIterator;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.slf4j.Logger;
@@ -46,6 +48,14 @@ public class LineBasedEntityIterator implements EntityIterator {
      * with 1)
      */
     public static final String PARAM_SCORE_POS = "score-pos";
+    /**
+     * If <code>true</code> ids are parsed to the {@link NamespacePrefixService}
+     * to convert '{prefix}:{localname}' like URIs to URIs. By default this is 
+     * deactivated.</p>
+     * NOTE: that {@link #PARAM_ID_NAMESPACE} is applied first. Meaning that
+     * '{prefixes}' can be used for this parameter of this feature is enabled.
+     */
+    public static final String PARAM_NS_PREFIX_STATE = "ns-prefix-state";
     /**
      * Default position for the entity score=2
      */
@@ -133,6 +143,12 @@ public class LineBasedEntityIterator implements EntityIterator {
     protected String namespace;
     private boolean trimLine;
     private boolean trimEntityId;
+    private NamespacePrefixService nsPrefixService;
+    private boolean nsPrefixState;
+    /**
+     * Holds the prefix [0] and namespace [1] of the last encountered prefix
+     */
+    private String[] lastNsPrefix = new String[2];
     
     /**
      * Default constructor relaying on {@link #setConfiguration(Map)} is used
@@ -185,6 +201,7 @@ public class LineBasedEntityIterator implements EntityIterator {
     @Override
     public void setConfiguration(Map<String,Object> config) {
         IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
+        nsPrefixService = indexingConfig.getNamespacePrefixService();
         log.info("Configure {} :",getClass().getSimpleName());
         Object value = config.get(PARAM_CHARSET);
         if(value != null && value.toString() != null){
@@ -289,6 +306,16 @@ public class LineBasedEntityIterator implements EntityIterator {
             trimEntityId = true;
             log.info("Set Entity ID State to '{}'",trimEntityId);
         }
+        //STANBOL-1015
+        value = config.get(PARAM_NS_PREFIX_STATE);
+        if(value instanceof Boolean){
+            nsPrefixState = ((Boolean)value).booleanValue();
+        } else if(value != null){
+            nsPrefixState = Boolean.parseBoolean(value.toString());
+        } else {
+            nsPrefixState = false; //deactivate as default
+        }
+        log.info("Set Namespace Prefix State to {}"+nsPrefixState);
     }
     private void setIdPos(int idPos) {
         if(idPos <= 0){
@@ -386,6 +413,23 @@ public class LineBasedEntityIterator implements EntityIterator {
                 id = StringEscapeUtils.unescapeJava(id);
                 log.debug(" - id = {}",id);
                 entity = namespace != null ? namespace+id : id;
+                if(nsPrefixState){
+                    //this optimises for cases where all entities do start
+                    //with the same prefix
+                    String prefix = NamespaceMappingUtils.getPrefix(entity);
+                    if(prefix != null){
+                        if(!prefix.equals(lastNsPrefix[0])){ //other prefix (or first)
+                            lastNsPrefix[0] = prefix;
+                            lastNsPrefix[1] = nsPrefixService.getNamespace(prefix);
+                            if(lastNsPrefix == null){
+                                throw new IllegalStateException("Missing Namespace "
+                                    + "Prefix mapping for Prefix '"+prefix+"'!");
+                            }
+                        }
+                        entity = new StringBuilder(lastNsPrefix[1]).append(
+                            entity,prefix.length()+1,entity.length()).toString();
+                    } //else this entity does not use a prefix
+                }
                 log.debug(" - entity = {}",entity);
             } catch (UnsupportedEncodingException e) {
                 throw new IllegalStateException("Unable to URLEncode EntityIds",e);
