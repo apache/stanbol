@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.zip.GZIPInputStream;
@@ -222,7 +223,9 @@ public class Urify implements Runnable{
             try {
                 while((triple = reader.readLine()) != null){
                     StringBuilder sb = new StringBuilder();
-                    for(String node : triple.split(" ")){
+                    StringTokenizer st = new StringTokenizer(triple," \t");
+                    while(st.hasMoreElements()){
+                        String node = st.nextToken();
                         if(node.startsWith("_:")){ //convert to uri
                             sb.append(prefix);
                             sb.append(node.substring(2,node.length()));
