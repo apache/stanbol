@@ -130,7 +130,7 @@ public class InMemoryValueFactory implements ValueFactory {
         }
         @Override
         public String toString() {
-            return value+(language!=null?('@'+language):"");
+            return value+(language!=null && !language.isEmpty() ? ('@'+language):"");
         }
         @Override
         public boolean equals(Object obj) {
