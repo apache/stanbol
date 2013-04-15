@@ -206,7 +206,20 @@ public enum DefaultNamespaceMappingsEnum{
     /**
      *  Expression of Core FRBR Concepts in RDF (http://vocab.org/frbr/core)
      */
-    frbr("http://purl.org/vocab/frbr/core#"),    
+    frbr("http://purl.org/vocab/frbr/core#"),
+    /*
+     * Freebase namesoaces
+     */
+    /**
+     * The freebase.com namespace
+     */
+    fb("http://rdf.freebase.com/ns/"),
+    /**
+     * The freebase.com key namespace. Keys are used to refer to keys used by
+     * for freebase topics (entities) on external sites (e.g. musicbrainz, 
+     * wikipedia ...).
+     */
+    key("http://rdf.freebase.com/key/")
     ;
     private String namespace;
     private String prefix;
