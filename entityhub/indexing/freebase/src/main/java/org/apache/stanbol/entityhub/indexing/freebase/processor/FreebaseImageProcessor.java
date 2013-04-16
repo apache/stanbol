@@ -45,14 +45,14 @@ public class FreebaseImageProcessor implements EntityProcessor {
      */
     public static final String PARAM_THUMBNAIL_PROPERTY = "thumbnail-property";
     public static final String DEFAULT_THUMBNAIL_PROPERTY = FOAF_NS + "thumbnail";
-    public static final String PARAM_MAX_THUMBNAIL_SIZE = "icon-max-size";
+    public static final String PARAM_MAX_THUMBNAIL_SIZE = "thumbnail-max-size";
     public static final int DEFAULT_MAX_THUMBNAIL_SIZE = -1; //use the default
     
     /**
      * The property used for depictions. If '<code>!</code>' is parsed depiction
      * generation is deactivated. 
      */
-    public static final String PARAM_DEPICTION_PROPERTY = "thumbnail-property";
+    public static final String PARAM_DEPICTION_PROPERTY = "depiction-property";
     public static final String DEFAULT_DEPICTION_PROPERTY = FOAF_NS + "depiction";
     public static final String PARAM_MAX_DEPICTION_WIDTH = "depicition-max-width";
     public static final int DEFAULT_MAX_DEPICTION_WIDTH = 800;
