@@ -51,7 +51,8 @@
     <module>tika</module>
     <module>htmlextractor</module>
     <module>xmpextractor</module>
-    <module>metaxa</module>
+    <!-- TODO: reactivate as soon as mvn repo is back online -->
+    <!-- module>metaxa</module -->
     <module>refactor</module>
 
     <!-- NLP processing engines -->
