@@ -64,6 +64,7 @@
     <module>geonames</module>
     <module>dbpedia</module>
     <module>dblp</module>
+    <module>freebase</module>
   </modules>
 
   <build>

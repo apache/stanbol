@@ -372,7 +372,7 @@ public class IndexingConfig {
      * @throws IOException
      */
     private void initNamespacePrefixMapper() throws IOException {
-        File nsPrefixMappings = new File(getConfigFolder(),"namespaceprefix.mappings");
+        File nsPrefixMappings = getConfigFile("namespaceprefix.mappings");
         if(!nsPrefixMappings.isFile()){
             FileUtils.writeLines(nsPrefixMappings,"UTF-8",Arrays.asList(
                 "# Syntax: '{prefix}\\t{namespace}\\n",

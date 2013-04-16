@@ -1,0 +1,16 @@
+#mappings used for the ReferencedSite configuration
+rdfs:label | d=entityhub:text
+fb:common.topic.alias | d=entityhub:text > skos:altLabel
+rdfs:label | d=entityhub:text > fise:matchLabel
+fb:common.topic.alias | d=entityhub:text > fise:matchLabel
+rdfs:comment | d=entityhub:text
+fb:common.topic.description | d=entityhub:text > rdfs:comment
+rdf:type | d=entityhub:ref
+fb:common.topic.notable_for | d=entityhub:ref > dc:type
+fb:base.ontologies.ontology_instance.equivalent_instances | d=entityhub:ref > owl:sameAs
+fb:common.topic.official_website | d=xsd:anyURI > foaf:homepage 
+fb:common.topic.topical_webpage | d=xsd:anyURI > foaf:homepage
+fb:common.topic.webpage | d=xsd:anyURI > foaf:homepage
+fb:type.object.timestamp | d=xsd:dateTime > dc:created
+fb:type.object.creator | d=entityhub:ref > dc:creator
+fb:type.object.mid > dc:identifier

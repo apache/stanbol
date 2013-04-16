@@ -1,0 +1,4 @@
+geo:lat = <http://rdf.freebase.com/ns/location.location.geolocation>/<http://rdf.freebase.com/ns/location.geocode.latitude>;
+geo:long = <http://rdf.freebase.com/ns/location.location.geolocation>/<http://rdf.freebase.com/ns/location.geocode.longitude>;
+geo:alt = <http://rdf.freebase.com/ns/location.location.geolocation>/<http://rdf.freebase.com/ns/location.geocode.elevation>;
+foaf:homepage = fn:first(<http://rdf.freebase.com/ns/common.topic.official_website>,<http://rdf.freebase.com/ns/common.topic.topical_webpage>,<http://rdf.freebase.com/ns/common.topic.webpage>);
