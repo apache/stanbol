@@ -64,9 +64,9 @@ public abstract class AbstractAnalyzerFactoryActivator implements BundleActivato
         //we need to reset the context ClassLoader to avoid leaking of Solr
         //versions present in the System (when Stanbol is running in an embedded
         //OSGI environment)
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        ClassLoader ccl = Thread.currentThread().getContextClassLoader();
         try {
-            Thread.currentThread().setContextClassLoader(CoreContainer.class.getClassLoader());
+            Thread.currentThread().setContextClassLoader(this.classLoader);
             charFilterFactoryRegistrations = registerAnalyzerFactories(context, 
                 classLoader, CharFilterFactory.class);
             tokenizerFactoryRegistrations = registerAnalyzerFactories(context, 
@@ -74,7 +74,7 @@ public abstract class AbstractAnalyzerFactoryActivator implements BundleActivato
             tokenFilterFactoryRegistrations = registerAnalyzerFactories(context, 
                 classLoader, TokenFilterFactory.class);
         } finally {
-            Thread.currentThread().setContextClassLoader(classLoader);
+            Thread.currentThread().setContextClassLoader(ccl);
         }
     }
 
