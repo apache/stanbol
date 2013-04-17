@@ -266,7 +266,7 @@ public class GeonamesIndexingSource implements EntityDataIterable, ResourceImpor
                 Integer geoNamesId = Integer.parseInt(id);
                 //create a new Doc based on the first Element (geonamesID)
                 Representation doc = valueFactory.createRepresentation(
-                    new StringBuilder(GEONAMES_RESOURCE_NS).append(id).toString());
+                    new StringBuilder(GEONAMES_RESOURCE_NS).append(id).append('/').toString());
                 //add the Integer id so that we do not need to parse it from the subject URI
                 doc.add(GeonamesPropertyEnum.idx_id.toString(), geoNamesId);
                 //add the geonames:Feature type

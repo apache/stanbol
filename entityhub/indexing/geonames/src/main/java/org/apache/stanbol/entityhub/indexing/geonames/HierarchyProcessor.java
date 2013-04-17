@@ -359,7 +359,7 @@ public class HierarchyProcessor implements EntityProcessor {
         //add country
         if(adminIds[0] != null){
             doc.add(GeonamesPropertyEnum.gn_parentCountry.toString(), vf.createReference(
-                new StringBuilder(GeonamesConstants.GEONAMES_RESOURCE_NS).append(adminIds[0]).toString()));
+                new StringBuilder(GeonamesConstants.GEONAMES_RESOURCE_NS).append(adminIds[0]).append('/').toString()));
             parentLevel = Collections.singleton(adminIds[0]);
         }  else {
             parentLevel = Collections.emptySet();
@@ -413,7 +413,7 @@ public class HierarchyProcessor implements EntityProcessor {
             if(id != null){
                 refs.add(vf.createReference(
                     new StringBuilder(GeonamesConstants.GEONAMES_RESOURCE_NS)
-                    .append(id).toString()));
+                    .append(id).append('/').toString()));
             }
         }
         return refs;
