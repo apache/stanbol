@@ -50,18 +50,17 @@
         <configuration>
           <instructions>
             <Bundle-Activator>
-              org.apache.stanbol.commons.solr.extras.icu.impl.IcuAnalyzerFoctoryActivator
+              org.apache.stanbol.commons.solr.extras.icu.impl.IcuAnalyzerFactoryActivator
             </Bundle-Activator>
             <Private-Package>
                 org.apache.stanbol.commons.solr.extras.icu.impl;version=${project.version}
             </Private-Package>
-            <Embed-Dependency>lucene-analyzers-icu, icu4j</Embed-Dependency>
+            <Embed-Dependency>lucene-analyzers-icu</Embed-Dependency>
             <Import-Package>
               *
             </Import-Package>
             <!-- used instead of Export-Package to preserve the jars -->
             <_exportcontents>
-              com.ibm.icu.*;version=4.8.1.1,
               org.apache.lucene.analysis.icu.*;version=${solr-version}
             </_exportcontents>
             <!-- 

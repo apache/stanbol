@@ -17,6 +17,7 @@ import org.apache.lucene.analysis.util.TokenFilterFactory;
 import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.util.SPIClassIterator;
 import org.apache.lucene.util.Version;
+import org.apache.solr.core.CoreContainer;
 import org.apache.stanbol.commons.solr.SolrConstants;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -34,9 +35,9 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public abstract class AbstractAnalyzerFoctoryActivator implements BundleActivator {
+public abstract class AbstractAnalyzerFactoryActivator implements BundleActivator {
 
-    private static Logger log = LoggerFactory.getLogger(AbstractAnalyzerFoctoryActivator.class);
+    private static Logger log = LoggerFactory.getLogger(AbstractAnalyzerFactoryActivator.class);
 
     public static final Map<Class<? extends AbstractAnalysisFactory>, String[]> SUFFIXES;
     
@@ -54,19 +55,27 @@ public abstract class AbstractAnalyzerFoctoryActivator implements BundleActivato
     private List<ServiceRegistration> tokenFilterFactoryRegistrations;
     
     
-    protected AbstractAnalyzerFoctoryActivator(){
+    protected AbstractAnalyzerFactoryActivator(){
         this.classLoader = getClass().getClassLoader();
     }
     
     @Override
     public void start(BundleContext context) throws Exception {
-        charFilterFactoryRegistrations = registerAnalyzerFactories(context, 
-            classLoader, CharFilterFactory.class);
-        tokenizerFactoryRegistrations = registerAnalyzerFactories(context, 
-            classLoader, TokenizerFactory.class);
-        tokenFilterFactoryRegistrations = registerAnalyzerFactories(context, 
-            classLoader, TokenFilterFactory.class);
-
+        //we need to reset the context ClassLoader to avoid leaking of Solr
+        //versions present in the System (when Stanbol is running in an embedded
+        //OSGI environment)
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(CoreContainer.class.getClassLoader());
+            charFilterFactoryRegistrations = registerAnalyzerFactories(context, 
+                classLoader, CharFilterFactory.class);
+            tokenizerFactoryRegistrations = registerAnalyzerFactories(context, 
+                classLoader, TokenizerFactory.class);
+            tokenFilterFactoryRegistrations = registerAnalyzerFactories(context, 
+                classLoader, TokenFilterFactory.class);
+        } finally {
+            Thread.currentThread().setContextClassLoader(classLoader);
+        }
     }
 
     @Override

@@ -78,6 +78,7 @@
                  exporting those frameworks -->
             <Import-Package>
               org.slf4j.impl;resolution:=optional,
+              com.ibm.icu.*;resolution:=optional,
               org.apache.log4j.jmx;resolution:=optional,
               org.apache.log4j.spi;resolution:=optional,
               org.jboss.netty.*;resolution:=optional,

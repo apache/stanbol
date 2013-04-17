@@ -51,7 +51,7 @@
         <configuration>
           <instructions>
             <Bundle-Activator>
-              org.apache.stanbol.commons.solr.extras.smartcn.impl.SmartcnAnalyzerFoctoryActivator
+              org.apache.stanbol.commons.solr.extras.smartcn.impl.SmartcnAnalyzerFactoryActivator
             </Bundle-Activator>
             <Private-Package>
               org.apache.stanbol.commons.solr.extras.smartcn.impl;version=${project.version}

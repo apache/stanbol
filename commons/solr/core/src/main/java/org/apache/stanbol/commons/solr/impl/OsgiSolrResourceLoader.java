@@ -14,7 +14,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.stanbol.commons.solr.SolrServerAdapter;
-import org.apache.stanbol.commons.solr.utils.AbstractAnalyzerFoctoryActivator;
+import org.apache.stanbol.commons.solr.utils.AbstractAnalyzerFactoryActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -26,7 +26,7 @@ import org.osgi.framework.ServiceReference;
  * This is because Solr 4 uses SPI ("META-INF/services" files) to lookup
  * those factories and this does not work across bundles in OSGI.<p>
  * This {@link SolrResourceLoader} variant is intended to be used together
- * with Bundle-Activators based on the {@link AbstractAnalyzerFoctoryActivator}.
+ * with Bundle-Activators based on the {@link AbstractAnalyzerFactoryActivator}.
  * <p> The {@link SolrServerAdapter} does use this class as {@link SolrResourceLoader}
  * when creating {@link SolrCore}s.
  * 

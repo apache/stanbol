@@ -50,7 +50,7 @@
         <configuration>
           <instructions>
             <Bundle-Activator>
-              org.apache.stanbol.commons.solr.extras.kuromoji.impl.KuromojiAnalyzerFoctoryActivator
+              org.apache.stanbol.commons.solr.extras.kuromoji.impl.KuromojiAnalyzerFactoryActivator
             </Bundle-Activator>
             <Private-Package>
                 org.apache.stanbol.commons.solr.extras.kuromoji.impl;version=${project.version}
