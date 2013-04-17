@@ -17,110 +17,80 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
+    <parent>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>stanbol-parent</artifactId>
+        <version>4-SNAPSHOT</version>
+        <relativePath>../../parent</relativePath>
+    </parent>
+
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>stanbol-parent</artifactId>
-    <version>4-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
-  </parent>
+    <artifactId>org.apache.stanbol.demos.enhancer.vie</artifactId>
+    <version>0.10.0-SNAPSHOT</version>
+    <packaging>bundle</packaging>
 
-  <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.demos.enhancer.vie</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
-  <packaging>bundle</packaging>
+    <name>Apache Stanbol Demos Enhancer VIE UI</name>
+    <description>VIE (https://github.com/bergie/VIE) based user interface for Stanbol (Enhancer and Entityhub)
+    </description>
 
-  <name>Apache Stanbol Demos Enhancer VIE UI</name>
-  <description>VIE (https://github.com/bergie/VIE) based user interface for Stanbol (Enhancer and Entityhub)</description>
+    <build>
+        <!-- make it an OSGi bundle -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Import-Package>
+                            javax.ws.rs.*; version="[0,2)",
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <version>0.8</version>
+                <configuration>
+                    <excludes>
+                        <exclude>src/main/resources/META-INF/resources/static/enhancervie/annotate.css</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
 
-  <build>
-    <!-- make it an OSGi bundle -->
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Import-Package>
-              javax.ws.rs.*; version="[0,2)",
-              *
-            </Import-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <version>0.8</version>
-        <configuration>
-          <excludes>
-            <exclude>.svnignore</exclude>
-            <exclude>README.md</exclude>
-            <exclude>src/license/THIRD-PARTY.properties</exclude>
-            <!-- rdfQuery has MIT licence -->
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/jquery.rdfquery.min.js</exclude>
-            <exclude>src/main/resources/META-INF/resources/static/enhancervie/annotate.css</exclude>
-            <!--
-                Annotate.js: MIT License
-                underscore.js: MIT license
-                backbone.js: MIT license
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/underscore-min.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/annotate.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/backbone.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/vie/vie-latest.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/vie/vie-latest.debug.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/backbone-min.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/jquery.rdfquery.min.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/annotate.coffee</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/annotate.css</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/hallo/format.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/lib/hallo/hallo.js</exclude>
-            <exclude>src/main/resources/org/apache/stanbol/commons/web/vie/static/test.js</exclude>
-            -->
-          </excludes>
-            <licenses>
-                <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
-                    <licenseFamilyCategory>MIT</licenseFamilyCategory>
-                    <licenseFamilyName>The MIT License (MIT)</licenseFamilyName>
-                    <notes></notes>
-                    <patterns>
-                        <pattern>the MIT license</pattern>
-                    </patterns>
-                </license>
-            </licenses>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+        </plugins>
+    </build>
 
-  <dependencies>
+    <dependencies>
 
-    <!-- dependencies on other IKS modules -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
-    </dependency> 
+        <!-- dependencies on other IKS modules -->
+        <dependency>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+            <version>0.12.0-SNAPSHOT</version>
+        </dependency>
 
-    <!-- Jersey -->
-    <dependency>
-    	<groupId>org.apache.stanbol</groupId>
-  		<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-      <version>0.11.0</version>      
-    </dependency>
+        <!-- Jersey -->
+        <dependency>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+            <version>0.11.0</version>
+        </dependency>
 
-    <!-- OSGi tax -->
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
-    </dependency>
+        <!-- OSGi tax -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
 
-  </dependencies>
+    </dependencies>
 
 </project>
