@@ -143,6 +143,11 @@
       <artifactId>org.apache.servicemix.bundles.spatial4j</artifactId>
       <version>0.3_1</version>
     </bundle>
+    <bundle> <!-- used by Solr and Clerezza -->
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <version>49.1</version>    
+    </bundle>
     <bundle>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore-osgi</artifactId>
@@ -316,7 +321,7 @@
       <artifactId>wymiwyg-commons-core</artifactId>
       <version>0.7.5</version>
     </bundle>
-    <!-- ICU is also exported by the o.a.s.commons.solr.extra.icu module
+    <!-- ICU is an bundle in the meantime
       bundle>
       <groupId>org.apache.clerezza.ext</groupId>
       <artifactId>com.ibm.icu</artifactId>
@@ -465,19 +470,19 @@
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.install</artifactId>
+      <artifactId>org.apache.stanbol.commons.solr.web</artifactId>
       <version>0.12.0-SNAPSHOT</version>
     </bundle>
-    <bundle>
+    <bundle> <!-- defualt config for Solr -->
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.web</artifactId>
+      <artifactId>org.apache.stanbol.commons.solr.defaults</artifactId>
       <version>0.12.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
   <startLevel level="29">
-    <bundle> <!-- defualt config for Solr -->
+    <bundle> <!-- IMPORTANT: this need to be started after commons.solr.defaults! -->
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.defaults</artifactId>
+      <artifactId>org.apache.stanbol.commons.solr.install</artifactId>
       <version>0.12.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
