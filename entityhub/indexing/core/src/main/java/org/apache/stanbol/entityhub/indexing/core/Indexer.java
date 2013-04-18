@@ -186,4 +186,19 @@ public interface Indexer {
      */
     public abstract State getState();
 
+    /**
+     * Tells the indexer that the {@link #indexEntities()} step should be skipped.
+     * Will set the {@link #getState()} to {@link State#INDEXED} without indexing
+     * any Entities. Otherwise this has the same pre-requirements as calling
+     * {@link #indexEntities()}
+     */
+    public void skipIndexEntities();
+    /**
+     * Tells the Indexer to skip the {@link #postProcessEntities()} step. Will set
+     * the {@link #getState()} to {@link State#POSTPROCESSED} without performing
+     * any post processing.Otherwise this has the same pre-requirements as calling
+     * {@link #postProcessEntities()}
+     */
+    void skipPostProcessEntities();
+
 }

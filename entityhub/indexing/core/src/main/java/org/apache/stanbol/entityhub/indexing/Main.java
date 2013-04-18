@@ -59,7 +59,9 @@ public class Main {
             path = args[1];
         }
         if("init".equalsIgnoreCase(args[0]) ||
-                "index".equalsIgnoreCase(args[0])){
+                "index".equalsIgnoreCase(args[0]) || 
+                "postprocess".equalsIgnoreCase(args[0]) ||
+                "finalise".equalsIgnoreCase(args[0])){
             if(path != null){
                 indexer = factory.create(path);
             } else {
@@ -71,6 +73,16 @@ public class Main {
             }
             if("index".equalsIgnoreCase(args[0])){
                 indexer.index();
+            } else if("postprocess".equalsIgnoreCase(args[0])){
+                indexer.initialiseIndexing();
+                indexer.skipIndexEntities();
+                indexer.postProcessEntities();
+                indexer.finaliseIndexing();
+            } else if ("finalise".equalsIgnoreCase(args[0])){
+                indexer.initialiseIndexing();
+                indexer.skipIndexEntities();
+                indexer.skipPostProcessEntities();
+                indexer.finaliseIndexing();
             }
         } else {
             System.err.println("Unknown command "+args[0]+" (supported: init,index)\n\n");
@@ -87,10 +99,13 @@ public class Main {
             "java -Xmx{size} -jar org.apache.stanbol.indexing.core-*" +
             "-jar-with-dependencies.jar [options] init|index [configDir]",
             "Indexing Commandline Utility: \n"+
-            "  size:  Heap requirements depend on the dataset and the configuration.\n"+
-            "         1024m should be a reasonable default.\n" +
-            "  init:  Initialise the configuration with the defaults \n" +
-            "  index: Needed to start the indexing process\n" +
+            "  size:        Heap requirements depend on the dataset and the\n"+
+            "               configuration. 1024m should be a reasonable default.\n" +
+            "  init:        Initialise the configuration with the defaults \n" +
+            "  index:       Needed to start the indexing process\n" +
+            "  postprocess: Skip indexing and directly start with post-processing\n" +
+            "  finalise:    Skip indexing and post-processing; only finalises \n" +
+            "               the index. \n"+
             "  configDir: the path to the configuration directory (default:" +
             " user.dir)",
             options,

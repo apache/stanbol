@@ -370,6 +370,24 @@ public class IndexerImpl implements Indexer {
         log.info("  ...finalisation completed");
     }
     @Override
+    public void skipPostProcessEntities() {
+        synchronized (stateSync) { //ensure that two threads do not start the
+            //initialisation at the same time ...
+            State state = getState();
+            if(state.ordinal() < State.INDEXED.ordinal()){
+                throw new IllegalStateException("The Indexer MUST BE already "+State.INDEXED+" when calling this Method!");
+            }
+            if(state == State.POSTPROCESSING){ //if state > INITIALISED
+                throw new IllegalStateException("Unable to skip post processing if postprocessing is already in progress!");
+            }
+            if(state.ordinal() >= state.POSTPROCESSED.ordinal()){
+                return; //already post processed
+            }
+            setState(State.POSTPROCESSED);
+            log.info("Skiped postprocessing ...");
+        }
+    }
+    @Override
     public void postProcessEntities() {
         synchronized (stateSync) { //ensure that two threads do not start the
             //initialisation at the same time ...
@@ -381,7 +399,7 @@ public class IndexerImpl implements Indexer {
                 return; // ignore this call
             }
             setState(State.POSTPROCESSING);
-            log.info("Indexing started ...");
+            log.info("PostProcessing started ...");
         }
         if(entityPostProcessors == null || entityPostProcessors.isEmpty()){
             setState(State.POSTPROCESSED);
@@ -528,10 +546,28 @@ public class IndexerImpl implements Indexer {
                 return; // ignore this call
             }
             setState(State.FINALISING);
-            log.info("Indexing started ...");
+            log.info("finalisation started ...");
         }
         indexingDestination.finalise();
         setState(State.FINISHED);
+    }
+    @Override
+    public void skipIndexEntities() {
+        synchronized (stateSync) { //ensure that two threads do not start the
+            //initialisation at the same time ...
+            State state = getState();
+            if(state.ordinal() < State.INITIALISED.ordinal()){
+                throw new IllegalStateException("The Indexer MUST BE already "+State.INITIALISED+" when calling this Method!");
+            }
+            if(state == State.INDEXING){ 
+                throw new IllegalStateException("Unable to skip indexing if indexing is already in progress!");
+            }
+            if(state.ordinal() >= state.INDEXED.ordinal()){ //if state > INDEXING
+                return; //already in INDEXED state
+            }
+            setState(State.INDEXED);
+            log.info("Indexing of Entities skipped ...");
+        }
     }
     @Override
     public void indexEntities() {
