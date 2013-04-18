@@ -61,7 +61,7 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
             </Bundle-Activator>
             <Embed-Dependency>freemarker</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
-            <Export-Package>freemarker.*</Export-Package>
+            <Export-Package>freemarker.*;version=${freemarker-version}</Export-Package>
             <Import-Package>
               !javax.servlet.jsp.*,
               !org.apache.tools.*,
