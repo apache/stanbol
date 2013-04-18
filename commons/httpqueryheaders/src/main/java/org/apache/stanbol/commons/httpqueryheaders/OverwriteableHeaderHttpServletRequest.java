@@ -23,9 +23,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -41,7 +44,8 @@ import org.slf4j.LoggerFactory;
 public class OverwriteableHeaderHttpServletRequest extends HttpServletRequestWrapper {
 
     Logger log = LoggerFactory.getLogger(OverwriteableHeaderHttpServletRequest.class);
-    Map<String,List<String>> overriddenHeaders = new HashMap<String,List<String>>();
+    //headers are case insensitive
+    Map<String,List<String>> overriddenHeaders = new TreeMap<String,List<String>>(String.CASE_INSENSITIVE_ORDER);
     
     public OverwriteableHeaderHttpServletRequest(HttpServletRequest request) {
         super(request);
@@ -118,7 +122,7 @@ public class OverwriteableHeaderHttpServletRequest extends HttpServletRequestWra
     
     @Override
     public Enumeration getHeaderNames() {
-        Set<String> names = new HashSet<String>();
+        Set<String> names = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         Enumeration<String> e = super.getHeaderNames();
         if(e != null){
             while(e.hasMoreElements()){
@@ -128,7 +132,7 @@ public class OverwriteableHeaderHttpServletRequest extends HttpServletRequestWra
         for(Entry<String,List<String>> entry : overriddenHeaders.entrySet()){
             if(entry.getValue() == null){
                 names.remove(entry.getKey());
-            } else {
+            } else if(!names.contains(entry.getKey())){
                 names.add(entry.getKey());
             }
         }
