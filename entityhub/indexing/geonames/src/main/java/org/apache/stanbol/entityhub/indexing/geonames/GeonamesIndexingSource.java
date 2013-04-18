@@ -291,7 +291,7 @@ public class GeonamesIndexingSource implements EntityDataIterable, ResourceImpor
                 doc.add(GeonamesPropertyEnum.gn_featureClass.toString(),getReference(featureClass));
                 //[7] featureCode (-> need to use <featureClass>.<featureCode>!!)
                 doc.add(GeonamesPropertyEnum.gn_featureCode.toString(),getReference(
-                    new StringBuilder(featureClass).append(t.next()).toString()));
+                    new StringBuilder(featureClass).append('.').append(t.next()).toString()));
                 //countryCode
                 //  -> geonames uses here the link to an HTML Page showing the Country
                 //     We would like to use an Link to a SKOS:Concept representing the Country
