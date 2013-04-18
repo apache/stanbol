@@ -23,10 +23,12 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -38,6 +40,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
@@ -744,28 +747,25 @@ public class SolrYard extends AbstractYard implements Yard {
             // But this would also prevent the possibility to intentionally
             // override the boost.
             String field = fields.next();
-            float boost;
+            /*
+             * With STANBOL-1027 the calculation of the boost has changed to
+             * consider multiple values for Representation#get(field).
+             */
+            float baseBoost; //the boost without considering the number of values per solr field
             Float fieldBoost = fieldBoostMap == null ? null : fieldBoostMap.get(field);
-            //With solr 3.6 one can not set index time boosts on fields that omitNorms
-            //because of that we need to restrict the usage of boosts to those manually
-            //configured in the fieldBoostMap. Before bosts where dropped for fields that
-            //do not support them
+            final Map<String,int[]> fieldsToBoost; //used to keep track of field we need boost
             if(fieldBoost != null){
-                boost = documentBoost != null ? fieldBoost * documentBoost : fieldBoost;
+                baseBoost = documentBoost != null ? fieldBoost * documentBoost : fieldBoost;
+                fieldsToBoost = new HashMap<String,int[]>();
             } else { 
-                boost = -1;
+                baseBoost = -1;
+                fieldsToBoost = null;
             }
-            //the old code that does no longer work with Solr 3.6 :(
-//            if(documentBoost != null){
-//                boost = documentBoost;
-//                if(fieldBoost != null){
-//                    boost = boost*fieldBoost;
-//                }
-//            } else if(fieldBoost != null){
-//                boost = fieldBoost;
-//            } else {
-//                boost = -1;
-//            }
+            //NOTE: Setting a boost requires two iteration
+            //  (1) we add the values to the SolrInputDocument without an boost
+            //  (2) set the boost by using doc.setField(field,doc.getFieldValues(),boost)
+            //  Holding field values in an own map does not make sense as the SolrInputDocument
+            //  does already exactly that (in an more efficient way)
             for (Iterator<Object> values = representation.get(field); values.hasNext();) {
                 // now we need to get the indexField for the value
                 Object next = values.next();
@@ -773,10 +773,23 @@ public class SolrYard extends AbstractYard implements Yard {
                 try {
                     value = indexValueFactory.createIndexValue(next);
                     for (String fieldName : fieldMapper.getFieldNames(Arrays.asList(field), value)) {
-                        //Set Boosts only for text data types
-                        if(boost > 0){
-                            inputDocument.addField(fieldName, value.getValue(), boost);
+                        //In step (1) of boosting just keep track of the field
+                        if(fieldBoost != null){ //wee need to boost in (2)
+                            int[] numValues = fieldsToBoost.get(fieldName);
+                            if(numValues == null){
+                                numValues = new int[]{1};
+                                fieldsToBoost.put(fieldName, numValues);
+                                //the first time add the document with the baseBoost
+                                //as this will be the correct boost for single value fields
+                                inputDocument.addField(fieldName, value.getValue(),baseBoost);
+                            } else {
+                                numValues[0]++;
+                                //for multi valued fields the correct boost is set in (2)
+                                //so we can add here without an boost
+                                inputDocument.addField(fieldName, value.getValue());
+                            }
                         } else {
+                            //add add the values without boost
                             inputDocument.addField(fieldName, value.getValue());
                         }
                     }
@@ -793,6 +806,18 @@ public class SolrYard extends AbstractYard implements Yard {
                     log.warn(
                         String.format("Unable to process value %s (type:%s) for field %s!", next,
                             next.getClass(), field), e);
+                }
+            }
+            if(fieldBoost != null){ //we need still to do part (2) of setting the correct boost
+                for(Entry<String,int[]> entry : fieldsToBoost.entrySet()){
+                    if(entry.getValue()[0] > 1) { //adapt the boost only for multi valued fields
+                        SolrInputField solrField = inputDocument.getField(entry.getKey());
+                        //the correct bosst is baseBoost (representing entity boost with field
+                        //boost) multiplied with the sqrt(fieldValues). The 2nd part aims to
+                        //compensate the Solr lengthNorm (1/sqrt(fieldTokens))
+                        //see STANBOL-1027 for details
+                        solrField.setBoost(baseBoost*(float)Math.sqrt(entry.getValue()[0]));
+                    }
                 }
             }
         }
