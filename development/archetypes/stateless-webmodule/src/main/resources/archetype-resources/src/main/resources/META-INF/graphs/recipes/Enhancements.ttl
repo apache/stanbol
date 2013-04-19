@@ -6,5 +6,7 @@
   rdfs:label "When presenting an enhanced document the property of its enhancements should be presented too";
   recipe:ingredient
     [a recipe:Ingredient;
-        recipe:ingredientInverseProperty <http://fise.iks-project.eu/ontology/extracted-from>];
+        recipe:ingredientInverseProperty <http://fise.iks-project.eu/ontology/extracted-from>],
+    [a recipe:Ingredient;
+        recipe:ingredientProperty <http://fise.iks-project.eu/ontology/entity-reference>];
   recipe:recipeDomain "${package.replace(".","/")}/Enhancements" .
