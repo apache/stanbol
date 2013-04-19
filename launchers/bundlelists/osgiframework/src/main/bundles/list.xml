@@ -123,6 +123,11 @@
 
   <!-- Felix web console and plugins -->
   <startLevel level="21">
+    <bundle>  <!-- Required by the Felix Webconsole -->
+      <groupId>org.apache.geronimo.bundles</groupId>
+      <artifactId>json</artifactId>
+      <version>20090211_1</version>
+    </bundle>
     <bundle>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.webconsole</artifactId>
