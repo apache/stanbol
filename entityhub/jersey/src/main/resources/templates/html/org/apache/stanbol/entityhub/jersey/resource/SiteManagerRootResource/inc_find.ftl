@@ -85,7 +85,7 @@
     <td><strong>LDPath:</strong>
     </td><td><textarea class="input" name="ldpath" rows="10">name = rdfs:label[@en] :: xsd:string;
 comment = rdfs:comment[@en] :: xsd:string;
-categories = dct:subject :: xsd:anyURI;
+categories = dc:subject :: xsd:anyURI;
 homepage = foaf:homepage :: xsd:anyURI;
 location = fn:concat("[",geo:lat,",",geo:long,"]") :: xsd:string;</textarea><br>
       (optional). LDPath programs can be used to specify what information to return for
