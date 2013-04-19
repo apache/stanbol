@@ -1132,34 +1132,12 @@
         <version>${solr-version}</version>
     </dependency>
     <!-- Other Solr/Lucene dependendies -->
-    <!-- StAX Parser (used by Solr/Lucene) -->
-    <!-- dependency> stay api is included in java 1.6
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.stax-api-1.0</artifactId>
-      <version>2.1.0</version>
-    </dependency> -->
-    <dependency>
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.woodstox</artifactId>
-      <version>3.2.9_3</version>
-      <exclusions>
-        <exclusion> <!-- provided from JDK 1.6 via frameworkfragment -->
-          <groupId>org.apache.servicemix.specs</groupId>
-          <artifactId>org.apache.servicemix.specs.stax-api-1.0</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.regexp</artifactId>
       <version>1.3_3</version>
     </dependency>
-    <dependency> <!--  required by Solr 3.2 -->
-      <groupId>xml-resolver</groupId>
-      <artifactId>xml-resolver</artifactId>
-      <version>1.2</version>
-    </dependency>
-    <dependency> <!--  required by Solr 3.2 -->
+    <dependency> <!--  required by Solr 4.2 -->
       <groupId>javax.portlet</groupId>
       <artifactId>portlet-api</artifactId>
       <version>2.0</version>
