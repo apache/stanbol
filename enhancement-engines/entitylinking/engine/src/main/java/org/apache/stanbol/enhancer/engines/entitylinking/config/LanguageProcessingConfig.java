@@ -161,6 +161,7 @@ public class LanguageProcessingConfig implements Cloneable{
      */
     private boolean linkMultiMatchableTokensInChunkState = DEFAULT_LINK_MULTIPLE_MATCHABLE_TOKENS_IN_CHUNKS_STATE;
     private int minSearchTokenLength;
+    private boolean linkOnlyUpperCaseTokenWithUnknownPos;
 
 
     /**
@@ -526,6 +527,23 @@ public class LanguageProcessingConfig implements Cloneable{
         return minSearchTokenLength;
     }
 
+    /**
+     * This returns the state if only upper case tokens should be marked as 
+     * 'linkable' if they do not have a POS tag
+     * @return the state
+     */
+    public boolean isLinkOnlyUpperCaseTokensWithUnknownPos(){
+        return linkOnlyUpperCaseTokenWithUnknownPos;
+    }
+ 
+    /**
+     * This returns the state if only upper case tokens should be marked as 
+     * 'linkable' if they do not have a POS tag
+     * @param linkOnlyUpperCaseTokenWithUnknownPos the state
+     */
+    public void setLinkOnlyUpperCaseTokenWithUnknownPos(boolean linkOnlyUpperCaseTokenWithUnknownPos) {
+        this.linkOnlyUpperCaseTokenWithUnknownPos = linkOnlyUpperCaseTokenWithUnknownPos;
+    }
     
     /**
      * Clones the {@link LanguageProcessingConfig}. Intended to be used
@@ -549,6 +567,7 @@ public class LanguageProcessingConfig implements Cloneable{
         c.linkMultiMatchableTokensInChunkState = linkMultiMatchableTokensInChunkState;
         c.matchedLexicalCategories = matchedLexicalCategories;
         c.minSearchTokenLength = minSearchTokenLength;
+        c.linkOnlyUpperCaseTokenWithUnknownPos = linkOnlyUpperCaseTokenWithUnknownPos;
         return c;
     }
 

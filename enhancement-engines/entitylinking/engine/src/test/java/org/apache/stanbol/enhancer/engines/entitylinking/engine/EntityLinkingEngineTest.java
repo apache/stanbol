@@ -98,7 +98,14 @@ public class EntityLinkingEngineTest {
     public static final String TEST_TEXT = "Dr. Patrick Marshall (1869 - November 1950) was a"
         + " geologist who lived in New Zealand and worked at the University of Otago.";
     
+    /**
+     * changed oder af given and family name
+     */
+    public static final String TEST_TEXT_WO = "Dr. Marshall Patrick (1869 - November 1950) was a"
+        + " geologist who lived in New Zealand and worked at the University of Otago.";
+
     private static AnalysedText TEST_ANALYSED_TEXT;
+    private static AnalysedText TEST_ANALYSED_TEXT_WO;
     
 //    public static final String TEST_TEXT2 = "A CBS televised debate between Australia's " +
 //    		"candidates for Prime Minister in the upcoming US election has been rescheduled " +
@@ -107,6 +114,8 @@ public class EntityLinkingEngineTest {
     private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
     
     private static final String TEST_REFERENCED_SITE_NAME = "dummRefSiteName";
+    
+    private static Value<PhraseTag> NOUN_PHRASE = Value.value(new PhraseTag("NP",LexicalCategory.Noun),1d);
     
     static TestSearcherImpl searcher;
     
@@ -166,48 +175,59 @@ public class EntityLinkingEngineTest {
         graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_ORGANISATION));
         searcher.addEntity(new Entity(uri, graph));
         
-        Value<PhraseTag> nounPhrase = Value.value(new PhraseTag("NP",LexicalCategory.Noun),1d);
         TEST_ANALYSED_TEXT = AnalysedTextFactory.getDefaultInstance().createAnalysedText(
-                ciFactory.createBlob(new StringSource(TEST_TEXT)));
-        TEST_ANALYSED_TEXT.addSentence(0, TEST_ANALYSED_TEXT.getEnd());
-        //add some noun phrases
-        TEST_ANALYSED_TEXT.addChunk(0, "Dr. Patrick Marshall".length()).addAnnotation(PHRASE_ANNOTATION, nounPhrase);
-        TEST_ANALYSED_TEXT.addChunk(TEST_TEXT.indexOf("New Zealand"), TEST_TEXT.indexOf("New Zealand")+"New Zealand".length())
-        .addAnnotation(PHRASE_ANNOTATION, nounPhrase);
-        TEST_ANALYSED_TEXT.addChunk(TEST_TEXT.indexOf("geologist"), TEST_TEXT.indexOf("geologist")+"geologist".length())
-        .addAnnotation(PHRASE_ANNOTATION, nounPhrase);
-        TEST_ANALYSED_TEXT.addChunk(TEST_TEXT.indexOf("the University of Otago"), 
-            TEST_TEXT.length()-1).addAnnotation(PHRASE_ANNOTATION, nounPhrase);
-        //add some tokens
-        TEST_ANALYSED_TEXT.addToken(0, 2).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.Abbreviation),1d));
-        TEST_ANALYSED_TEXT.addToken(2, 3).addAnnotation(POS_ANNOTATION, Value.value(new PosTag(".",Pos.Point),1d));
+            ciFactory.createBlob(new StringSource(TEST_TEXT)));
+        TEST_ANALYSED_TEXT_WO = AnalysedTextFactory.getDefaultInstance().createAnalysedText(
+                ciFactory.createBlob(new StringSource(TEST_TEXT_WO)));
+        initAnalyzedText(TEST_ANALYSED_TEXT);
+        TEST_ANALYSED_TEXT.addChunk(0, "Dr. Patrick Marshall".length()).addAnnotation(PHRASE_ANNOTATION, NOUN_PHRASE);
         TEST_ANALYSED_TEXT.addToken(4, 11).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NP",Pos.ProperNoun),1d));
         TEST_ANALYSED_TEXT.addToken(12, 20).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NP",Pos.ProperNoun),1d));
+        initAnalyzedText(TEST_ANALYSED_TEXT_WO);
+        TEST_ANALYSED_TEXT_WO.addChunk(0, "Dr. Marshall Patrick".length()).addAnnotation(PHRASE_ANNOTATION, NOUN_PHRASE);
+        TEST_ANALYSED_TEXT_WO.addToken(4, 12).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NP",Pos.ProperNoun),1d));
+        TEST_ANALYSED_TEXT_WO.addToken(13, 20).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NP",Pos.ProperNoun),1d));
+    }
+
+    /**
+     * @param nounPhrase
+     */
+    private static void initAnalyzedText(AnalysedText at) {
+        at.addSentence(0, TEST_ANALYSED_TEXT.getEnd());
+        at.addChunk(TEST_TEXT.indexOf("New Zealand"), TEST_TEXT.indexOf("New Zealand")+"New Zealand".length())
+        .addAnnotation(PHRASE_ANNOTATION, NOUN_PHRASE);
+        at.addChunk(TEST_TEXT.indexOf("geologist"), TEST_TEXT.indexOf("geologist")+"geologist".length())
+        .addAnnotation(PHRASE_ANNOTATION, NOUN_PHRASE);
+        at.addChunk(TEST_TEXT.indexOf("the University of Otago"), 
+            TEST_TEXT.length()-1).addAnnotation(PHRASE_ANNOTATION, NOUN_PHRASE);
+        //add some tokens
+        at.addToken(0, 2).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.Abbreviation),1d));
+        at.addToken(2, 3).addAnnotation(POS_ANNOTATION, Value.value(new PosTag(".",Pos.Point),1d));
         int start = TEST_TEXT.indexOf("(1869 - November 1950)");
-        TEST_ANALYSED_TEXT.addToken(start,start+1).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("(",Pos.OpenBracket),1d));
-        TEST_ANALYSED_TEXT.addToken(start+1,start+5).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NUM",Pos.Numeral),1d));
-        TEST_ANALYSED_TEXT.addToken(start+6,start+7).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("-",Pos.Hyphen),1d));
-        TEST_ANALYSED_TEXT.addToken(start+8,start+16).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
-        TEST_ANALYSED_TEXT.addToken(start+17,start+21).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NUM",Pos.Numeral),1d));
-        TEST_ANALYSED_TEXT.addToken(start+21,start+22).addAnnotation(POS_ANNOTATION, Value.value(new PosTag(")",Pos.CloseBracket),1d));
+        at.addToken(start,start+1).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("(",Pos.OpenBracket),1d));
+        at.addToken(start+1,start+5).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NUM",Pos.Numeral),1d));
+        at.addToken(start+6,start+7).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("-",Pos.Hyphen),1d));
+        at.addToken(start+8,start+16).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
+        at.addToken(start+17,start+21).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NUM",Pos.Numeral),1d));
+        at.addToken(start+21,start+22).addAnnotation(POS_ANNOTATION, Value.value(new PosTag(")",Pos.CloseBracket),1d));
                 
         start = TEST_TEXT.indexOf("geologist");
-        TEST_ANALYSED_TEXT.addToken(start,start+9).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
+        at.addToken(start,start+9).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
         
         start = TEST_TEXT.indexOf("New Zealand");
-        TEST_ANALYSED_TEXT.addToken(start,start+3).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
-        TEST_ANALYSED_TEXT.addToken(start+4,start+11).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NP",Pos.ProperNoun),1d));
+        at.addToken(start,start+3).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
+        at.addToken(start+4,start+11).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NP",Pos.ProperNoun),1d));
         
         start = TEST_TEXT.indexOf("the University of Otago");
-        TEST_ANALYSED_TEXT.addToken(start,start+3).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("ART",Pos.Article),1d));
-        TEST_ANALYSED_TEXT.addToken(start+4,start+14).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
-        TEST_ANALYSED_TEXT.addToken(start+15,start+17).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("OF",LexicalCategory.PronounOrDeterminer),1d));
-        TEST_ANALYSED_TEXT.addToken(start+18,start+23).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NP",Pos.ProperNoun),1d));
-        TEST_ANALYSED_TEXT.addToken(start+23,start+24).addAnnotation(POS_ANNOTATION, Value.value(new PosTag(".",Pos.Point),1d));
-        
+        at.addToken(start,start+3).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("ART",Pos.Article),1d));
+        at.addToken(start+4,start+14).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
+        at.addToken(start+15,start+17).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("OF",LexicalCategory.PronounOrDeterminer),1d));
+        at.addToken(start+18,start+23).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NP",Pos.ProperNoun),1d));
+        at.addToken(start+23,start+24).addAnnotation(POS_ANNOTATION, Value.value(new PosTag(".",Pos.Point),1d));
     }
     
     private LabelTokenizer labelTokenizer = new SimpleLabelTokenizer();
+
 
     @Before
     public void bindServices() throws IOException {
@@ -243,6 +263,34 @@ public class EntityLinkingEngineTest {
         linker.process();
         Map<String,List<String>> expectedResults = new HashMap<String,List<String>>();
         expectedResults.put("Patrick Marshall", new ArrayList<String>(
+                Arrays.asList("urn:test:PatrickMarshall")));
+        expectedResults.put("geologist", new ArrayList<String>(
+                Arrays.asList("urn:test:redirect:Geologist"))); //the redirected entity
+        expectedResults.put("New Zealand", new ArrayList<String>(
+                Arrays.asList("urn:test:NewZealand")));
+        expectedResults.put("University of Otago", new ArrayList<String>(
+                Arrays.asList("urn:test:UniversityOfOtago","urn:test:UniversityOfOtago_Texas")));
+        validateEntityLinkerResults(linker, expectedResults);
+    }
+    /**
+     * This tests the EntityLinker functionality (if the expected Entities
+     * are linked). In this case with the default configurations for
+     * {@link LexicalCategory#Noun}.
+     * @throws Exception
+     */
+    @Test
+    public void testEntityLinkerWithWrongOrder() throws Exception {
+        LanguageProcessingConfig tpc = new LanguageProcessingConfig();
+        tpc.setLinkedLexicalCategories(LanguageProcessingConfig.DEFAULT_LINKED_LEXICAL_CATEGORIES);
+        tpc.setLinkedPos(Collections.EMPTY_SET);
+        EntityLinkerConfig config = new EntityLinkerConfig();
+        config.setMinFoundTokens(2);//this is assumed by this test
+        config.setRedirectProcessingMode(RedirectProcessingMode.FOLLOW);
+        EntityLinker linker = new EntityLinker(TEST_ANALYSED_TEXT_WO,"en",
+            tpc, searcher, config, labelTokenizer);
+        linker.process();
+        Map<String,List<String>> expectedResults = new HashMap<String,List<String>>();
+        expectedResults.put("Marshall Patrick", new ArrayList<String>(
                 Arrays.asList("urn:test:PatrickMarshall")));
         expectedResults.put("geologist", new ArrayList<String>(
                 Arrays.asList("urn:test:redirect:Geologist"))); //the redirected entity

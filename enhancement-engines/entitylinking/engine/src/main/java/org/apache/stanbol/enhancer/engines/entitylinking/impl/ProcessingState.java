@@ -20,6 +20,7 @@
 package org.apache.stanbol.enhancer.engines.entitylinking.impl;
 
 import static java.util.Collections.disjoint;
+import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.UNICASE_SCRIPT_LANUAGES;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.PHRASE_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 
@@ -29,11 +30,13 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.iterators.FilterIterator;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessingConfig;
+import org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Chunk;
@@ -91,6 +94,11 @@ public class ProcessingState {
     //protected final EntityLinkerConfig elc;
 
     private AnalysedText at;
+    /**
+     * If the language uses a unicase script and therefore upper case specific
+     * processing rules can not be used (see STANBOL-1049)
+     */
+    private boolean isUnicaseLanguage;
 
     private static final Predicate PROCESSABLE_TOKEN_OREDICATE = new Predicate() {
         @Override
@@ -120,6 +128,10 @@ public class ProcessingState {
         }
         this.at = at; //store as field (just used for logging)
         this.language = language;
+        //STANBOL-1049: we need now to know if a language uses a unicase script
+        //ensure lower case and only use the language part 
+        String lookupLang = language.toLowerCase(Locale.ROOT).split("[_-]")[0];
+        this.isUnicaseLanguage = UNICASE_SCRIPT_LANUAGES.contains(lookupLang);
         //prefer to iterate over sentences
         Iterator<Sentence> sentences = at.getSentences();
         this.sections = sentences.hasNext() ? sentences : Collections.singleton(at).iterator();
@@ -222,8 +234,8 @@ public class ProcessingState {
         section = null;
         processableTokensIterator = null;
         consumedIndex = -1;
-        boolean foundProcessable = false;
-        while(!foundProcessable && sections.hasNext()){
+        boolean foundLinkableToken = false;
+        while(!foundLinkableToken && sections.hasNext()){
             section = sections.next();
             tokens.clear(); //clear token for each section (STANBOL-818)
             Iterator<Span> enclosed = section.getEnclosed(enclosedSpanTypes);
@@ -265,29 +277,63 @@ public class ProcessingState {
                                          tokenData.inChunk != null ? tokenData.inChunk.chunk.getSpan() : "none",
                                          tokenData.morpho != null ? tokenData.morpho : "none"});
                     }
-                    //determine if the token should be linked/matched
-                    tokenData.isLinkable = tokenData.isLinkablePos;
-                    tokenData.isMatchable = tokenData.isLinkable || tokenData.isMatchablePos;
-                    //for non processable but upper case tolkens we need to check
-                    //the uper case token configuration
-                    if(!tokenData.isLinkable && tokenData.upperCase){
-                        if(tokenData.index > 0 && //not a sentence or sub-sentence start
+                    if(!tokenData.hasAlphaNumeric){
+                        tokenData.isLinkable = false;
+                        tokenData.isMatchable = false;
+                    } else {
+                        // (1) apply basic rules for linkable/processable tokens
+                        //determine if the token should be linked/matched
+                        tokenData.isLinkable = tokenData.isLinkablePos != null ? tokenData.isLinkablePos : false;
+                        //matchabel := linkable OR has matchablePos
+                        tokenData.isMatchable = tokenData.isLinkable || 
+                                (tokenData.isMatchablePos != null && tokenData.isMatchablePos);
+                        
+                        //(2) for non linkable tokens check for upper case rules
+                        if(!tokenData.isLinkable && tokenData.upperCase && 
+                                tokenData.index > 0 && //not a sentence or sub-sentence start
                                 !tokens.get(tokenData.index-1).isSubSentenceStart){
-                            if(tpc.isLinkUpperCaseTokens() && //if upper case tokens should be linked
-                                    tokenData.isMatchable) { //convert matchable to 
-                                tokenData.isLinkable = true; //linkable
-                            } else if(tpc.isMatchUpperCaseTokens() || tpc.isLinkUpperCaseTokens()){
-                                //if matching for upperCase Tokens is activated or
-                                //linking is activated, but the current Token is not
-                                //matchable, than mark the Token as matchable
-                                tokenData.isMatchable = true;
-                            } //else upper case matching and linking is deactivated
-                        }
+                            //We have an upper case token!
+                            if(tpc.isLinkUpperCaseTokens()){
+                                if(tokenData.isMatchable) { //convert matchable to 
+                                    tokenData.isLinkable = true; //linkable
+                                } else { // and other tokens to
+                                    tokenData.isMatchable = true; //matchable
+                                }
+                            } else { 
+                                //finally we need to convert other Tokens to matchable
+                                //if MatchUpperCaseTokens is active
+                                if(!tokenData.isMatchable && tpc.isMatchUpperCaseTokens()){
+                                    tokenData.isMatchable = true;
+                                }
+                            }
+                        } //else not an upper case token
+                        
+                        //(3) Unknown POS tag Rules (see STANBOL-1049)
+                        if(!tokenData.isLinkable && tokenData.isLinkablePos == null && 
+                                tokenData.isLinkablePos == null){
+                            if(isUnicaseLanguage || !tpc.isLinkOnlyUpperCaseTokensWithUnknownPos()){
+                                if(tokenData.hasSearchableLength){
+                                    tokenData.isLinkable = true;
+                                } //else no need to change the state
+                            } else { //non unicase language and link only upper case tokens enabled
+                                if(tokenData.upperCase && // upper case token
+                                        tokenData.index > 0 && //not a sentence or sub-sentence start
+                                        !tokens.get(tokenData.index-1).isSubSentenceStart){
+                                    if(tokenData.hasSearchableLength){
+                                        tokenData.isLinkable = true;
+                                    } else {
+                                        tokenData.isMatchable = true;
+                                    }
+                                } else if(tokenData.hasSearchableLength){ //lower case and long token
+                                    tokenData.isMatchable = true;
+                                } //else lower case and short word 
+                            }
+                        } //else already linkable or POS tag present
                     }
                     //add the token to the list
                     tokens.add(tokenData);
-                    if(!foundProcessable){
-                        foundProcessable = tokenData.isLinkable;
+                    if(!foundLinkableToken){
+                        foundLinkableToken = tokenData.isLinkable;
                     }
                     if(activeChunk != null){
                         if(tokenData.isMatchable){
@@ -310,8 +356,8 @@ public class ProcessingState {
                                             log.debug("     > convert Token {}: {} (pos:{}) from matchable to processable",
                                                 new Object[]{i,ct.token.getSpan(),ct.token.getAnnotations(POS_ANNOTATION)});
                                             ct.isLinkable = true;
-                                            if(!foundProcessable){
-                                                foundProcessable = true;
+                                            if(!foundLinkableToken){
+                                                foundLinkableToken = true;
                                             }
                                         }
                                         i--;//mark both (ct & pt) as processed
@@ -328,7 +374,7 @@ public class ProcessingState {
             }
         }
         processableTokensIterator = new FilterIterator(tokens.iterator(), PROCESSABLE_TOKEN_OREDICATE);
-        return foundProcessable;
+        return foundLinkableToken;
     }
     /**
      * Getter for the text covered by the next tokenCount tokens relative to
@@ -495,13 +541,17 @@ public class ProcessingState {
          */
         public final boolean upperCase;
         /**
+         * if the length of the token is &gt;= {@link LanguageProcessingConfig#getMinSearchTokenLength()}
+         */
+        public boolean hasSearchableLength;
+        /**
          * If the POS type of this word matches a linkable category
          */
-        public final boolean isLinkablePos;
+        public final Boolean isLinkablePos;
         /**
          * if the POS type of this word matches a matchable category
          */
-        public final boolean isMatchablePos;
+        public final Boolean isMatchablePos;
         /**
          * if this Token represents the start of an sub-sentence such as an 
          * starting ending quote 
@@ -521,7 +571,7 @@ public class ProcessingState {
             this.index = index;
             this.inChunk = chunk;
             this.hasAlphaNumeric = Utils.hasAlphaNumericChar(token.getSpan());
-
+            this.hasSearchableLength = token.getSpan().length() >= tpc.getMinSearchTokenLength();
             PosTag selectedPosTag = null;
             boolean matchedPosTag = false; //matched any of the POS annotations
             
@@ -541,13 +591,16 @@ public class ProcessingState {
                 if((!disjoint(tpc.getLinkedLexicalCategories(), posTag.getCategories())) ||
                         (!disjoint(tpc.getLinkedPos(), posTag.getPosHierarchy())) ||
                         tpc.getLinkedPosTags().contains(posTag.getTag())){
-                    if(posAnnotation.probability() >= tpc.getMinPosAnnotationProbability()){
+                    if(posAnnotation.probability() == Value.UNKNOWN_PROBABILITY ||
+                            posAnnotation.probability() >= tpc.getMinPosAnnotationProbability()){
                         selectedPosTag = posTag;
                         isLinkablePos = true;
                         isMatchablePos = true;
+                        matchedPosTag = true;
                         break;
                     } // else probability to low for inclusion
-                } else if(posAnnotation.probability() >= tpc.getMinExcludePosAnnotationProbability()){
+                } else if(posAnnotation.probability() == Value.UNKNOWN_PROBABILITY ||
+                        posAnnotation.probability() >= tpc.getMinExcludePosAnnotationProbability()){
                     selectedPosTag = posTag; //also rejected PosTags are selected
                     matchedPosTag = true;
                     isLinkablePos = false;
@@ -555,14 +608,13 @@ public class ProcessingState {
                 } // else probability to low for exclusion
             }
             if(!matchedPosTag) { //not matched against a POS Tag ...
-                // ... fall back to the token length
-                this.isLinkablePos = token.getSpan().length() >= tpc.getMinSearchTokenLength();
+                this.isLinkablePos = null;
             } else {
                 this.isLinkablePos = isLinkablePos;
             }
             
             //(2) check if this token should be considered to match labels of suggestions
-            if(this.isLinkablePos){ //processable tokens are also matchable
+            if(this.isLinkablePos != null && this.isLinkablePos){ //processable tokens are also matchable
                 this.isMatchablePos = true;
             } else { //check POS and length to see if token is matchable
                 matchedPosTag = false; //reset to false!
@@ -571,14 +623,16 @@ public class ProcessingState {
                     if(posTag.isMapped()){
                         if(!Collections.disjoint(tpc.getMatchedLexicalCategories(), 
                             posTag.getCategories())){
-                            if(posAnnotation.probability() >= tpc.getMinPosAnnotationProbability()){
+                            if(posAnnotation.probability() == Value.UNKNOWN_PROBABILITY ||
+                                    posAnnotation.probability() >= tpc.getMinPosAnnotationProbability()){
                                 //override selectedPosTag if present
                                 selectedPosTag = posTag; //mark the matchable as selected PosTag
                                 isMatchablePos = true;
                                 matchedPosTag = true;
                                 break;
                             } // else probability to low for inclusion
-                        } else if(posAnnotation.probability() >= tpc.getMinExcludePosAnnotationProbability()){
+                        } else if(posAnnotation.probability() == Value.UNKNOWN_PROBABILITY ||
+                                posAnnotation.probability() >= tpc.getMinExcludePosAnnotationProbability()){
                             if(selectedPosTag == null){ //do not override existing values
                                 selectedPosTag = posTag; //also rejected PosTags are selected
                             }
@@ -590,7 +644,8 @@ public class ProcessingState {
                 }
                 if(!matchedPosTag){ //not matched against POS tag ...
                     //fall back to the token length
-                    this.isMatchablePos = token.getSpan().length() >= tpc.getMinSearchTokenLength();    
+                    this.isMatchablePos = null;
+                    //this.isMatchablePos = token.getSpan().length() >= tpc.getMinSearchTokenLength();    
                 } else {
                     this.isMatchablePos = isMatchablePos;
                 }
@@ -599,10 +654,12 @@ public class ProcessingState {
             for(Value<PosTag> posAnnotation : posAnnotations){
                 PosTag posTag = posAnnotation.value();
                 if((!disjoint(SUB_SENTENCE_START_POS,posTag.getPosHierarchy()))){
-                    if(posAnnotation.probability() >= tpc.getMinPosAnnotationProbability()){
+                    if(posAnnotation.probability() == Value.UNKNOWN_PROBABILITY ||
+                            posAnnotation.probability() >= tpc.getMinPosAnnotationProbability()){
                         isSubSentenceStart = true;
                     } // else probability to low for inclusion
-                } else if(posAnnotation.probability() >= tpc.getMinExcludePosAnnotationProbability()){
+                } else if(posAnnotation.probability() == Value.UNKNOWN_PROBABILITY ||
+                        posAnnotation.probability() >= tpc.getMinExcludePosAnnotationProbability()){
                     isSubSentenceStart = false;
                 }
             }
@@ -696,11 +753,13 @@ public class ProcessingState {
             for (Value<PhraseTag> phraseAnnotation : chunk.getAnnotations(PHRASE_ANNOTATION)) {
                 if (tpc.getProcessedPhraseCategories().contains(phraseAnnotation.value().getCategory())
                     || tpc.getProcessedPhraseTags().contains(phraseAnnotation.value().getTag())) {
-                    if (phraseAnnotation.probability() >= tpc.getMinPhraseAnnotationProbability()) {
+                    if (phraseAnnotation.probability() == Value.UNKNOWN_PROBABILITY ||
+                            phraseAnnotation.probability() >= tpc.getMinPhraseAnnotationProbability()) {
                         process = true;
                         break;
                     } // else probability to low for inclusion
-                } else if (phraseAnnotation.probability() >= tpc.getMinExcludePhraseAnnotationProbability()) {
+                } else if (phraseAnnotation.probability() == Value.UNKNOWN_PROBABILITY ||
+                        phraseAnnotation.probability() >= tpc.getMinExcludePhraseAnnotationProbability()) {
                     process = false;
                     break;
                 } // else probability to low for exclusion

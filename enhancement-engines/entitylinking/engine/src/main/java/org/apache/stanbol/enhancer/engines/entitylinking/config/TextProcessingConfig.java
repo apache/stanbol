@@ -17,6 +17,7 @@
 package org.apache.stanbol.enhancer.engines.entitylinking.config;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
@@ -39,6 +40,19 @@ import org.slf4j.LoggerFactory;
 public class TextProcessingConfig {
 
     private static final Logger log = LoggerFactory.getLogger(TextProcessingConfig.class);
+
+    /**
+     * Holds a list of ISO 2 letter language codes that do use unicase scripts -
+     * do not know upper case letters.<p>
+     * More information is available the Wikipedia page for 
+     * <a href="http://en.wikipedia.org/wiki/Letter_case">Letter case</a>.
+     */
+    public static final Set<String> UNICASE_SCRIPT_LANUAGES;
+    static {
+        UNICASE_SCRIPT_LANUAGES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+            "ar","he","zh","ja","ko","ka","hi","ne")));
+    }
+    
     /**
      * If enabled only {@link Pos#ProperNoun}, {@link Pos#Foreign} and {@link Pos#Acronym} are Matched. If
      * deactivated all Tokens with the category {@link LexicalCategory#Noun} and 
@@ -55,6 +69,17 @@ public class TextProcessingConfig {
      * Default for the {@link #PROCESS_ONLY_PROPER_NOUNS_STATE} (false)
      */
     public static final boolean DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE = false;
+    
+    /**
+     * Switch that allows to enable a mode where only upper case tokens are marked as
+     * 'linkable' if no POS tag is available (or existing POS tags are of low probability).<p>
+     * This is especially usefull for processing text in languages where no POS tagger is
+     * available.<p>
+     * NOTE: that this configuration is ignored for lanugages where there are no 
+     * upper case letters (Arabic, Hebrew, Chinese, Japanese, Korean, Hindi)
+     */
+    public static final String LINK_ONLY_UPPER_CASE_TOKENS_WITH_MISSING_POS_TAG = "enhancer.engines.linking.linkOnlyUpperCaseTokensWithMissingPosTag";
+    
     /**
      * Allows to configure the processed languages by using the syntax supported by {@link LanguageConfiguration}.
      * In addition this engine supports language specific configurations for matched {@link LexicalCategory}
@@ -209,8 +234,7 @@ public class TextProcessingConfig {
      */
     public final static TextProcessingConfig createInstance(Dictionary<String,Object> configuration) throws ConfigurationException {
         TextProcessingConfig tpc = new TextProcessingConfig();
-        //Parse the default text processing configuration
-        //set the default LexicalTypes
+        //Parse the Proper Noun Linking state 
         Object value = configuration.get(PROCESS_ONLY_PROPER_NOUNS_STATE);
         boolean properNounState;
         if(value instanceof Boolean){
@@ -230,6 +254,17 @@ public class TextProcessingConfig {
             tpc.defaultConfig.setLinkedPos(Collections.EMPTY_SET);
             log.debug("> Noun matching activated (matched LexicalCategories: {})",
                 tpc.defaultConfig.getLinkedLexicalCategories());
+        }
+        //parse upper case linking for languages without POS support state
+        //see STANBOL-1049
+        value = configuration.get(LINK_ONLY_UPPER_CASE_TOKENS_WITH_MISSING_POS_TAG);
+        final Boolean linkOnlyUpperCaseTokensWithMissingPosTag;
+        if(value instanceof Boolean){
+            tpc.defaultConfig.setLinkOnlyUpperCaseTokenWithUnknownPos(((Boolean)value).booleanValue());
+        } else if(value != null){
+            tpc.defaultConfig.setLinkOnlyUpperCaseTokenWithUnknownPos(Boolean.parseBoolean(value.toString()));
+        } else { //the default is the same as the properNounState
+            tpc.defaultConfig.setLinkOnlyUpperCaseTokenWithUnknownPos(properNounState);
         }
         // init MIN_SEARCH_TOKEN_LENGTH
         value = configuration.get(MIN_SEARCH_TOKEN_LENGTH);
