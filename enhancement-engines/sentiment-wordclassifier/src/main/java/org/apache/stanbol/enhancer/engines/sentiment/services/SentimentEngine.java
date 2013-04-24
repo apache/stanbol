@@ -272,8 +272,10 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
                     Value<PosTag> value = posTags.next();
                     PosTag tag = value.value();
                     boolean state = classifier.isAdjective(tag) || classifier.isNoun(tag);
-                    ignore = !state && value.probability() >= minPOSConfidence;
-                    process = state && value.probability() >= (minPOSConfidence/2.0);
+                    ignore = !state && (value.probability() == Value.UNKNOWN_PROBABILITY ||
+                            value.probability() >= minPOSConfidence);
+                    process = state && (value.probability() == Value.UNKNOWN_PROBABILITY ||
+                            value.probability() >= (minPOSConfidence/2.0));
                 }
             } //else process all tokens ... no POS tag checking needed
             if(process){

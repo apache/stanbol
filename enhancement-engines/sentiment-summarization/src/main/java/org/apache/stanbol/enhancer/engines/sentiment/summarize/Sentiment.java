@@ -64,7 +64,8 @@ public class Sentiment {
         this.end = token.getEnd();
         List<Value<PosTag>> tags = token.getAnnotations(NlpAnnotations.POS_ANNOTATION);
         for(Value<PosTag> tag : tags){
-            if(tag.probability() >= MIN_POS_CONF || 
+            if(tag.probability() == Value.UNKNOWN_PROBABILITY ||
+                    tag.probability() >= MIN_POS_CONF || 
                     !Collections.disjoint(tag.value().getCategories(),PREF_LEX_CAT)){
                 posTag = tag.value();
                 break;
