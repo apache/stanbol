@@ -1,32 +1,7 @@
-/*
-
-Copyright (c) 2011 Henri Bergius, IKS Consortium
-Copyright (c) 2011 Sebastian Germesin, IKS Consortium
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-*/
-
-(function(){
-//     VIE - Vienna IKS Editables
+/* VIE.js 2.1.0 - Semantic Interaction Toolkit
+by Henri Bergius and the IKS Project. Available under the MIT license.
+See http://viejs.org for more information
+*/(function () {//     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
 //     (c) 2011 Szaby Grünwald, IKS Consortium
@@ -417,7 +392,7 @@ VIE.prototype.loadSchema = function(url, options) {
         .error(function(data, textStatus, jqXHR) {
             if (options.error) {
                 console.warn(data, textStatus, jqXHR);
-                options.error.call(vie, "Could not load schema from URL (" + url + ")");
+                options.error.call(vie, "Could not load schema from URL (" + url + "): " + textStatus);
             }
          });
     }
@@ -475,12 +450,13 @@ if (typeof exports === 'object') {
     }
     if (!Backbone) {
         Backbone = require('backbone');
-        Backbone.setDomLibrary(jQuery);
+        Backbone.$ = jQuery;
     }
     if (!_) {
         _ = require('underscore')._;
     }
 }
+
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
@@ -659,6 +635,7 @@ VIE.prototype.Findable = function (options) {
     this.init(options, "find");
 };
 VIE.prototype.Findable.prototype = new VIE.prototype.Able();
+
 
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
@@ -855,6 +832,7 @@ VIE.Util = {
             /* fallback if no rdfQuery has been loaded */
             return VIE.Util._rdf2EntitiesNoRdfQuery(service, results);
         }
+        var entities = {};
         try {
             var rdf = (results instanceof jQuery.rdf)?
                     results.base(service.vie.namespaces.base()) :
@@ -874,7 +852,6 @@ VIE.Util = {
                 }
                 rdf = rdf.reason(rules, 10); /* execute the rules only 10 times to avoid looping */
             }
-            var entities = {};
             rdf.where('?subject ?property ?object').each(function() {
                 var subject = this.subject.toString();
                 if (!entities[subject]) {
@@ -929,18 +906,20 @@ VIE.Util = {
                     }
                 });
             });
-
-            var vieEntities = [];
-            jQuery.each(entities, function() {
-                var entityInstance = new service.vie.Entity(this);
-                entityInstance = service.vie.entities.addOrUpdate(entityInstance);
-                vieEntities.push(entityInstance);
-            });
-            return vieEntities;
         } catch (e) {
             console.warn("Something went wrong while parsing the returned results!", e);
             return [];
         }
+        var vieEntities = [];
+        jQuery.each(entities, function() {
+            try {
+                var entityInstance = new service.vie.Entity(this);
+                vieEntities.push(entityInstance);
+            } catch (e) {
+                console.warn("Something went wrong while creating VIE entities out of the returned results!", e, this, entityInstance);
+            }
+        });
+        return vieEntities;
     },
 
     /*
@@ -949,7 +928,7 @@ VIE.Util = {
     a score. It returns the value with the best score.
     */
     getPreferredLangForPreferredProperty: function(entity, preferredFields, preferredLanguages) {
-      var l, labelArr, lang, p, property, resArr, valueArr, _len, _len2,
+      var labelArr, lang, property, resArr, valueArr, _len, _len2,
         _this = this;
       resArr = [];
       /* Try to find a label in the preferred language
@@ -967,8 +946,8 @@ VIE.Util = {
               best candidate with the first preferred language
               and first preferred property
               */
-              var labelLang, score, value;
-              score = p;
+              var labelLang, value, p, score, l;
+              score = p = l = 0;
               labelLang = label["@language"];
               /*
                                       legacy code for compatibility with uotdated stanbol,
@@ -1586,6 +1565,7 @@ VIE.Util = {
         return additionalRules;
     }
 };
+
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
@@ -1719,6 +1699,16 @@ VIE.prototype.Entity = Backbone.Model.extend({
       obj[attrs] = options;
       return this.set(obj, opts);
     }
+
+    // VIE's type system is more strict than default Backbone. Unless validation is
+    // explicitly disabled, we should always validate on set
+    if (!options) {
+      options = {};
+    }
+    if (options.validate !== false && options.silent !== true) {
+      options.validate = true;
+    }
+
     // **`.set(entity)`**: In case you'd pass a VIE entity,
     // the passed entities attributes are being set for the entity.
     if (attrs.attributes) {
@@ -1802,6 +1792,9 @@ VIE.prototype.Entity = Backbone.Model.extend({
       return;
     }
     var types = this.get('@type');
+    if (!types) {
+      return;
+    }
     if (_.isArray(types)) {
       var results = [];
       _.each(types, function (type) {
@@ -1848,7 +1841,7 @@ VIE.prototype.Entity = Backbone.Model.extend({
 
     // Check the number of items in attr against max
     var checkMax = function (definition, attrs) {
-      if (!attrs[definition.id]) {
+      if (!attrs || !attrs[definition.id]) {
         return;
       }
 
@@ -2057,7 +2050,7 @@ VIE.prototype.Entity = Backbone.Model.extend({
         throw new Error("you cannot add a literal to a collection of entities!");
       }
       this.trigger('change:' + attr, this, value, {});
-      this.change({});
+      //this.change({});
     } else if (_.isArray(existing)) {
       if (value.isCollection) {
         value.each(function (v) {
@@ -2137,6 +2130,7 @@ VIE.prototype.Entity = Backbone.Model.extend({
   }
 
 });
+
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
@@ -2169,11 +2163,14 @@ VIE.prototype.Collection = Backbone.Collection.extend({
             if (id.indexOf("bnode") === 2) {
                 //bnode!
                 id = id.replace("_:bnode", 'c');
-                return this._byCid[id];
+                return this._byId[id];
             } else {
                 return this._byId["<" + id + ">"];
             }
         } else {
+            if (this._byId[id]) {
+              return this._byId[id];
+            }
             id = this.toReference(id);
             return this._byId[id];
         }
@@ -2210,8 +2207,8 @@ VIE.prototype.Collection = Backbone.Collection.extend({
         if (model.id && this.get(model.id)) {
             existing = this.get(model.id);
         }
-        if (this.getByCid(model.cid)) {
-            existing = this.getByCid(model.cid);
+        if (this.get(model.cid)) {
+            existing = this.get(model.cid);
         }
         if (existing) {
             var newAttribs = {};
@@ -2286,6 +2283,7 @@ VIE.prototype.Collection = Backbone.Collection.extend({
 
     isCollection: true
 });
+
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
@@ -2787,6 +2785,7 @@ VIE.prototype.Types = function () {
         return copy;
     };
 };
+
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
@@ -3201,6 +3200,7 @@ VIE.prototype.Attributes = function (domain, attrs) {
         this.add(attr.id, attr.range, attr.min, attr.max, attr.metadata);
     }, this);
 };
+
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
@@ -3665,6 +3665,7 @@ VIE.prototype.Namespaces.prototype.uri = function (curie) {
 //     namespaces.isUri(uri);   // --> true
 //     namespaces.isUri(curie); // --> false
 VIE.prototype.Namespaces.prototype.isUri = VIE.Util.isUri;
+
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
@@ -3757,6 +3758,7 @@ VIE.prototype.ClassicEntityManager.prototype = {
         return;
     }
 };
+
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
@@ -4011,6 +4013,7 @@ VIE.prototype.DBPediaConnector.prototype = {
     }
 };
 })();
+
 
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
@@ -4290,6 +4293,7 @@ VIE.prototype.OpenCalaisConnector.prototype = {
 })();
 
 
+
 (function(){
 
     VIE.prototype.RdfaRdfQueryService = function(options) {
@@ -4382,6 +4386,7 @@ VIE.prototype.RdfaRdfQueryService.prototype = {
 };
 
 })();
+
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
@@ -4770,6 +4775,9 @@ VIE.prototype.RdfaService.prototype = {
 
     // Return a template-generating function for given element
     getElementTemplate: function (element) {
+        if (_.isString(element)) {
+          element = jQuery.trim(element);
+        }
         var service = this;
         return function (entity, callback) {
             var newElement = jQuery(element).clone(false);
@@ -4812,7 +4820,7 @@ VIE.prototype.RdfaService.prototype = {
         var type;
         if (jQuery(element).attr('typeof') !== this.options.attributeExistenceComparator) {
             type = jQuery(element).attr('typeof');
-            if (type.indexOf("://") !== -1) {
+            if (type && type.indexOf("://") !== -1) {
                 return "<" + type + ">";
             } else {
                 return type;
@@ -4866,10 +4874,6 @@ VIE.prototype.RdfaService.prototype = {
         });
 
         if (!subject) {
-            if (matched === element) {
-                // Workaround for https://github.com/assaf/zombie/issues/235
-                return service.getElementSubject(jQuery(element).parent());
-            }
             return undefined;
         }
 
@@ -5108,6 +5112,7 @@ VIE.prototype.RdfaService.prototype = {
 };
 
 })();
+
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
@@ -5246,7 +5251,7 @@ VIE.prototype.StanbolService.prototype = {
 // **Parameters**:
 // *{VIE.Analyzable}* **analyzable** The analyzable.
 // **Throws**:
-// *{Error}* if an invalid VIE.Findable is passed.
+// *{Error}* if an invalid VIE.Analyzable is passed.
 // **Returns**:
 // *{VIE.StanbolService}* : The VIE.StanbolService instance itself.
 // **Example usage**:
@@ -5269,6 +5274,7 @@ VIE.prototype.StanbolService.prototype = {
             var success = function (results) {
                 _.defer(function(){
                     var entities = VIE.Util.rdf2Entities(service, results);
+                    service.vie.entities.addOrUpdate(entities);
                     analyzable.resolve(entities);
                 });
             };
@@ -5380,6 +5386,9 @@ VIE.prototype.StanbolService.prototype = {
         var success = function (results) {
             _.defer(function(){
                 var entities = VIE.Util.rdf2Entities(service, results);
+                _.each(entities, function(vieEntity) {
+                    service.vie.entities.addOrUpdate(vieEntity);
+                });
                 loadable.resolve(entities);
             });
         };
@@ -6389,6 +6398,7 @@ VIE.prototype.StanbolConnector.prototype = {
 };
 })();
 
+
 //     VIE - Vienna IKS Editables
 //     (c) 2011 Henri Bergius, IKS Consortium
 //     (c) 2011 Sebastian Germesin, IKS Consortium
@@ -6709,7 +6719,7 @@ VIE.prototype.ZemantaConnector.prototype = {
 };
 })();
 
-/*global VIE:false Backbone:false _:false jQuery:false */
+
 if (!VIE.prototype.view) {
     VIE.prototype.view = {};
 }
@@ -6726,11 +6736,9 @@ VIE.prototype.view.Collection = Backbone.View.extend({
         this.definition = this.options.definition;
         this.entityViews = {};
 
-        _.bindAll(this, 'addItem', 'removeItem', 'refreshItems');
-
-        this.collection.on('add', this.addItem);
-        this.collection.on('remove', this.removeItem);
-        this.collection.on('reset', this.refreshItems);
+        this.listenTo(this.collection, 'add', this.addItem);
+        this.listenTo(this.collection, 'remove', this.removeItem);
+        this.listenTo(this.collection, 'reset', this.refreshItems);
 
         // Make the view aware of existing entities in collection
         this.collection.each(function(entity) {
@@ -6866,7 +6874,7 @@ VIE.prototype.view.Collection = Backbone.View.extend({
         }, this);
     }
 });
-/*global VIE:false Backbone:false _:false */
+
 if (!VIE.prototype.view) {
     VIE.prototype.view = {};
 }
@@ -6877,9 +6885,8 @@ VIE.prototype.view.Entity = Backbone.View.extend({
         this.vie = options.vie;
 
         // Ensure view gets updated when properties of the Entity change.
-        _.bindAll(this, 'render', 'renderAbout');
-        this.model.on('change', this.render);
-        this.model.on('change:@subject', this.renderAbout);
+        this.listenTo(this.model, 'change', this.render);
+        this.listenTo(this.model, 'change:@subject', this.renderAbout);
     },
 
     // Rendering a view means writing the properties of the Entity back to
@@ -6898,6 +6905,7 @@ VIE.prototype.view.Entity = Backbone.View.extend({
         this.vie.service(this.service).setElementSubject(this.model.getSubjectUri(), this.el);
     }
 });
+
 // Based on [Julian Aubourg's xdr.js](https://github.com/jaubourg/ajaxHooks/blob/master/src/ajax/xdr.js)
 // Internet Explorer 8 & 9 don't support the cross-domain request protocol known as CORS.
 // Their solution we use is called XDomainRequest. This module is a wrapper for
@@ -6958,5 +6966,4 @@ if ( root.XDomainRequest ) {
   });
 }
 })( jQuery );
-
 })();

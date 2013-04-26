@@ -203,6 +203,8 @@
       var widget;
 
       widget = this;
+      this.pendingrequests = 0;
+      this.errorcollector = [];
       this._logger = this.options.debug ? console : {
         info: function() {},
         warn: function() {},
@@ -273,13 +275,23 @@
       return this._listNonblockElements(this.element);
     },
     _analyze: function(el) {
-      var hash,
+      var hash, lastRequestDone,
         _this = this;
 
       hash = this._elementHash(el);
-      return this.options.vie.analyze({
+      lastRequestDone = function() {
+        _this.errorcollector = _(_this.errorcollector).uniq();
+        if (_this.errorcollector.length) {
+          _this._trigger("error", _this.errorcollector, {
+            message: _this.errorcollector.join('; ')
+          });
+          return _this.errorcollector = [];
+        }
+      };
+      this.options.vie.analyze({
         element: jQuery(el)
       }).using(this.options.vieServices).execute().success(function(enhancements) {
+        _this.pendingrequests--;
         if (_this._elementHash(el) === hash) {
           console.info('applying suggestions to', el, enhancements);
           _this._applyEnhancements(el, enhancements);
@@ -287,13 +299,19 @@
         } else {
           console.info(el, 'changed in the meantime.');
         }
-        return _this._trigger("success", true);
+        _this._trigger("success", true);
+        if (_this.pendingrequests === 0) {
+          return lastRequestDone();
+        }
       }).fail(function(msg) {
-        _this._trigger('error', msg, {
-          message: msg
-        });
-        return _this._logger.error("analyze failed", msg);
+        _this._logger.error("analyze failed", msg);
+        _this.errorcollector.push(msg);
+        _this.pendingrequests--;
+        if (_this.pendingrequests === 0) {
+          return lastRequestDone();
+        }
       });
+      return this.pendingrequests++;
     },
     _applyEnhancements: function(el, enhancements) {
       var _this = this;
