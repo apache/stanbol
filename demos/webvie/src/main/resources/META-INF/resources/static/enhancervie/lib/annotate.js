@@ -227,7 +227,7 @@
     _destroy: function() {
       this.disable();
       $(':iks-annotationselector', this.element).each(function() {
-        if ($(this).data().annotationSelector) {
+        if ($(this).data().annotationSelector || $(this).data().IKSAnnotationSelector) {
           return $(this).annotationSelector('destroy');
         }
       });
@@ -367,7 +367,7 @@
         jQuery.removeData(el, 'hash');
       }
       return $(':IKS-annotationSelector', this.element).each(function() {
-        if ($(this).data().annotationSelector) {
+        if ($(this).data().annotationSelector || $(this).data().IKSAnnotationSelector) {
           return $(this).annotationSelector('disable');
         }
       });
@@ -391,7 +391,7 @@
       $(':IKS-annotationSelector', this.element).each(function() {
         var res;
 
-        if ($(this).data().annotationSelector) {
+        if ($(this).data().annotationSelector || $(this).data().IKSAnnotationSelector) {
           res = $(this).annotationSelector('acceptBestCandidate');
           if (res) {
             report.updated.push(this);
@@ -864,7 +864,7 @@
         delete this.dialog;
       }
       this._logger.info("destroy tooltip");
-      if (this.element.data().tooltip) {
+      if (this.element.data().tooltip || this.element.data().uiTooltip) {
         return this.element.tooltip("destroy");
       }
     },
@@ -873,7 +873,7 @@
 
       el = this.element.parent();
       this._logger.info("destroy tooltip");
-      if (this.element.data().tooltip) {
+      if (this.element.data().tooltip || this.element.data().uiTooltip) {
         this.element.tooltip("destroy");
       }
       if (!this.isAnnotated() && this.textEnhancements) {
@@ -1116,7 +1116,7 @@
           collision: "flip"
         }
       });
-      this.dialog = dialogEl.data('dialog');
+      this.dialog = dialogEl.data('dialog') || dialogEl.data('uiDialog');
       this.dialog.uiDialogTitlebar.hide();
       this._logger.info("dialog widget:", this.dialog);
       this.dialog.element.focus(100);
@@ -1200,7 +1200,7 @@
           }
         });
       }
-      return this.menu = this.menu.data('menu');
+      return this.menu = this.menu.data('menu') || this.menu.data('uiMenu');
     },
     _createPreview: function(uri, response) {
       var fail, success,
@@ -1406,6 +1406,14 @@
     }
   });
 
+  $(window).click(function(event) {
+    if (($(event.target).closest(".ui-dialog.annotation-selector-dialog")).length > 0) {
+      return false;
+    } else {
+      return $(".annotation-selector-dialog .ui-dialog-content:visible").dialog("close");
+    }
+  });
+
   Stanbol = Stanbol != null ? Stanbol : {};
 
   Stanbol.getTextAnnotations = function(enhList) {
@@ -1603,7 +1611,8 @@
   vie = new VIE();
 
   vie.use(new vie.StanbolService({
-    url: "http://dev.iks-project.eu:8080"
+    url: "http://dev.iks-project.eu:8080",
+    proxyDisabled: true
   }));
 
   jQuery.widget("IKS.vieAutocomplete", {
@@ -1672,7 +1681,7 @@
         ];
       },
       source: function(req, resp) {
-        var mergedEntityList, properties, success, waitingfor,
+        var getSuccessCallback, listOfResultLists, mergedEntityList, properties, term, waitingfor,
           _this = this;
 
         this._logger.info("req:", req);
@@ -1686,72 +1695,93 @@
         });
         waitingfor = 0;
         mergedEntityList = [];
-        success = function(entityList) {
-          return _.defer(function() {
-            var limit, res;
+        listOfResultLists = [];
+        getSuccessCallback = function(term, priority) {
+          return function(entityList) {
+            return _.defer(function() {
+              var limit, res;
 
-            waitingfor--;
-            _this._logger.info("resp:", _(entityList).map(function(ent) {
-              return ent.id;
-            }));
-            limit = 10;
-            entityList = _(entityList).filter(function(ent) {
-              if (ent.getSubject().replace(/^<|>$/g, "") === "http://www.iks-project.eu/ontology/rick/query/QueryResultSet") {
-                return false;
-              }
-              return true;
-            });
-            mergedEntityList = mergedEntityList.concat(entityList);
-            if (waitingfor === 0) {
-              mergedEntityList = _.sortBy(mergedEntityList, function(e) {
-                var s;
-
-                s = e.get('<http://stanbol.apache.org/ontology/entityhub/query#score>');
-                if (typeof s === "object") {
-                  s = _.max(s);
+              waitingfor--;
+              _this._logger.info(term, priority, "resp:", entityList);
+              limit = 10;
+              entityList = _(entityList).filter(function(ent) {
+                if (ent.getSubject().replace(/^<|>$/g, "") === "http://www.iks-project.eu/ontology/rick/query/QueryResultSet") {
+                  return false;
                 }
-                return 0 - s;
+                return true;
               });
-              _this._logger.info(_(mergedEntityList).map(function(e) {
-                var s, uri;
+              listOfResultLists[priority] = listOfResultLists[priority] || [];
+              listOfResultLists[priority] = listOfResultLists[priority].concat(entityList);
+              if (waitingfor === 0) {
+                console.info("listOfResultLists", listOfResultLists);
+                _.chain(listOfResultLists).compact().each(function(resultList) {
+                  var sortedList;
 
-                uri = e.getSubject();
-                s = e.get('<http://stanbol.apache.org/ontology/entityhub/query#score>');
-                return "" + uri + ": " + s;
-              }));
-              res = _(mergedEntityList.slice(0, limit)).map(function(entity) {
-                return {
-                  key: entity.getSubject().replace(/^<|>$/g, ""),
-                  label: "" + (_this._getLabel(entity)) + " @ " + (_this._sourceLabel(entity.id)),
-                  value: _this._getLabel(entity),
-                  getUri: function() {
-                    return this.key;
-                  }
-                };
-              });
-              return resp(res);
-            }
-          });
+                  sortedList = _(resultList).sortBy(function(e) {
+                    var s;
+
+                    s = e.get('<http://stanbol.apache.org/ontology/entityhub/query#score>');
+                    if (typeof s === "object") {
+                      s = _.max(s);
+                    }
+                    return 0 - s;
+                  });
+                  return mergedEntityList = mergedEntityList.concat(sortedList);
+                });
+                /*
+                @_logger.info _(mergedEntityList).map (e) ->
+                  uri = e.getSubject()
+                  s = e.get '<http://stanbol.apache.org/ontology/entityhub/query#score>'
+                  return "#{uri}: #{s}"
+                */
+
+                _this._logger.info(mergedEntityList);
+                res = _(mergedEntityList.slice(0, limit)).map(function(entity) {
+                  return {
+                    key: entity.getSubject().replace(/^<|>$/g, ""),
+                    label: "" + (_this._getLabel(entity)) + " @ " + (_this._sourceLabel(entity.id)),
+                    value: _this._getLabel(entity),
+                    getUri: function() {
+                      return this.key;
+                    }
+                  };
+                });
+                return resp(res);
+              }
+            });
+          };
         };
         waitingfor++;
+        term = "" + req.term + (req.term.length > 3 ? '*' : '');
         this.options.vie.find({
-          term: "" + req.term + (req.term.length > 3 ? '*' : ''),
+          term: term,
           field: this.options.field,
           properties: properties
         }).using(this.options.services).execute().fail(function(e) {
           return _this._logger.error("Something wrong happened at stanbol find:", e);
-        }).success(success);
+        }).success(getSuccessCallback(term, 3));
+        if (req.term.length > 3) {
+          waitingfor++;
+          this.options.vie.find({
+            term: req.term,
+            field: this.options.field,
+            properties: properties
+          }).using(this.options.services).execute().fail(function(e) {
+            return _this._logger.error("Something wrong happened at stanbol find:", e);
+          }).success(getSuccessCallback(req.term, 2));
+        }
         if (this.options.stanbolIncludeLocalSite) {
           this._logger.log("stanbolIncludeLocalSite");
           waitingfor++;
+          term = "" + req.term + (req.term.length > 3 ? '*' : '');
           return this.options.vie.find({
-            term: "" + req.term + (req.term.length > 3 ? '*' : ''),
+            term: term,
             field: this.options.field,
             properties: properties,
             local: true
           }).using(this.options.services).execute().fail(function(e) {
             return _this._logger.error("Something wrong happened at stanbol find:", e);
-          }).success(success);
+          }).success(getSuccessCallback('local:' + term, 1));
         }
       }
     },
@@ -1779,11 +1809,13 @@
           return _this.options.source.apply(_this, [req, resp]);
         },
         open: function(e, ui) {
-          var _this = this;
+          var uiMenu, _ref1,
+            _this = this;
 
           widget._logger.info("autocomplete.open", e, ui);
           if (widget.options.showTooltip) {
-            return $('.ui-menu-item', $(this).data().autocomplete.menu.activeMenu).each(function() {
+            uiMenu = ((_ref1 = $(this).data().autocomplete) != null ? _ref1.menu : void 0) || $(this).data().uiAutocomplete.menu;
+            $('.ui-menu-item', uiMenu.activeMenu).each(function() {
               var item, uri;
 
               item = $(this).data()["item.autocomplete"] || $(this).data()["uiAutocompleteItem"] || $(this).data()["ui-autocomplete-item"];
@@ -1792,17 +1824,27 @@
                 vie: widget.options.vie,
                 uri: uri
               });
-            }).first().parent().bind('menufocus', function(e, ui) {
+            });
+            $('.ui-menu-item', uiMenu.activeMenu).first().parent().unbind('menufocus').bind('menufocus', function(e, ui) {
               console.info('fire focusin');
               return ui.item.trigger('focusin', ui);
+            });
+            return $('.ui-menu-item', uiMenu.activeMenu).first().parent().unbind('menublur').bind('menublur', function(e, ui) {
+              return $(':IKS-Entitypreview').trigger('blur');
             });
           }
         },
         focus: function(e, ui) {
           return console.info("focus", ui);
         },
+        blur: function(e, ui) {
+          return console.info('autocomplete.blur event', e, ui);
+        },
         select: function(e, ui) {
-          $('.ui-menu-item', $(e.target).data().autocomplete.menu.activeMenu).each(function() {
+          var uiMenu, _ref1;
+
+          uiMenu = ((_ref1 = $(e.target).data().autocomplete) != null ? _ref1.menu : void 0) || $(e.target).data().uiAutocomplete.menu;
+          $('.ui-menu-item', uiMenu.activeMenu).each(function() {
             return $(this).entitypreview('destroy');
           });
           _.defer(function() {
