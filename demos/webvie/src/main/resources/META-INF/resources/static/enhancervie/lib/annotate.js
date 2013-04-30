@@ -482,16 +482,15 @@
         options = {};
       }
       occurrences = function(str, s) {
-        var last, next, res, _results;
+        var last, next, res;
         res = [];
         last = 0;
-        _results = [];
-        while (str.indexOf(s, last + 1) !== -1) {
-          next = str.indexOf(s, last + 1);
+        while (str.indexOf(s, last) !== -1) {
+          next = str.indexOf(s, last);
           res.push(next);
-          _results.push(last = next);
+          last = next + 1;
         }
-        return _results;
+        return res;
       };
       nearest = function(arr, nr) {
         return _(arr).sortedIndex(nr);
