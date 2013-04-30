@@ -123,6 +123,7 @@ article {
                 vie: z,
                 // typeFilter: ["http://dbpedia.org/ontology/Place", "http://dbpedia.org/ontology/Organisation", "http://dbpedia.org/ontology/Person"],
                 debug: true,
+                continuousChecking: true,
                 //autoAnalyze: true,
                 showTooltip: true,
                 decline: function (event, ui) {
