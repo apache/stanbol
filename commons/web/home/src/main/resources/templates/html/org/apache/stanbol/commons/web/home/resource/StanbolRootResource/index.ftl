@@ -23,7 +23,7 @@ Management System developers to semi-automatically enhance unstructured
 content (text, image, ...) with semantic annotations to be able to link
 documents with related entities and topics.</p>
 
-<p>Please go to <a href="http://incubator.apache.org/stanbol">the
+<p>Please go to <a href="http://stanbol.apache.org">the
 official website</a> to learn more on the project, read the
 documentation and join the mailing list.</p>
 
@@ -34,7 +34,7 @@ view that documents the matching RESTful API for applications:</p>
   <#list it.navigationLinks as link>
   <#if link.htmlDescription??>
     <dt><a href="${it.publicBaseUri}${link.path}">${link.label}</a><dt>
-    <dd>${link.htmlDescription }</dd>
+    <dd><#noescape>${link.htmlDescription}</#noescape></dd>
   </#if>
   </#list>
 
