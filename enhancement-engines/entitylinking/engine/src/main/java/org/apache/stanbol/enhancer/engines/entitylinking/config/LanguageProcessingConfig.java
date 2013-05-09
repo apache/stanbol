@@ -135,7 +135,7 @@ public class LanguageProcessingConfig implements Cloneable{
     /**
      * The minimum confidence that a POS annotation 
      */
-    private double minExcludePosAnnotationProbability = DEFAULT_MIN_EXCLUDE_POS_ANNOTATION_PROBABILITY/2;
+    private double minExcludePosAnnotationProbability = DEFAULT_MIN_EXCLUDE_POS_ANNOTATION_PROBABILITY;
 
     private boolean ignoreChunksState = DEFAULT_IGNORE_CHUNK_STATE;
 

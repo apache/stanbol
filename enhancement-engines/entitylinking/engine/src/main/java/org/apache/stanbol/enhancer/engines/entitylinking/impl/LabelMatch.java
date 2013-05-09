@@ -20,8 +20,12 @@ import java.util.Comparator;
 
 import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion.MATCH;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LabelMatch {
+    
+    private final Logger log = LoggerFactory.getLogger(LabelMatch.class);
     /**
      * To be used in case no match is present
      */
@@ -89,12 +93,14 @@ public class LabelMatch {
         score = textScore*labelScore;
         if(span < processableMatchCount){
             throw new IllegalArgumentException("The span '" + span
-                + "' MUST BE >= the number of matched processable tokens'"
+                + "' MUST BE >= then number of matched processable tokens'"
                 + processableMatchCount+"': "+toString()+"!");
         }
         if(span < matchCount){
-            throw new IllegalArgumentException("The span '" + span
-                + "' MUST BE >= the number of matched tokens '"+matchCount+"': "+toString()+"!");
+            log.warn("The span '{}' MUST BE >= then number of matched tokens '{}"
+                    + "': {}! Set span to {}.", new Object[]{
+                    span, matchCount, toString(), matchCount});
+            span = matchCount;
         }
         if(processableMatchCount > matchCount){
             throw new IllegalArgumentException("The number of matched processable tokens '"

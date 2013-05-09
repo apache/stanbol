@@ -93,13 +93,10 @@ public class EntityLinker {
         while(state.next()) {
             TokenData token = state.getToken();
             if(log.isDebugEnabled()){
-                log.debug("--- preocess Token {}: {} (lemma: {} | pos:{}) chunk: {}",
-                    new Object[]{token.index,token.token.getSpan(),
-                                 token.morpho != null ? token.morpho.getLemma() : "none", 
-                                 token.token.getAnnotations(POS_ANNOTATION),
-                                 token.inChunk != null ? 
-                                         (token.inChunk.chunk + " "+ token.inChunk.chunk.getSpan()) : 
-                                             "none"});
+                log.debug("--- preocess Token {}: {} (lemma: {}) linkable={}, matchable={} | chunk: {}",
+                    new Object[]{token.index,token.getTokenText(),token.getTokenLemma(),
+                        token.isLinkable, token.isMatchable, token.inChunk != null ? 
+                                (token.inChunk.chunk + " "+ token.inChunk.chunk.getSpan()) : "none"});
             }
             List<String> searchStrings = new ArrayList<String>(linkerConfig.getMaxSearchTokens());
             String searchString = linkerConfig.isLemmaMatching() ? token.getTokenLemma() :
@@ -134,11 +131,10 @@ public class EntityLinker {
                 if(minIncludeIndex <= prevIndex){
                     TokenData prevToken = state.getTokens().get(prevIndex);
                     if(log.isDebugEnabled()){
-                        log.debug("    {} {}:'{}' (lemma: {} | pos:{})",new Object[]{
+                        log.debug("    {} {}:'{}' (lemma: {}) linkable={}, matchable={}",new Object[]{
                             prevToken.isMatchable? '+':'-',prevToken.index,
-                            prevToken.token.getSpan(),
-                            prevToken.morpho != null ? prevToken.morpho.getLemma() : "none",
-                            prevToken.token.getAnnotations(POS_ANNOTATION)
+                            prevToken.getTokenText(), prevToken.getTokenLemma(),
+                            prevToken.isLinkable, prevToken.isMatchable
                         });
                     }
                     if(prevToken.isMatchable){
@@ -153,11 +149,10 @@ public class EntityLinker {
                 if(maxIndcludeIndex >= pastIndex){
                     TokenData pastToken = state.getTokens().get(pastIndex);
                     if(log.isDebugEnabled()){
-                        log.debug("    {} {}:'{}' (lemma: {} | pos:{})",new Object[]{
-                            pastToken.isMatchable? '+':'-',pastToken.index,
-                            pastToken.token.getSpan(),
-                            pastToken.morpho != null ? pastToken.morpho.getLemma() : "none",
-                            pastToken.token.getAnnotations(POS_ANNOTATION)
+                        log.debug("    {} {}:'{}' (lemma: {}) linkable={}, matchable={}",new Object[]{
+                                pastToken.isMatchable? '+':'-',pastToken.index,
+                                pastToken.getTokenText(), pastToken.getTokenLemma(),
+                                pastToken.isLinkable, pastToken.isMatchable
                         });
                     }
                     if(pastToken.isMatchable){

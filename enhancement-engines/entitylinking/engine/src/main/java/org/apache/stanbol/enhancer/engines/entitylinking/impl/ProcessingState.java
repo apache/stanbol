@@ -271,11 +271,11 @@ public class ProcessingState {
                 } else if(span.getType() == SpanTypeEnum.Token){
                     TokenData tokenData = new TokenData(tokens.size(),(Token)span,activeChunk);
                     if(log.isDebugEnabled()){
-                        log.debug("  > Token {}: {} (pos:{}) chunk: '{}' | morpho: {}",
-                            new Object[]{tokenData.index,tokenData.token, 
-                                         tokenData.token.getAnnotations(POS_ANNOTATION),
-                                         tokenData.inChunk != null ? tokenData.inChunk.chunk.getSpan() : "none",
-                                         tokenData.morpho != null ? tokenData.morpho : "none"});
+                        log.debug("  > {}: {} {}(pos:{}) chunk: '{}'",
+                            new Object[]{tokenData.index,tokenData.token,
+                                tokenData.morpho != null ? ("(lemma: "+tokenData.morpho.getLemma()+") ") : "",
+                                tokenData.token.getAnnotations(POS_ANNOTATION),
+                                tokenData.inChunk != null ? tokenData.inChunk.chunk.getSpan() : "none"});
                     }
                     if(!tokenData.hasAlphaNumeric){
                         tokenData.isLinkable = false;
@@ -296,6 +296,7 @@ public class ProcessingState {
                             if(tpc.isLinkUpperCaseTokens()){
                                 if(tokenData.isMatchable) { //convert matchable to 
                                     tokenData.isLinkable = true; //linkable
+                                    tokenData.isMatchable = true;
                                 } else { // and other tokens to
                                     tokenData.isMatchable = true; //matchable
                                 }
@@ -309,36 +310,43 @@ public class ProcessingState {
                         } //else not an upper case token
                         
                         //(3) Unknown POS tag Rules (see STANBOL-1049)
-                        if(!tokenData.isLinkable && tokenData.isLinkablePos == null && 
-                                tokenData.isLinkablePos == null){
+                        if(!tokenData.isLinkable && (tokenData.isLinkablePos == null || 
+                                tokenData.isMatchablePos == null)){
                             if(isUnicaseLanguage || !tpc.isLinkOnlyUpperCaseTokensWithUnknownPos()){
-                                if(tokenData.hasSearchableLength){
+                                if(tokenData.isLinkablePos == null && tokenData.hasSearchableLength){
                                     tokenData.isLinkable = true;
+                                    tokenData.isMatchable = true;
                                 } //else no need to change the state
                             } else { //non unicase language and link only upper case tokens enabled
                                 if(tokenData.upperCase && // upper case token
                                         tokenData.index > 0 && //not a sentence or sub-sentence start
                                         !tokens.get(tokenData.index-1).isSubSentenceStart){
-                                    if(tokenData.hasSearchableLength){
+                                    if(tokenData.hasSearchableLength && tokenData.isLinkablePos == null){
                                         tokenData.isLinkable = true;
-                                    } else {
+                                        tokenData.isMatchable = true;
+                                    } else if(tokenData.isMatchablePos == null){
                                         tokenData.isMatchable = true;
                                     }
-                                } else if(tokenData.hasSearchableLength){ //lower case and long token
+                                } else if(tokenData.hasSearchableLength &&  //lower case and long token
+                                        tokenData.isMatchablePos == null){ 
                                     tokenData.isMatchable = true;
                                 } //else lower case and short word 
                             }
                         } //else already linkable or POS tag present
                     }
+                    log.debug("    - {}",tokenData); 
                     //add the token to the list
                     tokens.add(tokenData);
                     if(!foundLinkableToken){
                         foundLinkableToken = tokenData.isLinkable;
                     }
                     if(activeChunk != null){
-                        if(tokenData.isMatchable){
+                        if (tokenData.isLinkable){
+                            //ignore matchableCount in Chunks with linkable Tokens
+                            activeChunk.matchableCount = -10; //by setting the count to -10
+                        } else if(tokenData.isMatchable){
                             activeChunk.matchableCount++;
-                        } 
+                        }
                         if (span.getEnd() >= activeChunk.getEndChar()){
                             //this is the last token in the current chunk
                             activeChunk.endToken = tokens.size()-1;
@@ -705,7 +713,15 @@ public class ProcessingState {
         public String getTokenLemma(){
             return morpho != null ? morpho.getLemma() : null;
         }
-                
+        @Override
+        public String toString() {
+            return new StringBuilder("TokenData: '").append(getTokenText())
+                    .append("'[linkable=").append(isLinkable).append("(linkabkePos=").append(isLinkablePos)
+                    .append(")| matchable=").append(isMatchable).append("(matchablePos=").append(isMatchablePos)
+                    .append(")| alpha=").append(hasAlphaNumeric).append("| seachLength=")
+                    .append(hasSearchableLength).append("| upperCase=").append(upperCase)
+                    .append("]").toString();
+        }  
     }
     /** 
      * Represents a Chunk (group of tokens) used as context for EntityLinking.
