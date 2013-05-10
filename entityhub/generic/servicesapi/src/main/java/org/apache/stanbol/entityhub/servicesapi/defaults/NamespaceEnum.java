@@ -397,13 +397,11 @@ public enum NamespaceEnum {
     frbr("http://purl.org/vocab/frbr/core#"),
     
     /**
-     * Special namespace used for disambiguation metadata 
-    * @deprecated All none core namespaces where deprecated. Users should use
-    * the NamespacePrefixService (module:
-    * org.apache.stanbol.commons.namespaceprefixservice) instead (see also
-    * <a href="https://issues.apache.org/jira/browse/STANBOL-824">STANBOL-824)</a>
+     * Special namespace used for disambiguation metadata. NOTE: that with STANBOL-1053
+     * the URI used for disambiguation changed.
+     * 
      */
-    disambiguation("dis","urn:stanbol.entityhub:disambiguation:"),
+    disambiguation("dis","http://stanbol.apache.org/ontology/disambiguation/disambiguation#"),
     /*
      * Old namespaces still kept for historical reasons
      */
