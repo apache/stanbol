@@ -22,10 +22,12 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
@@ -62,6 +64,7 @@ public class BaseStanbolResource {
     public URI getPublicBaseUri() {
         return uriInfo.getBaseUri();
     }
+    
     /**
      * The Apache Felix Webconsole base URL does not depend on alias configured
      * for the Stanbol JerseyEndpoint. However they is affected by the base
@@ -75,16 +78,25 @@ public class BaseStanbolResource {
     public URI getConsoleBaseUri() {
         String root = getRootUrl();
         UriBuilder consolePathBuilder;
-        if(root != null && !root.isEmpty() && !"/".equals(root)){
+        if(StringUtils.isNotBlank(root) && !"/".equals(root)){
             String request = uriInfo.getRequestUri().toString();
-            int alaiasIndex = request.lastIndexOf(root);
-            if(alaiasIndex > 0){
-                request = request.substring(0,request.lastIndexOf(root));
+            int aliasIndex = request.lastIndexOf(root);
+            if(aliasIndex > 0) {
+                request = request.substring(0, request.lastIndexOf(root));
             }
             consolePathBuilder = UriBuilder.fromUri(request);
         } else {
             consolePathBuilder = uriInfo.getRequestUriBuilder();
         }
+            
+        if (this.getClass().isAnnotationPresent(Path.class)) {
+        	String path = this.getClass().getAnnotation(Path.class).value();
+        	int levels = (path.endsWith("/") ? StringUtils.countMatches(path, "/")-1 : StringUtils.countMatches(path, "/"));
+        	for (int i=levels; i>0; i--) {
+        		consolePathBuilder = consolePathBuilder.path("../");
+        	}
+        }
+        
     	return consolePathBuilder.path(SYSTEM_CONSOLE).build();
     }
 
