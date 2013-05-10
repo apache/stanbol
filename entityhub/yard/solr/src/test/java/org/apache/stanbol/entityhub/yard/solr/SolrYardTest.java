@@ -16,8 +16,9 @@
  */
 package org.apache.stanbol.entityhub.yard.solr;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.io.IOError;
@@ -37,6 +38,7 @@ import org.apache.stanbol.commons.solr.managed.standalone.StandaloneEmbeddedSolr
 import org.apache.stanbol.commons.solr.managed.standalone.StandaloneManagedSolrServer;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
@@ -130,7 +132,45 @@ public class SolrYardTest extends YardTest {
     public void testSolrYardConfigInitWithNullID() {
         new SolrYardConfig(null, TEST_SOLR_CORE_NAME);
     }
-
+    /**
+     * Additional test for <a href="https://issues.apache.org/jira/browse/STANBOL-1065">
+     * STANBOL-1065</a>
+     * @throws YardException
+     */
+    @Test
+    public void testUriWithSpaces() throws YardException {
+        Yard yard = getYard();
+        String id1 = "http://www.example.com/with space";
+        String id2 = "http://www.example.com/other";
+        Representation test1 = create(id1,true);
+        Representation test2 = create(id2,true);
+        //now add a label containing space to id2
+        test1.addNaturalText(NamespaceEnum.rdfs+"label","expected result","en");
+        test2.addNaturalText(NamespaceEnum.rdfs+"label","space","en");
+        test2.addNaturalText(NamespaceEnum.rdfs+"comment","URIs with space got separated "
+            + "in queries causing parts in URIs after spaces to form full text " 
+            + "queries instead!","en");
+        yard.update(test1);
+        yard.update(test2);
+        //now try to query for some combination
+        assertNull("No Entity with ID 'http://www.example.com/with URIs' expected",
+            yard.getRepresentation("http://www.example.com/with URIs"));
+        assertNull("No Entity with ID 'http://www.example.com/with' expected",
+            yard.getRepresentation("http://www.example.com/with"));
+        //no check that lookups do work withspace uris
+        Representation result = yard.getRepresentation(id1);
+        assertNotNull("Entity with ID 'http://www.example.com/with space' expected",
+            result);
+        assertEquals("Entity with id '"+id1+"' expected, but got '"
+            + result.getId() + "' instead", id1, result.getId());
+        //finally test removal of Entities with space
+        yard.remove(id1);
+        assertNull("Entity with ID 'http://www.example.com/with space' got not deleted",
+            yard.getRepresentation(id1));
+        //and also clean up the 2nd entity used for the test
+        yard.remove(id2);
+    }
+    
     @Test
     public void testFieldQuery() throws YardException {
         // NOTE: this does not test if the updated view of the representation is

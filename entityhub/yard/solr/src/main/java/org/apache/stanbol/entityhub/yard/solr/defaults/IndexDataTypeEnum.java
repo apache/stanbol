@@ -17,15 +17,19 @@
 package org.apache.stanbol.entityhub.yard.solr.defaults;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.datatype.Duration;
 
+import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
@@ -45,46 +49,54 @@ import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
  * 
  */
 public enum IndexDataTypeEnum {
-    BOOLEAN(NamespaceEnum.xsd + "boolean", "bool", Boolean.class),
+    BOOLEAN(NamespaceEnum.xsd + "boolean", "bool", Boolean.class, DataTypeEnum.Boolean),
     // BYTE("byt",Byte.class),
-    INT(NamespaceEnum.xsd + "int", "int", Integer.class),
-    LONG(NamespaceEnum.xsd + "long", "lon", Long.class),
-    FLOAT(NamespaceEnum.xsd + "float", "flo", Float.class),
-    DOUBLE(NamespaceEnum.xsd + "double", "dou", Double.class),
-    REF(RdfResourceEnum.ReferenceDataType.getUri(), "ref", Reference.class),
+    INT(NamespaceEnum.xsd + "int", "int", Integer.class, DataTypeEnum.Int),
+    LONG(NamespaceEnum.xsd + "long", "lon", Long.class, DataTypeEnum.Long, DataTypeEnum.Integer),
+    FLOAT(NamespaceEnum.xsd + "float", "flo", Float.class, DataTypeEnum.Float),
+    DOUBLE(NamespaceEnum.xsd + "double", "dou", Double.class, DataTypeEnum.Double, DataTypeEnum.Decimal),
+    REF(RdfResourceEnum.ReferenceDataType.getUri(), "ref", Reference.class, DataTypeEnum.AnyUri, DataTypeEnum.Reference),
     // URI(NamespaceEnum.xsd+"anyURI","uri",URI.class), //currently URIs are modelled as REF
     // TODO: DATE & DUR to be removed. The plan is to add explicit support for ranged queries over time
     // spans/points!
-    DATE(NamespaceEnum.xsd + "dateTime", "cal", Date.class),
-    DUR(NamespaceEnum.xsd + "duration", "dur", Duration.class),
-    TXT(RdfResourceEnum.TextDataType.getUri(), null, Text.class, true), // no type prefix, but typically
+    DATE(NamespaceEnum.xsd + "dateTime", "cal", Date.class, DataTypeEnum.Date, DataTypeEnum.DateTime, DataTypeEnum.Time),
+    DUR(NamespaceEnum.xsd + "duration", "dur", Duration.class, DataTypeEnum.Duration),
+    TXT(RdfResourceEnum.TextDataType.getUri(), null, Text.class, true, DataTypeEnum.Text), // no type prefix, but typically
                                                                         // languageType prefixes
-    STR(NamespaceEnum.xsd + "string", "str", String.class, true), // string values (not used for languageType)
+    STR(NamespaceEnum.xsd + "string", "str", String.class, true, DataTypeEnum.String), // string values (not used for languageType)
     ID(NamespaceEnum.xsd + "id", "id", UUID.class), ;
     private IndexDataType indexType;
     private Class<?> javaType;
     private String prefix;
     private String suffix;
+    private final Set<DataTypeEnum> dataTypes;
     /**
      * if true, values of this dataType should be treated as natural languageType texts and added to the
      * {@link SolrConst#LANG_MERGER_FIELD}
      */
     private boolean languageType;
 
-    IndexDataTypeEnum(String name, String prefix, Class<?> type) {
-        this(name, prefix, null, type, false);
+    IndexDataTypeEnum(String name, String prefix, Class<?> type, DataTypeEnum...dataTypes) {
+        this(name, prefix, null, type, false,dataTypes);
     }
 
-    IndexDataTypeEnum(String name, String prefix, Class<?> type, boolean language) {
-        this(name, prefix, null, type, language);
+    IndexDataTypeEnum(String name, String prefix, Class<?> type, boolean language,DataTypeEnum...dataTypes) {
+        this(name, prefix, null, type, language, dataTypes);
     }
 
-    IndexDataTypeEnum(String name, String prefix, String suffix, Class<?> type, boolean language) {
+    IndexDataTypeEnum(String name, String prefix, String suffix, Class<?> type, boolean language,DataTypeEnum...dataTypes) {
         this.indexType = new IndexDataType(name);
         this.prefix = prefix;
         this.suffix = suffix;
         this.javaType = type;
         this.languageType = language;
+        if(dataTypes == null || dataTypes.length < 1){
+            this.dataTypes = Collections.emptySet();
+        } else {
+            EnumSet<DataTypeEnum> types = EnumSet.noneOf(DataTypeEnum.class);
+            types.addAll(Arrays.asList(dataTypes));
+            this.dataTypes = Collections.unmodifiableSet(types);
+        }
     }
 
     /**
@@ -132,6 +144,14 @@ public enum IndexDataTypeEnum {
     public boolean isLanguageType() {
         return languageType;
     }
+    /**
+     * The Entityhub {@link DataTypeEnum datatypes} mapped to this SolrYard
+     * {@link IndexDataType}
+     * @return the mapped {@link DataTypeEnum}s
+     */
+    public Set<DataTypeEnum> getMappedDataTypes(){
+        return dataTypes;
+    }
 
     /*--------------------------------------------------------------------------
      * Code that reads the config and inits lookup tables (also checks config)
@@ -142,6 +162,8 @@ public enum IndexDataTypeEnum {
     private static Map<IndexDataType,IndexDataTypeEnum> indexTypeMap;
     private static Map<List<String>,IndexDataTypeEnum> prefixSuffixMap;
     private static Map<String,IndexDataTypeEnum> uriMap;
+    private static Map<DataTypeEnum,IndexDataTypeEnum> dataTypeMap;
+    
     static {
         /*
          * This inits the Mappings and also validates the configuration provided by the Enumeration!
@@ -150,6 +172,8 @@ public enum IndexDataTypeEnum {
         Map<IndexDataType,IndexDataTypeEnum> itm = new HashMap<IndexDataType,IndexDataTypeEnum>();
         Map<List<String>,IndexDataTypeEnum> psm = new HashMap<List<String>,IndexDataTypeEnum>();
         Map<String,IndexDataTypeEnum> um = new HashMap<String,IndexDataTypeEnum>();
+        Map<DataTypeEnum, IndexDataTypeEnum> dm = new HashMap<DataTypeEnum,IndexDataTypeEnum>();
+        
         for (IndexDataTypeEnum dt : IndexDataTypeEnum.values()) {
             if (jtm.containsKey(dt.javaType)) {
                 throw new IllegalStateException(String.format(
@@ -178,11 +202,19 @@ public enum IndexDataTypeEnum {
             } else {
                 um.put(dt.getIndexType().getId(), dt);
             }
+            //inverse mappings for IndexDataTypesEnum -> DataTypeEnum
+            for(DataTypeEnum mdt : dt.getMappedDataTypes()){
+                if(dm.put(mdt, dt) != null){
+                    throw new IllegalStateException(String.format(
+                        "Found multiple IndexDataTypes are mapped with DataType %s!",mdt));
+                }
+            }
         }
         javaTypeMap = Collections.unmodifiableMap(jtm);
         indexTypeMap = Collections.unmodifiableMap(itm);
         prefixSuffixMap = Collections.unmodifiableMap(psm);
         uriMap = Collections.unmodifiableMap(um);
+        dataTypeMap = Collections.unmodifiableMap(dm);
     }
 
     /**
@@ -238,4 +270,14 @@ public enum IndexDataTypeEnum {
     public static IndexDataTypeEnum forUri(String uri) {
         return uriMap.get(uri);
     }
+    
+    /**
+     * Lookup table for the IndexDataTypeEnum based on the Entityhub {@link DataTypeEnum}
+     * @param dt the {@link DataTypeEnum}
+     * @return the {@link IndexDataTypeEnum} or <code>null</code> if the parsed datatype is not mapped.
+     */
+    public static IndexDataTypeEnum forDataTyoe(DataTypeEnum dt){
+        return dataTypeMap.get(dt);
+    }
+    
 }

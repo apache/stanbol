@@ -97,6 +97,15 @@ public interface FieldMapper {
      *             if the parsed index field is <code>null</code>.
      */
     Collection<String> getFieldNames(IndexField indexField) throws IllegalArgumentException;
+    /**
+     * Getter for the actual field names representing the parsed logical {@link IndexField}
+     * in the context of a Query.
+     * @param indexField the index field
+     * @return the actual field names in the index that need to be searched for the
+     * finding values of the parsed {@link IndexField}
+     * @throws IllegalArgumentException
+     */
+    Collection<String> getQueryFieldNames(IndexField indexField) throws IllegalArgumentException;
 
     /**
      * Getter for the logical {@link IndexField} of an given fieldName, typically as found in a document

@@ -130,9 +130,9 @@ public class SolrFieldMapper implements FieldMapper {
      * 
      * @see LinkedHashMap#
      */
-    private final Map<IndexField,Collection<String>> indexFieldMappings = 
+    private final Map<IndexField,List<String>> indexFieldMappings = 
             //STANBOL-669: LRU chaches MUST BE synchronized!
-            Collections.synchronizedMap(new LRU<IndexField,Collection<String>>());
+            Collections.synchronizedMap(new LRU<IndexField,List<String>>());
     /**
      * The assumption is, that only a handful of fields appear in index documents. So it makes sense to keep
      * some mappings within a cache rather than calculating them again and again.
@@ -327,20 +327,30 @@ public class SolrFieldMapper implements FieldMapper {
     }
 
     @Override
-    public Collection<String> getFieldNames(IndexField indexField) throws IllegalArgumentException {
+    public Collection<String> getQueryFieldNames(IndexField indexField) throws IllegalArgumentException {
+        List<String> fields = getFieldNames(indexField);
+        if((indexField.getLanguages() != null && !indexField.getLanguages().isEmpty()) &&
+                IndexDataTypeEnum.forIndexType(indexField.getDataType()).isLanguageType()){
+            return fields.subList(0, fields.size()-1); //cut of the field with all languages
+        } else {
+            return fields;
+        }
+    }
+    @Override
+    public List<String> getFieldNames(IndexField indexField) throws IllegalArgumentException {
         if (indexField == null) {
             throw new IllegalArgumentException("The parsed IndexField name MUST NOT be NULL!");
         }
-        Collection<String> fieldNames = indexFieldMappings.get(indexField);
+        List<String> fieldNames = indexFieldMappings.get(indexField);
         if (fieldNames == null) {
             SpecialFieldEnum specialField = indexField.getSpecialField();//check for special field;
             if(specialField != null){
                 switch (specialField) {
                     case fullText:
-                        fieldNames = Collections.singleton(getFullTextSearchField());
+                        fieldNames = Collections.singletonList(getFullTextSearchField());
                         break;
                     case references:
-                        fieldNames = Collections.singleton(getReferredDocumentField());
+                        fieldNames = Collections.singletonList(getReferredDocumentField());
                         break;
                     default:
                         throw new IllegalStateException("Unsupported Special Field '"
@@ -349,7 +359,7 @@ public class SolrFieldMapper implements FieldMapper {
                             + "JIRA issue at https://issues.apache.org/jira/browse/STANBOL!");
                 }
             } else {
-                fieldNames = new HashSet<String>(2); //typically only 1 or 2 values
+                fieldNames = new ArrayList<String>(2); //typically only 1 or 2 values
                 IndexDataTypeEnum dataTypeConfig = IndexDataTypeEnum.forIndexType(indexField.getDataType());
                 if (dataTypeConfig == null) {
                     throw new IllegalStateException(String.format(

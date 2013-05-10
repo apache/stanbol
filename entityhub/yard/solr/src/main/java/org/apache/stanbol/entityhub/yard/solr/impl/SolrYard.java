@@ -293,7 +293,7 @@ public class SolrYard extends AbstractYard implements Yard {
             }
         }
         if(query.getRequestHandler() == SolrQueryFactory.MLT_QUERY_TYPE){
-            log.info("{}",response);
+            log.debug("{}",response);
         }
         long queryTime = System.currentTimeMillis();
         // return a queryResultList
@@ -513,7 +513,7 @@ public class SolrYard extends AbstractYard implements Yard {
                     if(config.isMultiYardIndexLayout()){
                         //make sure we only delete the Entity only if it is  managed by 
                         //this Yard. Entities of other Yards MUST NOT be deleted!
-                        server.deleteByQuery(String.format("%s:%s AND %s:%s",
+                        server.deleteByQuery(String.format("%s:%s AND %s:\"%s\"",
                             fieldMapper.getDocumentDomainField(),
                             SolrUtil.escapeSolrSpecialChars(getId()),
                             fieldMapper.getDocumentIdField(),
@@ -560,7 +560,7 @@ public class SolrYard extends AbstractYard implements Yard {
                         //if someone parses an ID managed by an other yard we MUST NOT
                         //delete it!
                         for(String id : toRemove){
-                            server.deleteByQuery(String.format("%s:%s AND %s:%s",
+                            server.deleteByQuery(String.format("%s:%s AND %s:\"%s\"",
                                 fieldMapper.getDocumentDomainField(),
                                 SolrUtil.escapeSolrSpecialChars(getId()),
                                 fieldMapper.getDocumentIdField(),
@@ -1016,7 +1016,7 @@ public class SolrYard extends AbstractYard implements Yard {
                     if (num > 0) {
                         queryBuilder.append(" OR ");
                     }
-                    queryBuilder.append(String.format("%s:%s", fieldMapper.getDocumentIdField(),
+                    queryBuilder.append(String.format("%s:\"%s\"", fieldMapper.getDocumentIdField(),
                         SolrUtil.escapeSolrSpecialChars(uri)));
                     num++;
                 }
@@ -1074,7 +1074,7 @@ public class SolrYard extends AbstractYard implements Yard {
             }
         }
         solrQuery.setRows(1); // we query for the id, there is only one result
-        String queryString = String.format("%s:%s", fieldMapper.getDocumentIdField(),
+        String queryString = String.format("%s:\"%s\"", fieldMapper.getDocumentIdField(),
             SolrUtil.escapeSolrSpecialChars(uri));
         solrQuery.setQuery(queryString);
         QueryResponse queryResponse;

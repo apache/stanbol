@@ -25,6 +25,7 @@ import static org.apache.solr.common.params.MoreLikeThisParams.SIMILARITY_FIELDS
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -37,11 +38,13 @@ import java.util.Map.Entry;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MoreLikeThisParams;
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
+import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.defaults.SpecialFieldEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
@@ -118,6 +121,10 @@ public class SolrQueryFactory {
     private final IndexValueFactory indexValueFactory;
     private final ValueFactory valueFactory;
     private final Map<IndexConstraintTypeEnum,IndexConstraintTypeEncoder<?>> constraintEncoders;
+    /**
+     * {@link IndexConstraintTypeEncoder} used for MLT requests to encode the parsed fields
+     */
+    private final List<IndexConstraintTypeEncoder<IndexField>> mltFieldEncoders;
 
     private String domain;
     private Integer maxQueryResults = MAX_QUERY_RESULTS;
@@ -140,10 +147,12 @@ public class SolrQueryFactory {
         this.indexValueFactory = indexValueFactory;
         this.constraintEncoders = new HashMap<IndexConstraintTypeEnum,IndexConstraintTypeEncoder<?>>();
         // TODO: Make this configuration more flexible!
-        constraintEncoders.put(IndexConstraintTypeEnum.LANG, new LangEncoder(fieldMapper));
-        constraintEncoders.put(IndexConstraintTypeEnum.DATATYPE, new DataTypeEncoder(indexValueFactory,
-                fieldMapper));
-        constraintEncoders.put(IndexConstraintTypeEnum.FIELD, new FieldEncoder(fieldMapper));
+        IndexConstraintTypeEncoder<IndexField> langEncoder = new LangEncoder(fieldMapper);
+        constraintEncoders.put(IndexConstraintTypeEnum.LANG, langEncoder);
+        IndexConstraintTypeEncoder<IndexField> datatypeEncoder = new DataTypeEncoder(indexValueFactory, fieldMapper);
+        constraintEncoders.put(IndexConstraintTypeEnum.DATATYPE, datatypeEncoder);
+        IndexConstraintTypeEncoder<IndexField> fieldEncoder = new FieldEncoder(fieldMapper);
+        constraintEncoders.put(IndexConstraintTypeEnum.FIELD, fieldEncoder);
         constraintEncoders.put(IndexConstraintTypeEnum.EQ, new AssignmentEncoder(indexValueFactory));
         constraintEncoders.put(IndexConstraintTypeEnum.WILDCARD, new WildcardEncoder(indexValueFactory));
         constraintEncoders.put(IndexConstraintTypeEnum.REGEX, new RegexEncoder(indexValueFactory));
@@ -151,6 +160,7 @@ public class SolrQueryFactory {
         constraintEncoders.put(IndexConstraintTypeEnum.LE, new LeEncoder(indexValueFactory));
         constraintEncoders.put(IndexConstraintTypeEnum.GT, new GtEncoder(indexValueFactory));
         constraintEncoders.put(IndexConstraintTypeEnum.LT, new LtEncoder(indexValueFactory));
+        this.mltFieldEncoders = Arrays.asList(langEncoder,datatypeEncoder,fieldEncoder);
     }
 
     public enum SELECT {
@@ -182,12 +192,13 @@ public class SolrQueryFactory {
                 List<String> fields = new ArrayList<String>();
                 fields.add(fieldConstraint.getKey());
                 SimilarityConstraint simConstraint = (SimilarityConstraint) fieldConstraint.getValue();
-                IndexValue indexValue = indexValueFactory.createIndexValue(simConstraint.getContext());
+                final IndexValue contextValue = 
+                        indexValueFactory.createIndexValue(simConstraint.getContext());
                 fields.addAll(simConstraint.getAdditionalFields());
                 if(!similarityConstraintPresent){
                     similarityConstraintPresent = true; //similarity constraint present
                     //add the constraint to the query
-                    query.setQueryType(MLT_QUERY_TYPE);
+                    query.setRequestHandler(MLT_QUERY_TYPE);
                     query.set(MATCH_INCLUDE, false);
                     query.set(MIN_DOC_FREQ, 1);
                     query.set(MIN_TERM_FREQ, 1);
@@ -195,12 +206,16 @@ public class SolrQueryFactory {
                     query.set("mlt.boost", true); //testing
                     List<String> indexFields = new ArrayList<String>();
                     for(String field : fields){
+                        //we need to get the actual fields in the index for the
+                        //logical fields parsed with the constraint
+                        IndexDataTypeEnum mapedIndexTypeEnum = IndexDataTypeEnum.forDataTyoe(simConstraint.getContextType());
                         IndexField indexField = new IndexField(Collections.singletonList(field), 
-                            IndexDataTypeEnum.TXT.getIndexType());
-                        indexFields.addAll(fieldMapper.getFieldNames(indexField));
+                            mapedIndexTypeEnum == null ? null : mapedIndexTypeEnum.getIndexType(),
+                            simConstraint.getLanguages());
+                        indexFields.addAll(fieldMapper.getQueryFieldNames(indexField));
                     }
                     query.set(SIMILARITY_FIELDS, indexFields.toArray(new String[fields.size()]));
-                    query.set(STREAM_BODY, indexValue.getValue());
+                    query.set(STREAM_BODY, contextValue.getValue());
                     processedFieldConstraints.put(fieldConstraint.getKey(), fieldConstraint.getValue());
                 } else { //similarity constraint already present -> ignore further
                     //NOTE: users are informed about that by NOT including further
