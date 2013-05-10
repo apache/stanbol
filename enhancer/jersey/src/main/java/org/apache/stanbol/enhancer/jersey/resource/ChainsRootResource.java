@@ -29,11 +29,13 @@ import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveChains;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.buildChainsMap;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
@@ -102,10 +104,16 @@ public class ChainsRootResource extends BaseStanbolResource {
 
 
     public Collection<Chain> getChains(){
-        Set<Chain> chains = new HashSet<Chain>();
+        List<Chain> chains = new ArrayList<Chain>();
         for(Entry<ServiceReference,Chain> entry : this.chains.values()){
             chains.add(entry.getValue());
         }
+        Collections.sort(chains, new Comparator<Chain>() {
+            @Override
+            public int compare(Chain o1, Chain o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         return chains;
     }
     public String getServicePid(String name){

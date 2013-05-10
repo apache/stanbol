@@ -29,11 +29,13 @@ import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveEngines;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.buildEnginesMap;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
@@ -100,10 +102,16 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
     }
 
     public Collection<EnhancementEngine> getEngines(){
-        Set<EnhancementEngine> engines = new HashSet<EnhancementEngine>();
+        List<EnhancementEngine> engines = new ArrayList<EnhancementEngine>();
         for(Entry<ServiceReference,EnhancementEngine> entry : this.engines.values()){
             engines.add(entry.getValue());
         }
+        Collections.sort(engines, new Comparator<EnhancementEngine>() {
+            @Override
+            public int compare(EnhancementEngine o1, EnhancementEngine o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         return engines;
     }
     public String getServicePid(String name){
