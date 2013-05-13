@@ -86,6 +86,8 @@
               org.eclipse.jetty.*;resolution:=optional,
               javax.servlet.*; version="[2.5.0,4.0.0)",
               org.tartarus.snowball;resolution:=optional,
+              org.restlet;resolution:=optional,
+              org.restlet.*;resolution:=optional,
               *
             </Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
@@ -96,8 +98,7 @@
               lucene-spatial, lucene-spellchecker, lucene-misc, lucene-queries,
               lucene-memory, lucene-phonetic, lucene-grouping, lucene-codecs,
               lucene-queryparser, lucene-sandbox, lucene-suggest, 
-              zookeeper,
-              org.restlet, org.restlet.ext.servlet
+              zookeeper
             </Embed-Dependency>
             <Private-Package>
               org.apache.stanbol.commons.solr.impl;version=${project.version}
@@ -265,17 +266,7 @@
     <!-- 
       Restlet is used starting with Solr 4.2. For now commented as this in only
       a runtime dependency referenced in Bundlelists
-      -->
-    <dependency>
-      <groupId>org.restlet.jee</groupId>
-      <artifactId>org.restlet</artifactId>
-      <version>2.1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.restlet.jee</groupId>
-      <artifactId>org.restlet.ext.servlet</artifactId>
-      <version>2.1.1</version>
-    </dependency>    
+      -->    
 
     <!-- OSGI dependencies -->
     <dependency>
@@ -318,16 +309,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-    <!-- 
-      Apache Solr uses restlet (starting with Solr 4.2.0). This modules are
-      distributed by an own Maven server
-     -->
-  <repositories>
-    <repository>
-      <id>maven-restlet</id>
-      <name>Public online Restlet repository</name>
-      <url>http://maven.restlet.org</url>
-    </repository>
-  </repositories>
 
 </project>
