@@ -16,10 +16,13 @@
  */
 package org.apache.stanbol.enhancer.engines.opennlp.impl;
 
+import static org.apache.stanbol.enhancer.nlp.NlpServiceProperties.ENHANCEMENT_ENGINE_NLP_ROLE;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -30,6 +33,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
+import org.apache.stanbol.enhancer.nlp.NlpProcessingRole;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.osgi.framework.Constants;
@@ -87,6 +91,15 @@ public class NamedEntityExtractionEnhancementEngine
      * {@link ServiceProperties#ORDERING_CONTENT_EXTRACTION}
      */
     public static final Integer defaultOrder = ORDERING_CONTENT_EXTRACTION;
+
+    private static final Map<String,Object> SERVICE_PROPERTIES;
+    static {
+        Map<String,Object> sp = new HashMap<String,Object>();
+        sp.put(ENHANCEMENT_ENGINE_ORDERING,defaultOrder);
+        sp.put(ENHANCEMENT_ENGINE_NLP_ROLE, NlpProcessingRole.NamedEntityRecognition);
+        SERVICE_PROPERTIES = Collections.unmodifiableMap(sp);
+        
+    }
     /**
      * Bind method of {@link NEREngineCore#openNLP}
      * @param openNlp
@@ -145,8 +158,7 @@ public class NamedEntityExtractionEnhancementEngine
     
     @Override
     public Map<String,Object> getServiceProperties() {
-        return Collections.unmodifiableMap(Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING,
-            (Object) defaultOrder));
+        return SERVICE_PROPERTIES;
     }
 
 //    @Override
