@@ -31,5 +31,6 @@ public enum NlpProcessingRole {
     PartOfSpeachTagging,
     Chunking, 
     SentimentTagging, 
-    Lemmatize
+    Lemmatize,
+    NamedEntityRecognition
 }
