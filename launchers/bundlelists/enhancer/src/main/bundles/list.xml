@@ -264,11 +264,16 @@
       <artifactId>org.apache.stanbol.enhancer.engine.disambiguation.mlt</artifactId>
       <version>0.10.0-SNAPSHOT</version>
     </bundle>
-	  <bundle> <!-- Converts TextAnnotations to the STANBOL-987 model extensions -->
-		  <groupId>org.apache.stanbol</groupId>
-		  <artifactId>org.apache.stanbol.enhancer.engines.textannotationnewmodel</artifactId>
-		  <version>0.10.1-SNAPSHOT</version>
-	  </bundle>
+    <bundle> <!-- Converts TextAnnotations to the STANBOL-987 model extensions -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.textannotationnewmodel</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
+    <bundle> <!-- finds co-mentions of Entities earlier mentioned on the Text (STANBOL-1070)-->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.entitycomention</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
     <bundle> <!-- Refactor Enhancement Engine -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.refactor</artifactId>
