@@ -94,7 +94,10 @@
     <module>uima</module>
     
     <!-- Post-Processing-->
-    <module>textannotationnewmodel</module> <!-- converts TextAnnotations to the STANBOL-987 model -->
+    <!-- converts TextAnnotations to the STANBOL-987 model -->
+    <module>textannotationnewmodel</module> 
+    <!-- finds co-mentions of Entities earlier mentioned on the Text (STANBOL-1070)  -->
+    <module>entitycomention</module> 
     
     <!-- Enhancement Engines using external services -->
     <module>celi</module> <!-- http://linguagrid.org -->

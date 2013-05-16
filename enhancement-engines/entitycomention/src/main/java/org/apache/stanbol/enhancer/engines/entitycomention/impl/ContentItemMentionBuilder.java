@@ -1,0 +1,124 @@
+package org.apache.stanbol.enhancer.engines.entitycomention.impl;
+
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import org.apache.clerezza.rdf.core.LiteralFactory;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.stanbol.enhancer.engines.entitycomention.CoMentionConstants;
+import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
+import org.apache.stanbol.enhancer.engines.entitylinking.impl.LinkingStateAware;
+import org.apache.stanbol.enhancer.nlp.model.Section;
+import org.apache.stanbol.enhancer.nlp.model.Token;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class ContentItemMentionBuilder extends InMemoryEntityIndex implements LinkingStateAware{
+
+    private static final Logger log = LoggerFactory.getLogger(ContentItemMentionBuilder.class);
+    private static final LiteralFactory lf = LiteralFactory.getInstance();
+    
+    private ContentItem ci;
+    /**
+     * The last index notified via {@link #startToken(Token)}
+     */
+    private Integer lastIndex = 0; 
+    
+    private SortedMap<Integer,Collection<EntityMention>> mentionIndex = new TreeMap<Integer,Collection<EntityMention>>();
+
+    
+    public ContentItemMentionBuilder(ContentItem ci, LabelTokenizer labelTokenizer,
+            String...languages){
+        super(labelTokenizer,CoMentionConstants.CO_MENTION_LABEL_FIELD, languages);
+        this.ci = ci;
+        ci.getLock().readLock().lock();
+        try {
+            initContext();
+        } finally {
+            ci.getLock().readLock().unlock();
+        }
+    }
+
+
+    private void initContext() {
+        MGraph m = ci.getMetadata();
+        for(Iterator<Triple> it = m.filter(null, RDF_TYPE, ENHANCER_TEXTANNOTATION); it.hasNext();){
+            UriRef ta = (UriRef)it.next().getSubject();
+            String selectedText = EnhancementEngineHelper.getString(m, ta, ENHANCER_SELECTED_TEXT);
+            if(selectedText != null){
+                //NOTE: Typically it is not possible to find co-mentions for Entities with a
+                //      single Token, so can ignore those.
+                //      The only exception would be to use proper-nouns for initial linking and
+                //      Nouns for the co-mention resolution. In such cases this might result
+                //      in additional extractions.
+                String[] tokens = tokenizer.tokenize(selectedText, language);
+                if(tokens.length > 1){ //TODO make configurable
+                    Double confidence = EnhancementEngineHelper.get(m,ta,ENHANCER_CONFIDENCE,Double.class,lf);
+                    if(confidence == null || confidence > 0.85){ //TODO make configurable
+                        Integer start = EnhancementEngineHelper.get(m,ta,ENHANCER_START,Integer.class,lf);
+                        Integer end = EnhancementEngineHelper.get(m,ta,ENHANCER_END,Integer.class,lf);
+                        registerMention(new EntityMention(ta,m, ENHANCER_SELECTED_TEXT, DC_TYPE, 
+                            start != null && end != null ? new Integer[]{start,end} : null));
+                    } // else confidence to low
+                } //else ignore Tokens with a single token
+            } // else no selected text
+        }
+    }
+
+    private void registerMention(EntityMention entityMention){
+        if(entityMention.getStart() == null || entityMention.getStart() < 0){
+            log.debug(" > add global Mention[entity: {}]",entityMention.getId());
+            addEntity(entityMention);
+        } else {
+            Collection<EntityMention> mentions = mentionIndex.get(entityMention.getEnd());
+            if(mentions == null){
+                mentions = new ArrayList<EntityMention>();
+                mentionIndex.put(entityMention.getEnd(), mentions);
+            }
+            mentions.add(entityMention);
+        }
+    }
+
+    /**
+     * Everytime the entityLinker starts to process a token we need to check
+     * if we need to add additional contextual information from the {@link ContentItem}
+     * to the {@link InMemoryEntityIndex}
+     */
+    @Override
+    public void startToken(Token token) {
+        Integer actIndex = token.getStart();
+        for(Collection<EntityMention> mentions : mentionIndex.subMap(lastIndex, actIndex).values()){
+            for(EntityMention mention : mentions){
+                log.debug(" > add Mention[index: [{},{}], entity: {}]",new Object[]{
+                        mention.getStart(),mention.getEnd(), mention.getId()});
+                addEntity(mention);
+            }
+        }
+        lastIndex = actIndex;
+    }
+
+    @Override
+    public void startSection(Section sentence) {/* not used */}
+    @Override
+    public void endSection(Section sentence) {/* not used */}
+    @Override
+    public void endToken(Token token) {/* not used */}
+    
+        
+}
