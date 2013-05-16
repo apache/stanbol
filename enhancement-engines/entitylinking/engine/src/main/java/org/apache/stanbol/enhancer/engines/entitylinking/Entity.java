@@ -35,7 +35,7 @@ import org.apache.commons.collections.iterators.TransformIterator;
  * {@link EntitySearcher} implementations that do support rankings for
  * entities SHOULD override the {@link #getEntityRanking()} method.
  */
-public class Entity {
+public class Entity implements Comparable<Entity>{
 
     protected static final LiteralFactory lf = LiteralFactory.getInstance();
     
@@ -68,13 +68,13 @@ public class Entity {
         this.uri = uri;
         this.data = data;
     }
-    public UriRef getUri() {
+    public final UriRef getUri() {
         return uri;
     }
-    public String getId(){
+    public final String getId(){
         return uri.getUnicodeString();
     }
-    public MGraph getData() {
+    public final MGraph getData() {
         return data;
     }
     @SuppressWarnings("unchecked")
@@ -95,5 +95,36 @@ public class Entity {
      */
     public Float getEntityRanking(){
         return null;
+    }
+    /**
+     * Uses the hascode of the {@link #getUri() URI}
+     */
+    @Override
+    public int hashCode() {
+        return uri.hashCode();
+    }
+    /**
+     * Checks if the two Entities do have the same {@link #getUri() URI}
+     */
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof Entity && ((Entity)other).uri.equals(uri);
+    }
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Entity[uri: ").append(uri.getUnicodeString());
+        Float entityRanking = getEntityRanking();
+        if(entityRanking != null){
+            sb.append(" | ranking: ").append(entityRanking);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+    /**
+     * Compares Entities based on their {@link #getUri()}
+     */
+    @Override
+    public int compareTo(Entity other) {
+        return uri.getUnicodeString().compareTo(other.uri.getUnicodeString());
     }
 }

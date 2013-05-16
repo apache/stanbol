@@ -45,6 +45,7 @@ import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessi
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.ProcessingState.TokenData;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion.MATCH;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
+import org.apache.stanbol.enhancer.nlp.model.Section;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.slf4j.Logger;
@@ -70,6 +71,8 @@ public class EntityLinker {
     private Integer lookupLimit;
     
     private LabelTokenizer labelTokenizer;
+
+    private LinkingStateAware linkingStateAware;
     
 
     public EntityLinker(AnalysedText analysedText, String language,
@@ -77,6 +80,13 @@ public class EntityLinker {
                         EntitySearcher entitySearcher,
                         EntityLinkerConfig linkerConfig,
                         LabelTokenizer labelTokenizer) {
+        this(analysedText,language,textProcessingConfig,entitySearcher,linkerConfig,labelTokenizer,null);
+    }
+    public EntityLinker(AnalysedText analysedText, String language,
+                LanguageProcessingConfig textProcessingConfig,
+                EntitySearcher entitySearcher,
+                EntityLinkerConfig linkerConfig,
+                LabelTokenizer labelTokenizer, LinkingStateAware linkingStateAware) {
         //this.analysedText = analysedText;
         this.entitySearcher = entitySearcher;
         this.linkerConfig = linkerConfig;
@@ -84,13 +94,27 @@ public class EntityLinker {
         this.labelTokenizer = labelTokenizer;
         this.state = new ProcessingState(analysedText,language,textProcessingConfig);
         this.lookupLimit  = Math.max(10,linkerConfig.getMaxSuggestions()*2);
+        this.linkingStateAware = linkingStateAware;
     }
     /**
      * Steps over the sentences, chunks, tokens of the {@link #sentences}
      */
     public void process() throws EntitySearcherException {
         //int debugedIndex = 0;
+        Section sentence = null;
         while(state.next()) {
+            //STANBOL-1070: added linkingStateAware callbacks for components that
+            //   need to react on the state of the Linking process
+            if(linkingStateAware != null){
+                if(!state.getSentence().equals(sentence)){
+                    if(sentence != null){
+                        linkingStateAware.endSection(sentence);
+                    }
+                    sentence = state.getSentence(); //set the next sentence
+                    linkingStateAware.startSection(sentence); //notify its start
+                }
+                linkingStateAware.startToken(state.getToken().token); //notify the current token
+            }
             TokenData token = state.getToken();
             if(log.isDebugEnabled()){
                 log.debug("--- preocess Token {}: {} (lemma: {}) linkable={}, matchable={} | chunk: {}",
@@ -271,8 +295,13 @@ public class EntityLinker {
                 //set the next token to process to the next word after the
                 //currently found suggestion
                 state.setConsumed(start+span-1);
+            } // else suggestions are empty
+            if(linkingStateAware != null){
+                linkingStateAware.endToken(state.getToken().token);
             }
-            
+        }
+        if(linkingStateAware != null && sentence != null){
+            linkingStateAware.endSection(sentence);
         }
     }
     /**
