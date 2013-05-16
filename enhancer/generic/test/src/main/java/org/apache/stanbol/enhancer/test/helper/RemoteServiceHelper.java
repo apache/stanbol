@@ -71,6 +71,18 @@ public final class RemoteServiceHelper {
                 log.warn("deactivate Test because Internal Error of remote serivce (Message: '"
                         +check.getMessage()+"')", e);
                 return;
+            } else if(message.contains("Server returned HTTP response code: 401") ){
+                log.warn("deactivate Test because Server returned HTTP Error 401 Unauthorized (Message: '"
+                        +check.getMessage()+"')", e);
+                return;
+            } else if(message.contains("Server returned HTTP response code: 402") ){
+                log.warn("deactivate Test because Server returned HTTP Error 402 Payment Required (Message: '"
+                        +check.getMessage()+"')", e);
+                return;
+            } else if(message.contains("Server returned HTTP response code: 403") ){
+                log.warn("deactivate Test because Server returned HTTP Error 403 Forbidden (Message: '"
+                        +check.getMessage()+"')", e);
+                return;
             } else if(containedInMessage != null){
                 for(String contained : containedInMessage){
                     if(message.contains(contained)){
