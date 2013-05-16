@@ -81,7 +81,7 @@
     <dependency> <!-- STANBOL-739: adapt Lemmatizer Engine to use AnalyzedText -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.nlp</artifactId>
-      <version>0.10.0</version>
+      <version>0.11.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
