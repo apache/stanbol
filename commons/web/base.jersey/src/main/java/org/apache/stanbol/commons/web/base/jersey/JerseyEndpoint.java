@@ -47,7 +47,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Collection;
+import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.felix.scr.annotations.References;
 import org.apache.stanbol.commons.web.base.DefaultApplication;
 import org.apache.stanbol.commons.web.base.LinkResource;
@@ -83,6 +86,9 @@ public class JerseyEndpoint {
 
     @Property(value = "/static")
     public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "org.apache.stanbol.commons.web.static.url";
+    
+    @Reference
+    private Parser parser;
 
     /**
      * The origins allowed for multi-host requests
@@ -166,7 +172,11 @@ public class JerseyEndpoint {
 
     /** Initialize the Jersey subsystem */
     private synchronized void initJersey() throws NamespaceException, ServletException {
-
+        //temporary workaround for STANBOL-1073
+        InputStream in = new ByteArrayInputStream(
+                "<http://example.org/me> <http://xmlns.com/foaf/0.1/name> \"Jane Doe\" .".getBytes());
+        parser.parse(in, "text/turtle");
+        //end of STANBOL-1073 work around
         if (componentContext == null) {
             log.debug(" ... can not init Jersey Endpoint - Component not yet activated!");
             //throw new IllegalStateException("Null ComponentContext, not activated?");
