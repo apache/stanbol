@@ -384,7 +384,7 @@ public class ClerezzaOntologyProvider implements
 
     private static final ImportManagementPolicy _IMPORT_POLICY_DEFAULT = ImportManagementPolicy.PRESERVE;
 
-    private static final String _META_GRAPH_ID_DEFAULT = "org.apache.stanbol.ontologymanager.ontonet";
+    private static final String _META_GRAPH_ID_DEFAULT = "urn:x-localinstance:/ontologymanager.graph";
 
     private static final boolean _RESOLVE_IMPORTS_DEFAULT = true;
 
