@@ -131,21 +131,21 @@ import com.sun.jersey.api.view.ImplicitProduces;
 import com.sun.jersey.multipart.BodyPart;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
- * Provides the basic HTTP methods for storing and managing ontologies regardless of them belonging to a
- * specific network, scope or session.
- * 
+ * Provides the basic HTTP methods for storing and managing ontologies
+ * regardless of them belonging to a specific network, scope or session.
+ *
  * @author anuzzolese, alexdma
- * 
+ *
  */
-
 @Path("/ontonet")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class OntoNetRootResource extends AbstractOntologyAccessResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-
     protected ScopeManager onManager;
 
     /*
@@ -157,20 +157,19 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
      * Placeholder for the OntologyProvider to be fetched from the servlet context.
      */
     protected RegistryManager registryManager;
-
     protected SessionManager sessionManager;
 
     public OntoNetRootResource(@Context ServletContext servletContext) {
         super();
         this.servletContext = servletContext;
         this.ontologyProvider = (OntologyProvider<?>) ContextHelper.getServiceFromContext(
-            OntologyProvider.class, servletContext);
+                OntologyProvider.class, servletContext);
         this.onManager = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class,
-            servletContext);
+                servletContext);
         this.sessionManager = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
-            servletContext);
+                servletContext);
         this.registryManager = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
-            servletContext);
+                servletContext);
     }
 
     /*
@@ -187,12 +186,13 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     @PUT
     @Path("/{ontologyId:.+}")
     public Response createOntologyEntry(@PathParam("ontologyId") String ontologyId,
-                                        @Context HttpHeaders headers,
-                                        @Context UriInfo uriInfo) {
+            @Context HttpHeaders headers,
+            @Context UriInfo uriInfo) {
         OWLOntologyID key = OntologyUtils.decode(ontologyId);
         ResponseBuilder rb;
-        if (ontologyProvider.listAllRegisteredEntries().contains(key)) rb = Response.status(CONFLICT);
-        else {
+        if (ontologyProvider.listAllRegisteredEntries().contains(key)) {
+            rb = Response.status(CONFLICT);
+        } else {
             ontologyProvider.createBlankOntologyEntry(key);
             rb = Response.created(uriInfo.getRequestUri());
         }
@@ -206,13 +206,16 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
         OWLOntologyID key = OntologyUtils.decode(ontologyId);
         ResponseBuilder rb;
         try {
-            if (!ontologyProvider.hasOntology(key)) rb = Response.status(NOT_FOUND);
-            else try {
-                // TODO check aliases!
-                ontologyProvider.removeOntology(key);
-                rb = Response.ok();
-            } catch (OntologyHandleException e) {
-                rb = Response.status(CONFLICT);
+            if (!ontologyProvider.hasOntology(key)) {
+                rb = Response.status(NOT_FOUND);
+            } else {
+                try {
+                    // TODO check aliases!
+                    ontologyProvider.removeOntology(key);
+                    rb = Response.ok();
+                } catch (OntologyHandleException e) {
+                    rb = Response.status(CONFLICT);
+                }
             }
         } catch (OrphanOntologyKeyException e) {
             log.warn("Orphan ontology key {}. No associated graph found in store.", e.getOntologyKey());
@@ -222,11 +225,20 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
         return rb.build();
     }
 
-    public Set<String> getAliases(OWLOntologyID ontologyId) {
-        Set<String> aliases = new HashSet<String>();
-        for (OWLOntologyID alias : ontologyProvider.listAliases(ontologyId))
-            aliases.add(OntologyUtils.encode(alias));
-        return aliases;
+    public Set<String> getAliases(final OWLOntologyID ontologyId) {
+        //TODO use rdfViewable instead of Vieable to make separation of 
+        //presentation and application logic cleaner
+        return AccessController.doPrivileged(new PrivilegedAction<Set<String>>() {
+            @Override
+            public Set<String> run() {
+                Set<String> aliases = new HashSet<String>();
+                for (OWLOntologyID alias : ontologyProvider.listAliases(ontologyId)) {
+                    aliases.add(OntologyUtils.encode(alias));
+                }
+                return aliases;
+            }
+        });
+
     }
 
     private MGraph getGraph(String ontologyId, boolean merged, URI requestUri) {
@@ -276,7 +288,9 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
 
         // This is needed because we need to change import statements. No need to use a more efficient but
         // resource-intensive IndexedMGraph, since both o and oTemp will be GC'ed after serialization.
-        if (oTemp != null) o = new SimpleMGraph(oTemp);
+        if (oTemp != null) {
+            o = new SimpleMGraph(oTemp);
+        }
 
         if (o == null) {
             log.debug("Ontology {} not found in any ontology provider or library.", ontologyId);
@@ -296,12 +310,15 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
          */
         Iterator<Triple> imports = o.filter(null, OWL.imports, null);
         Set<Triple> oldImports = new HashSet<Triple>();
-        while (imports.hasNext())
+        while (imports.hasNext()) {
             oldImports.add(imports.next());
+        }
         for (Triple t : oldImports) {
             // construct new statement
             String s = ((UriRef) t.getObject()).getUnicodeString();
-            if (s.contains("::")) s = s.substring(s.indexOf("::") + 2, s.length());
+            if (s.contains("::")) {
+                s = s.substring(s.indexOf("::") + 2, s.length());
+            }
             UriRef target = new UriRef(base + "/" + s);
             o.add(new TripleImpl(t.getSubject(), OWL.imports, target));
             // remove old statement
@@ -318,18 +335,36 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
         }
 
         log.debug("Exported as Clerezza Graph in {} ms. Handing over to writer.", System.currentTimeMillis()
-                                                                                  - before);
+                - before);
         return o;
     }
 
-    public Set<String> getHandles(OWLOntologyID ontologyId) {
-        Set<String> handles = new HashSet<String>();
-        if (onManager != null) for (Scope scope : onManager.getRegisteredScopes())
-            if (scope.getCoreSpace().hasOntology(ontologyId)
-                || scope.getCustomSpace().hasOntology(ontologyId)) handles.add(scope.getID());
-        if (sessionManager != null) for (String sesId : sessionManager.getRegisteredSessionIDs())
-            if (sessionManager.getSession(sesId).hasOntology(ontologyId)) handles.add(sesId);
-        return handles;
+    public Set<String> getHandles(final OWLOntologyID ontologyId) {
+        //TODO use rdfViewable instead of Vieable to make separation of 
+        //presentation and application logic cleaner
+        return AccessController.doPrivileged(new PrivilegedAction<Set<String>>() {
+            @Override
+            public Set<String> run() {
+                Set<String> handles = new HashSet<String>();
+                if (onManager != null) {
+                    for (Scope scope : onManager.getRegisteredScopes()) {
+                        if (scope.getCoreSpace().hasOntology(ontologyId)
+                                || scope.getCustomSpace().hasOntology(ontologyId)) {
+                            handles.add(scope.getID());
+                        }
+                    }
+                }
+                if (sessionManager != null) {
+                    for (String sesId : sessionManager.getRegisteredSessionIDs()) {
+                        if (sessionManager.getSession(sesId).hasOntology(ontologyId)) {
+                            handles.add(sesId);
+                        }
+                    }
+                }
+                return handles;
+            }
+        });
+
     }
 
     @GET
@@ -350,16 +385,38 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     }
 
     public SortedSet<OWLOntologyID> getOntologies() {
-        // No orphans included.
-        SortedSet<OWLOntologyID> filtered = new TreeSet<OWLOntologyID>();
-        Set<OWLOntologyID> orphans = ontologyProvider.listOrphans();
-        for (OWLOntologyID id : ontologyProvider.getPublicKeys())
-            if (id != null && !orphans.contains(id)) filtered.add(id);
-        return filtered;
+        //As this method is invoked from the template it would be too late 
+        //to handle AccessControlExceptionS
+        //TODO use rdfViewable instead of Vieable to make separation of 
+        //presentation and application logic cleaner
+        return AccessController.doPrivileged(new PrivilegedAction<SortedSet<OWLOntologyID>>() {
+            @Override
+            public SortedSet<OWLOntologyID> run() {
+                // No orphans included.
+                SortedSet<OWLOntologyID> filtered = new TreeSet<OWLOntologyID>();
+                Set<OWLOntologyID> orphans = ontologyProvider.listOrphans();
+                for (OWLOntologyID id : ontologyProvider.getPublicKeys()) {
+                    if (id != null && !orphans.contains(id)) {
+                        filtered.add(id);
+                    }
+                }
+                return filtered;
+            }
+        });
     }
 
     public Set<OWLOntologyID> getOrphans() {
-        return ontologyProvider.listOrphans();
+        //As this method is invoked from the template it would be too late 
+        //to handle AccessControlExceptionS
+        //TODO use rdfViewable instead of Vieable to make separation of 
+        //presentation and application logic cleaner
+        return AccessController.doPrivileged(new PrivilegedAction<Set<OWLOntologyID>>() {
+
+            @Override
+            public Set<OWLOntologyID> run() {
+                return ontologyProvider.listOrphans();
+            }
+        });   
     }
 
     private OWLOntology getOWLOntology(String ontologyId, boolean merge, URI requestUri) {
@@ -413,7 +470,9 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
         for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
             changes.add(new RemoveImport(o, oldImp));
             String s = oldImp.getIRI().toString();
-            if (s.contains("::")) s = s.substring(s.indexOf("::") + 2, s.length());
+            if (s.contains("::")) {
+                s = s.substring(s.indexOf("::") + 2, s.length());
+            }
             IRI target = IRI.create(base + s);
             changes.add(new AddImport(o, df.getOWLImportsDeclaration(target)));
         }
@@ -428,31 +487,44 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
 
         o.getOWLOntologyManager().applyChanges(changes);
         log.debug("Exported as Clerezza Graph in {} ms. Handing over to writer.", System.currentTimeMillis()
-                                                                                  - before);
+                - before);
         return o;
     }
 
-    public int getSize(OWLOntologyID ontologyId) {
-        Multiplexer desc = new MGraphMultiplexer(ontologyProvider.getMetaGraph(MGraph.class));
-        return desc.getSize(ontologyId);
+    public int getSize(final OWLOntologyID ontologyId) {
+        //TODO use rdfViewable instead of Vieable to make separation of 
+        //presentation and application logic cleaner
+        return AccessController.doPrivileged(new PrivilegedAction<Integer>() {
+            @Override
+            public Integer run() {
+                Multiplexer desc = new MGraphMultiplexer(ontologyProvider.getMetaGraph(MGraph.class));
+                return desc.getSize(ontologyId);
+            }
+        });
+
     }
 
     @GET
     @Path("/{ontologyId:.+}")
     @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON})
     public Response getStandaloneGraph(@PathParam("ontologyId") String ontologyId,
-                                       @DefaultValue("false") @QueryParam("meta") boolean meta,
-                                       @DefaultValue("false") @QueryParam("merge") boolean merged,
-                                       @Context UriInfo uriInfo,
-                                       @Context HttpHeaders headers) {
+            @DefaultValue("false") @QueryParam("meta") boolean meta,
+            @DefaultValue("false") @QueryParam("merge") boolean merged,
+            @Context UriInfo uriInfo,
+            @Context HttpHeaders headers) {
 
-        if (meta) return getMetadata(ontologyId, uriInfo, headers);
+        if (meta) {
+            return getMetadata(ontologyId, uriInfo, headers);
+        }
 
         ResponseBuilder rb;
-        if (ontologyId == null || ontologyId.isEmpty()) rb = Response.status(BAD_REQUEST);
+        if (ontologyId == null || ontologyId.isEmpty()) {
+            rb = Response.status(BAD_REQUEST);
+        }
         OWLOntologyID key = OntologyUtils.decode(ontologyId);
-        if (ontologyProvider.listOrphans().contains(key)) rb = Response.status(NO_CONTENT);
-        else {
+        if (ontologyProvider.listOrphans().contains(key)) {
+            rb = Response.status(NO_CONTENT);
+        } else {
             TripleCollection o = getGraph(ontologyId, merged, uriInfo.getRequestUri());
             rb = o == null ? Response.status(NOT_FOUND) : Response.ok(o);
         }
@@ -461,29 +533,32 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     }
 
     /**
-     * Gets the ontology with the given identifier in its version managed by the session.
-     * 
-     * @param sessionId
-     *            the session identifier.
-     * @param ontologyId
-     *            the ontology identifier.
+     * Gets the ontology with the given identifier in its version managed by the
+     * session.
+     *
+     * @param sessionId the session identifier.
+     * @param ontologyId the ontology identifier.
      * @param uriInfo
      * @param headers
-     * @return the requested managed ontology, or {@link Status#NOT_FOUND} if either the sessionn does not
-     *         exist, or the if the ontology either does not exist or is not managed.
+     * @return the requested managed ontology, or {@link Status#NOT_FOUND} if
+     * either the sessionn does not exist, or the if the ontology either does
+     * not exist or is not managed.
      */
     @GET
     @Path("/{ontologyId:.+}")
     @Produces(value = {RDF_XML, TURTLE, X_TURTLE, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
     public Response getStandaloneOntology(@PathParam("ontologyId") String ontologyId,
-                                          @DefaultValue("false") @QueryParam("merge") boolean merged,
-                                          @Context UriInfo uriInfo,
-                                          @Context HttpHeaders headers) {
+            @DefaultValue("false") @QueryParam("merge") boolean merged,
+            @Context UriInfo uriInfo,
+            @Context HttpHeaders headers) {
         ResponseBuilder rb;
-        if (ontologyId == null || ontologyId.isEmpty()) rb = Response.status(BAD_REQUEST);
+        if (ontologyId == null || ontologyId.isEmpty()) {
+            rb = Response.status(BAD_REQUEST);
+        }
         OWLOntologyID key = OntologyUtils.decode(ontologyId);
-        if (ontologyProvider.listOrphans().contains(key)) rb = Response.status(NO_CONTENT);
-        else {
+        if (ontologyProvider.listOrphans().contains(key)) {
+            rb = Response.status(NO_CONTENT);
+        } else {
             OWLOntology o = getOWLOntology(ontologyId, merged, uriInfo.getRequestUri());
             rb = o == null ? Response.status(NOT_FOUND) : Response.ok(o);
         }
@@ -492,13 +567,14 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     }
 
     public Response getMetadata(@PathParam("ontologyId") String ontologyId,
-                                @Context UriInfo uriInfo,
-                                @Context HttpHeaders headers) {
+            @Context UriInfo uriInfo,
+            @Context HttpHeaders headers) {
         ResponseBuilder rb;
         UriRef me = new UriRef(getPublicBaseUri() + "ontonet/" + ontologyId);
         MGraph mGraph = new SimpleMGraph();
-        for (String alias : getAliases(OntologyUtils.decode(ontologyId)))
+        for (String alias : getAliases(OntologyUtils.decode(ontologyId))) {
             mGraph.add(new TripleImpl(new UriRef(getPublicBaseUri() + "ontonet/" + alias), OWL.sameAs, me));
+        }
         rb = Response.ok(mGraph);
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -509,18 +585,18 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
     public Response loadOntologyContent(@PathParam("ontologyId") String ontologyId,
-                                        FormDataMultiPart data,
-                                        @Context HttpHeaders headers) {
+            FormDataMultiPart data,
+            @Context HttpHeaders headers) {
         ResponseBuilder rb = performLoadOntology(data, headers,
-            Origin.create(OntologyUtils.decode(ontologyId)));
+                Origin.create(OntologyUtils.decode(ontologyId)));
         // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
     protected ResponseBuilder performLoadOntology(FormDataMultiPart data,
-                                                  HttpHeaders headers,
-                                                  Origin<?>... keys) {
+            HttpHeaders headers,
+            Origin<?>... keys) {
         log.debug(" post(FormDataMultiPart data)");
         ResponseBuilder rb = null;
 
@@ -533,22 +609,27 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
             if (bpart instanceof FormDataBodyPart) {
                 FormDataBodyPart dbp = (FormDataBodyPart) bpart;
                 String name = dbp.getName();
-                if (name.equals("file")) file = bpart.getEntityAs(File.class);
-                else {
+                if (name.equals("file")) {
+                    file = bpart.getEntityAs(File.class);
+                } else {
                     String value = dbp.getValue();
-                    if (name.equals("format") && !value.equals("auto")) format = value;
-                    else if (name.equals("url")) try {
-                        URI.create(value); // To throw 400 if malformed.
-                        location = IRI.create(value);
-                    } catch (Exception ex) {
-                        log.error("Malformed IRI for " + value, ex);
-                        throw new WebApplicationException(ex, BAD_REQUEST);
-                    }
-                    else if (name.equals("alias") && !"null".equals(value)) try {
-                        aliases.add(OntologyUtils.decode(value));
-                    } catch (Exception ex) {
-                        log.error("Malformed public key for " + value, ex);
-                        throw new WebApplicationException(ex, BAD_REQUEST);
+                    if (name.equals("format") && !value.equals("auto")) {
+                        format = value;
+                    } else if (name.equals("url")) {
+                        try {
+                            URI.create(value); // To throw 400 if malformed.
+                            location = IRI.create(value);
+                        } catch (Exception ex) {
+                            log.error("Malformed IRI for " + value, ex);
+                            throw new WebApplicationException(ex, BAD_REQUEST);
+                        }
+                    } else if (name.equals("alias") && !"null".equals(value)) {
+                        try {
+                            aliases.add(OntologyUtils.decode(value));
+                        } catch (Exception ex) {
+                            log.error("Malformed public key for " + value, ex);
+                            throw new WebApplicationException(ex, BAD_REQUEST);
+                        }
                     }
                 }
             }
@@ -562,13 +643,18 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
              * the stream, we might have to do that ourselves.
              */
             List<String> formats;
-            if (format != null && !format.trim().isEmpty()) formats = Collections.singletonList(format);
-            else // The RESTful API has its own list of preferred formats
-            formats = Arrays.asList(new String[] {RDF_XML, TURTLE, X_TURTLE, N3, N_TRIPLE, OWL_XML,
-                                                  FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON});
+            if (format != null && !format.trim().isEmpty()) {
+                formats = Collections.singletonList(format);
+            } else // The RESTful API has its own list of preferred formats
+            {
+                formats = Arrays.asList(new String[]{RDF_XML, TURTLE, X_TURTLE, N3, N_TRIPLE, OWL_XML,
+                    FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON});
+            }
             int unsupported = 0, failed = 0;
             Iterator<String> itf = formats.iterator();
-            if (!itf.hasNext()) throw new OntologyLoadingException("No suitable format found or defined.");
+            if (!itf.hasNext()) {
+                throw new OntologyLoadingException("No suitable format found or defined.");
+            }
             do {
                 String f = itf.next();
                 try {
@@ -591,8 +677,8 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
                     }
                 } catch (UnsupportedFormatException e) {
                     log.warn(
-                        "POST method failed for media type {}. This should not happen (should fail earlier)",
-                        headers.getMediaType());
+                            "POST method failed for media type {}. This should not happen (should fail earlier)",
+                            headers.getMediaType());
                     // rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
                     unsupported++;
                 } catch (IOException e) {
@@ -604,8 +690,11 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
                 }
             } while ((key == null/* || key.isAnonymous() */) && itf.hasNext());
             if ((key == null || key.isAnonymous()) && rb == null) {
-                if (failed > 0) throw new WebApplicationException(BAD_REQUEST);
-                else if (unsupported > 0) throw new WebApplicationException(UNSUPPORTED_MEDIA_TYPE);
+                if (failed > 0) {
+                    throw new WebApplicationException(BAD_REQUEST);
+                } else if (unsupported > 0) {
+                    throw new WebApplicationException(UNSUPPORTED_MEDIA_TYPE);
+                }
             }
         } else if (location != null) {
             try { // Here we try every format supported by the Java API
@@ -616,20 +705,26 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
             }
         } else if (!aliases.isEmpty()) // No content but there are aliases.
         {
-            for (Origin<?> origin : keys)
+            for (Origin<?> origin : keys) {
                 if (origin.getReference() instanceof OWLOntologyID) {
                     OWLOntologyID primary = ((OWLOntologyID) origin.getReference());
-                    if (ontologyProvider.getStatus(primary) != org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider.Status.NO_MATCH) for (OWLOntologyID alias : aliases)
-                        try {
-                            if (ontologyProvider.addAlias(primary, alias) && key == null) key = alias;
-                        } catch (IllegalArgumentException ex) {
-                            log.warn("Cannot add alias");
-                            log.warn(" ... ontology key: {}", primary);
-                            log.warn(" ... alias: {}", alias);
-                            log.warn(" ... reason: ", ex);
-                            continue;
+                    if (ontologyProvider.getStatus(primary) != org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider.Status.NO_MATCH) {
+                        for (OWLOntologyID alias : aliases) {
+                            try {
+                                if (ontologyProvider.addAlias(primary, alias) && key == null) {
+                                    key = alias;
+                                }
+                            } catch (IllegalArgumentException ex) {
+                                log.warn("Cannot add alias");
+                                log.warn(" ... ontology key: {}", primary);
+                                log.warn(" ... alias: {}", alias);
+                                log.warn(" ... reason: ", ex);
+                                continue;
+                            }
                         }
+                    }
                 }
+            }
         } else {
             log.error("Bad request");
             log.error(" file is: {}", file);
@@ -644,40 +739,61 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
                     rb.entity(new Viewable("index", this));
                     rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML + "; charset=utf-8");
                 }
-            } else rb = Response.ok();
-        } else if (rb == null) rb = Response.status(Status.INTERNAL_SERVER_ERROR);
+            } else {
+                rb = Response.ok();
+            }
+        } else if (rb == null) {
+            rb = Response.status(Status.INTERNAL_SERVER_ERROR);
+        }
         return rb;
     }
 
     /**
-     * Helper method to make sure a ResponseBuilder is created on every conditions, so that it is then
-     * possible to enable CORS on it afterwards.
-     * 
+     * Helper method to make sure a ResponseBuilder is created on every
+     * conditions, so that it is then possible to enable CORS on it afterwards.
+     *
      * @param ontologyId
      * @return
      */
     protected ResponseBuilder performShowOntology(String ontologyId) {
-        if (ontologyId == null || ontologyId.isEmpty()) return Response.status(BAD_REQUEST);
+        if (ontologyId == null || ontologyId.isEmpty()) {
+            return Response.status(BAD_REQUEST);
+        }
         OWLOntologyID key = OntologyUtils.decode(ontologyId);
-        if (ontologyProvider.listOrphans().contains(key)) return Response.status(NO_CONTENT);
+        if (ontologyProvider.listOrphans().contains(key)) {
+            return Response.status(NO_CONTENT);
+        }
         OWLOntology o = getOWLOntology(ontologyId, false, uriInfo.getRequestUri());
-        if (o == null) return Response.status(NOT_FOUND);
+        if (o == null) {
+            return Response.status(NOT_FOUND);
+        }
         // try {
         Set<OntologyCollector> handles = new HashSet<OntologyCollector>();
-        if (onManager != null) for (Scope scope : onManager.getRegisteredScopes()) {
-            if (scope.getCoreSpace().hasOntology(key)) handles.add(scope.getCoreSpace());
-            if (scope.getCustomSpace().hasOntology(key)) handles.add(scope.getCustomSpace());
+        if (onManager != null) {
+            for (Scope scope : onManager.getRegisteredScopes()) {
+                if (scope.getCoreSpace().hasOntology(key)) {
+                    handles.add(scope.getCoreSpace());
+                }
+                if (scope.getCustomSpace().hasOntology(key)) {
+                    handles.add(scope.getCustomSpace());
+                }
+            }
         }
-        if (sessionManager != null) for (String sesId : sessionManager.getRegisteredSessionIDs())
-            if (sessionManager.getSession(sesId).hasOntology(key)) handles.add(sessionManager
-                    .getSession(sesId));
+        if (sessionManager != null) {
+            for (String sesId : sessionManager.getRegisteredSessionIDs()) {
+                if (sessionManager.getSession(sesId).hasOntology(key)) {
+                    handles.add(sessionManager
+                            .getSession(sesId));
+                }
+            }
+        }
         // ByteArrayOutputStream out = new ByteArrayOutputStream();
         // o.getOWLOntologyManager().saveOntology(o, new ManchesterOWLSyntaxOntologyFormat(), out);
         return Response.ok(new Viewable("ontology",
-        // new OntologyPrettyPrintResource(servletContext,
-        // uriInfo, out)
+                // new OntologyPrettyPrintResource(servletContext,
+                // uriInfo, out)
                 new OntologyStatsResource(servletContext, uriInfo, key, o, ontologyProvider.listAliases(key),
-                        handles)));
+                handles)));
         // } catch (OWLOntologyStorageException e) {
         // throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         // }
@@ -697,8 +813,8 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     @Path("/{ontologyId:.+}")
     @Produces(TEXT_HTML)
     public Response showOntology(@PathParam("ontologyId") String ontologyId,
-                                 @Context HttpHeaders headers,
-                                 @Context UriInfo uriInfo) {
+            @Context HttpHeaders headers,
+            @Context UriInfo uriInfo) {
         ResponseBuilder rb = performShowOntology(ontologyId);
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
         addCORSOrigin(servletContext, rb, headers);
@@ -707,37 +823,39 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
 
     /**
      * POSTs an ontology content as application/x-www-form-urlencoded
-     * 
+     *
      * @param content
      * @param headers
      * @return
      */
     @POST
     @Consumes(value = {RDF_XML, TURTLE, X_TURTLE, N3, N_TRIPLE, OWL_XML, FUNCTIONAL_OWL, MANCHESTER_OWL,
-                       RDF_JSON})
+        RDF_JSON})
     public Response storeOntology(InputStream content, @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
         ResponseBuilder rb;
 
         MediaType mt = headers.getMediaType();
         if (RDF_XML_TYPE.equals(mt) || TURTLE_TYPE.equals(mt) || X_TURTLE_TYPE.equals(mt)
-            || N3_TYPE.equals(mt) || N_TRIPLE_TYPE.equals(mt) || RDF_JSON_TYPE.equals(mt)) {
+                || N3_TYPE.equals(mt) || N_TRIPLE_TYPE.equals(mt) || RDF_JSON_TYPE.equals(mt)) {
             OWLOntologyID key = null;
             try {
                 key = ontologyProvider.loadInStore(content, headers.getMediaType().toString(), true);
                 rb = Response.ok();
             } catch (UnsupportedFormatException e) {
                 log.warn(
-                    "POST method failed for media type {}. This should not happen (should fail earlier)",
-                    headers.getMediaType());
+                        "POST method failed for media type {}. This should not happen (should fail earlier)",
+                        headers.getMediaType());
                 rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
             } catch (IOException e) {
                 throw new WebApplicationException(e, BAD_REQUEST);
             }
             // An exception should have been thrown earlier, but just in case.
-            if (key == null || key.isAnonymous()) rb = Response.status(Status.INTERNAL_SERVER_ERROR);
+            if (key == null || key.isAnonymous()) {
+                rb = Response.status(Status.INTERNAL_SERVER_ERROR);
+            }
         } else if (OWL_XML_TYPE.equals(mt) || FUNCTIONAL_OWL_TYPE.equals(mt)
-                   || MANCHESTER_OWL_TYPE.equals(mt)) {
+                || MANCHESTER_OWL_TYPE.equals(mt)) {
             try {
                 OntologyInputSource<OWLOntology> src = new OntologyContentInputSource(content);
                 ontologyProvider.loadInStore(src.getRootOntology(), true);
@@ -745,13 +863,14 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
             } catch (OWLOntologyCreationException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
-        } else rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
+        } else {
+            rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
+        }
 
         addCORSOrigin(servletContext, rb, headers);
         Response r = rb.build();
         log.debug("POST request for ontology addition completed in {} ms with status {}.",
-            (System.currentTimeMillis() - before), r.getStatus());
+                (System.currentTimeMillis() - before), r.getStatus());
         return r;
     }
-
 }
