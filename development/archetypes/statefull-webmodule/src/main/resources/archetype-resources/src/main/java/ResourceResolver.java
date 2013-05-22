@@ -96,7 +96,7 @@ public class ResourceResolver {
     
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        log.info("The example service is being activated");
+        log.info("The example service is being deactivated");
     }
     
     /**
