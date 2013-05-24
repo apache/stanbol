@@ -205,6 +205,10 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
     private AnalyzedTextParser analyzedTextParser;
 
     private boolean writeTextAnnotations;
+
+    private Boolean serviceInitialised;
+
+    private Dictionary<String, Object> config;
     
     /**
      * Indicate if this engine can enhance supplied ContentItem, and if it
@@ -226,7 +230,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         if(entry == null || entry.getValue() == null) {
             return CANNOT_ENHANCE;
         }
-
+        checkRESTfulNlpAnalysisService();
         String language = getLanguage(this,ci,false);
         if(language == null) {
             return CANNOT_ENHANCE;
@@ -245,6 +249,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         return ENHANCE_ASYNC;
     }
 
+
     /**
      * Compute enhancements for supplied ContentItem. The results of the process
      * are expected to be stored in the metadata of the content item.
@@ -261,6 +266,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
      */
     @Override
     public void computeEnhancements(final ContentItem ci) throws EngineException {
+        checkRESTfulNlpAnalysisService(); //validate that the service is active
         //get/create the AnalysedText
         final AnalysedText at = NlpEngineHelper.initAnalysedText(this, analysedTextFactory, ci);
         final Blob blob = at.getBlob();
@@ -282,9 +288,13 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         } catch (PrivilegedActionException pae) {
             Exception e = pae.getException();
             if(e instanceof ClientProtocolException) {
+                //force re-initialisation upon error
+                serviceInitialised = false;
                 throw new EngineException(this, ci, "Exception while executing Request "
                     + "on RESTful NLP Analysis Service at "+analysisServiceUrl, e);
             } else if(e instanceof IOException) {
+                //force re-initialisation upon error
+                serviceInitialised = false;
                 throw new EngineException(this, ci, "Exception while executing Request "
                         + "on RESTful NLP Analysis Service at "+analysisServiceUrl, e);
             } else {
@@ -394,11 +404,9 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
     protected void activate(ComponentContext ce) throws ConfigurationException, IOException {
         super.activate(ce);
         log.info("activate {} '{}'",getClass().getSimpleName(),getName());
-        @SuppressWarnings("unchecked")
-        Dictionary<String, Object> properties = ce.getProperties();
-        languageConfig.setConfiguration(properties);
+        config = ce.getProperties();
 
-        Object value = properties.get(ANALYSIS_SERVICE_URL);
+        Object value = config.get(ANALYSIS_SERVICE_URL);
         if(value == null){
             throw new ConfigurationException(ANALYSIS_SERVICE_URL, 
                 "The RESTful Analysis Service URL is missing in the provided configuration!");
@@ -414,10 +422,10 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         }
         String usr;
         String pwd;
-        value = properties.get(ANALYSIS_SERVICE_USER);
+        value = config.get(ANALYSIS_SERVICE_USER);
         if(value != null && !value.toString().isEmpty()){
             usr = value.toString();
-            value = properties.get(ANALYSIS_SERVICE_PWD);
+            value = config.get(ANALYSIS_SERVICE_PWD);
             pwd = value == null ? null : value.toString();
         } else { // no user set
             usr = null;
@@ -435,6 +443,12 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         connectionManager.setMaxTotal(20);
         connectionManager.setDefaultMaxPerRoute(20);
 
+        //initially set the language config to validate the config
+        //but reset to the default as this is done in the 
+        //    #initRESTfulNlpAnalysisService(..) method
+        languageConfig.setConfiguration(config);
+        languageConfig.setDefault(); //reset to the default
+        
         httpClient = new DefaultHttpClient(connectionManager,httpParams);
         if(usr != null){
             log.info("  ... setting user to {}",usr);
@@ -442,6 +456,40 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                 new UsernamePasswordCredentials(usr, pwd));
             // And add request interceptor to have preemptive authentication
             httpClient.addRequestInterceptor(new PreemptiveAuthInterceptor(), 0);
+        }
+        initRESTfulNlpAnalysisService();
+        
+        value = config.get(WRITE_TEXT_ANNOTATIONS_STATE);
+        if(value instanceof Boolean){
+            this.writeTextAnnotations = ((Boolean)value).booleanValue();
+        } else if(value != null){
+            this.writeTextAnnotations = Boolean.parseBoolean(value.toString());
+        } else {
+            this.writeTextAnnotations = DEFAULT_WRITE_TEXT_ANNOTATION_STATE;
+        }
+    }
+    /**
+     * @throws EngineException
+     */
+    private void checkRESTfulNlpAnalysisService() throws EngineException {
+        if(!initRESTfulNlpAnalysisService()){
+            throw new EngineException("The configured RESTful NLP Analysis Service is "
+                + "currently not available (url: '"+analysisServiceUrl+"')");
+        }
+    }
+
+    /**
+     * initialises the RESRfulNlpAnalysis if not yet done.
+     */
+    private boolean initRESTfulNlpAnalysisService() {
+        if(serviceInitialised != null && serviceInitialised){
+            return true; //already initialised
+        }
+        if(serviceInitialised == null){
+            log.info(" ... checking configured RESTful NLP Analysis service {}", analysisServiceUrl);
+            serviceInitialised = false;
+        } else {
+            log.info(" ... re-trying to initialise RESTful NLP Analysis service {}", analysisServiceUrl);
         }
         //get the supported languages
         String supported;
@@ -452,28 +500,39 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                         new BasicResponseHandler());
                 }
             });
+            serviceInitialised = true;
         } catch (PrivilegedActionException pae) {
             Exception e = pae.getException();
+            if(serviceInitialised){
+                //reset the language config if the service get unavailable
+                languageConfig.setDefault();
+                serviceInitialised = false;
+            }
             if(e instanceof IOException){
-                throw (IOException)e;
+                log.warn("Unable to initialise RESTful NLP Analysis Service!", e);
+                return false;
             } else {
                 throw RuntimeException.class.cast(e);
             }
         }
-
+        //for the correct language configuration we need to combine the parsed
+        //language configuration with the languages supported by the
+        //RESTful NLP Analysis Service
+        
+        //set the parsed config
+        try {
+            languageConfig.setConfiguration(config);
+        } catch (ConfigurationException e) {
+            //the config was already checked in the activate method ... so this
+            //should never happen
+            throw new IllegalStateException(e.getMessage(),e);
+        }
+        //parse the supported languages
         StringTokenizer st = new StringTokenizer(supported, "{[\",]}");
         while(st.hasMoreElements()){
             supportedLanguages.add(st.nextToken());
         }
-        
-        value = properties.get(WRITE_TEXT_ANNOTATIONS_STATE);
-        if(value instanceof Boolean){
-            this.writeTextAnnotations = ((Boolean)value).booleanValue();
-        } else if(value != null){
-            this.writeTextAnnotations = Boolean.parseBoolean(value.toString());
-        } else {
-            this.writeTextAnnotations = DEFAULT_WRITE_TEXT_ANNOTATION_STATE;
-        }
+        return true;
     }
     
     @Deactivate
@@ -485,6 +544,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         httpParams = null;
         connectionManager.shutdown();
         connectionManager = null;
+        serviceInitialised = null;
         super.deactivate(context);
     }
     
