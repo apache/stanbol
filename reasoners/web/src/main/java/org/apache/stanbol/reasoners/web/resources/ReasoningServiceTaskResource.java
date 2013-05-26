@@ -322,16 +322,12 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
                     getCurrentService(), getCurrentTask(), target, parameters);
             ReasoningServiceResult<?> result = executor.call();
             return new ResponseTaskBuilder(uriInfo, context, headers).build(result);
-        } catch (InconsistentInputException e) {
-            new WebApplicationException(e);
-        } catch (ReasoningServiceException e) {
-            new WebApplicationException(e);
-        } catch (UnsupportedTaskException e) {
-            new WebApplicationException(e);
         } catch (Exception e) {
-            new WebApplicationException(e);
-        }
-        throw new WebApplicationException(new Exception("Error"), Response.Status.INTERNAL_SERVER_ERROR);
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException)e;
+            }
+            throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+        } 
     }
 
     /**

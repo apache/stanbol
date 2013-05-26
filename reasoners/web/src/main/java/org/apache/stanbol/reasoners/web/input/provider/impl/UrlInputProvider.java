@@ -100,13 +100,9 @@ public class UrlInputProvider implements ReasoningServiceInputProvider {
         } else if (type.isAssignableFrom(Statement.class)) {
             final OntModel input = ModelFactory.createOntologyModel();
             synchronized (url) {
-                try {
-                    // FIXME: use instead:
-                    // FileManager.get().loadModel
-                    input.read(url);
-                } catch (Exception e) {
-                    throw new IOException(e);
-                }
+                  // FIXME: use instead:
+                  // FileManager.get().loadModel
+                  input.read(url);
             }
             final StmtIterator iterator = input.listStatements();
             return new Iterator<T>(){
