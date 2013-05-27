@@ -780,7 +780,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         if (coreOntologies != null) for (String ont : coreOntologies)
             if (ont != null && !ont.isEmpty()) try {
                 srcs.add(new RootOntologySource(IRI.create(ont)));
-            } catch (Exception e2) {
+            } catch (OWLOntologyCreationException e2) {
                 // If this fails too, throw a bad request.
                 throw new WebApplicationException(e2, BAD_REQUEST);
             }
