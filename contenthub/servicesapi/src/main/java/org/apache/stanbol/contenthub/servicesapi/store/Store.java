@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.contenthub.servicesapi.store;
 
-import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.access.LockableMGraph;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 
@@ -62,6 +62,6 @@ public interface Store {
     /**
      * Get the graph of triples of enhancements related to the content item from this store
      */
-    MGraph getEnhancementGraph();
+    LockableMGraph getEnhancementGraph();
 
 }

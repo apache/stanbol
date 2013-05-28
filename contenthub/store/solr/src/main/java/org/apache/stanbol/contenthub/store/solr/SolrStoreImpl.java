@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.MGraph;
@@ -40,6 +41,7 @@ import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.LockableMGraph;
 import org.apache.clerezza.rdf.core.access.NoSuchEntityException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
@@ -150,9 +152,9 @@ public class SolrStoreImpl implements SolrStore {
     }
 
     @Override
-    public MGraph getEnhancementGraph() {
+    public LockableMGraph getEnhancementGraph() {
         final UriRef graphUri = new UriRef(Constants.ENHANCEMENTS_GRAPH_URI);
-        MGraph enhancementGraph = null;
+        LockableMGraph enhancementGraph = null;
         try {
             enhancementGraph = tcManager.getMGraph(graphUri);
         } catch (NoSuchEntityException e) {
@@ -240,7 +242,7 @@ public class SolrStoreImpl implements SolrStore {
     }
 
     private void removeEnhancements(String id) throws StoreException {
-        MGraph enhancementGraph = getEnhancementGraph();
+        LockableMGraph enhancementGraph = getEnhancementGraph();
         String enhancementQuery = QueryGenerator.getEnhancementsOfContent(id);
         SelectQuery selectQuery = null;
         try {
@@ -252,18 +254,23 @@ public class SolrStoreImpl implements SolrStore {
         }
 
         List<Triple> willBeRemoved = new ArrayList<Triple>();
-        ResultSet resultSet = tcManager.executeSparqlQuery(selectQuery, enhancementGraph);
-        while (resultSet.hasNext()) {
-            SolutionMapping mapping = resultSet.next();
-            UriRef ref = (UriRef) mapping.get("enhID");
-            Iterator<Triple> tripleItr = this.getEnhancementGraph().filter(ref, null, null);
-            while (tripleItr.hasNext()) {
-                Triple triple = tripleItr.next();
-                willBeRemoved.add(triple);
+        Lock l = enhancementGraph.getLock().writeLock();
+        l.lock();
+        try {
+            ResultSet resultSet = tcManager.executeSparqlQuery(selectQuery, enhancementGraph);
+            while (resultSet.hasNext()) {
+                SolutionMapping mapping = resultSet.next();
+                UriRef ref = (UriRef) mapping.get("enhID");
+                Iterator<Triple> tripleItr = enhancementGraph.filter(ref, null, null);
+                while (tripleItr.hasNext()) {
+                    Triple triple = tripleItr.next();
+                    willBeRemoved.add(triple);
+                }
             }
+            enhancementGraph.removeAll(willBeRemoved);
+        } finally {
+            l.unlock();
         }
-
-        enhancementGraph.removeAll(willBeRemoved);
     }
 
     private void updateEnhancementGraph(ContentItem ci) throws StoreException {
