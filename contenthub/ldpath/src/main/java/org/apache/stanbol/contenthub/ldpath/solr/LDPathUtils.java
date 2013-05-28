@@ -273,7 +273,8 @@ public class LDPathUtils {
 
     private InputStream getSolrTemplateStream() throws LDPathException {
         String solrCorePath = SOLR_CORE_PATH;
-        if (!solrCorePath.endsWith(File.separator)) solrCorePath += File.separator;
+        //The name of a resource is independent of the Java implementation; in particular, the path separator is always a slash (/). 
+        if (!solrCorePath.endsWith("/")) solrCorePath += '/';
         String templateZip = solrCorePath + SOLR_TEMPLATE_ZIP;
 
         URL resource = bundle.getEntry(templateZip);
