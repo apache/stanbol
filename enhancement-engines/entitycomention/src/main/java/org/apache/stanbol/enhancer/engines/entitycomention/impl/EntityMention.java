@@ -5,9 +5,11 @@ import java.util.Iterator;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.stanbol.enhancer.engines.entitycomention.CoMentionConstants;
 import org.apache.stanbol.enhancer.engines.entitycomention.EntityCoMentionEngine;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
+import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.EntityLinker;
 
 /**
@@ -24,7 +26,7 @@ public class EntityMention extends Entity {
     /**
      * The label field of this Entity
      */
-    public final UriRef labelField;
+    private final UriRef nameField;
     /**
      * The type field of this Entity
      */
@@ -52,7 +54,7 @@ public class EntityMention extends Entity {
         if(labelField == null){
             throw new IllegalArgumentException("The LabelField MUST NOT be NULL!");
         }
-        this.labelField = labelField;
+        this.nameField = labelField;
         if(typeField == null){
             throw new IllegalArgumentException("The TypeFeild MUST NOT be NULL!");
         }
@@ -82,7 +84,7 @@ public class EntityMention extends Entity {
     public Iterator<PlainLiteral> getText(UriRef field) {
         if(CO_MENTION_FIELD_HASH == field.hashCode() && //avoid calling equals
                 CoMentionConstants.CO_MENTION_LABEL_FIELD.equals(field)){
-            return super.getText(labelField);
+            return super.getText(nameField);
         } else if(CO_MENTION_TYPE_HASH == field.hashCode() && //avoid calling equals
                 CoMentionConstants.CO_MENTION_TYPE_FIELD.equals(field)){
             return super.getText(typeField);
@@ -95,7 +97,7 @@ public class EntityMention extends Entity {
     public Iterator<UriRef> getReferences(UriRef field) {
         if(CO_MENTION_FIELD_HASH == field.hashCode() && //avoid calling equals
                 CoMentionConstants.CO_MENTION_LABEL_FIELD.equals(field)){
-            return super.getReferences(labelField);
+            return super.getReferences(nameField);
         } else if(CO_MENTION_TYPE_HASH == field.hashCode() && //avoid calling equals
                 CoMentionConstants.CO_MENTION_TYPE_FIELD.equals(field)){
             return super.getReferences(typeField);
@@ -103,14 +105,62 @@ public class EntityMention extends Entity {
             return super.getReferences(field);
         }
     }
-    
+    /**
+     * Checks if this mention does have a span assigned. EntityMentions without
+     * a span are considered to be valid from the begin of the document. Examples
+     * could be manually tagged entities or entities extracted from the metadata
+     * of an document.
+     * @return if this entity has a span or not.
+     */
     public boolean hasSpan(){
         return span != null;
     }
+    /**
+     * The start of the span selected by this mention or <code>null</code> if this
+     * mention does not have a span assigned.
+     * @return the start char position of the mention or <code>null</code> if none
+     */
     public Integer getStart(){
         return span != null ? span[0] : null;
     }
+    /**
+     * The end of the span selected by this mention or <code>null</code> if this
+     * mention does not have a span assigned.
+     * @return the end char position of the mention or <code>null</code> if none
+     */
     public Integer getEnd(){
         return span != null ? span[1] : null;
+    }
+    /**
+     * The field used to obtain the names of the entities. For EntityMentions
+     * this is set on a per instance base, as the field my differ between
+     * different {@link EntityMention}s
+     * @return the field (property) used to obtain the labels of this mention
+     * @see EntityLinkerConfig#getNameField()
+     */
+    public UriRef getNameField() {
+        return nameField;
+    }
+    /**
+     * The field used to obtain the types of entities. For EntityMentions
+     * this is set on a per instance base, as the field my differ between
+     * different {@link EntityMention}s
+     * @return the field (property) used to obtain the type of this mention
+     * @see EntityLinkerConfig#getTypeField()
+     */
+    public UriRef getTypeField() {
+        return typeField;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(EntityMention.class.getSimpleName());
+        sb.append(' ').append(getId()).append(" [labels: ");
+        sb.append(IteratorUtils.toList(getText(nameField)).toString());
+        if(hasSpan()){
+            sb.append(" | span:[").append(getStart()).append(',').append(getEnd()).append(']');
+        }
+        sb.append(']');
+        return sb.toString();
     }
 }

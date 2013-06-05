@@ -43,6 +43,8 @@ import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * EntitySearch implementation that does hold Entity information of mentioned
  * Entities in memory.
@@ -51,6 +53,8 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
  */
 public class InMemoryEntityIndex implements EntitySearcher {
 
+    private final Logger log = LoggerFactory.getLogger(InMemoryEntityIndex.class);
+    
     protected final LabelTokenizer tokenizer;
     //Holds Entity data
     private SortedMap<String,Collection<Entity>> index = new TreeMap<String,Collection<Entity>>(String.CASE_INSENSITIVE_ORDER);
@@ -72,6 +76,9 @@ public class InMemoryEntityIndex implements EntitySearcher {
     
     
     public void addEntity(Entity entity){
+        if(log.isDebugEnabled()){
+            log.debug(" > register {}",entity);
+        }
         entities.put(entity.getUri(), entity);
         Iterator<PlainLiteral> labels = entity.getText(nameField);
         while(labels.hasNext()){

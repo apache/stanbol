@@ -82,8 +82,8 @@ public class ContentItemMentionBuilder extends InMemoryEntityIndex implements Li
     }
 
     private void registerMention(EntityMention entityMention){
+        log.debug(" > register {} ",entityMention);
         if(entityMention.getStart() == null || entityMention.getStart() < 0){
-            log.debug(" > add global Mention[entity: {}]",entityMention.getId());
             addEntity(entityMention);
         } else {
             Collection<EntityMention> mentions = mentionIndex.get(entityMention.getEnd());
@@ -102,15 +102,18 @@ public class ContentItemMentionBuilder extends InMemoryEntityIndex implements Li
      */
     @Override
     public void startToken(Token token) {
-        Integer actIndex = token.getStart();
-        for(Collection<EntityMention> mentions : mentionIndex.subMap(lastIndex, actIndex).values()){
-            for(EntityMention mention : mentions){
-                log.debug(" > add Mention[index: [{},{}], entity: {}]",new Object[]{
-                        mention.getStart(),mention.getEnd(), mention.getId()});
-                addEntity(mention);
+        log.debug(" > start token: {}",token);
+        final Integer actIndex = token.getStart();
+        if(actIndex > lastIndex){
+            for(Collection<EntityMention> mentions : mentionIndex.subMap(lastIndex, actIndex).values()){
+                for(EntityMention mention : mentions){
+                    addEntity(mention);
+                }
             }
-        }
-        lastIndex = actIndex;
+            lastIndex = actIndex;
+        } else if(lastIndex > actIndex){
+            log.warn("Token {} has earlier start index as the last one {}!", token, lastIndex);
+        } // else the same index ... ignore
     }
 
     @Override

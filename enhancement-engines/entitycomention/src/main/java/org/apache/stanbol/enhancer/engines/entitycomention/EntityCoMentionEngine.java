@@ -153,7 +153,7 @@ import org.slf4j.LoggerFactory;
 @Service(value=EnhancementEngine.class)
 public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties {
 
-    private static final Integer ENGINE_ORDERING = ServiceProperties.ORDERING_POST_PROCESSING - 90;
+    private static final Integer ENGINE_ORDERING = ServiceProperties.ORDERING_POST_PROCESSING + 90;
     private static final Map<String,Object> SERVICE_PROPERTIES = 
             Collections.unmodifiableMap(Collections.singletonMap(
                 ServiceProperties.ENHANCEMENT_ENGINE_ORDERING, 
@@ -170,7 +170,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
     @Reference 
     protected LabelTokenizer labelTokenizer; 
 
-    private BundleContext bundleContext;
+//    private BundleContext bundleContext;
     /**
      * EntityLinking configuration used for Co-Mention extractions
      */
@@ -193,7 +193,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
         super.activate(ctx);
         log.info("activate {}[name:{}]",getClass().getSimpleName(),getName());
         Dictionary<String,Object> properties = ctx.getProperties();
-        bundleContext = ctx.getBundleContext();
+//        bundleContext = ctx.getBundleContext();
         //extract TextProcessing and EnityLinking config from the provided properties
         textProcessingConfig = TextProcessingConfig.createInstance(properties);
         linkerConfig = EntityLinkerConfig.createInstance(properties,prefixService);
@@ -353,8 +353,6 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                     }
                     //now process initial mention(s) for the co-mention
                     for(UriRef initialMention : initialMentions){
-                        //link the co-mentation with the initial one
-                        metadata.add(new TripleImpl(textAnnotation, DC_RELATION, initialMention));
                         //check confidence of the initial one
                         Double confidnece = EnhancementEngineHelper.get(metadata, initialMention, 
                             ENHANCER_CONFIDENCE, Double.class, literalFactory);
@@ -382,6 +380,9 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                             metadata.add(new TripleImpl((NonLiteral)suggestion, DC_RELATION, textAnnotation));
     
                         }
+                        //finally link the co-mentation with the initial one
+                        metadata.add(new TripleImpl(textAnnotation, DC_RELATION, initialMention));
+                        //metadata.add(new TripleImpl(initialMention, DC_RELATION, textAnnotation));
                     }
                     //TODO: support also Entities
                     if(maxConfidence != null){ //set the confidence value (if known)
