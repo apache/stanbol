@@ -17,20 +17,22 @@
 package org.apache.stanbol.enhancer.topic;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.List;
 
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
+import org.apache.stanbol.commons.solr.managed.ManagedIndexState;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.enhancer.engine.topic.TopicClassificationEngine;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
@@ -38,6 +40,8 @@ import org.xml.sax.SAXException;
  */
 public abstract class ConfiguredSolrCoreTracker {
 
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+    
     protected ManagedSolrServer managedSolrServer;
 
     protected String solrCoreId;
@@ -49,7 +53,9 @@ public abstract class ConfiguredSolrCoreTracker {
 
     protected ComponentContext context;
 
-    protected String indexArchiveName;
+    protected String solrCoreConfig;
+
+    //protected String indexArchiveName;
 
     abstract public void configure(Dictionary<String,Object> config) throws ConfigurationException;
 
@@ -93,7 +99,22 @@ public abstract class ConfiguredSolrCoreTracker {
      *         tracker.
      */
     public SolrServer getActiveSolrServer() {
-        SolrServer result = solrServer != null ? solrServer : indexTracker.getService();
+        SolrServer result;
+        if(solrServer != null){
+            result = solrServer;
+        } else {
+            result = indexTracker.getService();
+            if(result == null){
+                //try to wait for the server (mainly because the evaluation
+                //server is created on demand and will need some time to be
+                //initialised).
+                for(int i = 0; i < 5 && result == null; i++){
+                    try {
+                        result = (SolrServer) indexTracker.waitForService(1000);
+                    } catch (InterruptedException e) {/* ignore */ }
+                }
+            }
+        }
         if (result == null) {
             if (solrCoreId != null) {
                 throw new RuntimeException("No Solr Core registered with id: " + solrCoreId);
@@ -105,27 +126,32 @@ public abstract class ConfiguredSolrCoreTracker {
     }
 
     protected void configureSolrCore(Dictionary<String,Object> config,
-                                     String solrCoreProperty,
-                                     String defaultCoreId) throws ConfigurationException {
+            String solrCoreProperty, String defaultCoreId,
+            String solrCoreConfigProperty) 
+                    throws ConfigurationException {
         Object solrCoreInfo = config.get(solrCoreProperty);
         if (solrCoreInfo instanceof SolrServer) {
             // Bind a fixed Solr server client instead of doing dynamic OSGi lookup using the service tracker.
             // This can be useful both for unit-testing .
             solrServer = (SolrServer) config.get(solrCoreProperty);
+            solrCoreConfig = TopicClassificationEngine.DEFAULT_SOLR_CORE_CONFIG;
         } else {
-            if (solrCoreInfo != null && !solrCoreInfo.toString().trim().isEmpty()) {
-                this.solrCoreId = solrCoreInfo.toString();
-            } else {
-                this.solrCoreId = defaultCoreId;
-            }
             if (context == null) {
                 throw new ConfigurationException(solrCoreProperty,
                         solrCoreProperty + " should be a SolrServer instance for using"
                                 + " the engine without any OSGi context. Got: " + solrCoreId);
             }
+            if (solrCoreInfo != null && !solrCoreInfo.toString().trim().isEmpty()) {
+                this.solrCoreId = solrCoreInfo.toString().trim();
+            } else {
+                this.solrCoreId = defaultCoreId;
+            }
+            solrCoreConfig = getRequiredStringParam(config, solrCoreConfigProperty, 
+                this.solrCoreId + ".solrindex.zip");
             try {
                 IndexReference indexReference = IndexReference.parse(solrCoreId);
-                indexReference = checkInitSolrIndex(indexReference);
+                //String configName = getRequiredStringParam(config, SOLR_CONFIG, defaultValue)
+                indexReference = checkInitSolrIndex(indexReference, solrCoreConfig);
                 // track the solr core OSGi updates
                 indexTracker = new RegisteredSolrServerTracker(context.getBundleContext(), indexReference);
                 indexTracker.open();
@@ -134,30 +160,61 @@ public abstract class ConfiguredSolrCoreTracker {
             }
         }
     }
-
-    protected IndexReference checkInitSolrIndex(IndexReference indexReference) throws IOException,
-                                                                              ConfigurationException,
-                                                                              SAXException {
+    /**
+     * Checks if the SolrIndex is available and if not it tries to initialise it
+     * @param indexReference the SolrCore reference
+     * @param solrCoreConfig the name of the SolrIndex configuration ({name}.solrindex.zip)
+     * @return
+     * @throws IOException
+     * @throws ConfigurationException
+     * @throws SAXException
+     */
+    protected IndexReference checkInitSolrIndex(IndexReference indexReference, String solrCoreConfig) 
+            throws IOException, ConfigurationException, SAXException {
         // if the solr core is managed, check that the index is properly activated
         if (managedSolrServer != null && indexReference.checkServer(managedSolrServer.getServerName())
-            && context != null) {
+            && context != null && solrCoreConfig != null) {
+            log.info(" > check/init index {} on ManagedSolrServer {}", indexReference, managedSolrServer.getServerName());
             String indexName = indexReference.getIndex();
-            IndexMetadata indexMetadata = managedSolrServer.getIndexMetadata(indexName);
-            if (indexMetadata == null) {
-                // TODO: debug the DataFileProvider init race conditions instead
-                // indexMetadata = managedSolrServer.createSolrIndex(indexName, indexArchiveName, null);
-                URL archiveUrl = context.getBundleContext().getBundle()
-                        .getEntry("/data-files/" + indexArchiveName + ".solrindex.zip");
-                if (archiveUrl == null) {
-                    throw new ConfigurationException(solrCoreId, "Could not find index archive for "
-                                                                 + indexArchiveName);
+            final IndexMetadata indexMetadata;
+            ManagedIndexState indexState = managedSolrServer.getIndexState(indexName);
+            if(indexState == null){
+                if(solrCoreConfig.indexOf(".solrindex.") < 0){ //if the suffix is missing
+                    solrCoreConfig = solrCoreConfig + ".solrindex.zip"; //append it
                 }
-                ZipArchiveInputStream zis = new ZipArchiveInputStream(archiveUrl.openStream());
-                indexMetadata = managedSolrServer.updateIndex(indexName, zis, indexArchiveName);
+                log.info("Create SolrCore {} (config: {}) on ManagedSolrServer {} ...",
+                    new Object[]{indexName,solrCoreConfig,managedSolrServer.getServerName()});
+                indexMetadata = managedSolrServer.createSolrIndex(indexName, 
+                    solrCoreConfig, null);
+                if(indexMetadata != null)
+                log.info("  ... created {}", indexMetadata.getIndexReference());
+            } else {
+                indexMetadata = managedSolrServer.getIndexMetadata(indexName);
+                if(indexState != ManagedIndexState.ACTIVE){
+                    log.info("  ... activate {}", indexMetadata.getIndexReference());
+                    managedSolrServer.activateIndex(indexName);
+                } else {
+                    log.info("  ... index {} already active", indexMetadata.getIndexReference());
+                }
             }
-            if (!indexMetadata.isActive()) {
-                managedSolrServer.activateIndex(indexName);
-            }
+//            IndexMetadata indexMetadata = managedSolrServer.getIndexMetadata(indexName);
+//            if (indexMetadata == null) {
+//                // TODO: debug the DataFileProvider init race conditions instead
+//                // indexMetadata = managedSolrServer.createSolrIndex(indexName, indexArchiveName, null);
+//                dfp.getInputStream(context.getBundleContext().getBundle().getSymbolicName(), 
+//                    indexArchiveName + ".solrindex.zip", null);
+//                URL archiveUrl = context.getBundleContext().getBundle()
+//                        .getEntry("/data-files/" + indexArchiveName + ".solrindex.zip");
+//                if (archiveUrl == null) {
+//                    throw new ConfigurationException(solrCoreId, "Could not find index archive for "
+//                                                                 + indexArchiveName);
+//                }
+//                ZipArchiveInputStream zis = new ZipArchiveInputStream(archiveUrl.openStream());
+//                indexMetadata = managedSolrServer.updateIndex(indexName, zis, indexArchiveName);
+//            }
+//            if (!indexMetadata.isActive()) {
+//                managedSolrServer.activateIndex(indexName);
+//            }
             indexReference = indexMetadata.getIndexReference();
         }
         return indexReference;

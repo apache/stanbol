@@ -43,6 +43,7 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.topic.Batch;
 import org.apache.stanbol.enhancer.topic.ConfiguredSolrCoreTracker;
 import org.apache.stanbol.enhancer.topic.UTCTimeStamper;
@@ -59,24 +60,38 @@ import org.slf4j.LoggerFactory;
 @Component(metatype = true, immediate = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties(value = {@Property(name = SolrTrainingSet.TRAINING_SET_NAME),
-                     @Property(name = SolrTrainingSet.SOLR_CORE),
-                     @Property(name = SolrTrainingSet.EXAMPLE_ID_FIELD, value = "id"),
-                     @Property(name = SolrTrainingSet.EXAMPLE_TEXT_FIELD, value = "text"),
-                     @Property(name = SolrTrainingSet.TOPICS_URI_FIELD, value = "topics"),
-                     @Property(name = SolrTrainingSet.MODIFICATION_DATE_FIELD, value = "modification_dt")})
+        @Property(name = SolrTrainingSet.SOLR_CORE),
+        @Property(name = SolrTrainingSet.SOLR_CORE_CONFIG, value = SolrTrainingSet.DEFAULT_SOLR_CORE_CONFIG)
+//        @Property(name = SolrTrainingSet.EXAMPLE_ID_FIELD, value = SolrTrainingSet.DEFAULT_EXAMPLE_ID_FIELD),
+//        @Property(name = SolrTrainingSet.EXAMPLE_TEXT_FIELD, value = SolrTrainingSet.DEFAULT_EXAMPLE_TEXT_FIELD),
+//        @Property(name = SolrTrainingSet.TOPICS_URI_FIELD, value = SolrTrainingSet.DEFAULT_TOPICS_URI_FIELD),
+//        @Property(name = SolrTrainingSet.MODIFICATION_DATE_FIELD, value = SolrTrainingSet.DEFAULT_MODIFICATION_DATE_FIELD)
+})
 public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements TrainingSet {
 
     public static final String TRAINING_SET_NAME = "org.apache.stanbol.enhancer.topic.trainingset.id";
 
     public static final String SOLR_CORE = "org.apache.stanbol.enhancer.engine.topic.solrCore";
 
+    public static final String SOLR_CORE_CONFIG = "org.apache.stanbol.enhancer.engine.topic.solrCoreConfig";
+    
+    public static final String DEFAULT_SOLR_CORE_CONFIG = "default-topic-trainingset.solrindex.zip";
+
     public static final String TOPICS_URI_FIELD = "org.apache.stanbol.enhancer.engine.topic.topicsUriField";
+    
+    public static final String DEFAULT_TOPICS_URI_FIELD = "topics";
 
     public static final String EXAMPLE_ID_FIELD = "org.apache.stanbol.enhancer.engine.topic.exampleIdField";
+    
+    public static final String DEFAULT_EXAMPLE_ID_FIELD = "id";
 
     public static final String EXAMPLE_TEXT_FIELD = "org.apache.stanbol.enhancer.engine.topic.exampleTextField";
+    
+    public static final String DEFAULT_EXAMPLE_TEXT_FIELD = "text";
 
     public static final String MODIFICATION_DATE_FIELD = "org.apache.stanbol.enhancer.engine.topic.modificiationDateField";
+    
+    public static final String DEFAULT_MODIFICATION_DATE_FIELD = "modification_dt";
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(SolrTrainingSet.class);
@@ -96,14 +111,13 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, bind = "bindManagedSolrServer", unbind = "unbindManagedSolrServer", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC)
     protected ManagedSolrServer managedSolrServer;
-
+    
     public String getName() {
         return trainingSetId;
     }
 
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, InvalidSyntaxException {
-        indexArchiveName = "default-topic-trainingset";
         @SuppressWarnings("unchecked")
         Dictionary<String,Object> config = context.getProperties();
         this.context = context;
@@ -120,11 +134,11 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
     @Override
     public void configure(Dictionary<String,Object> config) throws ConfigurationException {
         trainingSetId = getRequiredStringParam(config, TRAINING_SET_NAME);
-        exampleIdField = getRequiredStringParam(config, EXAMPLE_ID_FIELD);
-        exampleTextField = getRequiredStringParam(config, EXAMPLE_TEXT_FIELD);
-        topicUrisField = getRequiredStringParam(config, TOPICS_URI_FIELD);
-        modificationDateField = getRequiredStringParam(config, MODIFICATION_DATE_FIELD);
-        configureSolrCore(config, SOLR_CORE, trainingSetId);
+        exampleIdField = getRequiredStringParam(config, EXAMPLE_ID_FIELD, DEFAULT_EXAMPLE_ID_FIELD);
+        exampleTextField = getRequiredStringParam(config, EXAMPLE_TEXT_FIELD, DEFAULT_EXAMPLE_TEXT_FIELD);
+        topicUrisField = getRequiredStringParam(config, TOPICS_URI_FIELD, DEFAULT_TOPICS_URI_FIELD);
+        modificationDateField = getRequiredStringParam(config, MODIFICATION_DATE_FIELD, DEFAULT_MODIFICATION_DATE_FIELD);
+        configureSolrCore(config, SOLR_CORE, trainingSetId, SOLR_CORE_CONFIG);
     }
 
     public static ConfiguredSolrCoreTracker fromParameters(Dictionary<String,Object> config) throws ConfigurationException {

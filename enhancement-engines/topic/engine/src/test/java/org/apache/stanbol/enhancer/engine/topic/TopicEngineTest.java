@@ -175,13 +175,14 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertEquals(classifier.acceptedLanguages, new ArrayList<String>());
 
         // check some required attributes
-        Hashtable<String,Object> configWithMissingTopicField = new Hashtable<String,Object>();
-        configWithMissingTopicField.putAll(config);
-        configWithMissingTopicField.remove(TopicClassificationEngine.CONCEPT_URI_FIELD);
-        try {
-            TopicClassificationEngine.fromParameters(configWithMissingTopicField);
-            fail("Should have raised a ConfigurationException");
-        } catch (ConfigurationException e) {}
+// NOTE: This is no longer an required field, but uses a default values instead
+//        Hashtable<String,Object> configWithMissingTopicField = new Hashtable<String,Object>();
+//        configWithMissingTopicField.putAll(config);
+//        configWithMissingTopicField.remove(TopicClassificationEngine.CONCEPT_URI_FIELD);
+//        try {
+//            TopicClassificationEngine.fromParameters(configWithMissingTopicField);
+//            fail("Should have raised a ConfigurationException");
+//        } catch (ConfigurationException e) {}
 
         Hashtable<String,Object> configWithMissingEngineName = new Hashtable<String,Object>();
         configWithMissingEngineName.putAll(config);
@@ -594,22 +595,23 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
     protected Hashtable<String,Object> getDefaultClassifierConfigParams() {
         Hashtable<String,Object> config = new Hashtable<String,Object>();
         config.put(EnhancementEngine.PROPERTY_NAME, "test-engine");
-        config.put(TopicClassificationEngine.ENTRY_ID_FIELD, "entry_id");
-        config.put(TopicClassificationEngine.ENTRY_TYPE_FIELD, "entry_type");
-        config.put(TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, "model_entry_id");
         config.put(TopicClassificationEngine.SOLR_CORE, classifierSolrServer);
-        config.put(TopicClassificationEngine.CONCEPT_URI_FIELD, "concept");
-        config.put(TopicClassificationEngine.PRIMARY_TOPIC_URI_FIELD, "primary_topic");
-        config.put(TopicClassificationEngine.SIMILARTITY_FIELD, "classifier_features");
-        config.put(TopicClassificationEngine.BROADER_FIELD, "broader");
-        config.put(TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, "last_update_dt");
-        config.put(TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, "last_evaluation_dt");
-        config.put(TopicClassificationEngine.PRECISION_FIELD, "precision");
-        config.put(TopicClassificationEngine.RECALL_FIELD, "recall");
-        config.put(TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, "positive_support");
-        config.put(TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, "negative_support");
-        config.put(TopicClassificationEngine.FALSE_POSITIVES_FIELD, "false_positives");
-        config.put(TopicClassificationEngine.FALSE_NEGATIVES_FIELD, "false_negatives");
+        //those are now optional properties
+//        config.put(TopicClassificationEngine.ENTRY_ID_FIELD, "entry_id");
+//        config.put(TopicClassificationEngine.ENTRY_TYPE_FIELD, "entry_type");
+//        config.put(TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, "model_entry_id");
+//        config.put(TopicClassificationEngine.CONCEPT_URI_FIELD, "concept");
+//        config.put(TopicClassificationEngine.PRIMARY_TOPIC_URI_FIELD, "primary_topic");
+//        config.put(TopicClassificationEngine.SIMILARTITY_FIELD, "classifier_features");
+//        config.put(TopicClassificationEngine.BROADER_FIELD, "broader");
+//        config.put(TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, "last_update_dt");
+//        config.put(TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, "last_evaluation_dt");
+//        config.put(TopicClassificationEngine.PRECISION_FIELD, "precision");
+//        config.put(TopicClassificationEngine.RECALL_FIELD, "recall");
+//        config.put(TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, "positive_support");
+//        config.put(TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, "negative_support");
+//        config.put(TopicClassificationEngine.FALSE_POSITIVES_FIELD, "false_positives");
+//        config.put(TopicClassificationEngine.FALSE_NEGATIVES_FIELD, "false_negatives");
         return config;
     }
 

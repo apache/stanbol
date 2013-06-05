@@ -74,7 +74,7 @@
             <Private-Package>
               org.apache.stanbol.enhancer.engine.topic
             </Private-Package>
-            <Install-Path>install-config</Install-Path>
+            <!--  Install-Path>install-config</Install-Path -->
             <Data-Files>data-files</Data-Files>
             <Data-Files-Priority>-100</Data-Files-Priority>
           </instructions>

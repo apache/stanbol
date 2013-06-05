@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -142,70 +143,118 @@ import org.slf4j.LoggerFactory;
 @Component(metatype = true, immediate = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties(value = {
-                     @Property(name = EnhancementEngine.PROPERTY_NAME),
-                     @Property(name = TopicClassificationEngine.ORDER, intValue = 100),
-                     @Property(name = TopicClassificationEngine.SOLR_CORE),
-                     @Property(name = TopicClassificationEngine.LANGUAGES),
-                     @Property(name = TopicClassificationEngine.SIMILARTITY_FIELD, value = "classifier_features"),
-                     @Property(name = TopicClassificationEngine.CONCEPT_URI_FIELD, value = "concept"),
-                     @Property(name = TopicClassificationEngine.PRIMARY_TOPIC_URI_FIELD, value = "primary_topic"),
-                     @Property(name = TopicClassificationEngine.BROADER_FIELD, value = "broader"),
-                     @Property(name = TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, value = "last_update_dt"),
-                     @Property(name = TopicClassificationEngine.PRECISION_FIELD, value = "precision"),
-                     @Property(name = TopicClassificationEngine.RECALL_FIELD, value = "recall"),
-                     @Property(name = TopicClassificationEngine.ENTRY_ID_FIELD, value = "entry_id"),
-                     @Property(name = TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, value = "model_entry_id"),
-                     @Property(name = TopicClassificationEngine.ENTRY_TYPE_FIELD, value = "entry_type"),
-                     @Property(name = TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, value = "last_evaluation_dt"),
-                     @Property(name = TopicClassificationEngine.FALSE_NEGATIVES_FIELD, value = "false_negatives"),
-                     @Property(name = TopicClassificationEngine.FALSE_POSITIVES_FIELD, value = "false_positives"),
-                     @Property(name = TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, value = "positive_support"),
-                     @Property(name = TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, value = "negative_support"),
-                     @Property(name = TopicClassificationEngine.TRAINING_SET_ID),
-                     @Property(name = Constants.SERVICE_RANKING, intValue = 0)})
+        @Property(name = EnhancementEngine.PROPERTY_NAME),
+        @Property(name = TopicClassificationEngine.SOLR_CORE),
+        @Property(name = TopicClassificationEngine.SOLR_CORE_CONFIG,
+            value = TopicClassificationEngine.DEFAULT_SOLR_CORE_CONFIG),
+        @Property(name = TopicClassificationEngine.LANGUAGES),
+// those properties can still be set via a configuration file, but as most users
+// will not use them exclude those from the configuration form
+//        @Property(name = TopicClassificationEngine.SIMILARTITY_FIELD, value = TopicClassificationEngine.DEFAULT_SIMILARTITY_FIELD),
+//        @Property(name = TopicClassificationEngine.CONCEPT_URI_FIELD, value = TopicClassificationEngine.DEFAULT_CONCEPT_URI_FIELD),
+//        @Property(name = TopicClassificationEngine.PRIMARY_TOPIC_URI_FIELD, value = TopicClassificationEngine.DEFAULT_PRIMARY_TOPIC_URI_FIELD),
+//        @Property(name = TopicClassificationEngine.BROADER_FIELD, value = TopicClassificationEngine.DEFAULT_BROADER_FIELD),
+//        @Property(name = TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, value = TopicClassificationEngine.DEFAULT_MODEL_UPDATE_DATE_FIELD),
+//        @Property(name = TopicClassificationEngine.PRECISION_FIELD, value = TopicClassificationEngine.DEFAULT_PRECISION_FIELD),
+//        @Property(name = TopicClassificationEngine.RECALL_FIELD, value = TopicClassificationEngine.DEFAULT_RECALL_FIELD),
+//        @Property(name = TopicClassificationEngine.ENTRY_ID_FIELD, value = TopicClassificationEngine.DEFAULT_ENTRY_ID_FIELD),
+//        @Property(name = TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, value = TopicClassificationEngine.DEFAULT_MODEL_ENTRY_ID_FIELD),
+//        @Property(name = TopicClassificationEngine.ENTRY_TYPE_FIELD, value = TopicClassificationEngine.DEFAULT_ENTRY_TYPE_FIELD),
+//        @Property(name = TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, value = TopicClassificationEngine.DEFAULT_MODEL_EVALUATION_DATE_FIELD),
+//        @Property(name = TopicClassificationEngine.FALSE_NEGATIVES_FIELD, value = TopicClassificationEngine.DEFAULT_FALSE_NEGATIVES_FIELD),
+//        @Property(name = TopicClassificationEngine.FALSE_POSITIVES_FIELD, value = TopicClassificationEngine.DEFAULT_FALSE_POSITIVES_FIELD),
+//        @Property(name = TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, value = TopicClassificationEngine.DEFAULT_POSITIVE_SUPPORT_FIELD),
+//        @Property(name = TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, value = TopicClassificationEngine.DEFAULT_NEGATIVE_SUPPORT_FIELD),
+//        @Property(name = TopicClassificationEngine.ORDER, intValue = TopicClassificationEngine.DEFAULT_ENGINE_ORDER),
+        @Property(name = TopicClassificationEngine.TRAINING_SET_ID),
+        @Property(name = Constants.SERVICE_RANKING, intValue = 0)})
 public class TopicClassificationEngine extends ConfiguredSolrCoreTracker implements EnhancementEngine,
         ServiceProperties, TopicClassifier {
+
+    public static final String DEFAULT_SOLR_CORE_CONFIG = "default-topic-model.solrindex.zip";
 
     public static final String MODEL_ENTRY = "model";
 
     public static final String METADATA_ENTRY = "metadata";
-
+    /**
+     * The reference to the SolrCore used ny the TopicClassificationEngine.
+     * The default is the engine name with the suffix '-model'. This also supports
+     * the {server-name}:{index-name} syntax. if n
+     */
     public static final String SOLR_CORE = "org.apache.stanbol.enhancer.engine.topic.solrCore";
+    /**
+     * The name of the Solr Index archive (default: "default-topic-model.solrindex.zip").
+     * The file is loaded by using the DataFileProvider infrastructure. The archive may
+     * also include a pre-trained model.
+     */
+    public static final String SOLR_CORE_CONFIG = "org.apache.stanbol.enhancer.engine.topic.solrCoreConfig";
 
     public static final String LANGUAGES = "org.apache.stanbol.enhancer.engine.topic.languages";
 
     public static final String ORDER = "org.apache.stanbol.enhancer.engine.topic.order";
+    
+    public static final Integer DEFAULT_ENGINE_ORDER = ServiceProperties.ORDERING_CONTENT_EXTRACTION;
 
     public static final String ENTRY_ID_FIELD = "org.apache.stanbol.enhancer.engine.topic.entryIdField";
+    
+    public static final String DEFAULT_ENTRY_ID_FIELD = "entry_id";
 
     public static final String ENTRY_TYPE_FIELD = "org.apache.stanbol.enhancer.engine.topic.entryTypeField";
+    
+    public static final String DEFAULT_ENTRY_TYPE_FIELD = "entry_type";
 
     public static final String SIMILARTITY_FIELD = "org.apache.stanbol.enhancer.engine.topic.similarityField";
+    
+    public static final String DEFAULT_SIMILARTITY_FIELD = "classifier_features";
 
     public static final String CONCEPT_URI_FIELD = "org.apache.stanbol.enhancer.engine.topic.conceptUriField";
+    
+    public static final String DEFAULT_CONCEPT_URI_FIELD = "concept";
 
     public static final String BROADER_FIELD = "org.apache.stanbol.enhancer.engine.topic.broaderField";
+    
+    public static final String DEFAULT_BROADER_FIELD = "broader";
 
     public static final String PRIMARY_TOPIC_URI_FIELD = "org.apache.stanbol.enhancer.engine.topic.primaryTopicField";
+    
+    public static final String DEFAULT_PRIMARY_TOPIC_URI_FIELD = "primary_topic";
 
     public static final String MODEL_UPDATE_DATE_FIELD = "org.apache.stanbol.enhancer.engine.topic.modelUpdateDateField";
 
+    public static final String DEFAULT_MODEL_UPDATE_DATE_FIELD = "last_update_dt";
+    
     public static final String MODEL_EVALUATION_DATE_FIELD = "org.apache.stanbol.enhancer.engine.topic.modelEvaluationDateField";
+    
+    public static final String DEFAULT_MODEL_EVALUATION_DATE_FIELD = "last_evaluation_dt";
 
     public static final String MODEL_ENTRY_ID_FIELD = "org.apache.stanbol.enhancer.engine.topic.modelEntryIdField";
+    
+    public static final String DEFAULT_MODEL_ENTRY_ID_FIELD = "model_entry_id";
 
     public static final String PRECISION_FIELD = "org.apache.stanbol.enhancer.engine.topic.precisionField";
+    
+    public static final String DEFAULT_PRECISION_FIELD = "precision";
 
     public static final String RECALL_FIELD = "org.apache.stanbol.enhancer.engine.topic.recallField";
+    
+    public static final String DEFAULT_RECALL_FIELD = "recall";
 
     public static final String FALSE_POSITIVES_FIELD = "org.apache.stanbol.enhancer.engine.topic.falsePositivesField";
+    
+    public static final String DEFAULT_FALSE_POSITIVES_FIELD = "false_positives";
 
     public static final String FALSE_NEGATIVES_FIELD = "org.apache.stanbol.enhancer.engine.topic.falseNegativesField";
+    
+    public static final String DEFAULT_FALSE_NEGATIVES_FIELD = "false_negatives";
 
     public static final String POSITIVE_SUPPORT_FIELD = "org.apache.stanbol.enhancer.engine.topic.positiveSupportField";
 
+    public static final String DEFAULT_POSITIVE_SUPPORT_FIELD = "positive_support";
+    
     public static final String NEGATIVE_SUPPORT_FIELD = "org.apache.stanbol.enhancer.engine.topic.negativeSupportField";
 
+    public static final String DEFAULT_NEGATIVE_SUPPORT_FIELD = "negative_support";
+    
     public static final String TRAINING_SET_ID = "org.apache.stanbol.enhancer.engine.topic.trainingSetId";
 
     private static final Logger log = LoggerFactory.getLogger(TopicClassificationEngine.class);
@@ -250,6 +299,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     protected String engineName;
 
     protected List<String> acceptedLanguages;
+    private Set<String> acceptedLanguageSet;
 
     protected Integer order = ORDERING_EXTRACTION_ENHANCEMENT;
 
@@ -337,7 +387,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     protected void activate(ComponentContext context, Dictionary<String,Object> config) throws ConfigurationException,
                                                                                        InvalidSyntaxException {
         this.context = context;
-        indexArchiveName = "default-topic-model";
         configure(config);
 
         // if training set is not null, track it
@@ -376,36 +425,52 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     public void configure(Dictionary<String,Object> config) throws ConfigurationException {
         engineName = getRequiredStringParam(config, EnhancementEngine.PROPERTY_NAME);
-        entryIdField = getRequiredStringParam(config, ENTRY_ID_FIELD);
-        modelEntryIdField = getRequiredStringParam(config, MODEL_ENTRY_ID_FIELD);
-        conceptUriField = getRequiredStringParam(config, CONCEPT_URI_FIELD);
-        entryTypeField = getRequiredStringParam(config, ENTRY_TYPE_FIELD);
-        similarityField = getRequiredStringParam(config, SIMILARTITY_FIELD);
+        entryIdField = getRequiredStringParam(config, ENTRY_ID_FIELD, DEFAULT_ENTRY_ID_FIELD);
+        modelEntryIdField = getRequiredStringParam(config, MODEL_ENTRY_ID_FIELD, DEFAULT_MODEL_ENTRY_ID_FIELD);
+        conceptUriField = getRequiredStringParam(config, CONCEPT_URI_FIELD, DEFAULT_CONCEPT_URI_FIELD);
+        entryTypeField = getRequiredStringParam(config, ENTRY_TYPE_FIELD, DEFAULT_ENTRY_TYPE_FIELD);
+        similarityField = getRequiredStringParam(config, SIMILARTITY_FIELD, DEFAULT_SIMILARTITY_FIELD);
         acceptedLanguages = getStringListParan(config, LANGUAGES);
-        precisionField = getRequiredStringParam(config, PRECISION_FIELD);
-        recallField = getRequiredStringParam(config, RECALL_FIELD);
-        modelUpdateDateField = getRequiredStringParam(config, MODEL_UPDATE_DATE_FIELD);
-        modelEvaluationDateField = getRequiredStringParam(config, MODEL_EVALUATION_DATE_FIELD);
-        falsePositivesField = getRequiredStringParam(config, FALSE_POSITIVES_FIELD);
-        falseNegativesField = getRequiredStringParam(config, FALSE_NEGATIVES_FIELD);
-        positiveSupportField = getRequiredStringParam(config, POSITIVE_SUPPORT_FIELD);
-        negativeSupportField = getRequiredStringParam(config, NEGATIVE_SUPPORT_FIELD);
-        configureSolrCore(config, SOLR_CORE, engineName + "-model");
+        acceptedLanguageSet = new HashSet<String>(acceptedLanguages);
+        precisionField = getRequiredStringParam(config, PRECISION_FIELD, DEFAULT_PRECISION_FIELD);
+        recallField = getRequiredStringParam(config, RECALL_FIELD, DEFAULT_RECALL_FIELD);
+        modelUpdateDateField = getRequiredStringParam(config, MODEL_UPDATE_DATE_FIELD, DEFAULT_MODEL_UPDATE_DATE_FIELD);
+        modelEvaluationDateField = getRequiredStringParam(config, MODEL_EVALUATION_DATE_FIELD, DEFAULT_MODEL_EVALUATION_DATE_FIELD);
+        falsePositivesField = getRequiredStringParam(config, FALSE_POSITIVES_FIELD, DEFAULT_FALSE_POSITIVES_FIELD);
+        falseNegativesField = getRequiredStringParam(config, FALSE_NEGATIVES_FIELD, DEFAULT_FALSE_NEGATIVES_FIELD);
+        positiveSupportField = getRequiredStringParam(config, POSITIVE_SUPPORT_FIELD, DEFAULT_POSITIVE_SUPPORT_FIELD);
+        negativeSupportField = getRequiredStringParam(config, NEGATIVE_SUPPORT_FIELD, DEFAULT_NEGATIVE_SUPPORT_FIELD);
+        configureSolrCore(config, SOLR_CORE, engineName + "-model",SOLR_CORE_CONFIG);
 
         // optional fields, can be null
-        broaderField = (String) config.get(BROADER_FIELD);
-        primaryTopicUriField = (String) config.get(PRIMARY_TOPIC_URI_FIELD);
+        broaderField = getRequiredStringParam(config, BROADER_FIELD, DEFAULT_BROADER_FIELD);
+        primaryTopicUriField = getRequiredStringParam(config, PRIMARY_TOPIC_URI_FIELD, DEFAULT_PRIMARY_TOPIC_URI_FIELD);
         trainingSetId = (String) config.get(TRAINING_SET_ID);
         Object orderParamValue = config.get(ORDER);
-        if (orderParamValue != null) {
-            order = (Integer) orderParamValue;
+        if (orderParamValue instanceof Number) {
+            order = ((Number) orderParamValue).intValue();
+        } else if(orderParamValue != null){
+            try {
+                Integer.parseInt(orderParamValue.toString());
+            }catch (NumberFormatException e) {
+                throw new ConfigurationException(ORDER, "The configured EnhancementEngine "
+                    + "order MUST BE an Intever value!",e);
+            }
+        } else {
+            order = DEFAULT_ENGINE_ORDER;
         }
     }
 
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
         if (ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES) != null && getActiveSolrServer() != null) {
-            return ENHANCE_SYNCHRONOUS;
+            String language = EnhancementEngineHelper.getLanguage(ci);
+            if(acceptedLanguageSet.isEmpty() || acceptedLanguageSet.contains(language) ||
+                    acceptedLanguageSet.contains("")){
+                return ENHANCE_SYNCHRONOUS;
+            } else {
+                return CANNOT_ENHANCE;
+            }
         } else {
             return CANNOT_ENHANCE;
         }
@@ -420,6 +485,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                             + "(supported: '" + SUPPORTED_MIMETYPES
                             + "') -> this indicates that canEnhance was"
                             + "NOT called and indicates a bug in the used EnhancementJobManager!");
+        }
+        String language = EnhancementEngineHelper.getLanguage(ci);
+        if(!(acceptedLanguageSet.isEmpty() || acceptedLanguageSet.contains(language) ||
+                acceptedLanguageSet.contains(""))){
+            throw new IllegalStateException("The language '"+language+"' of the ContentItem is not configured as "
+                +" active for this Engine (active: "+acceptedLanguageSet+").");
         }
         String text;
         try {
@@ -551,7 +622,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         List<TopicSuggestion> suggestedTopics = new ArrayList<TopicSuggestion>(MAX_SUGGESTIONS * 3);
         SolrServer solrServer = getActiveSolrServer();
         SolrQuery query = new SolrQuery();
-        query.setQueryType("/" + MoreLikeThisParams.MLT);
+        query.setRequestHandler("/" + MoreLikeThisParams.MLT);
         query.setFilterQueries(entryTypeField + ":" + MODEL_ENTRY);
         query.set(MoreLikeThisParams.MATCH_INCLUDE, false);
         query.set(MoreLikeThisParams.MIN_DOC_FREQ, 1);
@@ -823,7 +894,15 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             return trainingSet;
         }
         if (trainingSetTracker != null) {
-            return (TrainingSet) trainingSetTracker.getService();
+            TrainingSet trainingsSet = (TrainingSet) trainingSetTracker.getService();
+            if(trainingsSet == null){
+                for(int i=0; i < 5 && trainingsSet == null; i++){
+                    try {
+                        trainingsSet = (TrainingSet) trainingSetTracker.waitForService(1000);
+                    } catch (InterruptedException e) {/*ignore*/}
+                }
+            }
+            return trainingsSet;
         }
         return null;
     }
@@ -1023,13 +1102,14 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         cvFoldCount = foldCount;
     }
 
-    protected Dictionary<String,Object> getCanonicalConfiguration(Object server) {
+    protected Dictionary<String,Object> getCanonicalConfiguration(Object server, Object coreConfig) {
         Hashtable<String,Object> config = new Hashtable<String,Object>();
         config.put(EnhancementEngine.PROPERTY_NAME, engineName + "-evaluation");
         config.put(TopicClassificationEngine.ENTRY_ID_FIELD, "entry_id");
         config.put(TopicClassificationEngine.ENTRY_TYPE_FIELD, "entry_type");
         config.put(TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, "model_entry_id");
         config.put(TopicClassificationEngine.SOLR_CORE, server);
+        config.put(TopicClassificationEngine.SOLR_CORE_CONFIG, coreConfig);
         config.put(TopicClassificationEngine.CONCEPT_URI_FIELD, "concept");
         config.put(TopicClassificationEngine.PRIMARY_TOPIC_URI_FIELD, "primary_topic");
         config.put(TopicClassificationEngine.SIMILARTITY_FIELD, "classifier_features");
@@ -1085,12 +1165,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         return updatedTopics;
     }
 
-    protected int performCVFold(int cvFoldIndex,
-                                int cvFoldCount,
-                                int cvIterations,
-                                boolean incremental) throws ConfigurationException,
-                                                    TrainingSetException,
-                                                    ClassifierException {
+    protected int performCVFold(int cvFoldIndex, int cvFoldCount, int cvIterations, boolean incremental)
+            throws ConfigurationException, TrainingSetException, ClassifierException {
 
         cvIterations = cvIterations <= 0 ? cvFoldCount : cvFoldCount;
         log.info(String.format("Performing evaluation %d-fold CV iteration %d/%d on classifier %s",
@@ -1102,7 +1178,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 // OSGi setup: the evaluation server will be generated automatically using the
                 // managedSolrServer
                 classifier.bindManagedSolrServer(managedSolrServer);
-                classifier.activate(context, getCanonicalConfiguration(engineName + "-evaluation"));
+                classifier.activate(context, getCanonicalConfiguration(
+                    engineName + "-evaluation", //TODO: maybe we should use the SolrCoreName instead
+                    solrCoreConfig));
             } else {
                 if(__evaluationServer == null){
                     __evaluationServerDir = new File(embeddedSolrServerDir,engineName + "-evaluation");
@@ -1112,7 +1190,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     __evaluationServer = EmbeddedSolrHelper.makeEmbeddedSolrServer(__evaluationServerDir,
                         "evaluationclassifierserver", "default-topic-model", "default-topic-model");
                 }
-                classifier.configure(getCanonicalConfiguration(__evaluationServer));
+                classifier.configure(getCanonicalConfiguration(__evaluationServer,solrCoreConfig));
             }
         } catch (Exception e) {
             throw new ClassifierException(e);
