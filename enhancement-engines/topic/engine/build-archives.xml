@@ -25,6 +25,10 @@
       <zipfileset dir="${resources.dir}default-topic-model"
         prefix="default-topic-model"/>
     </zip>
+    <zip destfile="${data.dir}shingle-topic-model.solrindex.zip">
+      <zipfileset dir="${resources.dir}shingle-topic-model"
+        prefix="shingle-topic-model"/>
+    </zip>
   </target>
 
   <target name="trainingset">
