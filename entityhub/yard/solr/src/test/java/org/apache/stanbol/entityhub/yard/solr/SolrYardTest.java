@@ -91,6 +91,9 @@ public class SolrYardTest extends YardTest {
         config.setName("Solr Yard Test");
         config.setDescription("The Solr Yard instance used to execute the Unit Tests defined for the Yard Interface");
         config.setAllowInitialisation(true);
+        //for unit testing we want immidiate commits (required after STANBOL-1092
+        // as the default changed to false)
+        config.setImmediateCommit(true); 
         //init the ManagedSolrServer used for the UnitTest
         System.setProperty(ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY, solrServerDir);
         IndexReference solrServerRef = IndexReference.parse(config.getSolrServerLocation());

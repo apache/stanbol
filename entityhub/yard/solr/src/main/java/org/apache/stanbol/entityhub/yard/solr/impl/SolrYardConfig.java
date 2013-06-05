@@ -112,9 +112,10 @@ public final class SolrYardConfig extends YardConfig {
      */
     public static final String IMMEDIATE_COMMIT = "org.apache.stanbol.entityhub.yard.solr.immediateCommit";
     /**
-     * By default {@link #IMMEDIATE_COMMIT} is enabled
+     * By default {@link #IMMEDIATE_COMMIT} is disabled (NOTE: was enabled, but changed with 
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-1092">STANBOL-1092</a>)
      */
-    public static final boolean DEFAULT_IMMEDIATE_COMMIT_STATE = true;
+    public static final boolean DEFAULT_IMMEDIATE_COMMIT_STATE = false;
     /**
      * If {@link #IMMEDIATE_COMMIT} is deactivated, than this time is parsed to update(..) and store(..)
      * operations as the maximum time (in ms) until a commit.
