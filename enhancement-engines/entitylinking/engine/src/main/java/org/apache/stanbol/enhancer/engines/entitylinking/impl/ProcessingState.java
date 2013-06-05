@@ -86,6 +86,12 @@ public class ProcessingState {
      */
     private int consumedIndex = -1;
     /**
+     * Ensures that Tokens are not processed twice in case of multiple
+     * overlapping Sentence Annotations (e.g. if two NLP frameworks contributing
+     * Sentences do not agree with each other).
+     */
+    private int consumedSectionIndex = -1;
+    /**
      * The language of the text
      */
     private String language;
@@ -136,7 +142,7 @@ public class ProcessingState {
         Iterator<Sentence> sentences = at.getSentences();
         this.sections = sentences.hasNext() ? sentences : Collections.singleton(at).iterator();
         //init the first sentence
-        initNextSentence();
+        //initNextSentence();
     }
     /**
      * Getter for the current section. This is typically a {@link Sentence}
@@ -237,6 +243,14 @@ public class ProcessingState {
         boolean foundLinkableToken = false;
         while(!foundLinkableToken && sections.hasNext()){
             section = sections.next();
+            if(consumedSectionIndex > section.getStart()){
+                log.debug(" > skipping {} because an other section until Index {} " +
+                		"was already processed. This is not an error, but indicates that" +
+                		"multiple NLP framewords do contribute divergating Sentence annotations",
+                		section, consumedSectionIndex);
+                continue; //ignore this section
+            }
+            consumedSectionIndex = section.getEnd();
             tokens.clear(); //clear token for each section (STANBOL-818)
             Iterator<Span> enclosed = section.getEnclosed(enclosedSpanTypes);
             ChunkData activeChunk = null;
