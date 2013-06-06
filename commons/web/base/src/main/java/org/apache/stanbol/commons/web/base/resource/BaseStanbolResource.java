@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriBuilder;
@@ -54,8 +53,6 @@ public class BaseStanbolResource {
     @Context
     protected UriInfo uriInfo;
 
-    @Context
-    protected ServletContext servletContext;
 
     public URI getRequestUri(){
         return uriInfo.getAbsolutePath();
@@ -75,7 +72,7 @@ public class BaseStanbolResource {
      * Because of this it will only work with the default {@link #SYSTEM_CONSOLE}.
      * @return The URI for the Apache Felix Webconsole
      */
-    public URI getConsoleBaseUri() {
+    /*public URI getConsoleBaseUri() {
         String root = getRootUrl();
         UriBuilder consolePathBuilder;
         if(StringUtils.isNotBlank(root) && !"/".equals(root)){
@@ -98,26 +95,26 @@ public class BaseStanbolResource {
         }
         
     	return consolePathBuilder.path(SYSTEM_CONSOLE).build();
-    }
+    }*/
 
     /**
      * @return the sorted list of navigation links data transfer objects
      */
-    @SuppressWarnings("unchecked")
+    /*@SuppressWarnings("unchecked")
     public List<NavigationLink> getNavigationLinks() {
         return (List<NavigationLink>) servletContext.getAttribute(NAVIGATION_LINKS);
-    }
+    }*/
 
     /**
      * @return menu items with "selected" CSS class for the active link precomputed where applicable
      */
-    public List<MenuItem> getMainMenuItems() {
+    /*public List<MenuItem> getMainMenuItems() {
         List<MenuItem> items = new ArrayList<MenuItem>();
         for (NavigationLink link : getNavigationLinks()) {
             items.add(new MenuItem(link.getLabel(), link.getPath(), uriInfo));
         }
         return items;
-    }
+    }*/
 
     public static class MenuItem {
 
@@ -150,7 +147,7 @@ public class BaseStanbolResource {
 
     }
 
-    public String getRootUrl() {
+    /*public String getRootUrl() {
         return (String) servletContext.getAttribute(ROOT_URL);
     }
 
@@ -176,5 +173,5 @@ public class BaseStanbolResource {
         } else {
             return Collections.emptyList();
         }
-    }
+    }*/
 }

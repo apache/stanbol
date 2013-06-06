@@ -34,7 +34,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -44,11 +43,12 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.felix.scr.annotations.Reference;
 
 /**
- * JAX-RS provider that parses RDF by fetching the OSGi parsing service from the ServletContext.
+ * JAX-RS provider that parses RDF by using the OSGi parsing service
  */
+//TODO make it a service/component
 @Provider
 public class GraphReader implements MessageBodyReader<Graph> {
 
@@ -67,12 +67,9 @@ public class GraphReader implements MessageBodyReader<Graph> {
         SUPPORTED_MEDIA_TYPES = Collections.unmodifiableSet(types);
     }
 
-    @Context
-    protected ServletContext servletContext;
 
-    protected Parser getParser() {
-        return ContextHelper.getServiceFromContext(Parser.class, servletContext);
-    }
+    @Reference
+    private Parser parser;
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
@@ -86,12 +83,6 @@ public class GraphReader implements MessageBodyReader<Graph> {
                           MediaType mediaType,
                           MultivaluedMap<String,String> httpHeaders,
                           InputStream entityStream) throws IOException, WebApplicationException {
-        Parser parser = getParser();
-        if (parser == null) {
-            RuntimeException e = new RuntimeException(String.format(
-                "Could not find RDF Parser implementing '%s' in OSGi context.", Parser.class.getName()));
-            throw new WebApplicationException(e);
-        }
         return parser.parse(entityStream, mediaType.toString());
     }
 }

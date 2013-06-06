@@ -63,10 +63,10 @@
     <module>releasing/source-assembly</module>    
     
     <module>parent</module>
-    <!-- <module>data</module>
+    <!-- <module>data</module> -->
     <module>commons</module>
 
-    <module>entityhub</module>
+    <!-- <module>entityhub</module>
     <module>ontologymanager</module>
     <module>rules</module>
     <module>enhancer</module>
