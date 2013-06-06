@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4-SNAPSHOT</version>
+    <version>5-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
@@ -31,7 +31,10 @@
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Web Template Viewable Writer</name>
-  <description>A bundle providing MessageBodyWriters for Viewable</description>
+  <description>A bundle providing MessageBodyWriters for Viewable. This bundle 
+      is here to facilitate usage of modules that predate RDFVieable. New
+      modules should no longer need this.
+  </description>
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/viewable-writer
@@ -77,11 +80,12 @@
     </dependency> 
     <dependency>
       <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
+      <artifactId>javax.ws.rs-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
+      <version>2.3.19</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
