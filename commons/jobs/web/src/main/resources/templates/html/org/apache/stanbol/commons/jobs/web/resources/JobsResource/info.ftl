@@ -20,7 +20,7 @@
 		
   <div class="panel">
 <p><b>Status: </b> ${it.jobInfo.status}</p>
-<p><b>Output location: </b> <a href="${it.jobInfo.outputLocation}">${it.jobInfo.outputLocation}</a></p>
+<p><b>Output location: </b> <a href="${it.outputLocation}">${it.outputLocation}</a></p>
 <p><b>Messages:</b> </p>
 <ul>
   <#list it.jobInfo.messages as message>

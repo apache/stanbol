@@ -130,7 +130,7 @@ public class JobsResource extends BaseStanbolResource {
 
             if(isHTML()){
                 // Result as HTML
-                return Response.ok(new Viewable("info", this)).build();
+                return Response.ok(new Viewable("info", info)).build();
             }else{
                 // Result as application/json, text/plain
                 return Response.ok(info).build();
