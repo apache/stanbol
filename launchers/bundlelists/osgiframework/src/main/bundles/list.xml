@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<bundles>
+  <!-- OSGi infrastructure -->
+  <startLevel level="5">
+    <!-- OSGI infrastructure -->
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>1.4.0</version>
+    </bundle>
+    <!-- bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>1.4.0</version>
+    </bundle  -->
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr</artifactId>
+      <version>1.6.0</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.configadmin</artifactId>
+      <version>1.2.8</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.metatype</artifactId>
+      <version>1.0.4</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.eventadmin</artifactId>
+      <version>1.2.14</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.dependencymanager</artifactId>
+      <version>3.0.0</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.dependencymanager.runtime</artifactId>
+      <version>3.0.0</version>
+    </bundle>
+    <!-- bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.deploymentadmin</artifactId>
+      <version>0.9.0</version>
+    </bundle -->
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.shell</artifactId>
+      <version>1.4.3</version>    
+    </bundle>
+    <!-- bundle>  OSGi Command Line Shell support (replaced by org.apache.felix.shell)
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+      <version>0.10.0</version>
+    </bundle -->
+<!--     <bundle>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.commons.osgi</artifactId>
+      <version>2.1.0</version>
+    </bundle>  -->
+  </startLevel>
+
+
+  <!-- Logging Dependencies -->
+  <startLevel level="5">
+    <bundle> <!-- STANNBOL-1025 upgraded to Sling logging 3.0.0 -->
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.commons.log</artifactId>
+      <version>3.0.0</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.commons.logservice</artifactId>
+      <version>1.0.2</version>
+    </bundle>    
+    <bundle> <!-- Can not use 1.7 because of o.a.sling.commons.log -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.6</version>
+    </bundle>
+    <bundle>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>1.6.6</version>    
+    </bundle>
+    <bundle>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+      <version>1.6.6</version>    
+    </bundle>
+  </startLevel>
+  
+  
+  <!-- HTTP service and Http related Utilities -->
+  <startLevel level="5">
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.http.whiteboard</artifactId>
+      <version>2.2.0</version>
+    </bundle>
+  </startLevel>
+
+  <!-- Felix web console and plugins -->
+  <startLevel level="21">
+    <bundle>  <!-- Required by the Felix Webconsole -->
+      <groupId>org.apache.geronimo.bundles</groupId>
+      <artifactId>json</artifactId>
+      <version>20090211_1</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.webconsole</artifactId>
+      <version>4.0.0</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.bundlerepository</artifactId>
+      <version>1.6.6</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.extensions.threaddump</artifactId>
+      <version>0.2.2</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.webconsole.plugins.packageadmin</artifactId>
+      <version>1.0.0</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.webconsole.plugins.ds</artifactId>
+      <version>1.0.0</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.webconsole.plugins.obr</artifactId>
+      <version>1.0.0</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.webconsole.plugins.event</artifactId>
+      <version>1.0.2</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.webconsole.plugins.memoryusage</artifactId>
+      <version>1.0.4</version>
+    </bundle>
+    <bundle> <!-- The Apache Sling Installer WebConsole plugin -->
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.installer.console</artifactId>
+      <version>1.0.0</version>
+    </bundle>
+  </startLevel>
+</bundles>

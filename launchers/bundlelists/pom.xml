@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>4-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>apache-stanbol-bundlelists</artifactId>
+  <version>0.10.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  
+  <name>Apache Stanbol Bundlelists</name>
+  <description>
+    Pseudo project to build all Stanbol OSGi bundlelists
+  </description>  
+
+  <inceptionYear>2010</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>  
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/launchers/bundlelists
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/launchers/bundlelists
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+  
+  <modules>
+    <!-- Commons -->
+    <module>osgiframework</module>
+    <module>stanbolcommons</module>
+
+    <!-- Data bundles -->
+    <module>defaultdata</module>
+    <module>opennlp</module>
+    <module>sentimentdata</module>
+
+    <!-- Components -->
+    <module>enhancer</module>
+    <module>entityhub</module>
+    <module>cmsadapter</module>
+    <module>contenthub</module>
+    <module>ontologymanager</module>
+    <module>reasoners</module>
+    <module>rules</module>
+
+    <!-- Specific features -->
+    <module>security</module>
+    <module>zzshell</module>
+    
+    <!-- language specific extensions -->
+    <module>language-extras/smartcn</module>
+    <module>language-extras/paoding</module>
+    <module>language-extras/kuromoji</module>
+  </modules>
+
+  <profiles>
+    <profile>
+      <id>apache-release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <configuration>
+              <excludeSubProjects>false</excludeSubProjects>
+              <excludes>
+                <!--
+                  All license headers are also checked per
+                  artifact. These excludes are necessary
+                  to make the reactor build suceed. Consider
+                  the excluded files here as already checked
+                  in the artifacts.
+                -->
+
+                <!-- exclude hidden files -->
+                <exclude>**/.*</exclude>
+                <exclude>**/.*/*</exclude>
+                <exclude>**/.*/**/*</exclude>
+
+                <!-- exclude build files -->
+                <exclude>**/target/**</exclude>
+                <exclude>**/*.log</exclude>             
+
+                <!-- exclude generated files listing the licenses of deps -->
+                <exclude>DEPENDENCIES</exclude>
+                <exclude>DEPENDENCIES-BY-LICENSE</exclude>
+                <exclude>RAT-REPORT</exclude>
+
+                <!-- exclude certain file types -->
+                <exclude>**/*.config</exclude>
+                <exclude>**/*.ref</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>aggregate-add-third-party</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>    
+  </profiles>
+</project>
