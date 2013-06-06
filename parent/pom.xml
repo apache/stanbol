@@ -22,14 +22,14 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>14</version>
+    <version>13</version>
     <relativePath />
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
   <packaging>pom</packaging>
-  <version>4-SNAPSHOT</version>
+  <version>5-SNAPSHOT</version>
 
   <name>Apache Stanbol Parent</name>
   <description>Parent POM for the Apache Stanbol project</description>
@@ -57,8 +57,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jersey-version>1.15</jersey-version>
-    <freemarker-version>2.3.19</freemarker-version>
     <owlapi-version>3.3</owlapi-version>
     <solr-version>4.2.1</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
@@ -493,6 +491,11 @@
   </developers>
 
   <dependencyManagement>
+      
+      <!-- TODO: evaluate/discus hwat really belongs into here, 
+      - only the dependency in mini launcher
+      - everything used by more than one component
+      - or ...      -->
     <dependencies>
 
       <!-- CMIS -->
@@ -820,59 +823,8 @@
         <version>2.5</version>
       </dependency>
 
-      <!-- Jersey -->
-      <dependency>
-          <groupId>org.glassfish.jersey.containers</groupId>
-          <!-- if your container implements Servlet API older than 3.0, use "jersey-container-servlet-core"  -->
-          <artifactId>jersey-container-servlet</artifactId>
-          <version>2.0</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-server</artifactId>
-        <version>${jersey-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-servlet</artifactId>
-        <version>${jersey-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-core</artifactId>
-        <version>${jersey-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-json</artifactId>
-        <version>${jersey-version}</version>
-        <exclusions>
-          <!-- jaxb is now part of java 6 -->
-          <exclusion>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>stax</groupId>
-            <artifactId>stax-api</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.jersey.contribs</groupId>
-        <artifactId>jersey-multipart</artifactId>
-        <version>${jersey-version}</version>
-      </dependency>
-
       <!-- JAX-RS JSR311 -->
-      <!-- NOTE that JAX-RS is included and exported by jersey-core
-          using Jersey in combination with this one might cause
-          incompatibilities
-        -->
+
       <dependency>
           <groupId>javax.ws.rs</groupId>
           <artifactId>javax.ws.rs-api</artifactId>
@@ -881,11 +833,11 @@
       </dependency>
 
       <!-- Freemarker -->
-      <dependency>
+      <!-- <dependency>
         <groupId>org.freemarker</groupId>
         <artifactId>freemarker</artifactId>
         <version>${freemarker-version}</version>
-      </dependency>
+      </dependency> -->
 
       <!-- JSON libraries -->
       <!-- Jettison -->
@@ -1359,11 +1311,12 @@
     </dependency>
 
     <!-- Apache James -->
-    <dependency>
+    <!-- do we need this?
+<dependency>
       <groupId>org.apache.james</groupId>
       <artifactId>apache-mime4j</artifactId>
       <version>0.6</version>
-    </dependency>    
+    </dependency> -->
 
     <!-- Testing Deps -->
     <dependency>
@@ -1442,13 +1395,6 @@
       <version>4.0.2</version>
       <scope>test</scope>
     </dependency>
-    <!--  already present
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr</artifactId>
-      <version>1.6.0</version>
-      <scope>test</scope>
-    </dependency>  -->
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-container-paxrunner</artifactId>
