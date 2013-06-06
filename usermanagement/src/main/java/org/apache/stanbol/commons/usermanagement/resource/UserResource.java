@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.commons.usermanagement.resource;
 
-import com.sun.jersey.multipart.FormDataParam;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
