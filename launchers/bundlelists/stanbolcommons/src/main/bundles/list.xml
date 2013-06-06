@@ -222,11 +222,11 @@
     <!-- NOTE: jersey-core bug, must start before jersey-server to avoid 
       jersey spi class not found errors. Restart jersey-server manually if getting 
       those. -->
-    <bundle>
+    <!-- <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
       <version>1.15</version>
-    </bundle>
+    </bundle> -->
   </startLevel>
   <startLevel level="25">
     <bundle>
@@ -243,14 +243,9 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>jaxrs.utils</artifactId>
-      <version>0.7-incubating-SNAPSHOT</version>
+      <version>0.7</version>
     </bundle>
-    <!-- still used in many places also it only runs on jersey and the code is not portable across jax-rs implementations -->
-    <bundle>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-multipart</artifactId>
-      <version>1.15</version>
-    </bundle>
+
     <!-- dependency of jersey-multipart -->
     <bundle>
       <groupId>org.jvnet</groupId>
@@ -405,7 +400,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <!-- support for JSON-LD -->
     <bundle>
@@ -422,7 +417,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.jobs.web</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
 
@@ -467,7 +462,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.web</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle> <!-- defualt config for Solr -->
       <groupId>org.apache.stanbol</groupId>
@@ -488,22 +483,22 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.resources</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base.jersey</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.home</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
   
@@ -527,12 +522,12 @@
 	  <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.ldpathtemplate</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
        <groupId>org.apache.stanbol</groupId>
        <artifactId>org.apache.stanbol.commons.freemarker</artifactId>
-       <version>0.12.0-SNAPSHOT</version>
+       <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
@@ -542,12 +537,12 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.rdfviewable.writer</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.viewable.writer</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
 
