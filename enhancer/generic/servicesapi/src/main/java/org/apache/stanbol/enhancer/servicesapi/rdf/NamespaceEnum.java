@@ -93,6 +93,11 @@ public enum NamespaceEnum {
      * The namespace of the Apache Stanbol Entityhub
      */
     entityhub("http://stanbol.apache.org/ontology/entityhub/entityhub#"),
+    /**
+     * Namespace for Disambiguation related properties and classes (added with
+     * STANBOL-1053)
+     */
+    dis("http://stanbol.apache.org/ontology/disambiguation/disambiguation#")
     ;
     
     String ns;
