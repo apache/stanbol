@@ -49,6 +49,7 @@ import org.apache.felix.scr.annotations.Reference;
  * JAX-RS provider that parses RDF by using the OSGi parsing service
  */
 //TODO make it a service/component
+//TODO check if clerezza rdf.jaxrs prvoder fits the purpose?
 @Provider
 public class GraphReader implements MessageBodyReader<Graph> {
 

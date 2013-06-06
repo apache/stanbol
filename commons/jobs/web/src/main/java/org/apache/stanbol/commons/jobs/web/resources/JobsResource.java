@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -35,9 +34,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 
 import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.jobs.api.Job;
 import org.apache.stanbol.commons.jobs.api.JobInfo;
@@ -54,23 +56,26 @@ import org.slf4j.LoggerFactory;
  * @author enridaga
  * 
  */
+@Component
+@Service(Object.class)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Path("/jobs")
 public class JobsResource extends BaseStanbolResource {
     
     private Logger log = LoggerFactory.getLogger(getClass());
-    private ServletContext context;
-    private HttpHeaders headers;
+
+    @Context
+    protected HttpHeaders headers;
     
-    private JobInfo info = null;
+    //private JobInfo info = null;
     
-    public JobsResource(@Context ServletContext servletContext, @Context HttpHeaders headers) {
-        this.context = servletContext;
-        this.headers = headers;
-    }
+    @Reference
+    private JobManager jobManager;
+
     
-    public JobInfo getJobInfo(){
+    /*public JobInfo getJobInfo(){
         return info;
-    }
+    }*/
     
     @GET
     public Response get(){
@@ -93,13 +98,14 @@ public class JobsResource extends BaseStanbolResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         
-        JobManager m = getJobManager();
+        JobManager m = jobManager;
 
         // If the job exists
         if (m.hasJob(id)) {
             log.info("Found job with id {}", id);
             Future<?> f = m.ping(id);
-            this.info = new JobInfoImpl();
+            //this.info = new JobInfoImpl();
+            JobInfo info = new JobInfoImpl();
             if(f.isDone()){
                 // The job is finished
                 if(f.isCancelled()){
@@ -164,7 +170,7 @@ public class JobsResource extends BaseStanbolResource {
         log.info("Called DELETE ({})", jid);
         if(!jid.equals("")){
             log.info("Looking for test job {}", jid);
-            JobManager m = getJobManager();
+            JobManager m = jobManager;
 
             // If the job exists
             if (m.hasJob(jid)){
@@ -188,7 +194,7 @@ public class JobsResource extends BaseStanbolResource {
     @DELETE
     public Response delete(){
         log.info("Called DELETE all jobs");
-        JobManager manager = getJobManager();
+        JobManager manager = jobManager;
         manager.removeAll();
         return Response.ok("All jobs have been deleted.").build();
     }
@@ -208,7 +214,7 @@ public class JobsResource extends BaseStanbolResource {
         // If an Id have been provided, check whether the job has finished and return the result
         if(!jid.equals("")){
             log.info("Looking for test job {}", jid);
-            JobManager m = getJobManager();
+            JobManager m = jobManager;
             // Remove first slash from param value
             jid = jid.substring(1);
             
@@ -255,7 +261,7 @@ public class JobsResource extends BaseStanbolResource {
             }
         }else{
             // No id have been provided, we create a new test job
-            JobManager m = getJobManager();
+            JobManager m = jobManager;
             String id = m.execute(new Job() {
                 @Override
                 public JobResult call() throws Exception {
@@ -292,13 +298,5 @@ public class JobsResource extends BaseStanbolResource {
         }
     }
 
-    /**
-     * Gets the job manager
-     * 
-     * @return
-     */
-    private JobManager getJobManager() {
-        log.debug("(getJobManager()) ");
-        return (JobManager) ContextHelper.getServiceFromContext(JobManager.class, this.context);
-    }
+
 }

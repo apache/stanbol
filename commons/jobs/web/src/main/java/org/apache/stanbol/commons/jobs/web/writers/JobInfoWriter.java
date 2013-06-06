@@ -30,6 +30,9 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.jobs.api.JobInfo;
 import org.apache.stanbol.commons.jobs.impl.JobInfoImpl;
 
@@ -39,6 +42,9 @@ import org.apache.stanbol.commons.jobs.impl.JobInfoImpl;
  * @author enridaga
  *
  */
+@Component
+@Service(Object.class)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Provider
 @Produces({"application/json","text/plain"})
 public class JobInfoWriter implements MessageBodyWriter<JobInfo> {

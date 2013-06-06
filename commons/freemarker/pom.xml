@@ -42,7 +42,9 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
-
+  <properties>
+      <freemarker-version>2.3.19</freemarker-version>
+  </properties>
   <build>
     <!-- make it an OSGi bundle -->
     <plugins>
@@ -104,6 +106,7 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
     <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
+      <version>${freemarker-version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>

@@ -46,6 +46,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//TODO check if clerezza rdf.jaxrs prvoder fits the purpose?
 //TODO make it a service/component
 @Provider
 // @Produces({TEXT_PLAIN, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON, APPLICATION_JSON})

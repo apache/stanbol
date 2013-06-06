@@ -46,17 +46,17 @@ import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.spi.container.servlet.ServletContainer;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.felix.scr.annotations.References;
-import org.apache.stanbol.commons.web.base.DefaultApplication;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 
 /**
  * Jersey-based RESTful endpoint for the Stanbol Enhancer engines and store.
@@ -212,7 +212,8 @@ public class JerseyEndpoint {
         Collections.sort(navigationLinks);
 
         // bind the aggregate JAX-RS application to a dedicated servlet
-        ServletContainer container = new ServletContainer(app);
+        ServletContainer container = new ServletContainer(
+                ResourceConfig.forApplication(app));
         Bundle appBundle = componentContext.getBundleContext().getBundle();
         httpService.registerServlet(applicationAlias, container, getInitParams(), null);
         registeredAliases.add(applicationAlias);

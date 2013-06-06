@@ -41,7 +41,6 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -56,6 +55,10 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.clerezza.rdf.rdfjson.serializer.RdfJsonSerializingProvider;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
@@ -70,25 +73,17 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Component
+@Service(Object.class)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Provider
 @Produces({RDF_XML, OWL_XML, MANCHESTER_OWL, FUNCTIONAL_OWL, TURTLE, X_TURTLE, N3, N_TRIPLE, RDF_JSON,
            TEXT_PLAIN})
 public class OWLOntologyWriter implements MessageBodyWriter<OWLOntology> {
 
+    @Reference
     protected Serializer serializer;
 
-    protected ServletContext servletContext;
-
-    public OWLOntologyWriter(@Context ServletContext servletContext) {
-        Logger log = LoggerFactory.getLogger(getClass());
-        this.servletContext = servletContext;
-        log.info("Setting context to " + servletContext);
-        serializer = (Serializer) this.servletContext.getAttribute(Serializer.class.getName());
-        if (serializer == null) {
-            log.info("Serializer not found in Servlet context.");
-            serializer = new Serializer();
-        }
-    }
 
     @Override
     public long getSize(OWLOntology arg0, Class<?> arg1, Type arg2, Annotation[] arg3, MediaType arg4) {

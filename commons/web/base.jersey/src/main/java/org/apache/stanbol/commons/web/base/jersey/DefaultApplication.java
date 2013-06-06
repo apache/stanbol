@@ -14,7 +14,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.commons.web.base;
+package org.apache.stanbol.commons.web.base.jersey;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,6 +26,7 @@ import javax.ws.rs.core.Application;
 import org.apache.stanbol.commons.web.base.writers.GraphWriter;
 import org.apache.stanbol.commons.web.base.writers.JenaModelWriter;
 import org.apache.stanbol.commons.web.base.writers.ResultSetWriter;
+import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,11 +49,11 @@ public class DefaultApplication extends Application {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         // resources contributed buy other bundles
         classes.addAll(contributedClasses);
-
+        //TODO check if clerezza rdf.jaxrs prvoder fits the purpose
         // message body writers, hard-coded for now
-        classes.add(GraphWriter.class);
-        classes.add(JenaModelWriter.class);
-        classes.add(ResultSetWriter.class);
+        //classes.add(GraphWriter.class);
+        //classes.add(JenaModelWriter.class);
+        //classes.add(ResultSetWriter.class);
         return classes;
     }
 
