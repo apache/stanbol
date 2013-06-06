@@ -79,10 +79,10 @@ public class OsgiSolrResourceLoader extends SolrResourceLoader {
             final String name = m.group(4);
             log.trace("Trying to load class from analysis SPI using name='{}'", name);
             ServiceReference[] referenced;
+            String filter;
             try {
-                referenced =
-                        bc.getServiceReferences(expectedType.getName(),
-                            String.format("(%s=%s)", PROPERTY_ANALYZER_FACTORY_NAME, name.toLowerCase(Locale.ROOT)));
+                filter = String.format("(%s=%s)", PROPERTY_ANALYZER_FACTORY_NAME, name.toLowerCase(Locale.ROOT));
+                referenced = bc.getServiceReferences(expectedType.getName(), filter);
             } catch (InvalidSyntaxException e) {
                 throw new IllegalStateException("Unable to create Filter for Service with name '" + name
                         + "'!", e);
@@ -94,6 +94,10 @@ public class OsgiSolrResourceLoader extends SolrResourceLoader {
                     bc.ungetService(referenced[0]); //we return the class and do not use the service
                     return clazz;
                 }
+            } else {
+                parentEx = new SolrException(SolrException.ErrorCode.SERVER_ERROR, 
+                    "Error loading Class '" + cname + "' via OSGI service Registry by using filter '"
+                    + filter + "'!", parentEx);
             }
         }
         if(parentEx != null) {
