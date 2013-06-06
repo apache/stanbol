@@ -1,0 +1,1604 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache</groupId>
+    <artifactId>apache</artifactId>
+    <version>14</version>
+    <relativePath />
+  </parent>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>stanbol-parent</artifactId>
+  <packaging>pom</packaging>
+  <version>4-SNAPSHOT</version>
+
+  <name>Apache Stanbol Parent</name>
+  <description>Parent POM for the Apache Stanbol project</description>
+
+  <inceptionYear>2010</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/parent</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/parent</developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
+  <issueManagement>
+    <system>Jira</system>
+    <url>http://issues.apache.org/jira/browse/STANBOL</url>
+  </issueManagement>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jersey-version>1.15</jersey-version>
+    <freemarker-version>2.3.19</freemarker-version>
+    <owlapi-version>3.3</owlapi-version>
+    <solr-version>4.2.1</solr-version>
+    <pax-exam-version>2.3.0.M1</pax-exam-version>
+    <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
+  </properties>
+
+  <prerequisites>
+    <maven>3.0.3</maven>
+  </prerequisites>
+
+  <build>
+    <plugins>
+      <!-- requires Java 6 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-java</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <message>Java 6 or higher is required to compile this module</message>
+                  <version>1.6</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Attach sources for all builds -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <inherited>true</inherited>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <!-- Compile for Java 6, source is Java 6 -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+
+      <!-- Add license to artifacts -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <configuration>
+              <resourceBundles>
+                <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+              </resourceBundles>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.3.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>2.1.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>maven-jetty-plugin</artifactId>
+          <version>6.1.20</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <version>2.3.7</version>
+          <inherited>true</inherited>
+          <configuration>
+            <instructions>
+              <Bundle-DocURL>http://stanbol.apache.org</Bundle-DocURL>
+              <Bundle-Vendor>Apache Stanbol</Bundle-Vendor>
+              <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+              <_versionpolicy>$${version;===;${@}}</_versionpolicy>
+              <_provider-policy>[$(version;===;$(@)),$(version;=+;$(@)))</_provider-policy>    
+              <_consumer-policy>[$(version;===;$(@)),$(version;+;$(@)))</_consumer-policy>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+        <version>1.7.4</version>
+        <!-- slf4j impl is needed when QDox inspects/loads classes that use a
+             static field for the logger, so that those classes can be loaded. -->
+          <dependencies>
+            <dependency>
+              <groupId>org.slf4j</groupId>
+              <artifactId>slf4j-simple</artifactId>
+              <version>1.6.1</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>generate-scr-scrdescriptor</id>
+              <goals>
+                <goal>scr</goal>
+              </goals>
+              <configuration>
+                <properties>
+                  <service.vendor>Apache Stanbol</service.vendor>
+                </properties>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.3.2</version>
+          <configuration>
+            <tagBase>
+              https://svn.apache.org/repos/asf/stanbol/tags/
+            </tagBase>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>1.0.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.sling</groupId>
+          <artifactId>maven-sling-plugin</artifactId>
+          <version>2.0.6</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.4.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.7</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.3.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>2.1.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.11</version>
+          <configuration>
+            <argLine>-Xmx1G</argLine>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.3.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>2.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-eclipse-plugin</artifactId>
+          <version>2.9</version>
+          <configuration>
+            <sourceExcludes>
+              <sourceExclude>DEPENDENCIES-BY-LICENSE</sourceExclude>
+            </sourceExcludes>
+          </configuration>          
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.2.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.sling</groupId>
+          <artifactId>maven-launchpad-plugin</artifactId>
+          <version>2.2.0</version>
+          <extensions>true</extensions>
+        </plugin>
+        <!-- generates version number of dependencies suitable for introspection
+          in pax-exam based OSGi lightweight-integration tests -->
+        <plugin>
+          <groupId>org.apache.servicemix.tooling</groupId>
+          <artifactId>depends-maven-plugin</artifactId>
+          <version>1.0</version>
+          <executions>
+            <execution>
+              <id>generate-depends-file</id>
+              <goals>
+                <goal>generate-depends-file</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+	<!-- workaround find from : https://issues.apache.org/jira/browse/SLING-2164b-->
+	<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+            		<pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.servicemix.tooling</groupId>
+                    <artifactId>depends-maven-plugin</artifactId>
+                    <versionRange>[1.0,)</versionRange>
+                    <goals>
+                      <goal>generate-depends-file</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute />
+                  </action>
+                </pluginExecution>
+            		<pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-scr-plugin</artifactId>
+                    <versionRange>[1.4.4,)</versionRange>
+                    <goals>
+                      <goal>scr</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <!-- <execute /> -->
+                    <!-- ignore as it cause error in eclipse when imported -->
+                    <ignore />
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <versionRange>[1.3,)</versionRange>
+                    <goals>
+                      <goal>run</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute />
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.groovy.maven</groupId>
+                    <artifactId>gmaven-plugin</artifactId>
+                    <versionRange>[1.0,)</versionRange>
+                    <goals>
+                      <goal>compile</goal>
+                      <goal>testCompile</goal>
+                      <goal>execute</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <versionRange>[1.5,)</versionRange>
+                    <goals>
+                      <goal>reserve-network-port</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.sling</groupId>
+                    <artifactId>maven-launchpad-plugin</artifactId>
+                    <versionRange>[2.2.0,)</versionRange>
+                    <goals>
+                      <goal>prepare-package</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+	              <!-- compilation errors when eclipse open -->
+	              <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <versionRange>[2.1,)</versionRange>
+                    <goals>
+                      <goal>copy-dependencies</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <!--  <execute /> -->
+                    <!-- ignore as it cause error in eclipse when imported -->
+                    <ignore />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <version>0.8</version>
+          <executions>
+            <execution>
+              <configuration>
+                <reportFile>${project.build.directory}/maven-shared-archive-resources/META-INF/RAT-REPORT</reportFile>
+              </configuration> 
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>1.0</version>
+          <executions>
+            <execution>
+              <configuration>
+                <groupByLicense>true</groupByLicense>
+                <failIfWarning>true</failIfWarning>
+                <useMissingFile>true</useMissingFile>
+                <outputDirectory>${project.build.directory}/maven-shared-archive-resources/META-INF</outputDirectory>
+                <thirdPartyFilename>DEPENDENCIES-BY-LICENSE</thirdPartyFilename>
+
+                <licenseMerges>
+                  <licenseMerge>Apache Software License|AL|Apache Software Licenses|Apache License</licenseMerge>
+                  <licenseMerge>Apache Software License, Version 1.1|AL 1.1|Apache Software License, Version 1.1</licenseMerge>
+                  <licenseMerge>Apache Software License, Version 2.0|AL 2.0|ALv2|The Apache Software License, Version 2.0|Apache Software License - Version 2.0|Apache License, Version 2.0|Apache License 2.0|Apache License Version 2|Apache License Version 2.0|Apache 2</licenseMerge>
+                  <licenseMerge>BSD License|BSD license|BSD|The BSD License|BSD-style license|BSD-like</licenseMerge>
+                  <licenseMerge>Common Development And Distribution License (CDDL), Version 1.0|CDDL 1.0|CDDL License|Common Development And Distribution License (CDDL) Version 1.0|COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0|Common Development and Distribution License (CDDL) v1.0|Dual license consisting of the CDDL v1.0 and GPL v2</licenseMerge>
+                  <licenseMerge>Common Development And Distribution License (CDDL), Version 1.1|CDDL 1.1|Common Public License Version 1.1</licenseMerge>
+                  <licenseMerge>Common Public License, Version 1.0|CPL 1.0|Common Public License Version 1.0</licenseMerge>
+                  <licenseMerge>Eclipse Public License, Version 1.0|Eclipse Public License - Version 1.0|Eclipse Public License - v 1.0</licenseMerge>
+                  <licenseMerge>GNU General Public License (GPL), Version 2 with classpath exception|GPLv2 with classpath exception|GPL2 w/ CPE</licenseMerge>
+                  <licenseMerge>GNU Lesser General Public License (LGPL)|GNU Lesser General Public License|LGPL</licenseMerge>
+                  <licenseMerge>GNU Lesser General Public License (LGPL), Version 2.1|The GNU Lesser General Public License, Version 2.1|LGPL 2.1</licenseMerge>
+                  <licenseMerge>MIT License|MIT|The MIT License|MIT license</licenseMerge>
+                  <licenseMerge>Public Domain License|public domain|Public Domain</licenseMerge>
+                </licenseMerges>
+              </configuration> 
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-remote-resources-plugin</artifactId>
+          <executions>
+            <execution>
+              <configuration>
+                <properties>
+                  <preDepListText>
+// ------------------------------------------------------------------
+// Transitive dependencies of this project determined from the
+// Apache Maven POM organized by organization.
+//
+// For a list of transitive depencies of this project determined
+// from the Apache Maven POM organized by licenses see the
+// DEPENDENCIES-BY-LICENSE file.
+// ------------------------------------------------------------------
+                  </preDepListText>
+                </properties>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <developers>
+    <!-- TBD -->
+  </developers>
+
+  <dependencyManagement>
+    <dependencies>
+
+      <!-- CMIS -->
+      <dependency>
+        <groupId>org.apache.chemistry.opencmis</groupId>
+        <artifactId>chemistry-opencmis-client-api</artifactId>
+        <version>0.4.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.chemistry.opencmis</groupId>
+        <artifactId>chemistry-opencmis-client-impl</artifactId>
+        <version>0.4.0</version>
+      </dependency>
+
+      <!-- JCR -->
+      <dependency>
+        <groupId>javax.jcr</groupId>
+        <artifactId>jcr</artifactId>
+        <version>2.0</version>
+      </dependency>      
+      <dependency>
+        <groupId>org.apache.jackrabbit</groupId>
+        <artifactId>jackrabbit-jcr-rmi</artifactId>
+        <version>2.2.5</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.jackrabbit</groupId>
+        <artifactId>jackrabbit-jcr-commons</artifactId>
+        <version>2.2.5</version>
+      </dependency>
+
+      <!-- OSGi -->
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.core</artifactId>
+        <version>4.1.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.compendium</artifactId>
+        <version>4.1.0</version>
+      </dependency>
+
+      <!-- Apache Felix -->
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.scr</artifactId>
+        <version>1.6.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.scr.annotations</artifactId>
+        <version>1.6.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.configadmin</artifactId>
+        <version>1.2.8</version>
+      </dependency>      
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.osgi.compendium</artifactId>
+        <version>1.4.0</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.http.jetty</artifactId>
+        <version>2.2.0</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.http.whiteboard</artifactId>
+        <version>2.2.0</version>
+        <scope>test</scope>
+      </dependency>
+
+
+      <!-- Apache Clerezza and runtime dependencies -->
+      <dependency>
+        <groupId>org.apache.clerezza.ext</groupId>
+        <artifactId>com.ibm.icu</artifactId>
+        <version>0.5-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.wymiwyg</groupId>
+        <artifactId>wymiwyg-commons-core</artifactId>
+        <version>0.7.5</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>utils</artifactId>
+        <version>0.1-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.core</artifactId>
+        <version>0.12-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.utils</artifactId>
+        <version>0.13-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.metadata</artifactId>
+        <version>0.1-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.ontologies</artifactId>
+        <version>0.11-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.jena.serializer</artifactId>
+        <version>0.9-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.jena.parser</artifactId>
+        <version>0.10-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.jena.sparql</artifactId>
+        <version>0.5-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.rdfjson</artifactId>
+        <version>0.3-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>platform.content</artifactId>
+        <version>0.13-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>platform.graphprovider.content</artifactId>
+        <version>0.6-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>platform.typerendering.scalaserverpages</artifactId>
+        <version>0.3-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>jaxrs.rdf.providers</artifactId>
+        <version>0.13-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.simple.storage</artifactId>
+        <version>0.7-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.jena.facade</artifactId>
+        <version>0.12-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.core.test</artifactId>
+        <version>0.13-incubating</version>
+        <scope>test</scope>
+      </dependency>
+
+
+      <!-- Commons -->
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>1.4</version>
+      </dependency>
+      <!-- As commons-beanutils:commons-beanutils is not bundle we use the
+           org.apache.stanbol.servuemix version instead -->
+      <dependency>
+        <groupId>org.apache.servicemix.bundles</groupId>
+        <artifactId>org.apache.servicemix.bundles.commons-beanutils</artifactId>
+        <version>1.8.3_1</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-collections</groupId>
+        <artifactId>commons-collections</artifactId>
+        <version>3.2.1</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>2.6</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-cli</groupId>
+        <artifactId>commons-cli</artifactId>
+        <version>1.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-exec</artifactId>
+        <version>1.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>1.4.1</version>
+      </dependency>
+      <dependency> <!-- dependency of commons-compress 1.4+ -->
+        <groupId>org.tukaani</groupId>
+        <artifactId>xz</artifactId>
+        <version>1.2</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>1.1.1</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.7</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+        <version>1.2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient-osgi</artifactId>
+        <version>4.2.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore-osgi</artifactId>
+        <version>4.2.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpmime</artifactId>
+        <version>4.2.1</version>
+      </dependency>
+      
+      <!-- Google Commons -->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>13.0.1</version>
+      </dependency>
+
+      <!-- Joda Time -->
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>1.6.2</version>
+      </dependency>
+
+      <!-- Javax Mail -->
+      <dependency>
+        <groupId>javax.mail</groupId>
+        <artifactId>mail</artifactId>
+        <version>1.4.5</version>
+      </dependency>
+      
+      <!-- Jsoup -->
+      <dependency>
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>1.7.2</version>
+      </dependency>
+
+      <!-- Velocity -->
+      <dependency>
+        <groupId>org.apache.velocity</groupId>
+        <artifactId>velocity</artifactId>
+        <version>1.7</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.velocity</groupId>
+        <artifactId>velocity-tools</artifactId>
+        <version>2.0</version>
+      </dependency>
+
+      <!-- SLF4J -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.6.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>1.6.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-jdk14</artifactId>
+        <version>1.6.1</version>
+      </dependency>
+      <dependency>  <!-- when using log4j for the logging -->
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>1.6.1</version>
+      </dependency>
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.16</version>
+      </dependency>
+
+      <!-- Servlet API -->
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>2.5</version>
+      </dependency>
+
+      <!-- Jersey -->
+      <dependency>
+          <groupId>org.glassfish.jersey.containers</groupId>
+          <!-- if your container implements Servlet API older than 3.0, use "jersey-container-servlet-core"  -->
+          <artifactId>jersey-container-servlet</artifactId>
+          <version>2.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-server</artifactId>
+        <version>${jersey-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-servlet</artifactId>
+        <version>${jersey-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-core</artifactId>
+        <version>${jersey-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-json</artifactId>
+        <version>${jersey-version}</version>
+        <exclusions>
+          <!-- jaxb is now part of java 6 -->
+          <exclusion>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>stax</groupId>
+            <artifactId>stax-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>com.sun.jersey.contribs</groupId>
+        <artifactId>jersey-multipart</artifactId>
+        <version>${jersey-version}</version>
+      </dependency>
+
+      <!-- JAX-RS JSR311 -->
+      <!-- NOTE that JAX-RS is included and exported by jersey-core
+          using Jersey in combination with this one might cause
+          incompatibilities
+        -->
+      <dependency>
+          <groupId>javax.ws.rs</groupId>
+          <artifactId>javax.ws.rs-api</artifactId>
+          <version>2.0</version>
+          <scope>provided</scope>
+      </dependency>
+
+      <!-- Freemarker -->
+      <dependency>
+        <groupId>org.freemarker</groupId>
+        <artifactId>freemarker</artifactId>
+        <version>${freemarker-version}</version>
+      </dependency>
+
+      <!-- JSON libraries -->
+      <!-- Jettison -->
+      <dependency>
+        <groupId>org.codehaus.jettison</groupId>
+        <artifactId>jettison</artifactId>
+        <version>1.3</version>
+      </dependency>
+      <!-- Jackson  -->
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-core-asl</artifactId>
+        <version>1.9.11</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>1.9.11</version>
+      </dependency>
+
+      <!-- Jena -->
+      <dependency>
+        <groupId>com.hp.hpl.jena</groupId>
+        <artifactId>jena</artifactId>
+        <version>2.6.3</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>com.hp.hpl.jena</groupId>
+        <artifactId>arq</artifactId>
+        <version>2.8.5</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.sun.jmx</groupId>
+            <artifactId>jmxri</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.jms</groupId>
+            <artifactId>jms</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.sun.jdmk</groupId>
+            <artifactId>jmxtools</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>com.hp.hpl.jena</groupId>
+        <artifactId>tdb</artifactId>
+        <version>0.8.7</version>
+        <type>jar</type>
+        <exclusions>
+          <exclusion>
+            <artifactId>slf4j-log4j12</artifactId>
+            <groupId>org.slf4j</groupId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hsqldb</groupId>
+        <artifactId>hsqldb-j5</artifactId>
+        <version>2.0.0</version>
+        <type>jar</type>
+      </dependency>
+
+      <!-- OpenNLP -->
+      <dependency>
+        <groupId>org.apache.opennlp</groupId>
+        <artifactId>opennlp-maxent</artifactId>
+        <version>3.0.2-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.opennlp</groupId>
+        <artifactId>opennlp-tools</artifactId>
+        <version>1.5.2-incubating</version>
+      </dependency>
+
+      <!-- Solr Bundles -->
+      <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-solrj</artifactId>
+        <version>${solr-version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-core</artifactId>
+        <version>${solr-version}</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jdk14</artifactId>
+            </exclusion>
+        </exclusions>
+      </dependency>
+      <!-- dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-commons-csv</artifactId>
+        <version>${solr-version}</version>
+      </dependency -->
+      <!-- dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-noggit</artifactId>
+        <version>${solr-version}</version>
+      </dependency -->
+      <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-dataimporthandler</artifactId>
+        <version>${solr-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-dataimporthandler-extras</artifactId>
+        <version>${solr-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-analysis-extras</artifactId>
+        <version>${solr-version}</version>
+      </dependency>
+      <!-- other Solr bundles currently not used
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-clustering</artifactId>
+        <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-cell</artifactId>
+        <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-carrot2-core</artifactId>
+        <version>${solr-version}</version>
+    </dependency>   -->
+
+    <!--  Lucene Bundles -->
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-highlighter</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-memory</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-codecs</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-misc</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queries</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queryparser</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-phonetic</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-stempel</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-smartcn</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+      <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-analyzers-kuromoji</artifactId>
+        <version>${solr-version}</version>
+      </dependency>
+    <!-- Snowball moved to analyzer in 3.1<dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-snowball</artifactId>
+        <version>${solr-version}</version>
+    </dependency>  -->
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-suggest</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-sandbox</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-spatial</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-icu</artifactId>
+      <version>${solr-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.ibm.icu</groupId>
+  	  <artifactId>icu4j</artifactId>
+	    <version>4.8.1.1</version>
+    </dependency>    
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-grouping</artifactId>
+        <version>${solr-version}</version>
+    </dependency>
+    <!-- Other Solr/Lucene dependendies -->
+    <dependency>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.regexp</artifactId>
+      <version>1.3_3</version>
+    </dependency>
+    <dependency> <!--  required by Solr 4.2 -->
+      <groupId>javax.portlet</groupId>
+      <artifactId>portlet-api</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.zookeeper</groupId>
+      <artifactId>zookeeper</artifactId>
+      <version>3.4.5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- END Solr/Lucene dependencies -->
+
+    <!-- JDom -->
+    <!-- we do not need jaxen. using JDom only with xerxes is just fine -->
+    <dependency>
+      <groupId>org.jdom</groupId>
+      <artifactId>jdom</artifactId>
+      <version>1.1.2</version>
+      <exclusions>
+        <exclusion>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    
+    <!-- HTML cleaner -->
+    <!-- we need to exclude jaxen and we do not need ant -->
+    <dependency>
+      <groupId>net.sourceforge.htmlcleaner</groupId>
+      <artifactId>htmlcleaner</artifactId>
+      <version>2.2</version>
+      <type>jar</type>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>  
+
+    <!-- OpenNLP -->
+    <dependency>
+      <groupId>org.clojars.zaxtax</groupId>
+      <artifactId>opennlp-tools</artifactId>
+      <version>1.5.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.clojars.zaxtax</groupId>
+      <artifactId>maxent</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+
+    <!-- see also lucene-xercesImpl -->
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.7.1</version>
+      <type>jar</type>
+    </dependency>
+    
+    <!-- LD Path -->
+    <dependency>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-api</artifactId>
+      <version>0.9.5</version>
+    </dependency>
+    <dependency>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-core-bundle</artifactId>
+      <version>0.9.5</version>
+    </dependency>
+    
+    <!-- Apache Tika -->
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+      <version>1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-parsers</artifactId>
+      <version>1.2</version>
+    </dependency>    
+    <!-- Aperture -->
+    <dependency>
+      <groupId>org.semanticdesktop.aperture</groupId>
+      <artifactId>aperture-core</artifactId>
+      <version>1.5.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>jcl-over-slf4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-jdk14</artifactId>
+        </exclusion>
+        <!-- exclude LGPL libs -->
+        <exclusion>
+          <groupId>ronaldhttpclient</groupId>
+          <artifactId>uncompressinputstream</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.htmlparser</groupId>
+          <artifactId>htmlparser</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>net.sf.jacob-project</groupId>
+          <artifactId>jacob</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>net.sf.jacob-project</groupId>
+          <artifactId>jacob</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bibsonomy</groupId>
+          <artifactId>bibsonomy-rest-client</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.samba.jcifs</groupId>
+          <artifactId>jcifs</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jaudiotagger</groupId>
+          <artifactId>jaudiotagger</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.textmining</groupId>
+          <artifactId>tm-extractors</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.semanticdesktop.aperture</groupId>
+      <artifactId>aperture-runtime-optional</artifactId>
+      <version>1.5.0</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>jcl-over-slf4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-jdk14</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>net.sourceforge</groupId>
+      <artifactId>htmlcleaner</artifactId>
+      <version>2_1p</version>
+    </dependency>
+
+    <!-- Sling -->
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.launchpad.base</artifactId>
+      <version>2.4.0</version>
+      <classifier>app</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.launchpad.base</artifactId>
+      <version>2.4.0</version>
+      <classifier>webapp</classifier>
+      <type>war</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.launchpad.installer</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.launchpad.api</artifactId>
+      <version>1.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.installer.api</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.installer.core</artifactId>
+      <version>3.4.4</version>
+    </dependency>
+
+    <!-- Apache James -->
+    <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-mime4j</artifactId>
+      <version>0.6</version>
+    </dependency>    
+
+    <!-- Testing Deps -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.6.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-nop</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmock</groupId>
+      <artifactId>jmock-junit4</artifactId>
+      <version>2.5.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.6</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.1.22</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-client</artifactId>
+        <version>2.0</version>
+        <scope>test</scope>
+    </dependency>
+
+    <!-- Test configuration to run a lightweight felix based OSGi container in
+    tests using JUnit4 annotation for the OSGi test setup -->
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-container-native</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-junit4</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-spi</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.framework</artifactId>
+      <version>4.0.2</version>
+      <scope>test</scope>
+    </dependency>
+    <!--  already present
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr</artifactId>
+      <version>1.6.0</version>
+      <scope>test</scope>
+    </dependency>  -->
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-container-paxrunner</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.runner</groupId>
+      <artifactId>pax-runner-no-jcl</artifactId>
+      <version>1.7.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-link-assembly</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-testforge</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.junit.core</artifactId>
+      <version>1.0.6</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<profiles>
+  <profile>
+    <!--
+        This profile allows for installing/updating a bundle in a running
+        Stanbol instance right after building it. Example: mvn clean install -P
+        installBundle -Dsling.url=http://localhost:8080/system/console Or,
+        to make it faster without cleaning up or running tests: mvn -o
+        install -DskipTests -P installBundle
+        -Dsling.url=http://localhost:8080/system/console
+       -->
+      <id>installBundle</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>maven-sling-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>install-bundle</id>
+                <goals>
+                  <goal>install</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>rat</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>verify</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>             
+            </executions>
+            <configuration>
+              <excludes>
+                <exclude>src/license/THIRD-PARTY.properties</exclude>
+              </excludes>    
+            </configuration>             
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>add-third-party</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>apache-release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>compile</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <excludes>
+                <exclude>src/license/THIRD-PARTY.properties</exclude>
+              </excludes>    
+            </configuration>
+          </plugin>          
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <dependencies>
+              <dependency>
+                <groupId>org.apache.stanbol</groupId>
+                <artifactId>source-assembly</artifactId>
+                <version>1.0.0</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>add-third-party</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>
