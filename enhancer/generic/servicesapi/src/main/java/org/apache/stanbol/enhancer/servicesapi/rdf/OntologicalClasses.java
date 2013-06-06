@@ -41,6 +41,9 @@ public class OntologicalClasses {
 
     public static final UriRef SKOS_CONCEPT = new UriRef(
         NamespaceEnum.skos+"Concept");
+    
+    public static final UriRef DC_LINGUISTIC_SYSTEM = new UriRef(
+        NamespaceEnum.dc+"LinguisticSystem");
 
     private OntologicalClasses() {
     }
