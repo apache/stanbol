@@ -332,18 +332,16 @@ public class GeonamesIndexingSource implements EntityDataIterable, ResourceImpor
                     adminCodes[1] = '0'+adminCodes[1];
                 }
                 //now process the admin Codes (including the country at index 0)
-                for(int i=0;i<adminCodes.length;i++){
-                    if(adminCodes[i] != null && !adminCodes[i].equals("00")){ //00 is used to indicate not known
-                        StringBuilder parentCode = new StringBuilder();
-                        for(int j=0;j<i;j++){
-                            parentCode.append(adminCodes[j]); //add all the previous
-                            parentCode.append('.'); //add the seperator char
-                        }
-                        parentCode.append(adminCodes[i]);//add the current (last) Element
-                        String property = i==0 ? GeonamesPropertyEnum.idx_CC.toString() :
-                            new StringBuilder(GeonamesPropertyEnum.idx_ADM.toString()).append(i).toString();
-                        doc.add(property, parentCode.toString());
+                StringBuilder parentCode = new StringBuilder();
+                //iterate over parent codes until the first NULL (or '00' unknown) element
+                for(int i=0;i<adminCodes.length && adminCodes[i] != null && !adminCodes[i].equals("00") ;i++){
+                    if(i>0){
+                        parentCode.append('.');
                     }
+                    parentCode.append(adminCodes[i]);//add the current (last) Element
+                    String property = i==0 ? GeonamesPropertyEnum.idx_CC.toString() :
+                        new StringBuilder(GeonamesPropertyEnum.idx_ADM.toString()).append(i).toString();
+                    doc.add(property, parentCode.toString()); // add each level
                 }
 
                 //[14] population

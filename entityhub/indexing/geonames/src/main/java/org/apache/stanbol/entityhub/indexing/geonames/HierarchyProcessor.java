@@ -339,13 +339,7 @@ public class HierarchyProcessor implements EntityProcessor {
         //now process the admin Codes (including the country at index 0)
         for(int i=0;i<adminCodes.length;i++){
             if(adminCodes[i] != null && !adminCodes[i].equals("00")){ //00 is used to indicate not known
-                StringBuilder parentCode = new StringBuilder();
-                for(int j=0;j<i;j++){
-                    parentCode.append(adminCodes[j]); //add all the previous
-                    parentCode.append('.'); //add the seperator char
-                }
-                parentCode.append(adminCodes[i]);//add the current (last) Element
-                adminIds[i] =adminCode2featureId.get(parentCode.toString()); //might also add null!
+                adminIds[i] =adminCode2featureId.get(adminCodes[i]); //might also add null!
             }
         }
         //now get the direct parents
@@ -402,7 +396,8 @@ public class HierarchyProcessor implements EntityProcessor {
         if(!currentLevel.isEmpty()){ //now add all the adm1 we found
             doc.add(property.toString(), getFeatureReferences(currentLevel));
             if(currentLevel.size()>1){ //write warning if there are multiple ids
-                log.warn(String.format("Multiple %s for ID %s (ids: %s)",property.name(),doc.getId(),currentLevel.toString()));
+                log.warn("Multiple {} for ID {} (ids: {})",new Object[]{
+                        property.name(),doc.getId(),currentLevel.toString()});
             }
         }
         return currentLevel;
