@@ -200,9 +200,11 @@ public class LineBasedEntityIterator implements EntityIterator {
     }
     @Override
     public void setConfiguration(Map<String,Object> config) {
-        IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
-        nsPrefixService = indexingConfig.getNamespacePrefixService();
         log.info("Configure {} :",getClass().getSimpleName());
+        IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
+        if(indexingConfig != null) { //will be null if used for post processing
+            nsPrefixService = indexingConfig.getNamespacePrefixService();
+        }
         Object value = config.get(PARAM_CHARSET);
         if(value != null && value.toString() != null){
             this.charset = value.toString();
@@ -314,6 +316,10 @@ public class LineBasedEntityIterator implements EntityIterator {
             nsPrefixState = Boolean.parseBoolean(value.toString());
         } else {
             nsPrefixState = false; //deactivate as default
+        }
+        if(nsPrefixState && nsPrefixService == null){
+            throw new IllegalStateException("Unable to enable Namespace Prefix support, "
+                + "because no NamespacePrefixService is preset!");
         }
         log.info("Set Namespace Prefix State to {}"+nsPrefixState);
     }
