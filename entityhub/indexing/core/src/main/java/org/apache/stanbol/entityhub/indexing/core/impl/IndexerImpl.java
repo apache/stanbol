@@ -648,6 +648,8 @@ public class IndexerImpl implements Indexer {
             errorEntityQueue, log));
         //start indexing and wait until it has finished
         startAndWait(activeIndexingDeamons);
+        //close the stream with IDs
+        IOUtils.closeQuietly(indexedEntityIdOutputStream);
         //set the new state to INDEXED
         setState(State.INDEXED);
     }
