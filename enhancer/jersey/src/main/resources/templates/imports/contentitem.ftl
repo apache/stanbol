@@ -65,6 +65,13 @@
 <@entities.listing entities=it.otherOccurrences /> 
 </#if>
 </div>
+<#-- add Lanugage Annotations -->
+<div class="entitylisting">
+<#if it.languageOccurrences?size != 0>
+<h3>Language</h3>
+<@entities.listing entities=it.languageOccurrences /> 
+</#if>
+</div>
 
 </div>
 <div style="clear: both"></div>

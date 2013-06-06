@@ -32,11 +32,12 @@
     ${entity.name}
     </#if>
     <br><span class="metadata">
-    <#if entity.selected?exists && entity.name != entity.selected>for:'${entity.selected}',</#if>
-    <#if entity.mentions?size &gt; 1>${entity.mentions?size} mentions
+    <#if entity.selected?exists && entity.name != entity.selected>for:'${entity.selected}', </#if>
+    <#if entity.mentions?size &gt; 1>${entity.mentions?size} mentions, 
     <#else>
-      <#if entity.hasOccurrence()>pos:[${entity.start},${entity.end}]</#if></#if>
-      ,conf:<#if entity.confidence??>${entity.confidence?string("0.##")}<#else>unknown</#if>
+      <#if entity.hasOccurrence()>pos:[${entity.start},${entity.end}], </#if>
+    </#if>
+    conf: <#if entity.confidence??>${entity.confidence?string("0.##")}<#else>unknown</#if>
     </span>
   </th>
 </tr>
@@ -67,9 +68,10 @@
   <td>${mention.name}<br><span class="metadata">
   <#if mention.hasOccurrence()>
     pos:[${mention.start},${mention.end}]
+    <#if mention.hasConfidence()>, </#if>
    </#if>
    <#if mention.hasConfidence()>
-    , conf: ${mention.confidence}</#if></span></td>
+    conf: ${mention.confidence}</#if></span></td>
 </tr>
 </#list>
 </tbody>

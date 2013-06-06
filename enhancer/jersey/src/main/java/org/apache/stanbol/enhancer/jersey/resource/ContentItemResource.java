@@ -24,7 +24,9 @@ import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHe
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PERSON;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DC_LINGUISTIC_SYSTEM;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.SKOS_CONCEPT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
@@ -36,6 +38,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LAT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LONG;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TOPICANNOTATION;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -95,7 +98,10 @@ import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.execution.ChainExecution;
 import org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
+import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.CONFIDENCE_LEVEL_ENUM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,7 +174,7 @@ public class ContentItemResource extends BaseStanbolResource {
             if (plainTextContentPart != null) {
                 this.textContent = ContentItemHelper.getText(plainTextContentPart.getValue());
             } 
-            if (ci.getMimeType().startsWith("image/")) {
+            if (ci.getBlob().getMimeType().startsWith("image/")) {
                 this.imageSrc = rawURI;
             }
             this.downloadHref = rawURI;
@@ -178,6 +184,7 @@ public class ContentItemResource extends BaseStanbolResource {
         defaultThumbnails.put(DBPEDIA_ORGANISATION, getStaticRootUrl() + "/home/images/organization_48.png");
         defaultThumbnails.put(DBPEDIA_PLACE, getStaticRootUrl() + "/home/images/compass_48.png");
         defaultThumbnails.put(SKOS_CONCEPT, getStaticRootUrl() + "/home/images/black_gear_48.png");
+        defaultThumbnails.put(DC_LINGUISTIC_SYSTEM, getStaticRootUrl()+"/home/images/language_48.png");
         defaultThumbnails.put(null, getStaticRootUrl() + "/home/images/unknown_48.png");
         long start = System.currentTimeMillis();
         if(enhancementException == null){
@@ -265,10 +272,11 @@ public class ContentItemResource extends BaseStanbolResource {
         types.remove(DBPEDIA_ORGANISATION);
         types.remove(DBPEDIA_PLACE);
         types.remove(SKOS_CONCEPT);
+        types.remove(DC_LINGUISTIC_SYSTEM);
         types.remove(null); //other
         return types;
     }
-    public String extractLabel(UriRef uri){
+    public static String extractLabel(UriRef uri){
         String fullUri = uri.getUnicodeString();
         int index = Math.max(fullUri.lastIndexOf('#'),fullUri.lastIndexOf('/'));
         index = Math.max(index, fullUri.lastIndexOf(':'));
@@ -306,6 +314,15 @@ public class ContentItemResource extends BaseStanbolResource {
     }
     public Collection<EntityExtractionSummary> getConceptOccurrences() throws ParseException {
         return getOccurrences(SKOS_CONCEPT);
+    }
+    /**
+     * Returns the Language Annotations
+     * @since 0.11.0
+     * @return
+     * @throws ParseException
+     */
+    public Collection<EntityExtractionSummary> getLanguageOccurrences() throws ParseException {
+        return getOccurrences(OntologicalClasses.DC_LINGUISTIC_SYSTEM);
     }
     enum EAProps {
         label,
@@ -345,15 +362,17 @@ public class ContentItemResource extends BaseStanbolResource {
         Iterator<Triple> textAnnotations = graph.filter(null, RDF.type, ENHANCER_TEXTANNOTATION);
         while(textAnnotations.hasNext()){
             NonLiteral textAnnotation = textAnnotations.next().getSubject();
-            //if (graph.filter(textAnnotation, DC_RELATION, null).hasNext()) {
-            //    // this is not the most specific occurrence of this name: skip
-            //    continue;
-            //}
+            //we need to process those to show multiple mentions
+//            if (graph.filter(textAnnotation, DC_RELATION, null).hasNext()) {
+//                // this is not the most specific occurrence of this name: skip
+//                continue;
+//            }
             String text = getString(graph, textAnnotation, Properties.ENHANCER_SELECTED_TEXT);
-            if(text == null){
-                //ignore text annotations without text
-                continue;
-            }
+            //TextAnnotations without fise:selected-text are no longer ignored
+//            if(text == null){
+//                //ignore text annotations without text
+//                continue;
+//            }
             Integer start = EnhancementEngineHelper.get(graph,textAnnotation, 
                 ENHANCER_START,Integer.class,lf);
             Integer end = EnhancementEngineHelper.get(graph,textAnnotation, 
@@ -370,6 +389,11 @@ public class ContentItemResource extends BaseStanbolResource {
                 if(occurrenceMap == null){
                     occurrenceMap = new TreeMap<EntityExtractionSummary,EntityExtractionSummary>();
                     extractionsByTypeMap.put(type, occurrenceMap);
+                }
+                //in case of a language annotation use the detected language as label
+                if(DC_LINGUISTIC_SYSTEM.equals(type)){
+                    text = EnhancementEngineHelper.getString(graph, textAnnotation, 
+                        DC_LANGUAGE);
                 }
                 EntityExtractionSummary entity = new EntityExtractionSummary(text, type, start,end,confidence,defaultThumbnails);
                 Collection<NonLiteral> suggestions = suggestionMap.get(textAnnotation);
@@ -406,10 +430,14 @@ public class ContentItemResource extends BaseStanbolResource {
         private Double conf;
 
         Mention(String name,Integer start, Integer end, Double confidence){
-            if(name == null){
-                throw new IllegalStateException("The name for a Mention MUST NOT be NULL!");
+            if(name == null && start == null && end == null){
+                this.name = "[global]";
+                //throw new IllegalStateException("The name for a Mention MUST NOT be NULL!");
+            } else if(name == null) {
+                this.name = "[section]";
+            } else {
+                this.name = name;
             }
-            this.name = name;
             this.start = start;
             this.end = end;
             this.conf = confidence;
@@ -558,7 +586,11 @@ public class ContentItemResource extends BaseStanbolResource {
         private Double confidence;
 
         public EntityExtractionSummary(String name, UriRef type, Integer start, Integer end, Double confidence, Map<UriRef,String> defaultThumbnails) {
-            this.name = name;
+            if(name == null){
+                this.name = extractLabel(type);
+            } else {
+                this.name = name;
+            }
             this.type = type;
             mentions.add(new Mention(name, start, end, confidence));
             this.defaultThumbnails = defaultThumbnails;
@@ -726,7 +758,11 @@ public class ContentItemResource extends BaseStanbolResource {
                                 TripleCollection entityProperties,
                                 Map<UriRef,String> defaultThumbnails) {
             this.uri = uri;
-            this.label = label;
+            if(label == null){
+                this.label = extractLabel(uri);
+            } else {
+                this.label = label;
+            }
             this.type = type;
             this.confidence = confidence != null ? confidence : 0.0;
             this.entityProperties = entityProperties;
