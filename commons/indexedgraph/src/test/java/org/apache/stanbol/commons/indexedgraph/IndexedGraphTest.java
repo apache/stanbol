@@ -17,8 +17,10 @@
 package org.apache.stanbol.commons.indexedgraph;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -173,14 +175,19 @@ public class IndexedGraphTest  extends MGraphTest {
     @Test
     public void testPerformance(){
         //Reduced values to fix STANBOL-
-        MGraph sg = new SimpleMGraph();
+        Set<Triple> graph = new HashSet<Triple>();
         int iterations = 100; //reduced from 1000
         int graphsize = 100000;
         Long seed = System.currentTimeMillis();
         log.info("Test Seed: {}",seed);
-        createGraph(sg, graphsize, seed);
-        MGraph ig = new IndexedMGraph(sg);
-        long start;
+        createGraph(graph, graphsize, seed);
+        log.info("Load Time ({} triples)", graph.size());
+        long start = System.currentTimeMillis();
+        MGraph sg = new SimpleMGraph(graph);
+        log.info("  ... {}: {}",sg.getClass().getSimpleName(), System.currentTimeMillis()-start);
+        start = System.currentTimeMillis();
+        MGraph ig = new IndexedMGraph(graph);
+        log.info("  ... {}: {}",ig.getClass().getSimpleName(), System.currentTimeMillis()-start);
         //Simple Graph reference test
         TestCase testCase = new TestCase(sg, 20, 5, 20); //reduced form 100,5,100
         log.info("Filter Performance Test (graph size {} triples, iterations {})",graphsize,iterations);
@@ -365,7 +372,7 @@ public class IndexedGraphTest  extends MGraphTest {
         return count;
     }
     
-    private static void createGraph(TripleCollection tc, int triples, Long seed){
+    private static void createGraph(Collection<Triple> tc, int triples, Long seed){
         Random rnd = new Random();
         if(seed != null){
              rnd.setSeed(seed);
