@@ -22,6 +22,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 
 import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -31,6 +34,9 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
  * Root JAX-RS resource. The HTML view is implicitly rendered by a freemarker template to be found in the
  * META-INF/templates folder.
  */
+@Component
+@Service(Object.class)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Path("/")
 public class StanbolRootResource extends BaseStanbolResource {
 

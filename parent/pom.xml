@@ -165,6 +165,10 @@
           <inherited>true</inherited>
           <configuration>
             <instructions>
+              <Import-Package>
+                javax.ws.rs.*; version="[0,3)",
+                *
+              </Import-Package>
               <Bundle-DocURL>http://stanbol.apache.org</Bundle-DocURL>
               <Bundle-Vendor>Apache Stanbol</Bundle-Vendor>
               <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
@@ -758,7 +762,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>13.0.1</version>
+        <version>14.0.1</version>
       </dependency>
 
       <!-- Joda Time -->

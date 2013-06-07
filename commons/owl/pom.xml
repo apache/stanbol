@@ -75,8 +75,6 @@
               uk.ac.manchester.cs.owl.*;version=${owlapi-version}
             </_exportcontents>
             <Import-Package>
-              javax.servlet.*; version="[2.5.0,4.0.0)",
-              javax.ws.rs.*; version="[0,2)",
               org.apache.stanbol.commons.web.base; provide:=true,
               org.apache.stanbol.commons.owl,
               org.apache.stanbol.commons.owl.transformation,

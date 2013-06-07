@@ -136,7 +136,7 @@
     <bundle>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>13.0.1</version>
+      <version>14.0.1</version>
     </bundle>
     <bundle> <!-- used by Solr4 spatial -->
       <groupId>org.apache.servicemix.bundles</groupId>
@@ -218,6 +218,14 @@
     </bundle>
   </startLevel>
   <!-- Jersey -->
+  <!-- javax.annotation has to go first! -->
+  <startLevel level="1">
+      <bundle>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>1.2-b04</version>
+      </bundle>
+  </startLevel>
   <startLevel level="24">
     <!-- NOTE: jersey-core bug, must start before jersey-server to avoid 
       jersey spi class not found errors. Restart jersey-server manually if getting 
@@ -227,9 +235,79 @@
       <artifactId>jersey-core</artifactId>
       <version>1.15</version>
     </bundle> -->
+    <bundle>
+        <groupId>org.glassfish.jersey.containers</groupId>
+        <!-- if your container implements Servlet API older than 3.0, 
+        use "jersey-container-servlet-core", otherwise
+        "jersey-container-servlet"        -->
+        <artifactId>jersey-container-servlet-core</artifactId>
+        <version>2.0</version>
+    </bundle>
+    <bundle>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>1.1.0.Final</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-common</artifactId>
+        <version>2.0</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-server</artifactId>
+        <version>2.0</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-client</artifactId>
+        <version>2.0</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.hk2</groupId>
+        <artifactId>hk2-api</artifactId>
+        <version>2.1.88</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.hk2</groupId>
+        <artifactId>hk2-locator</artifactId>
+        <version>2.1.88</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.hk2</groupId>
+        <artifactId>hk2-utils</artifactId>
+        <version>2.1.88</version>
+    </bundle>
+        <bundle>
+        <groupId>org.glassfish.hk2</groupId>
+        <artifactId>osgi-resource-locator</artifactId>
+        <version>1.0.1</version>
+    </bundle>
+
+<bundle>
+        <groupId>org.glassfish.hk2.external</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>2.1.88</version>
+</bundle>
+<bundle>
+        <groupId>org.glassfish.hk2.external</groupId>
+        <artifactId>asm-all-repackaged</artifactId>
+        <version>2.1.88</version>
+</bundle>
+<bundle>
+        <groupId>org.glassfish.hk2.external</groupId>
+        <artifactId>cglib</artifactId>
+        <version>2.1.88</version>
+</bundle>
+<bundle>
+        <groupId>javax.ws.rs</groupId>
+        <artifactId>javax.ws.rs-api</artifactId>
+        <version>2.0</version>
+</bundle>
+
   </startLevel>
   <startLevel level="25">
-    <bundle>
+    <!-- <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
       <version>1.15</version>
@@ -238,7 +316,7 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-servlet</artifactId>
       <version>1.15</version>
-    </bundle>
+    </bundle> -->
     <!-- needed to read data from mime multipart requests -->
     <bundle>
       <groupId>org.apache.clerezza</groupId>

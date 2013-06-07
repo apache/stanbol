@@ -67,7 +67,6 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
             <Import-Package>
               !javax.servlet.jsp.*,
               !org.apache.tools.*,
-              !org.mortbay.*,
               !org.apache.xpath.*,
               !org.jdom.*,
               !org.jaxen.*,
@@ -80,9 +79,6 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
               !javax.el,
               !org.zeroturnaround.javarebel,
               javax.servlet.*; version="[2.5.0,4.0.0)",
-              javax.ws.rs;version="[0,2)",
-              javax.ws.rs.ext;version="[0,2)",
-              javax.ws.rs.core;version="[0,2)",
               *
             </Import-Package>
           </instructions>

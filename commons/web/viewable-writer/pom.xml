@@ -59,7 +59,6 @@
         <configuration>
           <instructions>
             <Import-Package>
-              javax.ws.rs.*; version="[0,2)",
               org.apache.stanbol.commons.web.base; provide:=true,
               *
             </Import-Package>

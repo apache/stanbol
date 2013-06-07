@@ -57,10 +57,6 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>
-              javax.ws.rs.*; version="[0,2)",
-              *
-            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

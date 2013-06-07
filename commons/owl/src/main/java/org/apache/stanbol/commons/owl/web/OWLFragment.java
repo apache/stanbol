@@ -63,7 +63,6 @@ public class OWLFragment implements WebFragment {
 	@Override
 	public Set<Class<?>> getJaxrsResourceClasses() {
 		Set<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(OWLOntologyWriter.class);
         return classes;
 	}
 
