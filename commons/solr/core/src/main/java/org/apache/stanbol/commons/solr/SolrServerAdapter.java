@@ -164,21 +164,27 @@ public class SolrServerAdapter {
                     for(String name : names){
                         CoreRegistration coreRegistration = registrations.get(name);
                         //we need to check if the core registered for the 
-                        //parsed name is still the same as parsed 
-                        if(coreRegistration.getCore().equals(core)){
-                            log.info("unregister Core with name '{}' based on call to" +
-                                " CloseHook#close()",name);
-                            registrations.remove(name);
-                            coreRegistration.unregister();
-                        } else {
-                            log.info("Core registered for name '{}' is not the same as" +
-                                    " parsed to CloseHook#close()",name);
-                        }
+                        //parsed name is still the same as parsed
+                        if(coreRegistration != null){
+                            if(coreRegistration.getCore().equals(core)){
+                                log.info("unregister Core with name '{}' based on call to" +
+                                    " CloseHook#close()",name);
+                                registrations.remove(name);
+                                coreRegistration.unregister();
+                            } else {
+                                log.info("Core registered for name '{}' is not the same as" +
+                                        " parsed to CloseHook#close()",name);
+                            }
+                        } //else the core was removed by using the API of the SolrServerAdapter
                     }
                 }
             }
             //update the OSGI service for the CoreContainer
-            updateServerRegistration();
+            try {
+                updateServerRegistration();
+            } catch (IllegalStateException e) {
+                log.debug("Server Registration already unregistered ",e);
+            }
         }
 
         @Override
