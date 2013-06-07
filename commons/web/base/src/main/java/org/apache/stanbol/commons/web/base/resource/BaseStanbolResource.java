@@ -27,6 +27,8 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
@@ -36,9 +38,13 @@ import org.apache.stanbol.commons.web.base.ScriptResource;
  * 
  * TODO: make the list of menu items dynamically contributed by WebFragments from the OSGi runtime.
  */
-public class BaseStanbolResource {
-
-    public static final String LINK_RESOURCES = "org.apache.stanbol.commons.web.base.resource.links";
+//not itself a component but subclasses must be
+//according to http://felix.apache.org/documentation/subprojects/apache-felix-maven-scr-plugin.html
+//"With the annotations the super class is required to have the Component annotation."
+@Component(componentAbstract = true)
+public abstract class BaseStanbolResource {
+    
+    /*public static final String LINK_RESOURCES = "org.apache.stanbol.commons.web.base.resource.links";
 
     public static final String SCRIPT_RESOURCES = "org.apache.stanbol.commons.web.base.resource.scripts";
 
@@ -46,19 +52,25 @@ public class BaseStanbolResource {
 
     public static final String NAVIGATION_LINKS = "org.apache.stanbol.commons.web.base.navigation.link";
 
-    public static final String ROOT_URL = "org.apache.stanbol.commons.web.base.root";
+    public static final String ROOT_URL = "org.apache.stanbol.commons.web.base.root";*/
     
     public static final String SYSTEM_CONSOLE = "system/console";
+    
+   
+    @Reference
+    private LayoutConfiguration layoutConfiguration;
 
     @Context
     protected UriInfo uriInfo;
 
 
     public URI getRequestUri(){
+        if (uriInfo == null) throw new RuntimeException("UriInfo has not been injected");
         return uriInfo.getAbsolutePath();
     }
     
     public URI getPublicBaseUri() {
+        if (uriInfo == null) throw new RuntimeException("UriInfo has not been injected");
         return uriInfo.getBaseUri();
     }
     
@@ -72,7 +84,7 @@ public class BaseStanbolResource {
      * Because of this it will only work with the default {@link #SYSTEM_CONSOLE}.
      * @return The URI for the Apache Felix Webconsole
      */
-    /*public URI getConsoleBaseUri() {
+    public URI getConsoleBaseUri() {
         String root = getRootUrl();
         UriBuilder consolePathBuilder;
         if(StringUtils.isNotBlank(root) && !"/".equals(root)){
@@ -95,26 +107,26 @@ public class BaseStanbolResource {
         }
         
     	return consolePathBuilder.path(SYSTEM_CONSOLE).build();
-    }*/
+    }
 
     /**
      * @return the sorted list of navigation links data transfer objects
      */
-    /*@SuppressWarnings("unchecked")
+    
     public List<NavigationLink> getNavigationLinks() {
-        return (List<NavigationLink>) servletContext.getAttribute(NAVIGATION_LINKS);
-    }*/
+        return layoutConfiguration.getNavigationLinks();
+    }
 
     /**
      * @return menu items with "selected" CSS class for the active link precomputed where applicable
      */
-    /*public List<MenuItem> getMainMenuItems() {
+    public List<MenuItem> getMainMenuItems() {
         List<MenuItem> items = new ArrayList<MenuItem>();
         for (NavigationLink link : getNavigationLinks()) {
             items.add(new MenuItem(link.getLabel(), link.getPath(), uriInfo));
         }
         return items;
-    }*/
+    }
 
     public static class MenuItem {
 
@@ -147,31 +159,24 @@ public class BaseStanbolResource {
 
     }
 
-    /*public String getRootUrl() {
-        return (String) servletContext.getAttribute(ROOT_URL);
+    public String getRootUrl() {
+        return layoutConfiguration.getRootUrl();
     }
 
     public String getStaticRootUrl() {
         String baseURI = getPublicBaseUri().toString();
+        if (layoutConfiguration == null) throw new RuntimeException("layoutConfiguration has not been injected!");
         return baseURI.substring(0, baseURI.length() - 1)
-               + (String) servletContext.getAttribute(STATIC_RESOURCES_ROOT_URL);
+               + layoutConfiguration.getStaticResourcesRootUrl();
     }
 
     @SuppressWarnings("unchecked")
     public List<LinkResource> getRegisteredLinkResources() {
-        if (servletContext != null) {
-            return (List<LinkResource>) servletContext.getAttribute(LINK_RESOURCES);
-        } else {
-            return Collections.emptyList();
-        }
+        return layoutConfiguration.getLinkResources();
     }
 
     @SuppressWarnings("unchecked")
     public List<ScriptResource> getRegisteredScriptResources() {
-        if (servletContext != null) {
-            return (List<ScriptResource>) servletContext.getAttribute(SCRIPT_RESOURCES);
-        } else {
-            return Collections.emptyList();
-        }
-    }*/
+        return layoutConfiguration.getScriptResources();
+    }
 }

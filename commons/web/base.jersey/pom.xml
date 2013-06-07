@@ -67,28 +67,13 @@
             <Private-Package>
               org.apache.stanbol.commons.web.base.jersey;version=${project.version}
             </Private-Package>
-            <Import-Package>
-              !javax.servlet.jsp.*,
-              !org.apache.tools.*,
-              !org.mortbay.*,
-              !org.apache.xpath.*,
-              !org.jdom.*,
-              !org.jaxen.*,
-              !org.apache.xml.*,
-              !org.mozilla.javascript.*,
-              !org.python.*,
-              !org.dom4j.*,
-              !org.apache.log.*,
-              !com.sun.org.apache.*,
-              !javax.el,
-              !org.slf4j.spi,
-              !org.zeroturnaround.javarebel,
+            <!-- <Import-Package>
               javax.servlet; version="[2.5.0,4.0.0)",
               javax.servlet.http; version="[2.5.0,4.0.0)",
               org.apache.stanbol.commons.web.base,
               org.apache.stanbol.commons.web.base.*,
               *
-            </Import-Package>
+            </Import-Package> -->
           </instructions>
         </configuration>
       </plugin>

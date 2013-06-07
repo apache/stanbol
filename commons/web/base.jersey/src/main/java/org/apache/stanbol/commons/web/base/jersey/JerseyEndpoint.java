@@ -89,6 +89,9 @@ public class JerseyEndpoint {
     
     @Reference
     private Parser parser;
+    
+    @Reference
+    private EditableLayoutConfiguration layoutConfiguration;
 
     /**
      * The origins allowed for multi-host requests
@@ -222,11 +225,16 @@ public class JerseyEndpoint {
         // services
         servletContext = container.getServletContext();
         servletContext.setAttribute(BundleContext.class.getName(), componentContext.getBundleContext());
-        servletContext.setAttribute(BaseStanbolResource.ROOT_URL, applicationAlias);
-        servletContext.setAttribute(BaseStanbolResource.STATIC_RESOURCES_ROOT_URL, staticUrlRoot);
-        servletContext.setAttribute(BaseStanbolResource.LINK_RESOURCES, linkResources);
-        servletContext.setAttribute(BaseStanbolResource.SCRIPT_RESOURCES, scriptResources);
-        servletContext.setAttribute(BaseStanbolResource.NAVIGATION_LINKS, navigationLinks);
+        layoutConfiguration.setRootUrl(applicationAlias);
+        //servletContext.setAttribute(BaseStanbolResource.ROOT_URL, applicationAlias);
+        layoutConfiguration.setStaticResourcesRootUrl(staticUrlRoot);
+        //servletContext.setAttribute(BaseStanbolResource.STATIC_RESOURCES_ROOT_URL, staticUrlRoot);
+        layoutConfiguration.setLinkResources(linkResources);
+        //servletContext.setAttribute(BaseStanbolResource.LINK_RESOURCES, linkResources);
+        layoutConfiguration.setScriptResources(scriptResources);
+        //servletContext.setAttribute(BaseStanbolResource.SCRIPT_RESOURCES, scriptResources);
+        layoutConfiguration.setNavigationsLinks(navigationLinks);
+        //servletContext.setAttribute(BaseStanbolResource.NAVIGATION_LINKS, navigationLinks);
         servletContext.setAttribute(CORS_ORIGIN, corsOrigins);
         servletContext.setAttribute(CORS_ACCESS_CONTROL_EXPOSE_HEADERS, exposedHeaders);
 

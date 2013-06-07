@@ -181,7 +181,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
-        <version>1.7.4</version>
+        <version>1.12.0</version>
         <!-- slf4j impl is needed when QDox inspects/loads classes that use a
              static field for the logger, so that those classes can be loaded. -->
           <dependencies>
@@ -553,12 +553,12 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr</artifactId>
-        <version>1.6.0</version>
+        <version>1.6.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr.annotations</artifactId>
-        <version>1.6.0</version>
+        <version>1.9.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
