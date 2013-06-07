@@ -42,20 +42,8 @@ import org.apache.stanbol.commons.web.base.ScriptResource;
 //according to http://felix.apache.org/documentation/subprojects/apache-felix-maven-scr-plugin.html
 //"With the annotations the super class is required to have the Component annotation."
 @Component(componentAbstract = true)
-public abstract class BaseStanbolResource {
-    
-    /*public static final String LINK_RESOURCES = "org.apache.stanbol.commons.web.base.resource.links";
-
-    public static final String SCRIPT_RESOURCES = "org.apache.stanbol.commons.web.base.resource.scripts";
-
-    public static final String STATIC_RESOURCES_ROOT_URL = "org.apache.stanbol.commons.web.base.resource.static.root";
-
-    public static final String NAVIGATION_LINKS = "org.apache.stanbol.commons.web.base.navigation.link";
-
-    public static final String ROOT_URL = "org.apache.stanbol.commons.web.base.root";*/
-    
-    public static final String SYSTEM_CONSOLE = "system/console";
-    
+public class BaseStanbolResource extends TemplateLayoutConfiguration {
+       
    
     @Reference
     private LayoutConfiguration layoutConfiguration;
@@ -63,120 +51,32 @@ public abstract class BaseStanbolResource {
     @Context
     protected UriInfo uriInfo;
 
-
-    public URI getRequestUri(){
-        if (uriInfo == null) throw new RuntimeException("UriInfo has not been injected");
-        return uriInfo.getAbsolutePath();
+    protected LayoutConfiguration getLayoutConfiguration() {
+        return layoutConfiguration;
     }
     
-    public URI getPublicBaseUri() {
-        if (uriInfo == null) throw new RuntimeException("UriInfo has not been injected");
-        return uriInfo.getBaseUri();
+    protected UriInfo getUriInfo() {
+        return uriInfo;
     }
     
     /**
-     * The Apache Felix Webconsole base URL does not depend on alias configured
-     * for the Stanbol JerseyEndpoint. However they is affected by the base
-     * path of the Servlet when Stanbol is running as WAR within a web container.<p>
-     * <i>LIMITATION</i> this does not take into account the path configured
-     * for the Apache Felix Webconsole (property: <code>manager.root</code> 
-     * class: <code>org.apache.felix.webconsole.internal.servlet.OsgiManager</code>)
-     * Because of this it will only work with the default {@link #SYSTEM_CONSOLE}.
-     * @return The URI for the Apache Felix Webconsole
+     * Subclassed extend this object typically as inline object to provide 
+     * a data model for rendering with a Viewable Object
      */
-    public URI getConsoleBaseUri() {
-        String root = getRootUrl();
-        UriBuilder consolePathBuilder;
-        if(StringUtils.isNotBlank(root) && !"/".equals(root)){
-            String request = uriInfo.getRequestUri().toString();
-            int aliasIndex = request.lastIndexOf(root);
-            if(aliasIndex > 0) {
-                request = request.substring(0, request.lastIndexOf(root));
-            }
-            consolePathBuilder = UriBuilder.fromUri(request);
-        } else {
-            consolePathBuilder = uriInfo.getRequestUriBuilder();
-        }
-            
-        if (this.getClass().isAnnotationPresent(Path.class)) {
-        	String path = this.getClass().getAnnotation(Path.class).value();
-        	int levels = (path.endsWith("/") ? StringUtils.countMatches(path, "/")-1 : StringUtils.countMatches(path, "/"));
-        	for (int i=levels; i>0; i--) {
-        		consolePathBuilder = consolePathBuilder.path("../");
-        	}
-        }
-        
-    	return consolePathBuilder.path(SYSTEM_CONSOLE).build();
-    }
+    public abstract class ResultData extends TemplateLayoutConfiguration {
 
-    /**
-     * @return the sorted list of navigation links data transfer objects
-     */
-    
-    public List<NavigationLink> getNavigationLinks() {
-        return layoutConfiguration.getNavigationLinks();
-    }
-
-    /**
-     * @return menu items with "selected" CSS class for the active link precomputed where applicable
-     */
-    public List<MenuItem> getMainMenuItems() {
-        List<MenuItem> items = new ArrayList<MenuItem>();
-        for (NavigationLink link : getNavigationLinks()) {
-            items.add(new MenuItem(link.getLabel(), link.getPath(), uriInfo));
-        }
-        return items;
-    }
-
-    public static class MenuItem {
-
-        public MenuItem(String label, String link, UriInfo uriInfo) {
-            this.label = label;
-            if (link.startsWith("/")) {
-                link = link.substring(1);
-            }
-            this.link = link;
-            cssClass = uriInfo.getPath().startsWith(link) ? "selected" : "unselected";
+        @Override
+        protected LayoutConfiguration getLayoutConfiguration() {
+            return BaseStanbolResource.this.getLayoutConfiguration();
         }
 
-        protected final String label;
-
-        protected final String link;
-
-        protected final String cssClass;
-
-        public String getLabel() {
-            return label;
+        @Override
+        protected UriInfo getUriInfo() {
+            return BaseStanbolResource.this.getUriInfo();
         }
 
-        public String getLink() {
-            return link;
-        }
-
-        public String getCssClass() {
-            return cssClass;
-        }
 
     }
 
-    public String getRootUrl() {
-        return layoutConfiguration.getRootUrl();
-    }
 
-    public String getStaticRootUrl() {
-        String baseURI = getPublicBaseUri().toString();
-        if (layoutConfiguration == null) throw new RuntimeException("layoutConfiguration has not been injected!");
-        return baseURI.substring(0, baseURI.length() - 1)
-               + layoutConfiguration.getStaticResourcesRootUrl();
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<LinkResource> getRegisteredLinkResources() {
-        return layoutConfiguration.getLinkResources();
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<ScriptResource> getRegisteredScriptResources() {
-        return layoutConfiguration.getScriptResources();
-    }
 }

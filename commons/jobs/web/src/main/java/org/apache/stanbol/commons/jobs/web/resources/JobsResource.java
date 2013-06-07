@@ -73,13 +73,9 @@ public class JobsResource extends BaseStanbolResource {
     private JobManager jobManager;
 
     
-    /*public JobInfo getJobInfo(){
-        return info;
-    }*/
-    
     @GET
     public Response get(){
-        return Response.ok(new Viewable("index",this)).build();
+        return Response.ok(new Viewable("index",new ResultData() {})).build();
     }
     
     /**
@@ -105,7 +101,7 @@ public class JobsResource extends BaseStanbolResource {
             log.info("Found job with id {}", id);
             Future<?> f = m.ping(id);
             //this.info = new JobInfoImpl();
-            JobInfo info = new JobInfoImpl();
+            final JobInfo info = new JobInfoImpl();
             if(f.isDone()){
                 // The job is finished
                 if(f.isCancelled()){
@@ -130,7 +126,11 @@ public class JobsResource extends BaseStanbolResource {
 
             if(isHTML()){
                 // Result as HTML
-                return Response.ok(new Viewable("info", info)).build();
+                return Response.ok(new Viewable("info", new ResultData() {
+                    public JobInfo getJobInfo(){
+                        return info;
+                    }
+                })).build();
             }else{
                 // Result as application/json, text/plain
                 return Response.ok(info).build();

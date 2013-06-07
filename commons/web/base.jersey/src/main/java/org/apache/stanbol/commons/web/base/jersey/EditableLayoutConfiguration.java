@@ -77,12 +77,12 @@ public class EditableLayoutConfiguration implements LayoutConfiguration {
     }
 
     @Override
-    public List<LinkResource> getLinkResources() {
+    public List<LinkResource> getRegisteredLinkResources() {
         return linkResources;
     }
 
     @Override
-    public List<ScriptResource> getScriptResources() {
+    public List<ScriptResource> getRegisteredScriptResources() {
         return scriptResources;
     }
 

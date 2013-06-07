@@ -21,8 +21,7 @@ import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 
 /**
- *
- * @author Reto
+ * That's the data the Web Binding Provider need to provide
  */
 public interface LayoutConfiguration {
 
@@ -32,8 +31,8 @@ public interface LayoutConfiguration {
 
     public String getStaticResourcesRootUrl();
 
-    public List<LinkResource> getLinkResources();
+    public List<LinkResource> getRegisteredLinkResources();
 
-    public List<ScriptResource> getScriptResources();
+    public List<ScriptResource> getRegisteredScriptResources();
     
 }
