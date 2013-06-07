@@ -218,12 +218,12 @@ public class SolrServerAdapter {
         this.context = context;
         //create a clone so that only we control who changes to the properties
         serverProperties = parsedServerProperties.clone();
-        SolrResourceLoader loader = new OsgiSolrResourceLoader(context, solrDir.getAbsolutePath(), 
-            SolrServerAdapter.class.getClassLoader());
 
         ClassLoader classLoader = updateContextClassLoader();
         CoreContainer container;
         try {
+            SolrResourceLoader loader = new OsgiSolrResourceLoader(context, solrDir.getAbsolutePath(), 
+                SolrServerAdapter.class.getClassLoader());
             container = new OsgiCoreContainer(loader, context);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
