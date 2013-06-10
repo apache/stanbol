@@ -35,9 +35,9 @@
     </#if>
     <p class="collapseheader"> Execution of Chain 
       <#if it.chainExecution.completed>
-        <span style="color:#006600">
+        <span class="active">
       <#elseif it.chainExecution.failed>
-        <span style="color:#660000">
+        <span class="inactive"">
       <#else>
          <span>
       </#if>
@@ -50,11 +50,11 @@
       <#list it.engineExecutions as node>
         <li><#if node.offsetText??>${it.getExecutionOffsetText(node)}<#else>${it.getExecutionStartTime(node)}</#if>:
         <#if node.completed>
-          <span style="color:#006600">
+          <span class="active">
         <#elseif node.failed && node.executionNode.optional>
-          <span style="color:#666666">
+          <span class="optional">
         <#elseif node.failed && !node.executionNode.optional>
-          <span style="color:#660000">
+          <span class="inactive">
         <#else>
            <span>
         </#if>

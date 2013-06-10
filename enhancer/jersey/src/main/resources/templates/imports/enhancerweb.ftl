@@ -33,9 +33,9 @@
   </#if>
   <p class="collapseheader">Enhancement Chain: 
     <#if it.chainAvailable>
-      <span style="color:#006600">
+      <span class="active">
     <#else>
-      <span style="color:#660000">
+      <span class="inactive">
     </#if>
     <strong>${it.chain.name}</strong></span> 
     <#if it.activeNodes?size &lt; it.executionNodes?size>
@@ -50,11 +50,11 @@
       <#list executionNodes as node>
         <li>
         <#if node.engineActive>
-          <span style="color:#006600">
+          <span class="active">
         <#elseif node.optional>
-          <span style="color:#666666">
+          <span class="optional">
         <#else>
-          <span style="color:#660000">
+          <span class="inactive">
         </#if>
           <b>${node.engineName}</b> 
           <small>(
