@@ -445,3 +445,15 @@ p.note {
   text-align: center;
   font-size: 110%;
 }
+
+div.enginelisting span.active {
+  color: #006600;
+}
+
+div.enginelisting span.optional {
+  color: #666666;
+}
+
+div.enginelisting span.inactive {
+  color: #660000;
+}
