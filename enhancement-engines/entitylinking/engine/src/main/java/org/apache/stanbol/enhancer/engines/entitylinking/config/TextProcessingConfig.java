@@ -151,7 +151,7 @@ public class TextProcessingConfig {
      */
     private LanguageConfiguration languages = new LanguageConfiguration(PROCESSED_LANGUAGES, 
         // link multiple matchable tokens in chunks; link upper case words
-        new String[]{"*;lmmtip;uc=LINK;prop=0.75;pprob=0.75", 
+        new String[]{"*;lmmtip;uc=LINK;prob=0.75;pprob=0.75", 
             "de;uc=MATCH", //in German all Nouns are upper case
             });
 

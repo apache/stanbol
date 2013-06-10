@@ -36,7 +36,6 @@ import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.iterators.FilterIterator;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessingConfig;
-import org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Chunk;
