@@ -39,13 +39,14 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 
-import org.apache.stanbol.commons.viewable.Viewable;
+
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.jobs.api.Job;
 import org.apache.stanbol.commons.jobs.api.JobInfo;
 import org.apache.stanbol.commons.jobs.api.JobManager;
 import org.apache.stanbol.commons.jobs.api.JobResult;
 import org.apache.stanbol.commons.jobs.impl.JobInfoImpl;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

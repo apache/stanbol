@@ -167,7 +167,6 @@ public class JerseyEndpoint {
         } else {
             exposedHeaders = new HashSet<String>();
         }
-
         if (!webFragments.isEmpty()) {
             initJersey();
         }
@@ -175,6 +174,10 @@ public class JerseyEndpoint {
 
     /** Initialize the Jersey subsystem */
     private synchronized void initJersey() throws NamespaceException, ServletException {
+        if (componentContext == null) {
+            //we have not yet been activated
+            return;
+        }
         //temporary workaround for STANBOL-1073
         InputStream in = new ByteArrayInputStream(
                 "<http://example.org/me> <http://xmlns.com/foaf/0.1/name> \"Jane Doe\" .".getBytes());
