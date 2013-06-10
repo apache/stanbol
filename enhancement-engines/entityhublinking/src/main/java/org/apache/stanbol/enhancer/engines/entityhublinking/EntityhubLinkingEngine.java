@@ -109,7 +109,7 @@ import org.slf4j.LoggerFactory;
     @Property(name=PROCESS_ONLY_PROPER_NOUNS_STATE, boolValue=DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE),
     @Property(name=PROCESSED_LANGUAGES,
         cardinality=Integer.MAX_VALUE,
-        value={"*;lmmtip;uc=LINK;prop=0.75;pprob=0.75", // link multiple matchable tokens in chunks; link upper case words
+        value={"*;lmmtip;uc=LINK;prob=0.75;pprob=0.75", // link multiple matchable tokens in chunks; link upper case words
                "de;uc=MATCH", //in German all Nouns are upper case
                "es;lc=Noun", //the OpenNLP POS tagger for Spanish does not support ProperNouns
                "nl;lc=Noun"}), //same for Dutch 
