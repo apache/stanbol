@@ -259,6 +259,7 @@ public class JerseyEndpoint {
     protected void unbindWebFragment(WebFragment webFragment) throws IOException,
                                                              ServletException,
                                                              NamespaceException {
+        navigationLinks.removeAll(webFragment.getNavigationLinks());
         webFragments.remove(webFragment);
         initJersey();
     }
