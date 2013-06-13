@@ -23,6 +23,15 @@ package org.apache.stanbol.entityhub.servicesapi.query;
  * 
  */
 public abstract class Constraint {
+    
+    private static Double ONE = Double.valueOf(1.0);
+    
+    /**
+     * The boost allows to define the relative importance of a constraint for
+     * ranking of the query results. Values MUST BE <code> &gt;= 0</code>
+     */
+    private Double boost = ONE;
+    
     /**
      * Defines the enumeration of available Constraints. TODO Maybe we need a more "extensible" way to define
      * different constraints in future
@@ -73,6 +82,29 @@ public abstract class Constraint {
      */
     public final ConstraintType getType() {
         return type;
+    }
+
+    /**
+     * The boost
+     * @return the boost or <code>null</code> if not set
+     */
+    public final Double getBoost() {
+        return boost;
+    }
+
+    /**
+     * Setter for the boost.
+     * @param boost the boost or <code>null</code> to unset the boost
+     * @throws IllegalArgumentException it the boost is lower than zero
+     */
+    public final void setBoost(Double boost) {
+        if(boost == null){
+            this.boost = null;
+        } else if(boost <= 0f){
+            throw new IllegalArgumentException("The parsed Boost '{}' MUST NOT be <= zero!");
+        } else {
+            this.boost = boost;
+        }
     }
 
     @Override

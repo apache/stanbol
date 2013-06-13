@@ -47,6 +47,11 @@ public class TextConstraint extends Constraint {
     private final boolean caseSensitive;
     private final List<String> texts;
     /**
+     * If enabled the proximity of query terms will be used for ranking the 
+     * results.
+     */
+    private boolean proximityRanking;
+    /**
      * Creates a TextConstraint for multiple texts and languages. Parsed texts
      * are connected using OR and may appear in any of the parsed languages.
      * @param text the texts or <code>null</code> to search for any text in active languages
@@ -149,6 +154,7 @@ public class TextConstraint extends Constraint {
     public final List<String> getTexts() {
         return texts;
     }
+        
     /**
      * Getter for the first text constraint. If multiple constrains are set only
      * the first one will be returned.
@@ -158,6 +164,22 @@ public class TextConstraint extends Constraint {
     @Deprecated
     public final String getText(){
         return texts == null || texts.isEmpty() ? null : texts.get(0);
+    }
+    /**
+     * Getter for the Term Proximity state. If enabled the proximity of the
+     * parsed terms should be used to rank search results.
+     * @return the termProximity or <code>null</code> if not specified
+     */
+    public Boolean isProximityRanking() {
+        return proximityRanking;
+    }
+    /**
+     * Setter for the proximity ranking state. If enabled the proximity of the
+     * parsed terms should be used to rank search results.
+     * @param state the proximity ranking state to set
+     */
+    public void setProximityRanking(boolean state) {
+        this.proximityRanking = state;
     }
     @Override
     public String toString() {

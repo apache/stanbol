@@ -280,7 +280,8 @@ public class SiteConfigurationImpl implements SiteConfiguration {
     
     @Override
     public final String[] getEntityPrefixes() {
-        return getStringValues(ENTITY_PREFIX);
+        String[] prefixes = getStringValues(ENTITY_PREFIX);
+        return prefixes == null ? new String[]{} : prefixes;
     }
     /**
      * Setter for the Entity prefixes (typically the namespace or the host name)
@@ -355,7 +356,8 @@ public class SiteConfigurationImpl implements SiteConfiguration {
                 //ignore if name, text and url == null and/or empty
             }
         }
-        return licenseList.isEmpty()?null:licenseList.toArray(new License[licenseList.size()]);
+        return licenseList.isEmpty() ? new License[]{} : 
+            licenseList.toArray(new License[licenseList.size()]);
     }
     /**
      * Setter for the {@link License} information. This method stores the name,
