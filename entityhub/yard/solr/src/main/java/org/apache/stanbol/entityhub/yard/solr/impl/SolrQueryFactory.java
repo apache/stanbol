@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -60,6 +61,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint.ConstraintType;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint.MODE;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.defaults.QueryConst;
 import org.apache.stanbol.entityhub.yard.solr.impl.queryencoders.AssignmentEncoder;
 import org.apache.stanbol.entityhub.yard.solr.impl.queryencoders.DataTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.impl.queryencoders.FieldEncoder;
@@ -264,7 +266,7 @@ public class SolrQueryFactory {
         if (queryString.length() > 0) {
             String qs = queryString.toString();
             log.debug("QueryString: {}", qs);
-            if (MLT_QUERY_TYPE.equals(query.getQueryType())) {
+            if (MLT_QUERY_TYPE.equals(query.getRequestHandler())) {
                 query.set(CommonParams.FQ, qs);
             } else {
                 query.setQuery(qs);
@@ -349,12 +351,21 @@ public class SolrQueryFactory {
         RangeConstraint rangeConstraint = (RangeConstraint)indexConstraint.getConstraint();
         // we need to find the Index DataType for the range query
         IndexDataType dataType = null;
+        ConstraintValue lowerBound = new ConstraintValue();
+        ConstraintValue upperBound = new ConstraintValue();
+        //init the boosts
+        addBoost(lowerBound, rangeConstraint);
+        addBoost(upperBound, rangeConstraint);
+        //init IndexValues and check for the dataType
         if (rangeConstraint.getLowerBound() != null) {
-            dataType = indexValueFactory.createIndexValue(rangeConstraint.getLowerBound()).getType();
+            IndexValue value = indexValueFactory.createIndexValue(rangeConstraint.getLowerBound());
+            lowerBound.getValues().add(value);
+            dataType = value.getType();
         }
         if (rangeConstraint.getUpperBound() != null) {
-            IndexDataType upperDataType = indexValueFactory.createIndexValue(rangeConstraint.getUpperBound())
-                    .getType();
+            IndexValue value = indexValueFactory.createIndexValue(rangeConstraint.getUpperBound());
+            upperBound.getValues().add(value);
+            IndexDataType upperDataType = value.getType();
             if (dataType == null) {
                 dataType = upperDataType;
             } else {
@@ -365,7 +376,7 @@ public class SolrQueryFactory {
                         "upper:[value=%s|datatype=%s])",
                         rangeConstraint.getLowerBound(), dataType,
                         rangeConstraint.getUpperBound(), upperDataType));
-            }
+                }
             }
         }
         if (dataType == null) {
@@ -377,11 +388,11 @@ public class SolrQueryFactory {
         }
         //set the value range
         if (rangeConstraint.isInclusive()) {
-            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.LE, rangeConstraint.getUpperBound());
-            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.GE, rangeConstraint.getLowerBound());
+            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.LE, upperBound);
+            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.GE, lowerBound);
         } else {
-            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.LT, rangeConstraint.getUpperBound());
-            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.GT, rangeConstraint.getLowerBound());
+            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.LT, upperBound);
+            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.GT, lowerBound);
         }
     }
 
@@ -392,6 +403,15 @@ public class SolrQueryFactory {
     private void initTextConstraint(IndexConstraint indexConstraint) {
         TextConstraint textConstraint = (TextConstraint)indexConstraint.getConstraint();
         ConstraintValue constraintValue = new ConstraintValue();
+        //init the boost
+        addBoost(constraintValue, textConstraint);
+        //init the Phrase Query based on the ProximityRanking state
+        if(textConstraint.isProximityRanking() != null){
+            constraintValue.setProperty(QueryConst.PHRASE_QUERY_STATE, textConstraint.isProximityRanking());
+        } else {
+            //TODO: maybe make the default configureable for the SolrYard
+            constraintValue.setProperty(QueryConst.PHRASE_QUERY_STATE, QueryConst.DEFAULT_PHRASE_QUERY_STATE);
+        }
         for(String text : textConstraint.getTexts()){
             constraintValue.getValues().add(indexValueFactory.createIndexValue(
                 valueFactory.createText(text)));
@@ -417,7 +437,16 @@ public class SolrQueryFactory {
                     "PatterType %s not supported for Solr Index Queries!", textConstraint.getPatternType()));
         }
     }
-
+    /**
+     * Utility method that copies over the {@link Constraint#getBoost()} value
+     * to the {@link ConstraintValue}
+     */
+    private void addBoost(ConstraintValue constraintValue, Constraint constraint){
+        Double boost = constraint.getBoost();
+        if(boost != null && boost != 1.0){
+            constraintValue.setProperty(QueryConst.QUERY_BOOST, constraint.getBoost());
+        }
+    }
     /**
      * @param indexConstraint
      * @param refConstraint
@@ -461,6 +490,7 @@ public class SolrQueryFactory {
                 }
             } //else empty we will initialise based on the first parsed value!
             ConstraintValue constraintValue = new ConstraintValue(valueConstraint.getMode());
+            addBoost(constraintValue, valueConstraint); //init the boost
             for(Object value : valueConstraint.getValues()){
                 IndexValue indexValue;
                 if(indexDataType == null){ // if no supported types are present
@@ -628,10 +658,12 @@ public class SolrQueryFactory {
      * @author Rupert Westenthaler
      *
      */
-    public static class ConstraintValue implements Iterable<IndexValue>{
+    public static class ConstraintValue implements Iterable<IndexValue> {
 
         private final MODE mode;
         private final Set<IndexValue> values = new LinkedHashSet<IndexValue>();
+        
+        private Map<String,Object> properties;
         
         public ConstraintValue() {
             this(null);
@@ -653,6 +685,35 @@ public class SolrQueryFactory {
         public Iterator<IndexValue> iterator() {
             return values.iterator();
         }
+        /**
+         * Sets a property
+         * @param key the key 
+         * @param value the value
+         * @return the old value or <code>null</code> if none.
+         */
+        public Object setProperty(String key, Object value){
+            if(key == null){
+                return null;
+            }
+            if(properties == null){
+                if(value != null){
+                    properties = new HashMap<String,Object>();
+                } else {
+                    return null;
+                }
+            }
+            return properties.put(key, value);
+        }
+        
+        public Object getProperty(String key){
+            return properties == null ? null : properties.get(key);
+        }
+        
+        public Double getBoost() {
+            return properties == null ? null : 
+                (Double)properties.get(QueryConst.QUERY_BOOST);
+        }
+        
     }
     /**
      * Class internally used to process FieldConstraint. This class accesses the

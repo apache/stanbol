@@ -76,8 +76,14 @@ public class RegexEncoder implements IndexConstraintTypeEncoder<ConstraintValue>
                         "This encoder does not support the IndexDataType %s (supported: %s)", indexValue.getType(),
                         SUPPORTED_TYPES));
                 } else {
-                    // TODO: Implement some REGEX to WILDCard conversion for Solr
-                    queryConstraints.add(indexValue.getValue().toLowerCase());
+                    // NOTE that not all regex queries can be supported by Solr
+                    // see https://issues.apache.org/jira/browse/LUCENE-2604
+                    StringBuilder sb = new StringBuilder(indexValue.getValue().length()+2);
+                    sb.append('/').append(indexValue.getValue()).append('/');
+                    if(value.getBoost() != null){
+                        sb.append('^').append(value.getBoost());
+                    }
+                    queryConstraints.add(sb.toString());
                 }
                 if(value.getMode() == MODE.any){ //in any mode
                     //we need to add constraints separately (to connect them with OR)

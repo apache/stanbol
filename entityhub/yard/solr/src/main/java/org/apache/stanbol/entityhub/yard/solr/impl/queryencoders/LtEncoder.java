@@ -19,6 +19,7 @@ package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.stanbol.entityhub.yard.solr.impl.SolrQueryFactory.ConstraintValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
@@ -42,18 +43,32 @@ public class LtEncoder implements IndexConstraintTypeEncoder<Object> {
 
     @Override
     public void encode(EncodedConstraintParts constraint, Object value) {
+        Double boost = null;
         IndexValue indexValue;
         if (value == null) {
             indexValue = null; // default value
         } else if (value instanceof IndexValue) {
             indexValue = (IndexValue) value;
+        } else if (value instanceof ConstraintValue){
+            ConstraintValue cv = (ConstraintValue) value;
+            indexValue = cv.getValues() == null || cv.getValues().isEmpty() ? null : 
+                cv.getValues().iterator().next();
+            boost = cv.getBoost();
         } else {
             indexValue = indexValueFactory.createIndexValue(value);
         }
-        String geConstraint = String
-                .format("TO %s}", indexValue != null && indexValue.getValue() != null
-                                  && !indexValue.getValue().isEmpty() ? indexValue.getValue() : DEFAULT);
-        constraint.addEncoded(POS, geConstraint);
+        StringBuilder ltConstraint = new StringBuilder("TO ");
+        if(indexValue != null && indexValue.getValue() != null
+                && !indexValue.getValue().isEmpty()){
+            ltConstraint.append(indexValue.getValue());
+        } else {
+            ltConstraint.append(DEFAULT);
+        }
+        ltConstraint.append('}');
+        if(boost != null){
+            ltConstraint.append("^").append(boost);
+        }
+        constraint.addEncoded(POS, ltConstraint.toString());
     }
 
     @Override

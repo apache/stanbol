@@ -19,6 +19,7 @@ package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.stanbol.entityhub.yard.solr.impl.SolrQueryFactory.ConstraintValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
@@ -47,6 +48,10 @@ public class GtEncoder implements IndexConstraintTypeEncoder<Object> {
             indexValue = null; // default value
         } else if (value instanceof IndexValue) {
             indexValue = (IndexValue) value;
+        } else if (value instanceof ConstraintValue){
+            ConstraintValue cv = (ConstraintValue) value;
+            indexValue = cv.getValues() == null || cv.getValues().isEmpty() ? null : 
+                cv.getValues().iterator().next();
         } else {
             indexValue = indexValueFactory.createIndexValue(value);
         }

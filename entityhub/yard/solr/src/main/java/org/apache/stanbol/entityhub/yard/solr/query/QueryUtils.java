@@ -20,12 +20,14 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.icu.segmentation.DefaultICUTokenizerConfig;
 import org.apache.lucene.analysis.icu.segmentation.ICUTokenizer;
@@ -35,6 +37,7 @@ import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.impl.queryencoders.AssignmentEncoder;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 
@@ -82,11 +85,11 @@ public final class QueryUtils {
      * not escaped.
      * @return the (possible multiple) values that need to be connected with AND
      */
-    public static String[] encodeQueryValue(IndexValue indexValue, boolean escape) {
+    public static QueryTerm[] encodeQueryValue(IndexValue indexValue, boolean escape) {
         if (indexValue == null) {
             return null;
         }
-        String[] queryConstraints;
+        QueryTerm[] queryConstraints;
         String value = indexValue.getValue(); 
         if (escape) {
             value = SolrUtil.escapeSolrSpecialChars(value);
@@ -96,27 +99,24 @@ public final class QueryUtils {
         if (IndexDataTypeEnum.TXT.getIndexType().equals(indexValue.getType())) {
             if(escape) { 
                 //value does not contain '*' and '?' as they would be escaped.
-                queryConstraints = new String[] {
-                    new StringBuilder(value).insert(0, '"').append('"').toString()
-                };
+                queryConstraints = new QueryTerm[] {new QueryTerm(value,false,true, true)};
             } else { //non escaped strings might contain wildcard chars '*', '?'
                 //those need to be treated specially (STANBOL-607)
-                //Change to 2nd param to false after switching to Solr 3.6+ (see SOLR-2438)
-                queryConstraints = parseWildcardQueryTerms(value, true);
+                //Changed 2nd param to false as Stanbol now uses Solr 3.6+ (see SOLR-2438)
+                queryConstraints = parseWildcardQueryTerms(value, false);
             }
         } else if (IndexDataTypeEnum.STR.getIndexType().equals(indexValue.getType())) {
             if(escape){ 
                  //rw: 20120314: respect case sensitivity for escaped (non wildcard)
-                queryConstraints = new String[] { value.indexOf(' ')>=0 ?
-                        '"'+value+'"' : value
-                };
+                queryConstraints = new QueryTerm[] { new QueryTerm(value, false,
+                    value.indexOf(' ') >= 0 ? true : false, true)};
             } else { //encode non
                 //rw: 20120314: respect case sensitivity for escaped (non wildcard)
                 //Change to 2nd param to false after switching to Solr 3.6+ (see SOLR-2438)
                 queryConstraints = parseWildcardQueryTerms(value, true);
             }
         } else {
-            queryConstraints = new String[] {value};
+            queryConstraints = new QueryTerm[] {new QueryTerm(value,false,false,false)};
         }
         return queryConstraints;
     }
@@ -161,6 +161,25 @@ public final class QueryUtils {
     }
 
     /**
+     * Represents a term within a SolrQuery.
+     * @author Rupert Westenthaler
+     *
+     */
+    public static class QueryTerm {
+        public final boolean hasWildcard;
+        public final boolean needsQuotes;
+        public final String term;
+        public final boolean isText;
+        
+        private QueryTerm(String term, boolean hasWildcard, boolean needsQuotes, boolean isText){
+            this.term = term;
+            this.hasWildcard = hasWildcard;
+            this.needsQuotes = needsQuotes;
+            this.isText = isText;
+        }
+    }
+    
+    /**
      * Parses query terms for Wildcard queries as described in the first
      * comment of STANBOL-607. <p>
      * As an example the String:
@@ -178,16 +197,16 @@ public final class QueryUtils {
      * @return the query terms
      * @throws IOException
      */
-    private static String[] parseWildcardQueryTerms(String value,boolean loewercaseWildcardTokens) {
+    private static QueryTerm[] parseWildcardQueryTerms(String value,boolean loewercaseWildcardTokens) {
         //This assumes that the Tokenizer does tokenize '*' and '?',
         //what makes it a little bit tricky. 
         Tokenizer tokenizer = new ICUTokenizer(new StringReader(value),tokenizerConfig);
         Matcher m = WILDCARD_QUERY_CHAR_PATTERN.matcher(value);
         int next = m.find()?m.start()+1:-1;
         if(next < 0){ //No wildcard
-            return new String[]{'"'+value+'"'};
+            return new QueryTerm[]{new QueryTerm(value, false, true, true)};
         } 
-        ArrayList<String> queryElements = new ArrayList<String>(5);
+        ArrayList<QueryTerm> queryElements = new ArrayList<QueryTerm>(5);
         int lastAdded = -1;
         int lastOffset = 0;
         boolean foundWildcard = false;
@@ -214,7 +233,7 @@ public final class QueryUtils {
                             queryElement = queryElement.toLowerCase();
                         }
                         
-                        queryElements.add(queryElement);
+                        queryElements.add(new QueryTerm(queryElement, true, false, true));
                         lastAdded = offset.startOffset(); //previous token consumed
                         //set to the start of the current token
                         foundWildcard = false;
@@ -223,7 +242,7 @@ public final class QueryUtils {
                         if(loewercaseWildcardTokens){
                             queryElement = queryElement.toLowerCase();
                         }
-                        queryElements.add(queryElement);
+                        queryElements.add(new QueryTerm(queryElement,true,false, true));
                         lastAdded = -1; //consume the current token
                         foundWildcard = false;
                     }
@@ -235,7 +254,7 @@ public final class QueryUtils {
                     //      a single word
                     if(!foundWildcard && lastAdded<lastOffset){
                         String queryElement = value.substring(lastAdded,lastOffset);
-                        queryElements.add('"'+queryElement+'"');
+                        queryElements.add(new QueryTerm(queryElement,false,true, true));
                         lastAdded = offset.startOffset();
                     }//else multiple wildcards in a single token
                     foundWildcard = true;
@@ -252,12 +271,24 @@ public final class QueryUtils {
                 queryElement = queryElement.toLowerCase();
             }
             if(foundWildcard){
-                queryElements.add(queryElement);
+                queryElements.add(new QueryTerm(queryElement,true,false, true));
             } else {
-                queryElements.add('"'+queryElement+'"');
+                queryElements.add(new QueryTerm(queryElement,false,true, true));
             }
         }
-        return queryElements.toArray(new String[queryElements.size()]);
+        return queryElements.toArray(new QueryTerm[queryElements.size()]);
+    }
+    /**
+     * Creates a Phrase query over the parsed constraints
+     * @param phraseConstraints
+     */
+    public static StringBuilder encodePhraseQuery(Collection<String> phraseConstraints) {
+        StringBuilder sb = new StringBuilder(StringUtils.join(phraseConstraints, ' '));
+        sb.insert(0, '"');
+        sb.append("\"~");
+        //the span is 5+3*numTokens (9 ... 2 Tokens, 11 ... 3 Tokens ...)
+        sb.append(5+(3*phraseConstraints.size()));
+        return sb;
     }
 
 

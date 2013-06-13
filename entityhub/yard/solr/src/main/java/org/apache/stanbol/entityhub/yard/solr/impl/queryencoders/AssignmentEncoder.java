@@ -16,12 +16,17 @@
  */
 package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 
+import static org.apache.stanbol.entityhub.yard.solr.query.QueryUtils.encodePhraseQuery;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint.MODE;
+import org.apache.stanbol.entityhub.yard.solr.defaults.QueryConst;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrQueryFactory.ConstraintValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
@@ -31,6 +36,7 @@ import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
+import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils.QueryTerm;
 
 /**
  * Encodes the Assignment of the field to an value. If a value is parsed, than it encodes that the field must
@@ -40,8 +46,8 @@ import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
  */
 public class AssignmentEncoder implements IndexConstraintTypeEncoder<ConstraintValue> {
 
-    private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.assignment);
-    private static final String EQ = ":";
+    public static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.assignment);
+    public static final String EQ = ":";
 //    private final IndexValueFactory indexValueFactory;
 
     public AssignmentEncoder(IndexValueFactory indexValueFactory) {
@@ -58,11 +64,26 @@ public class AssignmentEncoder implements IndexConstraintTypeEncoder<ConstraintV
             return; //and return
         } //else encode the values and add them depending on the MODE
         Set<String> queryConstraints = new HashSet<String>();
+        Collection<String> phraseTerms = new ArrayList<String>();
         for(IndexValue indexValue : value){
-            String[] valueConstraints = QueryUtils.encodeQueryValue(indexValue, true);
-            if (valueConstraints != null) {
-                for (String stringConstraint : valueConstraints) {
-                    queryConstraints.add(EQ + stringConstraint);
+            QueryTerm[] qts = QueryUtils.encodeQueryValue(indexValue, true);
+            if (qts != null) {
+                for (QueryTerm qt : qts) {
+                    StringBuilder sb = new StringBuilder(qt.term.length() + 
+                        (qt.needsQuotes ? 3 : 1));
+                    sb.append(EQ);
+                    if(qt.needsQuotes){
+                        sb.append('"').append(qt.term).append('"');
+                    } else {
+                        sb.append(qt.term);
+                    }
+                    if(value.getBoost() != null){
+                        sb.append("^").append(value.getBoost());
+                    }
+                    queryConstraints.add(sb.toString());
+                    if(!qt.hasWildcard && qt.isText) {
+                        phraseTerms.add(qt.term);
+                    }
                 }
             } else {
                 queryConstraints.add(EQ);
@@ -77,9 +98,22 @@ public class AssignmentEncoder implements IndexConstraintTypeEncoder<ConstraintV
         if(value.getMode() == MODE.all){
             //in all mode we need to add all values in a single call
             constraint.addEncoded(POS, queryConstraints);
+            //NOTE also that for ALL mode Phrase queries do not make sense, as
+            //     they would weaken the selection criteria
+        } else {
+            if(phraseTerms.size() > 1){
+                Boolean state = (Boolean) value.getProperty(QueryConst.PHRASE_QUERY_STATE);
+                if(state != null && state.booleanValue()){
+                    StringBuilder sb = encodePhraseQuery(phraseTerms);
+                    sb.insert(0, EQ);
+                    if(value.getBoost() != null){
+                        sb.append("^").append(value.getBoost());
+                    }
+                    constraint.addEncoded(POS, sb.toString());
+                }//phrase query deactivated
+            } //else for less than two terms we can not build a phrase query
         }
     }
-
 
 
     @Override

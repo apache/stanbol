@@ -16,6 +16,9 @@
  */
 package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 
+import static org.apache.stanbol.entityhub.yard.solr.query.QueryUtils.encodePhraseQuery;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,6 +27,7 @@ import java.util.Set;
 
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint.MODE;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.defaults.QueryConst;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrQueryFactory.ConstraintValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
@@ -34,6 +38,7 @@ import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
+import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils.QueryTerm;
 
 public class WildcardEncoder implements IndexConstraintTypeEncoder<ConstraintValue> {
 
@@ -62,6 +67,8 @@ public class WildcardEncoder implements IndexConstraintTypeEncoder<ConstraintVal
         }
         // encode the value based on the type
         Set<String> queryConstraints = new HashSet<String>();
+        //the query constraints used for the phrase constraint
+        Collection<String> phraseTerms = new ArrayList<String>();
         for(IndexValue indexValue : value){
             if (indexValue != null) {
                 if (!SUPPORTED_TYPES.contains(indexValue.getType())) {
@@ -69,7 +76,24 @@ public class WildcardEncoder implements IndexConstraintTypeEncoder<ConstraintVal
                         "This encoder does not support the IndexDataType %s (supported: %s)", indexValue.getType(),
                         SUPPORTED_TYPES));
                 } else {
-                    queryConstraints.addAll(Arrays.asList(QueryUtils.encodeQueryValue(indexValue, false)));
+                    for(QueryTerm qt : QueryUtils.encodeQueryValue(indexValue, false)){
+                        StringBuilder sb = new StringBuilder(qt.needsQuotes ? 
+                                qt.term.length()+2 : 0);
+                        if(qt.needsQuotes){
+                            sb.append('"').append(qt.term).append('"');
+                            queryConstraints.add(sb.toString());
+                        } else {
+                           queryConstraints.add(qt.term);
+                        }
+                        if(value.getBoost() != null){
+                            sb.append("^").append(value.getBoost());
+                        }
+                        if(!qt.hasWildcard && qt.isText) {
+                            //phrases do not work with wildcard and are only
+                            //relevant for texts
+                            phraseTerms.add(qt.term);
+                        }
+                    }
                 }
                 if(value.getMode() == MODE.any){ //in any mode
                     //we need to add constraints separately (to connect them with OR)
@@ -81,6 +105,17 @@ public class WildcardEncoder implements IndexConstraintTypeEncoder<ConstraintVal
         if(value.getMode() == MODE.all){ // an all mode we need to add all
             //constraint in a single call (to connect them with AND)
             constraint.addEncoded(POS, queryConstraints);
+        } else {
+            if(phraseTerms.size() > 1){
+                Boolean state = (Boolean) value.getProperty(QueryConst.PHRASE_QUERY_STATE);
+                if(state != null && state.booleanValue()){
+                    StringBuilder sb = encodePhraseQuery(phraseTerms);
+                    if(value.getBoost() != null){
+                        sb.append("^").append(value.getBoost());
+                    }
+                    constraint.addEncoded(POS, sb.toString());
+                }
+            }
         }
     }
 
