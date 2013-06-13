@@ -111,7 +111,7 @@ public final class EntityhubTest extends QueryTestBase {
     @Test
     public void testEntityCrud() throws IOException, JSONException {
         //execution order is important
-        testEntityCreation(); 
+        testEntityCreation();
         testEntityCreated();
         testEntityUpdate();
         testEntityUpdated();
@@ -243,6 +243,7 @@ public final class EntityhubTest extends QueryTestBase {
         re = executor.execute(builder.buildOtherRequest(new HttpDelete(
             builder.buildUrl("/entityhub/entity", "id", ehUri))));
         re.assertStatus(200);
+
     }
     
     @Test
@@ -267,6 +268,7 @@ public final class EntityhubTest extends QueryTestBase {
             int status = re.getResponse().getStatusLine().getStatusCode();
             Assert.assertTrue(status == 200 || status == 304);
         }
+        
         testFindNameQuery();
         testFindWildcards();
         testFindLimitAndOffsetQuery();
@@ -275,7 +277,7 @@ public final class EntityhubTest extends QueryTestBase {
         RequestExecutor re = executor.execute(builder.buildOtherRequest(new HttpDelete(
             builder.buildUrl("/entityhub/entity", "id", "*"))));
         re.assertStatus(200);
-        
+
     }
     
     private void testFindNameQuery() throws IOException, JSONException {
