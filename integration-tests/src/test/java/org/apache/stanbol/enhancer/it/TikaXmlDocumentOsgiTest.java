@@ -52,5 +52,21 @@ public class TikaXmlDocumentOsgiTest extends EnhancerTestBase {
         )
         .assertStatus(200); //not interested in the results, just that it worked
     }
-
+    /**
+     * Tests docx format
+     * engine 
+     * @throws Exception
+     */
+    @Test
+    public void testDocx2() throws Exception {
+        InputStream in = EngineEnhancementRequestTest.class.getClassLoader().getResourceAsStream("Vorlage_Protokoll.docx");
+        Assert.assertNotNull("Unable to find test resource 'Vorlage_Protokoll.docx'",in);
+        executor.execute(
+            builder.buildPostRequest(getEndpoint()+"/engine/tika?omitMetadata=true")
+            .withHeader("Accept","text/plain")
+            .withHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            .withEntity(new InputStreamEntity(in, -1))
+        )
+        .assertStatus(200); //not interested in the results, just that it worked
+    }
 }
