@@ -416,10 +416,15 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         
         public static TestSettings fromSystemProperties(){
           TestSettings settings = new TestSettings();
+          log.info("set MaxRequests: {}",Integer.getInteger(PROPERTY_REQUESTS));
           settings.setMaxRequests(Integer.getInteger(PROPERTY_REQUESTS));
+          log.info("set NumThreads: {}",Integer.getInteger(PROPERTY_THREADS));
           settings.setNumThreads(Integer.getInteger(PROPERTY_THREADS));
+          log.info("set TestData: {}, Format {}",System.getProperty(PROPERTY_TEST_DATA),
+              System.getProperty(PROPERTY_TEST_DATA_TYPE));
           settings.setTestData(System.getProperty(PROPERTY_TEST_DATA), 
               System.getProperty(PROPERTY_TEST_DATA_TYPE));
+          log.info("set Chain: {}",System.getProperty(PROPERTY_CHAIN));
           settings.setChain(System.getProperty(PROPERTY_CHAIN));
           return settings;
         }
