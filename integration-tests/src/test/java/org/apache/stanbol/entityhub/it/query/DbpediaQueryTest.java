@@ -165,6 +165,7 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
         test.setLanguage("en");
         executeQuery(test);
     }
+    
     @Test
     public void testFindSpecificFieldQuery() throws IOException, JSONException {
         //TODO: there is no other text field as rdfs:label in the dbpedia 
@@ -623,5 +624,34 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
         //now execute the test
         executeQuery(test);        
         
+    }
+    @Test
+    public void testBoostAndProximityRanking() throws IOException, JSONException {
+            //test features added with STANBOL-1105, STANBOL-1106
+            FieldQueryTestCase test = new FieldQueryTestCase(
+                "{ "+
+                    "'selected': ["+
+                        "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
+                    "'offset': '0',"+
+                    "'limit': '3',"+
+                    "'constraints': [{ "+
+                        "'type': 'text', "+
+                        "'text': ['Frankfurt','Main','Flughafen'], "+
+                        "'language': ['de', 'en'], "+
+                        "'field': 'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label', "+
+                        "'boost': 12.34," +
+                        "'proximityRanking': true"+
+                    "}]"+
+                 "}",
+                 Arrays.asList( //list of expected results
+                     "http://dbpedia.org/resource/Frankfurt_Airport",
+                     "http://dbpedia.org/resource/Frankfurt",
+// this query selects Main instead of Airport, as Main has the same label in German and English
+//                     "http://dbpedia.org/resource/Airport"),
+                     "http://dbpedia.org/resource/Main"), 
+                 Arrays.asList( //list of required fields for results
+                    "http://www.w3.org/2000/01/rdf-schema#label"));
+            //now execute the test
+            executeQuery(test);        
     }
 }
