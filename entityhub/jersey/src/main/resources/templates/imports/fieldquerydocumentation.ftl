@@ -86,6 +86,15 @@ are required by all types.</p>
     </li>
 </ul>
 
+<p> In addition the following optional attributes are supported by all constraints </p>
+<ul>
+    <li><b><code>boost</code></b>: Allows to define a boost for a constraint. If
+    supported boosts will influence the ranking of query results. The boost value
+    MUST BE a number <code>&gt;= 0</code>. The default is <code>1</code>.</li>
+</ul>
+
+
+
 <p>There are 4 different constraint types.</p>
 <ol>
  <li><em><a href="#value-constraint">ValueConstraint</a>:</em> 
@@ -224,6 +233,10 @@ value. Note however that this would not work for "xsd:long".</p>
     <li><code>patternType</code>: one of "wildcard", "regex" or "none" 
         (default is "none") </li>
     <li><code>caseSensitive</code>: boolean (default is "false")</li>
+    <li><code>proximityRanking</code>: boolean (default is undefined). This tells
+        Sites that the proximity of parsed texts should be used for ranking. The
+        default is undefined and may depend on the actual Site executing the
+        query</li>
 </ul>
 
 <h4>Example:</h4>

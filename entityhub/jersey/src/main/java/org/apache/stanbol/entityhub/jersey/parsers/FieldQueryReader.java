@@ -266,6 +266,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
     }
 
     private static Constraint parseConstraint(JSONObject jConstraint, NamespacePrefixService nsPrefixService) throws JSONException {
+        final Constraint constraint;
         if(jConstraint.has("type") && !jConstraint.isNull("type")) {
             String type = jConstraint.getString("type");
             //Event that internally "reference" is not part of the
@@ -274,15 +275,15 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             //Value constraints with the dataType Reference and AnyURI are
             //considered to represent reference constraints
             if(type.equals("reference")){
-                return parseReferenceConstraint(jConstraint,nsPrefixService);
+                constraint = parseReferenceConstraint(jConstraint,nsPrefixService);
             } else if (type.equals(ConstraintType.value.name())){
-                return parseValueConstraint(jConstraint, nsPrefixService);
+                constraint = parseValueConstraint(jConstraint, nsPrefixService);
             } else if (type.equals(ConstraintType.text.name())){
-                return parseTextConstraint(jConstraint);
+                constraint = parseTextConstraint(jConstraint);
             } else if (type.equals(ConstraintType.range.name())){
-                return parseRangeConstraint(jConstraint,nsPrefixService);
+                constraint = parseRangeConstraint(jConstraint,nsPrefixService);
             } else if(type.equals(ConstraintType.similarity.name())){
-                return parseSimilarityConstraint(jConstraint, nsPrefixService);
+                constraint = parseSimilarityConstraint(jConstraint, nsPrefixService);
             } else {
                 log.warn(String.format("Unknown Constraint Type %s. Supported values are %s",               
                     Arrays.asList("reference",ConstraintType.values())));
@@ -307,6 +308,20 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             message.append(jConstraint.toString(4));
             throw new IllegalArgumentException(message.toString());
         }
+        //finally parse the optional boost
+        if(jConstraint.has("boost")){
+            double boost = jConstraint.optDouble("boost");
+            if(boost == Double.NaN || boost <= 0){
+                StringBuilder message = new StringBuilder("The Boost of a Constraint " +
+                		"MUST BE a double AND >= 0 (parsed: '");
+                message.append(jConstraint.get("boost")).append("')!");
+                log.warn(message.toString());
+                throw new IllegalArgumentException(message.toString());
+            } else {
+                constraint.setBoost(boost);
+            }
+        } //else no boost defined
+        return constraint;
     }
 
     private static Constraint parseSimilarityConstraint(JSONObject jConstraint, NamespacePrefixService nsPrefixService) throws JSONException {
@@ -414,7 +429,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
      * @throws JSONException
      */
     private static Constraint parseTextConstraint(JSONObject jConstraint) throws JSONException {
-        Constraint constraint;
+        final TextConstraint constraint;
         boolean caseSensitive = jConstraint.optBoolean("caseSensitive", false);
         //parse patternType
         PatternType patternType;
@@ -502,6 +517,10 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             constraint = new TextConstraint(textConstraints,
                 patternType,caseSensitive,
                 languages == null?null:languages.toArray(new String[languages.size()]));
+            //finally parse the optional termProximity
+            if(jConstraint.has("proximityRanking")){
+                constraint.setProximityRanking(jConstraint.optBoolean("proximityRanking", false));
+            }
         } else {
             StringBuilder message = new StringBuilder();
             message.append("Parsed TextConstraint doese not define the required field 'text'!\n");

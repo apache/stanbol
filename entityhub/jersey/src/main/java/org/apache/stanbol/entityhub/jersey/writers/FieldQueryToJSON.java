@@ -59,6 +59,11 @@ final class FieldQueryToJSON {
         for (Entry<String, Constraint> fieldConstraint : query) {
             JSONObject jFieldConstraint = convertConstraintToJSON(fieldConstraint.getValue(),nsPrefixService);
             jFieldConstraint.put("field", fieldConstraint.getKey()); //add the field
+            //write the boost if present
+            Double boost = fieldConstraint.getValue().getBoost();
+            if(boost != null){
+                jFieldConstraint.put("boost", boost);
+            }
             constraints.put(jFieldConstraint); //add fieldConstraint
         }
         if(query.getLimit() != null){
@@ -148,6 +153,10 @@ final class FieldQueryToJSON {
                 if(textConstraint.isCaseSensitive()){
                     jConstraint.put("caseSensitive", true);
                 } //else default is false
+                //write the proximity ranking state (if defined)
+                if(textConstraint.isProximityRanking() != null){
+                    jConstraint.put("proximityRanking", textConstraint.isProximityRanking());
+                }
                 break;
             case range:
                 RangeConstraint rangeConstraint = (RangeConstraint) constraint;
