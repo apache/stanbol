@@ -64,9 +64,6 @@
     <writeLockTimeout>5000</writeLockTimeout>
  </indexConfig>
  
- <jmx />
-   <!-- The default high-performance update handler -->
-
   <updateHandler class="solr.DirectUpdateHandler2">
     <!-- Deactivate transaction log 
     <updateLog>
