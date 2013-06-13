@@ -16,10 +16,15 @@
 */
 package org.apache.stanbol.enhancer.engines.entityhublinking;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -64,7 +69,13 @@ public class EntitySearcherUtils {
         //also add the entity rankings
         query.addSelectedField(RdfResourceEnum.entityRank.getUri());
         query.setLimit(20);//TODO make configurable
-        query.setConstraint(field.getUnicodeString(), new TextConstraint(search, languages));
+        //List<String> search2 = new ArrayList<String>(search.size() + 1);
+        //Collections.reverse(search);
+        //search2.add(StringUtils.join(search, " "));
+        //search2.addAll(search);
+        TextConstraint tc = new TextConstraint(search, languages);
+        tc.setProximityRanking(true); //STANBOL-1104
+        query.setConstraint(field.getUnicodeString(),tc);
         return query;
     }
 
