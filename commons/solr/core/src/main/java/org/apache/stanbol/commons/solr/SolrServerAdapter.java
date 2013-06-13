@@ -158,6 +158,7 @@ public class SolrServerAdapter {
         
         @Override
         public void preClose(SolrCore core) {
+            log.debug("  ... in preClose SolrCore {}", core.getName());
             Collection<String> names = server.getCoreNames(core);
             if(names != null){
                 synchronized (registrations) {
@@ -169,8 +170,10 @@ public class SolrServerAdapter {
                             if(coreRegistration.getCore().equals(core)){
                                 log.info("unregister Core with name '{}' based on call to" +
                                     " CloseHook#close()",name);
-                                registrations.remove(name);
-                                coreRegistration.unregister();
+                                CoreRegistration removed = registrations.remove(name);
+                                if(removed != null){
+                                    removed.unregister();
+                                } //else removed in the meantime by an other thread ... nothing to do
                             } else {
                                 log.info("Core registered for name '{}' is not the same as" +
                                         " parsed to CloseHook#close()",name);
@@ -276,6 +279,7 @@ public class SolrServerAdapter {
      * this instance. This will also cause all OSGI services to be unregistered
      */
     public void shutdown(){
+        log.debug(" ... in shutdown for SolrServer {}",serverProperties.getServerName());
         Collection<CoreRegistration> coreRegistrations;
         synchronized (registrations) {
             coreRegistrations = new ArrayList<CoreRegistration>(registrations.values());
@@ -481,10 +485,11 @@ public class SolrServerAdapter {
         //the reference count of the SolrCore does not reach 0)
         CoreRegistration current = new CoreRegistration(name,core);
         CoreRegistration old = registrations.put(name,current);
+        log.info("added Registration for SolrCore {}",name);
         if(old != null){
+            log.info("  ... unregister old registration {}", old);
             old.unregister();
         }
-        log.info("added Registration for SolrCore {}",name);
         return current.getServiceReference();
     }
     
@@ -703,7 +708,7 @@ public class SolrServerAdapter {
      */
     private class CoreRegistration {
         protected final String name;
-        protected final SolrCore core;
+        protected SolrCore core;
         private ServiceRegistration registration;
         /**
          * Creates and registers a {@link CoreRegistration}
@@ -767,15 +772,26 @@ public class SolrServerAdapter {
                     registration = null;
                 }
             }
-            
             try {
-                tmp.unregister(); //unregister the service
-            } catch (IllegalStateException e) {
-                log.info(String.format(
-                    "Looks like that the registration for SolrCore %s was already unregisterd",
-                    name),e);
-            } finally {
-                core.close(); //close the core to decrease the refernece count!!
+                if(tmp != null){
+                    try {
+                        tmp.unregister(); //unregister the service
+                    } catch (IllegalStateException e) {
+                        log.info(String.format(
+                            "Looks like that the registration for SolrCore %s was already unregisterd",
+                            name),e);
+                    }
+                }
+            } finally { //ensure that the core is closed to decrease the reference count
+                //ensure this is only done once
+                SolrCore core;
+                synchronized (this) {
+                    core = this.core; //copy over to a local variable
+                    this.core = null; //set the field to null
+                }
+                if(core != null){
+                    core.close(); //decrease the reference count!!
+                }
             }
         }
         /**
