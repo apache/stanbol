@@ -90,7 +90,9 @@ public class ViewableWriter implements MessageBodyWriter<Viewable> {
             freemarker.getTemplate(templatePath).process(pojo, out);
             out.flush();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("IOException while processing Template '"
+                + templatePath + "' with Object '"+pojo+"' (class: "
+                + pojo != null ? pojo.getClass().getName() : null + ")!",e);
         } catch (TemplateException e) {
             throw new RuntimeException(e);
         }
