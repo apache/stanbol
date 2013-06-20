@@ -156,12 +156,12 @@
     <dependency> <!-- provides the default Stanbol mappings -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0-SNAPSHOT</version>
     </dependency>
     <dependency> <!-- provides the prefix.cc mappings -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0-SNAPSHOT</version>
     </dependency>
 
     <dependency> <!-- for the Main (command line utility) -->
