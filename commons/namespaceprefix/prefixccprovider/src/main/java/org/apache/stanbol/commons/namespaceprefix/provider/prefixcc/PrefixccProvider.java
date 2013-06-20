@@ -17,17 +17,16 @@
 package org.apache.stanbol.commons.namespaceprefix.provider.prefixcc;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Date;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixProvider;
 import org.apache.stanbol.commons.namespaceprefix.impl.NamespacePrefixProviderImpl;
@@ -38,13 +37,17 @@ public class PrefixccProvider implements NamespacePrefixProvider {
 
     private static final Logger log = LoggerFactory.getLogger(PrefixccProvider.class);
         
-    public static final URL GET_ALL;
+    public static final URLConnection GET_ALL;
     static {
         try {
-            GET_ALL = new URL("http://prefix.cc/popular/all.file.txt");
+            URL url = new URL("http://prefix.cc/popular/all.file.txt");
+            GET_ALL = url.openConnection();
+            GET_ALL.connect();
         } catch (MalformedURLException e) {
             throw new IllegalStateException("Unable to create http://prefix.cc URL",e);
-        }
+        } catch (IOException e) {
+        	throw new IllegalStateException("Unable to open http://prefix.cc URLConnection",e);
+		}
     }
     private final ScheduledExecutorService scheduler = 
             Executors.newScheduledThreadPool(1);
@@ -112,9 +115,11 @@ public class PrefixccProvider implements NamespacePrefixProvider {
     protected final void loadMappings() {
         try {
             log.info("Load Namespace Prefix Mappings form {}",GET_ALL);
-            cache = new NamespacePrefixProviderImpl(GET_ALL.openStream());
-            cacheStamp = System.currentTimeMillis();
-            log.info("  ... completed");
+            if(GET_ALL.getContentType().equals("text/plain") && ((HttpURLConnection)GET_ALL).getResponseCode() == 200){
+            	cache = new NamespacePrefixProviderImpl(GET_ALL.getInputStream());
+            	cacheStamp = System.currentTimeMillis();
+            	log.info("  ... completed");
+            }
         } catch (IOException e) {
             log.warn("Unable to load prefix.cc NamespaceMappings (Message: "
                 + e.getMessage() +")",e);

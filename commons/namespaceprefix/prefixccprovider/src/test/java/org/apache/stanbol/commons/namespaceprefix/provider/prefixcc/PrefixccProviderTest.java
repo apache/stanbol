@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.namespaceprefix.service.StanbolNamespacePrefixService;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,9 +68,18 @@ public class PrefixccProviderTest {
     
     @Test
     public void testServiceLoader() throws IOException{
-        //this test works only if online
+        
+    	// Check if the service is down
+    	PrefixccProvider pcp = new PrefixccProvider(10,TimeUnit.SECONDS);
+    	if(!pcp.isAvailable()){
+    		log.info("Unable to retrieve prefixes from http://prefix.cc ... deactivating "
+    	               + PrefixccProvider.class.getSimpleName()+ "ServiceLoader support test");
+    	           return;
+    	}
+    	
+    	//this test works only if online
         try {
-            PrefixccProvider.GET_ALL.openStream();
+            PrefixccProvider.GET_ALL.getInputStream();
         } catch (IOException e) {
            log.info("Unable to connect to http://prefix.cc ... deactivating "
                + PrefixccProvider.class.getSimpleName()+ "ServiceLoader support test");
