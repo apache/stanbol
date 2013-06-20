@@ -53,7 +53,7 @@ will be located.
 
 The indexing itself can be started by
 
-    java -jar -Xmx32g org.apache.stanbol.entityhub.indexing.dbpedia-*.jar index
+    java -jar -Xmx32g org.apache.stanbol.entityhub.indexing.freebase-*.jar index
 
 but before doing this please note the points (2) ... (5)
 
@@ -95,6 +95,10 @@ freebase knowledge base by calling
         | sort -S $MAX_SORT_MEM \
         | uniq -c  \
         | sort -nr -S $MAX_SORT_MEM > $INCOMING_FILE
+
+NOTE: Ubuntu requires a different syntax for grep e.g.
+
+    grep $'^ns:m\..*\t.*\tns:m\.'
 
 See also the [fbranking.sh] script in the same directory. The $INCOMING_FILE
 needs to be copied to 'indexing/resource/incoming_lings.txt'.
