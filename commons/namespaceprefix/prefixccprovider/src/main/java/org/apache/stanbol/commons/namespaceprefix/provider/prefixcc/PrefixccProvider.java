@@ -17,10 +17,10 @@
 package org.apache.stanbol.commons.namespaceprefix.provider.prefixcc;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Date;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixProvider;
 import org.apache.stanbol.commons.namespaceprefix.impl.NamespacePrefixProviderImpl;
 import org.slf4j.Logger;
@@ -37,17 +38,13 @@ public class PrefixccProvider implements NamespacePrefixProvider {
 
     private static final Logger log = LoggerFactory.getLogger(PrefixccProvider.class);
         
-    public static final URLConnection GET_ALL;
+    public static final URL GET_ALL;
     static {
         try {
-            URL url = new URL("http://prefix.cc/popular/all.file.txt");
-            GET_ALL = url.openConnection();
-            GET_ALL.connect();
+            GET_ALL = new URL("http://prefix.cc/popular/all.file.txt");
         } catch (MalformedURLException e) {
             throw new IllegalStateException("Unable to create http://prefix.cc URL",e);
-        } catch (IOException e) {
-        	throw new IllegalStateException("Unable to open http://prefix.cc URLConnection",e);
-		}
+        }
     }
     private final ScheduledExecutorService scheduler = 
             Executors.newScheduledThreadPool(1);
@@ -115,11 +112,26 @@ public class PrefixccProvider implements NamespacePrefixProvider {
     protected final void loadMappings() {
         try {
             log.info("Load Namespace Prefix Mappings form {}",GET_ALL);
-            if(GET_ALL.getContentType().equals("text/plain") && ((HttpURLConnection)GET_ALL).getResponseCode() == 200){
-            	cache = new NamespacePrefixProviderImpl(GET_ALL.getInputStream());
-            	cacheStamp = System.currentTimeMillis();
-            	log.info("  ... completed");
+            HttpURLConnection con = (HttpURLConnection)GET_ALL.openConnection();
+            con.setReadTimeout(5000); //set the max connect & read timeout to 5sec
+            con.setConnectTimeout(5000);
+            con.connect();
+            String contentType = con.getContentType();
+            if("text/plain".equalsIgnoreCase(contentType)){
+                InputStream in = con.getInputStream();
+                try {
+                    cache = new NamespacePrefixProviderImpl(in);
+                    cacheStamp = System.currentTimeMillis();
+                    log.info("  ... completed");
+                } finally {
+                    IOUtils.closeQuietly(in);
+                }
+            } else {
+                log.warn("Response from prefix.cc does have the wrong content type '"
+                    + contentType + "' (expected: text/plain). This indicates that the "
+                    + "service is currently unavailable!");
             }
+            con.disconnect(); //we connect once every {long-period}
         } catch (IOException e) {
             log.warn("Unable to load prefix.cc NamespaceMappings (Message: "
                 + e.getMessage() +")",e);
