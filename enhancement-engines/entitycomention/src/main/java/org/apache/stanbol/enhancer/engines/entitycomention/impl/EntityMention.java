@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.PlainLiteral;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.stanbol.enhancer.engines.entitycomention.CoMentionConstants;
@@ -49,7 +50,7 @@ public class EntityMention extends Entity {
      * {@link CoMentionConstants#CO_MENTION_LABEL_FIELD} is parsed as parameter
      * @param span the start/end char indexes of the mention
      */
-    public EntityMention(UriRef uri, MGraph data, UriRef labelField, UriRef typeField, Integer[] span) {
+    public EntityMention(UriRef uri, TripleCollection data, UriRef labelField, UriRef typeField, Integer[] span) {
         super(uri, data);
         if(labelField == null){
             throw new IllegalArgumentException("The LabelField MUST NOT be NULL!");

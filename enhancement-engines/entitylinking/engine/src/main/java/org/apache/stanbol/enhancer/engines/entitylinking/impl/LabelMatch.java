@@ -57,10 +57,10 @@ public class LabelMatch {
      * @param span
      */
     protected LabelMatch(int start, int span, PlainLiteral label){
-        this(start,span,span,span,1f,label,span);
+        this(start,span,span,span,1f,label,span,span);
     }
     
-    protected LabelMatch(int start, int span,int processableMatchCount, int matchCount, float tokenMatchScore,PlainLiteral label,int labelTokenCount){
+    protected LabelMatch(int start, int span,int processableMatchCount, int matchCount, float tokenMatchScore,PlainLiteral label,int labelTokenCount, int coveredLabelTokenCount){
         if(start < 0){
             throw new IllegalArgumentException("parsed start position MUST BE >= 0!");
         }
@@ -75,7 +75,7 @@ public class LabelMatch {
         this.label = label;
         if(processableMatchCount <= 0){
             match = MATCH.NONE;
-        } else if(processableMatchCount == span){
+        } else if(processableMatchCount == span && matchCount == coveredLabelTokenCount){
             match = MATCH.FULL;
         } else {
             match = MATCH.PARTIAL;
@@ -88,9 +88,9 @@ public class LabelMatch {
         this.labelTokenCount = labelTokenCount;
         //init scores();
         double suggestionMatchScore = matchCount*this.tokenMatchScore;
-        textScore = suggestionMatchScore/this.span;
-        labelScore = suggestionMatchScore/this.labelTokenCount;
-        score = textScore*labelScore;
+        textScore = suggestionMatchScore/(double)this.span;
+        labelScore = suggestionMatchScore/(double)this.labelTokenCount;
+        score = textScore * labelScore;
         if(span < processableMatchCount){
             throw new IllegalArgumentException("The span '" + span
                 + "' MUST BE >= then number of matched processable tokens'"
@@ -207,12 +207,21 @@ public class LabelMatch {
     public static final Comparator<LabelMatch> DEFAULT_LABEL_TOKEN_COMPARATOR = new Comparator<LabelMatch>() {
         @Override
         public int compare(LabelMatch arg0, LabelMatch arg1) {
-            if(arg0.match == MATCH.NONE || arg1.match == MATCH.NONE ||
-                    arg0.processableMatchCount == arg1.processableMatchCount){
-                return arg1.match.ordinal() - arg0.match.ordinal(); //higher ordinal first
-            } else {
+            if(arg0.match.ordinal() >= MATCH.FULL.ordinal() && //for FULL or EXACT matches
+                    arg1.match.ordinal() >= MATCH.FULL.ordinal()){
                 return arg1.processableMatchCount - arg0.processableMatchCount; //bigger should be first
+            } else if(arg0.match == arg1.match){ //also if the MATCH type is equals
+                return arg1.processableMatchCount - arg0.processableMatchCount; //bigger should be first
+            } else { //sort by MATCH type
+                return arg1.match.ordinal() - arg0.match.ordinal(); //higher ordinal first
             }
+// OLD IMPLEMENTATION
+//            if(arg0.match == MATCH.NONE || arg1.match == MATCH.NONE ||
+//                    arg0.processableMatchCount == arg1.processableMatchCount){
+//                return arg1.match.ordinal() - arg0.match.ordinal(); //higher ordinal first
+//            } else {
+//                return arg1.processableMatchCount - arg0.processableMatchCount; //bigger should be first
+//            }
         }
     };
 

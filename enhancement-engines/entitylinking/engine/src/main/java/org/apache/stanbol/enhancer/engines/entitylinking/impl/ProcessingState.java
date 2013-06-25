@@ -34,6 +34,7 @@ import java.util.Locale;
 
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.iterators.FilterIterator;
+import org.apache.stanbol.commons.namespaceprefix.service.StanbolNamespacePrefixService;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessingConfig;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
@@ -710,6 +711,7 @@ public class ProcessingState {
                 }
                 morpho = mf;
             }
+            
         }
         
         /**

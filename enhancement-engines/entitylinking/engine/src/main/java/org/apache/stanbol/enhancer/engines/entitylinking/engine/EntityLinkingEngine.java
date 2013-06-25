@@ -261,6 +261,9 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
             log.error("Unable to link Entities with "+entityLinker,e);
             throw new EngineException(this, ci, "Unable to link Entities with "+entityLinker, e);
         }
+        if(log.isInfoEnabled()){
+            entityLinker.logStatistics(log);
+        }
         //write results (requires a write lock)
         ci.getLock().writeLock().lock();
         try {

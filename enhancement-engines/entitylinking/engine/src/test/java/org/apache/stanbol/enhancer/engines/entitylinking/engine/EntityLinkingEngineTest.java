@@ -210,18 +210,30 @@ public class EntityLinkingEngineTest {
         at.addToken(start+8,start+16).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
         at.addToken(start+17,start+21).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NUM",Pos.Numeral),1d));
         at.addToken(start+21,start+22).addAnnotation(POS_ANNOTATION, Value.value(new PosTag(")",Pos.CloseBracket),1d));
-                
+        
+        at.addToken(start+23, start+26).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("O",LexicalCategory.Adjective)));
+        at.addToken(start+27, start+28).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("A", LexicalCategory.Adposition)));
+        
         start = TEST_TEXT.indexOf("geologist");
         at.addToken(start,start+9).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
-        
+
+        at.addToken(start+10, start+13).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("O", LexicalCategory.Adjective)));
+        at.addToken(start+14, start+19).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("V", LexicalCategory.Verb)));
+        at.addToken(start+20, start+22).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("PP", LexicalCategory.PronounOrDeterminer)));
+
         start = TEST_TEXT.indexOf("New Zealand");
         at.addToken(start,start+3).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
         at.addToken(start+4,start+11).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NP",Pos.ProperNoun),1d));
         
+        //add filler Tokens for "and worked at"
+        at.addToken(start+12, start+15).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("O", LexicalCategory.Adjective)));
+        at.addToken(start+16, start+22).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("V", LexicalCategory.Verb)));
+        at.addToken(start+23, start+25).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("PP", LexicalCategory.PronounOrDeterminer)));
+        
         start = TEST_TEXT.indexOf("the University of Otago");
         at.addToken(start,start+3).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("ART",Pos.Article),1d));
         at.addToken(start+4,start+14).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NE",Pos.CommonNoun),1d));
-        at.addToken(start+15,start+17).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("OF",LexicalCategory.PronounOrDeterminer),1d));
+        at.addToken(start+15,start+17).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("OF",Pos.Preposition),1d));
         at.addToken(start+18,start+23).addAnnotation(POS_ANNOTATION, Value.value(new PosTag("NP",Pos.ProperNoun),1d));
         at.addToken(start+23,start+24).addAnnotation(POS_ANNOTATION, Value.value(new PosTag(".",Pos.Point),1d));
     }

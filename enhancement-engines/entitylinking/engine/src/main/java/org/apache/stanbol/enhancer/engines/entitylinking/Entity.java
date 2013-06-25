@@ -22,6 +22,7 @@ import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.collections.Predicate;
@@ -57,14 +58,14 @@ public class Entity implements Comparable<Entity>{
      * of the entity by containing {@link Triple}s that use the {@link #uri} as
      * {@link Triple#getSubject() subject}
      */
-    protected final MGraph data;
+    protected final TripleCollection data;
     
     /**
      * Constructs a new Entity
      * @param uri
      * @param data
      */
-    public Entity(UriRef uri, MGraph data) {
+    public Entity(UriRef uri, TripleCollection data) {
         this.uri = uri;
         this.data = data;
     }
@@ -74,7 +75,7 @@ public class Entity implements Comparable<Entity>{
     public final String getId(){
         return uri.getUnicodeString();
     }
-    public final MGraph getData() {
+    public final TripleCollection getData() {
         return data;
     }
     @SuppressWarnings("unchecked")

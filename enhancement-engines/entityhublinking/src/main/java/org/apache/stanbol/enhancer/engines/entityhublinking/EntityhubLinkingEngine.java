@@ -26,6 +26,7 @@ import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLin
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES_FIELDS;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.MIN_SEARCH_TOKEN_LENGTH;
+import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.ENTITY_TYPES;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.MIN_TOKEN_SCORE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.NAME_FIELD;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.REDIRECT_FIELD;
@@ -91,6 +92,7 @@ import org.slf4j.LoggerFactory;
     @Property(name=NAME_FIELD,value="rdfs:label"),
     @Property(name=CASE_SENSITIVE,boolValue=DEFAULT_CASE_SENSITIVE_MATCHING_STATE),
     @Property(name=TYPE_FIELD,value="rdf:type"),
+    @Property(name=ENTITY_TYPES,cardinality=Integer.MAX_VALUE),
     @Property(name=REDIRECT_FIELD,value="rdfs:seeAlso"),
     @Property(name=REDIRECT_MODE,options={
         @PropertyOption(

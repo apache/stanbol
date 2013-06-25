@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +58,7 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
     }
     
     @Override
-    public Entity get(UriRef id,Set<UriRef> includeFields) throws EntitySearcherException {
+    public Entity get(UriRef id,Set<UriRef> fields, String...languages) throws EntitySearcherException {
         if(id == null || id.getUnicodeString().isEmpty()){
             return null;
         }
@@ -72,14 +73,27 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
             throw new EntitySearcherException("Exception while getting "+id+
                 " from the Entityhub",e);
         }
-        return entity == null ? null : new EntityhubEntity(entity.getRepresentation());
+        if(entity != null){
+            Set<String> languageSet;
+            if(languages == null || languages.length < 1){
+                languageSet = null;
+            } else if (languages.length == 1){
+                languageSet = Collections.singleton(languages[0]);
+            } else {
+                languageSet = new HashSet<String>(Arrays.asList(languages));
+            }
+            return new EntityhubEntity(entity.getRepresentation(), fields, languageSet);
+        } else {
+            return null;
+        }
     }
+
     @Override
     public Collection<? extends Entity> lookup(UriRef field,
                                            Set<UriRef> includeFields,
                                            List<String> search,
                                            String[] languages,
-                                           Integer limit) throws EntitySearcherException {
+                                           Integer limit, Integer offset) throws EntitySearcherException {
         Entityhub entityhub = getSearchService();
         if(entityhub == null){
             throw new EntitySearcherException("The Entityhub is currently not active");
@@ -91,6 +105,9 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
         } else if(this.limit != null){
             query.setLimit(this.limit);
         }
+        if(offset != null && offset.intValue() > 0){
+            query.setOffset(offset.intValue());
+        }
         QueryResultList<Representation> results;
         try {
             results = entityhub.find(query);
@@ -98,11 +115,16 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
             throw new EntitySearcherException("Exception while searchign for "+
                 search+'@'+Arrays.toString(languages)+"in the Entityhub", e);
         }
-        Collection<Entity> entities = new ArrayList<Entity>(results.size());
-        for(Representation result : results){
-            entities.add(new EntityhubEntity(result));
+        if(!results.isEmpty()){
+            Set<String> languagesSet = new HashSet<String>(Arrays.asList(languages));
+            Collection<Entity> entities = new ArrayList<Entity>(results.size());
+            for(Representation result : results){
+                entities.add(new EntityhubEntity(result, null, languagesSet));
+            }
+            return entities;
+        } else {
+            return Collections.emptyList();
         }
-        return entities;
     }
 
     @Override

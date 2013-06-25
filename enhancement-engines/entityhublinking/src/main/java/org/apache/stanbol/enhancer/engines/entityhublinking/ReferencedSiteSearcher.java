@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +30,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
+import org.apache.stanbol.enhancer.engines.entitylinking.impl.Statistic;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -38,13 +40,18 @@ import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> implements EntitySearcher {
     
+    private final Logger log = LoggerFactory.getLogger(ReferencedSiteSearcher.class);
     
     private final String siteId;
     private final Integer limit;
     private Map<UriRef,Collection<Resource>> originInfo;
+    Statistic queryStats = new Statistic("query", 100, log);
+    Statistic resultStats = new Statistic("result", 1000, log);
     public ReferencedSiteSearcher(BundleContext context,String siteId, Integer limit){
         this(context,siteId,limit,null);
     }
@@ -61,7 +68,7 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
     }
     
     @Override
-    public Entity get(UriRef id,Set<UriRef> includeFields) {
+    public Entity get(UriRef id,Set<UriRef> fields, String ... languages) {
         if(id == null || id.getUnicodeString().isEmpty()){
             return null;
         }
@@ -76,7 +83,19 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
             throw new IllegalStateException("Exception while getting "+id+
                 " from the ReferencedSite "+site.getId(),e);
         }
-        return entity == null ? null : new EntityhubEntity(entity.getRepresentation());
+        if(entity != null){
+            Set<String> languageSet;
+            if(languages == null || languages.length < 1){
+                languageSet = null;
+            } else if (languages.length == 1){
+                languageSet = Collections.singleton(languages[0]);
+            } else {
+                languageSet = new HashSet<String>(Arrays.asList(languages));
+            }
+            return new EntityhubEntity(entity.getRepresentation(), fields, languageSet);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -84,18 +103,22 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
                                            Set<UriRef> includeFields,
                                            List<String> search,
                                            String[] languages,
-                                           Integer limit) throws IllegalStateException {
+                                           Integer limit, Integer offset) throws IllegalStateException {
         //build the query and than return the result
         Site site = getSearchService();
         if(site == null){
             throw new IllegalStateException("ReferencedSite "+siteId+" is currently not available");
         }
+        queryStats.begin();
         FieldQuery query = EntitySearcherUtils.createFieldQuery(site.getQueryFactory(), 
             field, includeFields, search, languages);
         if(limit != null && limit > 0){
             query.setLimit(limit);
         } else if(this.limit != null){
             query.setLimit(this.limit);
+        }
+        if(offset != null && offset.intValue() > 0){
+            query.setOffset(offset.intValue());
         }
         QueryResultList<Representation> results;
         try {
@@ -105,12 +128,20 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
                 search+'@'+Arrays.toString(languages)+"in the ReferencedSite "+
                 site.getId(), e);
         }
-        Collection<Entity> entities = new ArrayList<Entity>(results.size());
-        for(Representation result : results){
-            entities.add(new EntityhubEntity(result));
+        queryStats.complete();
+        if(!results.isEmpty()){
+            Set<String> languagesSet = new HashSet<String>(Arrays.asList(languages));
+            Collection<Entity> entities = new ArrayList<Entity>(results.size());
+            for(Representation result : results){
+                resultStats.begin();
+                entities.add(new EntityhubEntity(result, null, languagesSet));
+                resultStats.complete();
+            }
+            return entities;
+        } else {
+            return Collections.emptyList();
         }
-        return entities;
-        }
+    }
 
     @Override
     public boolean supportsOfflineMode() {

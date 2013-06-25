@@ -72,6 +72,26 @@ public class LanguageProcessingConfig implements Cloneable{
     public static final double DEFAULT_MIN_POS_ANNOTATION_PROBABILITY = 0.75;
 
     /**
+     * Default {@link LexicalCategory LexicalCategories} that allow the EntityLinker 
+     * to step-over non matchable tokens when determining search tokens for 
+     * Entityhub lookups (Defaults: {@link LexicalCategory#Noun}, 
+     * {@link LexicalCategory#Punctuation} and {@link LexicalCategory#Adposition}).
+     */
+    public static final Set<LexicalCategory> DEFAULT_CHUNKABLE_CATEGORIES = EnumSet.of(
+        LexicalCategory.Noun, LexicalCategory.Punctuation, LexicalCategory.Conjuction);
+    
+    /**
+     * Default {@link Pos} tags that allow the EntityLinker to step-over non matchable 
+     * tokens when determining search tokens for Entityhub lookups (default: empty).
+     */
+    private static final Set<Pos> DEFAULT_CHUNKABLE_POS = EnumSet.of(Pos.Preposition);
+    /**
+     * Default string tags that allow the EntityLinker to step-over non matchable 
+     * tokens when determining search tokens for Entityhub lookups (default: empty).
+     */
+    private static final Set<String> DEFAULT_CHUNKABKE_TAGS = Collections.emptySet();
+    
+    /**
      * Default value for POS annotation confidence required for not-processed POS tags
      * (not contained in both {@link #getLinkedLexicalCategories()} and 
      * {@link #getLinkedPosTags()}). <br> The default is 
@@ -139,6 +159,9 @@ public class LanguageProcessingConfig implements Cloneable{
 
     private boolean ignoreChunksState = DEFAULT_IGNORE_CHUNK_STATE;
 
+    private Set<LexicalCategory> chunkableCategories = DEFAULT_CHUNKABLE_CATEGORIES;
+    private Set<Pos> chunkablePos = DEFAULT_CHUNKABLE_POS;
+    private Set<String> chunkableTags = DEFAULT_CHUNKABKE_TAGS;
 
     private double minPhraseAnnotationProbability = DEFAULT_MIN_PHRASE_ANNOTATION_PROBABILITY;
 
@@ -516,6 +539,7 @@ public class LanguageProcessingConfig implements Cloneable{
     public void setMinSearchTokenLength(int minSearchTokenLength) {
         this.minSearchTokenLength = minSearchTokenLength;
     }
+    
     /**
      * The minimum number of character a {@link Token} (word) must have to be
      * used {@link EntitySearcher#lookup(java.util.List, String...) lookup} concepts
@@ -546,6 +570,76 @@ public class LanguageProcessingConfig implements Cloneable{
     }
     
     /**
+     * Getter for the chunkable {@link LexicalCategory LexicalCategories}. Those
+     * allow the EntityLinker to step-over non matchable tokens when determining 
+     * search tokens for Entityhub lookups.
+     * @return
+     */
+    public Set<LexicalCategory> getChunkableCategories(){
+        return chunkableCategories;
+    }
+    
+    /**
+     * Setter for the chunkable {@link LexicalCategory LexicalCategories}. Those
+     * allow the EntityLinker to step-over non matchable tokens when determining 
+     * search tokens for Entityhub lookups.
+     * @param categories The list of {@link LexicalCategory LexicalCategories} 
+     * considered as chunkable or <code>null</code> to reset to the default
+     */
+    public void setChunkableCategories(Set<LexicalCategory> categories){
+        if(categories == null){
+            this.chunkableCategories = DEFAULT_CHUNKABLE_CATEGORIES;
+        } else {
+            this.chunkableCategories = categories;
+        }
+    }
+
+    /**
+     * Setter for the {@link Pos} tags considered by the EntityLinker to step-over 
+     * non matchable tokens when determining search tokens for Entityhub lookups
+     * @param pos The list of {@link Pos} tags considered as chunkable or 
+     * <code>null</code> to reset to the default
+     */
+    public void setChunkablePos(Set<Pos> pos){
+        if(pos == null){
+            this.chunkablePos = DEFAULT_CHUNKABLE_POS;
+        } else {
+            this.chunkablePos = pos;
+        }
+    }
+    
+    /**
+     * Setter for the String tags considered by the EntityLinker to step-over 
+     * non matchable tokens when determining search tokens for Entityhub lookups
+     * @param tags The list of String tags considered as chunkable or 
+     * <code>null</code> to reset to the default
+     */
+    public void setChunkableTags(Set<String> tags){
+        if(tags == null){
+            this.chunkableTags = DEFAULT_CHUNKABKE_TAGS;
+        } else {
+            this.chunkableTags = tags;
+        }
+    }
+    /**
+     * Getter for the {@link Pos} tags considered by the EntityLinker to step-over 
+     * non matchable tokens when determining search tokens for Entityhub lookups
+     * @return
+     */
+    public Set<Pos> getChunkablePos(){
+        return chunkablePos;
+    }
+    
+    /**
+     * Getter for the String tags considered by the EntityLinker to step-over 
+     * non matchable tokens when determining search tokens for Entityhub lookups
+     * @return the String tags considered as chunkable
+     */
+    public Set<String> getChunkableTags(){
+        return chunkableTags;
+    }
+    
+    /**
      * Clones the {@link LanguageProcessingConfig}. Intended to be used
      * to create language specific configs based on the default one.
      */
@@ -568,6 +662,9 @@ public class LanguageProcessingConfig implements Cloneable{
         c.matchedLexicalCategories = matchedLexicalCategories;
         c.minSearchTokenLength = minSearchTokenLength;
         c.linkOnlyUpperCaseTokenWithUnknownPos = linkOnlyUpperCaseTokenWithUnknownPos;
+        c.chunkableCategories = chunkableCategories;
+        c.chunkablePos = chunkablePos;
+        c.chunkableTags = chunkableTags;
         return c;
     }
 

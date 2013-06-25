@@ -100,15 +100,15 @@ public class InMemoryEntityIndex implements EntitySearcher {
     }
     
     @Override
-    public Entity get(UriRef id, Set<UriRef> includeFields) throws IllegalStateException {
+    public Entity get(UriRef id, Set<UriRef> includeFields, String...languages) throws IllegalStateException {
         return entities.get(id);
     }
 
     @Override
     public Collection<? extends Entity> lookup(UriRef field,
                                            Set<UriRef> includeFields,
-                                           List<String> search,
-                                           String[] languages,Integer numResults) throws IllegalStateException {
+                                           List<String> search, String[] languages,
+                                           Integer numResults, Integer offset) throws IllegalStateException {
         //this assumes that 
         assert nameField.equals(field); //the nameField is the field
         assert Arrays.asList(languages).contains(language); //the parsed languages include the language
@@ -134,20 +134,30 @@ public class InMemoryEntityIndex implements EntitySearcher {
         }
         @SuppressWarnings("unchecked") //TODO how to create generic arrays
         Entry<Entity,int[]>[] resultArray = results.entrySet().toArray(new Entry[results.size()]);
-        Arrays.sort(resultArray, RESULT_SCORE_COMPARATOR);
+        int index;
+        if(offset != null && offset.intValue() > 0){
+            index = offset.intValue();
+        } else {
+            index = 0;
+        }
+        if(index >= resultArray.length){ //no more results
+            return Collections.emptyList();
+        }
         //final ranking
-        List<Entity> resultList = new ArrayList<Entity>(Math.min(numResults+3, results.size()));
+        Arrays.sort(resultArray, RESULT_SCORE_COMPARATOR);
+        List<Entity> resultList = new ArrayList<Entity>(Math.min(numResults+3, (resultArray.length-index)));
         int lastScore = -1;
         boolean done = false;
-        for(int i = 0; i < resultArray.length && !done;i++){
-            if(i < numResults){
-                resultList.add(resultArray[i].getKey());
-                if(i == (numResults - 1)){ //memorize the score of the last included
-                    lastScore = resultArray[i].getValue()[0];
+        //start at the parsed offset
+        for(; index < resultArray.length && !done; index++){
+            if(index < numResults){
+                resultList.add(resultArray[index].getKey());
+                if(index == (numResults - 1)){ //memorize the score of the last included
+                    lastScore = resultArray[index].getValue()[0];
                 }
-            } else if (lastScore == resultArray[i].getValue()[0]){
+            } else if (lastScore == resultArray[index].getValue()[0]){
                 //include additional results with the same score
-                resultList.add(resultArray[i].getKey());
+                resultList.add(resultArray[index].getKey());
             } else { //cut of
                 done = true;
             }

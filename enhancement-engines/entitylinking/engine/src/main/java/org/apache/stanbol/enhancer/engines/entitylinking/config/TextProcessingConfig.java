@@ -126,6 +126,11 @@ public class TextProcessingConfig {
     public static final String PARAM_POS_TYPES = "pos";
     public static final String PARAM_POS_TAG = "tag";
     public static final String PARAM_POS_PROBABILITY = "prob";
+    
+    public static final String PARAM_CHUNKABLE_CATEGORIES = "cc";
+    public static final String PARAM_CHUNKABLE_POS_TYPES = "cp";
+    public static final String PARAM_CHUNKABLE_TAGS = "ct";
+    
     /**
      * Parameter used to configure how to deal with upper case tokens
      */
@@ -413,6 +418,24 @@ public class TextProcessingConfig {
             }
         } else {
             log.info("   - use upper case token mode: match={}, link={}", tpc.isMatchUpperCaseTokens(), tpc.isLinkUpperCaseTokens());
+        }
+        //apply chunkable parameters (STANBOL-1117)
+        if(config.containsKey(PARAM_CHUNKABLE_CATEGORIES)){
+            Set<LexicalCategory> chunkableCategories = parseEnumParam(config, PROCESSED_LANGUAGES, 
+            language, PARAM_CHUNKABLE_CATEGORIES, LexicalCategory.class);
+            log.info(" ... set chunkable Categories to {}", chunkableCategories);
+            tpc.setChunkableCategories(chunkableCategories);
+        }
+        if(config.containsKey(PARAM_CHUNKABLE_POS_TYPES)){
+            Set<Pos> chunkablePos = parseEnumParam(config, PROCESSED_LANGUAGES, 
+            language, PARAM_CHUNKABLE_POS_TYPES, Pos.class);
+            log.info(" ... set chunkable POS tags to {}", chunkablePos);
+            tpc.setChunkablePos(chunkablePos);
+        }
+        if(config.containsKey(PARAM_CHUNKABLE_TAGS)){
+            Set<String> chunkableTags = parseStringTags(config.get(PARAM_CHUNKABLE_TAGS));
+            log.info(" ... set chunkable String tags to {}", chunkableTags);
+            tpc.setChunkableTags(chunkableTags);
         }
     }
 

@@ -18,12 +18,14 @@ package org.apache.stanbol.enhancer.engines.entitylinking.config;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -68,6 +70,10 @@ public class EntityLinkerConfig {
      * configured {@link #TYPE_MAPPINGS}.
      */
     public static final String TYPE_FIELD = "enhancer.engines.linking.typeField";
+    /**
+     * Allows to configure a list of entity types that are white/black listed.
+     */
+    public static final String ENTITY_TYPES = "enhancer.engines.linking.entityTypes";
     /**
      * Allows to enable/disable case sensitive matching
      */
@@ -374,6 +380,9 @@ public class EntityLinkerConfig {
     private UriRef nameField;
     private UriRef redirectField;
     private UriRef typeField;
+    private Map<UriRef,Integer> blacklistedTypes = new HashMap<UriRef,Integer>();
+    private Map<UriRef,Integer> whitelistedTypes = new HashMap<UriRef,Integer>();
+    private Boolean defaultWhitelistTypes = null;
     private Set<UriRef> dereferencedFields = new HashSet<UriRef>();
 
     private Set<UriRef> __selectedFields;
@@ -832,9 +841,72 @@ public class EntityLinkerConfig {
             linkerConfig.setRankEqualScoresBasedOnEntityRankings(
                 DEFAULT_RANK_EQUAL_SCORES_BASED_ON_ENTITY_RANKINGS);
         }
-        
+        //init the list of whitelisted/blacklisted types
+        value = configuration.get(ENTITY_TYPES);
+        List<String> entityTypesConfig; //first collect and cleanup the config
+        if(value == null){
+            entityTypesConfig = Collections.emptyList();
+        } else if(value instanceof String[]){
+            entityTypesConfig = new ArrayList<String>();
+            for(String type : (String[])value){
+                if(type != null){
+                    type = type.trim();
+                    if(!type.isEmpty()){
+                        entityTypesConfig.add(type);
+                    }
+                }
+            }
+        } else if(value instanceof Collection<?>){
+            entityTypesConfig = new ArrayList<String>();
+            for(Object o : (Collection<Object>)value){
+                if(o != null){
+                    String type = o.toString().trim();
+                    if(!type.isEmpty()){
+                        entityTypesConfig.add(type);
+                    }
+                }
+            }
+        } else if(value instanceof String){ //support parsing single values as string
+            String type = value.toString().trim();
+            if(type.isEmpty()){
+                entityTypesConfig = Collections.emptyList();
+            } else {
+                entityTypesConfig = Collections.singletonList(type);
+            }
+        } else {
+            throw new ConfigurationException(ENTITY_TYPES, "The list of ignored types (if present) "
+                + "MUST BE a collection or a string array (present: "+value.getClass().getName()+")!");
+        }
+        //apply the config
+        for(int i = 0; i < entityTypesConfig.size(); i++){
+            String type = entityTypesConfig.get(i);
+            if("*".equals(type)){
+                linkerConfig.setDefaultWhitelistTypes(Boolean.TRUE);
+            } else {
+                boolean blacklisted = type.charAt(0) == '!';
+                if(blacklisted && type.length() < 2){
+                    throw new ConfigurationException(ENTITY_TYPES, "The list of whitelisted/blacklisted "
+                        + "MUST NOT contain '!' (configured: "+entityTypesConfig+")!");
+                }
+                UriRef uri = new UriRef(getFullName(prefixService, ENTITY_TYPES, 
+                    blacklisted ? type.substring(1) : type));
+                if(blacklisted){
+                    linkerConfig.addBlacklistType(uri, Integer.valueOf(i));
+                } else {
+                    linkerConfig.addWhitelistType(uri, Integer.valueOf(i));
+                }
+            }
+        }
     }
-    
+    /**
+     * Gets the full URI for the parsed value by using the parsed {@link NamespacePrefixService}
+     * @param prefixService the {@link NamespacePrefixService} used to lookup the full URI
+     * @param property the config property (just used to create a {@link ConfigurationException}
+     * in case the used namespace prefix is unknown by the namespace prefix service)
+     * @param value the configured value (might be both a short or a full URI)
+     * @return the full URI
+     * @throws ConfigurationException
+     */
     private static String getFullName(NamespacePrefixService prefixService, String property,String value) throws ConfigurationException {
         String prefix = NamespaceMappingUtils.getPrefix(value);
         if(prefixService == null){
@@ -1332,6 +1404,63 @@ public class EntityLinkerConfig {
      */
     public void setRankEqualScoresBasedOnEntityRankings(boolean state) {
         this.rankEqualScoresBasedOnEntityRankings = state;
+    }
+    
+    /**
+     * Adds an type to the blacklist
+     */
+    public final void addBlacklistType(UriRef type, Integer order) {
+        if(type != null && order != null){
+            blacklistedTypes.put(type, order);
+        }
+    }
+    /**
+     * Adds an type to the blacklist
+     */
+    public final void addWhitelistType(UriRef type, Integer order) {
+        if(type != null && order != null){
+            whitelistedTypes.put(type, order);
+        }
+    }
+
+    public final void setDefaultWhitelistTypes(Boolean state){
+        this.defaultWhitelistTypes = state;
+    }
+    
+ 
+    public final boolean isDefaultWhitelistTypes(){
+        if(Boolean.FALSE.equals(defaultWhitelistTypes) && whitelistedTypes.isEmpty()){
+            //illegal configuration ... ignore
+            return true;
+        } else {
+            return defaultWhitelistTypes != null ? defaultWhitelistTypes.booleanValue() : 
+                whitelistedTypes.isEmpty(); //if whitelist is empty ... true
+        }
+    }
+    
+    /**
+     * @param ignoredTypes the ignoredTypes to set
+     */
+    public final Map<UriRef, Integer> getBlacklistedTypes() {
+        return blacklistedTypes;
+    }
+    
+    
+    /**
+     * @param ignoredTypes the ignoredTypes to set
+     */
+    public final Map<UriRef, Integer> getWhitelistedTypes() {
+        return whitelistedTypes;
+    }
+    /**
+     * checks if EntityType filtering is active or not
+     */
+    public final boolean isEntityTypeFilteringActive(){
+        if(whitelistedTypes.isEmpty() && blacklistedTypes.isEmpty()){
+            return false;
+        } else {
+            return true;
+        }
     }
     
 }

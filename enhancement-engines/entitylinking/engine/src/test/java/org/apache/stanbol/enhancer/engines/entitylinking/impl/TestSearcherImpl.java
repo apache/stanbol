@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,7 +76,7 @@ public class TestSearcherImpl implements EntitySearcher {
     }
     
     @Override
-    public Entity get(UriRef id, Set<UriRef> includeFields) throws IllegalStateException {
+    public Entity get(UriRef id, Set<UriRef> includeFields, String...lanuages) throws IllegalStateException {
         return entities.get(id);
     }
 
@@ -83,11 +84,11 @@ public class TestSearcherImpl implements EntitySearcher {
     public Collection<? extends Entity> lookup(UriRef field,
                                            Set<UriRef> includeFields,
                                            List<String> search,
-                                           String[] languages,Integer numResults) throws IllegalStateException {
+                                           String[] languages,Integer numResults, Integer offset) throws IllegalStateException {
         if(field.equals(nameField)){
             //we do not need sorting
             //Representation needs to implement equals, therefore results filters multiple matches
-            Set<Entity> results = new HashSet<Entity>();
+            Set<Entity> results = new LinkedHashSet<Entity>();
             for(String term : search){
                 //TODO: adding 'zzz' to the parsed term is no good solution for
                 //      searching ...
@@ -95,7 +96,16 @@ public class TestSearcherImpl implements EntitySearcher {
                     results.addAll(termResults);
                 }
             }
-            return results;
+            List<Entity> resultList = new ArrayList<Entity>(results);
+            if(offset != null && offset.intValue() > 0){
+                if(offset.intValue() > results.size()){
+                    return Collections.emptyList();
+                } else {
+                    return resultList.subList(offset, results.size());
+                }
+            } else {
+                return results;
+            }
         } else {
             throw new IllegalStateException("Lookup is only supported for the nameField '"+
                 nameField+"' parsed to the constructor");

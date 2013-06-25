@@ -16,12 +16,18 @@
 */
 package org.apache.stanbol.enhancer.engines.entityhublinking;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 
 public class EntityhubEntity extends Entity {
@@ -29,12 +35,43 @@ public class EntityhubEntity extends Entity {
     private static RdfValueFactory vf = RdfValueFactory.getInstance();
     private static UriRef entityRanking = new UriRef(RdfResourceEnum.entityRank.getUri());
     
-    public EntityhubEntity(Representation rep) {
+    public EntityhubEntity(Representation rep, Set<UriRef> fields, Set<String> languages) {
         super(new UriRef(rep.getId()), 
-            (MGraph)vf.toRdfRepresentation(rep).getRdfGraph());
+            toGraph(rep, fields, languages));
     }
     @Override
     public Float getEntityRanking() {
         return EnhancementEngineHelper.get(data, uri, entityRanking, Float.class, lf);
+    }
+    /**
+     * Converts {@link Representation}s to RDF ({@link TripleCollection}) and
+     * also filter literals with languages other than the parsed one
+     * @param rep
+     * @param languages
+     * @return
+     */
+    private static TripleCollection toGraph(Representation rep, Set<UriRef> includeFields, Set<String> languages){
+        if (rep instanceof RdfRepresentation) {
+            return ((RdfRepresentation) rep).getRdfGraph();
+        } else {
+            //create the Clerezza Represenation
+            RdfRepresentation clerezzaRep = vf.createRepresentation(rep.getId());
+            //Copy all values field by field
+            for (Iterator<String> fields = rep.getFieldNames(); fields.hasNext();) {
+                String field = fields.next();
+                if(includeFields == null || includeFields.contains(field)){
+                    for (Iterator<Object> fieldValues = rep.get(field); fieldValues.hasNext();) {
+                        Object value = fieldValues.next();
+                        if(languages == null || //we need not to filter languages
+                                !(value instanceof Text) || //filter only Text values
+                                languages.contains(((Text)value).getLanguage())){
+                            clerezzaRep.add(field, value);
+                        }
+                    }
+                }
+            }
+            return clerezzaRep.getRdfGraph();
+        }
+        
     }
 }
