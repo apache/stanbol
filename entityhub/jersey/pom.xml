@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-entityhub</artifactId>
-    <version>0.12.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -58,8 +58,6 @@
               org.apache.stanbol.entityhub.jersey.*
             </Export-Package -->
             <Import-Package>
-              javax.ws.rs.*; version="[0,2)",
-              org.apache.stanbol.commons.web.base; provide:=true,
               *
             </Import-Package>
             <Private-Package>
@@ -87,7 +85,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -103,7 +101,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-      <version>0.11.0</version>      
+      <version>1.0.0-SNAPSHOT</version>      
     </dependency>
 
     <!-- dependencies on other Entityhub modules -->
@@ -187,16 +185,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-server</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -36,7 +36,10 @@ import javax.ws.rs.ext.Provider;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.codehaus.jettison.json.JSONException;
 
@@ -47,6 +50,9 @@ import org.codehaus.jettison.json.JSONException;
  * @author Rupert Westenthaler
  * 
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Provider
 //@Produces( {MediaType.APPLICATION_JSON, SupportedFormat.N3, SupportedFormat.N_TRIPLE,
 //            SupportedFormat.RDF_XML, SupportedFormat.TURTLE, SupportedFormat.X_TURTLE,
@@ -66,13 +72,9 @@ public class SignWriter implements MessageBodyWriter<Entity> {
         supportedMediaTypes = Collections.unmodifiableSet(types);
     }
     public static final String DEFAULT_ENCODING = "UTF-8";
-
-    @Context
-    protected ServletContext servletContext;
-    
-    protected Serializer getSerializer() {
-        return ContextHelper.getServiceFromContext(Serializer.class, servletContext);
-    }
+   
+    @Reference
+    Serializer serializer;
     
     @Override
     public long getSize(Entity sign,
@@ -109,7 +111,7 @@ public class SignWriter implements MessageBodyWriter<Entity> {
                 throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
             }
         } else { // RDF
-            getSerializer().serialize(entityStream, EntityToRDF.toRDF(sign), mediaTypeString);
+            serializer.serialize(entityStream, EntityToRDF.toRDF(sign), mediaTypeString);
         }
     }
     

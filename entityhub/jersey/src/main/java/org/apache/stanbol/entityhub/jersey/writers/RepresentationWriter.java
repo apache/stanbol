@@ -36,16 +36,26 @@ import javax.ws.rs.ext.Provider;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.codehaus.jettison.json.JSONException;
 
+
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Provider
 //@Produces( {MediaType.APPLICATION_JSON, SupportedFormat.N3, SupportedFormat.N_TRIPLE,
 //            SupportedFormat.RDF_XML, SupportedFormat.TURTLE, SupportedFormat.X_TURTLE,
 //            SupportedFormat.RDF_JSON})
 public class RepresentationWriter implements MessageBodyWriter<Representation> {
 
+    @Reference
+    private Serializer ser;
+    
     public static final Set<String> supportedMediaTypes;
     static {
         Set<String> types = new HashSet<String>();
@@ -97,7 +107,6 @@ public class RepresentationWriter implements MessageBodyWriter<Representation> {
                 throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
             }
         } else { // RDF
-            Serializer ser = ContextHelper.getServiceFromContext(Serializer.class, servletContext);
             ser.serialize(entityStream, EntityToRDF.toRDF(rep), mediaTypeString);
         }
         

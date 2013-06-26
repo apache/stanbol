@@ -45,8 +45,11 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
-import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.codehaus.jettison.json.JSONException;
@@ -58,6 +61,9 @@ import org.slf4j.LoggerFactory;
 /**
  * TODO: Replace with Serializer infrastructure similar to {@link Serializer}
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Provider
 //@Produces({APPLICATION_JSON, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON})
 public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<?>> {
@@ -81,13 +87,11 @@ public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<
     @Context
     protected ServletContext servletContext;
     
-    protected Serializer getSerializer() {
-        return ContextHelper.getServiceFromContext(Serializer.class, servletContext);
-    }
-    
-    private NamespacePrefixService getNsPrefixService(){
-        return ContextHelper.getServiceFromContext(NamespacePrefixService.class, servletContext);
-    }
+    @Reference
+    private Serializer serializer;
+        
+    @Reference
+    private NamespacePrefixService namespacePrefixService;
 
     @Override
     public long getSize(QueryResultList<?> result, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
@@ -113,15 +117,15 @@ public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<
         }
         if (APPLICATION_JSON.equals(mediaTypeString)) {
             try {
-                IOUtils.write(QueryResultsToJSON.toJSON(resultList,getNsPrefixService())
+                IOUtils.write(QueryResultsToJSON.toJSON(resultList,namespacePrefixService)
                     .toString(4), entityStream,encoding);
             } catch (JSONException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
         } else { //RDF
             MGraph resultGraph = QueryResultsToRDF.toRDF(resultList);
-            addFieldQuery(resultList.getQuery(),resultGraph, getNsPrefixService());
-            getSerializer().serialize(entityStream, resultGraph, mediaTypeString);
+            addFieldQuery(resultList.getQuery(),resultGraph, namespacePrefixService);
+            serializer.serialize(entityStream, resultGraph, mediaTypeString);
         }
     }
     private void addFieldQuery(FieldQuery query, MGraph resultGraph, NamespacePrefixService nsPrefixService) {

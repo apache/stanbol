@@ -18,7 +18,6 @@ package org.apache.stanbol.entityhub.jersey.utils;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_HTML_TYPE;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.getAcceptableMediaType;
 import static org.apache.stanbol.entityhub.ldpath.LDPathUtils.getReader;
 
@@ -145,8 +144,7 @@ public class LDPathHelper {
                                          RDFBackend<Object> backend,
                                          String ldpath,
                                          Set<String> contexts,
-                                         HttpHeaders headers,
-                                         ServletContext servletContext) {
+                                         HttpHeaders headers) {
         Collection<String> supported = new HashSet<String>(JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
         final MediaType acceptedMediaType = getAcceptableMediaType(headers,
@@ -176,7 +174,7 @@ public class LDPathHelper {
         if(printDocu){ //a missing parameter and the content type is compatible to HTML
             ResponseBuilder rb = Response.ok(new Viewable("ldpath", resource));
             rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         } else if(acceptedMediaType.equals(TEXT_HTML_TYPE)){
             //HTML is only supported for documentation
@@ -196,7 +194,7 @@ public class LDPathHelper {
         }
         ResponseBuilder rb = Response.ok(data);
         rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
     

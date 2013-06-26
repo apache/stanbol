@@ -30,22 +30,11 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.entityhub.jersey.parsers.FieldQueryReader;
-import org.apache.stanbol.entityhub.jersey.parsers.RepresentationReader;
-import org.apache.stanbol.entityhub.jersey.resource.EntityhubRootResource;
-import org.apache.stanbol.entityhub.jersey.resource.ReferencedSiteRootResource;
-import org.apache.stanbol.entityhub.jersey.resource.SiteManagerRootResource;
-import org.apache.stanbol.entityhub.jersey.resource.reconcile.EntityhubReconcileResource;
-import org.apache.stanbol.entityhub.jersey.resource.reconcile.ReferencedSiteReconcileResource;
-import org.apache.stanbol.entityhub.jersey.resource.reconcile.SiteManagerReconcileResource;
 import org.apache.stanbol.entityhub.jersey.writers.JettisonWriter;
-import org.apache.stanbol.entityhub.jersey.writers.QueryResultListWriter;
-import org.apache.stanbol.entityhub.jersey.writers.RepresentationWriter;
-import org.apache.stanbol.entityhub.jersey.writers.SignWriter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service
 public class EntityhubWebFragment implements WebFragment {
     
@@ -71,22 +60,19 @@ public class EntityhubWebFragment implements WebFragment {
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         // resources
-        classes.add(EntityhubRootResource.class);
+        //classes.add(EntityhubRootResource.class);
         //classes.add(EntityMappingResource.class);
-        classes.add(ReferencedSiteRootResource.class);
-        classes.add(SiteManagerRootResource.class);
+        //classes.add(ReferencedSiteRootResource.class);
+        //classes.add(SiteManagerRootResource.class);
         //Google Refine Reconciliation API support
-        classes.add(ReferencedSiteReconcileResource.class);
-        classes.add(EntityhubReconcileResource.class);
-        classes.add(SiteManagerReconcileResource.class);
+        //classes.add(SiteManagerReconcileResource.class);
         //classes.add(SymbolResource.class);
         // message body readers and writers
-        classes.add(FieldQueryReader.class);
-        classes.add(QueryResultListWriter.class);
-        classes.add(SignWriter.class);
-        classes.add(RepresentationWriter.class);
-        classes.add(FieldQueryReader.class);
-        classes.add(RepresentationReader.class);
+        //classes.add(FieldQueryReader.class);
+        //classes.add(SignWriter.class);
+        //classes.add(RepresentationWriter.class);
+        //classes.add(FieldQueryReader.class);
+        //classes.add(RepresentationReader.class);
         //TODO: somehow writing of Json has not worked because of
         //      A message body writer for Java class org.codehaus.jettison.json.JSONArray,
         //     and Java type class org.codehaus.jettison.json.JSONArray, and MIME media

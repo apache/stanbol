@@ -17,8 +17,6 @@
 package org.apache.stanbol.entityhub.jersey.resource.reconcile;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum.resultScore;
 
 import java.util.ArrayList;
@@ -39,6 +37,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -46,12 +45,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import org.apache.felix.scr.annotations.Component;
 
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.CorsHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.jersey.grefine.ReconcileProperty;
@@ -88,6 +86,9 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
+//TODO rather than having the siteId as path param here instances of this class 
+//should be returned as subresource
+@Component(componentAbstract = true)
 public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResource {
 
     private final Logger log = LoggerFactory.getLogger(BaseGoogleRefineReconcileResource.class);
@@ -109,38 +110,37 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
         }
         
     };
-    
-    protected final NamespacePrefixService nsPrefixService;
+    @org.apache.felix.scr.annotations.Reference
+    private NamespacePrefixService nsPrefixService;
 
-    protected BaseGoogleRefineReconcileResource(ServletContext context){
-        super();
-        nsPrefixService = ContextHelper.getServiceFromContext(
-            NamespacePrefixService.class, context);
+    protected BaseGoogleRefineReconcileResource(){
     }
     
     @OPTIONS
     public final Response handleCorsPreflight(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        //enableCORS(servletContext, res, headers);
         return res.build();
     }
     
     @POST
-    public final Response queryPOST(@FormParam(value="query") String query, 
+    public final Response queryPOST(@PathParam(value = "site") String siteId,
+                          @FormParam(value="query") String query, 
                           @FormParam(value="queries")String queries,
                           @FormParam(value="callback")String callback,
                           @Context HttpHeaders header) throws WebApplicationException {
-        return query(query,queries,callback,header);
+        return query(siteId, query,queries,callback,header);
     }
     @GET
-    public final Response query(@QueryParam(value="query") String query, 
+    public final Response query(@PathParam(value = "site") String siteId,
+                          @QueryParam(value="query") String query, 
                           @QueryParam(value="queries")String queries,
                           @QueryParam(value="callback")String callback,
                           @Context HttpHeaders header) throws WebApplicationException {
         if(callback != null){
             log.info("callback: {}",callback);
             try {
-                return sendMetadata(callback,header);
+                return sendMetadata(siteId,callback,header);
             } catch (JSONException e) {
                 throw new WebApplicationException(e);
             }
@@ -149,7 +149,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
         if(query != null){
             log.debug("query: {}",query);
             try {
-                jResult = reconcile(ReconcileQuery.parseQuery(query,nsPrefixService));
+                jResult = reconcile(siteId, ReconcileQuery.parseQuery(query,nsPrefixService));
             } catch (JSONException e) {
                 throw new WebApplicationException(
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
@@ -159,12 +159,12 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
                 throw new WebApplicationException(
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                         String.format("Error while searching on %s (%s: %s)",
-                            getSiteName(),SiteException.class.getSimpleName(),e.getMessage())).build());
+                            getSiteName(siteId),SiteException.class.getSimpleName(),e.getMessage())).build());
             }
         } else if(queries != null){
             log.debug("multi-query: {}",queries);
             try {
-                jResult = reconcile(ReconcileQuery.parseQueries(queries,nsPrefixService));
+                jResult = reconcile(siteId, ReconcileQuery.parseQueries(queries,nsPrefixService));
             } catch (JSONException e) {
                 throw new WebApplicationException(
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
@@ -174,13 +174,13 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
                 throw new WebApplicationException(
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                         String.format("Error while searching on %s (%s: %s)",
-                            getSiteName(),SiteException.class.getSimpleName(),e.getMessage())).build());
+                            getSiteName(siteId),SiteException.class.getSimpleName(),e.getMessage())).build());
             }
         } else {
             if(MediaTypeUtil.isAcceptableMediaType(header,MediaType.TEXT_HTML_TYPE)){
                 ResponseBuilder rb = Response.ok(new Viewable("index", this, BaseGoogleRefineReconcileResource.class));
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-                addCORSOrigin(servletContext, rb, header);
+                //addCORSOrigin(servletContext, rb, header);
                 return rb.build();
             }
             throw new WebApplicationException(
@@ -189,28 +189,28 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
         }
         //return the results and enable Cors
         ResponseBuilder rb = Response.ok(jResult.toString()).type(MediaType.APPLICATION_JSON_TYPE);
-        CorsHelper.addCORSOrigin(servletContext, rb, header);
+        //CorsHelper.addCORSOrigin(servletContext, rb, header);
         return rb.build();
 
     }
 
 
-    private JSONObject reconcile(Map<String,ReconcileQuery> parsedQueries) throws JSONException, EntityhubException {
+    private JSONObject reconcile(@PathParam(value = "site") String siteId, Map<String,ReconcileQuery> parsedQueries) throws JSONException, EntityhubException {
         JSONObject container = new JSONObject();
         for(Entry<String,ReconcileQuery> query : parsedQueries.entrySet()){
-            container.put(query.getKey(), reconcile(query.getValue()));
+            container.put(query.getKey(), reconcile(siteId, query.getValue()));
         }
         return container;
     }
 
-    private JSONObject reconcile(ReconcileQuery rQuery) throws JSONException, EntityhubException {
-        FieldQuery query = createFieldQuery();
+    private JSONObject reconcile(String siteId, ReconcileQuery rQuery) throws JSONException, EntityhubException {
+        FieldQuery query = createFieldQuery(siteId);
         query.addSelectedFields(SELECTED_FIELDS);
         addNameConstraint(rQuery, query);
         addTypeConstraint(rQuery, query);
         addPropertyConstraints(rQuery, query);
         query.setLimit(query.getLimit());
-        QueryResultList<Representation> results = performQuery(query);
+        QueryResultList<Representation> results = performQuery(siteId, query);
         List<JSONObject> jResultList = new ArrayList<JSONObject>(results.size());
         //we need to know the highest score to normalise between [0..1]
         double maxQueryScore = -1;
@@ -260,19 +260,19 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
      * @return
      * @throws SiteException
      */
-    protected abstract QueryResultList<Representation> performQuery(FieldQuery query) throws EntityhubException;
+    protected abstract QueryResultList<Representation> performQuery(String siteId, FieldQuery query) throws EntityhubException;
     
     /**
      * Getter for the name of the Site as used for logging
      * @return
      */
-    protected abstract String getSiteName();
+    protected abstract String getSiteName(String siteId);
     
     /**
      * Creates a new FieldQuery
      * @return
      */
-    protected abstract FieldQuery createFieldQuery();
+    protected abstract FieldQuery createFieldQuery(String siteId);
     
     /**
      * @param rQuery
@@ -472,16 +472,17 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
      * @return
      * @throws JSONException
      */
-    protected Response sendMetadata(String callback, HttpHeaders header) throws JSONException {
+    protected Response sendMetadata(String siteId, 
+            String callback, HttpHeaders header) throws JSONException {
         //TODO: implement!!
         JSONObject jMetadata = new JSONObject();
-        jMetadata.put("name", "Stanbol Entityhub: "+getSiteName());
+        jMetadata.put("name", "Stanbol Entityhub: "+getSiteName(siteId));
         StringBuilder callbackString = new StringBuilder(callback);
         callbackString.append('(');
         callbackString.append(jMetadata.toString());
         callbackString.append(')');
         ResponseBuilder rb = Response.ok(callbackString.toString()).type(MediaType.APPLICATION_JSON_TYPE);
-        CorsHelper.addCORSOrigin(servletContext, rb, header);
+        //CorsHelper.addCORSOrigin(servletContext, rb, header);
         return rb.build();
     }
 }

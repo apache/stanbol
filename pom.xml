@@ -66,8 +66,8 @@
     <!-- <module>data</module> -->
     <module>commons</module>
 
-    <!-- <module>entityhub</module>
-    <module>ontologymanager</module>
+    <module>entityhub</module>
+    <!-- <module>ontologymanager</module>
     <module>rules</module>
     <module>enhancer</module>
     <module>contenthub</module>
@@ -82,10 +82,10 @@
 
     <module>launchers/bundlelists</module>
     <module>launchers/mini</module>
-<!--    <module>launchers/full</module>
+<!--    <module>launchers/full</module> -->
 
     <module>launchers/stable</module>
-    <module>launchers/full-war</module>
+   <!-- <module>launchers/full-war</module>
     
     <module>development/archetypes/statefull-webmodule</module>
     <module>development/archetypes/stateless-webmodule</module>
