@@ -10,8 +10,8 @@
     <@ldpath path="permission:javaPermissionEntry :: xsd:string"/>
     </#assign>
     <div class="role">
-        <input class="checkboxPermission" type="checkbox" id="${permission}" name="${permission}" value="${permission}" checked="checked"  />
-        <label for="${permission}">${permission}</label>
+        <input class="checkboxPermission" type="checkbox" id="${permission?html}" name="${permission?html}" value="${permission?html}" checked="checked"  />
+        <label for="${permission?html}">${permission?html}</label>
     </div>
     
 </@ldpath>

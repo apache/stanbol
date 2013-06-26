@@ -19,19 +19,26 @@ package org.apache.stanbol.commons.indexedgraph;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.clerezza.rdf.core.BNode;
+import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.AbstractTripleCollection;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
@@ -162,8 +169,10 @@ class IndexedTripleCollection extends AbstractTripleCollection implements Triple
     public IndexedTripleCollection(Collection<Triple> baseCollection) {
         super();
         spo.addAll(baseCollection);
-        pos.addAll(baseCollection);
-        osp.addAll(baseCollection);
+        //use internal index to fill the other indexes, because the parsed
+        //collection might be slow
+        pos.addAll(spo); 
+        osp.addAll(spo);
     }
     
     @Override
@@ -271,65 +280,187 @@ class IndexedTripleCollection extends AbstractTripleCollection implements Triple
             return Integer.MAX_VALUE;
         };
     };
-    
+
+//    /**
+//     * Compares two resources with special support for {@link #MIN} and
+//     * {@link #MAX} to allow building {@link SortedSet#subSet(Object, Object)}
+//     * for <code>null</code> values parsed to 
+//     * {@link #filter(NonLiteral, UriRef, Resource)}
+//     * @param a
+//     * @param b
+//     * @return
+//     */
+//    protected static int compareHash(Resource a, Resource b, Map<Integer,List<Resource>> confictsMap) {
+//        int hashA = a.hashCode();
+//        int hashB = b.hashCode();
+//        if (hashA != hashB) {
+//            return hashA > hashB ? 1 : -1;
+//        }
+//        //those resources might be equals
+//        //(1) Check for MIN, MAX (used to build sub-sets). Other resources might
+//        //    have a similar hasCode
+//        int state = a == MIN || b == MAX ? -1 :
+//            a == MAX || b == MIN ? 1 : 0;
+//        if(state == 0){
+//            if(a.equals(b)){ //check of the resources are equals
+//                return 0; //return zero
+//            } else if(//we need to care about HashCode conflicts 
+//                a instanceof BNode && b instanceof BNode){ // of BNodes
+//                log.info("HashCode conflict for {} and {}",a,b); //we have a conflict
+//                return resolveBNodeHashConflict(a, b, confictsMap);
+//            } else { //same hashCode but not equals
+//                //use the String representation of the Resources to sort them
+//                String as = resource2String(a);
+//                String bs = resource2String(b);
+//                log.info("same hash code {} - compare Strings a: {}, b: {}",
+//                    new Object[]{a.hashCode(),as,bs});
+//                return as.compareTo(bs);
+//            }
+//        }
+//       return state;
+//    }
 
     /**
-     * Compares two resources with special support for {@link #MIN} and
-     * {@link #MAX} to allow building {@link SortedSet#subSet(Object, Object)}
-     * for <code>null</code> values parsed to 
-     * {@link #filter(NonLiteral, UriRef, Resource)}
-     * @param a
-     * @param b
-     * @return
+     * Resolved BNode hasConflics, by storing the correct order for the affected
+     * {@link Integer} in a {@link List} of Resource instances.
+     * @param a the first {@link BNode}
+     * @param b the second {@link BNode}
+     * @param confictsMap the Map used to store the order of BNodes with conflicts
+     * @return the decision taken based on the confictsMap.
      */
-    protected static int compare(Resource a, Resource b, Map<Integer,List<Resource>> confictsMap) {
-        int hashA = a.hashCode();
-        int hashB = b.hashCode();
-        if (hashA != hashB) {
-            return hashA > hashB ? 1 : -1;
+    private static int resolveBNodeHashConflict(Resource a, Resource b,
+            Map<Integer,List<Resource>> confictsMap) {
+        //This is not a bad thing. We need just to ensure constant ordering
+        //and as there is nothing we can use to distinguish we need to keep
+        //this information in a list.
+        Integer hash = Integer.valueOf(a.hashCode());
+        List<Resource> resources = confictsMap.get(hash);
+        if(resources == null){ //new conflict ... just add and return
+            resources = new ArrayList<Resource>(2);
+            confictsMap.put(hash, resources);
+            resources.add(a);
+            resources.add(b);
+            return -1;
         }
-        int state = a == MIN || b == MAX ? -1 :
-            a == MAX || b == MIN ? 1 : a.toString().compareTo(b.toString());
-        if(state == 0 && //same string representation -> should be equals
-                a instanceof BNode && //but for BNodes it might be a hashcode conflict
-                !a.equals(b)){ //so check if they are not equals
-            log.info("HashCode conflict for {} and {}",a,b); //we have a conflict
-            //This is not a bad thing. We need just to ensure constant ordering
-            //and as there is nothing we can use to distinguish we need to keep
-            //this information in a list.
-            Integer hash = Integer.valueOf(a.hashCode());
-            List<Resource> resources = confictsMap.get(hash);
-            if(resources == null){ //new conflict ... just add and return
-                resources = new ArrayList<Resource>(2);
-                confictsMap.put(hash, resources);
-                resources.add(a);
-                resources.add(b);
-                return -1;
+        //already conflicting resource for this hash present
+        int aIndex=-1;
+        int bIndex=-1;
+        for(int i = 0; i<resources.size() && (aIndex < 0 || bIndex < 0);i++){
+            Resource r = resources.get(i);
+            if(aIndex < 0 && r.equals(a)){
+                aIndex = i;
             }
-            //already conflicting resource for this hash present
-            int aIndex=-1;
-            int bIndex=-1;
-            for(int i = 0; i<resources.size() && (aIndex < 0 || bIndex < 0);i++){
-                Resource r = resources.get(i);
-                if(aIndex < 0 && r.equals(a)){
-                    aIndex = i;
-                }
-                if(bIndex < 0 && r.equals(b)){
-                    bIndex = i;
-                }
+            if(bIndex < 0 && r.equals(b)){
+                bIndex = i;
             }
-            if(aIndex < 0){ //a not found
-                aIndex = resources.size();
-                resources.add(a);
-            }
-            if(bIndex < 0){ //b not found
-                bIndex = resources.size();
-                resources.add(b);
-            }
-            return aIndex < bIndex ? -1 : 1;
-       } //no conflict or no conflict possible
-       return state;
+        }
+        if(aIndex < 0){ //a not found
+            aIndex = resources.size();
+            resources.add(a);
+        }
+        if(bIndex < 0){ //b not found
+            bIndex = resources.size();
+            resources.add(b);
+        }
+        return aIndex < bIndex ? -1 : 1;
     }
-
+    /**
+     * Compares Resources to correctly sort them within the index.<p>
+     * Sort criteria are:<ol>
+     * <li> URIs are sorted by the {@link UriRef#getUnicodeString()} unicode string)
+     * <li> Literals 
+     *  <ol>
+     *      <li> sort by the {@link Literal#getLexicalForm() lixical form}
+     *      <li> sort by {@link PlainLiteral#getLanguage() language} (<code>null</code> value first)
+     *      <li> sort by {@link TypedLiteral#getDataType() type} (<code>null</code> value fist
+     *  </ol>
+     * <li> BNode 
+     *  <ol>
+     *      <li> sorted by their {@link System#identityHashCode(Object) Object hasCode}
+     *      <li> on hasCode conflicts (same hasCode but not equals) a random order is chosen
+     *      and kept in the parsed conflictsMap
+     *  </ol> 
+     * </ol>
+     * <b>NOTEs</b><ul>
+     * <li> parsed {@link Resource} are not required to correctly implement 
+     * {@link Object#hashCode() hashCode} and {@link Object#equals(Object) equals}
+     * <li> parsed {@link UriRef} and {@link BNode} and {@link Literal} MUST NOT
+     * extend/implement any of the other classes/interfaces. This means that an
+     * {@link UriRef} MUST NOT implement {@link BNode} nor {@link Literal}
+     * <li> parsed {@link Literal}s MAY implement {@link PlainLiteral} AND
+     * {@link TypedLiteral}. This allows wrappers over frameworks that do not
+     * distinguish between those two literal types to be used with the
+     * {@link IndexedTripleCollection}.
+     * </ul>
+     * 
+     * @param a the first resource to compare
+     * @param b the second resource to compare
+     * @param confictsMap the map used to resolve BNodes with hasCode conflicts 
+     * @return 
+     */
+    protected static int compare(Resource a, Resource b, Map<Integer,List<Resource>> confictsMap){
+        //Handle special cases for MAX and MIN values
+        if(a == MIN || b == MAX) {
+            return -1 ;
+        } else if(a == MAX || b == MIN){
+            return 1;
+        }
+        //sort (0) UriRefs < (1) Literals (PlainLiterals & TypedLiterals) < (3) BNodes
+        int at = a instanceof UriRef ? 0 : a instanceof Literal ? 1 : 2;
+        int bt = b instanceof UriRef ? 0 : b instanceof Literal ? 1 : 2;
+        if(at == bt){ //same type sort the different types
+            if(at < 2){ //no BNode
+                //sort in alphabetic order of the string representation
+                String as = at == 0 ? ((UriRef)a).getUnicodeString() :
+                    ((Literal)a).getLexicalForm();
+                String bs = bt == 0 ? ((UriRef)b).getUnicodeString() :
+                    ((Literal)b).getLexicalForm();
+                int sc = as.compareTo(bs);
+                if(sc == 0 && at == 1){ //same string value and Literals
+                    //check if the language and types are the same
+                    Language al = a instanceof PlainLiteral ? ((PlainLiteral)a).getLanguage() : null;
+                    Language bl = b instanceof PlainLiteral ? ((PlainLiteral)b).getLanguage() : null;
+                    //first try to sort by language
+                    if(al == null){
+                        sc = bl == null ? 0 : -1;
+                    } else if(bl == null){
+                        sc = 1;
+                    } else {
+                        sc = al.toString().compareTo(bl.toString());
+                    }
+                    if(sc == 0){
+                        //if still equals look at the dataType
+                        UriRef adt = a instanceof TypedLiteral ? ((TypedLiteral)a).getDataType() : null;
+                        UriRef bdt = b instanceof TypedLiteral ? ((TypedLiteral)b).getDataType() : null;
+                        if(adt == null){
+                            sc = bdt == null ? 0 : -1;
+                        } else if(bdt == null){
+                            sc = 1;
+                        } else {
+                            sc = adt.getUnicodeString().compareTo(bdt.getUnicodeString());
+                        }
+                    }
+                    return sc;
+                } else { //for UriRefs return the string compare
+                    return sc;
+                }
+            } else { //handle BNodes
+                //sort BNodes based on hashCode
+                int ah = System.identityHashCode(a);
+                int bh = System.identityHashCode(b);
+                if(ah == bh){
+                    if(!a.equals(b)){
+                        return resolveBNodeHashConflict(a, b, confictsMap);
+                    } else { //same hash and equals
+                        return 0;
+                    }
+                } else { //sort by hash
+                    return ah < bh ? -1 : 1;
+                }
+            }
+        } else {
+            return at < bt ? -1 : 1;
+        }
+    }
     
 }

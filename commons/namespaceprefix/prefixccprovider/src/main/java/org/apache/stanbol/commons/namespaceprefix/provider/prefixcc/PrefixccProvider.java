@@ -17,18 +17,18 @@
 package org.apache.stanbol.commons.namespaceprefix.provider.prefixcc;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixProvider;
 import org.apache.stanbol.commons.namespaceprefix.impl.NamespacePrefixProviderImpl;
 import org.slf4j.Logger;
@@ -112,9 +112,26 @@ public class PrefixccProvider implements NamespacePrefixProvider {
     protected final void loadMappings() {
         try {
             log.info("Load Namespace Prefix Mappings form {}",GET_ALL);
-            cache = new NamespacePrefixProviderImpl(GET_ALL.openStream());
-            cacheStamp = System.currentTimeMillis();
-            log.info("  ... completed");
+            HttpURLConnection con = (HttpURLConnection)GET_ALL.openConnection();
+            con.setReadTimeout(5000); //set the max connect & read timeout to 5sec
+            con.setConnectTimeout(5000);
+            con.connect();
+            String contentType = con.getContentType();
+            if("text/plain".equalsIgnoreCase(contentType)){
+                InputStream in = con.getInputStream();
+                try {
+                    cache = new NamespacePrefixProviderImpl(in);
+                    cacheStamp = System.currentTimeMillis();
+                    log.info("  ... completed");
+                } finally {
+                    IOUtils.closeQuietly(in);
+                }
+            } else {
+                log.warn("Response from prefix.cc does have the wrong content type '"
+                    + contentType + "' (expected: text/plain). This indicates that the "
+                    + "service is currently unavailable!");
+            }
+            con.disconnect(); //we connect once every {long-period}
         } catch (IOException e) {
             log.warn("Unable to load prefix.cc NamespaceMappings (Message: "
                 + e.getMessage() +")",e);

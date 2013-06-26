@@ -158,27 +158,36 @@ public class SolrServerAdapter {
         
         @Override
         public void preClose(SolrCore core) {
+            log.debug("  ... in preClose SolrCore {}", core.getName());
             Collection<String> names = server.getCoreNames(core);
             if(names != null){
                 synchronized (registrations) {
                     for(String name : names){
                         CoreRegistration coreRegistration = registrations.get(name);
                         //we need to check if the core registered for the 
-                        //parsed name is still the same as parsed 
-                        if(coreRegistration.getCore().equals(core)){
-                            log.info("unregister Core with name '{}' based on call to" +
-                                " CloseHook#close()",name);
-                            registrations.remove(name);
-                            coreRegistration.unregister();
-                        } else {
-                            log.info("Core registered for name '{}' is not the same as" +
-                                    " parsed to CloseHook#close()",name);
-                        }
+                        //parsed name is still the same as parsed
+                        if(coreRegistration != null){
+                            if(coreRegistration.getCore().equals(core)){
+                                log.info("unregister Core with name '{}' based on call to" +
+                                    " CloseHook#close()",name);
+                                CoreRegistration removed = registrations.remove(name);
+                                if(removed != null){
+                                    removed.unregister();
+                                } //else removed in the meantime by an other thread ... nothing to do
+                            } else {
+                                log.info("Core registered for name '{}' is not the same as" +
+                                        " parsed to CloseHook#close()",name);
+                            }
+                        } //else the core was removed by using the API of the SolrServerAdapter
                     }
                 }
             }
             //update the OSGI service for the CoreContainer
-            updateServerRegistration();
+            try {
+                updateServerRegistration();
+            } catch (IllegalStateException e) {
+                log.debug("Server Registration already unregistered ",e);
+            }
         }
 
         @Override
@@ -218,100 +227,16 @@ public class SolrServerAdapter {
         this.context = context;
         //create a clone so that only we control who changes to the properties
         serverProperties = parsedServerProperties.clone();
-        SolrResourceLoader loader = new OsgiSolrResourceLoader(context, solrDir.getAbsolutePath(), 
-            SolrServerAdapter.class.getClassLoader());
 
-        //We need to override some methods of the CoreContainer to
-        // (1) ensure the OsigSolrResourceLoader is used
-        // (2) update the OSGI service registrations
-        //Previously this was done in the SolrServerAdapter, but to also support
-        //ReferencedSolrServer (STANBOL-1081) we do it now directly for the
-        //CoreContainer. This allows also to correctly load and register
-        //cores that are created/changed via the Solr RESTful API
-        CoreContainer container = new CoreContainer(loader){
-            //override this to ensure that the OsgiSolrResourceLodaer is used
-            //to create SolrCores
-            @Override
-            public SolrCore create(CoreDescriptor dcore) {
-                log.info(" .... createCore {}:{}",serverProperties.getServerName(),dcore.getName());
-                if (getZkController() != null) {
-                    //TODO: add support for ZooKeeper managed cores
-                    return super.create(dcore);
-                } else {
-                    File idir = new File(dcore.getInstanceDir());
-                    String instanceDir = idir.getPath();
-                    //TODO: we can not use the indexSchemaCache because it is 
-                    //      a private variable
-                    SolrResourceLoader loader = new OsgiSolrResourceLoader(context, instanceDir, 
-                        CoreContainer.class.getClassLoader());
-                    SolrConfig config;
-                    try {
-                        config = new SolrConfig(loader, dcore.getConfigName(), null);
-                    } catch (Exception e) {
-                        throw new SolrException(ErrorCode.SERVER_ERROR, "Could not load config for " + dcore.getConfigName(), e);
-                    }
-                    IndexSchema schema = new IndexSchema(config,dcore.getSchemaName(),null);
-                    SolrCore core = new SolrCore(dcore.getName(), null, config, schema, dcore);
-                    if (core.getUpdateHandler().getUpdateLog() != null) {
-                        // always kick off recovery if we are in standalone mode.
-                        core.getUpdateHandler().getUpdateLog().recoverFromLog();
-                    }
-                    return core;
-                }
-            }
-            //this ensures that a closeHook is added to registered cores
-            @Override
-            protected SolrCore registerCore(Map<String,SolrCore> whichCores, String name, SolrCore core,
-                    boolean returnPrevNotClosed) {
-                log.info(" .... registerCore {}:{}",serverProperties.getServerName(),name);
-                SolrCore old =  super.registerCore(whichCores, name, core, returnPrevNotClosed);
-                //NOTE: we can not register the services here, as this can trigger
-                //      a deadlock!!
-                //Reason: OSGI ensures that activation is done by a single thread.
-                //        Solr uses a Threadpool to activate SolrCores. This means
-                //        that this method is called in a different thread context 
-                //        as the OSGI activation thread. However the registration
-                //        of the SolrCore would try to re-sync on the OSGI activation
-                //        Thread and therefore cause a deadlock as the
-                //        constructor of the SolrServerAdapter is typically expected
-                //        to be called within an activate method.
-                //Solution: the 'initialised' switch is only set to TRUE after the
-                //          initialisation of the CoreContainer. During initialisation
-                //          the SolrCores ore only registered after the construction
-                //          of the CoreContainer. This ensures that the OSGI
-                //          activation thread context is used for registration
-                //          If SolrCores are registered afterwards (e.g a SolrCore
-                //          is added to a ManagedSolrServer) the registration is
-                //          done as part of this method (because 'initialised' is
-                //          already set to TRUE). 
-                if(initialised){ //already initialised ?
-                    //register the core as OSGI service
-                    registerCoreService(name, core);
-                    updateCoreNamesInServerProperties();
-                    updateServerRegistration();
-                    //add a closeHook so that we know when to unregister
-                    core.addCloseHook(closeHook);
-                } //else ignore registration during startup
-                return old;
-            }
-            //in the case of a swap we need to update the OSGI service registrations
-            @Override
-            public void swap(String name1, String name2) {
-                log.info(" .... swap {}:{} with {}:{}",new Object[]{
-                        serverProperties.getServerName(),name1,
-                        serverProperties.getServerName(),name2
-                });
-                super.swap(name1, name2);
-                //also update the OSGI Service registrations
-                if(initialised){
-                    registerCoreService(name1,null);
-                    registerCoreService(name2,null);
-                    //update the OSGI service for the CoreContainer
-                    updateCoreNamesInServerProperties();
-                    updateServerRegistration();
-                } //else ignore registration during startup
-            }
-        };
+        ClassLoader classLoader = updateContextClassLoader();
+        CoreContainer container;
+        try {
+            SolrResourceLoader loader = new OsgiSolrResourceLoader(context, solrDir.getAbsolutePath(), 
+                SolrServerAdapter.class.getClassLoader());
+            container = new OsgiCoreContainer(loader, context);
+        } finally {
+            Thread.currentThread().setContextClassLoader(classLoader);
+        }
         File solrCof = new File(solrDir,parsedServerProperties.getSolrXml());
         this.server = container;
         this.registrations = Collections.synchronizedMap(
@@ -322,7 +247,7 @@ public class SolrServerAdapter {
             serverProperties.setServerName(solrDir.getAbsolutePath());
         }
         //now load the cores
-        ClassLoader classLoader = updateContextClassLoader();
+        classLoader = updateContextClassLoader();
         try {
             log.info("    ... load SolrConfig {}",solrCof);
             container.load(solrDir.getAbsolutePath(), solrCof);
@@ -354,6 +279,7 @@ public class SolrServerAdapter {
      * this instance. This will also cause all OSGI services to be unregistered
      */
     public void shutdown(){
+        log.debug(" ... in shutdown for SolrServer {}",serverProperties.getServerName());
         Collection<CoreRegistration> coreRegistrations;
         synchronized (registrations) {
             coreRegistrations = new ArrayList<CoreRegistration>(registrations.values());
@@ -559,10 +485,11 @@ public class SolrServerAdapter {
         //the reference count of the SolrCore does not reach 0)
         CoreRegistration current = new CoreRegistration(name,core);
         CoreRegistration old = registrations.put(name,current);
+        log.info("added Registration for SolrCore {}",name);
         if(old != null){
+            log.info("  ... unregister old registration {}", old);
             old.unregister();
         }
-        log.info("added Registration for SolrCore {}",name);
         return current.getServiceReference();
     }
     
@@ -670,6 +597,109 @@ public class SolrServerAdapter {
         serverRegistration.setProperties(serverProperties);
     }
     /**
+     * We need to override some methods of the CoreContainer to
+     * (1) ensure the OsigSolrResourceLoader is used
+     * (2) update the OSGI service registrations
+     * Previously this was done in the SolrServerAdapter, but to also support
+     * ReferencedSolrServer (STANBOL-1081) we do it now directly for the
+     * CoreContainer. This allows also to correctly load and register
+     * cores that are created/changed via the Solr RESTful API
+     * @author Rupert Westenthaler
+     */
+    private final class OsgiCoreContainer extends CoreContainer {
+        private final BundleContext context;
+
+        private OsgiCoreContainer(SolrResourceLoader loader, BundleContext context) {
+            super(loader);
+            this.context = context;
+        }
+
+        //override this to ensure that the OsgiSolrResourceLodaer is used
+        //to create SolrCores
+        @Override
+        public SolrCore create(CoreDescriptor dcore) {
+            log.info(" .... createCore {}:{}",serverProperties.getServerName(),dcore.getName());
+            if (getZkController() != null) {
+                //TODO: add support for ZooKeeper managed cores
+                return super.create(dcore);
+            } else {
+                File idir = new File(dcore.getInstanceDir());
+                String instanceDir = idir.getPath();
+                //TODO: we can not use the indexSchemaCache because it is 
+                //      a private variable
+                SolrResourceLoader loader = new OsgiSolrResourceLoader(context, instanceDir, 
+                    CoreContainer.class.getClassLoader());
+                SolrConfig config;
+                try {
+                    config = new SolrConfig(loader, dcore.getConfigName(), null);
+                } catch (Exception e) {
+                    throw new SolrException(ErrorCode.SERVER_ERROR, "Could not load config for " + dcore.getConfigName(), e);
+                }
+                IndexSchema schema = new IndexSchema(config,dcore.getSchemaName(),null);
+                SolrCore core = new SolrCore(dcore.getName(), null, config, schema, dcore);
+                if (core.getUpdateHandler().getUpdateLog() != null) {
+                    // always kick off recovery if we are in standalone mode.
+                    core.getUpdateHandler().getUpdateLog().recoverFromLog();
+                }
+                return core;
+            }
+        }
+
+        //this ensures that a closeHook is added to registered cores
+        @Override
+        protected SolrCore registerCore(Map<String,SolrCore> whichCores, String name, SolrCore core,
+                boolean returnPrevNotClosed) {
+            log.info(" .... registerCore {}:{}",serverProperties.getServerName(),name);
+            SolrCore old =  super.registerCore(whichCores, name, core, returnPrevNotClosed);
+            //NOTE: we can not register the services here, as this can trigger
+            //      a deadlock!!
+            //Reason: OSGI ensures that activation is done by a single thread.
+            //        Solr uses a Threadpool to activate SolrCores. This means
+            //        that this method is called in a different thread context 
+            //        as the OSGI activation thread. However the registration
+            //        of the SolrCore would try to re-sync on the OSGI activation
+            //        Thread and therefore cause a deadlock as the
+            //        constructor of the SolrServerAdapter is typically expected
+            //        to be called within an activate method.
+            //Solution: the 'initialised' switch is only set to TRUE after the
+            //          initialisation of the CoreContainer. During initialisation
+            //          the SolrCores ore only registered after the construction
+            //          of the CoreContainer. This ensures that the OSGI
+            //          activation thread context is used for registration
+            //          If SolrCores are registered afterwards (e.g a SolrCore
+            //          is added to a ManagedSolrServer) the registration is
+            //          done as part of this method (because 'initialised' is
+            //          already set to TRUE). 
+            if(initialised){ //already initialised ?
+                //register the core as OSGI service
+                registerCoreService(name, core);
+                updateCoreNamesInServerProperties();
+                updateServerRegistration();
+                //add a closeHook so that we know when to unregister
+                core.addCloseHook(closeHook);
+            } //else ignore registration during startup
+            return old;
+        }
+
+        //in the case of a swap we need to update the OSGI service registrations
+        @Override
+        public void swap(String name1, String name2) {
+            log.info(" .... swap {}:{} with {}:{}",new Object[]{
+                    serverProperties.getServerName(),name1,
+                    serverProperties.getServerName(),name2
+            });
+            super.swap(name1, name2);
+            //also update the OSGI Service registrations
+            if(initialised){
+                registerCoreService(name1,null);
+                registerCoreService(name2,null);
+                //update the OSGI service for the CoreContainer
+                updateCoreNamesInServerProperties();
+                updateServerRegistration();
+            } //else ignore registration during startup
+        }
+    }
+    /**
      * Internally used to manage the OSGI service registration for
      * {@link SolrCore}s of the {@link CoreContainer} managed by this
      * {@link SolrServerAdapter} instance
@@ -678,7 +708,7 @@ public class SolrServerAdapter {
      */
     private class CoreRegistration {
         protected final String name;
-        protected final SolrCore core;
+        protected SolrCore core;
         private ServiceRegistration registration;
         /**
          * Creates and registers a {@link CoreRegistration}
@@ -742,15 +772,26 @@ public class SolrServerAdapter {
                     registration = null;
                 }
             }
-            
             try {
-                tmp.unregister(); //unregister the service
-            } catch (IllegalStateException e) {
-                log.info(String.format(
-                    "Looks like that the registration for SolrCore %s was already unregisterd",
-                    name),e);
-            } finally {
-                core.close(); //close the core to decrease the refernece count!!
+                if(tmp != null){
+                    try {
+                        tmp.unregister(); //unregister the service
+                    } catch (IllegalStateException e) {
+                        log.info(String.format(
+                            "Looks like that the registration for SolrCore %s was already unregisterd",
+                            name),e);
+                    }
+                }
+            } finally { //ensure that the core is closed to decrease the reference count
+                //ensure this is only done once
+                SolrCore core;
+                synchronized (this) {
+                    core = this.core; //copy over to a local variable
+                    this.core = null; //set the field to null
+                }
+                if(core != null){
+                    core.close(); //decrease the reference count!!
+                }
             }
         }
         /**

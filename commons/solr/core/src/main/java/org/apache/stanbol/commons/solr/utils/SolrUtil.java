@@ -21,9 +21,9 @@ import java.util.regex.Pattern;
 public final class SolrUtil {
     private SolrUtil() {}
 
-    private static final String LUCENE_ESCAPE_CHARS = "[\\\\+\\-\\!\\(\\)\\:\\^\\[\\]\\{\\}\\~\\*\\?\\\"]";
+    private static final String LUCENE_ESCAPE_CHARS = "[\\\\+\\-\\!\\(\\)\\:\\^\\[\\]\\{\\}\\~\\*\\?\\\"\\/]";
     private static final Pattern LUCENE_PATTERN = Pattern.compile(LUCENE_ESCAPE_CHARS);
-    private static final String WILDCARD_ESCAPE_CHARS = "[\\\\+\\-\\!\\(\\)\\:\\^\\[\\]\\{\\}\\~\\\"]";
+    private static final String WILDCARD_ESCAPE_CHARS = "[\\\\+\\-\\!\\(\\)\\:\\^\\[\\]\\{\\}\\~\\\"\\/]";
     private static final Pattern WILDCARD_PATTERN = Pattern.compile(WILDCARD_ESCAPE_CHARS);
     private static final String REPLACEMENT_STRING = "\\\\$0";
 

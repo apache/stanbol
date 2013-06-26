@@ -141,12 +141,12 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
                 return null;
             }
             coreName = core.getName();
-            CoreDescriptor descriptior = core.getCoreDescriptor();
-            if(descriptior == null){ //core not registered with a container!
+            CoreDescriptor descriptor = core.getCoreDescriptor();
+            if(descriptor == null){ //core not registered with a container!
                 context.ungetService(reference);
                 return null; //ignore
             } else {
-                server = descriptior.getCoreContainer();
+                server = descriptor.getCoreContainer();
             }
         } else {
             if(service instanceof CoreContainer){ 

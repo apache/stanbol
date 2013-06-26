@@ -19,15 +19,16 @@ package org.apache.stanbol.commons.namespaceprefix.provider.prefixcc;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.namespaceprefix.service.StanbolNamespacePrefixService;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,18 +67,41 @@ public class PrefixccProviderTest {
         Assert.assertFalse(pcp.isAvailable());
         Assert.assertNull(pcp.getCacheTimeStamp());
     }
+    /**
+     * Checks if the service is reachable (test is performed online) and if
+     * prefix.cc sends information with the correct content type.
+     * @return
+     */
+    private boolean checkServiceAvailable(){
+        try {
+            HttpURLConnection con = (HttpURLConnection)PrefixccProvider.GET_ALL.openConnection();
+            con.setReadTimeout(5000); //set the max connect & read timeout to 5sec
+            con.setConnectTimeout(5000);
+            con.connect();
+            String contentType = con.getContentType();
+            IOUtils.closeQuietly(con.getInputStream()); //close the stream
+            if("text/plain".equalsIgnoreCase(contentType)){
+                return true;
+            } else {
+                log.info("Request to http://prefix.cc ... returned an unexpected "
+                        + "ContentType "+contentType+ " (expected: text/plain) "
+                        + " ... deactivate" + PrefixccProvider.class.getSimpleName() 
+                        + " test");
+                return false; //service seams to be down ... skip tests
+            }
+        } catch (IOException e) {
+           log.info("Unable to connect to http://prefix.cc ... deactivating "
+               + PrefixccProvider.class.getSimpleName()+ " test");
+           return false;
+        }
+    }
     
     @Test
     public void testServiceLoader() throws IOException{
         //this test works only if online
-        try {
-            PrefixccProvider.GET_ALL.openStream();
-        } catch (IOException e) {
-           log.info("Unable to connect to http://prefix.cc ... deactivating "
-               + PrefixccProvider.class.getSimpleName()+ "ServiceLoader support test");
-           return;
+        if(!checkServiceAvailable()){
+            return; //skip test
         }
-        
         //this test for now does not use predefined mappings
         
         URL mappingURL = PrefixccProviderTest.class.getClassLoader()
