@@ -1,0 +1,67 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# --- Define the Languages for all fields ---
+# Uncomment to restrict indexing to a specific list of languages, otherwise all
+# languages are indexed
+#| @=null;en;de;fr;it
+
+# --- RDF RDFS and OWL Mappings ---
+rdfs:label 
+rdfs:comment#rdfs:comment
+rdfs:seeAlso | d=entityhub:ref
+
+rdf:type | d=entityhub:ref
+
+owl:sameAs | d=entityhub:ref
+
+# --- Dublin Core ---
+#all DC Terms properties
+dc:*
+#to keep the old dc-element triples 
+dc-elements:*
+dc-elements:contributor > dc:contributor
+dc-elements:coverage > dc:coverage
+dc-elements:creator > dc:creator
+dc-elements:date > dc:date
+dc-elements:description > dc:description
+dc-elements:format > dc:format
+dc-elements:identifier > dc:identifier
+dc-elements:language > dc:language
+dc-elements:publisher > dc:publisher
+dc-elements:relation > dc:relation
+dc-elements:rights > dc:rights
+dc-elements:source > dc:source
+dc-elements:subject > dc:subject
+dc-elements:title > dc:title
+dc-elements:type > dc:type
+
+# --- Social Networks (via foaf) ---
+#The Friend of a Friend schema often used to describe social relations between people
+foaf:*
+foaf:knows | d=entityhub:ref
+foaf:made | d=entityhub:ref
+foaf:maker | d=entityhub:ref
+foaf:member | d=entityhub:ref
+foaf:homepage | d=xsd:anyURI
+foaf:depiction | d=xsd:anyURI
+foaf:img | d=xsd:anyURI
+foaf:logo | d=xsd:anyURI
+#page about the entity
+foaf:page | d=xsd:anyURI
+# --- The SWRC (Semantic Web for Research Communities) Ontology
+#select all
+swrc:*
+swrc:volume | d=xsd:int

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<rdf:RDF xmlns:cc="http://creativecommons.org/ns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:gn="http://www.geonames.org/ontology#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#">
+<gn:Feature rdf:about="http://sws.geonames.org/2985244/">
+<rdfs:isDefinedBy>http://sws.geonames.org/2985244/about.rdf</rdfs:isDefinedBy>
+<gn:name>Provence-Alpes-Côte d'Azur</gn:name>
+<gn:alternateName xml:lang="ko">프로방스알프코트다쥐르</gn:alternateName>
+<gn:alternateName xml:lang="an">Probenza-Alpes-Costa Azul</gn:alternateName>
+<gn:alternateName xml:lang="hr">Provansa-Alpe-Azurna obala</gn:alternateName>
+<gn:alternateName xml:lang="sl">Provansa-Alpe-Azurna obala</gn:alternateName>
+<gn:alternateName xml:lang="lt">Provansas-Alpės-Žydroji pakrantė</gn:alternateName>
+<gn:alternateName xml:lang="ca">Provença-Alps-Costa Blava</gn:alternateName>
+<gn:alternateName xml:lang="oc">Provença-Aups-Còsta d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="da">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="de">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="en">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="et">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="fi">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:officialName xml:lang="fr">Provence-Alpes-Côte d'Azur</gn:officialName>
+<gn:alternateName xml:lang="hu">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="id">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="lad">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="nl">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="nn">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="no">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="pt">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="qu">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="sk">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="sv">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="tr">Provence-Alpes-Côte d'Azur</gn:alternateName>
+<gn:officialName>Provence-Alpes-Côte d'Azur</gn:officialName>
+<gn:alternateName xml:lang="ro">Provence-Alpi-Coasta de Azur</gn:alternateName>
+<gn:alternateName xml:lang="frp">Provence-Arpes-Couta d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="io">Provenco Alpi Azur-Rivo</gn:alternateName>
+<gn:alternateName xml:lang="eo">Provenco-Alpoj-Bordo Lazura</gn:alternateName>
+<gn:alternateName xml:lang="eu">Proventza-Alpeak-Cote d'Azur</gn:alternateName>
+<gn:alternateName xml:lang="es">Provenza-Alpes-Costa Azul</gn:alternateName>
+<gn:alternateName xml:lang="it">Provenza-Alpi-Costa Azzurra</gn:alternateName>
+<gn:alternateName xml:lang="pl">Prowansja-Alpy-Lazurowe Wybrzeże</gn:alternateName>
+<gn:alternateName xml:lang="scn">Pruvenza-Alpi-Costa Azzola</gn:alternateName>
+<gn:alternateName xml:lang="fr">Région PACA</gn:alternateName>
+<gn:alternateName xml:lang="he">פרובנס-אלפ-קוט ד'אזור</gn:alternateName>
+<gn:alternateName xml:lang="sr">Прованса-Алпи-Азурна обала</gn:alternateName>
+<gn:alternateName xml:lang="bg">Прованс-Алпи-Лазурен бряг</gn:alternateName>
+<gn:alternateName xml:lang="ru">Прованс — Альпы — Лазурный берег</gn:alternateName>
+<gn:alternateName xml:lang="ka">პროვანსი-ალპები-ლაჟვარდოვანი ნაპირი</gn:alternateName>
+<gn:alternateName xml:lang="ja">プロヴァンス＝アルプ＝コート・ダジュール地域圏</gn:alternateName>
+<gn:alternateName xml:lang="zh">普罗旺斯-阿尔卑斯-蓝色海岸</gn:alternateName>
+<gn:featureClass rdf:resource="http://www.geonames.org/ontology#A"/>
+<gn:featureCode rdf:resource="http://www.geonames.org/ontology#A.ADM1"/>
+<gn:countryCode>FR</gn:countryCode>
+<gn:population>4864015</gn:population>
+<wgs84_pos:lat>44</wgs84_pos:lat>
+<wgs84_pos:long>6</wgs84_pos:long>
+<gn:parentFeature rdf:resource="http://sws.geonames.org/3017382/"/>
+<gn:parentCountry rdf:resource="http://sws.geonames.org/3017382/"/>
+<gn:parentADM1 rdf:resource="http://sws.geonames.org/2985244/"/>
+<gn:childrenFeatures rdf:resource="http://sws.geonames.org/2985244/contains.rdf"/>
+<gn:locationMap rdf:resource="http://www.geonames.org/2985244/region-provence-alpes-cote-d-azur.html"/>
+<gn:wikipediaArticle rdf:resource="http://af.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te-d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://an.wikipedia.org/wiki/Probenza-Alpes-Costa_Azul"/>
+<gn:wikipediaArticle rdf:resource="http://bg.wikipedia.org/wiki/%D0%9F%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D1%81-%D0%90%D0%BB%D0%BF%D0%B8-%D0%9B%D0%B0%D0%B7%D1%83%D1%80%D0%B5%D0%BD_%D0%B1%D1%80%D1%8F%D0%B3"/>
+<gn:wikipediaArticle rdf:resource="http://ca.wikipedia.org/wiki/Proven%C3%A7a_%E2%80%93_Alps_%E2%80%93_Costa_Blava"/>
+<gn:wikipediaArticle rdf:resource="http://ceb.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://cs.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://da.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://de.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%E2%80%99Azur"/>
+<gn:wikipediaArticle rdf:resource="http://en.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<owl:sameAs rdf:resource="http://dbpedia.org/resource/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://eo.wikipedia.org/wiki/Provenco-Alpoj-Bordo_Lazura"/>
+<gn:wikipediaArticle rdf:resource="http://es.wikipedia.org/wiki/Provenza-Alpes-Costa_Azul"/>
+<gn:wikipediaArticle rdf:resource="http://et.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://eu.wikipedia.org/wiki/Proventza-Alpeak-Cote_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://fi.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://fr.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://frp.wikipedia.org/wiki/Provence-Arpes-Couta_d%E2%80%99Azur"/>
+<gn:wikipediaArticle rdf:resource="http://he.wikipedia.org/wiki/%D7%A4%D7%A8%D7%95%D7%91%D7%90%D7%A0%D7%A1-%D7%90%D7%9C%D7%A4-%D7%A7%D7%95%D7%98_%D7%93%27%D7%90%D7%96%D7%95%D7%A8"/>
+<gn:wikipediaArticle rdf:resource="http://hr.wikipedia.org/wiki/Provansa-Alpe-Azurna_obala"/>
+<gn:wikipediaArticle rdf:resource="http://hu.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%E2%80%99Azur"/>
+<gn:wikipediaArticle rdf:resource="http://id.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://io.wikipedia.org/wiki/Provenco_Alpi_Azur-Rivo"/>
+<gn:wikipediaArticle rdf:resource="http://it.wikipedia.org/wiki/Provenza-Alpi-Costa_Azzurra"/>
+<gn:wikipediaArticle rdf:resource="http://ja.wikipedia.org/wiki/%E3%83%97%E3%83%AD%E3%83%B4%E3%82%A1%E3%83%B3%E3%82%B9%EF%BC%9D%E3%82%A2%E3%83%AB%E3%83%97%EF%BC%9D%E3%82%B3%E3%83%BC%E3%83%88%E3%83%BB%E3%83%80%E3%82%B8%E3%83%A5%E3%83%BC%E3%83%AB%E5%9C%B0%E5%9F%9F%E5%9C%8F"/>
+<gn:wikipediaArticle rdf:resource="http://jv.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://ka.wikipedia.org/wiki/%E1%83%9E%E1%83%A0%E1%83%9D%E1%83%95%E1%83%90%E1%83%9C%E1%83%A1%E1%83%98-%E1%83%90%E1%83%9A%E1%83%9E%E1%83%94%E1%83%91%E1%83%98-%E1%83%9A%E1%83%90%E1%83%9F%E1%83%95%E1%83%90%E1%83%A0%E1%83%93%E1%83%9D%E1%83%95%E1%83%90%E1%83%9C%E1%83%98_%E1%83%9C%E1%83%90%E1%83%9E%E1%83%98%E1%83%A0%E1%83%98"/>
+<gn:wikipediaArticle rdf:resource="http://ko.wikipedia.org/wiki/%ED%94%84%EB%A1%9C%EB%B0%A9%EC%8A%A4%EC%95%8C%ED%94%84%EC%BD%94%ED%8A%B8%EB%8B%A4%EC%A5%90%EB%A5%B4"/>
+<gn:wikipediaArticle rdf:resource="http://ku.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://la.wikipedia.org/wiki/Provincia_et_Alpis"/>
+<gn:wikipediaArticle rdf:resource="http://lad.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://lb.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://lt.wikipedia.org/wiki/Provansas-Alp%C4%97s-%C5%BDydrasis_Krantas"/>
+<gn:wikipediaArticle rdf:resource="http://lv.wikipedia.org/wiki/Provansa-Alpi-Az%C5%ABra_krasts"/>
+<gn:wikipediaArticle rdf:resource="http://nl.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://nn.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://no.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://oc.wikipedia.org/wiki/Proven%C3%A7a-Aups-C%C3%B2sta_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://pam.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://pl.wikipedia.org/wiki/Prowansja-Alpy-Lazurowe_Wybrze%C5%BCe"/>
+<gn:wikipediaArticle rdf:resource="http://pt.wikipedia.org/wiki/Proven%C3%A7a-Alpes-Costa_Azul"/>
+<gn:wikipediaArticle rdf:resource="http://qu.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://ro.wikipedia.org/wiki/Provence-Alpi-Coasta_de_Azur"/>
+<gn:wikipediaArticle rdf:resource="http://ru.wikipedia.org/wiki/%D0%9F%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D1%81_%E2%80%94_%D0%90%D0%BB%D1%8C%D0%BF%D1%8B_%E2%80%94_%D0%9B%D0%B0%D0%B7%D1%83%D1%80%D0%BD%D1%8B%D0%B9_%D0%B1%D0%B5%D1%80%D0%B5%D0%B3"/>
+<gn:wikipediaArticle rdf:resource="http://scn.wikipedia.org/wiki/Pruvenza-Alpi-Costa_Azzola"/>
+<gn:wikipediaArticle rdf:resource="http://sk.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://sl.wikipedia.org/wiki/Provansa-Alpe-Azurna_obala"/>
+<gn:wikipediaArticle rdf:resource="http://sr.wikipedia.org/wiki/%D0%9F%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D1%81%D0%B0-%D0%90%D0%BB%D0%BF%D0%B8-%D0%90%D0%B7%D1%83%D1%80%D0%BD%D0%B0_%D0%BE%D0%B1%D0%B0%D0%BB%D0%B0"/>
+<gn:wikipediaArticle rdf:resource="http://sv.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://tr.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://vec.wikipedia.org/wiki/Provenzsa-Alpi-Costa_Azsura"/>
+<gn:wikipediaArticle rdf:resource="http://vi.wikipedia.org/wiki/Provence-Alpes-C%C3%B4te_d%27Azur"/>
+<gn:wikipediaArticle rdf:resource="http://zh.wikipedia.org/wiki/%E6%99%AE%E7%BD%97%E6%97%BA%E6%96%AF-%E9%98%BF%E5%B0%94%E5%8D%91%E6%96%AF-%E8%93%9D%E8%89%B2%E6%B5%B7%E5%B2%B8"/>
+<owl:sameAs rdf:resource="http://rdf.insee.fr/geo/REG_93"/>
+</gn:Feature>
+</rdf:RDF>

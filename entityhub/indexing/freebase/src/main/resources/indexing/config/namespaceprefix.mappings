@@ -1,0 +1,8 @@
+# Syntax: '{prefix}\t{namespace}\n
+# where:
+#   {prefix} ... [0..9A..Za..z-_]
+#   {namespace} ... must end with '#' or '/' for URLs and ':' for URNs
+# one mapping per line, multiple prefixes for the same namespace allowed
+fb	http://rdf.freebase.com/ns/
+ns	http://rdf.freebase.com/ns/
+key	http://rdf.freebase.com/key/
