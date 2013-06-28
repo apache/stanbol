@@ -56,8 +56,7 @@ public class RecipesGraphProvider implements BundleListener {
     
     @Activate
     protected void activate(BundleContext context) {
-        //Work around because of STANBOL-1130
-        recipesGraph = new SimpleMGraph();//new IndexedMGraph();
+        recipesGraph = new IndexedMGraph();
         context.addBundleListener(this);
         for (Bundle b : context.getBundles()) {
             if (b.getState() == Bundle.ACTIVE) {
