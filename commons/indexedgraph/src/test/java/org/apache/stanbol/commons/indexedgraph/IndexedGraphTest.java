@@ -66,7 +66,6 @@ public class IndexedGraphTest  extends MGraphTest {
     protected MGraph getEmptyMGraph() {
         return new IndexedMGraph();
     }
-    /* FAILING die to STANBOL-1130
     @Test
     public void bNodeConsitency() {
         MGraph mGraph = getEmptyMGraph();
@@ -99,6 +98,7 @@ public class IndexedGraphTest  extends MGraphTest {
             
         
         };
+
         mGraph.add(new TripleImpl(bNode, uriRef1, uriRef2));
         mGraph.add(new TripleImpl(bNodeClone, uriRef2, uriRef3));
         NonLiteral bNodeBack = mGraph.filter(null, uriRef1, uriRef2).next().getSubject();
@@ -107,7 +107,6 @@ public class IndexedGraphTest  extends MGraphTest {
         Assert.assertEquals("The returnned bnodes are no longer equals", bNodeBack, bNodeBack2);
         Assert.assertTrue("Not finding a triple when searching with equal bNode", mGraph.filter(bNodeBack, uriRef2, null).hasNext());
     }
-    */
     @Test
     public void iteratorRemove() {
         TripleCollection itc = new IndexedTripleCollection();

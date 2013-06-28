@@ -446,11 +446,21 @@ class IndexedTripleCollection extends AbstractTripleCollection implements Triple
                 }
             } else { //handle BNodes
                 //sort BNodes based on hashCode
-                int ah = System.identityHashCode(a);
-                int bh = System.identityHashCode(b);
+                int ah = a.hashCode();
+                int bh = b.hashCode();
                 if(ah == bh){
                     if(!a.equals(b)){
-                        return resolveBNodeHashConflict(a, b, confictsMap);
+                        //if implementations hash is the same, but the instances
+                        //are not equals, try to sort them by identity hash code
+                        int ash = System.identityHashCode(a);
+                        int bsh = System.identityHashCode(b);
+                        if(ash == bsh){ //if those are still the same, we need
+                            //to resolve the hashCode conflict by memorise the
+                            //decision in a confilctMap
+                            return resolveBNodeHashConflict(a, b, confictsMap);
+                        } else {
+                            return ash < bsh ? -1 : 1;
+                        }
                     } else { //same hash and equals
                         return 0;
                     }
