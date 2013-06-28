@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.Enumeration;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Activate;
@@ -55,7 +56,8 @@ public class RecipesGraphProvider implements BundleListener {
     
     @Activate
     protected void activate(BundleContext context) {
-        recipesGraph = new IndexedMGraph();
+        //Work around because of STANBOL-1130
+        recipesGraph = new SimpleMGraph();//new IndexedMGraph();
         context.addBundleListener(this);
         for (Bundle b : context.getBundles()) {
             if (b.getState() == Bundle.ACTIVE) {
