@@ -427,18 +427,26 @@ public class SolrServerAdapter {
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
         }
-        //update the OSGI service for the new Core
-        ServiceReference coreRef = registerCoreService(coreName,core);
-        if(old != null){
-            //cleanup the old core
-            cleanupSolrCore(old);
+        //NOTE: core registration is now done as part of the registration of the
+        //      SolrCore to the CoreContainer
+//        ServiceReference coreRef = registerCoreService(coreName,core);
+//        if(old != null){
+//            //cleanup the old core
+//            cleanupSolrCore(old);
+//        }
+//        // persist the new core to have it available on the next start
+//        //server.persist();
+//        //update the OSGI service is now done by the overridden CoreContainer#create(..)
+//        //method
+//        updateServerRegistration();
+        //so just get the ServiceReference for the ServiceRegistration
+        CoreRegistration reg = registrations.get(coreName);
+        if (reg == null){
+            throw new IllegalStateException("No OSGI ServiceRegistration present after "
+                + "adding SolrCore '"+coreName+"' to SolrCore!");
+        } else {
+            return reg.getServiceReference();
         }
-        // persist the new core to have it available on the next start
-        //server.persist();
-        //update the OSGI service is now done by the overridden CoreContainer#create(..)
-        //method
-        //updateServerRegistration();
-        return coreRef;
     }
     
     /**
