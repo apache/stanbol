@@ -16,6 +16,7 @@
 */
 package org.apache.stanbol.enhancer.test.helper;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -58,6 +59,10 @@ public final class RemoteServiceHelper {
             log.warn("deactivate Test because of "+check.getMessage(), e);
             return;
         } else if (check instanceof SocketTimeoutException) {
+            log.warn("deactivate Test because of "+check.getMessage(), e);
+            return;
+        } else if(check instanceof FileNotFoundException){
+            //FileNotFoundException is thrown in case of 404 NOT FOUND responses
             log.warn("deactivate Test because of "+check.getMessage(), e);
             return;
         } else if (check instanceof IOException){
