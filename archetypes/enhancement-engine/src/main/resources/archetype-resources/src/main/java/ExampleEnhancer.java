@@ -10,6 +10,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.ontologies.DCTERMS;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -41,10 +42,11 @@ public class ExampleEnhancer extends AbstractEnhancementEngine
     private static final Logger log = LoggerFactory.getLogger(ExampleEnhancer.class);
 
     /**
-     * Default ordering means that ths engine is called after all engines that
-     * use a value within the ordering range defined by
-     * {@link ServiceProperties${symbol_pound}ORDERING_EXTRACTION_ENHANCEMENT} and what that
-     * the latter means will hoefully become clear with STANBOL-967
+     * ServiceProperties are currently only used for automatic ordering of the 
+     * execution of EnhancementEngines (e.g. by the WeightedChain implementation).
+     * Default ordering means that the engine is called after all engines that
+     * use a value < {@link ServiceProperties#ORDERING_CONTENT_EXTRACTION}
+     * and >= {@link ServiceProperties#ORDERING_EXTRACTION_ENHANCEMENT}.
      */
     public Map getServiceProperties() {
         return Collections.unmodifiableMap(Collections.singletonMap(
@@ -81,6 +83,8 @@ public class ExampleEnhancer extends AbstractEnhancementEngine
             MGraph metadata = ci.getMetadata();
             // update some sample data
             UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
+            metadata.add(new TripleImpl(textAnnotation, DCTERMS.type, 
+                    new UriRef("http://example.org/ontology/LengthEnhancement")));
             metadata.add(new TripleImpl(textAnnotation, RDFS.comment,
                     new PlainLiteralImpl("A text of " + content.length() + " charaters")));
         } catch (IOException ex) {
