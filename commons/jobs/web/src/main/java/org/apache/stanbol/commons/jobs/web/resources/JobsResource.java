@@ -127,11 +127,7 @@ public class JobsResource extends BaseStanbolResource {
 
             if(isHTML()){
                 // Result as HTML
-                return Response.ok(new Viewable("info", new ResultData() {
-                    public JobInfo getJobInfo(){
-                        return info;
-                    }
-                })).build();
+                return Response.ok(new Viewable("info", new JobsResultData(info))).build();
             }else{
                 // Result as application/json, text/plain
                 return Response.ok(info).build();
@@ -142,6 +138,16 @@ public class JobsResource extends BaseStanbolResource {
         }
     }
 
+    public class JobsResultData extends ResultData{
+        private JobInfo ji;
+        public JobsResultData(JobInfo jinfo){
+            this.ji = jinfo;
+        }
+        public JobInfo getJobInfo(){
+            return ji;
+        }
+    }
+    
     private boolean isHTML() {
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         Set<String> htmlformats = new HashSet<String>();
