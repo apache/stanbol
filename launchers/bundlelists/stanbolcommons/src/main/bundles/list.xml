@@ -223,7 +223,7 @@
       <bundle>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
-      <version>1.2-b04</version>
+      <version>1.2</version>
       </bundle>
   </startLevel>
   <startLevel level="24">

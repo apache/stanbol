@@ -60,7 +60,7 @@ public class BaseStanbolResource extends TemplateLayoutConfiguration {
     }
     
     /**
-     * Subclassed extend this object typically as inline object to provide 
+     * Subclassed extend this object  to provide 
      * a data model for rendering with a Viewable Object
      */
     public abstract class ResultData extends TemplateLayoutConfiguration {

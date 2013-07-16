@@ -43,7 +43,7 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
     <url>http://stanbol.apache.org/</url>
   </scm>
   <properties>
-      <freemarker-version>2.3.19</freemarker-version>
+      <freemarker-version>2.3.20</freemarker-version>
   </properties>
   <build>
     <!-- make it an OSGi bundle -->
