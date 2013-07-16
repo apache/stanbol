@@ -16,8 +16,6 @@
 */
 package org.apache.stanbol.entityhub.indexing.core;
 
-import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig.DEFAULT_INDEXED_ENTITIES_ID_FILE_NAME;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;

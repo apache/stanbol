@@ -80,7 +80,7 @@ public class IndexingConfig {
     private static final String DESTINATION_PATH = DEFAULT_ROOT_PATH+File.separatorChar+DESTINATION_FOLDER;
     private static final String DISTRIBUTION_FOLDER = "dist";
     private static final String DISTRIBUTION_PATH = DEFAULT_ROOT_PATH+File.separatorChar+DISTRIBUTION_FOLDER;
-    private static final String INDEXING_PROERTIES = "indexing.properties";
+    private static final String INDEXING_PROPERTIES = "indexing.properties";
     private static final String CONFIG_PARAM = "config";
     public static final String KEY_INDEXING_CONFIG = "indexingConfig";
     
@@ -135,7 +135,7 @@ public class IndexingConfig {
 //    private final Map<File,File> canonicalDirs = new HashMap<File,File>();
     
     /**
-     * The main indexing configuration as parsed form {@link #INDEXING_PROERTIES}
+     * The main indexing configuration as parsed form {@link #INDEXING_PROPERTIES}
      * file within the {@link #configDir}.
      */
     private final Map<String,Object> configuration;
@@ -318,16 +318,16 @@ public class IndexingConfig {
         }
         
         //check the main configuration
-        this.configuration = loadConfig(INDEXING_PROERTIES,true);
+        this.configuration = loadConfig(INDEXING_PROPERTIES,true);
         Object value = configuration.get(KEY_NAME);
         if(value == null){
             throw new IllegalArgumentException("Indexing Configuration '"+
-                INDEXING_PROERTIES+"' is missing the required key "+KEY_NAME+"!");
+                INDEXING_PROPERTIES+"' is missing the required key "+KEY_NAME+"!");
         }
         this.name = value.toString();
         if(name.isEmpty()){
             throw new IllegalArgumentException("Invalid Indexing Configuration '"+
-                INDEXING_PROERTIES+"': The value for the parameter"+KEY_NAME+" MUST NOT be empty!");
+                INDEXING_PROPERTIES+"': The value for the parameter"+KEY_NAME+" MUST NOT be empty!");
         }
         value = configuration.get(KEY_INDEX_FIELD_CONFIG);
         if(value == null || value.toString().isEmpty()){
@@ -360,7 +360,7 @@ public class IndexingConfig {
             throw new IllegalArgumentException("Invalid Indexing Configuration: " +
             		"IndexFieldConfiguration '"+indexFieldConfig+"' not found. " +
             		"Provide the missing file or use the '"+KEY_INDEX_FIELD_CONFIG+
-            		"' in the '"+INDEXING_PROERTIES+"' to configure a different one!");
+            		"' in the '"+INDEXING_PROPERTIES+"' to configure a different one!");
         }
     }
     
@@ -594,9 +594,9 @@ public class IndexingConfig {
         String contextResource;
         if(classpathResourceOffset != null){
             contextResource = FilenameUtils.concat(classpathResourceOffset, 
-                CONFIG_PATH+File.separatorChar+INDEXING_PROERTIES);
+                CONFIG_PATH+File.separatorChar+INDEXING_PROPERTIES);
         } else {
-            contextResource = CONFIG_PATH+File.separatorChar+INDEXING_PROERTIES;
+            contextResource = CONFIG_PATH+File.separatorChar+INDEXING_PROPERTIES;
         }
         URL contextUrl = loadViaClasspath(contextResource);
         if(contextUrl == null){// if indexing.properties is not found via classpath
@@ -782,6 +782,20 @@ public class IndexingConfig {
     public String getDescription(){
         Object value = configuration.get(KEY_DESCRIPTION);
         return value != null?value.toString():null;
+    }
+    /**
+     * Getter for the failOnError as configured by the {@link IndexingConstants#KEY_FAIL_ON_ERROR_LOADING_RESOURCE}
+     * by the main indexing configuration.
+     * @return the boolean value of the failOnError parameter
+     */
+    public boolean isFailOnError(){
+    	//by default failOnError is false to continue execution of the indexing tool
+        boolean failOnError = false;
+    	Object value = configuration.get(IndexingConstants.KEY_FAIL_ON_ERROR_LOADING_RESOURCE);
+    	if(value != null && !value.toString().isEmpty()){
+            failOnError = Boolean.parseBoolean(value.toString());
+        }
+    	return failOnError;
     }
     /**
      * The {@link ScoreNormaliser} as configured by the {@link IndexingConstants#KEY_SCORE_NORMALIZER}

@@ -293,16 +293,20 @@ public class ResourceLoader {
                 } else { //this does not use an imported folder or the state is not LOADED
                     files.put(file, state);
                 }
-                //if failOnError is activated we stop the loading on the first
-                //error!
-                if(failOnError && ResourceState.ERROR == state){
-                    String msg = "Error while loading Resource "+file;
-                    if(e != null){
-                        throw new IllegalStateException(msg,e);
-                    } else {
-                        throw new IllegalStateException(msg);
-                    }
-                }
+                if(ResourceState.ERROR == state){
+                	//if failOnError is activated we stop the loading on the first error!                   
+                    if (failOnError){
+                    	 String msg = "Error while loading Resource "+file;
+                    	if(e != null){
+                            throw new IllegalStateException(msg,e);
+                        } else {
+                            throw new IllegalStateException(msg);
+                        }
+                    }else {
+                    	//if failOnError is de-activated ignore the resource loading error and continue..                   
+                    	log.info("Ignore Error for File {} and continue", file);
+                    }                    
+                } 
             } else {
                 log.info("Ignore Error for File {} because it is no longer registered with this RdfLoader",
                     file);
