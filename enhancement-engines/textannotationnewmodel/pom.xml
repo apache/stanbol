@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>apache-stanbol-enhancement-engines</artifactId>
+    <version>0.10.1-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+	<packaging>bundle</packaging>
+	<artifactId>org.apache.stanbol.enhancer.engines.textannotationnewmodel</artifactId>
+  <name>Apache Stanbol Enhancement Engine : TextAnnotation new Model Conterter</name>
+	<description>
+    Post processing Engine that converts fise:TextAnnotation to the model as
+    descibed by STANBOL-087. This means that it add fise:selection-prefix and
+    fise:selection-suffix values for all TextAnnotations.
+    This Engine allows EnhancementEngines that do not support those properties
+    to be used in usecases where those properties are required.
+  </description>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/textannotationnewmodel/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/textannotationnewmodel/
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Private-Package>
+							org.apache.stanbol.enhancer.engines.textannotationnewmodel.*;version=${project.version}
+						</Private-Package>
+						<Import-Package>
+							org.apache.stanbol.enhancer.servicesapi; provide:=true,
+							org.apache.stanbol.enhancer.servicesapi.impl; provide:=true,
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
+		</dependency>
+		<!-- for tests -->
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.test</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.core</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency><!-- for loading test Enhancements -->
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.jena.parser</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
