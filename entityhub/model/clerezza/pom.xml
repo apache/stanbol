@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-entityhub</artifactId>
-    <version>0.12.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
@@ -63,8 +63,8 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.entityhub.servicesapi.model; provide:=true; version="[0.11,0.13)",
-              org.apache.stanbol.entityhub.servicesapi.util; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.entityhub.servicesapi.model; provide:=true; version="[0.11,1.1)",
+              org.apache.stanbol.entityhub.servicesapi.util; provide:=true; version="[0.11,1.1)",
               org.apache.stanbol.entityhub.model.clerezza,
               org.apache.stanbol.entityhub.model.clerezza.utils,
               *
@@ -90,12 +90,12 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.11.0</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -111,7 +111,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.test</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>

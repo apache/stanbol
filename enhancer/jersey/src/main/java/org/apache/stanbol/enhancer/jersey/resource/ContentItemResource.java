@@ -17,7 +17,6 @@
 package org.apache.stanbol.enhancer.jersey.resource;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getReference;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getReferences;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getString;
@@ -38,7 +37,6 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LAT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LONG;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TOPICANNOTATION;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -61,7 +59,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -88,6 +85,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.commons.web.base.resource.LayoutConfiguration;
+import org.apache.stanbol.commons.web.base.resource.TemplateLayoutConfiguration;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
@@ -106,7 +105,7 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.CONFIDENCE_L
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ContentItemResource extends BaseStanbolResource {
+public class ContentItemResource extends TemplateLayoutConfiguration {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -154,19 +153,22 @@ public class ContentItemResource extends BaseStanbolResource {
     private ArrayList<org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution> engineExecutions;
 
     private EnhancementException enhancementException;
+    private LayoutConfiguration layoutConfiguration;
+    private UriInfo uriInfo;
     
     public ContentItemResource(String localId,
                                ContentItem ci,
                                UriInfo uriInfo,
                                String storePath,
                                Serializer serializer,
-                               ServletContext servletContext,
+                               LayoutConfiguration layoutConfiguration,
                                EnhancementException enhancementException) throws IOException {
         this.contentItem = ci;
         this.localId = localId;
         this.uriInfo = uriInfo;
         this.serializer = serializer;
-        this.servletContext = servletContext;
+        this.layoutConfiguration = layoutConfiguration;
+        //this.servletContext = servletContext;
         this.enhancementException = enhancementException;
         if (localId != null) {
             URI rawURI = uriInfo.getBaseUriBuilder().path(storePath).path("raw").path(localId).build();
@@ -211,6 +213,16 @@ public class ContentItemResource extends BaseStanbolResource {
             }
         }
         log.info(" ... {}ms fro parsing Enhancement Reuslts",System.currentTimeMillis()-start);
+    }
+    
+    @Override
+    protected LayoutConfiguration getLayoutConfiguration() {
+        return layoutConfiguration;
+    }
+    
+    @Override
+    protected UriInfo getUriInfo() {
+        return uriInfo;
     }
 
     public String getRdfMetadata(String mediatype) throws UnsupportedEncodingException {
@@ -891,7 +903,7 @@ public class ContentItemResource extends BaseStanbolResource {
     public Response get(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-        addCORSOrigin(servletContext,rb, headers);
+//        addCORSOrigin(servletContext,rb, headers);
         return rb.build();
     }
     

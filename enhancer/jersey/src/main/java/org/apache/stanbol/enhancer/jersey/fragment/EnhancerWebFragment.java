@@ -22,26 +22,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.sparql.QueryEngine;
-
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.enhancer.jersey.reader.ContentItemReader;
-import org.apache.stanbol.enhancer.jersey.resource.ChainsRootResource;
-import org.apache.stanbol.enhancer.jersey.resource.EnginesRootResource;
-import org.apache.stanbol.enhancer.jersey.resource.EnhancementChainResource;
-import org.apache.stanbol.enhancer.jersey.resource.EnhancementEngineResource;
-import org.apache.stanbol.enhancer.jersey.resource.EnhancementEnginesRootResource;
-import org.apache.stanbol.enhancer.jersey.resource.EnhancerRootResource;
-import org.apache.stanbol.enhancer.jersey.writers.ContentItemWriter;
-import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 
 /**
  * Statically define the list of available resources and providers to be contributed to the the Stanbol JAX-RS
@@ -61,17 +47,6 @@ public class EnhancerWebFragment implements WebFragment {
 			"storing anything on the server-side.";
 
 
-    @Reference
-    EnhancementJobManager jobManager;
-    /**
-     * Optional to have SPARQL support for the Stanbol Enhancer Config
-     */
-    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
-    QueryEngine queryEngine;
-
-    @Reference
-    Serializer serializer;
-
     @Override
     public String getName() {
         return NAME;
@@ -82,15 +57,15 @@ public class EnhancerWebFragment implements WebFragment {
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         // resources
-        classes.add(EnginesRootResource.class);
-        classes.add(EnhancerRootResource.class);
-        classes.add(EnhancementChainResource.class);
-        classes.add(ChainsRootResource.class);
-        classes.add(EnhancementEnginesRootResource.class);
-        classes.add(EnhancementEngineResource.class);
+        //classes.add(EnginesRootResource.class);
+        //classes.add(EnhancerRootResource.class);
+        //classes.add(EnhancementChainResource.class);
+        //classes.add(ChainsRootResource.class);
+        //classes.add(EnhancementEnginesRootResource.class);
+        //classes.add(EnhancementEngineResource.class);
         //Reader/Writer for ContentItems
-        classes.add(ContentItemReader.class);
-        classes.add(ContentItemWriter.class);
+        //classes.add(ContentItemReader.class);
+        //classes.add(ContentItemWriter.class);
         return classes;
     }
 

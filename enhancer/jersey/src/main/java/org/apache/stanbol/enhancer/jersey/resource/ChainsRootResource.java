@@ -24,8 +24,6 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveChains;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.buildChainsMap;
 
@@ -37,12 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -50,45 +46,70 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 
 
+@Component
+@Service(Object.class)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Path("/enhancer/chain")
 public class ChainsRootResource extends BaseStanbolResource {
 
+    @Reference
+    private EnhancementJobManager jobManager;
+    @Reference
+    private EnhancementEngineManager engineManager;
+    @Reference
+    private ChainManager chainManager;
+    @Reference
+    private ContentItemFactory ciFactory;
+    @Reference
+    private Serializer serializer;
     
-    private final Map<String, Entry<ServiceReference,Chain>> chains;
-    private final Chain defaultChain;
+    private Map<String, Entry<ServiceReference,Chain>> chains;
+    private Chain defaultChain;
     
-    public ChainsRootResource(@Context ServletContext context) {
-        // bind the job manager by looking it up from the servlet request context
-        ChainManager chainManager = ContextHelper.getServiceFromContext(ChainManager.class, context);
-        if(chainManager == null){
-            throw new WebApplicationException(new IllegalStateException(
-                "The required ChainManager Service is not available!"));
-        }
+    @Activate
+    public void activate(ComponentContext ctx) {
         defaultChain = chainManager.getDefault();
         chains = buildChainsMap(chainManager);
     }
+    
+    
+    @Path("{chain}")
+    public GenericEnhancerUiResource get(@PathParam(value = "chain") String chain) {
+        return new GenericEnhancerUiResource(chain, jobManager, 
+                engineManager, chainManager, ciFactory, serializer, 
+                getLayoutConfiguration(), getUriInfo());
+    }
 
-    @OPTIONS
+    /*@OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
         enableCORS(servletContext,res, headers);
         return res.build();
-    }
+    }*/
 
     @GET
     @Produces(TEXT_HTML)
     public Response get(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok(new Viewable("index", this),TEXT_HTML);
-        addCORSOrigin(servletContext,res, headers);
+        //addCORSOrigin(servletContext,res, headers);
         return res.build();
     }
     @GET
@@ -98,7 +119,7 @@ public class ChainsRootResource extends BaseStanbolResource {
         MGraph graph = new SimpleMGraph();
         addActiveChains(chains.values(),defaultChain,graph,rootUrl);
         ResponseBuilder res = Response.ok(graph);
-        addCORSOrigin(servletContext,res, headers);
+        //addCORSOrigin(servletContext,res, headers);
         return res.build();
     }
 

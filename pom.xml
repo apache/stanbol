@@ -68,13 +68,13 @@
 
     <module>entityhub</module>
     <!-- <module>ontologymanager</module>
-    <module>rules</module>
+    <module>rules</module> -->
     <module>enhancer</module>
-    <module>contenthub</module>
+    <!-- <module>contenthub</module> -->
 
     <module>enhancement-engines</module>
 
-    <module>cmsadapter</module>
+    <!-- <module>cmsadapter</module>
 
     <module>reasoners</module>
 

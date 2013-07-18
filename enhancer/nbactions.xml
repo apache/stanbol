@@ -29,15 +29,4 @@
                 <Env.MAVEN_OPTS>-Xmx1024M -XX:MaxPermSize=128M</Env.MAVEN_OPTS>
             </properties>
         </action>
-        <action>
-            <actionName>CUSTOM-use-latests-versions</actionName>
-            <displayName>use-latests-versions</displayName>
-            <goals>
-                <goal>versions:use-latest-versions</goal>
-            </goals>
-            <properties>
-                <includes>org.apache.stanbol</includes>
-                <allowSnapshots>true</allowSnapshots>
-            </properties>
-        </action>
     </actions>

@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-entityhub</artifactId>
-    <version>0.12.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -58,7 +58,7 @@
               at.newmedialab.ldpath; provide:=true,
               at.newmedialab.ldpath.api.backend; provide:=true,
               at.newmedialab.ldpath.api.transformers; provide:=true,
-              org.apache.stanbol.entityhub.servicesapi.query; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.entityhub.servicesapi.query; provide:=true; version="[0.11,1.1)",
               org.apache.stanbol.entityhub.ldpath,
               org.apache.stanbol.entityhub.ldpath.backend,
               org.apache.stanbol.entityhub.ldpath.query,
@@ -90,12 +90,12 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
       <!-- NOTE: 0.11.0 would be fine, but 0.12.0-SNAPSHOT is required for unit tests -->
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.11.0</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
     <!-- LD Path -->
@@ -140,7 +140,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>

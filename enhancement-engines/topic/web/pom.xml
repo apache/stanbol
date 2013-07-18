@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engine.topic.web</artifactId>
-  <version>0.10.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancement Engine : Topic Classification : Web API</name>
@@ -82,7 +82,7 @@
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",
-              org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
+              org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,1.1)",
               *
             </Import-Package>
             <Private-Package>
@@ -139,15 +139,7 @@
     <dependency>
     	<groupId>org.apache.stanbol</groupId>
   		<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-      <version>0.11.0</version>      
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-server</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-core</artifactId>
+      <version>1.0.0-SNAPSHOT</version>      
     </dependency>
 
 

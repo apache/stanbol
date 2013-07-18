@@ -594,7 +594,7 @@
       <dependency>
         <groupId>org.wymiwyg</groupId>
         <artifactId>wymiwyg-commons-core</artifactId>
-        <version>0.7.5</version>
+        <version>0.7.6</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -604,7 +604,7 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core</artifactId>
-        <version>0.12-incubating</version>
+        <version>0.13</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -629,17 +629,17 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.serializer</artifactId>
-        <version>0.9-incubating</version>
+        <version>0.10</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.parser</artifactId>
-        <version>0.10-incubating</version>
+        <version>0.11</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.sparql</artifactId>
-        <version>0.5-incubating</version>
+        <version>0.6</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -664,7 +664,7 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>jaxrs.rdf.providers</artifactId>
-        <version>0.13-incubating</version>
+        <version>0.14</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -674,7 +674,7 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.facade</artifactId>
-        <version>0.12-incubating</version>
+        <version>0.13</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>

@@ -343,7 +343,7 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
-      <version>0.12-incubating</version>
+      <version>0.13</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
@@ -363,22 +363,22 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.sparql</artifactId>
-      <version>0.5-incubating</version>
+      <version>0.6</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.commons</artifactId>
-      <version>0.5-incubating</version>
+      <version>0.6</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.facade</artifactId>
-      <version>0.12-incubating</version>
+      <version>0.13</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza.ext</groupId>
       <artifactId>com.hp.hpl.jena.tdb</artifactId>
-      <version>0.3-incubating</version>
+      <version>0.4-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza.ext</groupId>
@@ -388,7 +388,7 @@
     <bundle>
       <groupId>org.wymiwyg</groupId>
       <artifactId>wymiwyg-commons-core</artifactId>
-      <version>0.7.5</version>
+      <version>0.7.6</version>
     </bundle>
     <!-- ICU is an bundle in the meantime
       bundle>
@@ -399,22 +399,22 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.storage</artifactId>
-      <version>0.5-incubating</version>
+      <version>0.6</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.tdb.storage</artifactId>
-      <version>0.5-incubating</version>
+      <version>0.6</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.serializer</artifactId>
-      <version>0.9-incubating</version>
+      <version>0.10</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.parser</artifactId>
-      <version>0.10-incubating</version>
+      <version>0.11</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>

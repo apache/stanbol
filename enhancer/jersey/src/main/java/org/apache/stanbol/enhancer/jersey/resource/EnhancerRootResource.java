@@ -26,11 +26,9 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveChains;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveEngines;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -43,92 +41,139 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
+import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.DescribeQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
 import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Enhancer;
 
 import org.apache.stanbol.commons.viewable.Viewable;
-
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.commons.web.base.resource.LayoutConfiguration;
+import org.apache.stanbol.enhancer.servicesapi.ChainManager;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 
 /**
- * RESTful interface to browse the list of available engines and allow to call them in a stateless,
- * synchronous way.
+ * RESTful interface to browse the list of available engines and allow to call
+ * them in a stateless, synchronous way.
  * <p>
- * If you need the content of the extractions to be stored on the server, use the StoreRootResource API
- * instead.
+ * If you need the content of the extractions to be stored on the server, use
+ * the StoreRootResource API instead.
  */
+@Component
+@Service(Object.class)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Path("/enhancer")
-public final class EnhancerRootResource extends AbstractEnhancerUiResource {
+public final class EnhancerRootResource extends BaseStanbolResource {
 
-    public EnhancerRootResource(@Context ServletContext context){
-        super(null,context);
-    }
+    @Reference
+    private EnhancementJobManager jobManager;
+    @Reference
+    private EnhancementEngineManager engineManager;
+    @Reference
+    private ChainManager chainManager;
+    @Reference
+    private ContentItemFactory ciFactory;
+    @Reference
+    private Serializer serializer;
+    @Reference
+    private QueryEngine queryEngine;
     
-    @GET
-    @Produces(value={APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
-    public Response getEngines(@Context HttpHeaders headers){
-        MGraph graph = getEnhancerConfigGraph();
-        ResponseBuilder res = Response.ok(graph);
-        addCORSOrigin(servletContext,res, headers);
-        return res.build();
+    @Path("")
+    public EnhancerResource get() {
+        return new EnhancerResource(jobManager, engineManager, 
+                chainManager, ciFactory, serializer, getLayoutConfiguration(),
+                getUriInfo());
     }
+            
+          
 
-    /**
-     * Creates the RDF graph for the current Stanbol Enhancer configuration
-     * @return the graph with the configuration
-     */
-    private MGraph getEnhancerConfigGraph() {
-        String rootUrl = uriInfo.getBaseUriBuilder().path(getRootUrl()).build().toString();
-        UriRef enhancerResource = new UriRef(rootUrl+"enhancer");
-        MGraph graph = new SimpleMGraph();
-        graph.add(new TripleImpl(enhancerResource, RDF.type, Enhancer.ENHANCER));
-        addActiveEngines(engineManager, graph, rootUrl);
-        addActiveChains(chainManager, graph, rootUrl);
-        return graph;
-    }
-    
-    @GET
-    @Path("/sparql")
-    @Consumes(APPLICATION_FORM_URLENCODED)
-    @Produces({TEXT_HTML + ";qs=2", "application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
-    public Object sparql(@QueryParam(value = "query") String sparqlQuery,
-                         @Context HttpHeaders headers) throws ParseException {
-        if (sparqlQuery == null) {
-            return Response.ok(new Viewable("sparql", this), TEXT_HTML).build();
+    public class EnhancerResource extends GenericEnhancerUiResource {
+        public EnhancerResource(
+            EnhancementJobManager jobManager, 
+            EnhancementEngineManager engineManager, 
+            ChainManager chainManager, 
+            ContentItemFactory ciFactory,
+            Serializer serializer,
+            LayoutConfiguration layoutConfiguration, 
+            UriInfo uriInfo) {
+            super(null, jobManager, engineManager, chainManager, ciFactory, 
+                    serializer, layoutConfiguration, uriInfo);
         }
-        Query query = QueryParser.getInstance().parse(sparqlQuery);
-        String mediaType = "application/sparql-results+xml";
-        if (query instanceof DescribeQuery || query instanceof ConstructQuery) {
-            mediaType = "application/rdf+xml";
-        }
-        ResponseBuilder responseBuilder;
-        if(queryEngine != null){
-            Object result = queryEngine.execute(null, getEnhancerConfigGraph(), query);
-            responseBuilder = Response.ok(result, mediaType);
-        } else {
-            responseBuilder = Response.status(Status.SERVICE_UNAVAILABLE)
-                    .entity("No SPRAQL query engine available");
-        }
-        addCORSOrigin(servletContext, responseBuilder, headers);
-        return responseBuilder.build();
-    }
 
-    @POST
-    @Path("/sparql")
-    @Consumes(APPLICATION_FORM_URLENCODED)
-    @Produces({"application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
-    public Object postSparql(@FormParam("query") String sparqlQuery,
-                             @Context HttpHeaders headers) throws ParseException {
-        return sparql(sparqlQuery, headers);
-    }
+        @GET
+        @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON, RDF_XML, TURTLE, X_TURTLE})
+        public Response getEngines(@Context HttpHeaders headers) {
+            MGraph graph = getEnhancerConfigGraph();
+            ResponseBuilder res = Response.ok(graph);
+            //addCORSOrigin(servletContext,res, headers);
+            return res.build();
+        }
 
+        /**
+         * Creates the RDF graph for the current Stanbol Enhancer configuration
+         *
+         * @return the graph with the configuration
+         */
+        private MGraph getEnhancerConfigGraph() {
+            String rootUrl = getUriInfo().getBaseUriBuilder().path(getRootUrl()).build().toString();
+            UriRef enhancerResource = new UriRef(rootUrl + "enhancer");
+            MGraph graph = new SimpleMGraph();
+            graph.add(new TripleImpl(enhancerResource, RDF.type, Enhancer.ENHANCER));
+            addActiveEngines(engineManager, graph, rootUrl);
+            addActiveChains(chainManager, graph, rootUrl);
+            return graph;
+        }
+
+        @GET
+        @Path("/sparql")
+        @Consumes(APPLICATION_FORM_URLENCODED)
+        @Produces({TEXT_HTML + ";qs=2", "application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
+        public Object sparql(@QueryParam(value = "query") String sparqlQuery,
+                @Context HttpHeaders headers) throws ParseException {
+            if (sparqlQuery == null) {
+                return Response.ok(new Viewable("sparql", EnhancerRootResource.this), TEXT_HTML).build();
+            }
+            Query query = QueryParser.getInstance().parse(sparqlQuery);
+            String mediaType = "application/sparql-results+xml";
+            if (query instanceof DescribeQuery || query instanceof ConstructQuery) {
+                mediaType = "application/rdf+xml";
+            }
+            ResponseBuilder responseBuilder;
+            if (queryEngine != null) {
+                Object result = queryEngine.execute(null, getEnhancerConfigGraph(), query);
+                responseBuilder = Response.ok(result, mediaType);
+            } else {
+                responseBuilder = Response.status(Status.SERVICE_UNAVAILABLE)
+                        .entity("No SPRAQL query engine available");
+            }
+            //    addCORSOrigin(servletContext, responseBuilder, headers);
+            return responseBuilder.build();
+        }
+
+        @POST
+        @Path("/sparql")
+        @Consumes(APPLICATION_FORM_URLENCODED)
+        @Produces({"application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
+        public Object postSparql(@FormParam("query") String sparqlQuery,
+                @Context HttpHeaders headers) throws ParseException {
+            return sparql(sparqlQuery, headers);
+        }
+    }
 }
