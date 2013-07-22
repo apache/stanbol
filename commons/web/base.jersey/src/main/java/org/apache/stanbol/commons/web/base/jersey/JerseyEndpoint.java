@@ -172,16 +172,16 @@ public class JerseyEndpoint {
 
     /** Initialize the Jersey subsystem */
     private synchronized void initJersey() throws NamespaceException, ServletException {
-        //temporary workaround for STANBOL-1073
-        InputStream in = new ByteArrayInputStream(
-                "<http://example.org/me> <http://xmlns.com/foaf/0.1/name> \"Jane Doe\" .".getBytes());
-        parser.parse(in, "text/turtle");
-        //end of STANBOL-1073 work around
         if (componentContext == null) {
             log.debug(" ... can not init Jersey Endpoint - Component not yet activated!");
             //throw new IllegalStateException("Null ComponentContext, not activated?");
             return;
         }
+        //temporary workaround for STANBOL-1073
+        InputStream in = new ByteArrayInputStream(
+                "<http://example.org/me> <http://xmlns.com/foaf/0.1/name> \"Jane Doe\" .".getBytes());
+        parser.parse(in, "text/turtle");
+        //end of STANBOL-1073 work around
 
         shutdownJersey();
 
