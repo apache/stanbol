@@ -69,6 +69,17 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
+      <plugin> 
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- 
+            Unit Tests are skipped because CELI web services where unavailable
+            since some time (2013.07.22)
+            -->
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
