@@ -136,6 +136,7 @@
                 <exclude>**/*.tsv</exclude>
                 <exclude>**/*.sem</exclude>
                 <exclude>**/*.ldpath</exclude>
+                <exclude>**/*.mappings</exclude>
 
                 <!-- exclude test files --> 
                 <exclude>**/test/**/*.eml</exclude>
@@ -147,6 +148,7 @@
                 <exclude>**/test/**/*.rtf</exclude>
                 <exclude>**/test/**/*.rules</exclude>
                 <exclude>**/test/**/*.odt</exclude>
+                <exclude>**/test/**/*.config</exclude>
               </excludes>
             </configuration>
           </plugin>
