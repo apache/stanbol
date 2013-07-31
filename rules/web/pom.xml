@@ -84,7 +84,7 @@
             <exclude>src/license/THIRD-PARTY.properties</exclude>
             
             <!-- MIT License  -->
-            <exclude>src/main/resources/org/apache/stanbol/rules/web/static/jquery/jquery-1.6.1</exclude>
+            <exclude>src/main/resources/META-INF/resources/static/rules/jquery/jquery-1.6.1</exclude>
           </excludes>
         </configuration>
       </plugin>      

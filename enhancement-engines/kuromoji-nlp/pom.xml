@@ -65,6 +65,9 @@
           <excludes>
             <!-- AL20 License -->
             <exclude>src/license/THIRD-PARTY.properties</exclude>
+
+            <!-- Config -->
+            <exclude>src/main/resources/nostoptags.txt</exclude>
           </excludes>
         </configuration>
       </plugin>
