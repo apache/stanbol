@@ -120,6 +120,7 @@
                 <exclude>DEPENDENCIES</exclude>
                 <exclude>DEPENDENCIES-BY-LICENSE</exclude>
                 <exclude>RAT-REPORT</exclude>
+                <exclude>**/src/license/THIRD-PARTY.properties</exclude>
 
                 <!-- exclude certain file types -->
                 <exclude>**/*.config</exclude>

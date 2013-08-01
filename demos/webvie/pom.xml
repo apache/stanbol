@@ -1,96 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Licensed to the Apache Software Foundation (ASF) under one or more
-  contributor license agreements.  See the NOTICE file distributed with
-  this work for additional information regarding copyright ownership.
-  The ASF licenses this file to You under the Apache License, Version 2.0
-  (the "License"); you may not use this file except in compliance with
-  the License.  You may obtain a copy of the License at
+	Licensed to the Apache Software Foundation (ASF) under one or more
+	contributor license agreements.  See the NOTICE file distributed with
+	this work for additional information regarding copyright ownership.
+	The ASF licenses this file to You under the Apache License, Version 2.0
+	(the "License"); you may not use this file except in compliance with
+	the License.  You may obtain a copy of the License at
 
-      http://www.apache.org/licenses/LICENSE-2.0
+		http://www.apache.org/licenses/LICENSE-2.0
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>stanbol-parent</artifactId>
-        <version>4-SNAPSHOT</version>
-        <relativePath>../../parent</relativePath>
-    </parent>
+	<parent>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>stanbol-parent</artifactId>
+		<version>4-SNAPSHOT</version>
+		<relativePath>../../parent</relativePath>
+	</parent>
 
-    <groupId>org.apache.stanbol</groupId>
-    <artifactId>org.apache.stanbol.demos.enhancer.vie</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+	<groupId>org.apache.stanbol</groupId>
+	<artifactId>org.apache.stanbol.demos.enhancer.vie</artifactId>
+	<version>0.10.0-SNAPSHOT</version>
+	<packaging>bundle</packaging>
 
-    <name>Apache Stanbol Demos Enhancer VIE UI</name>
-    <description>VIE (https://github.com/bergie/VIE) based user interface for Stanbol (Enhancer and Entityhub)
-    </description>
+	<name>Apache Stanbol Demos Enhancer VIE UI</name>
+	<description>VIE (https://github.com/bergie/VIE) based user interface for Stanbol (Enhancer and Entityhub)
+	</description>
 
-    <build>
-        <!-- make it an OSGi bundle -->
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Import-Package>
-                            javax.ws.rs.*; version="[0,2)",
-                            *
-                        </Import-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.rat</groupId>
-                <artifactId>apache-rat-plugin</artifactId>
-                <version>0.8</version>
-                <configuration>
-                    <excludes>
-                        <exclude>src/main/resources/META-INF/resources/static/enhancervie/annotate.css</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
+	<build>
+		<!-- make it an OSGi bundle -->
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							javax.ws.rs.*; version="[0,2)",
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.rat</groupId>
+				<artifactId>apache-rat-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>src/license/THIRD-PARTY.properties</exclude>
 
-        </plugins>
-    </build>
+						<!-- For license information of included static resources (JS, CSS) see
+								 src/main/resources/META-INF/resources/static/enhancervie/README.md -->
+						<exclude>src/main/resources/META-INF/resources/static/enhancervie/**</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 
-    <dependencies>
+		</plugins>
+	</build>
 
-        <!-- dependencies on other IKS modules -->
-        <dependency>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-            <version>0.12.0-SNAPSHOT</version>
-        </dependency>
+	<dependencies>
 
-        <!-- Jersey -->
-        <dependency>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-            <version>0.11.0</version>
-        </dependency>
+		<!-- dependencies on other IKS modules -->
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
+			<version>0.12.0-SNAPSHOT</version>
+		</dependency>
 
-        <!-- OSGi tax -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
-        </dependency>
+		<!-- Jersey -->
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+			<version>0.11.0</version>
+		</dependency>
 
-    </dependencies>
+		<!-- OSGi tax -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr.annotations</artifactId>
+		</dependency>
+
+	</dependencies>
 
 </project>
