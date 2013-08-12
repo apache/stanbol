@@ -22,6 +22,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SE
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.slf4j.Logger;
@@ -79,16 +80,24 @@ public final class NamedEntity {
      * text annotation is missing required information.
      */
     public static NamedEntity createFromTextAnnotation(TripleCollection graph, NonLiteral textAnnotation){
-        String name = EnhancementEngineHelper.getString(graph, textAnnotation, ENHANCER_SELECTED_TEXT);
-        if (name == null) {
+        String selected = EnhancementEngineHelper.getString(graph, textAnnotation, ENHANCER_SELECTED_TEXT);
+        if (selected == null) {
             log.debug("Unable to create NamedEntity for TextAnnotation {} "
                     + "because property {} is not present",textAnnotation,ENHANCER_SELECTED_TEXT);
             return null;
         }
-        name = name.trim();
+        String name = selected.trim();
         if(name.isEmpty()){
             log.debug("Unable to process TextAnnotation {} because its selects "
             		+ "an empty Stirng !",textAnnotation);
+            return null;
+        }
+        // remove punctuation form the search string
+        name = cleanupKeywords(name);
+        if(name.isEmpty()){
+            log.debug("Unable to process TextAnnotation {} because its selects "
+                    + "an stirng with punktations only (selected: {})!",
+                    textAnnotation, selected);
             return null;
         }
         UriRef type = EnhancementEngineHelper.getReference(graph, textAnnotation, DC_TYPE);
@@ -97,8 +106,7 @@ public final class NamedEntity {
                      + " is not present!",textAnnotation, DC_TYPE);
             return null;
         }
-        // remove punctuation form the search string
-        return new NamedEntity(textAnnotation,cleanupKeywords(name),type);
+        return new NamedEntity(textAnnotation,name,type);
     }        
     /**
      * Removes punctuation form a parsed string
