@@ -22,7 +22,7 @@ semantic content management.
 
 ## Building Stanbol
 
-To build Stanbol you need a JDK 1.6 and Maven 2.2.1 installed. You probably
+To build Stanbol you need a JDK 1.6 and Maven 3.0.3+ installed. You probably
 need
 
     $ export MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256M"
