@@ -36,22 +36,22 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.security.core</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.authentication.basic</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.security.fexilwebconsole</artifactId>
-        <version>0.12.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.security.usermanagement</artifactId>
-        <version>0.12.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </bundle>
 		<!-- <bundle>
 			<groupId>org.apache.clerezza</groupId>
