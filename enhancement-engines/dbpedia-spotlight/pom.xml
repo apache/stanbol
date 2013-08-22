@@ -107,7 +107,7 @@
     <dependency><!-- to ensure deactivation in offline mode -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency> 
     <dependency>

@@ -153,7 +153,7 @@
       <!-- The Apache Stanbol lauchpad -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.launchpad</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <!-- maven-launchpad-plugin builds on the launchpad.base app -->
@@ -166,7 +166,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -175,7 +175,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -184,7 +184,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.security</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency> 
@@ -193,50 +193,51 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.zzshell</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
 
-    <!-- Stanbol CMS Adapter Bundle List -->
+    <!-- Stanbol CMS Adapter Bundle List 
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.cmsadapter</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
 
-    <!-- Stanbol Contenthub Bundle List -->
+    <!-- Stanbol Contenthub Bundle List
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.contenthub</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
 
-    <!-- Stanbol Data Bundle List -->
+    <!-- Stanbol Data Bundle List
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.defaultdata</artifactId>
       <version>1.1.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>
-    <dependency> <!-- include all OpenNLP models in the full launcher -->
+    </dependency> -->
+    <!-- include all OpenNLP models in the full launcher
+    <dependency> 
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.opennlp</artifactId>
       <version>1.1.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
 
     <!-- Stanbol Enhancer Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.enhancer</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -245,63 +246,63 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.entityhub</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
 
-    <!-- Stanbol Ontology Manager Bundle List -->
+    <!-- Stanbol Ontology Manager Bundle List
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.ontologymanager</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
 
-    <!-- Stanbol Rules Bundle List -->
+    <!-- Stanbol Rules Bundle List
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.rules</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
     
-    <!-- Stanbol Reasoners Bundle List -->
+    <!-- Stanbol Reasoners Bundle List
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.reasoners</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
     
     <!-- Language Extras -->
-    <!-- Basic Cinese language support (STANBOL-855 -->
+    <!-- Basic Cinese language support (STANBOL-855
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.smartcn</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
     <!-- TODO Paoding does not yet support Solr 4 -->
     <!-- dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.paoding</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency -->
-    <!-- Japanese Language Support -->
+    <!-- Japanese Language Support
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.kuromoji</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
     
   </dependencies>
 </project>

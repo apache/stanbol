@@ -105,12 +105,12 @@
     <dependency> <!-- provides the default Stanbol mappings -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency> <!-- provides the prefix.cc mappings -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency> <!-- for the Main (command line utility) -->
@@ -159,7 +159,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.source.vcard</artifactId>
       <version>1.0.0-SNAPSHOT</version>
-      <scope>0.12.0-SNAPSHOT</scope>
+      <scope>1.0.0-SNAPSHOT</scope>
     </dependency>
         
     <!-- dependencies of the solr yard destination -->

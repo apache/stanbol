@@ -52,8 +52,6 @@ public class TopicClassifierFragment implements WebFragment {
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(TopicClassifierRootResource.class);
-        classes.add(TopicModelResource.class);
         classes.add(GraphReader.class);
         return classes;
     }
