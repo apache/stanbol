@@ -43,7 +43,6 @@ import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.RedirectProcessingMode;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessingConfig;
-import org.apache.stanbol.enhancer.engines.entitylinking.impl.ProcessingState.TokenData;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion.MATCH;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Section;
@@ -351,7 +350,7 @@ public class EntityLinker {
                 LinkedEntity linkedEntity = linkedEntities.get(selectedText);
                 if(linkedEntity == null){
                     linkedEntity = new LinkedEntity(selectedText,
-                        suggestions, getLinkedEntityTypes(suggestions.subList(0, 1)));
+                        suggestions, getLinkedEntityTypes(suggestions));
                     linkedEntities.put(selectedText, linkedEntity);
                 } // else Assumption: The list of suggestions is the SAME
                 linkedEntity.addOccurrence(state.getSentence(), 
@@ -374,7 +373,7 @@ public class EntityLinker {
                     linkedEntity = linkedEntities.get(selectedText);
                     if(linkedEntity == null){
                         linkedEntity = new LinkedEntity(selectedText,
-                            partialMatches, getLinkedEntityTypes(suggestions.subList(0, 1)));
+                            partialMatches, getLinkedEntityTypes(suggestions));
                         linkedEntities.put(selectedText, linkedEntity);
                     } // else Assumption: The list of suggestions is the SAME
                     linkedEntity.addOccurrence(state.getSentence(), 
@@ -486,7 +485,12 @@ public class EntityLinker {
      */
     private Set<UriRef> getLinkedEntityTypes(Collection<Suggestion> suggestions){
         Collection<UriRef> conceptTypes = new HashSet<UriRef>();
+        double score = -1; //only consider types of the best ranked Entities
         for(Suggestion suggestion : suggestions){
+            double actScore = suggestion.getScore();
+            if(actScore < score){
+                break;
+            }
             for(Iterator<UriRef> types = 
                 suggestion.getEntity().getReferences(linkerConfig.getTypeField()); 
                 types.hasNext();conceptTypes.add(types.next()));
