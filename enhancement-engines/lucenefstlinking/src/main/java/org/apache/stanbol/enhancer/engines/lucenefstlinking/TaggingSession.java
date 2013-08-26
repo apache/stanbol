@@ -105,7 +105,7 @@ public class TaggingSession implements Closeable {
     private int docLoaded = 0;
     private int docCached = 0;
     private int docAppended = 0;
-    private final ValueSourceAccessor uniqueKeyCache;
+    //private final ValueSourceAccessor uniqueKeyCache;
     //private final Map<Integer,Match> matchPool = new HashMap<Integer,Match>(2048);
     private final FieldLoaderImpl fieldLoader;
 
@@ -182,7 +182,7 @@ public class TaggingSession implements Closeable {
         searcherRef = config.getIndex().getSearcher();
         SolrIndexSearcher searcher = searcherRef.get();
         documentCacheRef = config.getEntityCacheManager().getCache(searcher);
-        uniqueKeyCache = null; //no longer used.
+//        uniqueKeyCache = null; //no longer used.
 //        uniqueKeyCache = new ValueSourceAccessor(searcher, idSchemaField.getType()
 //            .getValueSource(idSchemaField, null));
         fieldLoader = new FieldLoaderImpl(searcher.getIndexReader());
@@ -324,7 +324,7 @@ public class TaggingSession implements Closeable {
                     if(config.getExecutorService() != null){
                         // TODO: this code should get moved to a CorpusManager class
                         config.getExecutorService().execute(
-                            new CorpusCreationTask(config.getIndex(), fstInfo));
+                            new CorpusCreationTask(config, fstInfo));
                         throw new CorpusException("The FST corpus for language '"
                                 + fstInfo.language + "' was invalid and is now "
                                 + "enqueued for re-creation. Retry at a  later "

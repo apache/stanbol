@@ -198,7 +198,6 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
             }
             log.debug("Process Matches for {} extragted Tags:",tags.size());
             int matches = match(at,tags.values());
-            //thr remaining code is logging only
             if(log.isTraceEnabled()){
                 String text = at.getSpan();
                 for(Tag tag : tags.values()){
@@ -235,6 +234,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         } finally {
             ci.getLock().writeLock().unlock();
         }
+        tags.clear(); //help the GC
     }
 
     private int match(AnalysedText at, Collection<Tag> tags) {

@@ -372,6 +372,8 @@ public class FstLinkingEngineComponent {
      * @see #DEFAULT_ENTITY_CACHE_SIZE
      */
     private EntityCacheManager documentCacheFactory;
+
+    private IndexConfiguration indexConfig;
     
     /**
      * Default constructor as used by OSGI. This expects that 
@@ -461,13 +463,19 @@ public class FstLinkingEngineComponent {
         ThreadFactory tf = new NamedThreadFactory(engineName+"-FST-RuntimeCreation");
         //TODO: maybe use the more advanced 
         //    com.google.common.util.concurrent.ThreadFactoryBuilder
-        if(fstCreatorService == null || fstCreatorService.isTerminated()){
-            fstCreatorService =  Executors.newFixedThreadPool(tpSize,tf);
-        } else { //still running from a previous activation
-            //try to shutdownNow
-            fstCreatorService.shutdownNow();
-            fstCreatorService = Executors.newFixedThreadPool(tpSize,tf);
+        if(fstCreatorService != null && !fstCreatorService.isTerminated()){
+            //NOTE: We can not call terminateNow, because to interrupt threads
+            //      here would also close FileChannels used by the SolrCore
+            //      and produce java.nio.channels.ClosedByInterruptException
+            //      exceptions followed by java.nio.channels.ClosedChannelException
+            //      on following calls to affected files of the SolrIndex.
+            
+            //Because of that we just log a warning and let uncompleted tasks
+            //complete!
+            log.warn("some items in a previouse FST Runtime Creation Threadpool have "
+                + "still not finished!");
         }
+        fstCreatorService = Executors.newFixedThreadPool(tpSize,tf);
         
         //(6) Parse the EntityCache config
         int ecSize;
@@ -568,10 +576,10 @@ public class FstLinkingEngineComponent {
         if(reference == null && this.indexReference == null){
             return; //nothing to do
         }
-        final IndexConfiguration indexConfig;
         BundleContext bundleContext = this.bundleContext;
         synchronized (this) { //init one after the other in case of multiple calls
             SolrCore core;
+            IndexConfiguration indexConfig; // the indexConfig build by this call
             try {
                 if(bundleContext == null){ //already deactivated
                     return; //NOTE: unregistering is done in finally block
@@ -652,7 +660,7 @@ public class FstLinkingEngineComponent {
                 //check if the fst does not exist and the fstInfo allows creation
                 if(!fstInfo.fst.exists() && fstInfo.allowCreation){
                     //create a task on the FST corpus creation service
-                    fstCreatorService.execute(new CorpusCreationTask(core, fstInfo));
+                    fstCreatorService.execute(new CorpusCreationTask(indexConfig, fstInfo));
                 }
             }
             //set the default linking corpora
@@ -663,6 +671,8 @@ public class FstLinkingEngineComponent {
             CorpusInfo defaultCoprous = indexConfig.getCorpus(defaultLanguage);
             log.info(" ... set '{}' as default FST Corpus: {}", defaultCoprous.language, defaultCoprous);
             indexConfig.setDefaultCorpus(defaultCoprous);
+            //set the index configuration to the field;
+            this.indexConfig = indexConfig;
             FstLinkingEngine engine = new FstLinkingEngine(engineName, indexConfig,
                 textProcessingConfig, entityLinkerConfig);
             String[] services = new String [] {
@@ -858,7 +868,7 @@ public class FstLinkingEngineComponent {
                             CorpusInfo langFstInfo = new CorpusInfo(language, 
                                 encodedLangIndexField,encodedLangStoreField,
                                 fieldType.getAnalyzer(), langFstFile, langAllowCreation);
-                            log.info("   ... add {} for explicitly configured language", langFstInfo);
+                            log.debug("   ... add {} for explicitly configured language", langFstInfo);
                             indexConfig.addCorpus(langFstInfo);
                             foundCorpus = true;
                         } else {
@@ -901,6 +911,11 @@ public class FstLinkingEngineComponent {
         if(solrServer != null){
             solrServer.close(); //decrease the reference count!!
             this.solrCore = null; //rest the field
+        }
+        //deactivate the index configuration if present
+        if(indexConfig != null){
+            indexConfig.deactivate();
+            indexConfig = null;
         }
     }
 
@@ -971,18 +986,16 @@ public class FstLinkingEngineComponent {
     protected void deactivate(ComponentContext ctx) {
         if(solrServerTracker != null){
             //closing the tracker will also cause registered engines to be
-            //unregistered as service (see #unregisterEngine())
+            //unregistered as service (see #updateEngineRegistration())
             solrServerTracker.close();
             solrServerTracker = null;
         }
         if(fstCreatorService != null){
-            //cancel not yet started tasks, because with the next activation
-            //those might be outdated.
-            List<Runnable> canceled = fstCreatorService.shutdownNow();
-            log.info("Cancelled FST initialistion tasks because of deactivation:");
-            for(Runnable r : canceled){
-                log.info(" > {}",r);
-            }
+            //we MUST NOT call shutdownNow(), because this would close
+            //low level Solr FileChannels.
+            fstCreatorService.shutdown();
+            //do not set NULL, as we want to warn users an re-activation if old
+            //threads are still running.
         }
         indexReference = null;
         engineMetadata = null;

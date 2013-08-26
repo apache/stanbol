@@ -81,6 +81,8 @@ public class IndexConfiguration {
    
     private final LanguageConfiguration fstConfig;
 
+    private boolean active = true;
+    
     public IndexConfiguration(LanguageConfiguration fstConfig, SolrCore index){
         if(fstConfig == null){
             throw new IllegalArgumentException("The parsed FST configuration MUST NOT be NULL!");
@@ -214,4 +216,18 @@ public class IndexConfiguration {
     public EntityCacheManager getEntityCacheManager() {
         return entityCacheManager;
     }
+    /**
+     * Deactivates this {@link IndexConfiguration}
+     */
+    public void deactivate(){
+        active = false;
+    }
+    /**
+     * If this {@link IndexConfiguration} is still active
+     * @return <code>true</code> if still active. Otherwise <code>false</code>
+     */
+    public boolean isActive(){
+        return active;
+    }
+    
 }

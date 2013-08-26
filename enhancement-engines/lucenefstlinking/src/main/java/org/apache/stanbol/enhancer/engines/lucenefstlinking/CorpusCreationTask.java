@@ -19,10 +19,9 @@ package org.apache.stanbol.enhancer.engines.lucenefstlinking;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.RefCounted;
@@ -42,65 +41,70 @@ public class CorpusCreationTask implements Runnable{
     private final Logger log = LoggerFactory.getLogger(CorpusCreationTask.class);
     
     private final CorpusInfo fstInfo;
-    private final SolrCore core;
+    private final IndexConfiguration indexConfig;
     private final long enqueued;
     
-    public CorpusCreationTask(SolrCore core, CorpusInfo fstInfo){
-        if(core == null || fstInfo == null){
+    public CorpusCreationTask(IndexConfiguration indexConfig, CorpusInfo fstInfo){
+        if(indexConfig == null || fstInfo == null){
             throw new IllegalArgumentException("Pared parameters MUST NOT be NULL!");
         }
-        this.core = core;
+        this.indexConfig = indexConfig;
         this.fstInfo = fstInfo;
         this.enqueued = fstInfo.enqueue();
     }
     
     @Override
     public void run() {
+        if(!indexConfig.isActive()){
+            return; //task cancelled
+        }
         //check if the FST corpus was enqueued a 2nd time
         if(enqueued != fstInfo.getEnqueued()){
             return;
         }
+        SolrCore core = indexConfig.getIndex();
         if(core.isClosed()){
             log.warn("Unable to build {} becuase SolrCore {} is closed!",fstInfo,core.getName());
             return;
         }
+        TaggerFstCorpus corpus = null;
         RefCounted<SolrIndexSearcher> searcherRef = core.getSearcher();
-        SolrIndexSearcher searcher = searcherRef.get();
-        DirectoryReader reader = searcher.getIndexReader();
-        TaggerFstCorpus corpus;
         try {
+            SolrIndexSearcher searcher = searcherRef.get();
+            //we do get the AtomicReader, because TaggerFstCorpus will need it
+            //anyways. This prevents to create another SlowCompositeReaderWrapper.
+            IndexReader reader = searcher.getAtomicReader();
             log.info(" ... build FST corpus for {}",fstInfo);
-            corpus = new TaggerFstCorpus(reader, reader.getVersion(),
+            corpus = new TaggerFstCorpus(reader, searcher.getIndexReader().getVersion(),
                 null, fstInfo.indexedField, fstInfo.storedField, fstInfo.analyzer,
                 fstInfo.partialMatches,1,100);
-        } catch (Exception e) {
-            log.warn("Unable to build "+fstInfo+"!",e);
-            return;
-        } finally {
-//            try {
-//                reader.close();
-//            } catch (IOException e) { /* ignore */ }
-            searcherRef.decref();
-        }
-        if(fstInfo.fst.exists()){
-            if(!FileUtils.deleteQuietly(fstInfo.fst)){
-                log.warn("Unable to delete existing FST fiel for {}",fstInfo);
-            }
-        }
-        try {
-            corpus.save(fstInfo.fst);
         } catch (IOException e) {
-            log.warn("Unable to store FST corpus " + fstInfo + " to "
-                    + fstInfo.fst.getAbsolutePath() + "!", e);
+            throw new IllegalStateException("Unable to read Information to build "
+                    + fstInfo + " from SolrIndex '" + core.getName() + "'!", e);
+        } finally {
+            searcherRef.decref(); //ensure that we dereference the searcher
         }
-        //set the created corpus to the FST Info
-        fstInfo.setCorpus(enqueued, corpus);
+        if(indexConfig.isActive()){
+            if(fstInfo.fst.exists()){
+                if(!FileUtils.deleteQuietly(fstInfo.fst)){
+                    log.warn("Unable to delete existing FST fiel for {}",fstInfo);
+                }
+            }
+            try {
+                corpus.save(fstInfo.fst);
+            } catch (IOException e) {
+                log.warn("Unable to store FST corpus " + fstInfo + " to "
+                        + fstInfo.fst.getAbsolutePath() + "!", e);
+            }
+            //set the created corpus to the FST Info
+            fstInfo.setCorpus(enqueued, corpus);
+        } //else index configuration no longer active ... ignore the built FST
     }
     
     @Override
     public String toString() {
         return new StringBuilder("Task: building ").append(fstInfo)
-                .append(" for SolrCore ").append(core.getName()).toString();
+                .append(" for SolrCore ").append(indexConfig.getIndex().getName()).toString();
     }
 
 }

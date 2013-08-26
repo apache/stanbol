@@ -154,8 +154,8 @@ __Other__
 
 As the first version of the FST Linking Engine is still in active development their are some know issues:
 
-* Stopping an Engine while FST models are build will close the IndexReader of the underlaying Solr index. This will cause any followup requests to the Solr index to fail with Exceptions.
 * Currently FST models are not updated if the Solr index is changed. This means that this Engine currently only works for read-only indexes. If a Index is changed users will need to delete the FST file and restart the Engine to trigger the recreation of the FST model
 * the Japanese FieldType as specified in the [fst_field_types.xml](fst_field_types.xml) file does produce position increments != 1
+* the RefCounted EntityCache is not destroyed prior to finalise(). This means that at some point the reference count is not correctly dereferenced. 
 
 
