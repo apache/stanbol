@@ -62,7 +62,7 @@
               org.apache.stanbol.commons.stanboltools.datafileprovider.bundle.impl.Activator
             </Bundle-Activator>
             <Import-Package>
-              org.apache.stanbol.commons.stanboltools.datafileprovider; provide:=true; version="[0.9,0.13)",
+              org.apache.stanbol.commons.stanboltools.datafileprovider; version="[0.9,1.1)",
               *          
             </Import-Package>
             <Export-Package>

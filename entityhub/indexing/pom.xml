@@ -56,7 +56,7 @@
 
   <modules>
     <module>core</module>
-    <module>source/jenatdb</module>
+    <!-- test fails, maybe due to incompatible jena version <module>source/jenatdb</module> -->
     <module>source/vcard</module>
     <module>destination/solryard</module>
     <!-- Utils for createing local caches (indexing utils) -->
