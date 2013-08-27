@@ -1,0 +1,5 @@
+Name=geonames.org
+Description=The GeoNames geographical database is available for download free of charge under a creative commons attribution license. It contains over 10 million geographical names and consists of 7.5 million unique features whereof 2.8 million populated places and 5.5 million alternate names. All features are categorized into one out of nine feature classes and further subcategorized into one out of 645 feature codes.License=Creative Commons Attribution 3.0 License
+License-Url=http://creativecommons.org/licenses/by/3.0/
+Homepage=http://www.geonames.org/
+Index-Archive=geonames.solrindex.zip

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project name="OpenNLP Model Download Helper" default="download" basedir=".">
+  <description>
+    Contains only a singel target that is used by the Maven Ant
+    Plugin to download OpenNLP Models from the Web
+  </description>
+   
+  <!-- Removed the German Tokenizer, because it does sometime create "wrong"
+       tokens. In the absence of this model the SimpleTokenizer will be used by
+       default. -->
+  <!-- switched from perceptron to maxent for POS tagging for openNLP 1.5.2 -->
+  <delete file="${target.directory}/de-pos-perceptron.bin" quiet="true"></delete>
+  <target name="download">
+    <!-- Added this delete to ensure that already downloaded versions of the 
+         German Tokenizer models are removed. -->
+    <delete dir="${target.directory}" includes="de-token.bin" />
+  	<copy todir="${target.directory}" flatten="true">
+      <resources>
+        <!-- url url="${model.url}/de-token.bin"/>
+              -->
+        <url url="${model.url}/de-sent.bin"/>
+        <!-- url url="${model.url}/de-pos-perceptron.bin"/ -->
+        <url url="${model.url}/de-pos-maxent.bin"/>
+        <!-- Noune Phrase Chunker for German -->
+        <url url="${model.url}/OpenNLP_1.5.1-German-Chunker-TigerCorps07.zip"/>
+      </resources>
+    </copy>
+  </target>
+</project>
