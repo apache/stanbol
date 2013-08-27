@@ -196,20 +196,8 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     log.info(" - sum fst: {} ms", taggingEnd - taggingStart);
                 }
             }
-            log.debug("Process Matches for {} extragted Tags:",tags.size());
             int matches = match(at,tags.values());
-            if(log.isTraceEnabled()){
-                String text = at.getSpan();
-                for(Tag tag : tags.values()){
-                    log.trace(" {}: '{}'", tag, text.subSequence(tag.getStart(), tag.getEnd()));
-                    int i=1;
-                    for(Match match : tag.getSuggestions()){
-                        log.trace(" {}. {} - {} ({})", new Object[]{
-                                i++, match.getScore(),  match.getMatchLabel(), match.getUri()});
-                    }
-                }
-            }
-            log.info(" - loaded {} ({} loaded, {} cached, {} appended) Matches in {} ms", 
+            log.debug(" - loaded {} ({} loaded, {} cached, {} appended) Matches in {} ms", 
                     new Object[]{matches, session.getSessionDocLoaded(),
                         session.getSessionDocCached(), session.getSessionDocAppended(),
                         System.currentTimeMillis()-taggingEnd});
@@ -238,12 +226,14 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
     }
 
     private int match(AnalysedText at, Collection<Tag> tags) {
+        log.trace("  ... process matches for {} extracted Tags:",tags.size());
         int matchCount = 0;
         String text = at.getSpan();
         Iterator<Tag> tagIt = tags.iterator();
         while(tagIt.hasNext()){
             Tag tag = tagIt.next();
             String anchor = text.substring(tag.getStart(), tag.getEnd());
+            log.trace(" {}: '{}'", tag, anchor);
             tag.setAnchor(anchor);
             if(!elConfig.isCaseSensitiveMatching()){
                 anchor = anchor.toLowerCase(Locale.ROOT);
@@ -251,7 +241,12 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
             
             int alength = anchor.length();
             List<Match> suggestions = new ArrayList<Match>(tag.getMatches().size());
+            int i=1; //only for trace level debugging
             for(Match match : tag.getMatches()){
+                if(log.isTraceEnabled()){
+                    log.trace(" {}. {} - {} ({})", new Object[]{
+                            i++, match.getScore(),  match.getMatchLabel(), match.getUri()});
+                }
                 matchCount++;
                 if(!filterEntityByType(match.getTypes().iterator())){
                     int distance = Integer.MAX_VALUE;
@@ -275,8 +270,12 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                         double length = Math.max(alength, matchLabel.getLexicalForm().length());
                         match.setMatch(1d - ((double)distance/length),matchLabel);
                     }
+                    log.trace(" ... add suggestion: label: '{}'; conf: {}", 
+                            matchLabel, match.getScore());
                     suggestions.add(match);
-                } //else the type of the current Entity is blacklisted
+                } else { //the type of the current Entity is blacklisted
+                    log.trace("  ... filtered because of entity types");
+                }
             }
             if(suggestions.isEmpty()){
                 tagIt.remove(); // remove this tag as no match is left
@@ -435,7 +434,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
      */
     private void adaptScoreForEntityRankings(List<Match> equalScoreList, double nextScore) {
         double score = equalScoreList.get(0).getScore();
-        log.debug("  > Adapt Score of multiple Suggestions "
+        log.trace("  > Adapt Score of multiple Suggestions "
             + "with '{}' based on EntityRanking",score);
         //Adapt the score to reflect the entity ranking
         //but do not change order with entities of different
@@ -443,17 +442,17 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         //TODO: make the max change (0.1) configurable
         double dif = (Math.min(0.1, score-nextScore))/equalScoreList.size();
         Collections.sort(equalScoreList,Match.ENTITY_RANK_COMPARATOR);
-        log.debug("    - keep socre of {} at {}", equalScoreList.get(0).getUri(), score);
+        log.trace("    - keep socre of {} at {}", equalScoreList.get(0).getUri(), score);
         for(int i=1;i<equalScoreList.size();i++){
             score = score-dif;
             if(Match.ENTITY_RANK_COMPARATOR.compare(equalScoreList.get(i-1), 
                 equalScoreList.get(i)) != 0){
                 equalScoreList.get(i).updateScore(score);
-                log.debug("    - set score of {} to {}", equalScoreList.get(i).getUri(), score);
+                log.trace("    - set score of {} to {}", equalScoreList.get(i).getUri(), score);
             } else {
                 double lastScore = equalScoreList.get(i-1).getScore();
                 equalScoreList.get(i).updateScore(lastScore);
-                log.debug("    - set score of {} to {}", equalScoreList.get(i).getUri(), lastScore);
+                log.trace("    - set score of {} to {}", equalScoreList.get(i).getUri(), lastScore);
             }
         }
     }

@@ -97,6 +97,8 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 /**
  * This is the OSGI component for the {@link FstLinkingEngine}. It is used to
  * manage the service configuration, tracks dependencies and handles the 
@@ -458,11 +460,12 @@ public class FstLinkingEngineComponent {
         if(tpSize <= 0){ //if configured value <= 0 we use the default
             tpSize = DEFAULT_FST_THREAD_POOL_SIZE;
         }
-        //now initialise the ThreadPool (and shutdown the existing one if present)
-        //we use the Lucene utils ThreadFactory to have nice names for created threads
-        ThreadFactory tf = new NamedThreadFactory(engineName+"-FST-RuntimeCreation");
-        //TODO: maybe use the more advanced 
-        //    com.google.common.util.concurrent.ThreadFactoryBuilder
+        //build a ThreadFactoryBuilder for low priority daemon threads that
+        //do use a meaningful name
+        ThreadFactoryBuilder tfBuilder = new ThreadFactoryBuilder();
+        tfBuilder.setDaemon(true);//should be stopped if the VM closes
+        tfBuilder.setPriority(Thread.MIN_PRIORITY); //low priority
+        tfBuilder.setNameFormat(engineName+"-FstRuntimeCreation-thread-%d");
         if(fstCreatorService != null && !fstCreatorService.isTerminated()){
             //NOTE: We can not call terminateNow, because to interrupt threads
             //      here would also close FileChannels used by the SolrCore
@@ -475,7 +478,7 @@ public class FstLinkingEngineComponent {
             log.warn("some items in a previouse FST Runtime Creation Threadpool have "
                 + "still not finished!");
         }
-        fstCreatorService = Executors.newFixedThreadPool(tpSize,tf);
+        fstCreatorService = Executors.newFixedThreadPool(tpSize,tfBuilder.build());
         
         //(6) Parse the EntityCache config
         int ecSize;

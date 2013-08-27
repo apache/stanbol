@@ -78,9 +78,9 @@ This configuration is line based (multi valued) and uses the following generic s
 The following parameters are supported by the Engine:
 
 * __field__: The indexed field in the configured Solr index. In multilingual scenarios this might be the 'base name' of the field that is extended by a prefix or suffix to get the actual field name in the Solr index (see also the field encoding configuration)
-* __stored__: The field in the Solr index with the stored label information. This parameter is optional. If not present `stored` is assumed to be equals to `field`.
-* __fst__: Optionally allows to manually specify the base file name of the FST models. Those files are assumed within the data directory of the configured Solr index under `fst/{fst}.{lang}.fst`. By default the configured `field` name is used (with non alpha-numeric chars replaced by '_').If runtime creation is enabled those files will be created if not present.
-* __generate__: If enabled the Engine will generate missing FST models. NOTE that the creation of FST models is an expensive operation. Because of this the default is `false`.
+* __stored__ (default: _field_ value) : The field in the Solr index with the stored label information. This parameter is optional. If not present `stored` is assumed to be equals to `field`.
+* __fst__ (default based on _field_ value): Optionally allows to manually specify the base file name of the FST models. Those files are assumed within the data directory of the configured Solr index under `fst/{fst}.{lang}.fst`. By default the configured `field` name is used (with non alpha-numeric chars replaced by '_').If runtime creation is enabled those files will be created if not present.
+* __generate__ (default: false): If enabled the Engine will generate missing FST models. If this is enabled the engine will also be able to update FST models after changes to the Solr Index. __NOTE__ that the creation of FST models is an expensive operation (both CPU and memory wise). The FST engine uses a pool of low priority threads to create FST models. The size of the pool can be configured by using the `enhancer.engines.linking.solrfst.fstThreadPoolSize` parameter. Because of this the default is `false`.
 
 A more advanced Configuration might look like:
 
@@ -94,6 +94,20 @@ A more advanced Configuration might look like:
 This would set the index field to "fise:fstTagging", the stored field to "rdfs:label" and allow runtime generation. It would also enable to process English, German, Spanish, French and Italian texts. A similar configuration that would build FST models for all languages would look as follows 
 
     *;field=fise:fstTagging;stored=rdfs:label;generate=true
+
+__Runtime FST generation Thread Pool__
+
+The `enhancer.engines.linking.solrfst.fstThreadPoolSize` parameter can be used to configure the size of the thread pool used for the runtime generation of FST models. The default size of the thread pool is `1`. Threads do use the lowest possible priority to reduce the performance impact on enhancements as much as possible.
+
+When configuring the size of the thread pool users need to be aware that the generation of FST models does need a lot more memory as the resulting model. So having to manny parallel threads might require to increase the memory settings of the JVM. On typical machines FST creation threads will consume 100% CPU. That means that the number of threads should be configured to the number of CPU cores that can be spared for FST generation.
+
+_NOTE_ that the `generate` parameter of the FST Tagging Configuration needs to be set to `true` to enable runtime generation.
+
+### Entity Cache Configuration
+
+While FST tagging is fully done in-memory the FST linking engine needs to read information of matching Entities from the Solr index. This requires disc IO and is typically the part of the process that consumes the most time. The Entity Cache tries to prevent such disc level IO by caching SolrDocuments containing only fields required for the linking process (labels, types and (if available) entity rankings).  To further reduce memory requirements only labels in languages requested by processed ContentItems are stored in the cache. The Cache uses the LRU semantic and is based on the Solr cache implementation.
+
+The size of the cache can be configured by using the `enhancer.engines.linking.solrfst.entityCacheSize` parameter. The default size is ~65k entities. Increasing the maximum size of the cache will improve performance. For small and medium sized vocabularies the cache can be configured in a way that all entities are cached in memory. 
 
 ### Text Processing Configuration
 
@@ -122,6 +136,17 @@ In addition the following properties are __IGNORED__ as they are not relevant fo
 * <s>__Min Matched Tokens__ _(enhancer.engines.linking.minFoundTokens)_</s>
 * <s>__Min Text Score__ _(enhancer.engines.linking.minTextScore)_</s>
 
+
+## Further Information
+
+### Runtime generation of FST models
+
+The `generate`
+
+### FST model updates
+
+The FST Model
+
 ## TODOs:
 
 __Making existing Entityhub SolrYard indexes Compatible with FST linking:__
@@ -147,6 +172,7 @@ __Feature related__
 
 __Other__
 
+* Not tested with enabled SecurityManager
 * Implementation of an own Entity Dereferencing Engine: This is required as the FST Linking Engine can not dereference Entity data (as the EntityLinking and the EntityTagging engine).
 
 
@@ -154,8 +180,7 @@ __Other__
 
 As the first version of the FST Linking Engine is still in active development their are some know issues:
 
-* Currently FST models are not updated if the Solr index is changed. This means that this Engine currently only works for read-only indexes. If a Index is changed users will need to delete the FST file and restart the Engine to trigger the recreation of the FST model
-* the Japanese FieldType as specified in the [fst_field_types.xml](fst_field_types.xml) file does produce position increments != 1
+* The Japanese FieldType as specified in the [fst_field_types.xml](fst_field_types.xml) file does produce position increments != 1. This is caused by Kuromoji's [JapaneseTokenizer](http://lucene.apache.org/core/3_6_0/api/contrib-kuromoji/org/apache/lucene/analysis/ja/JapaneseTokenizer.html) outputting several tokens for the same position (posInc=0). The implementation of [Issue10](https://github.com/OpenSextant/SolrTextTagger/issues/10) will solve this by adding support for such TokenStream configurations.
 * the RefCounted EntityCache is not destroyed prior to finalise(). This means that at some point the reference count is not correctly dereferenced. 
 
 

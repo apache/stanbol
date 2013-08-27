@@ -37,6 +37,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queries.function.valuesource.IfFunction;
@@ -53,6 +54,8 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.opensextant.solrtexttagger.TaggerFstCorpus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.AllowConcurrentEvents;
 
 /**
  * Profile created based on the {@link IndexConfiguration} for processing a
@@ -108,11 +111,24 @@ public class TaggingSession implements Closeable {
     //private final ValueSourceAccessor uniqueKeyCache;
     //private final Map<Integer,Match> matchPool = new HashMap<Integer,Match>(2048);
     private final FieldLoaderImpl fieldLoader;
+    /**
+     * The current version of the SolIndex (as reported by 
+     * {@link DirectoryReader#getVersion()}) of the 
+     * {@link IndexConfiguration#getIndex()}
+     */
+    private final Long indexVersion;
 
     
     TaggingSession(String language, IndexConfiguration config) throws CorpusException {
         this.language = language;
         this.config = config;
+        //init the SolrIndexSearcher
+        searcherRef = config.getIndex().getSearcher();
+        SolrIndexSearcher searcher = searcherRef.get();
+        DirectoryReader indexReader = searcher.getIndexReader();
+        indexVersion = Long.valueOf(indexReader.getVersion());
+        
+        //get the corpusInfo
         CorpusInfo langCorpusInfo = config.getCorpus(language);
         CorpusInfo defaultCorpusInfo = config.getDefaultCorpus();
         
@@ -130,7 +146,7 @@ public class TaggingSession implements Closeable {
         }
         if(langCorpusInfo != null){
             this.langCorpus = new Corpus(langCorpusInfo,
-                obtainFstCorpus(langCorpusInfo));
+                obtainFstCorpus(indexVersion,langCorpusInfo));
             this.labelField = langCorpusInfo.storedField;
             solrDocfields.add(labelField);
             this.labelLang = langCorpusInfo.language == null || 
@@ -142,7 +158,7 @@ public class TaggingSession implements Closeable {
         }
         if(defaultCorpusInfo != null && !defaultCorpusInfo.equals(langCorpusInfo)){
             this.defaultCorpus = new Corpus(defaultCorpusInfo,
-                obtainFstCorpus(defaultCorpusInfo));
+                obtainFstCorpus(indexVersion,defaultCorpusInfo));
             this.defaultLabelField = defaultCorpusInfo.storedField;
             solrDocfields.add(defaultLabelField);
             this.defaultLabelLang = defaultCorpusInfo.language == null || 
@@ -179,9 +195,7 @@ public class TaggingSession implements Closeable {
         } else {
             this.rankingField = null;
         }
-        searcherRef = config.getIndex().getSearcher();
-        SolrIndexSearcher searcher = searcherRef.get();
-        documentCacheRef = config.getEntityCacheManager().getCache(searcher);
+        documentCacheRef = config.getEntityCacheManager().getCache(indexVersion);
 //        uniqueKeyCache = null; //no longer used.
 //        uniqueKeyCache = new ValueSourceAccessor(searcher, idSchemaField.getType()
 //            .getValueSource(idSchemaField, null));
@@ -301,12 +315,12 @@ public class TaggingSession implements Closeable {
     /**
      * Obtains the FST corpus for the parsed CorpusInfo. The other parameters
      * are just used for error messages in case this is not successful.
+     * @param indexVersion the current version of the index
      * @param fstInfo the info about the corpus
-     * @param ci the contentIteem (just used for logging and error messages)
-     * @return
-     * @throws CorpusException
+     * @return the TaggerFstCorpus
+     * @throws CorpusException if the requested corpus is currently not available
      */
-    private TaggerFstCorpus obtainFstCorpus(CorpusInfo fstInfo) throws CorpusException {
+    private TaggerFstCorpus obtainFstCorpus(Long indexVersion, CorpusInfo fstInfo) throws CorpusException {
         TaggerFstCorpus fstCorpus;
         synchronized (fstInfo) { // one at a time
             fstCorpus = fstInfo.getCorpus(); 
@@ -333,11 +347,41 @@ public class TaggingSession implements Closeable {
                         throw new CorpusException(fstInfo.getErrorMessage(), null);
                     }
                 }
+            } else { //fstCorpus != null
+                if(indexVersion != null && indexVersion.longValue() != fstCorpus.getIndexVersion()){
+                    log.info("FST corpus for language '{}' is outdated ...", fstInfo.language);
+                    if(fstInfo.isEnqueued()){
+                        log.info("  ... already sheduled for recreation. "
+                            + "Use outaded corpus for tagging");
+                    } else if(fstInfo.allowCreation && config.getExecutorService() != null){
+                        log.info("  ... initialise recreation");
+                        config.getExecutorService().execute(
+                            new CorpusCreationTask(config, fstInfo));
+                    } else {
+                        log.warn("Unable to update outdated FST corpus for language '{}' "
+                                + "because runtimeCreation is {} and ExecutorServic "
+                                + "is {} available!", new Object[]{fstInfo.language,
+                                fstInfo.allowCreation ? "enabled" : "disabled" ,
+                                config.getExecutorService() == null ? "not" : ""});
+                        log.warn("  ... please adapt the Engine configuration for up "
+                            + "to date FST corpora!");
+                    }
+                } else { //FST corpus is up to date with the current Solr index version
+                    log.debug("FST corpus for language '{}' is up to date", fstInfo.language);
+                }
             }
-
         }
         return fstCorpus;
     }
+    /**
+     * The current version of the SolrIndex as reported by the {@link IndexReader}
+     * used by this TaggingSession.
+     * @return the current version of the SolrIndex.
+     */
+    public Long getIndexVersion() {
+        return indexVersion;
+    }
+    
     /**
      * {@link FieldLoader} implementation used to create {@link Match} instances
      */

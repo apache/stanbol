@@ -160,7 +160,7 @@ public class CorpusInfo {
         }
         //check if the set version is the most current one
         if(enqueued == this.enqueued){ //if so
-            enqueued = -1; //mark this one as up-to-date
+            this.enqueued = -1; //mark this one as up-to-date
         }
     }
 
