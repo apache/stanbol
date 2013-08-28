@@ -63,7 +63,7 @@
     <module>releasing/source-assembly</module>    
     
     <module>parent</module>
-    <!-- <module>data</module> -->
+    <module>data</module>
     <module>commons</module>
 
     <module>entityhub</module>
