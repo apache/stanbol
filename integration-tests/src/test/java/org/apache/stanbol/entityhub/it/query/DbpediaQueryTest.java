@@ -21,6 +21,7 @@ import java.util.Arrays;
 
 import org.apache.stanbol.entityhub.it.ReferencedSiteTest;
 import org.apache.stanbol.entityhub.it.SitesManagerTest;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.defaults.SpecialFieldEnum;
 import org.apache.stanbol.entityhub.test.query.FieldQueryTestCase;
 import org.apache.stanbol.entityhub.test.query.FindQueryTestCase;
@@ -53,43 +54,50 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
         FindQueryTestCase test = new FindQueryTestCase("Paris",
             Arrays.asList(
                 "http://dbpedia.org/resource/Paris",
-                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C.",
-                "http://dbpedia.org/resource/University_of_Paris"));//,
-                //"http://dbpedia.org/resource/Paris_Hilton"));
+                "http://dbpedia.org/resource/Paris_Hilton",
+                "http://dbpedia.org/resource/University_of_Paris")); //and more
         executeQuery(test);
     }
     @Test
     public void testFindLimitAndOffsetQuery() throws IOException, JSONException {
+        //expected:
+        // Paris: 16.905037
+        // University_of_Paris: 10.565648
+        // Paris_Hilton, Salon_(Paris), Paris_M%C3%A9tro, Paris_Opera, 
+        //    Paris_Saint-Germain_F.C., Paris_Commune, Paris_Masters: 8.452518
         //only the first result
         FindQueryTestCase test = new FindQueryTestCase("Paris",
             Arrays.asList(
                 "http://dbpedia.org/resource/Paris"),
             Arrays.asList(
-                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C.",
                 "http://dbpedia.org/resource/University_of_Paris",
-                "http://dbpedia.org/resource/Paris_Hilton"));
+                "http://dbpedia.org/resource/Paris_Hilton",
+                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C."));
+        test.setLanguage("en");
         test.setLimit(1);
         executeQuery(test);
         //the second result
         test = new FindQueryTestCase("Paris",
             Arrays.asList(
-                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C.",
                 "http://dbpedia.org/resource/University_of_Paris"),
             Arrays.asList(
                 "http://dbpedia.org/resource/Paris",
-                "http://dbpedia.org/resource/Paris_Hilton"));
-        test.setLimit(2);
+                "http://dbpedia.org/resource/Paris_Hilton",
+                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C."));
+        test.setLanguage("en");
+        test.setLimit(1);
         test.setOffset(1);
         executeQuery(test);
         //the second and third
         test = new FindQueryTestCase("Paris",
             Arrays.asList(
-                "http://dbpedia.org/resource/University_of_Paris",
+                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C.",
                 "http://dbpedia.org/resource/Paris_Hilton"),
             Arrays.asList(
-                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C.",
+                "http://dbpedia.org/resource/University_of_Paris",
                 "http://dbpedia.org/resource/Paris"));
-        test.setLimit(2);
+        test.setLanguage("en");
+        test.setLimit(10);
         test.setOffset(2);
         executeQuery(test);
     }
@@ -99,31 +107,46 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
             Arrays.asList(
                 "http://dbpedia.org/resource/Paris",
                 "http://dbpedia.org/resource/University_of_Paris",
-                "http://dbpedia.org/resource/Paris_M%C3%A9tro"));
+                "http://dbpedia.org/resource/Paris_M%C3%A9tro",
+                "http://dbpedia.org/resource/Paris_Commune",
+                "http://dbpedia.org/resource/Paris-Charles_de_Gaulle_Airport"));
+        test.setLimit(10);
         executeQuery(test);
 
         //now the same test but only in English labels
         test = new FindQueryTestCase("Parigi",false); //no results
         test.setLanguage("en");
+        test.setLimit(3);
         executeQuery(test);
         
-        //now in Italian
+        //now in Italian (expects the same as the query with no language constriants
         test = new FindQueryTestCase("Parigi",
             Arrays.asList(
                 "http://dbpedia.org/resource/Paris",
                 "http://dbpedia.org/resource/University_of_Paris",
-                "http://dbpedia.org/resource/Paris%E2%80%93Roubaix",
-                "http://dbpedia.org/resource/Dakar_Rally"));
+                "http://dbpedia.org/resource/Paris_M%C3%A9tro",
+                "http://dbpedia.org/resource/Paris_Peace_Conference,_1919",
+                "http://dbpedia.org/resource/Paris-Charles_de_Gaulle_Airport"));
         test.setLanguage("it");
+        test.setLimit(10);
         executeQuery(test);
 
         //now search for Paris in Italian labels
         test = new FindQueryTestCase("Paris",
             Arrays.asList(
                 "http://dbpedia.org/resource/Paris_Hilton",
-                "http://dbpedia.org/resource/Paris%E2%80%93Nice",
-                "http://dbpedia.org/resource/Paris,_Texas"));
+                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C.",
+                "http://dbpedia.org/resource/Paris_Opera",
+                "http://dbpedia.org/resource/Stade_Fran%C3%A7ais",
+                "http://dbpedia.org/resource/Institut_d'%C3%89tudes_Politiques_de_Paris"),
+            Arrays.asList(
+                "http://dbpedia.org/resource/Paris",
+                "http://dbpedia.org/resource/University_of_Paris",
+                "http://dbpedia.org/resource/Paris_M%C3%A9tro",
+                "http://dbpedia.org/resource/Paris_Peace_Conference,_1919",
+                "http://dbpedia.org/resource/Paris-Charles_de_Gaulle_Airport"));
         test.setLanguage("it");
+        test.setLimit(10);
         executeQuery(test);
     }
     @Test
@@ -131,29 +154,37 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
         //first a search without wildcards
         FindQueryTestCase test = new FindQueryTestCase("cia",
             Arrays.asList(
-                "http://dbpedia.org/resource/CIA",
-                "http://dbpedia.org/resource/CIA_World_Factbook"),
+                "http://dbpedia.org/resource/Central_Intelligence_Agency",
+                "http://dbpedia.org/resource/The_World_Factbook"),
             Arrays.asList(
                 "http://dbpedia.org/resource/Ciara"));
+        test.setField("http://dbpedia.org/ontology/surfaceForm");
         test.setLanguage("en");
+        test.setLimit(5); //there are a lot of those
         executeQuery(test);
         //now the same search with wildcards
         test = new FindQueryTestCase("cia*",
             Arrays.asList(
-                "http://dbpedia.org/resource/CIA",
+                "http://dbpedia.org/resource/Central_Intelligence_Agency",
+                "http://dbpedia.org/resource/County_Kerry", //Ciarraí (county)
+                "http://dbpedia.org/resource/Vitamin_C", //Ciamin
                 "http://dbpedia.org/resource/Ciara",
-                "http://dbpedia.org/resource/CIA_World_Factbook"));
+                "http://dbpedia.org/resource/The_World_Factbook")); //CIA World Factbook
+        test.setField("http://dbpedia.org/ontology/surfaceForm");
         test.setLanguage("en");
+        test.setLimit(10); //there are a lot of those
         executeQuery(test);
         
         test = new FindQueryTestCase("proto*",
             Arrays.asList(
                 "http://dbpedia.org/resource/Prototype",
                 "http://dbpedia.org/resource/Proton",
-                "http://dbpedia.org/resource/Internet_Protocol"),
+                "http://dbpedia.org/resource/Hypertext_Transfer_Protocol",
+                "http://dbpedia.org/resource/File_Transfer_Protocol"),
             Arrays.asList(
                 "http://dbpedia.org/resource/Pretoria"));
         test.setLanguage("en");
+        test.setLimit(100); //there a a lot of those
         executeQuery(test);
         //now the same search with wildcards
         test = new FindQueryTestCase("pr?to*",
@@ -161,8 +192,10 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                 "http://dbpedia.org/resource/Pretoria",
                 "http://dbpedia.org/resource/Prototype",
                 "http://dbpedia.org/resource/Proton",
-                "http://dbpedia.org/resource/Internet_Protocol"));
+                "http://dbpedia.org/resource/Program_and_System_Information_Protocol",
+                "http://dbpedia.org/resource/Hypertext_Transfer_Protocol"));
         test.setLanguage("en");
+        test.setLimit(100); //there a a lot of those
         executeQuery(test);
     }
     
@@ -182,24 +215,24 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                     "'http:\\/\\/dbpedia.org\\/ontology\\/birthDate',"+
                     "'http:\\/\\/dbpedia.org\\/ontology\\/deathDate'],"+
                 "'offset': '0',"+
-                "'limit': '3',"+
+                "'limit': '5',"+
                 "'constraints': [{ "+
                     "'type': 'range', "+
                     "'field': 'http:\\/\\/dbpedia.org\\/ontology\\/birthDate', "+
-                    "'lowerBound': '1946-01-01T00:00:00.000Z',"+
-                    "'upperBound': '1946-12-31T23:59:59.999Z',"+
+                    "'lowerBound': '1946-07-01T00:00:00.000Z',"+
+                    "'upperBound': '1946-08-31T23:59:59.999Z',"+
                     "'inclusive': true,"+
                     "'datatype': 'xsd:dateTime'"+
                 "},{ "+
                     "'type': 'reference', "+
                     "'field': 'http:\\/\\/www.w3.org\\/1999\\/02\\/22-rdf-syntax-ns#type', "+
-                    "'value': 'http:\\/\\/dbpedia.org\\/ontology\\/Person', "+
+                    "'value': 'http:\\/\\/dbpedia.org\\/ontology\\/MusicalArtist', "+
                 "}]"+
              "}",
-             Arrays.asList( //list of expected results
-                 "http://dbpedia.org/resource/Bill_Clinton",
-                 "http://dbpedia.org/resource/George_W._Bush",
-                 "http://dbpedia.org/resource/Donald_Trump"),
+             Arrays.asList( //list of expected results (3/5 found)
+                 "http://dbpedia.org/resource/Linda_Ronstadt",
+                 "http://dbpedia.org/resource/Barry_Gibb",
+                 "http://dbpedia.org/resource/Jimmy_Webb"),
              Arrays.asList( //list of required fields for results
                 "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
                 "http://www.w3.org/2000/01/rdf-schema#label",
@@ -207,7 +240,7 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
         //now execute the test
         executeQuery(test);
         
-        //cities with more than 1 million inhabitants and an altitude over
+        //cities with more than 3 million inhabitants and an altitude over
         //1000 meter
         test = new FieldQueryTestCase(
             "{"+
@@ -216,11 +249,11 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                     "'http:\\/\\/dbpedia.org\\/ontology\\/populationTotal',"+
                     "'http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#alt'],"+
                 "'offset': '0',"+
-                "'limit': '3',"+
+                "'limit': '5',"+
                 "'constraints': [{ "+
                      "'type': 'range', "+
                      "'field': 'http:\\/\\/dbpedia.org\\/ontology\\/populationTotal', "+
-                     "'lowerBound': 1000000,"+
+                     "'lowerBound': 3000000,"+
                      "'inclusive': true,"+
                      "'datatype': 'xsd:long'"+
                  "},{ "+
@@ -236,8 +269,8 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
             "}",
             Arrays.asList(
                 "http://dbpedia.org/resource/Mexico_City",
-                "http://dbpedia.org/resource/Bogot%C3%A1",
-                "http://dbpedia.org/resource/Quito"),
+                "http://dbpedia.org/resource/Nairobi",
+                "http://dbpedia.org/resource/Kunming"),
             Arrays.asList(
                 "http://www.w3.org/2000/01/rdf-schema#label",
                 "http://dbpedia.org/ontology/populationTotal",
@@ -253,7 +286,7 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                 "'selected': ["+
                     "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
                 "'offset': '0',"+
-                "'limit': '3',"+
+                "'limit': '10',"+
                 "'constraints': [{ "+
                     "'type': 'text', "+
                     "'language': 'de', "+
@@ -265,18 +298,18 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
              Arrays.asList( //list of expected results
                  "http://dbpedia.org/resource/Frankfurt",
                  "http://dbpedia.org/resource/Eintracht_Frankfurt",
-                 "http://dbpedia.org/resource/Frankfort,_Kentucky"),
+                 "http://dbpedia.org/resource/Frankfurt_Airport"),
              Arrays.asList( //list of required fields for results
                 "http://www.w3.org/2000/01/rdf-schema#label"));
         //now execute the test
         executeQuery(test);  
-
+        
         test = new FieldQueryTestCase(
             "{ "+
                 "'selected': ["+
                     "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
                 "'offset': '0',"+
-                "'limit': '3',"+
+                "'limit': '10',"+
                 "'constraints': [{ "+
                     "'type': 'text', "+
                     "'text': ['Frankfurt','Main','Flughafen'], "+
@@ -287,6 +320,7 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
              Arrays.asList( //list of expected results
                  "http://dbpedia.org/resource/Frankfurt_Airport",
                  "http://dbpedia.org/resource/Frankfurt",
+                 "http://dbpedia.org/resource/Maine",
                  "http://dbpedia.org/resource/Airport"),
              Arrays.asList( //list of required fields for results
                 "http://www.w3.org/2000/01/rdf-schema#label"));
@@ -326,18 +360,19 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                 "'selected': ["+
                     "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
                 "'offset': '0',"+
-                "'limit': '3',"+
+                "'limit': '5',"+
                 "'constraints': [{ "+
                     "'type': 'value',"+
-                    "'value': '34',"+
+                    "'value': '64',"+
                     "'field': 'http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#alt',"+
                     "'datatype': 'xsd:int'"+
                     "}]"+
              "}",
              Arrays.asList( //list of expected results
-                 "http://dbpedia.org/resource/Berlin",
-                 "http://dbpedia.org/resource/Baghdad",
-                 "http://dbpedia.org/resource/Orlando,_Florida"),
+                 "http://dbpedia.org/resource/Manchester,_New_Hampshire",
+                 "http://dbpedia.org/resource/Cornwall,_Ontario",
+                 "http://dbpedia.org/resource/Lexington,_Massachusetts"
+                 ),
              Arrays.asList( //list of required fields for results
                 "http://www.w3.org/2000/01/rdf-schema#label"));
         //now execute the test
@@ -352,7 +387,7 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                 "'limit': '3',"+
                 "'constraints': [{ "+
                     "'type': 'value',"+
-                    "'value': '34',"+ //NOTE this is a JSON String!
+                    "'value': '64',"+ //NOTE this is a JSON String!
                     "'field': 'http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#alt',"+
                     "}]"+
              "}",
@@ -368,14 +403,14 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                 "'limit': '3',"+
                 "'constraints': [{ "+
                     "'type': 'value',"+
-                    "'value': 34,"+
+                    "'value': 64,"+
                     "'field': 'http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#alt',"+
                     "}]"+
              "}",
              Arrays.asList( //list of expected results
-                 "http://dbpedia.org/resource/Berlin",
-                 "http://dbpedia.org/resource/Baghdad",
-                 "http://dbpedia.org/resource/Orlando,_Florida"));
+                 "http://dbpedia.org/resource/Manchester,_New_Hampshire",
+                 "http://dbpedia.org/resource/Cornwall,_Ontario",
+                 "http://dbpedia.org/resource/Lexington,_Massachusetts"));
         //now execute the test
         executeQuery(test);
     }    
@@ -425,15 +460,14 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                 "'limit': '3',"+
                 "'constraints': [{ "+
                     "'type': 'value',"+
-                    "'value': ['34','519'],"+
+                    "'value': ['1288','519'],"+
                     "'field': 'http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#alt',"+
                     "'datatype': 'xsd:int'"+
                     "}]"+
              "}",
              Arrays.asList( //list of expected results
-                 "http://dbpedia.org/resource/Munich",
-                 "http://dbpedia.org/resource/Berlin",
-                 "http://dbpedia.org/resource/Baghdad"),
+                 "http://dbpedia.org/resource/Munich", //519
+                 "http://dbpedia.org/resource/Salt_Lake_City"), //1288
              Arrays.asList( //list of required fields for results
                 "http://www.w3.org/2000/01/rdf-schema#label"));
         //now execute the test
@@ -449,14 +483,13 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                 "'limit': '3',"+
                 "'constraints': [{ "+
                     "'type': 'value',"+
-                    "'value': [34,519],"+
+                    "'value': [1288,519],"+
                     "'field': 'http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#alt',"+
                     "}]"+
              "}",
              Arrays.asList( //list of expected results
-                 "http://dbpedia.org/resource/Munich",
-                 "http://dbpedia.org/resource/Berlin",
-                 "http://dbpedia.org/resource/Baghdad"));
+                 "http://dbpedia.org/resource/Munich", //519
+                 "http://dbpedia.org/resource/Salt_Lake_City")); //1288
         //now execute the test
         executeQuery(test);
     }    
@@ -471,20 +504,24 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                 "'selected': ["+
                     "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
                 "'offset': '0',"+
-                "'limit': '3',"+
+                "'limit': '5',"+
                 "'constraints': [{ "+
                     "'type': 'text',"+ 
                     "'patternType': 'wildcard',"+ 
-                    "'text': ['microbiologist'],"+  
+                    "'text': ['physicist'],"+  
                     "'field': 'entityhub-query:fullText'"+ 
                  "},{"+ 
                     "'type': 'reference',"+  
-                    "'value': ['dbp-ont:Person'],"+  
+                    "'value': ['dbp-ont:Scientist'],"+  
                     "'field': 'rdf:type',"+ 
                     "}]"+
              "}",
              Arrays.asList( //list of expected results
-                 "http://dbpedia.org/resource/Louis_Pasteur"),
+                 "http://dbpedia.org/resource/Albert_Einstein",
+                 "http://dbpedia.org/resource/Isaac_Newton",
+                 "http://dbpedia.org/resource/Galileo_Galilei",
+                 "http://dbpedia.org/resource/Nikola_Tesla",
+                 "http://dbpedia.org/resource/Stephen_Hawking"),
              Arrays.asList( //list of required fields for results
                 "http://www.w3.org/2000/01/rdf-schema#label"));
         //now execute the test
@@ -519,7 +556,7 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                  "http://dbpedia.org/resource/Paris",
                  "http://dbpedia.org/resource/Moscow",
                  "http://dbpedia.org/resource/Rome",
-                 "http://dbpedia.org/resource/Berlin"),
+                 "http://dbpedia.org/resource/Helsinki"),
              Arrays.asList( //list of required fields for results
                 "http://www.w3.org/2000/01/rdf-schema#label"));
         //now execute the test
@@ -539,7 +576,7 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                 "'selected': ["+
                     "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
                 "'offset': '0',"+
-                "'limit': '5',"+
+                "'limit': '20',"+
                 "'constraints': [{ "+
                     "'type': 'reference',"+ 
                     "'value': ["+
@@ -552,12 +589,11 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                     "}]"+
              "}",
              Arrays.asList( //list of expected results
+                 "http://dbpedia.org/resource/Berlin",
+                 "http://dbpedia.org/resource/Amsterdam",
                  "http://dbpedia.org/resource/London",
                  "http://dbpedia.org/resource/Paris",
-                 "http://dbpedia.org/resource/Moscow",
-                 "http://dbpedia.org/resource/Rome",
-                 //now we get Los_Angeles because it has the dbp-ont:City type
-                 "http://dbpedia.org/resource/Los_Angeles"),
+                 "http://dbpedia.org/resource/Rome"),
              Arrays.asList( //list of required fields for results
                 "http://www.w3.org/2000/01/rdf-schema#label"));
         //now execute the test
@@ -633,7 +669,7 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                     "'selected': ["+
                         "'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label'],"+
                     "'offset': '0',"+
-                    "'limit': '3',"+
+                    "'limit': '10',"+
                     "'constraints': [{ "+
                         "'type': 'text', "+
                         "'text': ['Frankfurt','Main','Flughafen'], "+
@@ -646,9 +682,13 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                  Arrays.asList( //list of expected results
                      "http://dbpedia.org/resource/Frankfurt_Airport",
                      "http://dbpedia.org/resource/Frankfurt",
-// this query selects Main instead of Airport, as Main has the same label in German and English
-//                     "http://dbpedia.org/resource/Airport"),
-                     "http://dbpedia.org/resource/Main"), 
+                     //NOTE: Main is no longer part of the new default data index
+                     //      with only 26k (instead of 43k) entities.
+                     "http://dbpedia.org/resource/Goethe_University_Frankfurt",
+                     "http://dbpedia.org/resource/Frankfurt_(Oder)",
+                     "http://dbpedia.org/resource/FSV_Frankfurt",
+                     "http://dbpedia.org/resource/Eintracht_Frankfurt",
+                     "http://dbpedia.org/resource/1._FFC_Frankfurt"),
                  Arrays.asList( //list of required fields for results
                     "http://www.w3.org/2000/01/rdf-schema#label"));
             //now execute the test

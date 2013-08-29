@@ -69,8 +69,8 @@ public class HttpQueryHeaderPostTest extends EnhancerTestBase {
         .assertStatus(200)
         //check for JSON-LD (the default content type
         .assertContentType("application/json")
-        .assertContentRegexp("\"entity-reference\": \"http://dbpedia.org/resource/London\",",
-            "\"creator\": \"org.apache.stanbol.enhancer.engines.langdetect.LanguageDetectionEnhancementEngine\"",
-            "\"creator\": \"org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine\"");
+        .assertContentRegexp("entity-reference\": \"http://dbpedia.org/resource/London\"",
+            "creator\": \"org.apache.stanbol.enhancer.engines.langdetect.LanguageDetectionEnhancementEngine\"",
+            "creator\": \"org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine\"");
     }
 }

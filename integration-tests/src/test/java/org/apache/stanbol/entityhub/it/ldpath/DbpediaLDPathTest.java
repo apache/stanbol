@@ -171,13 +171,12 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         .assertContentContains(
             "\"@id\": \"http://dbpedia.org/resource/Paris\"",
             "\"comment\": {",
-            "Paris is the capital and largest city in France",
-            "\"homepage\": [",
-            "http://www.paris.fr",
+            "Paris is the capital and largest city of France.",
+            "\"homepage\": \"http://www.paris.fr/\"",
             "\"labels\": [",
-            "\"@value\": \"Pariisi\"",
+            "\"@value\": \"Parigi\"",
             "\"@value\": \"巴黎\"",
-            "\"location\": \"[48.856667,2.350833]\"",
+            "\"location\": \"[48.8567,2.3508]\"",
             "\"name\": {",
             "\"@value\": \"Paris\""
             );
@@ -227,21 +226,20 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
             .withHeader("Accept", "text/turtle")
             .withFormContent(
                 "name","York",
-                "lang","en",
                 "ldpath","@prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;"+
                     "lat = geo:lat :: xsd:double;",
                 "limit","3")
          )
          .assertStatus(200)
          .assertContentType("text/turtle")
-         .assertContentContains(
+         .assertContentRegexp(
              "<http://stanbol.apache.org/ontology/entityhub/query#score>",
-             "<http://dbpedia.org/resource/York>",
-             "<lat>   \"53.958332\"^^<http://www.w3.org/2001/XMLSchema#double> .",
              "<http://dbpedia.org/resource/New_York_City>",
-             "<lat>   \"40.716667\"^^<http://www.w3.org/2001/XMLSchema#double> .",
+             "<lat>.*\"40\\.716667\"\\^\\^<http://www\\.w3\\.org/2001/XMLSchema#double>",
              "<http://dbpedia.org/resource/New_York>",
-             "<lat>   \"43.0\"^^<http://www.w3.org/2001/XMLSchema#double> .");
+             "<lat>.*\"43\\.0\"\\^\\^<http://www\\.w3\\.org/2001/XMLSchema#double>",
+             "<http://dbpedia.org/resource/York>",
+             "<lat>.*\"53\\.958332\"\\^\\^<http://www\\.w3\\.org/2001/XMLSchema#double>");
     }
     @Test
     public void testFindLDPathSelectPaths() throws IOException {
@@ -251,7 +249,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
             builder.buildPostRequest("/entityhub/site/dbpedia/find")
             .withHeader("Accept", "text/turtle")
             .withFormContent(
-                "name","Spinne",
+                "name","Webspinnen",
                 "lang","de",
                 "ldpath","@prefix dct : <http://purl.org/dc/terms/> ;"+
                     "name = rdfs:label[@en] :: xsd:string;"+
@@ -266,6 +264,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
              "<name>  \"Spider\"@en ;",
              "<category>.*<http://dbpedia.org/resource/Category:Arachnids>",
              "<category>.*<http://dbpedia.org/resource/Category:Spiders>",
+             "<others>.*<http://dbpedia.org/resource/Opiliones>",
              "<others>.*<http://dbpedia.org/resource/Acari>",
              "<others>.*<http://dbpedia.org/resource/Spider>",
              "<others>.*<http://dbpedia.org/resource/Scorpion>",

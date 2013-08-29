@@ -47,8 +47,10 @@ public class DefaultDataDispatchFilterTest extends SolrDispatchFilterComponentTe
         .assertStatus(200)
         .assertContentRegexp(
             "http://dbpedia.org/resource/Paris",
-            "http://dbpedia.org/resource/Paris,_France",
-            "http://dbpedia.org/resource/Category:People_from_Paris",
-            "http://dbpedia.org/resource/University_of_Paris");
+            "http://dbpedia.org/resource/Paris_Saint-Germain_F.C.",
+            "http://dbpedia.org/resource/University_of_Paris",
+            "http://dbpedia.org/resource/Paris_Opera",
+            "http://dbpedia.org/resource/Paris_Hilton",
+            "http://dbpedia.org/resource/Paris_M%C3%A9tro");
     }
 }

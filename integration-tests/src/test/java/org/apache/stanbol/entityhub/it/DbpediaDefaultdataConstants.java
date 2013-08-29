@@ -35,11 +35,10 @@ public class DbpediaDefaultdataConstants {
     static {
         Set<String> required = new HashSet<String>();
         required.add(NamespaceEnum.rdfs+"label");
+        //the new default data index supports surface forms
+        required.add(NamespaceEnum.dbpediaOnt+"surfaceForm");
         required.add(NamespaceEnum.rdf+"type");
-        //TODO: STANBOL-600 change to NamespaceEnum.entityhub as soon as a
-        //      new dbpedia default data index is available
-        //      This will be done as soon as the next DBpedia release is available
-        required.add(NamespaceEnum.rickModel+"entityRank");
+        required.add(NamespaceEnum.entityhub+"entityRank");
         DBPEDIA_DEFAULTDATA_REQUIRED_FIELDS = Collections.unmodifiableSet(required);
 
         Set<String> optional = new HashSet<String>();
@@ -49,6 +48,7 @@ public class DbpediaDefaultdataConstants {
         optional.add("http://www.w3.org/2003/01/geo/wgs84_pos#lat");
         optional.add("http://www.w3.org/2003/01/geo/wgs84_pos#long");
         optional.add("http://www.w3.org/2003/01/geo/wgs84_pos#alt");
+        optional.add("http://dbpedia.org/ontology/areaTotal");
         optional.add("http://dbpedia.org/ontology/birthDate");
         optional.add("http://dbpedia.org/ontology/deathDate");
         optional.add("http://xmlns.com/foaf/0.1/homepage");

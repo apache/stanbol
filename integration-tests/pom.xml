@@ -116,10 +116,10 @@
             <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
             <server.ready.path.1>/:stanbol.css</server.ready.path.1>
             <server.ready.path.2>/enhancer:Stateless REST analysis:Accept:text/html</server.ready.path.2>
-            <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
+            <!-- server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
             <server.ready.path.4>/entityhub:The RESTful API of the Entityhub</server.ready.path.4>
             <server.ready.path.5>/ontonet:Apache Stanbol OntoNet:Accept:text/html</server.ready.path.5>
-            <server.ready.path.6>/reasoners:The Stanbol Reasoners provides</server.ready.path.6>
+            <server.ready.path.6>/reasoners:The Stanbol Reasoners provides</server.ready.path.6> -->
           </systemPropertyVariables>
           <excludes>
             <!-- Config is to big and Regex check on result causes OutOfMemoryExceptions -->
