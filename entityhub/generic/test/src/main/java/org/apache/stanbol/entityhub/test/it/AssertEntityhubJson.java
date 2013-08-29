@@ -63,13 +63,18 @@ public class AssertEntityhubJson {
      * {@link QueryTestCase#getExpectedStatus()} is a 2xx status code.
      */
     public static void assertQueryResults(RequestExecutor re, QueryTestCase test) throws JSONException{
-    	log.debug("Assert Query Results for test {}",test.getContent());
+    	if(log.isDebugEnabled()){
+    	    log.debug("Assert Query Results for test {}",test.getContent());
+    	}
         re.assertStatus(test.getExpectedStatus());
         re.assertContentType("application/json"); //currently only application/json is supported
         if(!test.expectsSuccess()){
             return; //no further checks for tests that expect failure
         }
         JSONObject jso = new JSONObject(re.getContent());
+        if(log.isDebugEnabled()){
+            log.debug("Assert Results: {}",jso.toString(2));
+        }
         JSONArray results = jso.getJSONArray("results");
         if(test.expectesResults()){
             assertTrue("Missing Results for Query: \n "+test+
