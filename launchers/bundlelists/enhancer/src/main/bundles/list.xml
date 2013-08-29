@@ -274,11 +274,13 @@
       <artifactId>org.apache.stanbol.enhancer.engines.entitycomention</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </bundle>
-    <bundle> <!-- Refactor Enhancement Engine -->
+    <!-- Refactor Enhancement Engine -->
+    <!-- TODO:  reactivate when ontologymanager is part of ng
+    <bundle> 
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.refactor</artifactId>
       <version>1.0.0-SNAPSHOT</version>
-    </bundle>
+    </bundle> -->
 
     
     <!-- External Service Integration -->
