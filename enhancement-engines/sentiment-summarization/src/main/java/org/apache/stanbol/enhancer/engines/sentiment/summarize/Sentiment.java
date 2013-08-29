@@ -79,22 +79,24 @@ public class Sentiment {
         this.start = token.getStart();
         this.end = token.getEnd();
         List<Value<PosTag>> tags = token.getAnnotations(NlpAnnotations.POS_ANNOTATION);
-        for(Value<PosTag> tag : tags){
-            if(tag.probability() == Value.UNKNOWN_PROBABILITY ||
-                    tag.probability() >= MIN_POS_CONF || 
-                    !Collections.disjoint(tag.value().getCategories(),PREF_LEX_CAT)){
-                posTag = tag.value();
-                break;
+        if(tags != null && !tags.isEmpty()){
+            for(Value<PosTag> tag : tags){
+                if(tag.probability() == Value.UNKNOWN_PROBABILITY ||
+                        tag.probability() >= MIN_POS_CONF || 
+                        !Collections.disjoint(tag.value().getCategories(),PREF_LEX_CAT)){
+                    posTag = tag.value();
+                    break;
+                }
             }
-        }
-        if(posTag == null){
-            posTag = tags.get(0).value();
-        }
-        if(posTag.hasCategory(LexicalCategory.Noun)){
-            addAbout(token); //add the token also as noun
-        }
-        if(posTag.hasCategory(LexicalCategory.Verb)){
-            setVerb(token);
+            if(posTag == null){
+                posTag = tags.get(0).value();
+            }
+            if(posTag.hasCategory(LexicalCategory.Noun)){
+                addAbout(token); //add the token also as noun
+            }
+            if(posTag.hasCategory(LexicalCategory.Verb)){
+                setVerb(token);
+            }
         }
     }
     

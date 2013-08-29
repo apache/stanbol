@@ -416,9 +416,9 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
         Integer[] context;
         PosTag pos = sentiment.getPosTag();
         boolean isPredicative;
-        if(pos.getPosHierarchy().contains(Pos.PredicativeAdjective)){
+        if(pos != null && pos.getPosHierarchy().contains(Pos.PredicativeAdjective)){
             isPredicative = true;
-        } else if(pos.hasCategory(LexicalCategory.Adjective) && 
+        } else if(pos != null && pos.hasCategory(LexicalCategory.Adjective) && 
                 //Adjective that are not directly in front of a Noun
                 nouns.get(Integer.valueOf(index+1)) == null){ 
           isPredicative = true;
@@ -492,14 +492,14 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                 context = new Integer[]{Integer.valueOf(index-nounContext),
                         Integer.valueOf(index+nounContext)};
             }
-        } else if(pos.hasCategory(LexicalCategory.Adjective)){
+        } else if(pos != null && pos.hasCategory(LexicalCategory.Adjective)){
             //for all other adjective the affected noun is expected directly
             //after the noun
             context = new Integer[]{index,Integer.valueOf(index+1)};
-        } else if(pos.hasCategory(LexicalCategory.Noun)){
+        } else if(pos != null && pos.hasCategory(LexicalCategory.Noun)){
             //a noun with an sentiment
             context = new Integer[]{index,index};
-        } else { //else return default
+        } else { //else (includes pos == null) return default
             context = new Integer[]{Integer.valueOf(index-nounContext),
                     Integer.valueOf(index+nounContext)};
         }
@@ -515,17 +515,17 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
 
     private boolean isPronoun(Token token, String language) {
         Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
-        return posAnnotation.value().getPosHierarchy().contains(Pos.Pronoun);
+        return posAnnotation == null ? false : posAnnotation.value().getPosHierarchy().contains(Pos.Pronoun);
     }
 
     private boolean isVerb(Token token, String language) {
         Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
-        return posAnnotation.value().hasCategory(LexicalCategory.Verb);
+        return posAnnotation == null ? false : posAnnotation.value().hasCategory(LexicalCategory.Verb);
     }
     
     private boolean isCoordinatingConjuction(Token token, String language) {
         Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
-        return posAnnotation.value().getPosHierarchy().contains(Pos.CoordinatingConjunction);
+        return posAnnotation == null ? false : posAnnotation.value().getPosHierarchy().contains(Pos.CoordinatingConjunction);
     }
 
     private boolean isSectionBorder(Token token, String language) {
