@@ -57,13 +57,15 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <dbpedia.default.index.url>http://dev.iks-project.eu/downloads/stanbol-indices/dbpedia_43k.solrindex.zip</dbpedia.default.index.url>
+    <dbpedia.default.index.url>http://dev.iks-project.eu/downloads/stanbol-indices/dbpedia_26k.solrindex.bz2</dbpedia.default.index.url>
+    <!-- this is the name of the old index. Used to ensure deletion  -->
+    <dbpedia.default.index.old>dbpedia_43k.solrindex.zip</dbpedia.default.index.old>
     <dbpedia.default.path>org/apache/stanbol/data/site/dbpedia/default</dbpedia.default.path>
     <dbpedia.default.index.path>${dbpedia.default.path}/index</dbpedia.default.index.path>
     <dbpedia.default.config.path>${dbpedia.default.path}/config</dbpedia.default.config.path>
     <downloadWarning>
 *                  
-* WARNING - this build downloads a DPBedia index for 43k entities
+* WARNING - this build downloads a DPBedia index for 26k entities
 * that is *not* licensed under the Apache License, but under the
 * Creative Commons Attribution-ShareAlike 3.0 Unported License.
 * See https://issues.apache.org/jira/browse/STANBOL-873.
@@ -124,6 +126,8 @@
               <target>
                 <property name="target.directory" value="${project.basedir}/downloads/resources/${dbpedia.default.index.path}" />
                 <property name="index.url" value="${dbpedia.default.index.url}" />
+                <!-- used to ensure deletion of the old default data index -->
+                <property name="index.name.old" value="${dbpedia.default.index.old}" />
                                 
                 <echo message="copy Solr Index " />
                 <echo message=" FROM ${index.url} " />
