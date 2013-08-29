@@ -16,30 +16,6 @@
  */
 package org.apache.stanbol.enhancer.web.topic.resource;
 
-import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
-
-import java.util.List;
-
-import javax.servlet.ServletContext;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriInfo;
-
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.commons.viewable.Viewable;
@@ -48,13 +24,23 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
-import org.apache.stanbol.enhancer.topic.ClassifierException;
-import org.apache.stanbol.enhancer.topic.TopicClassifier;
-import org.apache.stanbol.enhancer.topic.training.TrainingSet;
-import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
+import org.apache.stanbol.enhancer.topic.api.ClassifierException;
+import org.apache.stanbol.enhancer.topic.api.TopicClassifier;
+import org.apache.stanbol.enhancer.topic.api.training.TrainingSet;
+import org.apache.stanbol.enhancer.topic.api.training.TrainingSetException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+
+import javax.servlet.ServletContext;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.util.List;
+
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 
 /**

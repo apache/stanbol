@@ -76,10 +76,14 @@
     <module>entitylinking</module>
     <module>entityhublinking</module>
     <module>entitytagging</module>
+    <!-- fast EntityLinking using Lucene FST -->
+    <!-- TODO: not yet included in the default build -->
+    <!-- <module>lucenefstlinking</module> -->
     <!-- deprecated -->
     <module>keywordextraction</module>
 
 	  <!-- Categorization -->
+    <module>topic/api</module>
     <module>topic/engine</module>
     <module>topic/web</module>
 
@@ -105,7 +109,6 @@
     <module>geonames</module> <!-- http://geonames.org -->
     <module>opencalais</module> <!-- http://opencalais.com/ -->
     <module>zemanta</module> <!-- htt://zemanta.com -->
-  
   </modules>
 
   <build>

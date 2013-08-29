@@ -14,23 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.enhancer.topic.training;
+package org.apache.stanbol.enhancer.topic.api;
 
-import java.io.IOException;
 
 /**
- * Unexpected Error while performing read or write access to a topic classifier training set.
+ * Exception raised when trying to classify a document or updating the classifier statistical model.
  */
-public class TrainingSetException extends IOException {
+public class ClassifierException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+    public ClassifierException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    public TrainingSetException(String message) {
+    public ClassifierException(String message) {
         super(message);
     }
 
-    public TrainingSetException(String message, Throwable cause) {
-        super(message, cause);
+    public ClassifierException(Throwable cause) {
+        super(cause);
     }
+
+    private static final long serialVersionUID = 1L;
 
 }

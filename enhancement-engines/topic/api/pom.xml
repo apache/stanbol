@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>apache-stanbol-enhancement-engines</artifactId>
+        <version>0.10.1-SNAPSHOT</version>
+        <relativePath>../..</relativePath>
+    </parent>
+
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.enhancer.engine.topic.api</artifactId>
+    <version>0.10.1-SNAPSHOT</version>
+    <packaging>bundle</packaging>
+
+    <name>Apache Stanbol Enhancement Engine : Topic Classification (API)</name>
+    <description>
+        Implementation of an annotation engine that links the content item
+        to a set of possible categories from a dedicated Solr index using
+        MoreLikeThis queries.
+
+        The classification can be either applied to a complete document
+        (text in a given language) which is the default behavior or to a
+        specific portion of the text (using a TextAnnotation).
+    </description>
+
+    <inceptionYear>2010</inceptionYear>
+
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/topic/engine/
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/topic/engine/
+        </developerConnection>
+        <url>http://stanbol.apache.org/</url>
+    </scm>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.servicemix.tooling</groupId>
+                <artifactId>depends-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Import-Package>
+                            org.apache.stanbol.enhancer.topic.api,
+                            org.apache.stanbol.enhancer.topic.api.training,
+                            *
+                        </Import-Package>
+                        <Export-Package>
+                            org.apache.stanbol.enhancer.topic.api;version=${project.version},
+                            org.apache.stanbol.enhancer.topic.api.training;version=${project.version}
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!-- AL20 licensed files. See src/main/resources/README -->
+                        <exclude>src/main/resources/install-config/default-topic-model.solrindex.ref</exclude>
+                        <exclude>src/license/THIRD-PARTY.properties</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.clerezza</groupId>
+            <artifactId>rdf.core</artifactId>
+        </dependency>
+
+    </dependencies>
+    
+</project>

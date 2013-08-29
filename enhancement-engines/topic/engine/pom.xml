@@ -63,14 +63,10 @@
             <Import-Package>
               org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
               org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
-              org.apache.stanbol.enhancer.topic,
-              org.apache.stanbol.enhancer.topic.training,
+              org.apache.stanbol.enhancer.topic.api.*,
               *
             </Import-Package>
-            <Export-Package>
-              org.apache.stanbol.enhancer.topic;version=${project.version},
-              org.apache.stanbol.enhancer.topic.training;version=${project.version}
-            </Export-Package>
+            <Export-Package></Export-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.engine.topic
             </Private-Package>
@@ -303,7 +299,14 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
       <version>0.12.0-SNAPSHOT</version>
-    </dependency>    
+    </dependency>
+
+      <!-- API dependency -->
+      <dependency>
+          <groupId>org.apache.stanbol</groupId>
+          <artifactId>org.apache.stanbol.enhancer.engine.topic.api</artifactId>
+          <version>0.10.1-SNAPSHOT</version>
+      </dependency>
   </dependencies>
 
 </project>

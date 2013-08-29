@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.enhancer.topic.training;
+package org.apache.stanbol.enhancer.topic.api.training;
+
+import org.apache.stanbol.enhancer.topic.api.Batch;
 
 import java.util.Date;
 import java.util.List;
-
-import org.apache.stanbol.enhancer.topic.Batch;
 
 /**
  * Source of categorized text documents that can be used to build a the statistical model of a

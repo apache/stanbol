@@ -14,11 +14,11 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.enhancer.topic;
+package org.apache.stanbol.enhancer.topic.api;
+
+import org.apache.stanbol.enhancer.topic.api.training.TrainingSetException;
 
 import java.util.List;
-
-import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
 
 public interface BatchProcessor<T> {
 

@@ -14,19 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.enhancer.topic;
+package org.apache.stanbol.enhancer.topic.api;
+
+import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.stanbol.enhancer.topic.api.training.TrainingSet;
+import org.apache.stanbol.enhancer.topic.api.training.TrainingSetException;
+import org.osgi.framework.InvalidSyntaxException;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.enhancer.servicesapi.ChainException;
-import org.apache.stanbol.enhancer.servicesapi.EngineException;
-import org.apache.stanbol.enhancer.topic.training.TrainingSet;
-import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
-import org.osgi.framework.InvalidSyntaxException;
 
 /**
  * Service interface for suggesting hierarchical concepts from a specific scheme (a.k.a. taxonomy, thesaurus
@@ -175,7 +173,7 @@ public interface TopicClassifier {
      * Return the list of names of chains where the classifier is currently registered as an enhancement
      * engine.
      */
-    List<String> getChainNames() throws InvalidSyntaxException, ChainException;
+    List<String> getChainNames() throws InvalidSyntaxException;
 
     /**
      * Initialize the concept hierarchy of the model using the provided RDF model (e.g. a SKOS taxonomy).

@@ -84,19 +84,19 @@ import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
-import org.apache.stanbol.enhancer.topic.Batch;
-import org.apache.stanbol.enhancer.topic.BatchProcessor;
-import org.apache.stanbol.enhancer.topic.ClassificationReport;
-import org.apache.stanbol.enhancer.topic.ClassifierException;
 import org.apache.stanbol.enhancer.topic.ConfiguredSolrCoreTracker;
 import org.apache.stanbol.enhancer.topic.EmbeddedSolrHelper;
-import org.apache.stanbol.enhancer.topic.TopicClassifier;
-import org.apache.stanbol.enhancer.topic.TopicSuggestion;
 import org.apache.stanbol.enhancer.topic.UTCTimeStamper;
-import org.apache.stanbol.enhancer.topic.training.Example;
+import org.apache.stanbol.enhancer.topic.api.Batch;
+import org.apache.stanbol.enhancer.topic.api.BatchProcessor;
+import org.apache.stanbol.enhancer.topic.api.ClassificationReport;
+import org.apache.stanbol.enhancer.topic.api.ClassifierException;
+import org.apache.stanbol.enhancer.topic.api.TopicClassifier;
+import org.apache.stanbol.enhancer.topic.api.TopicSuggestion;
+import org.apache.stanbol.enhancer.topic.api.training.Example;
+import org.apache.stanbol.enhancer.topic.api.training.TrainingSet;
+import org.apache.stanbol.enhancer.topic.api.training.TrainingSetException;
 import org.apache.stanbol.enhancer.topic.training.SolrTrainingSet;
-import org.apache.stanbol.enhancer.topic.training.TrainingSet;
-import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
@@ -148,26 +148,27 @@ import org.slf4j.LoggerFactory;
         @Property(name = TopicClassificationEngine.SOLR_CORE_CONFIG,
             value = TopicClassificationEngine.DEFAULT_SOLR_CORE_CONFIG),
         @Property(name = TopicClassificationEngine.LANGUAGES),
-// those properties can still be set via a configuration file, but as most users
-// will not use them exclude those from the configuration form
-//        @Property(name = TopicClassificationEngine.SIMILARTITY_FIELD, value = TopicClassificationEngine.DEFAULT_SIMILARTITY_FIELD),
-//        @Property(name = TopicClassificationEngine.CONCEPT_URI_FIELD, value = TopicClassificationEngine.DEFAULT_CONCEPT_URI_FIELD),
-//        @Property(name = TopicClassificationEngine.PRIMARY_TOPIC_URI_FIELD, value = TopicClassificationEngine.DEFAULT_PRIMARY_TOPIC_URI_FIELD),
-//        @Property(name = TopicClassificationEngine.BROADER_FIELD, value = TopicClassificationEngine.DEFAULT_BROADER_FIELD),
-//        @Property(name = TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, value = TopicClassificationEngine.DEFAULT_MODEL_UPDATE_DATE_FIELD),
-//        @Property(name = TopicClassificationEngine.PRECISION_FIELD, value = TopicClassificationEngine.DEFAULT_PRECISION_FIELD),
-//        @Property(name = TopicClassificationEngine.RECALL_FIELD, value = TopicClassificationEngine.DEFAULT_RECALL_FIELD),
-//        @Property(name = TopicClassificationEngine.ENTRY_ID_FIELD, value = TopicClassificationEngine.DEFAULT_ENTRY_ID_FIELD),
-//        @Property(name = TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, value = TopicClassificationEngine.DEFAULT_MODEL_ENTRY_ID_FIELD),
-//        @Property(name = TopicClassificationEngine.ENTRY_TYPE_FIELD, value = TopicClassificationEngine.DEFAULT_ENTRY_TYPE_FIELD),
-//        @Property(name = TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, value = TopicClassificationEngine.DEFAULT_MODEL_EVALUATION_DATE_FIELD),
-//        @Property(name = TopicClassificationEngine.FALSE_NEGATIVES_FIELD, value = TopicClassificationEngine.DEFAULT_FALSE_NEGATIVES_FIELD),
-//        @Property(name = TopicClassificationEngine.FALSE_POSITIVES_FIELD, value = TopicClassificationEngine.DEFAULT_FALSE_POSITIVES_FIELD),
-//        @Property(name = TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, value = TopicClassificationEngine.DEFAULT_POSITIVE_SUPPORT_FIELD),
-//        @Property(name = TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, value = TopicClassificationEngine.DEFAULT_NEGATIVE_SUPPORT_FIELD),
-//        @Property(name = TopicClassificationEngine.ORDER, intValue = TopicClassificationEngine.DEFAULT_ENGINE_ORDER),
+     // those properties can still be set via a configuration file, but as most users
+     // will not use them exclude those from the configuration form
+//             @Property(name = TopicClassificationEngine.SIMILARTITY_FIELD, value = TopicClassificationEngine.DEFAULT_SIMILARTITY_FIELD),
+//             @Property(name = TopicClassificationEngine.CONCEPT_URI_FIELD, value = TopicClassificationEngine.DEFAULT_CONCEPT_URI_FIELD),
+//             @Property(name = TopicClassificationEngine.PRIMARY_TOPIC_URI_FIELD, value = TopicClassificationEngine.DEFAULT_PRIMARY_TOPIC_URI_FIELD),
+//             @Property(name = TopicClassificationEngine.BROADER_FIELD, value = TopicClassificationEngine.DEFAULT_BROADER_FIELD),
+//             @Property(name = TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, value = TopicClassificationEngine.DEFAULT_MODEL_UPDATE_DATE_FIELD),
+//             @Property(name = TopicClassificationEngine.PRECISION_FIELD, value = TopicClassificationEngine.DEFAULT_PRECISION_FIELD),
+//             @Property(name = TopicClassificationEngine.RECALL_FIELD, value = TopicClassificationEngine.DEFAULT_RECALL_FIELD),
+//             @Property(name = TopicClassificationEngine.ENTRY_ID_FIELD, value = TopicClassificationEngine.DEFAULT_ENTRY_ID_FIELD),
+//             @Property(name = TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, value = TopicClassificationEngine.DEFAULT_MODEL_ENTRY_ID_FIELD),
+//             @Property(name = TopicClassificationEngine.ENTRY_TYPE_FIELD, value = TopicClassificationEngine.DEFAULT_ENTRY_TYPE_FIELD),
+//             @Property(name = TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, value = TopicClassificationEngine.DEFAULT_MODEL_EVALUATION_DATE_FIELD),
+//             @Property(name = TopicClassificationEngine.FALSE_NEGATIVES_FIELD, value = TopicClassificationEngine.DEFAULT_FALSE_NEGATIVES_FIELD),
+//             @Property(name = TopicClassificationEngine.FALSE_POSITIVES_FIELD, value = TopicClassificationEngine.DEFAULT_FALSE_POSITIVES_FIELD),
+//             @Property(name = TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, value = TopicClassificationEngine.DEFAULT_POSITIVE_SUPPORT_FIELD),
+//             @Property(name = TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, value = TopicClassificationEngine.DEFAULT_NEGATIVE_SUPPORT_FIELD),
+//             @Property(name = TopicClassificationEngine.ORDER, intValue = TopicClassificationEngine.DEFAULT_ENGINE_ORDER),
         @Property(name = TopicClassificationEngine.TRAINING_SET_ID),
-        @Property(name = Constants.SERVICE_RANKING, intValue = 0)})
+        @Property(name = Constants.SERVICE_RANKING, intValue = 0)
+})
 public class TopicClassificationEngine extends ConfiguredSolrCoreTracker implements EnhancementEngine,
         ServiceProperties, TopicClassifier {
 
@@ -1488,15 +1489,19 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     @Override
-    public List<String> getChainNames() throws InvalidSyntaxException, ChainException {
+    public List<String> getChainNames() throws InvalidSyntaxException {
         List<String> chainNames = new ArrayList<String>();
         BundleContext bundleContext = context.getBundleContext();
         ServiceReference[] references = bundleContext.getServiceReferences(Chain.class.getName(), null);
         if (references != null) {
             for (ServiceReference ref : references) {
                 Chain chain = (Chain) bundleContext.getService(ref);
-                if (chain.getEngines().contains(getName())) {
-                    chainNames.add(chain.getName());
+                try {
+                    if (chain.getEngines().contains(getName())) {
+                        chainNames.add(chain.getName());
+                    }
+                } catch (ChainException e) {
+                    // This chain is currently not active ... ignore
                 }
             }
         }

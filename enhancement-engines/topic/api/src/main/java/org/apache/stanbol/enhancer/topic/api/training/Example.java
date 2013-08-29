@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.enhancer.topic.training;
-
-import java.util.Collection;
+package org.apache.stanbol.enhancer.topic.api.training;
 
 import org.apache.commons.lang.StringUtils;
+
+import java.util.Collection;
 
 /**
  * Data transfer object to pack the items of a multi-label text classification training set.
