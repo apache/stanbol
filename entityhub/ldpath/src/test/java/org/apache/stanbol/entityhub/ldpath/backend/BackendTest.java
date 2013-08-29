@@ -60,7 +60,7 @@ public class BackendTest extends LDPathTestBase {
         Map<String,Collection<?>> expected = new HashMap<String,Collection<?>>();
         expected.put("title_en", new HashSet<String>(Arrays.asList("Paris")));
         expected.put("title", new HashSet<String>(
-                Arrays.asList("Paris","Parijs","Parigi","Pariisi","巴黎","Париж")));
+                Arrays.asList("Paris","París","Parigi","巴黎","باريس")));
         // NOTE: LDPath uses String to represent anyUri
         expected.put("type", new HashSet<String>(Arrays.asList(
             "http://www.w3.org/2002/07/owl#Thing",
@@ -78,9 +78,10 @@ public class BackendTest extends LDPathTestBase {
         allValues.addAll(Arrays.asList(
             "http://dbpedia.org/resource/Category:Capitals_in_Europe",
             "http://dbpedia.org/resource/Category:Host_cities_of_the_Summer_Olympic_Games",
-            "2.350833","0.81884754","2193031"));
+            "48.8567","2.3508",
+            "http://upload.wikimedia.org/wikipedia/commons/6/6e/Paris_-_Eiffelturm_und_Marsfeld2.jpg"));
         expected.put("all", allValues);
-        expected.put("lat", Collections.emptySet());
+        expected.put("lat", Collections.singleton(48.8567));
         EXPECTED_RESULTS_PARIS = Collections.unmodifiableMap(expected);
     }
     
@@ -89,7 +90,7 @@ public class BackendTest extends LDPathTestBase {
     static {
         StringBuilder builder = new StringBuilder();
         //TODO:write LDPath test statement (or load it from test resources
-        builder.append("name = rdfs:label :: xsd:string;");
+        builder.append("name = skos:prefLabel :: xsd:string;");
         builder.append("parent = skos:broader :: xsd:anyURI;");
         builder.append("childs = ^skos:broader :: xsd:anyURI;");
         builder.append("members = ^<http://purl.org/dc/terms/subject> :: xsd:anyURI;");
@@ -104,32 +105,49 @@ public class BackendTest extends LDPathTestBase {
                 ));
         expected.put("parent", new HashSet<String>(Arrays.asList(
             "http://dbpedia.org/resource/Category:Harvard_University_people",
-            "http://dbpedia.org/resource/Category:Alumni_by_university_or_college_in_Massachusetts",
-            "http://dbpedia.org/resource/Category:Ivy_League_alumni")
+            "http://dbpedia.org/resource/Category:Alumni_by_university_or_college_in_Massachusetts")
             ));
         expected.put("childs", new HashSet<String>(Arrays.asList(
-            "http://dbpedia.org/resource/Category:John_F._Kennedy_School_of_Government_alumni",
             "http://dbpedia.org/resource/Category:Harvard_Law_School_alumni",
-            "http://dbpedia.org/resource/Category:Harvard_Medical_School_alumni",
             "http://dbpedia.org/resource/Category:Harvard_Business_School_alumni")
             ));
         expected.put("members", new HashSet<String>(Arrays.asList(
-            "http://dbpedia.org/resource/Edward_Said",
-            "http://dbpedia.org/resource/Cole_Porter", 
-            "http://dbpedia.org/resource/Theodore_Roosevelt",
-            "http://dbpedia.org/resource/Al_Gore",
-            "http://dbpedia.org/resource/T._S._Eliot",
-            "http://dbpedia.org/resource/Henry_Kissinger",
-            "http://dbpedia.org/resource/Robert_F._Kennedy",
-            "http://dbpedia.org/resource/Benjamin_Netanyahu",
-            "http://dbpedia.org/resource/Natalie_Portman",
+            "http://dbpedia.org/resource/Jacques_Derrida",
+            "http://dbpedia.org/resource/Pete_Seeger",
             "http://dbpedia.org/resource/John_F._Kennedy",
-            "http://dbpedia.org/resource/Michelle_Obama",
+            "http://dbpedia.org/resource/William_S._Burroughs",
+            "http://dbpedia.org/resource/Norman_Mailer",
+            "http://dbpedia.org/resource/John_Quincy_Adams",
+            "http://dbpedia.org/resource/John_Lithgow",
+            "http://dbpedia.org/resource/Ban_Ki-moon",
+            "http://dbpedia.org/resource/W._E._B._Du_Bois",
+            "http://dbpedia.org/resource/John_Adams",
             "http://dbpedia.org/resource/Jacques_Chirac",
-            "http://dbpedia.org/resource/Pierre_Trudeau",
+            "http://dbpedia.org/resource/William_Lyon_Mackenzie_King",
+            "http://dbpedia.org/resource/Chuck_Schumer",
+            "http://dbpedia.org/resource/Carl_H._Eigenmann",
             "http://dbpedia.org/resource/Jack_Lemmon",
-            "http://dbpedia.org/resource/Franklin_D._Roosevelt",
-            "http://dbpedia.org/resource/John_Adams") // and manny more
+            "http://dbpedia.org/resource/Michael_Dukakis",
+            "http://dbpedia.org/resource/William_Rehnquist",
+            "http://dbpedia.org/resource/Robert_Frost",
+            "http://dbpedia.org/resource/T._S._Eliot",
+            "http://dbpedia.org/resource/Cole_Porter",
+            "http://dbpedia.org/resource/Henry_Kissinger",
+            "http://dbpedia.org/resource/Theodore_Roosevelt",
+            "http://dbpedia.org/resource/Benazir_Bhutto",
+            "http://dbpedia.org/resource/Pierre_Trudeau",
+            "http://dbpedia.org/resource/Henry_David_Thoreau",
+            "http://dbpedia.org/resource/Aga_Khan_IV",
+            "http://dbpedia.org/resource/Leonard_Bernstein",
+            "http://dbpedia.org/resource/William_Randolph_Hearst",
+            "http://dbpedia.org/resource/Natalie_Portman",
+            "http://dbpedia.org/resource/Al_Gore",
+            "http://dbpedia.org/resource/Al_Jean",
+            "http://dbpedia.org/resource/William_Healey_Dall",
+            "http://dbpedia.org/resource/Charles_Sanders_Peirce",
+            "http://dbpedia.org/resource/Conan_O'Brien",
+            "http://dbpedia.org/resource/Yo-Yo_Ma",
+            "http://dbpedia.org/resource/Robert_F._Kennedy")
             ));
         EXPECTED_HARVARD_ALUMNI = Collections.unmodifiableMap(expected);
     }    
