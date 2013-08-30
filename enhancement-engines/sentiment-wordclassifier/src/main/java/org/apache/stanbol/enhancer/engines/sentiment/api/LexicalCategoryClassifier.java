@@ -16,6 +16,8 @@
 
 package org.apache.stanbol.enhancer.engines.sentiment.api;
 
+import java.util.Set;
+
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 
@@ -31,16 +33,11 @@ import org.apache.stanbol.enhancer.nlp.pos.PosTag;
  */
 public abstract class LexicalCategoryClassifier implements SentimentClassifier {
 
-    public abstract double classifyWord(String word);
+    public abstract double classifyWord(LexicalCategory cat, String word);
 
     @Override
-    public boolean isAdjective(PosTag posTag) {
-        return posTag.hasCategory(LexicalCategory.Adjective);
-    }
-
-    @Override
-    public boolean isNoun(PosTag posTag) {
-        return posTag.hasCategory(LexicalCategory.Noun);
+    public Set<LexicalCategory> getCategories(PosTag posTag) {
+        return posTag.getCategories();
     }
 
 }

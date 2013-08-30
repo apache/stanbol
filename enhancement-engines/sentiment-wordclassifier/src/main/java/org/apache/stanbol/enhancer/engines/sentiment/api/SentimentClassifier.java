@@ -16,6 +16,9 @@
 
 package org.apache.stanbol.enhancer.engines.sentiment.api;
 
+import java.util.Set;
+
+import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.osgi.framework.BundleContext;
 
@@ -27,7 +30,10 @@ import org.osgi.framework.BundleContext;
  * can be used with this engine. Implementations need to be 
  * {@link BundleContext#registerService(String, Object, java.util.Dictionary)
  * registered as OSGI service}.
+ * @see LexicalCategoryClassifier
+ * 
  * @author Sebastian Schaffert
+ * @author Rupert Westenthaler
  */
 public interface SentimentClassifier {
 
@@ -35,29 +41,26 @@ public interface SentimentClassifier {
      * Given the word passed as argument, return a value between -1 and 1 indicating its sentiment value from
      * very negative to very positive. Unknown words should return the value 0.
      *
-     * @param word
+     * @param cat the lexical category of the word (see 
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-1151">STANBOL-1151</a>)
+     * @param word the word
      * @return
      */
-    public double classifyWord(String word);
+    public double classifyWord(LexicalCategory cat, String word);
 
 
     /**
-     * Helper method. Return true if the given POS tag indicates an adjective in the language implemented by
-     * this classifier.
-     *
-     * @param posTag
-     * @return
+     * Getter for the LexicalCategories for the parsed {@link PosTag}. Used
+     * to lookup the lexical categories for the 
+     * {@link #classifyWord(LexicalCategory, String)} lookups.<p>
+     * Simple implementations might return {@link PosTag#getCategories()}. But
+     * as some {@link PosTag} instances might only define the literal
+     * {@link PosTag#getTag()} value this method might also implement its own
+     * mappings.
+     * @param posTag the posTag
+     * @return the categories 
      */
-    public boolean isAdjective(PosTag posTag);
-
-    /**
-     * Helper method. Return true if the given POS tag indicates a noun in the language implemented by this
-     * classifier.
-     *
-     * @param posTag
-     * @return
-     */
-    public boolean isNoun(PosTag posTag);
+    public Set<LexicalCategory> getCategories(PosTag posTag);
     
     /**
      * The language of this WordClassifier

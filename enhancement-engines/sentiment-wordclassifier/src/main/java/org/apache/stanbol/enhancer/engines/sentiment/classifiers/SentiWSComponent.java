@@ -20,7 +20,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -39,17 +41,19 @@ import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileListener
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileTracker;
 import org.apache.stanbol.enhancer.engines.sentiment.api.LexicalCategoryClassifier;
 import org.apache.stanbol.enhancer.engines.sentiment.api.SentimentClassifier;
+import org.apache.stanbol.enhancer.engines.sentiment.util.WordSentimentDictionary;
+import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 /**
  * A German word classifier based on SentiWS. Reads the SentiWS positive and negative word lists and parses them
  * into an appropriate hash table, so lookups should be extremely fast.
  * <p/>
  * @author Sebastian Schaffert
+ * @author Rupert Westenthaler
  */
 @Component(immediate=true)
 public class SentiWSComponent {
@@ -177,15 +181,13 @@ public class SentiWSComponent {
      */
     public static class SentiWsClassifierDE extends LexicalCategoryClassifier implements SentimentClassifier {
     
-        private ReadWriteLock lock = new ReentrantReadWriteLock();
-        private Map<String,Double> wordMap = new TreeMap<String,Double>();
+        private WordSentimentDictionary dict = new WordSentimentDictionary(Locale.GERMAN);
 
         protected SentiWsClassifierDE(){}
         
         protected void parseSentiWS(InputStream is) throws IOException {
             log.debug("parsing SentiWS word lists ...");
             BufferedReader in = new BufferedReader(new InputStreamReader(is));
-            lock.writeLock().lock();
             try {
                 for(String line = in.readLine(); line != null; line = in.readLine()) {
                     // input file will have a space- or tab-separated list per line:
@@ -195,37 +197,37 @@ public class SentiWSComponent {
                     String[] components = line.split("\\s");
 
                     // parse the weight
-                    Double weight = Double.parseDouble(components[1]);
+                    Double weight = Double.valueOf(components[1]);
 
                     // get the main word
-                    String[] mainWord = components[0].split("\\|");
-                    wordMap.put(mainWord[0],weight);
+                    String[] wordPart = components[0].split("\\|");
+                    String mainWord = wordPart[0];
+                    LexicalCategory cat = getLexicalCategory(wordPart[1]);
+                    dict.updateSentiment(cat, mainWord, weight);
 
                     // get the remaining words (deflections)
                     if(components.length > 2) {
                         for(String word : components[2].split(",")) {
-                            String lcWord = word.toLowerCase(Locale.GERMAN);
-                            Double current = wordMap.put(lcWord,weight);
-                            if(current != null){
-                                log.warn("Multiple sentiments [{},{}] for word {}",
-                                    new Object[]{current,weight,lcWord});
-                            }
+                            dict.updateSentiment(cat, word, weight);
                         }
                     }
                 }
             } finally {
-                lock.writeLock().unlock();
                 IOUtils.closeQuietly(in);
             }
         }
     
-    
-        public int getWordCount() {
-            lock.readLock().lock();
-            try {
-                return wordMap.size();
-            } finally {
-                lock.readLock().unlock();
+        private LexicalCategory getLexicalCategory(String posTag){
+            char c = posTag.charAt(0);
+            switch (c) {
+                case 'N':
+                    return LexicalCategory.Noun;
+                case 'V':
+                    return LexicalCategory.Verb;
+                case 'A':
+                    return LexicalCategory.Adjective;
+                default: //TODO: change this to a warning and return NULL
+                    throw new IllegalStateException("Unsupported posTag '"+posTag+"'!");
             }
         }
         
@@ -242,26 +244,16 @@ public class SentiWSComponent {
          * @return
          */
         @Override
-        public double classifyWord(String word) {
-            lock.readLock().lock();
-            try {
-                Double sentiment = wordMap.get(word.toLowerCase(Locale.GERMAN));
-                return sentiment != null ? sentiment.doubleValue() : 0.0;
-            } finally {
-                lock.readLock().unlock();  
-            }
+        public double classifyWord(LexicalCategory cat, String word) {
+            Double sentiment = dict.getSentiment(cat, word);
+            return sentiment != null ? sentiment.doubleValue() : 0.0;
         }
         /**
          * Internally used to free up resources when the service is
          * unregistered
          */
         protected void close(){
-            lock.writeLock().lock();
-            try {
-                wordMap.clear();
-            } finally {
-                lock.writeLock().unlock();
-            }
+            dict.clear();
         }
     }
 

@@ -25,6 +25,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -264,14 +265,26 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
         Iterator<Token> tokens = analysedText.getTokens();
         while(tokens.hasNext()){
             Token token = tokens.next();
-            boolean process = !adjectivesOnly;
-            if(!process){ //check POS types
+            Set<LexicalCategory> cats = null;
+            boolean process = false;
+            if(!adjectivesOnly){
+                process = true;
+                Value<PosTag> posTag = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
+                if(posTag != null && posTag.probability() == Value.UNKNOWN_PROBABILITY
+                        || posTag.probability() >= (minPOSConfidence/2.0)){
+                    cats = classifier.getCategories(posTag.value());
+                } else { //no POS tags or probability to low
+                    cats = Collections.emptySet();
+                }
+            } else { //check PosTags if we need to lookup this word
                 Iterator<Value<PosTag>> posTags = token.getAnnotations(NlpAnnotations.POS_ANNOTATION).iterator();
                 boolean ignore = false;
                 while(!ignore && !process && posTags.hasNext()) {
                     Value<PosTag> value = posTags.next();
                     PosTag tag = value.value();
-                    boolean state = classifier.isAdjective(tag) || classifier.isNoun(tag);
+                    cats = classifier.getCategories(tag);
+                    boolean state = cats.contains(LexicalCategory.Adjective) 
+                            || cats.contains(LexicalCategory.Noun);
                     ignore = !state && (value.probability() == Value.UNKNOWN_PROBABILITY ||
                             value.probability() >= minPOSConfidence);
                     process = state && (value.probability() == Value.UNKNOWN_PROBABILITY ||
@@ -279,11 +292,28 @@ public class SentimentEngine  extends AbstractEnhancementEngine<RuntimeException
                 }
             } //else process all tokens ... no POS tag checking needed
             if(process){
-                double sentiment = classifier.classifyWord(token.getSpan());
+                String word = token.getSpan();
+                double sentiment = 0.0;
+                if(cats.isEmpty()){
+                    sentiment = classifier.classifyWord(null, word);
+                } else { //in case of multiple Lexical Cats
+                    //we build the average over NOT NULL sentiments for the word
+                    int catSentNum = 0;
+                    for(LexicalCategory cat : cats){
+                        double catSent = classifier.classifyWord(cat, word);
+                        if(catSent != 0.0){
+                            catSentNum++;
+                            sentiment = sentiment + catSent;
+                        }
+                    }
+                    if(catSentNum > 0){
+                        sentiment = sentiment / (double) catSentNum;
+                    }
+                }
                 if(sentiment != 0.0){
                     token.addAnnotation(SENTIMENT_ANNOTATION, new Value<Double>(sentiment));
                 } //else do not set sentiments with 0.0
-            }
+            } // else do not process
         }
 //        } finally {
 //            ci.getLock().writeLock().unlock();

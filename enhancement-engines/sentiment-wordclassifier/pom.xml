@@ -67,10 +67,12 @@
               org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
               org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
               org.apache.stanbol.enhancer.engines.sentiment.api; provide:=true,
+              org.apache.stanbol.enhancer.engines.sentiment.util; provide:=true,
               *
             </Import-Package>
             <Export-Package>
-              org.apache.stanbol.enhancer.engines.sentiment.api;version=${project.version}
+              org.apache.stanbol.enhancer.engines.sentiment.api;version=${project.version},
+              org.apache.stanbol.enhancer.engines.sentiment.util; version=${project.version}
             </Export-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.engines.sentiment.classifiers;version=${project.version},
