@@ -81,13 +81,9 @@ public class ChainsRootResource extends BaseStanbolResource {
     @Reference
     private Serializer serializer;
     
-    private Map<String, Entry<ServiceReference,Chain>> chains;
-    private Chain defaultChain;
     
     @Activate
     public void activate(ComponentContext ctx) {
-        defaultChain = chainManager.getDefault();
-        chains = buildChainsMap(chainManager);
     }
     
     
@@ -117,7 +113,7 @@ public class ChainsRootResource extends BaseStanbolResource {
     public Response getEngines(@Context HttpHeaders headers){
         String rootUrl = uriInfo.getBaseUriBuilder().path(getRootUrl()).build().toString();
         MGraph graph = new SimpleMGraph();
-        addActiveChains(chains.values(),defaultChain,graph,rootUrl);
+        addActiveChains(buildChainsMap(chainManager).values(),chainManager.getDefault(),graph,rootUrl);
         ResponseBuilder res = Response.ok(graph);
         //addCORSOrigin(servletContext,res, headers);
         return res.build();
@@ -126,7 +122,7 @@ public class ChainsRootResource extends BaseStanbolResource {
 
     public Collection<Chain> getChains(){
         List<Chain> chains = new ArrayList<Chain>();
-        for(Entry<ServiceReference,Chain> entry : this.chains.values()){
+        for(Entry<ServiceReference,Chain> entry : buildChainsMap(chainManager).values()){
             chains.add(entry.getValue());
         }
         Collections.sort(chains, new Comparator<Chain>() {
@@ -138,7 +134,7 @@ public class ChainsRootResource extends BaseStanbolResource {
         return chains;
     }
     public String getServicePid(String name){
-        Entry<ServiceReference,Chain> entry = chains.get(name);
+        Entry<ServiceReference,Chain> entry = buildChainsMap(chainManager).get(name);
         if(entry != null){
             return (String)entry.getKey().getProperty(Constants.SERVICE_PID);
         } else {
@@ -146,7 +142,7 @@ public class ChainsRootResource extends BaseStanbolResource {
         }
     }
     public Integer getServiceRanking(String name){
-        Entry<ServiceReference,Chain> entry = chains.get(name);
+        Entry<ServiceReference,Chain> entry = buildChainsMap(chainManager).get(name);
         Integer ranking = null;
         if(entry != null){
             ranking = (Integer)entry.getKey().getProperty(Constants.SERVICE_RANKING);
@@ -158,7 +154,7 @@ public class ChainsRootResource extends BaseStanbolResource {
         }
     }
     public Long getServiceId(String name){
-        Entry<ServiceReference,Chain> entry = chains.get(name);
+        Entry<ServiceReference,Chain> entry = buildChainsMap(chainManager).get(name);
         if(entry != null){
             return (Long)entry.getKey().getProperty(Constants.SERVICE_ID);
         } else {
@@ -166,10 +162,10 @@ public class ChainsRootResource extends BaseStanbolResource {
         }
     }
     public Chain getDefaultChain(){
-        return defaultChain;
+        return chainManager.getDefault();
     }
     public boolean isDefault(String name){
-        return defaultChain.getName().equals(name);
+        return chainManager.getDefault().getName().equals(name);
     }
     
     
