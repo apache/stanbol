@@ -40,7 +40,11 @@ Used Solr indexes need also confirm to the requirements of the [SolrTextTagger](
 The SolrTextTagger README provides an example for a Field Analyzer configuration that does work. To make things easier this engine includes this [XML file](fst_field_types.xml) that includes a schema.xml fragment with FST tagging compatible configurations for most languages supported by Solr.
 
 
-### Field Name Encoding 
+### Solr Index Layout Configuration
+
+This part of the configuration is used to specify the layout if the used Solr index. It specifies how Entity information are stored in the Solr index.
+
+#### Field Name Encoding 
 
 The Field Name Encoding configuration `enhancer.engines.linking.solrfst.fieldEncoding` specifies how Solr fields for multiple languages are encoded. As an example a Vocabulary with labels in multiple languages might use "en_label" for the English language labels and "de_label" for the German language labels. In this case users should set this property to `UnderscorePrefix` and simple use "label" when configuring the FST field name. 
 
@@ -60,7 +64,7 @@ This is the full list of supported Field encodings:
 * AtSuffix: {field}-{lang} (e.g. "name@en")
 * None: In this case no prefix/suffix rewriting of configured `field` and `store` values is done. This means that the FST Configuration MUST define the exact field names in the Solr index for every configured language.
 
-### FST Tagging Configuration
+#### FST Tagging Configuration
 
 The FST Tagging Configuration `enhancer.engines.linking.solrfst.fstconfig` defines several things:
 
@@ -95,13 +99,19 @@ This would set the index field to "fise:fstTagging", the stored field to "rdfs:l
 
     *;field=fise:fstTagging;stored=rdfs:label;generate=true
 
-__Runtime FST generation Thread Pool__
+#### Additional Entity Information
+
+* __Entity Type Field__ _(enhancer.engines.linking.solrfst.typeField)_: This field specifies the Solr field name holding entity type information of Entities. In case 'SolrYard' is used as _Field Name Encoding_ one can use the the QNAME of the property (typically 'rdf:type'). Otherwise the value must be the exact field name holding the type information. Values are expected to be URIs.
+* __Entity Ranking Field__ _(enhancer.engines.linking.solrfst.rankingField)_: This is an __ADDITIONAL__ property used to configure the name of the Field storing the floating point value of the ranking for the Entity. Entities with higher ranking will get a slightly better `fise:confidence` value if labels of several Entities do match the text.
+
+### Runtime FST generation Thread Pool
 
 The `enhancer.engines.linking.solrfst.fstThreadPoolSize` parameter can be used to configure the size of the thread pool used for the runtime generation of FST models. The default size of the thread pool is `1`. Threads do use the lowest possible priority to reduce the performance impact on enhancements as much as possible.
 
 When configuring the size of the thread pool users need to be aware that the generation of FST models does need a lot more memory as the resulting model. So having to manny parallel threads might require to increase the memory settings of the JVM. On typical machines FST creation threads will consume 100% CPU. That means that the number of threads should be configured to the number of CPU cores that can be spared for FST generation.
 
 _NOTE_ that the `generate` parameter of the FST Tagging Configuration needs to be set to `true` to enable runtime generation.
+
 
 ### Entity Cache Configuration
 
@@ -120,11 +130,9 @@ For now this engine uses the exact same [Text Processing configuration](http://s
 
 The Entity Linking Configuration of this Engine is very similar as the one for the [EntityLinking engine](http://stanbol.apache.org/docs/trunk/components/enhancer/engines/entitylinking#entity-linker-configuration). The configuration does use the exact same keys, but it does not support all properties and some do have a slightly different meaning. In the following only the differences are described. For the all other things please refer to the linked section of the documentation of the EntityLinking engine.
 
-
-* <s>__Label Field__ _(enhancer.engines.linking.labelField)_</s>: The label field is __IGNORED__ as the field holding the labels is anyway provided by the FST Tagging configuration. That means that the field defined by the _stored_ parameter is used. If the _stored_ parameter is not present it fallbacks to the _field_ parameter.
-* __Type Field__ _(enhancer.engines.linking.typeField)_: This must be the name of the Solr field holding the Entity type information. In case 'SolrYard' is used as _Field Name Encoding_ one can use the the QNAME of the property (typically 'rdf:type')
+* <s>__Label Field__ _(enhancer.engines.linking.labelField)_</s>: The label field is __IGNORED__ as the field holding the labels is anyway provided by the [FST Tagging Configuration]. That means that the field defined by the _stored_ parameter is used. If the _stored_ parameter is not present it fallbacks to the _field_ parameter.
+* <s>__Type Field__ _(enhancer.engines.linking.typeField)_</s>: This configuration gets __IGNORED__ in favor of the `enhancer.engines.linking.solrfst.typeField`. See the [Additional Entity Information] section for details. 
 * __Redirect Field__ _(enhancer.engines.linking.redirectField)_</s>: Note implemented. __NOTE__ This might not be possible to efficiently implement. When those redirects need already be considered when building the FST models.
-* __Entity Ranking Field__ _(enhancer.engines.linking.solrfst.rankingField)_: This is an __ADDITIONAL__ property used to configure the name of the Field storing the floating point value of the ranking for the Entity. Entities with higher ranking will get a slightly better `fise:confidence` value if labels of several Entities do match the text.
 * <s>__Use EntityRankings (enhancer.engines.linking.useEntityRankings)_</s>: This configuration gets __IGNORED__. EntityRanking based sorting is enabled as soon as the _Entity Ranking Field_ is configured.
 * <s>__Lemma based Matching__ _(enhancer.engines.linking.lemmaMatching)_</s>: Not Yet implemented
 * <s>__Min Match Score__ _(enhancer.engines.linking.minMatchScore)_</s>: Not Yet Implemented. Currently all linked Entities are added regardless of their score. However the way the Tagging is done makes it very unlikely to have suggestions with `fise:confidence` values less as 0.5.

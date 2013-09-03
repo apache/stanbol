@@ -143,26 +143,24 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
             name="AtSuffix")
         },value="SolrYard"),
     @Property(name=FstLinkingEngineComponent.FST_CONFIG, cardinality=Integer.MAX_VALUE),
+    @Property(name=FstLinkingEngineComponent.SOLR_TYPE_FIELD, value="rdf:type"),
+    @Property(name=FstLinkingEngineComponent.SOLR_RANKING_FIELD, value="entityhub:entityRank"),
+//  @Property(name=REDIRECT_FIELD,value="rdfs:seeAlso"),
+//  @Property(name=REDIRECT_MODE,options={
+//      @PropertyOption(
+//          value='%'+REDIRECT_MODE+".option.ignore",
+//          name="IGNORE"),
+//      @PropertyOption(
+//          value='%'+REDIRECT_MODE+".option.addValues",
+//          name="ADD_VALUES"),
+//      @PropertyOption(
+//              value='%'+REDIRECT_MODE+".option.follow",
+//              name="FOLLOW")
+//      },value="IGNORE"),
     @Property(name=FstLinkingEngineComponent.FST_THREAD_POOL_SIZE,
         intValue=FstLinkingEngineComponent.DEFAULT_FST_THREAD_POOL_SIZE),
     @Property(name=FstLinkingEngineComponent.ENTITY_CACHE_SIZE, 
         intValue=FstLinkingEngineComponent.DEFAULT_ENTITY_CACHE_SIZE),
-    @Property(name=FstLinkingEngineComponent.SOLR_TYPE_FIELD, value="rdf:type"),
-    @Property(name=FstLinkingEngineComponent.SOLR_RANKING_FIELD, value="entityhub:entityRank"),
-//    @Property(name=REDIRECT_FIELD,value="rdfs:seeAlso"),
-//    @Property(name=REDIRECT_MODE,options={
-//        @PropertyOption(
-//            value='%'+REDIRECT_MODE+".option.ignore",
-//            name="IGNORE"),
-//        @PropertyOption(
-//            value='%'+REDIRECT_MODE+".option.addValues",
-//            name="ADD_VALUES"),
-//        @PropertyOption(
-//                value='%'+REDIRECT_MODE+".option.follow",
-//                name="FOLLOW")
-//        },value="IGNORE"),
-    @Property(name=TYPE_FIELD,value="rdf:type"),
-    @Property(name=ENTITY_TYPES,cardinality=Integer.MAX_VALUE),
     @Property(name=SUGGESTIONS, intValue=DEFAULT_SUGGESTIONS),
     @Property(name=CASE_SENSITIVE,boolValue=DEFAULT_CASE_SENSITIVE_MATCHING_STATE),
     @Property(name=PROCESS_ONLY_PROPER_NOUNS_STATE, boolValue=DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE),
@@ -172,6 +170,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
                "es;lc=Noun", //the OpenNLP POS tagger for Spanish does not support ProperNouns
                "nl;lc=Noun"}), //same for Dutch 
     @Property(name=DEFAULT_MATCHING_LANGUAGE,value=""),
+    @Property(name=ENTITY_TYPES,cardinality=Integer.MAX_VALUE),
     @Property(name=TYPE_MAPPINGS,cardinality=Integer.MAX_VALUE, value={
         "dbp-ont:Organisation; dbp-ont:Newspaper; schema:Organization > dbp-ont:Organisation",
         "dbp-ont:Person; foaf:Person; schema:Person > dbp-ont:Person",
@@ -709,8 +708,14 @@ public class FstLinkingEngineComponent {
         log.info(" - default config");
         Map<String,String> defaultParams = fstConfig.getDefaultParameters();
         String fstName = defaultParams.get(PARAM_FST);
-        final String indexField = defaultParams.get(PARAM_FIELD);
-        final String storeField = defaultParams.get(PARAM_STORE_FIELD);
+        String indexField = defaultParams.get(PARAM_FIELD);
+        if(indexField == null){ //apply the defaults if null
+            indexField = DEFAULT_FIELD;
+        }
+        String storeField = defaultParams.get(PARAM_STORE_FIELD);
+        if(storeField == null){ //apply the defaults if null
+            storeField = indexField;
+        }
         if(fstName == null){ //use default
             fstName = getDefaultFstFileName(indexField);
         }
