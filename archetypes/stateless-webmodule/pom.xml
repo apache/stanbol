@@ -53,6 +53,23 @@
         </plugin>
       </plugins>
     </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 License -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+            
+            <exclude>src/test/resources/projects/basic/goal.txt</exclude>
+            <exclude>src/main/resources/archetype-resources/src/main/resources/META-INF/graphs/recipes/Enhancements.ttl</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
+
+    </plugins>
   </build>
 
 </project>
