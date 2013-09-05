@@ -1,0 +1,487 @@
+#  Licensed to the Apache Software Foundation (ASF) under one or more
+#  contributor license agreements.  See the NOTICE file distributed with
+#  this work for additional information regarding copyright ownership.
+#  The ASF licenses this file to You under the Apache License, Version 2.0
+#  (the "License"); you may not use this file except in compliance with
+#  the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+  
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix : <http://stanbol.apache.org/ontology/meta/ontonet#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://stanbol.apache.org/ontology/meta/ontonet> .
+
+<http://stanbol.apache.org/ontology/meta/ontonet> rdf:type owl:Ontology ;
+                                                  
+                                                  owl:versionIRI <http://svn.apache.org/repos/asf/incubator/stanbol/trunk/ontologymanager/ontonet/src/main/resources/ontologies/meta.owl> .
+
+
+#################################################################
+#
+#    Annotation properties
+#
+#################################################################
+
+
+
+
+#################################################################
+#
+#    Datatypes
+#
+#################################################################
+
+
+
+
+#################################################################
+#
+#    Object Properties
+#
+#################################################################
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#hasAppended
+
+:hasAppended rdf:type owl:ObjectProperty ;
+             
+             rdfs:label "hasAppended"@en ;
+             
+             rdfs:range :Scope ;
+             
+             rdfs:domain :Session ;
+             
+             owl:inverseOf :isAppendedTo .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#hasCoreSpace
+
+:hasCoreSpace rdf:type owl:FunctionalProperty ,
+                       owl:InverseFunctionalProperty ,
+                       owl:ObjectProperty ;
+              
+              rdfs:label "hasCoreSpace"@en ;
+              
+              rdfs:domain :Scope ;
+              
+              rdfs:range :Space ;
+              
+              owl:propertyDisjointWith :hasCustomSpace ;
+              
+              rdfs:subPropertyOf :hasSpace ;
+              
+              owl:inverseOf :isCoreSpaceOf .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#hasCustomSpace
+
+:hasCustomSpace rdf:type owl:FunctionalProperty ,
+                         owl:InverseFunctionalProperty ,
+                         owl:ObjectProperty ;
+                
+                rdfs:label "hasCustomSpace"@en ;
+                
+                rdfs:domain :Scope ;
+                
+                rdfs:range :Space ;
+                
+                rdfs:subPropertyOf :hasSpace ;
+                
+                owl:inverseOf :isCustomSpaceOf .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#hasSpace
+
+:hasSpace rdf:type owl:InverseFunctionalProperty ,
+                   owl:ObjectProperty ;
+          
+          rdfs:label "hasSpace"@en ;
+          
+          rdfs:domain :Scope ;
+          
+          rdfs:range :Space .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#hasStatus
+
+:hasStatus rdf:type owl:ObjectProperty ;
+           
+           rdfs:label "hasStatus"@en .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#isAppendedTo
+
+:isAppendedTo rdf:type owl:ObjectProperty ;
+              
+              rdfs:label "isAppendedTo"@en .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#isCoreSpaceOf
+
+:isCoreSpaceOf rdf:type owl:ObjectProperty ;
+               
+               rdfs:label "isCoreSpaceOf"@en ;
+               
+               owl:propertyDisjointWith :isCustomSpaceOf ;
+               
+               rdfs:subPropertyOf :isSpaceOf .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#isCustomSpaceOf
+
+:isCustomSpaceOf rdf:type owl:ObjectProperty ;
+                 
+                 rdfs:label "isCustomSpaceOf"@en ;
+                 
+                 rdfs:subPropertyOf :isSpaceOf .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#isManagedBy
+
+:isManagedBy rdf:type owl:ObjectProperty ;
+             
+             rdfs:label "isManagedBy"@en .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#isManagedByCore
+
+:isManagedByCore rdf:type owl:ObjectProperty ;
+                 
+                 rdfs:label "isManagedByCore"@en ;
+                 
+                 rdfs:subPropertyOf :isManagedBy ;
+                 
+                 owl:propertyDisjointWith :isManagedByCustom .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#isManagedByCustom
+
+:isManagedByCustom rdf:type owl:ObjectProperty ;
+                   
+                   rdfs:label "isManagedByCustom"@en ;
+                   
+                   rdfs:subPropertyOf :isManagedBy .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#isSpaceOf
+
+:isSpaceOf rdf:type owl:ObjectProperty ;
+           
+           rdfs:label "isSpaceOf"@en .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#manages
+
+:manages rdf:type owl:ObjectProperty ;
+         
+         rdfs:label "manages"@en ;
+         
+         rdfs:range :Entry ;
+         
+         rdfs:domain :OntologyCollector ;
+         
+         owl:inverseOf :isManagedBy .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#managesInCore
+
+:managesInCore rdf:type owl:ObjectProperty ;
+               
+               rdfs:label "managesInCore"@en ;
+               
+               rdfs:range :Entry ;
+               
+               rdfs:domain :Scope ;
+               
+               owl:inverseOf :isManagedByCore ;
+               
+               rdfs:subPropertyOf :manages ;
+               
+               owl:propertyDisjointWith :managesInCustom .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#managesInCustom
+
+:managesInCustom rdf:type owl:ObjectProperty ;
+                 
+                 rdfs:label "managesInCustom"@en ;
+                 
+                 rdfs:range :Entry ;
+                 
+                 rdfs:domain :Scope ;
+                 
+                 owl:inverseOf :isManagedByCustom ;
+                 
+                 rdfs:subPropertyOf :manages .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#mapsToGraph
+
+:mapsToGraph rdf:type owl:FunctionalProperty ,
+                      owl:ObjectProperty ;
+             
+             rdfs:label "mapsToGraph"@en ;
+             
+             rdfs:domain :Entry ;
+             
+             rdfs:range :Graph .
+
+
+
+
+
+#################################################################
+#
+#    Data properties
+#
+#################################################################
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#hasOntologyIRI
+
+:hasOntologyIRI rdf:type owl:DatatypeProperty ;
+                
+                rdfs:label "hasOntologyIRI"@en ;
+                
+                rdfs:domain :Entry ;
+                
+                rdfs:range xsd:anyURI .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#hasSizeInAxioms
+
+:hasSizeInAxioms rdf:type owl:DatatypeProperty ,
+                          owl:FunctionalProperty ;
+                 
+                 rdfs:label "hasSizeInAxioms"@en ;
+                 
+                 rdfs:domain :Entry ;
+                 
+                 rdfs:range xsd:int .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#hasSizeInTriples
+
+:hasSizeInTriples rdf:type owl:DatatypeProperty ,
+                           owl:FunctionalProperty ;
+                  
+                  rdfs:label "hasSizeInTriples"@en ;
+                  
+                  rdfs:domain :Entry ;
+                  
+                  rdfs:range xsd:int .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#hasVersionIRI
+
+:hasVersionIRI rdf:type owl:DatatypeProperty ;
+               
+               rdfs:label "hasVersionIRI"@en ;
+               
+               rdfs:domain :Entry ;
+               
+               rdfs:range xsd:anyURI .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#retrievedFrom
+
+:retrievedFrom rdf:type owl:DatatypeProperty ;
+               
+               rdfs:label "retrievedFrom"@en ;
+               
+               rdfs:domain :Entry ;
+               
+               rdfs:range xsd:anyURI .
+
+
+
+
+
+#################################################################
+#
+#    Classes
+#
+#################################################################
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#Entry
+
+:Entry rdf:type owl:Class ;
+       
+       rdfs:label "Entry"@en .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#Graph
+
+:Graph rdf:type owl:Class ;
+       
+       rdfs:label "Graph"@en ;
+       
+       rdfs:subClassOf owl:Thing .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#OntologyCollector
+
+:OntologyCollector rdf:type owl:Class ;
+                   
+                   rdfs:label "OntologyCollector"@en .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#Scope
+
+:Scope rdf:type owl:Class ;
+       
+       rdfs:label "Scope"@en ;
+       
+       rdfs:subClassOf :OntologyCollector .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#Session
+
+:Session rdf:type owl:Class ;
+         
+         rdfs:label "Session"@en ;
+         
+         rdfs:subClassOf :OntologyCollector .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#Space
+
+:Space rdf:type owl:Class ;
+       
+       rdfs:label "Space"@en ;
+       
+       rdfs:subClassOf :OntologyCollector .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#Status
+
+:Status rdf:type owl:Class ;
+        
+        rdfs:label "Status"@en ;
+        
+        owl:equivalentClass [ rdf:type owl:Class ;
+                              owl:oneOf ( :Status.INACTIVE
+                                          :Status.ACTIVE
+                                          :Status.ZOMBIE
+                                        )
+                            ] .
+
+
+
+
+
+#################################################################
+#
+#    Individuals
+#
+#################################################################
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#Status.ACTIVE
+
+:Status.ACTIVE rdf:type :Status ,
+                        owl:NamedIndividual ;
+               
+               rdfs:label "Status.ACTIVE"@en .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#Status.INACTIVE
+
+:Status.INACTIVE rdf:type :Status ,
+                          owl:NamedIndividual ;
+                 
+                 rdfs:label "Status.INACTIVE"@en .
+
+
+
+###  http://stanbol.apache.org/ontology/meta/ontonet#Status.ZOMBIE
+
+:Status.ZOMBIE rdf:type :Status ,
+                        owl:NamedIndividual ;
+               
+               rdfs:label "Status.ZOMBIE"@en .
+
+
+
+
+
+#################################################################
+#
+#    General axioms
+#
+#################################################################
+
+
+[ rdf:type owl:AllDifferent ;
+  owl:distinctMembers ( :Status.ACTIVE
+                        :Status.INACTIVE
+                        :Status.ZOMBIE
+                      )
+] .
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Entry
+                :Graph
+                :OntologyCollector
+                :Status
+              )
+] .
+[ rdf:type owl:AllDisjointProperties ;
+  owl:members ( :hasAppended
+                :hasSpace
+                :hasStatus
+                :isAppendedTo
+                :isManagedBy
+                :isSpaceOf
+                :manages
+                :mapsToGraph
+              )
+] .
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Scope
+                :Session
+                :Space
+              )
+] .
+
+
+
+
+###  Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net
+

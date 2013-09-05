@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY meta "http://www.ontologydesignpatterns.org/schemas/meta.owl#" >
+    <!ENTITY partof "http://www.ontologydesignpatterns.org/cp/owl/partof.owl#" >
+    <!ENTITY coddata "http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#" >
+    <!ENTITY codkernel "http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.ontologydesignpatterns.org/schemas/meta.owl#"
+     xml:base="http://www.ontologydesignpatterns.org/schemas/meta.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:codkernel="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:partof="http://www.ontologydesignpatterns.org/cp/owl/partof.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:coddata="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#"
+     xmlns:meta="http://www.ontologydesignpatterns.org/schemas/meta.owl#">
+    <owl:Ontology rdf:about="">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Meta-level schema to represent ontology registries</rdfs:label>
+        <rdfs:comment>This simple vocabulary that can be used to represent ontology registries. It is conceptually related with the C-ODO ontology by means of inclusion of C-ODO modules.</rdfs:comment>
+        <rdfs:comment>Should import: http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl</rdfs:comment>
+        <rdfs:comment>Should import: http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl</rdfs:comment>
+        <owl:versionInfo rdf:datatype="&xsd;string">0.3.1</owl:versionInfo>
+        <owl:versionInfo rdf:datatype="&xsd;string">This is a modified version of the original meta.owl ontology for inclusion in projects under the Apache License 2.0. Import statements have been removed to avoid forcing the inclusion of C-ODO Light ontologies until their license is cleared.</owl:versionInfo>
+        <owl:versionInfo xml:lang="en">Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+        </owl:versionInfo>
+        <owl:versionInfo xml:lang="en">Created by Enrico Daga</owl:versionInfo>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/partof.owl#hasPart -->
+
+    <owl:ObjectProperty rdf:about="&partof;hasPart"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/partof.owl#isPartOf -->
+
+    <owl:ObjectProperty rdf:about="&partof;isPartOf"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/schemas/meta.owl#hasOntology -->
+
+    <owl:ObjectProperty rdf:about="#hasOntology">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:subPropertyOf rdf:resource="&partof;hasPart"/>
+        <rdfs:domain rdf:resource="&coddata;OntologyLibrary"/>
+        <rdfs:range rdf:resource="&codkernel;Ontology"/>
+        <owl:inverseOf rdf:resource="#isOntologyOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/schemas/meta.owl#isOntologyOf -->
+
+    <owl:ObjectProperty rdf:about="#isOntologyOf">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:subPropertyOf rdf:resource="&partof;isPartOf"/>
+        <rdfs:range rdf:resource="&coddata;OntologyLibrary"/>
+        <rdfs:domain rdf:resource="&codkernel;Ontology"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary -->
+
+    <owl:Class rdf:about="&coddata;OntologyLibrary"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology -->
+
+    <owl:Class rdf:about="&codkernel;Ontology"/>
+</rdf:RDF>
+
+
