@@ -26,7 +26,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL_TYPE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
@@ -91,11 +91,12 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.clerezza.rdf.ontologies.OWL;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.commons.owl.util.OWL2Constants;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.viewable.Viewable;
+//import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.ontologymanager.multiplexer.clerezza.collector.MGraphMultiplexer;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
@@ -146,30 +147,36 @@ import java.security.PrivilegedAction;
 public class OntoNetRootResource extends AbstractOntologyAccessResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
+    
+    @Reference
     protected ScopeManager onManager;
 
     /*
      * Placeholder for the OntologyProvider to be fetched from the servlet context.
      */
+    @Reference
     protected OntologyProvider<?> ontologyProvider;
 
     /*
      * Placeholder for the OntologyProvider to be fetched from the servlet context.
      */
+    @Reference
     protected RegistryManager registryManager;
+    
+    @Reference
     protected SessionManager sessionManager;
 
-    public OntoNetRootResource(@Context ServletContext servletContext) {
+    public OntoNetRootResource() {
         super();
-        this.servletContext = servletContext;
-        this.ontologyProvider = (OntologyProvider<?>) ContextHelper.getServiceFromContext(
-                OntologyProvider.class, servletContext);
-        this.onManager = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class,
-                servletContext);
-        this.sessionManager = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
-                servletContext);
-        this.registryManager = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
-                servletContext);
+//        this.servletContext = servletContext;
+//        this.ontologyProvider = (OntologyProvider<?>) ContextHelper.getServiceFromContext(
+//                OntologyProvider.class, servletContext);
+//        this.onManager = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class,
+//                servletContext);
+//        this.sessionManager = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
+//                servletContext);
+//        this.registryManager = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
+//                servletContext);
     }
 
     /*
@@ -179,7 +186,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     // @DELETE
     public Response clear(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -196,7 +203,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
             ontologyProvider.createBlankOntologyEntry(key);
             rb = Response.created(uriInfo.getRequestUri());
         }
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -221,7 +228,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
             log.warn("Orphan ontology key {}. No associated graph found in store.", e.getOntologyKey());
             rb = Response.status(NOT_FOUND);
         }
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -372,7 +379,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     public Response getHtmlInfo(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -380,7 +387,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     @Produces({RDF_XML, TURTLE, X_TURTLE, APPLICATION_JSON, RDF_JSON})
     public Response getMetaGraph(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok(ontologyProvider.getMetaGraph(Graph.class));
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -528,7 +535,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
             TripleCollection o = getGraph(ontologyId, merged, uriInfo.getRequestUri());
             rb = o == null ? Response.status(NOT_FOUND) : Response.ok(o);
         }
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -562,7 +569,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
             OWLOntology o = getOWLOntology(ontologyId, merged, uriInfo.getRequestUri());
             rb = o == null ? Response.status(NOT_FOUND) : Response.ok(o);
         }
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -576,7 +583,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
             mGraph.add(new TripleImpl(new UriRef(getPublicBaseUri() + "ontonet/" + alias), OWL.sameAs, me));
         }
         rb = Response.ok(mGraph);
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -590,7 +597,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
         ResponseBuilder rb = performLoadOntology(data, headers,
                 Origin.create(OntologyUtils.decode(ontologyId)));
         // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -792,7 +799,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
         return Response.ok(new Viewable("ontology",
                 // new OntologyPrettyPrintResource(servletContext,
                 // uriInfo, out)
-                new OntologyStatsResource(servletContext, uriInfo, key, o, ontologyProvider.listAliases(key),
+                new OntologyStatsResource(uriInfo, key, o, ontologyProvider.listAliases(key),
                 handles)));
         // } catch (OWLOntologyStorageException e) {
         // throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
@@ -805,7 +812,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     public Response postOntology(FormDataMultiPart data, @Context HttpHeaders headers) {
         ResponseBuilder rb = performLoadOntology(data, headers);
         // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -817,7 +824,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
             @Context UriInfo uriInfo) {
         ResponseBuilder rb = performShowOntology(ontologyId);
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -867,7 +874,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
             rb = Response.status(UNSUPPORTED_MEDIA_TYPE);
         }
 
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         Response r = rb.build();
         log.debug("POST request for ontology addition completed in {} ms with status {}.",
                 (System.currentTimeMillis() - before), r.getStatus());

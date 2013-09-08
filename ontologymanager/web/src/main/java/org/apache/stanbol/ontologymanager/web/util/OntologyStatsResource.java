@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.ontologymanager.servicesapi.collector.OntologyCollector;
@@ -45,13 +44,13 @@ public class OntologyStatsResource extends AbstractOntologyAccessResource {
 
     private OWLOntology o;
 
-    public OntologyStatsResource(ServletContext context,
+    public OntologyStatsResource(
                                  UriInfo uriInfo,
                                  OWLOntologyID key,
                                  OWLOntology o,
                                  Set<OWLOntologyID> identifiers,
                                  Set<OntologyCollector> handles) {
-        this.servletContext = context;
+//        this.servletContext = context;
         this.uriInfo = uriInfo;
         this.submitted = key;
         this.o = o;

@@ -16,11 +16,11 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.OPTIONS;
-import static javax.ws.rs.HttpMethod.POST;
-import static javax.ws.rs.HttpMethod.PUT;
+//import static javax.ws.rs.HttpMethod.DELETE;
+//import static javax.ws.rs.HttpMethod.GET;
+//import static javax.ws.rs.HttpMethod.OPTIONS;
+//import static javax.ws.rs.HttpMethod.POST;
+//import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -31,8 +31,6 @@ import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
@@ -81,9 +79,10 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+//import org.apache.stanbol.commons.viewable.Viewable;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.IrremovableOntologyException;
@@ -116,6 +115,9 @@ import org.slf4j.LoggerFactory;
 import com.sun.jersey.multipart.BodyPart;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+//import org.apache.stanbol.commons.web.base.ContextHelper;
 
 /**
  * The REST resource of an OntoNet {@link Session} whose identifier is known.
@@ -128,31 +130,36 @@ public class SessionResource extends AbstractOntologyAccessResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    @Reference
     protected ScopeManager onMgr;
 
+    @Reference
     protected OntologyProvider<TcProvider> ontologyProvider;
 
     /*
      * Placeholder for the RegistryManager to be fetched from the servlet context.
      */
+    @Reference
     protected RegistryManager regMgr;
 
     /*
      * Placeholder for the session manager to be fetched from the servlet context.
      */
+    @Reference
     protected SessionManager sesMgr;
 
     protected Session session;
 
-    public SessionResource(@PathParam(value = "id") String sessionId, @Context ServletContext servletContext) {
-        this.servletContext = servletContext;
-        this.sesMgr = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
-            servletContext);
-        this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
-            servletContext);
-        this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
-            OntologyProvider.class, servletContext);
-        this.onMgr = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
+    public SessionResource(@PathParam(value = "id") String sessionId) {
+//        public SessionResource(@PathParam(value = "id") String sessionId, @Context ServletContext servletContext) {
+//        this.servletContext = servletContext;
+//        this.sesMgr = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
+//            servletContext);
+//        this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
+//            servletContext);
+//        this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
+//            OntologyProvider.class, servletContext);
+//        this.onMgr = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
         session = sesMgr.getSession(sessionId);
     }
 
@@ -165,7 +172,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         // Export to Clerezza Graph, which can be rendered as JSON-LD.
         ResponseBuilder rb = Response.ok(session.export(Graph.class, merge, prefix));
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -180,7 +187,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         // Export smaller graphs to OWLOntology due to the more human-readable rendering.
         if (merge) rb = Response.ok(session.export(Graph.class, merge, prefix));
         else rb = Response.ok(session.export(OWLOntology.class, merge, prefix));
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -193,7 +200,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         // Export to OWLOntology, the only to support OWL formats.
         ResponseBuilder rb = Response.ok(session.export(OWLOntology.class, merge, prefix));
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -219,7 +226,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
             throw new WebApplicationException(e, FORBIDDEN);
         }
         ResponseBuilder rb = Response.created(uriInfo.getRequestUri());
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -241,7 +248,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         sesMgr.destroySession(sessionId);
         session = null;
         ResponseBuilder rb = Response.ok();
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -257,7 +264,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
             }
         }
         ResponseBuilder rb = Response.ok();
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -299,7 +306,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         if (session == null) rb = Response.status(NOT_FOUND);
         else rb = Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -329,7 +336,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers, GET, POST, PUT, DELETE, OPTIONS);
+//        enableCORS(servletContext, rb, headers, GET, POST, PUT, DELETE, OPTIONS);
         return rb.build();
     }
 
@@ -337,7 +344,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
     @Path("/{ontologyId:.+}")
     public Response handleCorsPreflightOntology(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers, GET, DELETE, OPTIONS);
+//        enableCORS(servletContext, rb, headers, GET, DELETE, OPTIONS);
         return rb.build();
     }
 
@@ -365,7 +372,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         Graph o = session.getOntology(OntologyUtils.decode(ontologyId), Graph.class, merge, prefix);
         ResponseBuilder rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -402,7 +409,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
                 rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
             }
         }
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -431,7 +438,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         OWLOntology o = session.getOntology(OntologyUtils.decode(ontologyId), OWLOntology.class, merge,
             prefix);
         ResponseBuilder rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -453,14 +460,14 @@ public class SessionResource extends AbstractOntologyAccessResource {
             else try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 o.getOWLOntologyManager().saveOntology(o, new ManchesterOWLSyntaxOntologyFormat(), out);
-                rb = Response.ok(new Viewable("ontology", new OntologyPrettyPrintResource(servletContext,
+                rb = Response.ok(new Viewable("ontology", new OntologyPrettyPrintResource(
                         uriInfo, out, session)));
             } catch (OWLOntologyStorageException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
         }
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -501,7 +508,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
         }
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -558,7 +565,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
             log.error("FAILED parse with media type {}.", mt);
             throw new WebApplicationException(e, BAD_REQUEST);
         }
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -586,7 +593,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
         ResponseBuilder rb = Response.ok();
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -757,7 +764,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         // throw new WebApplicationException(BAD_REQUEST);
         // }
         // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         log.info("POST ontology completed in {} ms.", System.currentTimeMillis() - before);
         return rb.build();
     }

@@ -18,8 +18,8 @@ package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
@@ -47,8 +47,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.stanbol.commons.web.viewable.Viewable;
+//import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
@@ -78,14 +79,15 @@ public class ScopeManagerResource extends BaseStanbolResource {
     /*
      * Placeholder for the ONManager to be fetched from the servlet context.
      */
+    @Reference
     protected ScopeManager onm;
-
+    @Reference
     protected TcManager tcManager;
 
     public ScopeManagerResource(@Context ServletContext servletContext) {
-        this.servletContext = servletContext;
-        this.onm = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
-        this.tcManager = (TcManager) ContextHelper.getServiceFromContext(TcManager.class, servletContext);
+//        this.servletContext = servletContext;
+//        this.onm = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
+//        this.tcManager = (TcManager) ContextHelper.getServiceFromContext(TcManager.class, servletContext);
     }
 
     /**
@@ -109,7 +111,7 @@ public class ScopeManagerResource extends BaseStanbolResource {
     public Response getHtmlInfo(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -138,7 +140,7 @@ public class ScopeManagerResource extends BaseStanbolResource {
         ResponseBuilder rb = Response.ok(ontology);
         MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
         if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -149,7 +151,7 @@ public class ScopeManagerResource extends BaseStanbolResource {
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers);
+//        enableCORS(servletContext, rb, headers);
         return rb.build();
     }
 

@@ -17,7 +17,7 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,8 +34,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.stanbol.commons.web.viewable.Viewable;
+//import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
@@ -47,13 +48,13 @@ import org.slf4j.LoggerFactory;
 public class RegistryManagerResource extends BaseStanbolResource {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-
+    @Reference
     protected RegistryManager regMgr;
 
     // bind the registry manager by looking it up from the servlet request context
-    public RegistryManagerResource(@Context ServletContext context, @Context UriInfo uriInfo) {
+    public RegistryManagerResource( @Context UriInfo uriInfo) {
         super();
-        regMgr = ContextHelper.getServiceFromContext(RegistryManager.class, context);
+//        regMgr = ContextHelper.getServiceFromContext(RegistryManager.class, context);
         this.uriInfo = uriInfo;
     }
 
@@ -62,7 +63,7 @@ public class RegistryManagerResource extends BaseStanbolResource {
     public Response getHtmlInfo(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 

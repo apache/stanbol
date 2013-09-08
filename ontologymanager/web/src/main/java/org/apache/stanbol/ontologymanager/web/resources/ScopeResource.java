@@ -16,11 +16,11 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.OPTIONS;
-import static javax.ws.rs.HttpMethod.POST;
-import static javax.ws.rs.HttpMethod.PUT;
+//import static javax.ws.rs.HttpMethod.DELETE;
+//import static javax.ws.rs.HttpMethod.GET;
+//import static javax.ws.rs.HttpMethod.OPTIONS;
+//import static javax.ws.rs.HttpMethod.POST;
+//import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -31,8 +31,8 @@ import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
@@ -85,10 +85,11 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.viewable.Viewable;
+//import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
@@ -137,13 +138,15 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     /*
      * Placeholder for the ONManager to be fetched from the servlet context.
      */
+    @Reference
     protected ScopeManager onm;
-
+    @Reference
     protected OntologyProvider<TcProvider> ontologyProvider;
 
     /*
      * Placeholder for the RegistryManager to be fetched from the servlet context.
      */
+    @Reference
     protected RegistryManager regMgr;
 
     protected Scope scope;
@@ -151,13 +154,13 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     public ScopeResource(@PathParam(value = "scopeid") String scopeId, @Context ServletContext servletContext) {
         super();
         log.info("<init> with scope {}", scopeId);
-
-        this.servletContext = servletContext;
-        this.onm = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
-        this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
-            servletContext);
-        this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
-            OntologyProvider.class, servletContext);
+//
+//        this.servletContext = servletContext;
+//        this.onm = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
+//        this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
+//            servletContext);
+//        this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
+//            OntologyProvider.class, servletContext);
 
         if (scopeId == null || scopeId.isEmpty()) {
             log.error("Missing path parameter scopeid={}", scopeId);
@@ -181,7 +184,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         // Export to Clerezza Graph, which can be rendered as JSON-LD.
         ResponseBuilder rb = Response.ok(scope.export(Graph.class, merge, prefix));
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -196,7 +199,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         if (merge) rb = Response.ok(scope.export(Graph.class, merge, prefix));
         else rb = Response.ok(scope.export(OWLOntology.class, merge, prefix));
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -209,7 +212,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         // Export to OWLOntology due to the more human-readable rendering.
         ResponseBuilder rb = Response.ok(scope.export(OWLOntology.class, merge, prefix));
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -221,7 +224,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         onm.deregisterScope(scope);
         scope = null;
         ResponseBuilder rb = Response.ok();
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -243,7 +246,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         Graph o = space.export(Graph.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -258,7 +261,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         OWLOntology o = space.export(OWLOntology.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -284,7 +287,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         Graph o = space.export(Graph.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -299,7 +302,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         OWLOntology o = space.export(OWLOntology.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -308,9 +311,9 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     public Response getHtmlInfo(@Context HttpHeaders headers) {
         ResponseBuilder rb;
         if (scope == null) rb = Response.status(NOT_FOUND);
-        else rb = Response.ok(new Viewable("index", this));
+        else rb = Response.ok(new Viewable("index", this)); // TODO move to a dedicated class
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -343,7 +346,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers, GET, POST, PUT, DELETE, OPTIONS);
+//        enableCORS(servletContext, rb, headers, GET, POST, PUT, DELETE, OPTIONS);
         return rb.build();
     }
 
@@ -351,7 +354,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @Path("/core")
     public Response handleCorsPreflightCore(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers, GET, OPTIONS);
+//        enableCORS(servletContext, rb, headers, GET, OPTIONS);
         return rb.build();
     }
 
@@ -359,7 +362,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @Path("/custom")
     public Response handleCorsPreflightCustom(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers, GET, OPTIONS);
+//        enableCORS(servletContext, rb, headers, GET, OPTIONS);
         return rb.build();
     }
 
@@ -367,7 +370,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @Path("/{ontologyId:.+}")
     public Response handleCorsPreflightOntology(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers, GET, DELETE, OPTIONS);
+//        enableCORS(servletContext, rb, headers, GET, DELETE, OPTIONS);
         return rb.build();
     }
 
@@ -409,7 +412,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
             else rb = Response.ok(o);
         }
 
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -451,7 +454,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
             if (o == null) rb = Response.status(NOT_FOUND);
             else rb = Response.ok(o);
         }
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -475,14 +478,14 @@ public class ScopeResource extends AbstractOntologyAccessResource {
             else try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 o.getOWLOntologyManager().saveOntology(o, new ManchesterOWLSyntaxOntologyFormat(), out);
-                rb = Response.ok(new Viewable("ontology", new OntologyPrettyPrintResource(servletContext,
+                rb = Response.ok(new Viewable("ontology", new OntologyPrettyPrintResource(
                         uriInfo, out, scope)));
             } catch (OWLOntologyStorageException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
         }
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -519,7 +522,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                 onm.setScopeActive(scopeId, true);
             }
         } else rb = Response.status(BAD_REQUEST); // null/blank ontology ID
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -573,7 +576,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         } catch (UnmodifiableOntologyCollectorException e) {
             throw new WebApplicationException(e, FORBIDDEN);
         }
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -603,7 +606,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         } catch (OWLOntologyCreationException e) {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -734,7 +737,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         // else throw new WebApplicationException(BAD_REQUEST);
         // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
         // FIXME return an appropriate response e.g. 201
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -813,7 +816,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         }
 
         ResponseBuilder rb = Response.created(uriInfo.getAbsolutePath());
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
