@@ -57,13 +57,15 @@
         <configuration>
           <instructions>
             <Import-Package>
-              javax.ws.rs.*; version="[0,2)",
-              org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
+              javax.ws.rs.*; version="[2.0,3]",
+              org.apache.stanbol.commons.web.base; provide:=true; version="[1.0.0,2)",
+              com.sun.jersey.*; version="[1.15.0,2)",
+              com.sun.net.httpserver.*,
               *
             </Import-Package>            
-            <!-- Export-Package>
-              org.apache.stanbol.ontologymanager.web.*
-            </Export-Package -->
+            <Export-Package>
+            org.objectweb.asm.*,  com.sun.jersey.*, org.jvnet.mimepull.*, sun.*, com.sun.*, com.sun.net.httpserver.*
+            </Export-Package>
             <Private-Package>
               org.apache.stanbol.ontologymanager.web; version=${project.version},
               org.apache.stanbol.ontologymanager.web.resources; version=${project.version},
@@ -140,12 +142,22 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
       <version>1.15</version>
+      <scope>compile</scope>
     </dependency>
     <dependency> <!-- because of multipart -->
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
       <version>1.15</version>
+      <scope>compile</scope>
     </dependency>
+    <dependency> <!-- because of jersey (temporary) -->
+      <groupId>com.sun.net.httpserver</groupId>
+      <artifactId>http</artifactId>
+      <version>20070405</version>
+      <scope>compile</scope>
+    </dependency>
+
+
 
     <!-- generic tax -->
     <dependency>
