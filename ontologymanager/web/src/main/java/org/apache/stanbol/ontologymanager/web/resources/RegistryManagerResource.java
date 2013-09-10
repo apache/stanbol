@@ -34,7 +34,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.viewable.Viewable;
 //import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -44,6 +47,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/ontonet/registry")
 public class RegistryManagerResource extends BaseStanbolResource {
 
@@ -51,11 +57,8 @@ public class RegistryManagerResource extends BaseStanbolResource {
     @Reference
     protected RegistryManager regMgr;
 
-    // bind the registry manager by looking it up from the servlet request context
-    public RegistryManagerResource( @Context UriInfo uriInfo) {
+    public RegistryManagerResource() {
         super();
-//        regMgr = ContextHelper.getServiceFromContext(RegistryManager.class, context);
-        this.uriInfo = uriInfo;
     }
 
     @GET

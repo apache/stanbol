@@ -79,7 +79,10 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 //import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.viewable.Viewable;
@@ -125,6 +128,9 @@ import com.sun.jersey.multipart.FormDataMultiPart;
  * @author alexdma
  * 
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/ontonet/session/{id}")
 public class SessionResource extends AbstractOntologyAccessResource {
 
@@ -150,7 +156,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
 
     protected Session session;
 
-    public SessionResource(@PathParam(value = "id") String sessionId) {
+    public SessionResource() {
 //        public SessionResource(@PathParam(value = "id") String sessionId, @Context ServletContext servletContext) {
 //        this.servletContext = servletContext;
 //        this.sesMgr = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
@@ -160,14 +166,16 @@ public class SessionResource extends AbstractOntologyAccessResource {
 //        this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
 //            OntologyProvider.class, servletContext);
 //        this.onMgr = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
-        session = sesMgr.getSession(sessionId);
+        
     }
 
     @GET
     @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON})
-    public Response asOntologyGraph(@PathParam("scopeid") String scopeid,
+    public Response asOntologyGraph(@PathParam(value = "id") String sessionId,
+                                    @PathParam("scopeid") String scopeid,
                                     @DefaultValue("false") @QueryParam("merge") boolean merge,
                                     @Context HttpHeaders headers) {
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         // Export to Clerezza Graph, which can be rendered as JSON-LD.
@@ -178,9 +186,11 @@ public class SessionResource extends AbstractOntologyAccessResource {
 
     @GET
     @Produces(value = {RDF_XML, TURTLE, X_TURTLE})
-    public Response asOntologyMixed(@PathParam("scopeid") String scopeid,
+    public Response asOntologyMixed(@PathParam(value = "id") String sessionId,
+                                    @PathParam("scopeid") String scopeid,
                                     @DefaultValue("false") @QueryParam("merge") boolean merge,
                                     @Context HttpHeaders headers) {
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         ResponseBuilder rb;
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
@@ -193,9 +203,11 @@ public class SessionResource extends AbstractOntologyAccessResource {
 
     @GET
     @Produces(value = {MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
-    public Response asOntologyOWL(@PathParam("scopeid") String scopeid,
+    public Response asOntologyOWL(@PathParam(value = "id") String sessionId,
+                                  @PathParam("scopeid") String scopeid,
                                   @DefaultValue("false") @QueryParam("merge") boolean merge,
                                   @Context HttpHeaders headers) {
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         // Export to OWLOntology, the only to support OWL formats.
@@ -216,7 +228,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
      */
     @PUT
     public Response createSession(@PathParam("id") String sessionId,
-                                  @Context UriInfo uriInfo,
+//                                  @Context UriInfo uriInfo,
                                   @Context HttpHeaders headers) {
         try {
             session = sesMgr.createSession(sessionId);
@@ -242,8 +254,9 @@ public class SessionResource extends AbstractOntologyAccessResource {
      */
     @DELETE
     public Response deleteSession(@PathParam("id") String sessionId,
-                                  @Context UriInfo uriInfo,
+//                                  @Context UriInfo uriInfo,
                                   @Context HttpHeaders headers) {
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         sesMgr.destroySession(sessionId);
         session = null;
@@ -254,8 +267,9 @@ public class SessionResource extends AbstractOntologyAccessResource {
 
     @POST
     @Produces({WILDCARD})
-    public Response emptyPost(@Context HttpHeaders headers) {
+    public Response emptyPost(@PathParam("id") String sessionId, @Context HttpHeaders headers) {
         log.debug(" post(no data)");
+        session = sesMgr.getSession(sessionId);
         for (Scope sc : getAllScopes()) { // First remove appended scopes not in the list
             String scid = sc.getID();
             if (getAppendedScopes().contains(scid)) {
@@ -301,8 +315,10 @@ public class SessionResource extends AbstractOntologyAccessResource {
 
     @GET
     @Produces(TEXT_HTML)
-    public Response getHtmlInfo(@Context HttpHeaders headers) {
+    public Response getHtmlInfo(@PathParam("id") String sessionId, @Context HttpHeaders headers) {
         ResponseBuilder rb;
+
+        session = sesMgr.getSession(sessionId);
         if (session == null) rb = Response.status(NOT_FOUND);
         else rb = Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
@@ -366,8 +382,10 @@ public class SessionResource extends AbstractOntologyAccessResource {
     public Response managedOntologyGetGraph(@PathParam("id") String sessionId,
                                             @PathParam("ontologyId") String ontologyId,
                                             @DefaultValue("false") @QueryParam("merge") boolean merge,
-                                            @Context UriInfo uriInfo,
+//                                            @Context UriInfo uriInfo,
                                             @Context HttpHeaders headers) {
+
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         Graph o = session.getOntology(OntologyUtils.decode(ontologyId), Graph.class, merge, prefix);
@@ -394,9 +412,11 @@ public class SessionResource extends AbstractOntologyAccessResource {
     public Response managedOntologyGetMixed(@PathParam("id") String sessionId,
                                             @PathParam("ontologyId") String ontologyId,
                                             @DefaultValue("false") @QueryParam("merge") boolean merge,
-                                            @Context UriInfo uriInfo,
+//                                            @Context UriInfo uriInfo,
                                             @Context HttpHeaders headers) {
         ResponseBuilder rb;
+
+        session = sesMgr.getSession(sessionId);
         if (session == null) rb = Response.status(NOT_FOUND);
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
@@ -431,8 +451,10 @@ public class SessionResource extends AbstractOntologyAccessResource {
     public Response managedOntologyGetOWL(@PathParam("id") String sessionId,
                                           @PathParam("ontologyId") String ontologyId,
                                           @DefaultValue("false") @QueryParam("merge") boolean merge,
-                                          @Context UriInfo uriInfo,
+//                                          @Context UriInfo uriInfo,
                                           @Context HttpHeaders headers) {
+
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         OWLOntology o = session.getOntology(OntologyUtils.decode(ontologyId), OWLOntology.class, merge,
@@ -490,9 +512,10 @@ public class SessionResource extends AbstractOntologyAccessResource {
     @Path(value = "/{ontologyId:.+}")
     public Response managedOntologyUnload(@PathParam("id") String sessionId,
                                           @PathParam("ontologyId") String ontologyId,
-                                          @Context UriInfo uriInfo,
+//                                          @Context UriInfo uriInfo,
                                           @Context HttpHeaders headers) {
         ResponseBuilder rb;
+        session = sesMgr.getSession(sessionId);
         if (session == null) rb = Response.status(NOT_FOUND);
         else {
             OWLOntologyID id = OntologyUtils.decode(ontologyId);
@@ -527,9 +550,11 @@ public class SessionResource extends AbstractOntologyAccessResource {
     @POST
     @Consumes(value = {RDF_XML, OWL_XML, N_TRIPLE, N3, TURTLE, X_TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL,
                        RDF_JSON})
-    public Response manageOntology(InputStream content, @Context HttpHeaders headers) {
+    public Response manageOntology(InputStream content, @PathParam("id") String sessionId, @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
         ResponseBuilder rb;
+
+        session = sesMgr.getSession(sessionId);
         String mt = headers.getMediaType().toString();
         if (session == null) rb = Response.status(NOT_FOUND); // Always check session first
         else try {
@@ -583,7 +608,9 @@ public class SessionResource extends AbstractOntologyAccessResource {
      */
     @POST
     @Consumes(value = MediaType.TEXT_PLAIN)
-    public Response manageOntology(String iri, @Context HttpHeaders headers) {
+    public Response manageOntology(String iri, @PathParam("id") String sessionId, @Context HttpHeaders headers) {
+
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         try {
             session.addOntology(new RootOntologySource(IRI.create(iri)));

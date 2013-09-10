@@ -85,7 +85,10 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.web.viewable.Viewable;
@@ -130,6 +133,9 @@ import com.sun.jersey.multipart.FormDataMultiPart;
  * @author alexdma
  * 
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/ontonet/ontology/{scopeid}")
 public class ScopeResource extends AbstractOntologyAccessResource {
 
@@ -151,9 +157,10 @@ public class ScopeResource extends AbstractOntologyAccessResource {
 
     protected Scope scope;
 
-    public ScopeResource(@PathParam(value = "scopeid") String scopeId, @Context ServletContext servletContext) {
+    
+    public ScopeResource() {
         super();
-        log.info("<init> with scope {}", scopeId);
+//        log.info("<init> with scope {}", scopeId);
 //
 //        this.servletContext = servletContext;
 //        this.onm = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
@@ -162,11 +169,11 @@ public class ScopeResource extends AbstractOntologyAccessResource {
 //        this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
 //            OntologyProvider.class, servletContext);
 
-        if (scopeId == null || scopeId.isEmpty()) {
-            log.error("Missing path parameter scopeid={}", scopeId);
-            throw new WebApplicationException(NOT_FOUND);
-        }
-        scope = onm.getScope(scopeId);
+//        if (scopeId == null || scopeId.isEmpty()) {
+//            log.error("Missing path parameter scopeid={}", scopeId);
+//            throw new WebApplicationException(NOT_FOUND);
+//        }
+//        scope = onm.getScope(scopeId);
 
         // // Skip null checks: the scope might be created with a PUT
         // if (scope == null) {
@@ -180,6 +187,9 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     public Response asOntologyGraph(@PathParam("scopeid") String scopeid,
                                     @DefaultValue("false") @QueryParam("merge") boolean merge,
                                     @Context HttpHeaders headers) {
+
+        scope = onm.getScope(scopeid);
+        
         if (scope == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         // Export to Clerezza Graph, which can be rendered as JSON-LD.
@@ -193,6 +203,8 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     public Response asOntologyMixed(@PathParam("scopeid") String scopeid,
                                     @DefaultValue("false") @QueryParam("merge") boolean merge,
                                     @Context HttpHeaders headers) {
+        scope = onm.getScope(scopeid);
+        
         if (scope == null) return Response.status(NOT_FOUND).build();
         // Export smaller graphs to OWLOntology due to the more human-readable rendering.
         ResponseBuilder rb;
@@ -208,6 +220,8 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     public Response asOntologyOWL(@PathParam("scopeid") String scopeid,
                                   @DefaultValue("false") @QueryParam("merge") boolean merge,
                                   @Context HttpHeaders headers) {
+        scope = onm.getScope(scopeid);
+        
         if (scope == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         // Export to OWLOntology due to the more human-readable rendering.
@@ -221,6 +235,8 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                     @Context UriInfo uriInfo,
                                     @Context HttpHeaders headers,
                                     @Context ServletContext servletContext) {
+        scope = onm.getScope(scopeid);
+        
         onm.deregisterScope(scope);
         scope = null;
         ResponseBuilder rb = Response.ok();
@@ -242,6 +258,8 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                       @DefaultValue("false") @QueryParam("merge") boolean merge,
                                       @Context UriInfo uriInfo,
                                       @Context HttpHeaders headers) {
+        scope = onm.getScope(scopeid);
+        
         OntologySpace space = scope.getCoreSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         Graph o = space.export(Graph.class, merge, prefix);
@@ -257,6 +275,8 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                     @DefaultValue("false") @QueryParam("merge") boolean merge,
                                     @Context UriInfo uriInfo,
                                     @Context HttpHeaders headers) {
+        scope = onm.getScope(scopeid);
+        
         OntologySpace space = scope.getCoreSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         OWLOntology o = space.export(OWLOntology.class, merge, prefix);
@@ -283,6 +303,8 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                         @DefaultValue("false") @QueryParam("merge") boolean merge,
                                         @Context UriInfo uriInfo,
                                         @Context HttpHeaders headers) {
+        scope = onm.getScope(scopeid);
+        
         OntologySpace space = scope.getCustomSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         Graph o = space.export(Graph.class, merge, prefix);
@@ -298,6 +320,8 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                       @DefaultValue("false") @QueryParam("merge") boolean merge,
                                       @Context UriInfo uriInfo,
                                       @Context HttpHeaders headers) {
+        scope = onm.getScope(scopeid);
+        
         OntologySpace space = scope.getCustomSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         OWLOntology o = space.export(OWLOntology.class, merge, prefix);
@@ -308,8 +332,10 @@ public class ScopeResource extends AbstractOntologyAccessResource {
 
     @GET
     @Produces(TEXT_HTML)
-    public Response getHtmlInfo(@Context HttpHeaders headers) {
+    public Response getHtmlInfo(@PathParam("scopeid") String scopeid, @Context HttpHeaders headers) {
         ResponseBuilder rb;
+        scope = onm.getScope(scopeid);
+        
         if (scope == null) rb = Response.status(NOT_FOUND);
         else rb = Response.ok(new Viewable("index", this)); // TODO move to a dedicated class
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
@@ -389,13 +415,16 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @GET
     @Path("/{ontologyId:.+}")
     @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON})
-    public Response managedOntologyGetGraph(@PathParam("ontologyId") String ontologyId,
+    public Response managedOntologyGetGraph(@PathParam("scopeid") String scopeid,
+                                            @PathParam("ontologyId") String ontologyId,
                                             @DefaultValue("false") @QueryParam("merge") boolean merge,
                                             @Context UriInfo uriInfo,
                                             @Context HttpHeaders headers) {
         log.debug("Absolute URL Path {}", uriInfo.getRequestUri());
         log.debug("Ontology ID {}", ontologyId);
         ResponseBuilder rb;
+        scope = onm.getScope(scopeid);
+        
         if (scope == null) rb = Response.status(NOT_FOUND);
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
@@ -431,13 +460,17 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @GET
     @Path("/{ontologyId:.+}")
     @Produces(value = {RDF_XML, TURTLE, X_TURTLE, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
-    public Response managedOntologyGetOWL(@PathParam("ontologyId") String ontologyId,
+    public Response managedOntologyGetOWL(
+                                          @PathParam("scopeid") String scopeid,
+                                          @PathParam("ontologyId") String ontologyId,
                                           @DefaultValue("false") @QueryParam("merge") boolean merge,
                                           @Context UriInfo uriInfo,
                                           @Context HttpHeaders headers) {
         log.debug("Absolute URL Path {}", uriInfo.getRequestUri());
         log.debug("Ontology ID {}", ontologyId);
         ResponseBuilder rb;
+        scope = onm.getScope(scopeid);
+        
         if (scope == null) rb = Response.status(NOT_FOUND);
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
@@ -461,9 +494,12 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @GET
     @Path("/{ontologyId:.+}")
     @Produces(TEXT_HTML)
-    public Response managedOntologyShow(@PathParam("ontologyId") String ontologyId,
+    public Response managedOntologyShow(@PathParam("scopeid") String scopeid,
+                                        @PathParam("ontologyId") String ontologyId,
                                         @Context HttpHeaders headers) {
         ResponseBuilder rb;
+
+        scope = onm.getScope(scopeid);
         if (scope == null) rb = Response.status(NOT_FOUND);
         else if (ontologyId == null || ontologyId.isEmpty()) rb = Response.status(BAD_REQUEST);
         else if (!ontologyProvider.hasOntology(OntologyUtils.decode(ontologyId))) rb = Response
@@ -499,11 +535,13 @@ public class ScopeResource extends AbstractOntologyAccessResource {
      */
     @DELETE
     @Path("/{ontologyId:.+}")
-    public Response managedOntologyUnload(@PathParam("ontologyId") String ontologyId,
+    public Response managedOntologyUnload(@PathParam("scopeid") String scopeid,
+                                          @PathParam("ontologyId") String ontologyId,
                                           @PathParam("scopeid") String scopeId,
                                           @Context UriInfo uriInfo,
                                           @Context HttpHeaders headers) {
         ResponseBuilder rb;
+        scope = onm.getScope(scopeid);
         if (ontologyId != null && !ontologyId.trim().isEmpty()) {
             OWLOntologyID id = OntologyUtils.decode(ontologyId);
             OntologySpace cs = scope.getCustomSpace();
@@ -541,9 +579,10 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @POST
     @Consumes(value = {RDF_XML, OWL_XML, N_TRIPLE, N3, TURTLE, X_TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL,
                        RDF_JSON})
-    public Response manageOntology(InputStream content, @Context HttpHeaders headers) {
+    public Response manageOntology(InputStream content,@PathParam("scopeid") String scopeid, @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
         ResponseBuilder rb;
+        scope = onm.getScope(scopeid);
         if (scope == null) rb = Response.status(NOT_FOUND); // Always check session first
         else try {
             MediaType mt = headers.getMediaType();
@@ -594,8 +633,9 @@ public class ScopeResource extends AbstractOntologyAccessResource {
      */
     @POST
     @Consumes(value = MediaType.TEXT_PLAIN)
-    public Response manageOntology(String iri, @Context HttpHeaders headers) {
+    public Response manageOntology(String iri,@PathParam("scopeid") String scopeid, @Context HttpHeaders headers) {
         ResponseBuilder rb;
+        scope = onm.getScope(scopeid);
         if (scope == null) rb = Response.status(NOT_FOUND);
         else try {
             OWLOntologyID key = scope.getCustomSpace().addOntology(new RootOntologySource(IRI.create(iri)));
@@ -613,9 +653,10 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @POST
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
-    public Response postOntology(FormDataMultiPart data, @Context HttpHeaders headers) {
+    public Response postOntology(FormDataMultiPart data, @PathParam("scopeid") String scopeid, @Context HttpHeaders headers) {
         log.debug(" post(FormDataMultiPart data)");
         ResponseBuilder rb;
+        scope = onm.getScope(scopeid);
 
         // TODO remove and make sure it is set across the method
         rb = Response.status(BAD_REQUEST);
@@ -763,10 +804,10 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                   @QueryParam("corereg") final List<String> coreRegistries,
                                   @QueryParam("coreont") final List<String> coreOntologies,
                                   @DefaultValue("false") @QueryParam("activate") boolean activate,
-                                  @Context UriInfo uriInfo,
-                                  @Context HttpHeaders headers,
-                                  @Context ServletContext servletContext) {
+                                  @Context HttpHeaders headers) {
         log.debug("Request URI {}", uriInfo.getRequestUri());
+
+        scope = onm.getScope(scopeid);
         List<OntologyInputSource<?>> srcs = new ArrayList<OntologyInputSource<?>>(coreOntologies.size()
                                                                                   + coreRegistries.size());
         // First thing, check registry sources.

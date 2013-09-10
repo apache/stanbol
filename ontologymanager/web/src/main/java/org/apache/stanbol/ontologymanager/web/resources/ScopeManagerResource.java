@@ -47,7 +47,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.viewable.Viewable;
 //import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -70,6 +73,9 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/ontonet/ontology")
 public class ScopeManagerResource extends BaseStanbolResource {
 
@@ -84,10 +90,7 @@ public class ScopeManagerResource extends BaseStanbolResource {
     @Reference
     protected TcManager tcManager;
 
-    public ScopeManagerResource(@Context ServletContext servletContext) {
-//        this.servletContext = servletContext;
-//        this.onm = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
-//        this.tcManager = (TcManager) ContextHelper.getServiceFromContext(TcManager.class, servletContext);
+    public ScopeManagerResource() {
     }
 
     /**
