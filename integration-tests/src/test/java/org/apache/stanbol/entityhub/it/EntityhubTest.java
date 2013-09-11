@@ -23,6 +23,7 @@ import static org.apache.stanbol.entityhub.it.DbpediaDefaultdataConstants.DBPEDI
 import static org.apache.stanbol.entityhub.it.DbpediaDefaultdataConstants.DBPEDIA_SITE_ID;
 import static org.apache.stanbol.entityhub.it.DbpediaDefaultdataConstants.DBPEDIA_SITE_PATH;
 import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.assertEntity;
+import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.assertQueryResults;
 import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.assertRepresentation;
 
 import java.io.File;
@@ -54,6 +55,7 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.stanbol.commons.testing.http.Request;
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.apache.stanbol.entityhub.test.it.AssertEntityhubJson;
 import org.apache.stanbol.entityhub.test.it.EntityhubTestBase;
 import org.apache.stanbol.entityhub.test.query.FieldQueryTestCase;
 import org.apache.stanbol.entityhub.test.query.FindQueryTestCase;
@@ -316,17 +318,16 @@ public final class EntityhubTest extends QueryTestBase {
         test.setField("http://usefulinc.com/ns/doap#description");
         test.setLimit(10);
         test.setLanguage(null);
-        executeQuery(test);
+        RequestExecutor re = executeQuery(test);
+        //get the list of results (will assert the response twice)
+        //to check the expected limit and offset results
+        List<String> resultList = assertQueryResults(re,test);
+        List<String> expected = resultList.subList(2, 4); //3rd and 4th element
+        List<String> excluded = new ArrayList<String>(); //all other
+        excluded.addAll(resultList.subList(0, 2));
+        excluded.addAll(resultList.subList(4, resultList.size()));
         //repeat the test with offset 2 and limit 2 to only retrieve the 3-4 result
-        test = new FindQueryTestCase("XML XSL*",
-            Arrays.asList(
-                    "http://xalan.apache.org/xalan-j/",
-                    "http://velocity.apache.org/dvsl/devel/"),
-            Arrays.asList(
-                    "http://velocity.apache.org/anakia/",
-                    "http://xalan.apache.org/xalan-c/",
-                    "http://xmlgraphics.apache.org/commons/",
-                    "http://xmlgraphics.apache.org/fop"));
+        test = new FindQueryTestCase("XML XSL*", expected, excluded);
         test.setField("http://usefulinc.com/ns/doap#description");
         test.setOffset(2);
         test.setLimit(2);
