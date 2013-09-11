@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,15 +62,16 @@ public class AssertEntityhubJson {
      * @throws JSONException in case the {@link RequestExecutor#getContent()} are
      * no valid JSON. NOTE that the contents are only parsed if the
      * {@link QueryTestCase#getExpectedStatus()} is a 2xx status code.
+     * @return in case of success the List of result Entity IDs
      */
-    public static void assertQueryResults(RequestExecutor re, QueryTestCase test) throws JSONException{
+    public static List<String> assertQueryResults(RequestExecutor re, QueryTestCase test) throws JSONException{
     	if(log.isDebugEnabled()){
     	    log.debug("Assert Query Results for test {}",test.getContent());
     	}
         re.assertStatus(test.getExpectedStatus());
         re.assertContentType("application/json"); //currently only application/json is supported
         if(!test.expectsSuccess()){
-            return; //no further checks for tests that expect failure
+            return null; //no further checks for tests that expect failure
         }
         JSONObject jso = new JSONObject(re.getContent());
         if(log.isDebugEnabled()){
@@ -96,11 +98,13 @@ public class AssertEntityhubJson {
         //General NOTE:
         //  use opt**(..) methods to avoid JSON Exception. We want to parse
         //  everything and than do asserts!
+        List<String> resultIds = new ArrayList<String>(results.length());
         for(int i=0;i<results.length();i++){
             JSONObject result = results.getJSONObject(i);
             String id = result.optString("id", null);
             log.info("({}) {}",i,id);
             assertNotNull("ID missing for an Result", id);
+            resultIds.add(id);
             if(expectedIds != null){
                 expectedIds.remove(id); //not all results must be in the list
             }
@@ -114,6 +118,7 @@ public class AssertEntityhubJson {
             assertTrue("The following expected results where missing in the Response: \n "+expectedIds,
                 expectedIds.isEmpty());
         }
+        return resultIds;
     }
 
     /**
