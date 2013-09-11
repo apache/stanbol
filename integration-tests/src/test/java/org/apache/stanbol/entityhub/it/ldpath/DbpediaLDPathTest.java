@@ -228,7 +228,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
                 "name","York",
                 "ldpath","@prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;"+
                     "lat = geo:lat :: xsd:double;",
-                "limit","3")
+                "limit","5")
          )
          .assertStatus(200)
          .assertContentType("text/turtle")
