@@ -126,7 +126,11 @@
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
-          <excludes></excludes>
+          <excludes>
+            <!-- auto generated -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+            <exclude>dependency-reduced-pom.xml</exclude>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>
