@@ -18,16 +18,10 @@ package org.apache.stanbol.enhancer.engines.lucenefstlinking;
 
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.CASE_SENSITIVE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_CASE_SENSITIVE_MATCHING_STATE;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_DEREFERENCE_ENTITIES_STATE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_MATCHING_LANGUAGE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_SUGGESTIONS;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES_FIELDS;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.ENTITY_TYPES;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.REDIRECT_FIELD;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.REDIRECT_MODE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.SUGGESTIONS;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.TYPE_FIELD;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.TYPE_MAPPINGS;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.PROCESSED_LANGUAGES;
@@ -43,17 +37,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
+import org.apache.commons.compress.compressors.FileNameUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.text.StrLookup;
+import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -61,13 +56,10 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.FieldInfo;
 import org.apache.lucene.index.FieldInfos;
-import org.apache.lucene.util.NamedThreadFactory;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrCore;
@@ -81,7 +73,6 @@ import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig;
-import org.apache.stanbol.enhancer.engines.entitylinking.engine.EntityLinkingEngine;
 import org.apache.stanbol.enhancer.engines.lucenefstlinking.cache.EntityCacheManager;
 import org.apache.stanbol.enhancer.engines.lucenefstlinking.cache.FastLRUCacheManager;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
@@ -143,6 +134,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
             name="AtSuffix")
         },value="SolrYard"),
     @Property(name=FstLinkingEngineComponent.FST_CONFIG, cardinality=Integer.MAX_VALUE),
+    @Property(name=FstLinkingEngineComponent.FST_FOLDER, 
+    value=FstLinkingEngineComponent.DEFAULT_FST_FOLDER),
     @Property(name=FstLinkingEngineComponent.SOLR_TYPE_FIELD, value="rdf:type"),
     @Property(name=FstLinkingEngineComponent.SOLR_RANKING_FIELD, value="entityhub:entityRank"),
 //  @Property(name=REDIRECT_FIELD,value="rdfs:seeAlso"),
@@ -197,6 +190,18 @@ public class FstLinkingEngineComponent {
      * FST file. The FST file is looked up using the {@link DataFileProvider}.
      */
     public static final String FST_CONFIG = "enhancer.engines.linking.solrfst.fstconfig";
+    /**
+     * The folder used to store the FST files. The {@link #DEFAULT_FST_FOLDER default} is 
+     * '<code>${solr-data-dir}/fst</code>' - this is '<code>./fst</code>' relative to the
+     * {@link SolrCore#getDataDir()} of the current SolrCore.
+     */
+    public static final String FST_FOLDER = "enhancer.engines.linking.solrfst.fstfolder";
+    /**
+     * The default of the FST folder is '<code>${solr-data-dir}/fst</code>' - 
+     * this is '<code>./fst</code>' relative to the {@link SolrCore#getDataDir()} 
+     * of the current SolrCore.
+     */
+    public static final String DEFAULT_FST_FOLDER = "${solr-data-dir}/fst";
     /**
      * The name of the Solr field holding the entity type information
      */
@@ -290,6 +295,12 @@ public class FstLinkingEngineComponent {
      * Holds the FST configuration parsed to the engine
      */
     private LanguageConfiguration fstConfig;
+    /**
+     * The configured fstFolder. NOTE that the actual folder is determined in the
+     * {@link #updateEngineRegistration(ServiceReference, SolrServer)} based on
+     * the SolrCore.
+     */
+    private String fstFolder;
     /**
      * Holds the {@link TextProcessingConfig} parsed from the configuration of
      * this engine. <p>
@@ -438,6 +449,19 @@ public class FstLinkingEngineComponent {
         if(value != null && !StringUtils.isBlank(value.toString())){
             fstConfig.setConfiguration(properties);
         } //else keep the default
+        
+        value = properties.get(FST_FOLDER);
+        if(value instanceof String){
+            this.fstFolder = ((String)value).trim();
+            if(this.fstFolder.isEmpty()){
+                this.fstFolder = null;
+            }
+        } else if(value == null){
+            this.fstFolder = null;
+        } else {
+            throw new ConfigurationException(FST_FOLDER, "Values MUST BE of type String"
+                + "(found: "+value.getClass().getName()+")!");
+        }
         
         //(5) Create the ThreadPool used for the runtime creation of FST models
         value = properties.get(FST_THREAD_POOL_SIZE);
@@ -602,17 +626,8 @@ public class FstLinkingEngineComponent {
                 //NOTE: the FST cofnig is processed even if the SolrCore has not changed
                 //      because their might be config changes and/or new FST files in the
                 //      FST directory of the SolrCore.
-                String dataDir = core.getDataDir();
-                File fstDir = new File(dataDir,"fst");
-                if(!fstDir.isDirectory()){ //create the FST directory
-                    try {
-                        FileUtils.forceMkdir(fstDir);
-                    } catch (IOException e) {
-                        unregisterEngine(); //unregister current engine and clean up
-                        throw new IllegalStateException("Unable to create Directory for"
-                                + "storing the FST files within the SolrCore data dir.");
-                    }
-                }
+                File fstDir = getFstDirectory(core, fstFolder);
+                //File fstDir = new File(dataDir,"fst");
                 //now collect the FST configuration
                 indexConfig = new IndexConfiguration(fstConfig, core);
                 //set fields parsed in the activate method
@@ -686,6 +701,37 @@ public class FstLinkingEngineComponent {
         }
 
         
+    }
+    /**
+     * Resolves the directory to store the FST models based on the configured
+     * {@link #FST_FOLDER}. Also considering the name of the SolrServer and
+     * SolrCore
+     * @param core
+     * @param fstFolderConfig
+     * @return
+     */
+    private File getFstDirectory(SolrCore core, String fstFolderConfig) {
+        StrSubstitutor substitutor = new StrSubstitutor(new SolrCoreStrLookup(
+            indexReference, core, bundleContext));
+        substitutor.setEnableSubstitutionInVariables(true);
+        String folderStr = substitutor.replace(fstFolderConfig);
+        if(folderStr.indexOf("${") > 0){
+            folderStr = substitutor.replace(folderStr);
+        }
+        //convert separators to the current OS
+        folderStr = FilenameUtils.separatorsToSystem(folderStr);
+        File fstDir = new File(folderStr);
+        if(!fstDir.isDirectory()){ //create the FST directory
+            try {
+                FileUtils.forceMkdir(fstDir);
+            } catch (IOException e) {
+                unregisterEngine(); //unregister current engine and clean up
+                throw new IllegalStateException("Unable to create Directory for"
+                        + "storing the FST files at location '"+fstDir+"'.");
+            }
+        }
+        
+        return fstDir;
     }
 
     /**
@@ -1010,6 +1056,42 @@ public class FstLinkingEngineComponent {
         textProcessingConfig = null;
         entityLinkerConfig = null;
         bundleContext = null;
+    }
+    
+    /**
+     * {@link StrSubstitutor} {@link StrLookup} implementation used for
+     * determining the directory for storing FST files based on the configured
+     * {@link FstLinkingEngineComponent#FST_FOLDER} configuration.
+     * @author Rupert Westenthaler
+     *
+     */
+    private static class SolrCoreStrLookup extends StrLookup {
+
+        private final BundleContext bc;
+        private final SolrCore core;
+        private final IndexReference indexRef;
+
+        public SolrCoreStrLookup(IndexReference indexRef, SolrCore core, BundleContext bc) {
+            this.indexRef = indexRef;
+            this.core = core;
+            this.bc = bc;
+        }
+        
+        @Override
+        public String lookup(String key) {
+            if("solr-data-dir".equals(key)){
+                return core.getDataDir();
+            } else if("solr-index-dir".equals(key)){
+                return core.getIndexDir();
+            } else if("solr-server-name".equals(key)){
+                return indexRef.getServer();
+            } else if("solr-core-name".equals(key)){
+                return core.getName();
+            } else {
+                return bc.getProperty(key);
+            }
+        }
+        
     }
     
 }
