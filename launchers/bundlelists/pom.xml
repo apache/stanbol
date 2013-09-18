@@ -62,9 +62,9 @@
     <module>stanbolcommons</module>
 
     <!-- Data bundles -->
-  <!--  <module>defaultdata</module>
+    <module>defaultdata</module>
     <module>opennlp</module>
-    <module>sentimentdata</module> -->
+    <module>sentimentdata</module>
 
     <!-- Components -->
     <module>enhancer</module>
