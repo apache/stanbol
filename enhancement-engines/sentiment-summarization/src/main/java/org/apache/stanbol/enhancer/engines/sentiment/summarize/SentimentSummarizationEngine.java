@@ -142,6 +142,10 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
      * The dc:type value used for fise:TextAnnotations indicating a Sentiment
      */
     public static final UriRef SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"Sentiment");
+    /**
+     * The dc:Type value sued for the sentiment annotation of the whole document
+     */
+    public static final UriRef DOCUMENT_SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"DocumentSentiment");
 
 
     private static final int DEFAULT_NEGATION_CONTEXT = 2;
@@ -194,12 +198,12 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                 Boolean.parseBoolean(value.toString());
         //should we write sentiment values for sentences
         value = ctx.getProperties().get(PROPERTY_SENTENCE_SENTIMENT_STATE);
-        this.writeDocumentSentiment = value == null ? DEFAULT_SENTENCE_SENTIMENT_STATE :
+        this.writeSentencesSentimet = value == null ? DEFAULT_SENTENCE_SENTIMENT_STATE :
             value instanceof Boolean ? ((Boolean)value).booleanValue() : 
                 Boolean.parseBoolean(value.toString());
         //should we write sentiment values for phrases
         value = ctx.getProperties().get(PROPERTY_PHRASE_SENTIMENT_STATE);
-        this.writeDocumentSentiment = value == null ? DEFAULT_PHRASE_SENTIMENT_STATE :
+        this.writeSentimentPhrases = value == null ? DEFAULT_PHRASE_SENTIMENT_STATE :
             value instanceof Boolean ? ((Boolean)value).booleanValue() : 
                 Boolean.parseBoolean(value.toString());
     }
@@ -714,6 +718,10 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
         if(ssoType != null){
             metadata.add(new TripleImpl(enh, DC_TYPE, ssoType));
         }
+        if(section.getType() == SpanTypeEnum.Text){
+            metadata.add(new TripleImpl(enh, DC_TYPE, DOCUMENT_SENTIMENT_TYPE));
+        }
+        
     }
     /**
      * The maximum size of the preix/suffix for the selection context
