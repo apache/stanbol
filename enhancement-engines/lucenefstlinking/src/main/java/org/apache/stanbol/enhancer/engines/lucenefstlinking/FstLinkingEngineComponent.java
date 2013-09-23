@@ -42,7 +42,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.commons.compress.compressors.FileNameUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -748,7 +747,7 @@ public class FstLinkingEngineComponent {
     private boolean processFstConfig(IndexConfiguration indexConfig, File fstDir, AtomicReader indexReader) {
         log.info("> process FST config for {} (FST dir: {})",indexReference,
             fstDir.getAbsolutePath());
-        IndexSchema schema = indexConfig.getIndex().getSchema();
+        IndexSchema schema = indexConfig.getIndex().getLatestSchema();
         boolean foundCorpus = false;
         //(0) get basic parameters of the default configuration
         log.info(" - default config");

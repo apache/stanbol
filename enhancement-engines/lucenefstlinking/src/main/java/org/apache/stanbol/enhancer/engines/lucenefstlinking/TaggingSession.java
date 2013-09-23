@@ -133,7 +133,7 @@ public class TaggingSession implements Closeable {
         CorpusInfo defaultCorpusInfo = config.getDefaultCorpus();
         
         //obtain the Solr Document Id field
-        SchemaField idSchemaField = config.getIndex().getSchema().getUniqueKeyField();
+        SchemaField idSchemaField = config.getIndex().getLatestSchema().getUniqueKeyField();
         idField = idSchemaField.getName();
         solrDocfields.add(idField);
 
