@@ -20,6 +20,8 @@ import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -102,30 +104,9 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
         if(value != null && !value.toString().isEmpty() && !DEFAULT_CLASS_NAME_CONFIG.equals(value)){
             Entry<String,Map<String,String>> charFilterConfig = parseConfigLine(
                 PROPERTY_CHAR_FILTER_FACTORY, value.toString());
-            Object factoryObject;
-            try {
-                factoryObject = resourceLoader.newInstance(charFilterConfig.getKey(), Object.class);
-            } catch (SolrException e) {
-                throw new ConfigurationException(PROPERTY_CHAR_FILTER_FACTORY, "Unable to instantiate the "
-                        + "class '"+charFilterConfig.getKey()+"'!", e);
-            }
-
-            if(factoryObject instanceof CharFilterFactory){
-                charFilterFactory = (CharFilterFactory)factoryObject;
-                Map<String,String> config = charFilterConfig.getValue();
-                addLuceneMatchVersionIfNotPresent(config, charFilterFactory);
-                charFilterFactory.init(config);
-                if(factoryObject instanceof ResourceLoaderAware){
-                    try {
-                        ((ResourceLoaderAware)factoryObject).inform(resourceLoader);
-                    } catch (IOException e) {
-                        throw new ConfigurationException(PROPERTY_CHAR_FILTER_FACTORY, "Could not load configuration");
-                    }
-                }
-            } else {
-                throw new ConfigurationException(PROPERTY_CHAR_FILTER_FACTORY, "The parsed class '"
-                        + charFilterConfig.getKey() +"' is not assignable to "+CharFilterFactory.class);
-            }
+            charFilterFactory = initAnalyzer(PROPERTY_CHAR_FILTER_FACTORY, 
+                charFilterConfig.getKey(), CharFilterFactory.class, 
+                charFilterConfig.getValue());
         } else {
             charFilterFactory = null;
         }
@@ -137,32 +118,9 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
         }
         Entry<String,Map<String,String>> tokenizerConfig = parseConfigLine(
             PROPERTY_CHAR_FILTER_FACTORY, value.toString());
-
-        Object factoryObject;
-        try {
-            factoryObject = resourceLoader.newInstance(tokenizerConfig.getKey(), Object.class);
-        } catch (SolrException e) {
-            throw new ConfigurationException(PROPERTY_TOKENIZER_FACTORY, "Unable to instantiate the "
-                    + "class '"+tokenizerConfig.getKey()+"'!", e);
-        }
-
-        if(factoryObject instanceof TokenizerFactory){
-            tokenizerFactory = (TokenizerFactory)factoryObject;
-            Map<String,String> config = tokenizerConfig.getValue();
-            addLuceneMatchVersionIfNotPresent(config, tokenizerFactory);
-            tokenizerFactory.init(config);
-        } else {
-            throw new ConfigurationException(PROPERTY_TOKENIZER_FACTORY, "The instance "
-                    + factoryObject + "of the parsed parsed class '" + tokenizerConfig.getKey()
-                    + "' is not assignable to "+TokenizerFactory.class);
-        }
-        if(factoryObject instanceof ResourceLoaderAware){
-            try {
-                ((ResourceLoaderAware)factoryObject).inform(resourceLoader);
-            } catch (IOException e) {
-                throw new ConfigurationException(PROPERTY_TOKENIZER_FACTORY, "Could not load configuration");
-            }
-        }
+        tokenizerFactory = initAnalyzer(PROPERTY_TOKENIZER_FACTORY, 
+            tokenizerConfig.getKey(), TokenizerFactory.class, 
+            tokenizerConfig.getValue());
 
         //initialise the list of Token Filters
         Collection<String> values;
@@ -189,31 +147,10 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
             }
             Entry<String,Map<String,String>> filterConfig = parseConfigLine(
                 PROPERTY_CHAR_FILTER_FACTORY, filterConfigLine);
-            Object filterFactoryObject;
-            try {
-                filterFactoryObject = resourceLoader.newInstance(filterConfig.getKey(), Object.class);
-            } catch (SolrException e) {
-                throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "Unable to instantiate the "
-                        + "class '"+filterConfig.getKey()+"'!", e);
-            }
-
-            if(filterFactoryObject instanceof TokenFilterFactory){
-                TokenFilterFactory tff = (TokenFilterFactory)filterFactoryObject;
-                Map<String,String> config = filterConfig.getValue();
-                addLuceneMatchVersionIfNotPresent(config,tff);
-                tff.init(config);
-                filterFactories.add(tff);
-            } else {
-                throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "The parsed class '"
-                        + filterConfig.getKey() +"' is not assignable to "+TokenFilterFactory.class);
-            }
-            if(filterFactoryObject instanceof ResourceLoaderAware){
-                try {
-                    ((ResourceLoaderAware)filterFactoryObject).inform(resourceLoader);
-                } catch (IOException e) {
-                    throw new ConfigurationException(PROPERTY_TOKEN_FILTER_FACTORY, "Could not load configuration");
-                }
-            }
+            TokenFilterFactory tff = initAnalyzer(PROPERTY_TOKEN_FILTER_FACTORY, 
+                filterConfig.getKey(), TokenFilterFactory.class, 
+                filterConfig.getValue());
+            filterFactories.add(tff);
         }
         //init the language configuration
         value = ctx.getProperties().get(LabelTokenizer.SUPPORTED_LANUAGES);
@@ -224,12 +161,9 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
         langConf.setConfiguration(ctx.getProperties());
     }
 
-	private void addLuceneMatchVersionIfNotPresent(Map<String, String> config, AbstractAnalysisFactory factory) {
+	private static void addLuceneMatchVersionIfNotPresent(Map<String, String> config) {
 		if(!config.containsKey("luceneMatchVersion")){
-		    config.put("luceneMatchVersion", Version.LUCENE_41.toString());
-		}
-		if(factory.getLuceneMatchVersion() == null){
-			factory.setLuceneMatchVersion(Version.LUCENE_41);
+		    config.put("luceneMatchVersion", Version.LUCENE_44.toString());
 		}
 	}
 
@@ -341,4 +275,50 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
         }
         return params.isEmpty() ? new HashMap<String,String>() : params;
     }
+    
+    private <T> T initAnalyzer(String property, String analyzerName, Class<T> type, Map<String,String> config)
+        throws ConfigurationException {
+        Class<? extends T> analyzerClass;
+        try {
+            analyzerClass = resourceLoader.findClass(analyzerName, type);
+        } catch (SolrException e) {
+            throw new ConfigurationException(PROPERTY_CHAR_FILTER_FACTORY, "Unable find "
+                + type.getSimpleName()+ " '" + analyzerName+"'!", e);
+        }
+        Constructor<? extends T> constructor;
+        try {
+            constructor = analyzerClass.getConstructor(Map.class);
+        } catch (NoSuchMethodException e1) {
+            throw new ConfigurationException(PROPERTY_CHAR_FILTER_FACTORY, "Unable find "
+                + type.getSimpleName()+ "constructor with parameter Map<String,String> "
+                + "for class " + analyzerClass +" (analyzer: '"+analyzerName+"') !");
+        }
+        addLuceneMatchVersionIfNotPresent(config);
+        T analyzer;
+        try {
+            analyzer = constructor.newInstance(config);
+        } catch (IllegalArgumentException e) {
+            throw new ConfigurationException(property, "Unable to instantiate "
+                +type.getSimpleName()+' '+ analyzerClass +" (analyzer: "+analyzerName+"') !",e);
+        } catch (InstantiationException e) {
+            throw new ConfigurationException(property, "Unable to instantiate "
+                    +type.getSimpleName()+' '+ analyzerClass +" (analyzer: "+analyzerName+"') !",e);
+        } catch (IllegalAccessException e) {
+            throw new ConfigurationException(property, "Unable to instantiate "
+                    +type.getSimpleName()+' '+ analyzerClass +" (analyzer: "+analyzerName+"') !",e);
+        } catch (InvocationTargetException e) {
+            throw new ConfigurationException(property, "Unable to instantiate "
+                    +type.getSimpleName()+' '+ analyzerClass +" (analyzer: "+analyzerName+"') !",e);
+        }
+        if(analyzer instanceof ResourceLoaderAware){
+            try {
+                ((ResourceLoaderAware)analyzer).inform(resourceLoader);
+            } catch (IOException e) {
+                throw new ConfigurationException(PROPERTY_CHAR_FILTER_FACTORY, "Could not load configuration");
+            }
+        }
+        return analyzer;
+    }
+    
+    
 }

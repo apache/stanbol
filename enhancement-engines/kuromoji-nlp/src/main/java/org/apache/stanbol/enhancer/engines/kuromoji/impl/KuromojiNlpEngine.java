@@ -115,7 +115,7 @@ import org.slf4j.LoggerFactory;
 })
 public class KuromojiNlpEngine extends AbstractEnhancementEngine<IOException,RuntimeException> implements ServiceProperties {
 
-    private static final Version LUCENE_VERSION = Version.LUCENE_41;
+    private static final Version LUCENE_VERSION = Version.LUCENE_44;
     private static final String TOKENIZER_MODE = "search"; //normal, extended
     private static final Map<String,Object> SERVICE_PROPERTIES;
     private static final Map<String,String> TOKENIZER_FACTORY_CONFIG = new HashMap<String,String>();
@@ -361,25 +361,17 @@ public class KuromojiNlpEngine extends AbstractEnhancementEngine<IOException,Run
         //and third the parentResourceLoader (if present).
         resourceLoader = new StanbolResourceLoader(KuromojiNlpEngine.class.getClassLoader(), 
             new StanbolResourceLoader(parentResourceLoader));
-        tokenizerFactory = new JapaneseTokenizerFactory();
-        tokenizerFactory.init(TOKENIZER_FACTORY_CONFIG);
-        tokenizerFactory.setLuceneMatchVersion(LUCENE_VERSION);
+        tokenizerFactory = new JapaneseTokenizerFactory(TOKENIZER_FACTORY_CONFIG);
         ((ResourceLoaderAware) tokenizerFactory).inform(resourceLoader);
         //base form filter
-        TokenFilterFactory baseFormFilterFactory =  new JapaneseBaseFormFilterFactory();
-        baseFormFilterFactory.init(BASE_FORM_FILTER_CONFIG);
-        baseFormFilterFactory.setLuceneMatchVersion(LUCENE_VERSION);
+        TokenFilterFactory baseFormFilterFactory =  new JapaneseBaseFormFilterFactory(BASE_FORM_FILTER_CONFIG);
         filterFactories.add(baseFormFilterFactory);
         //POS filter
-        TokenFilterFactory posFilterFactory = new JapanesePartOfSpeechStopFilterFactory();
-        posFilterFactory.init(POS_FILTER_CONFIG);
-        posFilterFactory.setLuceneMatchVersion(LUCENE_VERSION);
+        TokenFilterFactory posFilterFactory = new JapanesePartOfSpeechStopFilterFactory(POS_FILTER_CONFIG);
         ((ResourceLoaderAware) posFilterFactory).inform(resourceLoader);
         filterFactories.add(posFilterFactory);
         //Stemming
-        TokenFilterFactory stemmFilterFactory = new JapaneseKatakanaStemFilterFactory();
-        stemmFilterFactory.init(STEMM_FILTER_CONFIG);
-        stemmFilterFactory.setLuceneMatchVersion(LUCENE_VERSION);
+        TokenFilterFactory stemmFilterFactory = new JapaneseKatakanaStemFilterFactory(STEMM_FILTER_CONFIG);
         filterFactories.add(stemmFilterFactory);
     }
     
