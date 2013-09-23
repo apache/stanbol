@@ -136,12 +136,17 @@
     <bundle>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>13.0.1</version>
+      <version>14.0.1</version>
     </bundle>
     <bundle> <!-- used by Solr4 spatial -->
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.spatial4j</artifactId>
-      <version>0.3_1</version>
+      <version>0.3_2</version>
+    </bundle>
+    <bundle> <!-- used by Lucene core -->
+      <groupId>com.googlecode.concurrentlinkedhashmap</groupId>
+      <artifactId>concurrentlinkedhashmap-lru</artifactId>
+      <version>1.4</version>
     </bundle>
     <bundle> <!-- used by Solr and Clerezza -->
       <groupId>com.ibm.icu</groupId>
