@@ -184,7 +184,7 @@ public class TestEntityLinkingEnhancementEngine {
         //perform the computation of the enhancements
         entityLinkingEngine.computeEnhancements(ci);
         int entityAnnotationCount = validateAllEntityAnnotations(ci);
-        assertEquals(4, entityAnnotationCount);
+        assertEquals(3, entityAnnotationCount);
     }
     
     private static int validateAllEntityAnnotations(ContentItem ci){
