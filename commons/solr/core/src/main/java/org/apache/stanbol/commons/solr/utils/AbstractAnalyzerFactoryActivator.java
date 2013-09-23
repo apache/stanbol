@@ -146,28 +146,33 @@ public abstract class AbstractAnalyzerFactoryActivator implements BundleActivato
               throw new ServiceConfigurationError("The class name " + service.getName() +
                 " has wrong suffix, allowed are: " + Arrays.toString(suffixes));
             }
-            AbstractAnalysisFactory factory;
-            try {
-                factory = service.newInstance();
-            } catch (Exception e) {
-                throw new IllegalArgumentException("SPI class of type "+ type.getName()
-                    + " with name '"+name+"' cannot be instantiated. This is likely "
-                    + "due to a misconfiguration of the java class '" 
-                    + service.getName() + "': ", e);
-            }
+            //as if Solr 4.4. we can no longer create an instance of the Factories
+            //as constructors not take the Map<String,String> with the configuration
+            //(we do not have any configuration).
+            //because of that we register the new RegisteredSolrAnalyzerFactory class
+            //instead
+//            AbstractAnalysisFactory factory;
+//            try {
+//                factory = service.newInstance();
+//            } catch (Exception e) {
+//                throw new IllegalArgumentException("SPI class of type "+ type.getName()
+//                    + " with name '"+name+"' cannot be instantiated. This is likely "
+//                    + "due to a misconfiguration of the java class '" 
+//                    + service.getName() + "': ", e);
+//            }
             Dictionary<String,Object> prop = new Hashtable<String,Object>();
-            prop.put(SolrConstants.PROPERTY_ANALYZER_FACTORY_NAME,name);
-            Version version = factory.getLuceneMatchVersion();
-            if(version != null){
-                prop.put(SolrConstants.PROPERTY_LUCENE_MATCH_VERSION, version.name());
-            }
+            prop.put(SolrConstants.PROPERTY_ANALYZER_FACTORY_NAME, name);
+            prop.put(SolrConstants.PROPERTY_ANALYZER_FACTORY_IMPL, service.getName());
+            prop.put(SolrConstants.PROPERTY_ANALYZER_FACTORY_TYPE, type.getName());
             //use 0 - bundle id as service ranking. This ensures that if two
             //factories do use the same name the one provided by the bundle with the
             //lower id is used by default
             int serviceRanking = 0 - (int)bc.getBundle().getBundleId();
             prop.put(Constants.SERVICE_RANKING, serviceRanking);
             log.debug(" ... {} (name={})",service.getName(),name);
-            registrations.add(bc.registerService(type.getName(), factory, prop));
+            //register the AnalyzerFactory
+            registrations.add(bc.registerService(RegisteredSolrAnalyzerFactory.class.getName(), 
+                new RegisteredSolrAnalyzerFactory<S>(name, type, service), prop));
         }
         return registrations;
     }

@@ -57,12 +57,14 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.core.CloseHook;
+import org.apache.solr.core.ConfigSolr;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.IndexSchemaFactory;
 import org.apache.stanbol.commons.solr.impl.OsgiSolrResourceLoader;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -228,16 +230,17 @@ public class SolrServerAdapter {
         //create a clone so that only we control who changes to the properties
         serverProperties = parsedServerProperties.clone();
 
+        File solrCof = new File(solrDir,parsedServerProperties.getSolrXml());
         ClassLoader classLoader = updateContextClassLoader();
         CoreContainer container;
         try {
+            log.info("   ... create OSGI enabled SolrCore (conf: {}",solrCof);
             SolrResourceLoader loader = new OsgiSolrResourceLoader(context, solrDir.getAbsolutePath(), 
                 SolrServerAdapter.class.getClassLoader());
-            container = new OsgiCoreContainer(loader, context);
+            container = new OsgiCoreContainer(loader, context,solrCof);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
         }
-        File solrCof = new File(solrDir,parsedServerProperties.getSolrXml());
         this.server = container;
         this.registrations = Collections.synchronizedMap(
             new HashMap<String,CoreRegistration>());
@@ -249,8 +252,7 @@ public class SolrServerAdapter {
         //now load the cores
         classLoader = updateContextClassLoader();
         try {
-            log.info("    ... load SolrConfig {}",solrCof);
-            container.load(solrDir.getAbsolutePath(), solrCof);
+            container.load();
             log.info("      - loaded SolrConfig {}",solrCof);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
@@ -617,8 +619,8 @@ public class SolrServerAdapter {
     private final class OsgiCoreContainer extends CoreContainer {
         private final BundleContext context;
 
-        private OsgiCoreContainer(SolrResourceLoader loader, BundleContext context) {
-            super(loader);
+        private OsgiCoreContainer(SolrResourceLoader loader, BundleContext context, File solrConf) {
+            super(loader,ConfigSolr.fromFile(loader, solrConf));
             this.context = context;
         }
 
@@ -626,6 +628,9 @@ public class SolrServerAdapter {
         //to create SolrCores
         @Override
         public SolrCore create(CoreDescriptor dcore) {
+            if (isShutDown()) {
+                throw new SolrException(ErrorCode.SERVICE_UNAVAILABLE, "Solr has shutdown.");
+            }
             log.info(" .... createCore {}:{}",serverProperties.getServerName(),dcore.getName());
             if (getZkController() != null) {
                 //TODO: add support for ZooKeeper managed cores
@@ -633,17 +638,43 @@ public class SolrServerAdapter {
             } else {
                 File idir = new File(dcore.getInstanceDir());
                 String instanceDir = idir.getPath();
-                //TODO: we can not use the indexSchemaCache because it is 
-                //      a private variable
                 SolrResourceLoader loader = new OsgiSolrResourceLoader(context, instanceDir, 
                     CoreContainer.class.getClassLoader());
                 SolrConfig config;
                 try {
                     config = new SolrConfig(loader, dcore.getConfigName(), null);
                 } catch (Exception e) {
+                    log.error("Failed to load file {}", new File(instanceDir, dcore.getConfigName()).getAbsolutePath());
                     throw new SolrException(ErrorCode.SERVER_ERROR, "Could not load config for " + dcore.getConfigName(), e);
                 }
-                IndexSchema schema = new IndexSchema(config,dcore.getSchemaName(),null);
+                IndexSchema schema = null;
+                //indexSchemaCache is now protected (Solr 4.4)
+                if (indexSchemaCache != null) {
+                  final String resourceNameToBeUsed = IndexSchemaFactory.getResourceNameToBeUsed(dcore.getSchemaName(), config);
+                  File schemaFile = new File(resourceNameToBeUsed);
+                  if (!schemaFile.isAbsolute()) {
+                    schemaFile = new File(loader.getConfigDir(), schemaFile.getPath());
+                  }
+                  if (schemaFile.exists()) {
+                    String key = schemaFile.getAbsolutePath()
+                        + ":"
+                        + new SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT).format(new Date(
+                        schemaFile.lastModified()));
+                    schema = indexSchemaCache.get(key);
+                    if (schema == null) {
+                      log.info("creating new schema object for core: " + dcore.getProperty(CoreDescriptor.CORE_NAME));
+                      schema = IndexSchemaFactory.buildIndexSchema(dcore.getSchemaName(), config);
+                      indexSchemaCache.put(key, schema);
+                    } else {
+                      log.info("re-using schema object for core: " + dcore.getProperty(CoreDescriptor.CORE_NAME));
+                    }
+                  }
+                }
+
+                if (schema == null) {
+                  schema = IndexSchemaFactory.buildIndexSchema(dcore.getSchemaName(), config);
+                }
+
                 SolrCore core = new SolrCore(dcore.getName(), null, config, schema, dcore);
                 if (core.getUpdateHandler().getUpdateLog() != null) {
                     // always kick off recovery if we are in standalone mode.
@@ -655,10 +686,9 @@ public class SolrServerAdapter {
 
         //this ensures that a closeHook is added to registered cores
         @Override
-        protected SolrCore registerCore(Map<String,SolrCore> whichCores, String name, SolrCore core,
-                boolean returnPrevNotClosed) {
+        protected SolrCore registerCore(boolean isTransientCore, String name, SolrCore core, boolean returnPrevNotClosed) {
             log.info(" .... registerCore {}:{}",serverProperties.getServerName(),name);
-            SolrCore old =  super.registerCore(whichCores, name, core, returnPrevNotClosed);
+            SolrCore old =  super.registerCore(isTransientCore, name, core, returnPrevNotClosed);
             //NOTE: we can not register the services here, as this can trigger
             //      a deadlock!!
             //Reason: OSGI ensures that activation is done by a single thread.

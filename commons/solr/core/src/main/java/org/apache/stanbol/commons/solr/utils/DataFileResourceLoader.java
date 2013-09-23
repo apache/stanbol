@@ -93,4 +93,9 @@ public class DataFileResourceLoader implements ResourceLoader {
         throw new UnsupportedOperationException("Loading of ClassFiles is not supported");
     }
 
+    @Override
+    public <T> Class<? extends T> findClass(String cname, Class<T> expectedType) {
+        throw new UnsupportedOperationException("Loading of ClassFiles is not supported");
+    }
+
 }

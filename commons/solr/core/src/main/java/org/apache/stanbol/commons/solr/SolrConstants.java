@@ -20,6 +20,9 @@ import java.io.File;
 import java.util.Locale;
 
 import org.apache.lucene.analysis.util.AbstractAnalysisFactory;
+import org.apache.lucene.analysis.util.CharFilterFactory;
+import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.util.Version;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrCore;
@@ -152,6 +155,17 @@ public final class SolrConstants {
      * to find anayzer factory instances.
      */
     public static final String PROPERTY_ANALYZER_FACTORY_NAME = "org.apache.lucene.analysis.factory.name";
+    /**
+     * The full qualified name of the {@link AbstractAnalysisFactory} implementation
+     * registered with the {@link #PROPERTY_ANALYZER_FACTORY_NAME name}.
+     */
+    public static final String PROPERTY_ANALYZER_FACTORY_IMPL = "org.apache.lucene.analysis.factory.impl";
+    /**
+     * The full qualified name of the {@link AbstractAnalysisFactory} interface
+     * implemented by the class. One of {@link CharFilterFactory}, 
+     * {@link TokenizerFactory}or {@link TokenFilterFactory}.
+     */
+    public static final String PROPERTY_ANALYZER_FACTORY_TYPE = "org.apache.lucene.analysis.factory.type";
     
     public static final String PROPERTY_LUCENE_MATCH_VERSION = Version.class.getName().toLowerCase(Locale.ROOT);
     

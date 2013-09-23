@@ -31,6 +31,7 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.stanbol.commons.solr.SolrServerAdapter;
 import org.apache.stanbol.commons.solr.utils.AbstractAnalyzerFactoryActivator;
+import org.apache.stanbol.commons.solr.utils.RegisteredSolrAnalyzerFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -98,16 +99,18 @@ public class OsgiSolrResourceLoader extends SolrResourceLoader {
             String filter;
             try {
                 filter = String.format("(%s=%s)", PROPERTY_ANALYZER_FACTORY_NAME, name.toLowerCase(Locale.ROOT));
-                referenced = bc.getServiceReferences(expectedType.getName(), filter);
+                referenced = bc.getServiceReferences(RegisteredSolrAnalyzerFactory.class.getName(), filter);
             } catch (InvalidSyntaxException e) {
                 throw new IllegalStateException("Unable to create Filter for Service with name '" + name
                         + "'!", e);
             }
             if (referenced != null && referenced.length > 0) {
                 Object service = bc.getService(referenced[0]);
-                if (service != null) {
-                    clazz = (Class<? extends T>) service.getClass();
-                    bc.ungetService(referenced[0]); //we return the class and do not use the service
+                if (service instanceof RegisteredSolrAnalyzerFactory) {
+                    //TODO: we could check the type here
+                    clazz = ((RegisteredSolrAnalyzerFactory)service).getFactoryClass();
+                    //we do not use a service so immediately unget it
+                    bc.ungetService(referenced[0]);
                     return clazz;
                 }
             } else {

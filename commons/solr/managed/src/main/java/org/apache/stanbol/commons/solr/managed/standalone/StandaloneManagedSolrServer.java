@@ -216,9 +216,8 @@ public class StandaloneManagedSolrServer implements ManagedSolrServer {
             }
         }
         server = new CoreContainer(managedSolrDir.getAbsolutePath());
-        File solrXml = new File(managedSolrDir,"solr.xml");
-        server.load(managedSolrDir.getAbsolutePath(), solrXml);
-        server.setPersistent(true);
+        //File solrXml = new File(managedSolrDir,"solr.xml");
+        server.load();
     }    
     private void shutdown() {
         server.shutdown();
