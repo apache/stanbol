@@ -101,7 +101,7 @@ public class TaggingSession implements Closeable {
     protected final String redirectField;
     protected final String rankingField;
     private final RefCounted<SolrIndexSearcher> searcherRef;
-    /*
+    /**
      * Document Cache and session statistics for the cache
      */
     private RefCounted<EntityCache> documentCacheRef;
@@ -177,25 +177,27 @@ public class TaggingSession implements Closeable {
                 + defaultCorpusInfo != null ? defaultCorpusInfo.indexedField : "<undefined>"
                 + ") is currently available!",null);
         }
-        if(config.getTypeField() != null){
-            this.typeField = config.getTypeField();
+        if(config.getEncodedTypeField() != null){
+            this.typeField = config.getEncodedTypeField();
             solrDocfields.add(typeField);
         } else {
             this.typeField = null;
         }
-        if(config.getRedirectField() != null){
-            this.redirectField = config.getRedirectField();
+        if(config.getEncodedRedirectField() != null){
+            this.redirectField = config.getEncodedRedirectField();
             solrDocfields.add(redirectField);
         } else {
             this.redirectField = null;
         }
-        if(config.getRankingField() != null){
-            this.rankingField = config.getRankingField();
+        if(config.getEncodedRankingField() != null){
+            this.rankingField = config.getEncodedRankingField();
             solrDocfields.add(rankingField);
         } else {
             this.rankingField = null;
         }
-        documentCacheRef = config.getEntityCacheManager().getCache(indexVersion);
+        if(config.getEntityCacheManager() != null){
+            documentCacheRef = config.getEntityCacheManager().getCache(indexVersion);
+        }
 //        uniqueKeyCache = null; //no longer used.
 //        uniqueKeyCache = new ValueSourceAccessor(searcher, idSchemaField.getType()
 //            .getValueSource(idSchemaField, null));
@@ -214,7 +216,9 @@ public class TaggingSession implements Closeable {
     public void close(){
         //matchPool.clear(); //clean up the matchpool
         searcherRef.decref(); //clean up the Solr index searcher reference
-        documentCacheRef.decref(); //clean up the DocumentCache reference
+        if(documentCacheRef != null){
+            documentCacheRef.decref(); //clean up the DocumentCache reference
+        }
     }
     /**
      * The language of this Session. This is typically the language detected for
@@ -281,9 +285,12 @@ public class TaggingSession implements Closeable {
         TaggingSession session = new TaggingSession(language, indexConfig);
         return session;
     }
-    
+    /**
+     * Getter for the EntityCache 
+     * @return the cache or <code>null</code> if no one is configured
+     */
     public EntityCache getDocumentCache(){
-        return documentCacheRef.get();
+        return documentCacheRef != null ? documentCacheRef.get() : null;
     }
     /**
      * The number of Lucene Documents loaded form disc in this session so far
@@ -412,7 +419,11 @@ public class TaggingSession implements Closeable {
                 loadedFieldsFields.add(new StringField(LOADED_FIELDS_FIELD_NAME, 
                     loadedFieldName, Store.NO));
             }
-            this.cache = documentCacheRef.get();
+            if(documentCacheRef != null){
+                this.cache = documentCacheRef.get();
+            } else {
+                this.cache = null;
+            }
         }
         
         @Override
@@ -421,7 +432,7 @@ public class TaggingSession implements Closeable {
             Integer ID = Integer.valueOf(id);
             Document doc = sessionCache.get(ID);
             if(doc == null){
-                doc = cache.get(ID);
+                doc = cache != null ? cache.get(ID) : null;
                 if(doc == null){
                     doc = reader.document(id, solrDocfields);
                     //if we read a doc from the index we need to add information about
@@ -432,7 +443,9 @@ public class TaggingSession implements Closeable {
                         doc.add(loadedFieldsField);
                     }
                     docLoaded++;
-                    cache.cache(ID, doc);
+                    if(cache != null){
+                        cache.cache(ID, doc);
+                    }
                 } else {
                     //we need to check if the fields of the cached doc are sufficient
                     //for the requested Solr Document fields
@@ -507,26 +520,29 @@ public class TaggingSession implements Closeable {
                 }
                 //load the rankings
                 if(rankingField != null){
-                    Number num = doc.getField(rankingField).numericValue();
-                    Double ranking;
-                    if(num instanceof Double){
-                        ranking = (Double)num;
-                    } else if (num != null){
-                        ranking = Double.valueOf(num.doubleValue());
-                    } else { //num == null
-                        String value = doc.get(rankingField);
-                        if(value != null){
-                            try {
-                                ranking = Double.valueOf(value);
-                            } catch (NumberFormatException e) {
+                    IndexableField field = doc.getField(rankingField);
+                    if(field != null) {
+                        Number num = field.numericValue();
+                        Double ranking;
+                        if(num instanceof Double){
+                            ranking = (Double)num;
+                        } else if (num != null){
+                            ranking = Double.valueOf(num.doubleValue());
+                        } else { //num == null
+                            String value = field.stringValue();
+                            if(value != null){
+                                try {
+                                    ranking = Double.valueOf(value);
+                                } catch (NumberFormatException e) {
+                                    ranking = null;
+                                }
+                            } else {
                                 ranking = null;
                             }
-                        } else {
-                            ranking = null;
                         }
-                    }
-                    if(ranking != null){
-                        values.put(FieldType.ranking, ranking);
+                        if(ranking != null){
+                            values.put(FieldType.ranking, ranking);
+                        }
                     }
                 }
                 return values;

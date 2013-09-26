@@ -16,19 +16,36 @@
 */
 package org.apache.stanbol.enhancer.engines.lucenefstlinking;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.FieldInfo;
+import org.apache.lucene.index.FieldInfos;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.schema.FieldType;
+import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.util.RefCounted;
+import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.engines.lucenefstlinking.cache.EntityCacheManager;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
 import org.opensextant.solrtexttagger.TaggerFstCorpus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Holds the configuration of the index used by the FST linking engine.
@@ -37,6 +54,8 @@ import org.opensextant.solrtexttagger.TaggerFstCorpus;
  *
  */
 public class IndexConfiguration {
+    
+    private static final Logger log = LoggerFactory.getLogger(IndexConfiguration.class);
     
     private final SolrCore index;
     /**
@@ -66,7 +85,7 @@ public class IndexConfiguration {
      * The encoding used by SolrFields (e.g. to define label fields for different
      * languages).
      */
-    private FieldEncodingEnum fieldEncoding;
+    private final FieldEncodingEnum fieldEncoding;
     /**
      * The instance used to retrieve/create the cache for Lucene {@link Document}s
      * of Entities.
@@ -81,17 +100,86 @@ public class IndexConfiguration {
    
     private final LanguageConfiguration fstConfig;
 
-    private boolean active = true;
+    private boolean active = false;
+
+    private File fstDirectory;
+    /**
+     * Property used to configure the FieldName encoding of the SolrIndex. This
+     * is mainly needed for label fields of different languages (e.g. by using 
+     * the iso language code as prefix/suffix of Solr fields. However this also
+     * adds support for SolrIndexes encoded as specified by the Stanbol
+     * Entityhub SolrYard implementation. See {@link FieldEncodingEnum} for 
+     * supported values
+     */
+    public static final String FIELD_ENCODING = "enhancer.engines.linking.solrfst.fieldEncoding";
+    /**
+     * The name of the Solr field storing rankings for entities. Entities with a
+     * higher value are considered as better (more popular).
+     */
+    public static final String SOLR_RANKING_FIELD = "enhancer.engines.linking.solrfst.rankingField";
+    /**
+     * The name of the Solr field holding the entity type information
+     */
+    public static final String SOLR_TYPE_FIELD = "enhancer.engines.linking.solrfst.typeField";
+    /**
+     * Language configuration defining the language, solr field and the name of the
+     * FST file. The FST file is looked up using the {@link DataFileProvider}.
+     */
+    public static final String FST_CONFIG = "enhancer.engines.linking.solrfst.fstconfig";
+    /**
+     * The folder used to store the FST files. The {@link DEFAULT_FST_FOLDER default} is 
+     * '<code>${solr-data-dir}/fst</code>' - this is '<code>./fst</code>' relative to the
+     * {@link SolrCore#getDataDir()} of the current SolrCore.
+     */
+    public static final String FST_FOLDER = "enhancer.engines.linking.solrfst.fstfolder";
+    /**
+     * The default of the FST folder is '<code>${solr-data-dir}/fst</code>' - 
+     * this is '<code>./fst</code>' relative to the {@link SolrCore#getDataDir()} 
+     * of the current SolrCore.
+     */
+    public static final String DEFAULT_FST_FOLDER = "${solr-data-dir}/fst";
+    /**
+     * By default runtime generation for the FST is deactivated. Use the
+     * {@link PARAM_RUNTIME_GENERATION} to enable it.
+     */
+    public static final boolean DEFAULT_RUNTIME_GENERATION = false;
+    /**
+     * Parameter that specifies if FST files are allowed to be generated at runtime.
+     * Enabling this will require (1) write access to the SolrCore directory and
+     * (2) a lot of Memory and CPU usage during the generation.
+     */
+    public static final String PARAM_RUNTIME_GENERATION = "generate";
+    /**
+     * Parameter used by the {@link IndexConfiguration#FST_CONFIG} to configure the solrField with
+     * the stored labels. If not defined this defaults to the configured
+     * {@link PARAM_FIELD}.
+     */
+    public static final String PARAM_STORE_FIELD = "stored";
+    /**
+     * Parameter used by the {@link IndexConfiguration#FST_CONFIG} to configure the Solr Field 
+     * with the indexed labels used to buld the FST corpus.
+     */
+    public static final String PARAM_FIELD = "field";
+    public static final String DEFAULT_FIELD = "rdfs:label";
+    /**
+     * Parameter used by the {@link IndexConfiguration#FST_CONFIG} to configure the name of the fst
+     * file for a language
+     */
+    public static final String PARAM_FST = "fst";
     
-    public IndexConfiguration(LanguageConfiguration fstConfig, SolrCore index){
+    public IndexConfiguration(LanguageConfiguration fstConfig, SolrCore index, FieldEncodingEnum fieldEncoding){
         if(fstConfig == null){
             throw new IllegalArgumentException("The parsed FST configuration MUST NOT be NULL!");
         }
+        this.fstConfig = fstConfig;
         if(index == null || index.isClosed()){
             throw new IllegalArgumentException("The parsed SolrCore MUST NOT be NULL nore closed!");
         }
-        this.fstConfig = fstConfig;
         this.index = index;
+        if(fieldEncoding == null){
+            fieldEncoding = FieldEncodingEnum.None;
+        }
+        this.fieldEncoding = fieldEncoding;
     }
     
     public CorpusInfo setDefaultCorpus(CorpusInfo corpus){
@@ -104,7 +192,7 @@ public class IndexConfiguration {
         return oldDefault;
     }
     
-    public CorpusInfo addCorpus(CorpusInfo corpus){
+    protected CorpusInfo addCorpus(CorpusInfo corpus){
         if(corpus != null){
             return corpusInfos.put(corpus.language, corpus);
         } else {
@@ -112,7 +200,7 @@ public class IndexConfiguration {
         }
     }
     
-    public CorpusInfo removeCorpus(String language){
+    protected CorpusInfo removeCorpus(String language){
         return corpusInfos.remove(language);
     }
     /**
@@ -123,47 +211,50 @@ public class IndexConfiguration {
     }
 
     /**
-     * @param fieldEncoding the fieldEncoding to set
-     */
-    public final void setFieldEncoding(FieldEncodingEnum fieldEncoding) {
-        this.fieldEncoding = fieldEncoding;
-    }
-    /**
      * @return the typeField
      */
-    public final String getTypeField() {
+    public final String getEncodedTypeField() {
         return typeField;
     }
 
     /**
+     * Sets AND encodes the parsed value (based on the specified 
+     * {@link #getFieldEncoding() FieldEncoding})
      * @param typeField the typeField to set
      */
     public final void setTypeField(String typeField) {
-        this.typeField = typeField;
+        this.typeField = typeField == null ? null :
+            FieldEncodingEnum.encodeUri(typeField, fieldEncoding);
     }
     /**
      * @return the redirectField
      */
-    public final String getRedirectField() {
+    public final String getEncodedRedirectField() {
         return redirectField;
     }
     /**
+     * Sets AND encodes the parsed value (based on the specified 
+     * {@link #getFieldEncoding() FieldEncoding})
      * @param redirectField the redirectField to set
      */
     public final void setRedirectField(String redirectField) {
-        this.redirectField = redirectField;
+        this.redirectField = redirectField == null ? null :
+            FieldEncodingEnum.encodeUri(redirectField, fieldEncoding);
     }
     /**
      * @return the rankingField
      */
-    public final String getRankingField() {
+    public final String getEncodedRankingField() {
         return rankingField;
     }
     /**
+     * Sets AND encodes the parsed value (based on the specified 
+     * {@link #getFieldEncoding() FieldEncoding})
      * @param rankingField the rankingField to set
      */
     public final void setRankingField(String rankingField) {
-        this.rankingField = rankingField;
+        this.rankingField = rankingField == null ? null :
+            FieldEncodingEnum.encodeFloat(rankingField, fieldEncoding);
     }
 
     public CorpusInfo getCorpus(String language) {
@@ -216,12 +307,23 @@ public class IndexConfiguration {
     public EntityCacheManager getEntityCacheManager() {
         return entityCacheManager;
     }
+
+    public File getFstDirectory() {
+        return fstDirectory;
+    }
+    
+    public void setFstDirectory(File fstDirectory) {
+        this.fstDirectory = fstDirectory;
+    }
+
+    
     /**
      * Deactivates this {@link IndexConfiguration}
      */
     public void deactivate(){
         active = false;
     }
+    
     /**
      * If this {@link IndexConfiguration} is still active
      * @return <code>true</code> if still active. Otherwise <code>false</code>
@@ -229,5 +331,273 @@ public class IndexConfiguration {
     public boolean isActive(){
         return active;
     }
+    /**
+     * Activated this indexing configuration by inspecting the {@link SolrCore}
+     * based on the provided configuration 
+     * @return
+     */
+    public boolean activate() {
+        active = true;
+        RefCounted<SolrIndexSearcher> searcherRef = index.getSearcher(true, true, null);
+        try {
+            return processFstConfig(searcherRef.get().getAtomicReader());
+        }catch (RuntimeException e) { //in case of any excpetion
+            throw e; //re-throw 
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to activate IndexConfiguration", e);
+        } finally {
+            searcherRef.decref(); //decrease the count on the searcher
+        }
+    }
+    /**
+     * This method combines the {@link #fstConfig} with the data present in the
+     * {@link SolrCore}.
+     * @param indexReader The {@link AtomicReader} has access to the actual
+     * fields present in the {@link SolrCore}. It is used to compare field
+     * configurations in the {@link #fstConfig} with fields present in the solr
+     * index.
+     * @return if any FST configuration was successfully processed
+     */
+    private boolean processFstConfig(AtomicReader indexReader) throws IOException {
+        if(index == null){
+            throw new IllegalArgumentException("No SolrCore set for this configuration");
+        }
+        if(fstDirectory == null){
+            fstDirectory = new File(index.getDataDir(),"fst");
+        }
+        log.info("> process FST config for {} (FST dir: {})", index.getName(),
+            fstDirectory.getAbsolutePath());
+        //init the fstDirectory
+        if(fstDirectory.isFile()){
+            throw new IOException("Default FST directory exists and "
+                    + "is a File. Use #setFstDirectory() to set different one");
+        } else if(!fstDirectory.exists()){
+            FileUtils.forceMkdir(fstDirectory);
+        }
+        IndexSchema schema = index.getLatestSchema();
+        boolean foundCorpus = false;
+        //(0) get basic parameters of the default configuration
+        log.info(" - default config");
+        Map<String,String> defaultParams = fstConfig.getDefaultParameters();
+        String fstName = defaultParams.get(IndexConfiguration.PARAM_FST);
+        String indexField = defaultParams.get(IndexConfiguration.PARAM_FIELD);
+        if(indexField == null){ //apply the defaults if null
+            indexField = IndexConfiguration.DEFAULT_FIELD;
+        }
+        String storeField = defaultParams.get(IndexConfiguration.PARAM_STORE_FIELD);
+        if(storeField == null){ //apply the defaults if null
+            storeField = indexField;
+        }
+        if(fstName == null){ //use default
+            fstName = getDefaultFstFileName(indexField);
+        }
+        final boolean allowCreation;
+        String allowCreationString = defaultParams.get(IndexConfiguration.PARAM_RUNTIME_GENERATION);
+        if(allowCreationString == null){
+            allowCreation = IndexConfiguration.DEFAULT_RUNTIME_GENERATION;
+        } else {
+            allowCreation = Boolean.parseBoolean(allowCreationString);
+        }
+        //This are all fields actually present in the index (distinguished with
+        //those defined in the schema). This also includes actual instances of
+        //dynamic field definition in the schema.
+        FieldInfos fieldInfos = indexReader.getFieldInfos(); //we need this twice
+        
+        //(1) in case the fstConfig uses a wildcard we need to search for
+        //    languages present in the SolrIndex. For that we use the indexReader
+        //    to get the FieldInfos and match them against FST files in the FST
+        //    directory and FieldType definitions in the schema of the SolrCore
+        //NOTE: this needs only do be done if wildcards are enabled in the fstConfig
+        if(fstConfig.useWildcard()){ 
+            //(1.a) search for present FST files in the FST directory
+            Map<String,File> presentFstFiles = new HashMap<String,File>();
+            WildcardFileFilter fstFilter = new WildcardFileFilter(
+                fstName+".*.fst");
+            @SuppressWarnings("unchecked")
+            Iterator<File> fstFiles = FileUtils.iterateFiles(fstDirectory, fstFilter, null);
+            while(fstFiles.hasNext()){
+                File fstFile = fstFiles.next();
+                String fstFileName = fstFile.getName();
+                //files are named such as "{name}.{lang}.fst"
+                String language = FilenameUtils.getExtension(
+                    FilenameUtils.getBaseName(fstFileName));
+                presentFstFiles.put(language, fstFile);
+            }
+            //(1.b) iterate over the fields in the Solr index and search for 
+            //      matches against the configured indexField name
+            String fieldWildcard = FieldEncodingEnum.encodeLanguage(indexField,
+                fieldEncoding, "*");
+            for(FieldInfo fieldInfo : fieldInfos){
+                //try to match the field names against the wildcard
+                if(FilenameUtils.wildcardMatch(fieldInfo.name, fieldWildcard)){
+                    //for matches parse the language from the field name
+                    String language = FieldEncodingEnum.parseLanguage(
+                        fieldInfo.name, fieldEncoding, indexField);
+                    if(language != null && //successfully parsed language
+                            //is current language is enabled? 
+                            fstConfig.isLanguage(language) &&
+                            //is there no explicit configuration for this language?
+                            !fstConfig.getExplicitlyIncluded().contains(language)){
+                        //generate the FST file name
+                        StringBuilder fstFileName = new StringBuilder(fstName);
+                        if(!language.isEmpty()){
+                            fstFileName.append('.').append(language);
+                        }
+                        fstFileName.append(".fst");
+                        File fstFile = new File(fstDirectory,fstFileName.toString());
+                        //get the FieldType of the field from the Solr schema
+                        FieldType fieldType = schema.getFieldTypeNoEx(fieldInfo.name);
+                        if(fieldType != null){ //if the fieldType is present
+                            if(allowCreation || fstFile.isFile()){ //and FST is present or can be created
+                                //we need also to check if the stored field with
+                                //the labels is present
+                                //get the stored Field and check if it is present!
+                                String storeFieldName;
+                                if(storeField == null){ //storeField == indexField
+                                    storeFieldName = fieldInfo.name;
+                                } else { // check that the storeField is present in the index
+                                    storeFieldName = FieldEncodingEnum.encodeLanguage(
+                                        storeField, fieldEncoding, language);
+                                    FieldInfo storedFieldInfos = fieldInfos.fieldInfo(storeFieldName);
+                                    if(storedFieldInfos == null){
+                                        log.warn(" ... ignore language {} because Stored Field {} "
+                                                + "for IndexField {} does not exist! ", new Object[]{
+                                                language,storeFieldName,fieldInfo.name});
+                                        storeFieldName = null;
+                                    }
+                                    
+                                }
+                                if(storeFieldName != null){ // == valid configuration
+                                    CorpusInfo fstInfo = new CorpusInfo(language, 
+                                        fieldInfo.name, storeFieldName,  
+                                        fieldType.getAnalyzer(), fstFile, allowCreation);
+                                    log.debug(" ... init {} ", fstInfo);
+                                    addCorpus(fstInfo);
+                                    foundCorpus = true;
+                                }
+                            } else {
+                                log.warn(" ... ignore language {} (field: {}) because "
+                                    + "FST file '{}' does not exist and runtime creation "
+                                    + "is deactivated!",new Object[]{ language,
+                                            fieldInfo.name, fstFile.getAbsolutePath()});
+                            }
+                        } else {
+                            log.warn(" ... ignore language {} becuase unknown fieldtype "
+                                + "for SolrFied {}",language,fieldInfo.name);
+                        }
+                    } //else the field matched the wildcard, but has not passed the
+                    //encoding test.
+                } //Solr field does not match the field definition in the config
+            } // end iterate over all fields in the SolrIndex
+        } //else Wildcard not enabled in the fstConfig
+        
+        //(2) process explicit configuration for configured languages
+        for(String language : fstConfig.getExplicitlyIncluded()){
+            //(2.a) get the language specific config (with fallback to default)
+            Map<String,String> config = fstConfig.getLanguageParams(language);
+            String langIndexField = config.get(IndexConfiguration.PARAM_FIELD);
+            String langStoreField = config.get(IndexConfiguration.PARAM_STORE_FIELD);
+            String langFstFileName = config.get(IndexConfiguration.PARAM_FST);
+            final boolean langAllowCreation;
+            final String langAllowCreationString = config.get(IndexConfiguration.PARAM_RUNTIME_GENERATION);
+            if(langIndexField != null){
+                //also consider explicit field names as default for the fst name
+                if(langFstFileName == null){
+                    StringBuilder fileName = new StringBuilder(
+                        getDefaultFstFileName(langIndexField));
+                    if(!language.isEmpty()){
+                        fileName.append('.').append(language);
+                    }
+                    fileName.append(".fst");
+                    langFstFileName = fileName.toString();
+                }
+            } else {
+                langIndexField = indexField;
+            }
+            if(langStoreField == null){ //fallbacks
+                if(storeField != null){ //first to default store field
+                    langStoreField = storeField;
+                } else { //else to the lang index field
+                    langStoreField = langIndexField;
+                }
+            }
+            if(langFstFileName == null){ //no fstFileName config
+                // ... use the default
+                langFstFileName = new StringBuilder(fstName).append('.')
+                        .append(language).append(".fst").toString(); 
+            }
+            if(langAllowCreationString != null){
+                langAllowCreation = Boolean.parseBoolean(langAllowCreationString);
+            } else {
+                langAllowCreation = allowCreation;
+            }
+            //(2.b) check if the Solr field is present
+            String encodedLangIndexField = FieldEncodingEnum.encodeLanguage(
+                langIndexField, fieldEncoding, language);
+            String encodedLangStoreField = FieldEncodingEnum.encodeLanguage(
+                langStoreField, fieldEncoding, language);
+            FieldInfo langIndexFieldInfo = fieldInfos.fieldInfo(encodedLangIndexField);
+            if(langIndexFieldInfo != null){
+                FieldInfo langStoreFieldInfo = fieldInfos.fieldInfo(encodedLangStoreField);
+                if(langStoreFieldInfo != null){
+                    FieldType fieldType = schema.getFieldTypeNoEx(langIndexFieldInfo.name);
+                    if(fieldType != null){
+                        //(2.c) check the FST file
+                        File langFstFile = new File(fstDirectory,langFstFileName);
+                        if(langFstFile.isFile() || langAllowCreation){
+                            CorpusInfo langFstInfo = new CorpusInfo(language, 
+                                encodedLangIndexField,encodedLangStoreField,
+                                fieldType.getAnalyzer(), langFstFile, langAllowCreation);
+                            log.debug("   ... add {} for explicitly configured language", langFstInfo);
+                            addCorpus(langFstInfo);
+                            foundCorpus = true;
+                        } else {
+                            log.warn(" ... ignore language {} (field: {}) because "
+                                    + "FST file '{}' does not exist and runtime creation "
+                                    + "is deactivated!",new Object[]{ language,
+                                            langIndexFieldInfo.name, langFstFile.getAbsolutePath()});
+                        }
+                    } else {
+                        log.warn(" ... ignore language {} becuase unknown fieldtype "
+                                + "for SolrFied {}", language, langIndexFieldInfo.name);
+                    }
+                } else {
+                    log.warn(" ... ignore language {} because configured stored Field {} "
+                            + "for IndexField {} does not exist! ", new Object[]{
+                            language,langStoreField,langIndexFieldInfo.name});
+                }
+            } else {
+                log.warn(" ... ignore language {} because configured field {} (encoded: {}) "
+                    + "is not present in the SolrIndex!", new Object[]{
+                            language, langIndexField, encodedLangIndexField });
+            }
+        }
+        return foundCorpus;
+    }
     
+    /**
+     * Getter for the default FST file name based on the configured field
+     * name. This method returns the '<code>{name}</code>' part of the
+     * '<code>{name}.{lang}.fst</code>' name.
+     * @param fstFieldName the field name.
+     * @return the '<code>{name}</code>' part of the'<code>{name}.{lang}.fst</code>' name
+     */
+    private String getDefaultFstFileName(final String fstFieldName) {
+        String fstName;
+        if(!StringUtils.isAlphanumeric(fstFieldName)) {
+            StringBuilder escaped = new StringBuilder(fstFieldName.length());
+            for(int i = 0; i < fstFieldName.length();i++){
+                int codepoint = fstFieldName.codePointAt(i);
+                if(Character.isLetterOrDigit(codepoint)){
+                    escaped.appendCodePoint(codepoint);
+                } else {
+                    escaped.append('_');
+                }
+            }
+            fstName = escaped.toString();
+        } else {
+            fstName = fstFieldName;
+        }
+        return fstName;
+    }
 }

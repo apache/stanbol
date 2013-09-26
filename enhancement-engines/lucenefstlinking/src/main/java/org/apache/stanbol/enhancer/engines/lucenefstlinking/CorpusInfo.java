@@ -122,6 +122,9 @@ public class CorpusInfo {
             this.enqueued = -1;
         }
     }
+    public boolean isFstFile(){
+        return fst != null && fst.isFile();
+    }
     
     public boolean isFstFileError(){
         return fstFileError;

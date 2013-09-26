@@ -201,7 +201,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     new Object[]{matches, session.getSessionDocLoaded(),
                         session.getSessionDocCached(), session.getSessionDocAppended(),
                         System.currentTimeMillis()-taggingEnd});
-            if(log.isDebugEnabled()){
+            if(log.isDebugEnabled() && session.getDocumentCache() != null){
                 log.debug("EntityCache Statistics: {}", 
                     session.getDocumentCache().printStatistics());
             }
@@ -244,8 +244,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
             int i=1; //only for trace level debugging
             for(Match match : tag.getMatches()){
                 if(log.isTraceEnabled()){
-                    log.trace(" {}. {} - {} ({})", new Object[]{
-                            i++, match.getScore(),  match.getMatchLabel(), match.getUri()});
+                    log.trace(" {}. {}", i++,  match.getUri());
                 }
                 matchCount++;
                 if(!filterEntityByType(match.getTypes().iterator())){
@@ -287,6 +286,15 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                 //cut the list on the maximum nuber of suggestions
                 if(suggestions.size() > elConfig.getMaxSuggestions()){
                     suggestions = suggestions.subList(0, elConfig.getMaxSuggestions());
+                }
+            }
+            if(log.isTraceEnabled()){ //log the suggestion information
+                log.trace("Suggestions:");
+                int si=1;
+                for(Match m : suggestions){
+                    log.trace(" {}. {} - {} ({})", new Object[]{
+                            si,m.getScore(),m.getMatchLabel(),m.getUri()});
+                    si++;
                 }
             }
             tag.setSuggestions(suggestions);
@@ -551,7 +559,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
     }
 
     /**
-     * Retrieves all {@link EntitySearcher#getTypeField()} values of the parsed
+     * Retrieves all {@link EntitySearcher#getEncodedTypeField()} values of the parsed
      * {@link Suggestion}s and than lookup the {@link NamespaceEnum#dcTerms dc}:type
      * values for the {@link LinkedEntity#getTypes()} by using the configured
      * {@link EntityLinkerConfig#getTypeMappings() types mappings} (and if

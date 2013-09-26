@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class LinkableTokenFilterStream extends TokenFilter {
+public final class LinkableTokenFilterStream extends TokenFilter {
 
     private final Logger log = LoggerFactory.getLogger(LinkableTokenFilterStream.class);
     
